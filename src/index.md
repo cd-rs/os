@@ -1,5 +1,5 @@
 ---
-title: Systems in Rust
+title: OS in Rust
 author: ""
 subtitle: ""
 format: html
