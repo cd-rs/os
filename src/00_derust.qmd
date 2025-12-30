@@ -1,0 +1,297 @@
+---
+title: Derust
+---
+
+## Announcements
+
+- **Welcome** to OS in Rust
+  - The most famous systems topic...
+  - Now in Rust, your favorite language!
+- **Action Items**:
+  - Access the [course webpage](https://cd-rs.github.io/os/)
+  - Join the Discord!
+    - You should have gotten an email...
+  - Set up Linux/Rust/Git.
+
+## Homework
+
+- The first homework, "LISP", is ready now.
+  - It is fun with a lot of extensions.
+  - Mostly makes sure you have everything set up.
+- Due Friday, 5 Sept. at 1440 PT.
+
+## Today
+
+- Logistics
+- On Systems
+- On Rust
+- Course Sketch
+- Derust
+
+# Logistics
+
+## It me
+
+- **Name** 
+  - (Prof. )?Calvin
+- **Credentials**
+  - B.A. Mathematics
+  - B.S., M.S., Ph.D. Computer Science
+- **Pronouns** 
+  - they/them 
+
+## The Great Work
+
+- Thesis Title
+  - Mining Secure Behavior of Hardware Designs 
+- Plain English
+  - Just as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs. 
+
+## Course Format
+
+- Lecture Monday
+- Lab Wednesday
+- Homework due Friday 1440 PT (the *next* Friday)
+    - You should all meet on Friday.
+- In-class midterm week of 3/16
+- Your OS is due whenever the final is scheduled.
+    - Waiting on registrar to announce.
+
+## Ungrading++
+
+- Your voices have been heard:
+
+> I think failing my systems class was the best thing that happened to me.
+
+> This course demanded strong self-motivation... Thus, I didn't learn as much as I might've if grading mattered more.
+
+## Specification Grading
+
+- All the rage. I was never fan but tell me what you think.
+- Basically, I will assign some stuff but you don't have to do all of it perfectly.
+    - No partial credit, everything is yes/no grading.
+- I took distributions over final, midterm, and Lab/HW
+
+## It pays to get A's
+
+|Grade|Requirements|
+|:----------:|------|
+|A|Final meets spec|
+|A|90% ave HW/Lab/Midterm, Final compiles|
+|A-|90% ave HW/Lab, Midterm/Final compile|
+|A-|Midterm meets spec, Final compiles|
+
+## But B's are the Knees
+
+|Grade|Requirements|
+|:----------:|------|
+|B+|90% ave HW/Lab, Midterm compiles|
+|B| 80% ave HW/Lab, Midterm compiles|
+|B-|80% ave HW/Lab|
+
+## These may (???) earn degrees
+
+|Grade|Requirements|
+|:----------:|------|
+|C|80% ave Lab|
+|D|60% ave Lab|
+|F|Anything else|
+
+## Lab Grading
+
+- "A" (=100%)
+    - Meets spec by end of class
+- "B" (=90%)
+    - Compiles at end of class
+- "F" (=0%)
+    - Anything else
+    
+## HW Grading
+
+- "A" (=100%)
+    - On time
+    - Passes autograder.
+        - I lack confidence I can make excellent autograders for all stages, so give me some grace here.
+- "B" (=90%)
+    - On time
+    - Compiles
+- "F" (=0%)
+    - Anything else
+    
+## Final
+
+- Create, document, and publish an operating system... in Rust!
+    - Free-standing binary
+    - Faults/exceptions/interrupts
+    - Memory management
+    
+## Late Work Policy
+
+- Late work is not accepted.
+    - No exceptions.
+    - The specification grading framework incorpates tolerances.
+    - An OS that meets spec by end-of-term is an A, always.
+
+## AI Policy
+
+- I would be shocked if it is helpful to you.
+- If you think it is helpful, that is probably not a good sign.
+- You can use it (I wouldn't)
+
+## Collaboration Policy
+
+- You should chat with each other.
+- You should write your own code.
+- If someone shows you something and you don't understand it *as well as code you write yourself*, it is a waste of your time to use the code.
+    - But *not* a waste as a way to learn.
+
+# On Systems
+
+## The Hard Part
+
+- After ~10 years of systems research I've convinced myself [only two things](https://www.joelonsoftware.com/2005/12/29/the-perils-of-javaschools-2/) really matter:
+
+  - References, and
+  - Recursion 
+
+- Recursion isn't too bad... 
+
+```py
+>>> exp = lambda b, n : b if n == 1 else b*exp(b,n-1)
+>>> exp(2,8)
+256
+```
+
+- Covered in 271 and possibly 351 and no longer interesting on its own, though will be used.
+
+## References
+
+- References are a beast, but without them nothing makes sense! 
+
+:::: {.columns}
+
+::: {.column width="50%"}
+```py
+>>> x = 1
+>>> def addx():
+...     x += 1
+...
+>>> addx()
+UnboundLocalError:
+<blah blah blah error messages>
+```
+::: 
+
+::: {.column width="50%"}
+
+```py
+>>> x = [1]
+>>> def addx():
+...     x[0] += 1
+...
+>>> addx()
+>>> x
+[2]
+```
+:::
+
+::::
+
+## Insight
+
+- **Definition:**
+  - References: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.
+- **Importance:**
+  - This key-value storage is a service provided by the operating system!
+
+## Python and OSes
+
+- **Why not .py (.js, .java, .cs, .cpp, etc)?**
+  - These languages assume an underlying OS (or VM or browser).
+  - There is more to life than running code other people wrote.
+  - Good languages (except Java) but not for us
+  - The other systems language is C (and maybe C++)
+
+# On Rust
+
+## Rust and References
+
+- Rust:
+    - Obscures references, but...
+    - *Does not* obscure memory.
+- This is good!
+    - Memory matters, but pointers are historical accident.
+- You should probably use Rust in every application where correctness or performance matters.
+
+## Rust and Recursion
+
+- Separately, Rust is built on one of the most exciting ongoing computer science research efforts:
+- **LLVM** (stands for LLVM)
+- Basically, a way of turning human-readable code into machine-executable code.
+    - Very good at turning recursion into iteration and/or vice versa.
+- This term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS.
+
+# Course Sketch
+
+## Citation
+
+- We will follow "Philipp Oppermann's blog" "Writing an OS in Rust" version 2.
+- [Read more.](https://os.phil-opp.com/)
+
+## Bare Bones
+
+- A binary that doesn't require an underlying OS.
+- Something that (1) runs and (2) prints.
+- Simple I/O
+- Unit and integration testing.
+
+## Interrupts
+
+- CPU Exceptions
+    - Like division by zero.
+- Double faults
+    - Faults while handling a fault.
+- Hardware interrupts
+    - Like I/O
+
+## Memory Management
+
+- Paging
+- Page tables
+- The heap
+- Heap allocation.
+   
+
+# Final
+
+## Final Exam/Project
+
+- **Implement Minimal OS in Rust**
+  - Individual
+  - Under version control
+  - Compiles and runs and is tested
+  
+# On `vim`
+
+## Vim
+
+- You should use `vim` or another console-based editor as a component of your learning in this class.
+- This will not be assessed (how can it be) but will *likely* be expected in a non-trivial subset of settings this course material will be useful.
+- I will live-code in `vim` probably.
+
+# Derust
+
+## Rust Features
+
+- [option](https://doc.rust-lang.org/core/option/)
+- [result](https://doc.rust-lang.org/core/result/)
+- [std](https://doc.rust-lang.org/std/)
+- [iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html)
+- [closures](https://doc.rust-lang.org/book/ch13-01-closures.html)
+- [pattern matching](https://doc.rust-lang.org/book/ch06-00-enums.html)
+- [string formatting](https://doc.rust-lang.org/core/macro.write.html)
+- [ownership system](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
+
+## Options
+
+# Fin

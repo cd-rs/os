@@ -5,5 +5,1419 @@
     "title": "OS in Rust",
     "section": "",
     "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nLISP\n\n\n0x1\n01/19\nNone\nUnsafe\nsub list\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\nFinal OS due whenever the final exam would finish, TBA\n\n\nLecture Recordings\nForthcoming"
+  },
+  {
+    "objectID": "00_derust.html",
+    "href": "00_derust.html",
+    "title": "Derust",
+    "section": "",
+    "text": "Welcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nYou should have gotten an email…\n\nSet up Linux/Rust/Git.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#announcements",
+    "href": "00_derust.html#announcements",
+    "title": "Derust",
+    "section": "",
+    "text": "Welcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nYou should have gotten an email…\n\nSet up Linux/Rust/Git.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#homework",
+    "href": "00_derust.html#homework",
+    "title": "Derust",
+    "section": "Homework",
+    "text": "Homework\n\nThe first homework, “LISP”, is ready now.\n\nIt is fun with a lot of extensions.\nMostly makes sure you have everything set up.\n\nDue Friday, 5 Sept. at 1440 PT.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#today",
+    "href": "00_derust.html#today",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#it-me",
+    "href": "00_derust.html#it-me",
+    "title": "Derust",
+    "section": "It me",
+    "text": "It me\n\nName\n\n(Prof. )?Calvin\n\nCredentials\n\nB.A. Mathematics\nB.S., M.S., Ph.D. Computer Science\n\nPronouns\n\nthey/them",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#the-great-work",
+    "href": "00_derust.html#the-great-work",
+    "title": "Derust",
+    "section": "The Great Work",
+    "text": "The Great Work\n\nThesis Title\n\nMining Secure Behavior of Hardware Designs\n\nPlain English\n\nJust as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#course-format",
+    "href": "00_derust.html#course-format",
+    "title": "Derust",
+    "section": "Course Format",
+    "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#ungrading",
+    "href": "00_derust.html#ungrading",
+    "title": "Derust",
+    "section": "Ungrading++",
+    "text": "Ungrading++\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#specification-grading",
+    "href": "00_derust.html#specification-grading",
+    "title": "Derust",
+    "section": "Specification Grading",
+    "text": "Specification Grading\n\nAll the rage. I was never fan but tell me what you think.\nBasically, I will assign some stuff but you don’t have to do all of it perfectly.\n\nNo partial credit, everything is yes/no grading.\n\nI took distributions over final, midterm, and Lab/HW",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#it-pays-to-get-as",
+    "href": "00_derust.html#it-pays-to-get-as",
+    "title": "Derust",
+    "section": "It pays to get A’s",
+    "text": "It pays to get A’s\n\n\n\nGrade\nRequirements\n\n\n\n\nA\nFinal meets spec\n\n\nA\n90% ave HW/Lab/Midterm, Final compiles\n\n\nA-\n90% ave HW/Lab, Midterm/Final compile\n\n\nA-\nMidterm meets spec, Final compiles",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#but-bs-are-the-knees",
+    "href": "00_derust.html#but-bs-are-the-knees",
+    "title": "Derust",
+    "section": "But B’s are the Knees",
+    "text": "But B’s are the Knees\n\n\n\nGrade\nRequirements\n\n\n\n\nB+\n90% ave HW/Lab, Midterm compiles\n\n\nB\n80% ave HW/Lab, Midterm compiles\n\n\nB-\n80% ave HW/Lab",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#these-may-earn-degrees",
+    "href": "00_derust.html#these-may-earn-degrees",
+    "title": "Derust",
+    "section": "These may (???) earn degrees",
+    "text": "These may (???) earn degrees\n\n\n\nGrade\nRequirements\n\n\n\n\nC\n80% ave Lab\n\n\nD\n60% ave Lab\n\n\nF\nAnything else",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#lab-grading",
+    "href": "00_derust.html#lab-grading",
+    "title": "Derust",
+    "section": "Lab Grading",
+    "text": "Lab Grading\n\n“A” (=100%)\n\nMeets spec by end of class\n\n“B” (=90%)\n\nCompiles at end of class\n\n“F” (=0%)\n\nAnything else",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#hw-grading",
+    "href": "00_derust.html#hw-grading",
+    "title": "Derust",
+    "section": "HW Grading",
+    "text": "HW Grading\n\n“A” (=100%)\n\nOn time\nPasses autograder.\n\nI lack confidence I can make excellent autograders for all stages, so give me some grace here.\n\n\n“B” (=90%)\n\nOn time\nCompiles\n\n“F” (=0%)\n\nAnything else",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#final",
+    "href": "00_derust.html#final",
+    "title": "Derust",
+    "section": "Final",
+    "text": "Final\n\nCreate, document, and publish an operating system… in Rust!\n\nFree-standing binary\nFaults/exceptions/interrupts\nMemory management",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#late-work-policy",
+    "href": "00_derust.html#late-work-policy",
+    "title": "Derust",
+    "section": "Late Work Policy",
+    "text": "Late Work Policy\n\nLate work is not accepted.\n\nNo exceptions.\nThe specification grading framework incorpates tolerances.\nAn OS that meets spec by end-of-term is an A, always.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#ai-policy",
+    "href": "00_derust.html#ai-policy",
+    "title": "Derust",
+    "section": "AI Policy",
+    "text": "AI Policy\n\nI would be shocked if it is helpful to you.\nIf you think it is helpful, that is probably not a good sign.\nYou can use it (I wouldn’t)",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#collaboration-policy",
+    "href": "00_derust.html#collaboration-policy",
+    "title": "Derust",
+    "section": "Collaboration Policy",
+    "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#the-hard-part",
+    "href": "00_derust.html#the-hard-part",
+    "title": "Derust",
+    "section": "The Hard Part",
+    "text": "The Hard Part\n\nAfter ~10 years of systems research I’ve convinced myself only two things really matter:\n\nReferences, and\nRecursion\n\nRecursion isn’t too bad…\n\n&gt;&gt;&gt; exp = lambda b, n : b if n == 1 else b*exp(b,n-1)\n&gt;&gt;&gt; exp(2,8)\n256\n\nCovered in 271 and possibly 351 and no longer interesting on its own, though will be used.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#references",
+    "href": "00_derust.html#references",
+    "title": "Derust",
+    "section": "References",
+    "text": "References\n\nReferences are a beast, but without them nothing makes sense!\n\n\n\n&gt;&gt;&gt; x = 1\n&gt;&gt;&gt; def addx():\n...     x += 1\n...\n&gt;&gt;&gt; addx()\nUnboundLocalError:\n&lt;blah blah blah error messages&gt;\n\n&gt;&gt;&gt; x = [1]\n&gt;&gt;&gt; def addx():\n...     x[0] += 1\n...\n&gt;&gt;&gt; addx()\n&gt;&gt;&gt; x\n[2]",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#insight",
+    "href": "00_derust.html#insight",
+    "title": "Derust",
+    "section": "Insight",
+    "text": "Insight\n\nDefinition:\n\nReferences: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.\n\nImportance:\n\nThis key-value storage is a service provided by the operating system!",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#python-and-oses",
+    "href": "00_derust.html#python-and-oses",
+    "title": "Derust",
+    "section": "Python and OSes",
+    "text": "Python and OSes\n\nWhy not .py (.js, .java, .cs, .cpp, etc)?\n\nThese languages assume an underlying OS (or VM or browser).\nThere is more to life than running code other people wrote.\nGood languages (except Java) but not for us\nThe other systems language is C (and maybe C++)",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#rust-and-references",
+    "href": "00_derust.html#rust-and-references",
+    "title": "Derust",
+    "section": "Rust and References",
+    "text": "Rust and References\n\nRust:\n\nObscures references, but…\nDoes not obscure memory.\n\nThis is good!\n\nMemory matters, but pointers are historical accident.\n\nYou should probably use Rust in every application where correctness or performance matters.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#rust-and-recursion",
+    "href": "00_derust.html#rust-and-recursion",
+    "title": "Derust",
+    "section": "Rust and Recursion",
+    "text": "Rust and Recursion\n\nSeparately, Rust is built on one of the most exciting ongoing computer science research efforts:\nLLVM (stands for LLVM)\nBasically, a way of turning human-readable code into machine-executable code.\n\nVery good at turning recursion into iteration and/or vice versa.\n\nThis term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#citation",
+    "href": "00_derust.html#citation",
+    "title": "Derust",
+    "section": "Citation",
+    "text": "Citation\n\nWe will follow “Philipp Oppermann’s blog” “Writing an OS in Rust” version 2.\nRead more.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#bare-bones",
+    "href": "00_derust.html#bare-bones",
+    "title": "Derust",
+    "section": "Bare Bones",
+    "text": "Bare Bones\n\nA binary that doesn’t require an underlying OS.\nSomething that (1) runs and (2) prints.\nSimple I/O\nUnit and integration testing.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#interrupts",
+    "href": "00_derust.html#interrupts",
+    "title": "Derust",
+    "section": "Interrupts",
+    "text": "Interrupts\n\nCPU Exceptions\n\nLike division by zero.\n\nDouble faults\n\nFaults while handling a fault.\n\nHardware interrupts\n\nLike I/O",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#memory-management",
+    "href": "00_derust.html#memory-management",
+    "title": "Derust",
+    "section": "Memory Management",
+    "text": "Memory Management\n\nPaging\nPage tables\nThe heap\nHeap allocation.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#final-examproject",
+    "href": "00_derust.html#final-examproject",
+    "title": "Derust",
+    "section": "Final Exam/Project",
+    "text": "Final Exam/Project\n\nImplement Minimal OS in Rust\n\nIndividual\nUnder version control\nCompiles and runs and is tested",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#vim",
+    "href": "00_derust.html#vim",
+    "title": "Derust",
+    "section": "Vim",
+    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected in a non-trivial subset of settings this course material will be useful.\nI will live-code in vim probably.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#rust-features",
+    "href": "00_derust.html#rust-features",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nstring formatting\nownership system",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#options",
+    "href": "00_derust.html#options",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.rjs.html#announcements",
+    "href": "00_derust.rjs.html#announcements",
+    "title": "Derust",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nYou should have gotten an email…\n\nSet up Linux/Rust/Git."
+  },
+  {
+    "objectID": "00_derust.rjs.html#homework",
+    "href": "00_derust.rjs.html#homework",
+    "title": "Derust",
+    "section": "Homework",
+    "text": "Homework\n\nThe first homework, “LISP”, is ready now.\n\nIt is fun with a lot of extensions.\nMostly makes sure you have everything set up.\n\nDue Friday, 5 Sept. at 1440 PT."
+  },
+  {
+    "objectID": "00_derust.rjs.html#today",
+    "href": "00_derust.rjs.html#today",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
+  },
+  {
+    "objectID": "00_derust.rjs.html#it-me",
+    "href": "00_derust.rjs.html#it-me",
+    "title": "Derust",
+    "section": "It me",
+    "text": "It me\n\nName\n\n(Prof. )?Calvin\n\nCredentials\n\nB.A. Mathematics\nB.S., M.S., Ph.D. Computer Science\n\nPronouns\n\nthey/them"
+  },
+  {
+    "objectID": "00_derust.rjs.html#the-great-work",
+    "href": "00_derust.rjs.html#the-great-work",
+    "title": "Derust",
+    "section": "The Great Work",
+    "text": "The Great Work\n\nThesis Title\n\nMining Secure Behavior of Hardware Designs\n\nPlain English\n\nJust as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs."
+  },
+  {
+    "objectID": "00_derust.rjs.html#course-format",
+    "href": "00_derust.rjs.html#course-format",
+    "title": "Derust",
+    "section": "Course Format",
+    "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ungrading",
+    "href": "00_derust.rjs.html#ungrading",
+    "title": "Derust",
+    "section": "Ungrading++",
+    "text": "Ungrading++\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
+  },
+  {
+    "objectID": "00_derust.rjs.html#specification-grading",
+    "href": "00_derust.rjs.html#specification-grading",
+    "title": "Derust",
+    "section": "Specification Grading",
+    "text": "Specification Grading\n\nAll the rage. I was never fan but tell me what you think.\nBasically, I will assign some stuff but you don’t have to do all of it perfectly.\n\nNo partial credit, everything is yes/no grading.\n\nI took distributions over final, midterm, and Lab/HW"
+  },
+  {
+    "objectID": "00_derust.rjs.html#it-pays-to-get-as",
+    "href": "00_derust.rjs.html#it-pays-to-get-as",
+    "title": "Derust",
+    "section": "It pays to get A’s",
+    "text": "It pays to get A’s\n\n\n\nGrade\nRequirements\n\n\n\n\nA\nFinal meets spec\n\n\nA\n90% ave HW/Lab/Midterm, Final compiles\n\n\nA-\n90% ave HW/Lab, Midterm/Final compile\n\n\nA-\nMidterm meets spec, Final compiles"
+  },
+  {
+    "objectID": "00_derust.rjs.html#but-bs-are-the-knees",
+    "href": "00_derust.rjs.html#but-bs-are-the-knees",
+    "title": "Derust",
+    "section": "But B’s are the Knees",
+    "text": "But B’s are the Knees\n\n\n\nGrade\nRequirements\n\n\n\n\nB+\n90% ave HW/Lab, Midterm compiles\n\n\nB\n80% ave HW/Lab, Midterm compiles\n\n\nB-\n80% ave HW/Lab"
+  },
+  {
+    "objectID": "00_derust.rjs.html#these-may-earn-degrees",
+    "href": "00_derust.rjs.html#these-may-earn-degrees",
+    "title": "Derust",
+    "section": "These may (???) earn degrees",
+    "text": "These may (???) earn degrees\n\n\n\nGrade\nRequirements\n\n\n\n\nC\n80% ave Lab\n\n\nD\n60% ave Lab\n\n\nF\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#lab-grading",
+    "href": "00_derust.rjs.html#lab-grading",
+    "title": "Derust",
+    "section": "Lab Grading",
+    "text": "Lab Grading\n\n“A” (=100%)\n\nMeets spec by end of class\n\n“B” (=90%)\n\nCompiles at end of class\n\n“F” (=0%)\n\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#hw-grading",
+    "href": "00_derust.rjs.html#hw-grading",
+    "title": "Derust",
+    "section": "HW Grading",
+    "text": "HW Grading\n\n“A” (=100%)\n\nOn time\nPasses autograder.\n\nI lack confidence I can make excellent autograders for all stages, so give me some grace here.\n\n\n“B” (=90%)\n\nOn time\nCompiles\n\n“F” (=0%)\n\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#final",
+    "href": "00_derust.rjs.html#final",
+    "title": "Derust",
+    "section": "Final",
+    "text": "Final\n\nCreate, document, and publish an operating system… in Rust!\n\nFree-standing binary\nFaults/exceptions/interrupts\nMemory management"
+  },
+  {
+    "objectID": "00_derust.rjs.html#late-work-policy",
+    "href": "00_derust.rjs.html#late-work-policy",
+    "title": "Derust",
+    "section": "Late Work Policy",
+    "text": "Late Work Policy\n\nLate work is not accepted.\n\nNo exceptions.\nThe specification grading framework incorpates tolerances.\nAn OS that meets spec by end-of-term is an A, always."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ai-policy",
+    "href": "00_derust.rjs.html#ai-policy",
+    "title": "Derust",
+    "section": "AI Policy",
+    "text": "AI Policy\n\nI would be shocked if it is helpful to you.\nIf you think it is helpful, that is probably not a good sign.\nYou can use it (I wouldn’t)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#collaboration-policy",
+    "href": "00_derust.rjs.html#collaboration-policy",
+    "title": "Derust",
+    "section": "Collaboration Policy",
+    "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn."
+  },
+  {
+    "objectID": "00_derust.rjs.html#the-hard-part",
+    "href": "00_derust.rjs.html#the-hard-part",
+    "title": "Derust",
+    "section": "The Hard Part",
+    "text": "The Hard Part\n\nAfter ~10 years of systems research I’ve convinced myself only two things really matter:\n\nReferences, and\nRecursion\n\nRecursion isn’t too bad…\n\n&gt;&gt;&gt; exp = lambda b, n : b if n == 1 else b*exp(b,n-1)\n&gt;&gt;&gt; exp(2,8)\n256\n\nCovered in 271 and possibly 351 and no longer interesting on its own, though will be used."
+  },
+  {
+    "objectID": "00_derust.rjs.html#references",
+    "href": "00_derust.rjs.html#references",
+    "title": "Derust",
+    "section": "References",
+    "text": "References\n\nReferences are a beast, but without them nothing makes sense!\n\n\n\n&gt;&gt;&gt; x = 1\n&gt;&gt;&gt; def addx():\n...     x += 1\n...\n&gt;&gt;&gt; addx()\nUnboundLocalError:\n&lt;blah blah blah error messages&gt;\n\n&gt;&gt;&gt; x = [1]\n&gt;&gt;&gt; def addx():\n...     x[0] += 1\n...\n&gt;&gt;&gt; addx()\n&gt;&gt;&gt; x\n[2]"
+  },
+  {
+    "objectID": "00_derust.rjs.html#insight",
+    "href": "00_derust.rjs.html#insight",
+    "title": "Derust",
+    "section": "Insight",
+    "text": "Insight\n\nDefinition:\n\nReferences: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.\n\nImportance:\n\nThis key-value storage is a service provided by the operating system!"
+  },
+  {
+    "objectID": "00_derust.rjs.html#python-and-oses",
+    "href": "00_derust.rjs.html#python-and-oses",
+    "title": "Derust",
+    "section": "Python and OSes",
+    "text": "Python and OSes\n\nWhy not .py (.js, .java, .cs, .cpp, etc)?\n\nThese languages assume an underlying OS (or VM or browser).\nThere is more to life than running code other people wrote.\nGood languages (except Java) but not for us\nThe other systems language is C (and maybe C++)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-and-references",
+    "href": "00_derust.rjs.html#rust-and-references",
+    "title": "Derust",
+    "section": "Rust and References",
+    "text": "Rust and References\n\nRust:\n\nObscures references, but…\nDoes not obscure memory.\n\nThis is good!\n\nMemory matters, but pointers are historical accident.\n\nYou should probably use Rust in every application where correctness or performance matters."
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-and-recursion",
+    "href": "00_derust.rjs.html#rust-and-recursion",
+    "title": "Derust",
+    "section": "Rust and Recursion",
+    "text": "Rust and Recursion\n\nSeparately, Rust is built on one of the most exciting ongoing computer science research efforts:\nLLVM (stands for LLVM)\nBasically, a way of turning human-readable code into machine-executable code.\n\nVery good at turning recursion into iteration and/or vice versa.\n\nThis term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS."
+  },
+  {
+    "objectID": "00_derust.rjs.html#citation",
+    "href": "00_derust.rjs.html#citation",
+    "title": "Derust",
+    "section": "Citation",
+    "text": "Citation\n\nWe will follow “Philipp Oppermann’s blog” “Writing an OS in Rust” version 2.\nRead more."
+  },
+  {
+    "objectID": "00_derust.rjs.html#bare-bones",
+    "href": "00_derust.rjs.html#bare-bones",
+    "title": "Derust",
+    "section": "Bare Bones",
+    "text": "Bare Bones\n\nA binary that doesn’t require an underlying OS.\nSomething that (1) runs and (2) prints.\nSimple I/O\nUnit and integration testing."
+  },
+  {
+    "objectID": "00_derust.rjs.html#interrupts",
+    "href": "00_derust.rjs.html#interrupts",
+    "title": "Derust",
+    "section": "Interrupts",
+    "text": "Interrupts\n\nCPU Exceptions\n\nLike division by zero.\n\nDouble faults\n\nFaults while handling a fault.\n\nHardware interrupts\n\nLike I/O"
+  },
+  {
+    "objectID": "00_derust.rjs.html#memory-management",
+    "href": "00_derust.rjs.html#memory-management",
+    "title": "Derust",
+    "section": "Memory Management",
+    "text": "Memory Management\n\nPaging\nPage tables\nThe heap\nHeap allocation."
+  },
+  {
+    "objectID": "00_derust.rjs.html#final-examproject",
+    "href": "00_derust.rjs.html#final-examproject",
+    "title": "Derust",
+    "section": "Final Exam/Project",
+    "text": "Final Exam/Project\n\nImplement Minimal OS in Rust\n\nIndividual\nUnder version control\nCompiles and runs and is tested"
+  },
+  {
+    "objectID": "00_derust.rjs.html#vim",
+    "href": "00_derust.rjs.html#vim",
+    "title": "Derust",
+    "section": "Vim",
+    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected in a non-trivial subset of settings this course material will be useful.\nI will live-code in vim probably."
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features",
+    "href": "00_derust.rjs.html#rust-features",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nstring formatting\nownership system"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options",
+    "href": "00_derust.rjs.html#options",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options"
+  },
+  {
+    "objectID": "20_options.rjs.html#announcements",
+    "href": "20_options.rjs.html#announcements",
+    "title": "Options",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to Systems in Rust\nAction Items:\n\n“Hi Cargo” is due on Friday\nWe are now ramping for Wordle"
+  },
+  {
+    "objectID": "20_options.rjs.html#today",
+    "href": "20_options.rjs.html#today",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership"
+  },
+  {
+    "objectID": "20_options.rjs.html#variables",
+    "href": "20_options.rjs.html#variables",
+    "title": "Options",
+    "section": "Variables",
+    "text": "Variables\n\nPython variables are, I think a bit sketchy.\nThere is no difference between creating and updating the value of a variable.\n\n\n\nfile.py\n\nx = 10\nx = 11"
+  },
+  {
+    "objectID": "20_options.rjs.html#why-it-matters",
+    "href": "20_options.rjs.html#why-it-matters",
+    "title": "Options",
+    "section": "Why it matters",
+    "text": "Why it matters\n\nThis isn’t objectively bad, but isn’t good specifically in the case of languages that track how much memory they use.\nYou cannot determine without examining prior code whether the following statement uses more memory or uses existing memory\n\n\n\nfile.py\n\ny = 10 # Was there a prior y?\n\n\nBackstreet Boys - I Want It That Way (Official HD Video)"
+  },
+  {
+    "objectID": "20_options.rjs.html#alternatives",
+    "href": "20_options.rjs.html#alternatives",
+    "title": "Options",
+    "section": "Alternatives",
+    "text": "Alternatives\n\nThe other scripting language, JavaScript, doesn’t even do this:\n\n\n\nscript.js\n\nlet y = 10;\ny = 11 // There was a prior y! (kinda)\n\n\n.rs is a bit more .js-like than .py-like when it comes to variables."
+  },
+  {
+    "objectID": "20_options.rjs.html#rust-let",
+    "href": "20_options.rjs.html#rust-let",
+    "title": "Options",
+    "section": "Rust let",
+    "text": "Rust let\n\nLike .js, .rs uses the let formulation to create new variables:\n\n\n\nsrc/main.rs\n\nlet s = \"Imma string in RUST!\"; // Rust comment\n\n\nHowever it differs in a critical way.\nSay we wish to reassign y:\n\n\n\nsrc/main.rs\n\n\u0016\u0016s = \"Anything else.\""
+  },
+  {
+    "objectID": "20_options.rjs.html#immutability",
+    "href": "20_options.rjs.html#immutability",
+    "title": "Options",
+    "section": "Immutability",
+    "text": "Immutability\n\nIf we attempt to do so in Rust, we’ll draw a mutability error:\n\n\u0016error[E0384]: cannot assign twice to immutable variable `s`\n --&gt; src/main.rs:3:4\n  |\n2 |    let s = \"Imma string in RUST!\"; // Rust comment\n  |        - first assignment to `s`\n3 |    s = \"Bleeblarbu\";\n  |    ^^^^^^^^^^^^^^^^ cannot assign twice to immutable variable\n  |\n\nAnd get a helpful recommendation:\n\nhelp: consider making this binding mutable\n  |\n2 |    let mut s = \"Imma string in RUST!\"; // Rust comment\n  |        +++"
+  },
+  {
+    "objectID": "20_options.rjs.html#defaults",
+    "href": "20_options.rjs.html#defaults",
+    "title": "Options",
+    "section": "Defaults",
+    "text": "Defaults\n\nRust variables default to immutable.\nYou’ve seen this before, sorta:\n\n&gt;&gt;&gt; x = (1,2)\n&gt;&gt;&gt; x[1] = 2\nTraceback (most recent call last):\n  File \"&lt;stdin&gt;\", line 1, in &lt;module&gt;\nTypeError: 'tuple' object does not support item assignment\n\nRust variables are like Python tuple elements."
+  },
+  {
+    "objectID": "20_options.rjs.html#defaults-1",
+    "href": "20_options.rjs.html#defaults-1",
+    "title": "Options",
+    "section": "Defaults",
+    "text": "Defaults\n\nRust variables default to immutable.\nThis follows a post-language release style development in .js, where programmers are now recommended to use const rather than let for all variables.\n\n\n\nscript.js\n\nconst y = 10; // This reflects recent .js style recommendations.\ny = 11;       // This will throw an error.\n\n\nYou can check in node or in your browser.\n\n&gt; const y = 10;\nundefined\n&gt; y = 11;\nUncaught TypeError: Assignment to constant variable."
+  },
+  {
+    "objectID": "20_options.rjs.html#mutability-1",
+    "href": "20_options.rjs.html#mutability-1",
+    "title": "Options",
+    "section": "Mutability",
+    "text": "Mutability\n\nIf a variable positively, absolutely, must be updated for a program to make sense:\n\nCounting words in a file\nCounting visitors to a website\nCounting sheep before hitting a honk shoo / snork mimimi angle\n\nUse the let mut formulation.\n\n.rs let mut :: .js let :: .py []\n.rs let :: .js const :: .py ()"
+  },
+  {
+    "objectID": "20_options.rjs.html#example",
+    "href": "20_options.rjs.html#example",
+    "title": "Options",
+    "section": "Example",
+    "text": "Example\n\n\nsrc/main.rs\n\nlet mut sheeps_counted = 0;\nsheeps_counted = 1;\nprintln!(\"Sheeps accounted for counter count: {sheeps_counted}\");\n}\n\n\nThis is allowed.\n\nIt will draw an unused variable warning on the zero, which is for another day."
+  },
+  {
+    "objectID": "20_options.rjs.html#my-advice",
+    "href": "20_options.rjs.html#my-advice",
+    "title": "Options",
+    "section": "My advice",
+    "text": "My advice\n\nUse let\nIf you get an error when using let, you should consider changing your code design equally as strongly as you consider adding mut\nYou can do either (just think about both)"
+  },
+  {
+    "objectID": "20_options.rjs.html#today-1",
+    "href": "20_options.rjs.html#today-1",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership"
+  },
+  {
+    "objectID": "20_options.rjs.html#more-than-hints",
+    "href": "20_options.rjs.html#more-than-hints",
+    "title": "Options",
+    "section": "More than hints",
+    "text": "More than hints\n\nIn Rust, the Pythonic type hint formulation is mandatory in all cases where the type of a variable is non-obvious.\n\n\n\nfile.py\n\n# Somehow each of this things is totally allowed\n\u0016x : int\nx = 1.5\ny : float = \"Hi\"\n\n\nIt is also enforced."
+  },
+  {
+    "objectID": "20_options.rjs.html#try-it-v0",
+    "href": "20_options.rjs.html#try-it-v0",
+    "title": "Options",
+    "section": "Try it v0",
+    "text": "Try it v0\n\nWe can yeet the accursed Python directly into src/main.rs and just furnish let to make the variable declarations well formed:\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    let x : int;\n    x = 1.5;\n    let y : float = \"Hi\";\n}\n\n\nWe will yield a somewhat unremarkable error:\n\nerror[E0412]: cannot find type `int` in this scope\n --&gt; src/main.rs:2:13\n  |\n2 |     let x : int;\n  |             ^^^\n  |             |\n  |             not found in this scope\n  |             help: perhaps you intended to use this type: `i32`"
+  },
+  {
+    "objectID": "20_options.rjs.html#integers",
+    "href": "20_options.rjs.html#integers",
+    "title": "Options",
+    "section": "Integers",
+    "text": "Integers\n\nRust numerical types have a fixed size.\nThey are in that respect like NumPy integers\nThey are different in that respect from Python int which is of theoretically infinite size and JavaScript, which only has floats.\nYou can tell by working with large numbers\n\n\u0016&gt;&gt;&gt; import numpy as np\n&gt;&gt;&gt; x = np.int8(100)\n&gt;&gt;&gt; x * x\n&lt;stdin&gt;:1: RuntimeWarning: overflow encountered in scalar multiply\nnp.int8(16)\n&gt;&gt;&gt; y = 100\n&gt;&gt;&gt; y * y\n10000"
+  },
+  {
+    "objectID": "20_options.rjs.html#signage",
+    "href": "20_options.rjs.html#signage",
+    "title": "Options",
+    "section": "Signage",
+    "text": "Signage\n\nIn Rust, as in NumPy, we specify whether integers may be signed (negative) or not.\nThese are usually referred to as “integer” and “unsigned”\n\n\n\n\n\ninteger.py\n\n&gt;&gt;&gt; x = np.int8(100)\n&gt;&gt;&gt; x + x\n&lt;stdin&gt;:1: RuntimeWarning: overflow encountered in scalar add\nnp.int8(-56)\n&gt;&gt;&gt; x - 110\nnp.int8(-10)\n\n\n\n\nunsigned.py\n\n&gt;&gt;&gt; x = np.uint8(100)\n&gt;&gt;&gt; x + x\nnp.uint8(200)\n&gt;&gt;&gt; x - 110\n&lt;stdin&gt;:1: RuntimeWarning: overflow encountered in scalar subtract\nnp.uint8(246)"
+  },
+  {
+    "objectID": "20_options.rjs.html#on-ints",
+    "href": "20_options.rjs.html#on-ints",
+    "title": "Options",
+    "section": "On ints",
+    "text": "On ints\n\nUnsigned can be twice as big but can’t be negative.\nThe maximize size is two to the power of “bit length” - the number after int, like 8.\n\nOne lower power for signed values.\n\n&gt;&gt;&gt; x = np.int8(2 ** 7)\nTraceback (most recent call last):\nFile \"&lt;stdin&gt;\", line 1, in &lt;module&gt;\nOverflowError: Python integer 128 out of bounds for int8\n&gt;&gt;&gt; x = np.int8(2 ** 7 - 1)\n&gt;&gt;&gt; x\nnp.int8(127)\nIn Rust, as in NumPy, we must decide how much memory we use before we use it."
+  },
+  {
+    "objectID": "20_options.rjs.html#rust-integers",
+    "href": "20_options.rjs.html#rust-integers",
+    "title": "Options",
+    "section": "Rust integers",
+    "text": "Rust integers\n\n\n\nLength\nSigned\nUnsigned\n\n\n\n\n8-bit\ni8\nu8\n\n\n16-bit\ni16\nu16\n\n\n32-bit\ni32\nu32\n\n\n64-bit\ni64\nu64\n\n\n128-bit\ni128\nu128\n\n\narchitecture dependent\nisize\nusize\n\n\n\n\nYou should use u64 unless you have a compelling reason not to."
+  },
+  {
+    "objectID": "20_options.rjs.html#aside",
+    "href": "20_options.rjs.html#aside",
+    "title": "Options",
+    "section": "Aside",
+    "text": "Aside\n\nThe case of wanting to use -1 for error handling does not apply to Rust for reasons we’ll cover latter, so always try to get code working with unsigned first.\n64 is just (at 99.9%+ probability) the preferred size for your physical device.\nYou should use the forthcoming “Option” for these matters."
+  },
+  {
+    "objectID": "20_options.rjs.html#does-np.uin64-u64",
+    "href": "20_options.rjs.html#does-np.uin64-u64",
+    "title": "Options",
+    "section": "Does np.uin64 ~= u64",
+    "text": "Does np.uin64 ~= u64\n\nWhat happens if you add 1 to these?\n\nMake a hypothesis.\n\nE.g. write a comment.\n\nConduct an experiment.\n\nE.g. alter and run the code.\n\nUpdate your hypothesis, if not supported.\n\n\n\n\n\u0016&gt;&gt;&gt; x = np.uint64(2 ** 64 - 1)\n&gt;&gt;&gt; x\nnp.uint64(18446744073709551615)\n\nfn main() {\n    let x : u64 = 18446744073709551615;\n    println!(\"{x}\");\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#floats",
+    "href": "20_options.rjs.html#floats",
+    "title": "Options",
+    "section": "Floats",
+    "text": "Floats\n\nThere are floats in Rust.\nThere are not floats in the Linux kernel.\n\n\nKernel code is normally prohibited from using floating-point (FP) registers or instructions, including the C float and double data types.\n\n\nTherefore there are not floats in this class.\n\nIf an operating system can be written without floats, so too can your code."
+  },
+  {
+    "objectID": "20_options.rjs.html#booleans",
+    "href": "20_options.rjs.html#booleans",
+    "title": "Options",
+    "section": "Booleans",
+    "text": "Booleans\n\nBooleans are called bool (like Python) and stylized all-lowercase (like JavaScript)\n\n\n\nsrc/main.rs\n\nfn main() {\n    let t = true;\n\n    let f: bool = false; // with explicit type annotation\n}\n\n\nOtherwise unremarkable."
+  },
+  {
+    "objectID": "20_options.rjs.html#characters",
+    "href": "20_options.rjs.html#characters",
+    "title": "Options",
+    "section": "Characters",
+    "text": "Characters\n\nVs. Python, Rust has a specific character type, distinct from strings of length 1.\nIt uses single quotes, which look like this: ''\nHere is an example:\n\n\n\nsrc/main.rs\n\nfn main() {\n    let c : char = 'a';  // Correct\n    let c : char = \"a\";  // Banned\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#error-message",
+    "href": "20_options.rjs.html#error-message",
+    "title": "Options",
+    "section": "Error message",
+    "text": "Error message\n\u0016error[E0308]: mismatched types\n --&gt; src/main.rs:3:20\n  |\n3 |     let c : char = \"a\";\n  |             ----   ^^^ expected `char`, found `&str`\n  |             |\n  |             expected due to this\n  |\nhelp: if you meant to write a `char` literal, use single quotes\n  |\n3 -     let c : char = \"a\";\n3 +     let c : char = 'a';\n  |\n\nFor more information about this error, try `rustc --explain E0308`.\nerror: could not compile `scratch` (bin \"scratch\") due to 1 previous error\nuser@DESKTOP-THMS2PJ:~/tmp/scratch$ cat src/main.rs\nfn main() {\n    let c : char = 'a';\n    let c : char = \"a\";\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#takeaway",
+    "href": "20_options.rjs.html#takeaway",
+    "title": "Options",
+    "section": "Takeaway",
+    "text": "Takeaway\n\nI never used Rust characters but ended up using them on Wordle, so just showing them now.\nI don’t expect you to use them pretty much ever, but they motivate the next topic via this line:\n\n  |             ----   ^^^ expected `char`, found `&str`\n\nWhat in the name of FeO is a &str"
+  },
+  {
+    "objectID": "20_options.rjs.html#strings",
+    "href": "20_options.rjs.html#strings",
+    "title": "Options",
+    "section": "“Strings”",
+    "text": "“Strings”\n\nThere are kinda not really exactly strings in Rust.\nThis mostly has to do with Rust having unicode support.\nWe won’t really leverage unicode this term since we aren’t writing human-facing applications.\nBut we still deal with the consequences."
+  },
+  {
+    "objectID": "20_options.rjs.html#today-2",
+    "href": "20_options.rjs.html#today-2",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership"
+  },
+  {
+    "objectID": "20_options.rjs.html#size",
+    "href": "20_options.rjs.html#size",
+    "title": "Options",
+    "section": "Size",
+    "text": "Size\n\nVersus the other types in Rust, which we stressed were of fixed size…\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically."
+  },
+  {
+    "objectID": "20_options.rjs.html#ownership-rules",
+    "href": "20_options.rjs.html#ownership-rules",
+    "title": "Options",
+    "section": "Ownership Rules",
+    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped."
+  },
+  {
+    "objectID": "20_options.rjs.html#scope",
+    "href": "20_options.rjs.html#scope",
+    "title": "Options",
+    "section": "Scope",
+    "text": "Scope\n\nQuoth Rust Book:\n\n    {                      // s is not valid here, since it's not yet declared\n        let s = \"hello\";   // s is valid from this point forward\n\n        // do stuff with s\n    }                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others."
+  },
+  {
+    "objectID": "20_options.rjs.html#capital-s-string",
+    "href": "20_options.rjs.html#capital-s-string",
+    "title": "Options",
+    "section": "Capital S String",
+    "text": "Capital S String\n\nWe have thus far used “string literals”, where the string is typed into the program.\nThis is a special case and doesn’t allow working with strings.\nFor that, we use capital S String, which is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not."
+  },
+  {
+    "objectID": "20_options.rjs.html#its-confusing",
+    "href": "20_options.rjs.html#its-confusing",
+    "title": "Options",
+    "section": "It’s confusing",
+    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nVersus the immortal u64, our most beloved type, the ignomious String is fickle and fleeting.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#whats-happening",
+    "href": "20_options.rjs.html#whats-happening",
+    "title": "Options",
+    "section": "What’s happening?",
+    "text": "What’s happening?\n\nI am unwilling to defend this Rust design decision, though we’ll understand it better over the course of the term.\nBasically, s passes “out of scope” as soon as it is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types (and in my view which types are non-obvious).\n\nIt is potentially infinite types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least)."
+  },
+  {
+    "objectID": "20_options.rjs.html#clone",
+    "href": "20_options.rjs.html#clone",
+    "title": "Options",
+    "section": "Clone",
+    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++"
+  },
+  {
+    "objectID": "20_options.rjs.html#example-1",
+    "href": "20_options.rjs.html#example-1",
+    "title": "Options",
+    "section": "Example",
+    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}\n\n\nBoth draw warnings for unused variables, but it’s a silly example anyway."
+  },
+  {
+    "objectID": "20_options.rjs.html#why-it-matters-1",
+    "href": "20_options.rjs.html#why-it-matters-1",
+    "title": "Options",
+    "section": "Why it matters?",
+    "text": "Why it matters?\n\nYou’ll probably want to decompose capital S String operations into functions.\n\nThis is known as “programming”\n\nYou may want to .clone() a capital S String beforing yeeting it into a helper."
+  },
+  {
+    "objectID": "20_options.rjs.html#example-code",
+    "href": "20_options.rjs.html#example-code",
+    "title": "Options",
+    "section": "Example Code",
+    "text": "Example Code\n\n\ncolour.rs\n\n\u0016fn print_red(s:String) {\n    // Some terminal hacking nonsense for colors\n    println!(\"\\u{001b}[31m{s}\\u{001b}[0m\");\n}\n\nfn print_grn(s:String) {\n    // More nonsense but 31 -&gt; 32\n    println!(\"\\u{001b}[32m{s}\\u{001b}[0m\");\n}\n\nfn main() {\n    let s = String::from(\"6\");\n    print_red(s.clone());\n    print_grn(s.clone());\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#example-output",
+    "href": "20_options.rjs.html#example-output",
+    "title": "Options",
+    "section": "Example output",
+    "text": "Example output\n\nI see something like this, your mileage may vary:\n\n6\n\n\n6\n\n\n6\n\nOn these slides, that’s styled with HTML, in my terminal it is styled with “ANSI Escape Codes”\nMy source is here: Read me!\n\n\n\ncolour.py\n\nprint(\"\\u001b[31mHello, world!\\u001b[0m\")\n\n\nMore in the lab."
+  },
+  {
+    "objectID": "20_options.rjs.html#today-3",
+    "href": "20_options.rjs.html#today-3",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership"
+  },
+  {
+    "objectID": "20_options.rjs.html#declarations",
+    "href": "20_options.rjs.html#declarations",
+    "title": "Options",
+    "section": "Declarations",
+    "text": "Declarations\n\nYou have now seen how functions are declared when they accept arguments.\n\n\n\ncolour.rs\n\n\u0016fn print_red(s:String) {\n    // Some terminal hacking nonsense for colors\n    println!(\"\\u{001b}[31m{s}\\u{001b}[0m\");\n}\n\nfn print_grn(s:String) {\n    // More nonsense but 31 -&gt; 32\n    println!(\"\\u{001b}[32m{s}\\u{001b}[0m\");\n}\n\n\nSame as variables."
+  },
+  {
+    "objectID": "20_options.rjs.html#today-4",
+    "href": "20_options.rjs.html#today-4",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership"
+  },
+  {
+    "objectID": "20_options.rjs.html#loops-1",
+    "href": "20_options.rjs.html#loops-1",
+    "title": "Options",
+    "section": "3 loops",
+    "text": "3 loops\n\nThere are 3 loops in Rust, one of for which I am issuing a partial ban, and also recursion.\n\nloop\nfor\nwhile\nRecursion"
+  },
+  {
+    "objectID": "20_options.rjs.html#loop",
+    "href": "20_options.rjs.html#loop",
+    "title": "Options",
+    "section": "Loop",
+    "text": "Loop\n\nRust loop is its infinite loop type.\nI don’t recommend using it.\n\n\n\nsrc/main.rs\n\n// The rust book literally tells us to just run this code?\n\u0016\u0016fn main() {\n    loop {\n        println!(\"again!\");\n    }\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#if-you-must",
+    "href": "20_options.rjs.html#if-you-must",
+    "title": "Options",
+    "section": "If you must",
+    "text": "If you must\n\nIf you must loop, please use:\n\nA named loop, with\nA named break\n\n\n\n\nsrc/main.rs\n\n// I would never do this, but it can be fun.\n\u0016\u0016fn main() {\n    let mut x = 0;\n    `loop_city: loop {\n        println!(\"{x}\");\n        x += 1\n        if x &gt; 10 {\n            break `loop_city;\n        }\n    }\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#just-recurse",
+    "href": "20_options.rjs.html#just-recurse",
+    "title": "Options",
+    "section": "Just recurse",
+    "text": "Just recurse\n\nThis is how I would do that…\n\n\n\nsrc/main.rs\n\n\u0016fn help(x:u64) {\n    if x &lt;= 10 {\n        println!(\"{x}\");\n        help(x + 1);\n    }\n}\n\nfn main() {\n    help(0);\n}\n\n\nBy the way - ! rather than not is logical negation.\n\nSo would be !(x &gt; 10) vs. not (x &gt; 10)"
+  },
+  {
+    "objectID": "20_options.rjs.html#while",
+    "href": "20_options.rjs.html#while",
+    "title": "Options",
+    "section": "while",
+    "text": "while\n\nMy second favorite after recursion is while\n\nI finished undergraduate without using a for loop btw.\nYou may not this is identical to the recursive solution.\n\n\n\n\n\nVia while\n\n\n\nsrc/main.rs\n\nfn main() {\n    let mut x = 0;\n    while x &lt;= 10 {\n        println!(\"{x}\");\n        x += 1;\n    }\n}\n\n\n\nVia fn\n\n\n\nsrc/main.rs\n\n// elsewhere help is called on 0\n\u0016fn help(x:u64) {\n    if x &lt;= 10 {\n        println!(\"{x}\");\n        help(x + 1);\n    }\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#for",
+    "href": "20_options.rjs.html#for",
+    "title": "Options",
+    "section": "for",
+    "text": "for\n\nRust for is Pythonic “for each” rather than C/C++/Java/JavaScript “for” which should help you.\nWe also implement a collection type, the array (which is Python tuple-like or NumPy array-like)\n\n\n\nsrc/main.rs\n\nfn main() {\n    let a = [10, 20, 30, 40, 50];\n\n    for element in a {\n        println!(\"the value is: {element}\");\n    }\n}"
+  },
+  {
+    "objectID": "20_options.rjs.html#i-dont-know",
+    "href": "20_options.rjs.html#i-dont-know",
+    "title": "Options",
+    "section": "I don’t know…",
+    "text": "I don’t know…\n\nI don’t know if you’ll think of Wordle as loops over elements of a collection:\n\n    for c in guess.chars() {\n        println!(\"{}\", c);\n    }\n\nBut the alternatives are, I think, pretty bleak:\n\n\u0016    for i in 0..5 { // Rust range\n        // Rust strings lack indices\n        // Instead they return either a character or a \"None\"\n        // We have to unwrap that\n        // Rust strings, amirite\n        println!(\"{}\", guess.chars().nth(i).unwrap());\n    }\n\nHelpfully, cargo run told me how to write that."
+  },
+  {
+    "objectID": "20_options.rjs.html#today-5",
+    "href": "20_options.rjs.html#today-5",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership"
+  },
+  {
+    "objectID": "20_options.rjs.html#missing-pieces",
+    "href": "20_options.rjs.html#missing-pieces",
+    "title": "Options",
+    "section": "Missing pieces",
+    "text": "Missing pieces\n\nWe did not discuss the following in detail:\n\nFloats (don’t use them)\nRange (0..5)\nError handling (unwrap)\nString slices (&str)\n\nI think I taught you how to avoid each, however.\nRead more in Rust Book chapters 3 and 4."
+  },
+  {
+    "objectID": "20_options.html",
+    "href": "20_options.html",
+    "title": "Options",
+    "section": "",
+    "text": "Welcome to Systems in Rust\nAction Items:\n\n“Hi Cargo” is due on Friday\nWe are now ramping for Wordle",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#announcements",
+    "href": "20_options.html#announcements",
+    "title": "Options",
+    "section": "",
+    "text": "Welcome to Systems in Rust\nAction Items:\n\n“Hi Cargo” is due on Friday\nWe are now ramping for Wordle",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#today",
+    "href": "20_options.html#today",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#variables",
+    "href": "20_options.html#variables",
+    "title": "Options",
+    "section": "Variables",
+    "text": "Variables\n\nPython variables are, I think a bit sketchy.\nThere is no difference between creating and updating the value of a variable.\n\n\n\nfile.py\n\nx = 10\nx = 11",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#why-it-matters",
+    "href": "20_options.html#why-it-matters",
+    "title": "Options",
+    "section": "Why it matters",
+    "text": "Why it matters\n\nThis isn’t objectively bad, but isn’t good specifically in the case of languages that track how much memory they use.\nYou cannot determine without examining prior code whether the following statement uses more memory or uses existing memory\n\n\n\nfile.py\n\ny = 10 # Was there a prior y?\n\n\nBackstreet Boys - I Want It That Way (Official HD Video)",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#alternatives",
+    "href": "20_options.html#alternatives",
+    "title": "Options",
+    "section": "Alternatives",
+    "text": "Alternatives\n\nThe other scripting language, JavaScript, doesn’t even do this:\n\n\n\nscript.js\n\nlet y = 10;\ny = 11 // There was a prior y! (kinda)\n\n\n.rs is a bit more .js-like than .py-like when it comes to variables.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#rust-let",
+    "href": "20_options.html#rust-let",
+    "title": "Options",
+    "section": "Rust let",
+    "text": "Rust let\n\nLike .js, .rs uses the let formulation to create new variables:\n\n\n\nsrc/main.rs\n\nlet s = \"Imma string in RUST!\"; // Rust comment\n\n\nHowever it differs in a critical way.\nSay we wish to reassign y:\n\n\n\nsrc/main.rs\n\n\u0016\u0016s = \"Anything else.\"",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#immutability",
+    "href": "20_options.html#immutability",
+    "title": "Options",
+    "section": "Immutability",
+    "text": "Immutability\n\nIf we attempt to do so in Rust, we’ll draw a mutability error:\n\n\u0016error[E0384]: cannot assign twice to immutable variable `s`\n --&gt; src/main.rs:3:4\n  |\n2 |    let s = \"Imma string in RUST!\"; // Rust comment\n  |        - first assignment to `s`\n3 |    s = \"Bleeblarbu\";\n  |    ^^^^^^^^^^^^^^^^ cannot assign twice to immutable variable\n  |\n\nAnd get a helpful recommendation:\n\nhelp: consider making this binding mutable\n  |\n2 |    let mut s = \"Imma string in RUST!\"; // Rust comment\n  |        +++",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#defaults",
+    "href": "20_options.html#defaults",
+    "title": "Options",
+    "section": "Defaults",
+    "text": "Defaults\n\nRust variables default to immutable.\nYou’ve seen this before, sorta:\n\n&gt;&gt;&gt; x = (1,2)\n&gt;&gt;&gt; x[1] = 2\nTraceback (most recent call last):\n  File \"&lt;stdin&gt;\", line 1, in &lt;module&gt;\nTypeError: 'tuple' object does not support item assignment\n\nRust variables are like Python tuple elements.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#defaults-1",
+    "href": "20_options.html#defaults-1",
+    "title": "Options",
+    "section": "Defaults",
+    "text": "Defaults\n\nRust variables default to immutable.\nThis follows a post-language release style development in .js, where programmers are now recommended to use const rather than let for all variables.\n\n\n\nscript.js\n\nconst y = 10; // This reflects recent .js style recommendations.\ny = 11;       // This will throw an error.\n\n\nYou can check in node or in your browser.\n\n&gt; const y = 10;\nundefined\n&gt; y = 11;\nUncaught TypeError: Assignment to constant variable.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#mutability-1",
+    "href": "20_options.html#mutability-1",
+    "title": "Options",
+    "section": "Mutability",
+    "text": "Mutability\n\nIf a variable positively, absolutely, must be updated for a program to make sense:\n\nCounting words in a file\nCounting visitors to a website\nCounting sheep before hitting a honk shoo / snork mimimi angle\n\nUse the let mut formulation.\n\n.rs let mut :: .js let :: .py []\n.rs let :: .js const :: .py ()",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#example",
+    "href": "20_options.html#example",
+    "title": "Options",
+    "section": "Example",
+    "text": "Example\n\n\nsrc/main.rs\n\nlet mut sheeps_counted = 0;\nsheeps_counted = 1;\nprintln!(\"Sheeps accounted for counter count: {sheeps_counted}\");\n}\n\n\nThis is allowed.\n\nIt will draw an unused variable warning on the zero, which is for another day.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#my-advice",
+    "href": "20_options.html#my-advice",
+    "title": "Options",
+    "section": "My advice",
+    "text": "My advice\n\nUse let\nIf you get an error when using let, you should consider changing your code design equally as strongly as you consider adding mut\nYou can do either (just think about both)",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#today-1",
+    "href": "20_options.html#today-1",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#more-than-hints",
+    "href": "20_options.html#more-than-hints",
+    "title": "Options",
+    "section": "More than hints",
+    "text": "More than hints\n\nIn Rust, the Pythonic type hint formulation is mandatory in all cases where the type of a variable is non-obvious.\n\n\n\nfile.py\n\n# Somehow each of this things is totally allowed\n\u0016x : int\nx = 1.5\ny : float = \"Hi\"\n\n\nIt is also enforced.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#try-it-v0",
+    "href": "20_options.html#try-it-v0",
+    "title": "Options",
+    "section": "Try it v0",
+    "text": "Try it v0\n\nWe can yeet the accursed Python directly into src/main.rs and just furnish let to make the variable declarations well formed:\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    let x : int;\n    x = 1.5;\n    let y : float = \"Hi\";\n}\n\n\nWe will yield a somewhat unremarkable error:\n\nerror[E0412]: cannot find type `int` in this scope\n --&gt; src/main.rs:2:13\n  |\n2 |     let x : int;\n  |             ^^^\n  |             |\n  |             not found in this scope\n  |             help: perhaps you intended to use this type: `i32`",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#integers",
+    "href": "20_options.html#integers",
+    "title": "Options",
+    "section": "Integers",
+    "text": "Integers\n\nRust numerical types have a fixed size.\nThey are in that respect like NumPy integers\nThey are different in that respect from Python int which is of theoretically infinite size and JavaScript, which only has floats.\nYou can tell by working with large numbers\n\n\u0016&gt;&gt;&gt; import numpy as np\n&gt;&gt;&gt; x = np.int8(100)\n&gt;&gt;&gt; x * x\n&lt;stdin&gt;:1: RuntimeWarning: overflow encountered in scalar multiply\nnp.int8(16)\n&gt;&gt;&gt; y = 100\n&gt;&gt;&gt; y * y\n10000",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#signage",
+    "href": "20_options.html#signage",
+    "title": "Options",
+    "section": "Signage",
+    "text": "Signage\n\nIn Rust, as in NumPy, we specify whether integers may be signed (negative) or not.\nThese are usually referred to as “integer” and “unsigned”\n\n\n\n\n\ninteger.py\n\n&gt;&gt;&gt; x = np.int8(100)\n&gt;&gt;&gt; x + x\n&lt;stdin&gt;:1: RuntimeWarning: overflow encountered in scalar add\nnp.int8(-56)\n&gt;&gt;&gt; x - 110\nnp.int8(-10)\n\n\n\n\nunsigned.py\n\n&gt;&gt;&gt; x = np.uint8(100)\n&gt;&gt;&gt; x + x\nnp.uint8(200)\n&gt;&gt;&gt; x - 110\n&lt;stdin&gt;:1: RuntimeWarning: overflow encountered in scalar subtract\nnp.uint8(246)",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#on-ints",
+    "href": "20_options.html#on-ints",
+    "title": "Options",
+    "section": "On ints",
+    "text": "On ints\n\nUnsigned can be twice as big but can’t be negative.\nThe maximize size is two to the power of “bit length” - the number after int, like 8.\n\nOne lower power for signed values.\n\n&gt;&gt;&gt; x = np.int8(2 ** 7)\nTraceback (most recent call last):\nFile \"&lt;stdin&gt;\", line 1, in &lt;module&gt;\nOverflowError: Python integer 128 out of bounds for int8\n&gt;&gt;&gt; x = np.int8(2 ** 7 - 1)\n&gt;&gt;&gt; x\nnp.int8(127)\nIn Rust, as in NumPy, we must decide how much memory we use before we use it.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#rust-integers",
+    "href": "20_options.html#rust-integers",
+    "title": "Options",
+    "section": "Rust integers",
+    "text": "Rust integers\n\n\n\nLength\nSigned\nUnsigned\n\n\n\n\n8-bit\ni8\nu8\n\n\n16-bit\ni16\nu16\n\n\n32-bit\ni32\nu32\n\n\n64-bit\ni64\nu64\n\n\n128-bit\ni128\nu128\n\n\narchitecture dependent\nisize\nusize\n\n\n\n\nYou should use u64 unless you have a compelling reason not to.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#aside",
+    "href": "20_options.html#aside",
+    "title": "Options",
+    "section": "Aside",
+    "text": "Aside\n\nThe case of wanting to use -1 for error handling does not apply to Rust for reasons we’ll cover latter, so always try to get code working with unsigned first.\n64 is just (at 99.9%+ probability) the preferred size for your physical device.\nYou should use the forthcoming “Option” for these matters.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#does-np.uin64-u64",
+    "href": "20_options.html#does-np.uin64-u64",
+    "title": "Options",
+    "section": "Does np.uin64 ~= u64",
+    "text": "Does np.uin64 ~= u64\n\nWhat happens if you add 1 to these?\n\nMake a hypothesis.\n\nE.g. write a comment.\n\nConduct an experiment.\n\nE.g. alter and run the code.\n\nUpdate your hypothesis, if not supported.\n\n\n\n\n\u0016&gt;&gt;&gt; x = np.uint64(2 ** 64 - 1)\n&gt;&gt;&gt; x\nnp.uint64(18446744073709551615)\n\nfn main() {\n    let x : u64 = 18446744073709551615;\n    println!(\"{x}\");\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#floats",
+    "href": "20_options.html#floats",
+    "title": "Options",
+    "section": "Floats",
+    "text": "Floats\n\nThere are floats in Rust.\nThere are not floats in the Linux kernel.\n\n\nKernel code is normally prohibited from using floating-point (FP) registers or instructions, including the C float and double data types.\n\n\nTherefore there are not floats in this class.\n\nIf an operating system can be written without floats, so too can your code.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#booleans",
+    "href": "20_options.html#booleans",
+    "title": "Options",
+    "section": "Booleans",
+    "text": "Booleans\n\nBooleans are called bool (like Python) and stylized all-lowercase (like JavaScript)\n\n\n\nsrc/main.rs\n\nfn main() {\n    let t = true;\n\n    let f: bool = false; // with explicit type annotation\n}\n\n\nOtherwise unremarkable.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#characters",
+    "href": "20_options.html#characters",
+    "title": "Options",
+    "section": "Characters",
+    "text": "Characters\n\nVs. Python, Rust has a specific character type, distinct from strings of length 1.\nIt uses single quotes, which look like this: ''\nHere is an example:\n\n\n\nsrc/main.rs\n\nfn main() {\n    let c : char = 'a';  // Correct\n    let c : char = \"a\";  // Banned\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#error-message",
+    "href": "20_options.html#error-message",
+    "title": "Options",
+    "section": "Error message",
+    "text": "Error message\n\u0016error[E0308]: mismatched types\n --&gt; src/main.rs:3:20\n  |\n3 |     let c : char = \"a\";\n  |             ----   ^^^ expected `char`, found `&str`\n  |             |\n  |             expected due to this\n  |\nhelp: if you meant to write a `char` literal, use single quotes\n  |\n3 -     let c : char = \"a\";\n3 +     let c : char = 'a';\n  |\n\nFor more information about this error, try `rustc --explain E0308`.\nerror: could not compile `scratch` (bin \"scratch\") due to 1 previous error\nuser@DESKTOP-THMS2PJ:~/tmp/scratch$ cat src/main.rs\nfn main() {\n    let c : char = 'a';\n    let c : char = \"a\";\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#takeaway",
+    "href": "20_options.html#takeaway",
+    "title": "Options",
+    "section": "Takeaway",
+    "text": "Takeaway\n\nI never used Rust characters but ended up using them on Wordle, so just showing them now.\nI don’t expect you to use them pretty much ever, but they motivate the next topic via this line:\n\n  |             ----   ^^^ expected `char`, found `&str`\n\nWhat in the name of FeO is a &str",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#strings",
+    "href": "20_options.html#strings",
+    "title": "Options",
+    "section": "“Strings”",
+    "text": "“Strings”\n\nThere are kinda not really exactly strings in Rust.\nThis mostly has to do with Rust having unicode support.\nWe won’t really leverage unicode this term since we aren’t writing human-facing applications.\nBut we still deal with the consequences.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#today-2",
+    "href": "20_options.html#today-2",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#size",
+    "href": "20_options.html#size",
+    "title": "Options",
+    "section": "Size",
+    "text": "Size\n\nVersus the other types in Rust, which we stressed were of fixed size…\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#ownership-rules",
+    "href": "20_options.html#ownership-rules",
+    "title": "Options",
+    "section": "Ownership Rules",
+    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#scope",
+    "href": "20_options.html#scope",
+    "title": "Options",
+    "section": "Scope",
+    "text": "Scope\n\nQuoth Rust Book:\n\n    {                      // s is not valid here, since it's not yet declared\n        let s = \"hello\";   // s is valid from this point forward\n\n        // do stuff with s\n    }                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#capital-s-string",
+    "href": "20_options.html#capital-s-string",
+    "title": "Options",
+    "section": "Capital S String",
+    "text": "Capital S String\n\nWe have thus far used “string literals”, where the string is typed into the program.\nThis is a special case and doesn’t allow working with strings.\nFor that, we use capital S String, which is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#its-confusing",
+    "href": "20_options.html#its-confusing",
+    "title": "Options",
+    "section": "It’s confusing",
+    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nVersus the immortal u64, our most beloved type, the ignomious String is fickle and fleeting.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#whats-happening",
+    "href": "20_options.html#whats-happening",
+    "title": "Options",
+    "section": "What’s happening?",
+    "text": "What’s happening?\n\nI am unwilling to defend this Rust design decision, though we’ll understand it better over the course of the term.\nBasically, s passes “out of scope” as soon as it is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types (and in my view which types are non-obvious).\n\nIt is potentially infinite types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least).",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#clone",
+    "href": "20_options.html#clone",
+    "title": "Options",
+    "section": "Clone",
+    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#example-1",
+    "href": "20_options.html#example-1",
+    "title": "Options",
+    "section": "Example",
+    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}\n\n\n\nBoth draw warnings for unused variables, but it’s a silly example anyway.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#why-it-matters-1",
+    "href": "20_options.html#why-it-matters-1",
+    "title": "Options",
+    "section": "Why it matters?",
+    "text": "Why it matters?\n\nYou’ll probably want to decompose capital S String operations into functions.\n\nThis is known as “programming”\n\nYou may want to .clone() a capital S String beforing yeeting it into a helper.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#example-code",
+    "href": "20_options.html#example-code",
+    "title": "Options",
+    "section": "Example Code",
+    "text": "Example Code\n\n\ncolour.rs\n\n\u0016fn print_red(s:String) {\n    // Some terminal hacking nonsense for colors\n    println!(\"\\u{001b}[31m{s}\\u{001b}[0m\");\n}\n\nfn print_grn(s:String) {\n    // More nonsense but 31 -&gt; 32\n    println!(\"\\u{001b}[32m{s}\\u{001b}[0m\");\n}\n\nfn main() {\n    let s = String::from(\"6\");\n    print_red(s.clone());\n    print_grn(s.clone());\n    println!(\"{s}\")\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#example-output",
+    "href": "20_options.html#example-output",
+    "title": "Options",
+    "section": "Example output",
+    "text": "Example output\n\nI see something like this, your mileage may vary:\n\n6\n\n\n6\n\n\n6\n\nOn these slides, that’s styled with HTML, in my terminal it is styled with “ANSI Escape Codes”\nMy source is here: Read me!\n\n\n\ncolour.py\n\nprint(\"\\u001b[31mHello, world!\\u001b[0m\")\n\n\nMore in the lab.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#today-3",
+    "href": "20_options.html#today-3",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#declarations",
+    "href": "20_options.html#declarations",
+    "title": "Options",
+    "section": "Declarations",
+    "text": "Declarations\n\nYou have now seen how functions are declared when they accept arguments.\n\n\n\ncolour.rs\n\n\u0016fn print_red(s:String) {\n    // Some terminal hacking nonsense for colors\n    println!(\"\\u{001b}[31m{s}\\u{001b}[0m\");\n}\n\nfn print_grn(s:String) {\n    // More nonsense but 31 -&gt; 32\n    println!(\"\\u{001b}[32m{s}\\u{001b}[0m\");\n}\n\n\nSame as variables.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#today-4",
+    "href": "20_options.html#today-4",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#loops-1",
+    "href": "20_options.html#loops-1",
+    "title": "Options",
+    "section": "3 loops",
+    "text": "3 loops\n\nThere are 3 loops in Rust, one of for which I am issuing a partial ban, and also recursion.\n\nloop\nfor\nwhile\nRecursion",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#loop",
+    "href": "20_options.html#loop",
+    "title": "Options",
+    "section": "Loop",
+    "text": "Loop\n\nRust loop is its infinite loop type.\nI don’t recommend using it.\n\n\n\nsrc/main.rs\n\n// The rust book literally tells us to just run this code?\n\u0016\u0016fn main() {\n    loop {\n        println!(\"again!\");\n    }\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#if-you-must",
+    "href": "20_options.html#if-you-must",
+    "title": "Options",
+    "section": "If you must",
+    "text": "If you must\n\nIf you must loop, please use:\n\nA named loop, with\nA named break\n\n\n\n\nsrc/main.rs\n\n// I would never do this, but it can be fun.\n\u0016\u0016fn main() {\n    let mut x = 0;\n    `loop_city: loop {\n        println!(\"{x}\");\n        x += 1\n        if x &gt; 10 {\n            break `loop_city;\n        }\n    }\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#just-recurse",
+    "href": "20_options.html#just-recurse",
+    "title": "Options",
+    "section": "Just recurse",
+    "text": "Just recurse\n\nThis is how I would do that…\n\n\n\nsrc/main.rs\n\n\u0016fn help(x:u64) {\n    if x &lt;= 10 {\n        println!(\"{x}\");\n        help(x + 1);\n    }\n}\n\nfn main() {\n    help(0);\n}\n\n\nBy the way - ! rather than not is logical negation.\n\nSo would be !(x &gt; 10) vs. not (x &gt; 10)",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#while",
+    "href": "20_options.html#while",
+    "title": "Options",
+    "section": "while",
+    "text": "while\n\nMy second favorite after recursion is while\n\nI finished undergraduate without using a for loop btw.\nYou may not this is identical to the recursive solution.\n\n\n\n\n\nVia while\n\n\n\nsrc/main.rs\n\nfn main() {\n    let mut x = 0;\n    while x &lt;= 10 {\n        println!(\"{x}\");\n        x += 1;\n    }\n}\n\n\n\nVia fn\n\n\n\nsrc/main.rs\n\n// elsewhere help is called on 0\n\u0016fn help(x:u64) {\n    if x &lt;= 10 {\n        println!(\"{x}\");\n        help(x + 1);\n    }\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#for",
+    "href": "20_options.html#for",
+    "title": "Options",
+    "section": "for",
+    "text": "for\n\nRust for is Pythonic “for each” rather than C/C++/Java/JavaScript “for” which should help you.\nWe also implement a collection type, the array (which is Python tuple-like or NumPy array-like)\n\n\n\nsrc/main.rs\n\nfn main() {\n    let a = [10, 20, 30, 40, 50];\n\n    for element in a {\n        println!(\"the value is: {element}\");\n    }\n}",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#i-dont-know",
+    "href": "20_options.html#i-dont-know",
+    "title": "Options",
+    "section": "I don’t know…",
+    "text": "I don’t know…\n\nI don’t know if you’ll think of Wordle as loops over elements of a collection:\n\n    for c in guess.chars() {\n        println!(\"{}\", c);\n    }\n\nBut the alternatives are, I think, pretty bleak:\n\n\u0016    for i in 0..5 { // Rust range\n        // Rust strings lack indices\n        // Instead they return either a character or a \"None\"\n        // We have to unwrap that\n        // Rust strings, amirite\n        println!(\"{}\", guess.chars().nth(i).unwrap());\n    }\n\nHelpfully, cargo run told me how to write that.",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#today-5",
+    "href": "20_options.html#today-5",
+    "title": "Options",
+    "section": "Today",
+    "text": "Today\n\nMutability\nTyping\nParameters\nLoops\nIntro to Ownership",
+    "crumbs": [
+      "Options"
+    ]
+  },
+  {
+    "objectID": "20_options.html#missing-pieces",
+    "href": "20_options.html#missing-pieces",
+    "title": "Options",
+    "section": "Missing pieces",
+    "text": "Missing pieces\n\nWe did not discuss the following in detail:\n\nFloats (don’t use them)\nRange (0..5)\nError handling (unwrap)\nString slices (&str)\n\nI think I taught you how to avoid each, however.\nRead more in Rust Book chapters 3 and 4.",
+    "crumbs": [
+      "Options"
+    ]
   }
 ]

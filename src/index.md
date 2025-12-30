@@ -31,7 +31,7 @@ format: html
 
 |Week|Date (M)|Lecture (M)|Lab (W)|HW (F)|
 |:--:|:---|:----|:-------|:-------|
-|0x0|01/12|Derust|`wc`|LISP|
+|0x0|01/12|[Derust](00_derust.qmd)|`wc`|LISP|
 |0x1|01/19|[`None`](https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf)|Unsafe|`sub` list|
 |0x2|01/26|OSes|`bash`|`scm.sh`|
 |0x3|02/02|Binary|
