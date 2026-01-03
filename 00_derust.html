@@ -102,6 +102,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -169,7 +198,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#it-me" id="toc-it-me" class="nav-link" data-scroll-target="#it-me">It me</a></li>
   <li><a href="#the-great-work" id="toc-the-great-work" class="nav-link" data-scroll-target="#the-great-work">The Great Work</a></li>
   <li><a href="#course-format" id="toc-course-format" class="nav-link" data-scroll-target="#course-format">Course Format</a></li>
-  <li><a href="#ungrading" id="toc-ungrading" class="nav-link" data-scroll-target="#ungrading">Ungrading++</a></li>
+  <li><a href="#grade-policy" id="toc-grade-policy" class="nav-link" data-scroll-target="#grade-policy">Grade Policy</a></li>
   <li><a href="#specification-grading" id="toc-specification-grading" class="nav-link" data-scroll-target="#specification-grading">Specification Grading</a></li>
   <li><a href="#it-pays-to-get-as" id="toc-it-pays-to-get-as" class="nav-link" data-scroll-target="#it-pays-to-get-as">It pays to get A’s</a></li>
   <li><a href="#but-bs-are-the-knees" id="toc-but-bs-are-the-knees" class="nav-link" data-scroll-target="#but-bs-are-the-knees">But B’s are the Knees</a></li>
@@ -212,6 +241,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#rust-features" id="toc-rust-features" class="nav-link" data-scroll-target="#rust-features">Rust Features</a></li>
   <li><a href="#options" id="toc-options" class="nav-link" data-scroll-target="#options">Options</a></li>
+  <li><a href="#options-1" id="toc-options-1" class="nav-link" data-scroll-target="#options-1">Options</a></li>
+  <li><a href="#options-2" id="toc-options-2" class="nav-link" data-scroll-target="#options-2">Options</a></li>
+  <li><a href="#options-3" id="toc-options-3" class="nav-link" data-scroll-target="#options-3">Options</a></li>
+  <li><a href="#options-4" id="toc-options-4" class="nav-link" data-scroll-target="#options-4">Options</a></li>
+  <li><a href="#rust-features-1" id="toc-rust-features-1" class="nav-link" data-scroll-target="#rust-features-1">Rust Features</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#check-it" id="toc-check-it" class="nav-link" data-scroll-target="#check-it">Check it</a></li>
+  <li><a href="#rust-features-2" id="toc-rust-features-2" class="nav-link" data-scroll-target="#rust-features-2">Rust Features</a></li>
+  <li><a href="#std" id="toc-std" class="nav-link" data-scroll-target="#std"><code>std</code></a></li>
+  <li><a href="#iterators" id="toc-iterators" class="nav-link" data-scroll-target="#iterators">Iterators</a></li>
+  <li><a href="#closures" id="toc-closures" class="nav-link" data-scroll-target="#closures">Closures</a></li>
+  <li><a href="#pattern-matching" id="toc-pattern-matching" class="nav-link" data-scroll-target="#pattern-matching">Pattern Matching</a></li>
+  <li><a href="#formatting" id="toc-formatting" class="nav-link" data-scroll-target="#formatting">Formatting</a></li>
+  <li><a href="#read-more" id="toc-read-more" class="nav-link" data-scroll-target="#read-more">Read More</a></li>
+  <li><a href="#rust-features-3" id="toc-rust-features-3" class="nav-link" data-scroll-target="#rust-features-3">Rust Features</a></li>
+  <li><a href="#ownership" id="toc-ownership" class="nav-link" data-scroll-target="#ownership">Ownership</a></li>
+  <li><a href="#size" id="toc-size" class="nav-link" data-scroll-target="#size">Size</a></li>
+  <li><a href="#ownership-rules" id="toc-ownership-rules" class="nav-link" data-scroll-target="#ownership-rules">Ownership Rules</a></li>
+  <li><a href="#scope" id="toc-scope" class="nav-link" data-scroll-target="#scope">Scope</a></li>
+  <li><a href="#capital-s-string" id="toc-capital-s-string" class="nav-link" data-scroll-target="#capital-s-string">Capital S String</a></li>
+  <li><a href="#its-confusing" id="toc-its-confusing" class="nav-link" data-scroll-target="#its-confusing">It’s confusing</a></li>
+  <li><a href="#whats-happening" id="toc-whats-happening" class="nav-link" data-scroll-target="#whats-happening">What’s happening?</a></li>
+  <li><a href="#clone" id="toc-clone" class="nav-link" data-scroll-target="#clone">Clone</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  <li><a href="#today-1" id="toc-today-1" class="nav-link" data-scroll-target="#today-1">Today</a></li>
   </ul></li>
   <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
   </ul>
@@ -329,8 +383,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 </ul>
 </section>
-<section id="ungrading" class="level2">
-<h2 class="anchored" data-anchor-id="ungrading">Ungrading++</h2>
+<section id="grade-policy" class="level2">
+<h2 class="anchored" data-anchor-id="grade-policy">Grade Policy</h2>
 <ul>
 <li>Your voices have been heard:</li>
 </ul>
@@ -686,19 +740,403 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Derust</h1>
 <section id="rust-features" class="level2">
 <h2 class="anchored" data-anchor-id="rust-features">Rust Features</h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/core/option/">option</a></li>
-<li><a href="https://doc.rust-lang.org/core/result/">result</a></li>
-<li><a href="https://doc.rust-lang.org/std/">std</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></li>
-<li><a href="https://doc.rust-lang.org/core/macro.write.html">string formatting</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership system</a></li>
+<ul class="task-list">
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
 </ul>
 </section>
 <section id="options" class="level2">
 <h2 class="anchored" data-anchor-id="options">Options</h2>
+<ul>
+<li>Sometimes code makes sense.</li>
+<li><a href="https://en.wikipedia.org/wiki/Multiply%E2%80%93accumulate_operation">MAD</a></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1"></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb4-2"><a href="#cb4-2"></a></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co"># Multiply-add operation</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="kw">def</span> mad(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> uint64:</span>
+<span id="cb4-5"><a href="#cb4-5"></a>    <span class="cf">return</span> a <span class="op">+</span> b <span class="op">*</span> c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-1" class="level2">
+<h2 class="anchored" data-anchor-id="options-1">Options</h2>
+<ul>
+<li>Sometimes it doesn’t.</li>
+<li>This needn’t return a positive value!</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1"></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="co"># Multiply-sub operation</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="kw">def</span> msu(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> uint64:</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    <span class="cf">return</span> a <span class="op">-</span> b <span class="op">*</span> c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-2" class="level2">
+<h2 class="anchored" data-anchor-id="options-2">Options</h2>
+<ul>
+<li>Handle your cases!</li>
+<li>But this causes other problems…</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1"></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb6-2"><a href="#cb6-2"></a></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="co"># Multiply-sub operation</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="kw">def</span> msu(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> uint64:</span>
+<span id="cb6-5"><a href="#cb6-5"></a>    <span class="cf">if</span> b <span class="op">*</span> c <span class="op">&gt;</span> a:</span>
+<span id="cb6-6"><a href="#cb6-6"></a>        <span class="cf">return</span> a <span class="op">+</span> b <span class="op">*</span> c</span>
+<span id="cb6-7"><a href="#cb6-7"></a>    <span class="cf">else</span>:</span>
+<span id="cb6-8"><a href="#cb6-8"></a>        <span class="cf">return</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-3" class="level2">
+<h2 class="anchored" data-anchor-id="options-3">Options</h2>
+<ul>
+<li>Handle your cases!</li>
+<li>But this causes other problems…</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1"></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="im">from</span> typing <span class="im">import</span> Union</span>
+<span id="cb7-3"><a href="#cb7-3"></a></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co"># Multiply-sub operation</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="kw">def</span> msu(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> Union[<span class="va">None</span>,uint64]:</span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="cf">if</span> b <span class="op">*</span> c <span class="op">&gt;</span> a:</span>
+<span id="cb7-7"><a href="#cb7-7"></a>        <span class="cf">return</span> a <span class="op">+</span> b <span class="op">*</span> c</span>
+<span id="cb7-8"><a href="#cb7-8"></a>    <span class="cf">else</span>:</span>
+<span id="cb7-9"><a href="#cb7-9"></a>        <span class="cf">return</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-4" class="level2">
+<h2 class="anchored" data-anchor-id="options-4">Options</h2>
+<ul>
+<li>Every wish there was a nice way to handle a <code>Union[None,x]</code> <span class="math inline">\(\forall x\)</span>?</li>
+<li>It’s the <a href="https://doc.rust-lang.org/std/option/">option</a> type:</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">fn</span> divide(numerator<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span> denominator<span class="op">:</span> <span class="dt">f64</span>) <span class="op">-&gt;</span> <span class="dt">Option</span><span class="op">&lt;</span><span class="dt">f64</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>    <span class="cf">if</span> denominator <span class="op">==</span> <span class="dv">0.0</span> <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>        <span class="cn">None</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>        <span class="cn">Some</span>(numerator <span class="op">/</span> denominator)</span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rust-features-1" class="level2">
+<h2 class="anchored" data-anchor-id="rust-features-1">Rust Features</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
+</ul>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<ul>
+<li>Results are basically options that incorporate error handling.</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">// Linux Kernel Versions, latest is 6</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="kw">fn</span> check_version(val<span class="op">:</span> <span class="dt">u8</span>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">,</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="dt">str</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>    <span class="cf">if</span> val <span class="op">&lt;</span> <span class="dv">7</span> <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>        <span class="cf">return</span> <span class="cn">Ok</span>(val)<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>        <span class="cf">return</span> <span class="cn">Err</span>(<span class="st">"Not yet released."</span>)</span>
+<span id="cb9-7"><a href="#cb9-7"></a>    <span class="op">}</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="check-it" class="level2">
+<h2 class="anchored" data-anchor-id="check-it">Check it</h2>
+<ul>
+<li>Add main.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a>fn main() <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>    <span class="pp">dbg!</span>(check_version(<span class="dv">4</span>))<span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a>    <span class="pp">dbg!</span>(check_version(<span class="dv">7</span>))<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><code>cargo r</code></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">[src/main.rs:10:5]</span> check_version<span class="er">(</span><span class="ex">4</span><span class="kw">)</span> <span class="ex">=</span> Ok<span class="er">(</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a>    <span class="ex">4,</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="kw">)</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="ex">[src/main.rs:11:5]</span> check_version<span class="er">(</span><span class="ex">7</span><span class="kw">)</span> <span class="ex">=</span> Err<span class="er">(</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>    <span class="st">"Not yet released."</span><span class="ex">,</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rust-features-2" class="level2">
+<h2 class="anchored" data-anchor-id="rust-features-2">Rust Features</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
+</ul>
+</section>
+<section id="std" class="level2">
+<h2 class="anchored" data-anchor-id="std"><code>std</code></h2>
+<ul>
+<li>Options, results, and more fun things, like vectors, are all part of <code>std</code></li>
+</ul>
+<blockquote class="blockquote">
+<p><a href="https://doc.rust-lang.org/std/">The Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like <code>Vec&lt;T&gt;</code> and <code>Option&lt;T&gt;</code>, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things.</a></p>
+</blockquote>
+</section>
+<section id="iterators" class="level2">
+<h2 class="anchored" data-anchor-id="iterators">Iterators</h2>
+<ul>
+<li>An iterator is pretty much a for-each loop, the Python loop type.</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">let</span> v1 <span class="op">=</span> <span class="pp">vec!</span>[<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">;</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="kw">let</span> v1_iter <span class="op">=</span> v1<span class="op">.</span>iter()<span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="cf">for</span> val <span class="kw">in</span> v1_iter <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a>    <span class="pp">println!</span>(<span class="st">"Got: {val}"</span>)<span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Oh look, <code>vec!</code> from <code>std</code></li>
+</ul>
+</section>
+<section id="closures" class="level2">
+<h2 class="anchored" data-anchor-id="closures">Closures</h2>
+<ul>
+<li>A closure is pretty much a lambda function, like the Python <code>lambda</code> keyword.</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">fn</span>  add_one_v1   (x<span class="op">:</span> <span class="dt">u32</span>) <span class="op">-&gt;</span> <span class="dt">u32</span> <span class="op">{</span> x <span class="op">+</span> <span class="dv">1</span> <span class="op">}</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="kw">let</span> add_one_v2 <span class="op">=</span> <span class="op">|</span>x<span class="op">:</span> <span class="dt">u32</span><span class="op">|</span> <span class="op">-&gt;</span> <span class="dt">u32</span> <span class="op">{</span> x <span class="op">+</span> <span class="dv">1</span> <span class="op">};</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="kw">let</span> add_one_v3 <span class="op">=</span> <span class="op">|</span>x<span class="op">|</span>             <span class="op">{</span> x <span class="op">+</span> <span class="dv">1</span> <span class="op">};</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="kw">let</span> add_one_v4 <span class="op">=</span> <span class="op">|</span>x<span class="op">|</span>               x <span class="op">+</span> <span class="dv">1</span>  <span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>No one can stop you from writing <code>fn</code>’s, not even people who actually know Rust!</li>
+</ul>
+</section>
+<section id="pattern-matching" class="level2">
+<h2 class="anchored" data-anchor-id="pattern-matching">Pattern Matching</h2>
+<ul>
+<li>The language designers intend options (and results) to be handled as follows:</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb14-1"><a href="#cb14-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Hello, world"</span><span class="op">;</span></span>
+<span id="cb14-3"><a href="#cb14-3"></a>    <span class="cf">match</span> s<span class="op">.</span>chars()<span class="op">.</span>nth(<span class="dv">11</span>) <span class="op">{</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a>        <span class="cn">Some</span>(c) <span class="op">=&gt;</span> <span class="pp">println!</span>(<span class="st">"The 11th character is {:?}"</span><span class="op">,</span> c)<span class="op">,</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a>        <span class="cn">None</span> <span class="op">=&gt;</span> <span class="pp">println!</span>(<span class="st">"String `s` is fewer than 11 characters in length"</span>)<span class="op">,</span></span>
+<span id="cb14-6"><a href="#cb14-6"></a>    <span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Basically, if-else is “un-Rust-like” most of the time.</li>
+</ul>
+</section>
+<section id="formatting" class="level2">
+<h2 class="anchored" data-anchor-id="formatting">Formatting</h2>
+<ul>
+<li><code>print!</code>, <code>println!</code>, and <code>format!</code> are all nice ways to work with strings.</li>
+<li>Handy if you are an OS and want to interface with a human.</li>
+<li>Assuming you (the OS) know how to display text.
+<ul>
+<li>We’ll get there.</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1"></a><span class="pp">format!</span>(<span class="st">"test"</span>)<span class="op">;</span>                             <span class="co">// =&gt; "test"</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a><span class="pp">format!</span>(<span class="st">"hello {}"</span><span class="op">,</span> <span class="st">"world!"</span>)<span class="op">;</span>               <span class="co">// =&gt; "hello world!"</span></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="pp">format!</span>(<span class="st">"x = {}, y = {val}"</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> val <span class="op">=</span> <span class="dv">30</span>)<span class="op">;</span>  <span class="co">// =&gt; "x = 10, y = 30"</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="kw">let</span> (x<span class="op">,</span> y) <span class="op">=</span> (<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="pp">format!</span>(<span class="st">"{x} + {y} = 3"</span>)<span class="op">;</span>                    <span class="co">// =&gt; "1 + 2 = 3"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Similar to Python f-strings and also every other language.</li>
+</ul>
+</section>
+<section id="read-more" class="level2">
+<h2 class="anchored" data-anchor-id="read-more">Read More</h2>
+<ul>
+<li>I use most of these language features in two extended examples.
+<ul>
+<li><a href="https://cd-c89.github.io/rs/30_bits.html#hex-reader">Hex reader</a></li>
+<li><a href="https://cd-c89.github.io/rs/B0_dynamic.html#fibonacci">Fibonacci</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="rust-features-3" class="level2">
+<h2 class="anchored" data-anchor-id="rust-features-3">Rust Features</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
+</ul>
+</section>
+<section id="ownership" class="level2">
+<h2 class="anchored" data-anchor-id="ownership">Ownership</h2>
+<ul>
+<li>Big topic.</li>
+<li>Big deal.</li>
+<li>Learn by doing.</li>
+<li>Quick example.</li>
+</ul>
+</section>
+<section id="size" class="level2">
+<h2 class="anchored" data-anchor-id="size">Size</h2>
+<ul>
+<li>Versus e.g.&nbsp;<code>u8</code> which was a fixed size.</li>
+<li>A string is not.</li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">// String of length 0</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a><span class="kw">let</span> s <span class="op">=</span> <span class="st">""</span><span class="op">;</span> </span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="co">// Complete text of Bhagavad Gita</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="kw">let</span> t <span class="op">=</span> <span class="st">"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>And in fact, if we implemented Python integers in Rust, they would follow similar rules.
+<ul>
+<li>Anything that has no bounded upper size, basically.</li>
+</ul></li>
+</ul>
+</section>
+<section id="ownership-rules" class="level2">
+<h2 class="anchored" data-anchor-id="ownership-rules">Ownership Rules</h2>
+<ul>
+<li>Each value in Rust has an <em>owner</em>.</li>
+<li>There can only be one owner at a time.</li>
+<li>When the owner goes out of scope, the value will be dropped.</li>
+</ul>
+</section>
+<section id="scope" class="level2">
+<h2 class="anchored" data-anchor-id="scope">Scope</h2>
+<ul>
+<li>Quoth Rust Book:</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a href="#cb17-1"></a><span class="op">{</span>                      <span class="co">// s is not valid here, since it's not yet declared</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"hello"</span><span class="op">;</span>   <span class="co">// s is valid from this point forward</span></span>
+<span id="cb17-3"><a href="#cb17-3"></a></span>
+<span id="cb17-4"><a href="#cb17-4"></a>    <span class="co">// do stuff with s</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="op">}</span>                      <span class="co">// this scope is now over, and s is no longer valid</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>You can experimentally verify each of the claims.</li>
+<li>Basically, the memory associated with <code>s</code> exists at some time points, but not others.</li>
+<li>Think: Address of building that hasn’t been made/has been condemned.</li>
+</ul>
+</section>
+<section id="capital-s-string" class="level2">
+<h2 class="anchored" data-anchor-id="capital-s-string">Capital S String</h2>
+<ul>
+<li>Capital S <code>String</code> is closer to data structure than a data type in some ways:</li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a href="#cb18-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> s <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">"hello"</span>)<span class="op">;</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a></span>
+<span id="cb18-3"><a href="#cb18-3"></a>    s<span class="op">.</span>push_str(<span class="st">", world!"</span>)<span class="op">;</span> <span class="co">// push_str() appends a literal to a String</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a></span>
+<span id="cb18-5"><a href="#cb18-5"></a>    <span class="pp">println!</span>(<span class="st">"{s}"</span>)<span class="op">;</span> <span class="co">// this will print `hello, world!`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>It accepts a push operation a la a queue/stack/list, and must be initialized with a function call.</li>
+<li>A <code>String</code> is mutable, a literal is not.</li>
+</ul>
+</section>
+<section id="its-confusing" class="level2">
+<h2 class="anchored" data-anchor-id="its-confusing">It’s confusing</h2>
+<ul>
+<li>This leads to some un-Pythonic behavior.</li>
+<li>We compare <em>fixed size</em> and <em>variable size</em> types, which have distinct behavior</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>This works.</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a href="#cb19-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb19-2"><a href="#cb19-2"></a>    <span class="kw">let</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb19-3"><a href="#cb19-3"></a>    <span class="kw">let</span> y <span class="op">=</span> x<span class="op">;</span></span>
+<span id="cb19-4"><a href="#cb19-4"></a>    <span class="pp">println!</span>(<span class="st">"{x}"</span>)<span class="op">;</span></span>
+<span id="cb19-5"><a href="#cb19-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>This doesn’t.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">"6"</span>)<span class="op">;</span></span>
+<span id="cb20-3"><a href="#cb20-3"></a>    <span class="kw">let</span> t <span class="op">=</span> s<span class="op">;</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a>    <span class="pp">println!</span>(<span class="st">"{s}"</span>)</span>
+<span id="cb20-5"><a href="#cb20-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="whats-happening" class="level2">
+<h2 class="anchored" data-anchor-id="whats-happening">What’s happening?</h2>
+<ul>
+<li><code>s</code> passes “out of scope” once its value is assigned to <code>t</code>.</li>
+<li>Thereafter, there is no declared variable of name <code>s</code>.</li>
+<li>But this only happens to some types.
+<ul>
+<li>It is unbounded types, but it’s unclear that e.g.&nbsp;<code>String::from("6")</code> isn’t a fixed width string of lenth 1 (to me at least).</li>
+</ul></li>
+</ul>
+</section>
+<section id="clone" class="level2">
+<h2 class="anchored" data-anchor-id="clone">Clone</h2>
+<ul>
+<li>My secret inside source with a real job (e.g.&nbsp;not professor) who writes Rust and also thought this was a bit silly:</li>
+</ul>
+<blockquote class="blockquote">
+<p>Whenever I use Rust, I just always <code>.clone</code> and when someone asks me about it, I say that’s a performance optimization for latter.</p>
+</blockquote>
+<ul>
+<li>Rust says the same thing, actually:</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1"></a><span class="ex">help:</span> consider cloning the value if the performance cost is acceptable</span>
+<span id="cb21-2"><a href="#cb21-2"></a>  <span class="kw">|</span></span>
+<span id="cb21-3"><a href="#cb21-3"></a><span class="ex">6</span> <span class="kw">|</span>     <span class="bu">let</span> <span class="va">t</span> <span class="op">=</span> <span class="va">s</span>.clone<span class="er">(</span><span class="kw">);</span></span>
+<span id="cb21-4"><a href="#cb21-4"></a>  <span class="kw">|</span>              <span class="ex">++++++++</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
+<ul>
+<li>It is reasonable to use <code>.clone</code> on capital S <code>String</code> for e.g.&nbsp;Wordle, as needed.</li>
+<li>As a challenge, don’t use <code>.clone</code> (you don’t need it)</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>This works.</li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a href="#cb22-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a>    <span class="kw">let</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb22-3"><a href="#cb22-3"></a>    <span class="kw">let</span> y <span class="op">=</span> x<span class="op">;</span></span>
+<span id="cb22-4"><a href="#cb22-4"></a>    <span class="pp">println!</span>(<span class="st">"{x}"</span>)<span class="op">;</span></span>
+<span id="cb22-5"><a href="#cb22-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>This works.</li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a href="#cb23-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">"6"</span>)<span class="op">;</span></span>
+<span id="cb23-3"><a href="#cb23-3"></a>    <span class="kw">let</span> t <span class="op">=</span> s<span class="op">.</span>clone()<span class="op">;</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a>    <span class="pp">println!</span>(<span class="st">"{s}"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="today-1" class="level2">
+<h2 class="anchored" data-anchor-id="today-1">Today</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="">Logistics</label></li>
+<li><label><input type="checkbox" checked="">On Systems</label></li>
+<li><label><input type="checkbox" checked="">On Rust</label></li>
+<li><label><input type="checkbox" checked="">Course Sketch</label></li>
+<li><label><input type="checkbox" checked="">Derust</label></li>
+</ul>
 </section>
 </section>
 <section id="fin" class="level1">
@@ -1190,303 +1628,680 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">---</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="an">title:</span><span class="co"> Derust</span></span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="co">---</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a></span>
-<span id="cb4-5"><a href="#cb4-5"></a><span class="fu">## Announcements</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="ss">- </span>**Welcome** to OS in Rust</span>
-<span id="cb4-8"><a href="#cb4-8"></a><span class="ss">  - </span>The most famous systems topic...</span>
-<span id="cb4-9"><a href="#cb4-9"></a><span class="ss">  - </span>Now in Rust, your favorite language!</span>
-<span id="cb4-10"><a href="#cb4-10"></a><span class="ss">- </span>**Action Items**:</span>
-<span id="cb4-11"><a href="#cb4-11"></a><span class="ss">  - </span>Access the <span class="co">[</span><span class="ot">course webpage</span><span class="co">](https://cd-rs.github.io/os/)</span></span>
-<span id="cb4-12"><a href="#cb4-12"></a><span class="ss">  - </span>Join the Discord!</span>
-<span id="cb4-13"><a href="#cb4-13"></a><span class="ss">    - </span>You should have gotten an email...</span>
-<span id="cb4-14"><a href="#cb4-14"></a><span class="ss">  - </span>Set up Linux/Rust/Git.</span>
-<span id="cb4-15"><a href="#cb4-15"></a></span>
-<span id="cb4-16"><a href="#cb4-16"></a><span class="fu">## Homework</span></span>
-<span id="cb4-17"><a href="#cb4-17"></a></span>
-<span id="cb4-18"><a href="#cb4-18"></a><span class="ss">- </span>The first homework, "LISP", is ready now.</span>
-<span id="cb4-19"><a href="#cb4-19"></a><span class="ss">  - </span>It is fun with a lot of extensions.</span>
-<span id="cb4-20"><a href="#cb4-20"></a><span class="ss">  - </span>Mostly makes sure you have everything set up.</span>
-<span id="cb4-21"><a href="#cb4-21"></a><span class="ss">- </span>Due Friday, 5 Sept. at 1440 PT.</span>
-<span id="cb4-22"><a href="#cb4-22"></a></span>
-<span id="cb4-23"><a href="#cb4-23"></a><span class="fu">## Today</span></span>
-<span id="cb4-24"><a href="#cb4-24"></a></span>
-<span id="cb4-25"><a href="#cb4-25"></a><span class="ss">- </span>Logistics</span>
-<span id="cb4-26"><a href="#cb4-26"></a><span class="ss">- </span>On Systems</span>
-<span id="cb4-27"><a href="#cb4-27"></a><span class="ss">- </span>On Rust</span>
-<span id="cb4-28"><a href="#cb4-28"></a><span class="ss">- </span>Course Sketch</span>
-<span id="cb4-29"><a href="#cb4-29"></a><span class="ss">- </span>Derust</span>
-<span id="cb4-30"><a href="#cb4-30"></a></span>
-<span id="cb4-31"><a href="#cb4-31"></a><span class="fu"># Logistics</span></span>
-<span id="cb4-32"><a href="#cb4-32"></a></span>
-<span id="cb4-33"><a href="#cb4-33"></a><span class="fu">## It me</span></span>
-<span id="cb4-34"><a href="#cb4-34"></a></span>
-<span id="cb4-35"><a href="#cb4-35"></a><span class="ss">- </span>**Name** </span>
-<span id="cb4-36"><a href="#cb4-36"></a><span class="ss">  - </span>(Prof. )?Calvin</span>
-<span id="cb4-37"><a href="#cb4-37"></a><span class="ss">- </span>**Credentials**</span>
-<span id="cb4-38"><a href="#cb4-38"></a><span class="ss">  - </span>B.A. Mathematics</span>
-<span id="cb4-39"><a href="#cb4-39"></a><span class="ss">  - </span>B.S., M.S., Ph.D. Computer Science</span>
-<span id="cb4-40"><a href="#cb4-40"></a><span class="ss">- </span>**Pronouns** </span>
-<span id="cb4-41"><a href="#cb4-41"></a><span class="ss">  - </span>they/them </span>
-<span id="cb4-42"><a href="#cb4-42"></a></span>
-<span id="cb4-43"><a href="#cb4-43"></a><span class="fu">## The Great Work</span></span>
-<span id="cb4-44"><a href="#cb4-44"></a></span>
-<span id="cb4-45"><a href="#cb4-45"></a><span class="ss">- </span>Thesis Title</span>
-<span id="cb4-46"><a href="#cb4-46"></a><span class="ss">  - </span>Mining Secure Behavior of Hardware Designs </span>
-<span id="cb4-47"><a href="#cb4-47"></a><span class="ss">- </span>Plain English</span>
-<span id="cb4-48"><a href="#cb4-48"></a><span class="ss">  - </span>Just as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs. </span>
-<span id="cb4-49"><a href="#cb4-49"></a></span>
-<span id="cb4-50"><a href="#cb4-50"></a><span class="fu">## Course Format</span></span>
-<span id="cb4-51"><a href="#cb4-51"></a></span>
-<span id="cb4-52"><a href="#cb4-52"></a><span class="ss">- </span>Lecture Monday</span>
-<span id="cb4-53"><a href="#cb4-53"></a><span class="ss">- </span>Lab Wednesday</span>
-<span id="cb4-54"><a href="#cb4-54"></a><span class="ss">- </span>Homework due Friday 1440 PT (the *next* Friday)</span>
-<span id="cb4-55"><a href="#cb4-55"></a><span class="ss">    - </span>You should all meet on Friday.</span>
-<span id="cb4-56"><a href="#cb4-56"></a><span class="ss">- </span>In-class midterm week of 3/16</span>
-<span id="cb4-57"><a href="#cb4-57"></a><span class="ss">- </span>Your OS is due whenever the final is scheduled.</span>
-<span id="cb4-58"><a href="#cb4-58"></a><span class="ss">    - </span>Waiting on registrar to announce.</span>
-<span id="cb4-59"><a href="#cb4-59"></a></span>
-<span id="cb4-60"><a href="#cb4-60"></a><span class="fu">## Ungrading++</span></span>
-<span id="cb4-61"><a href="#cb4-61"></a></span>
-<span id="cb4-62"><a href="#cb4-62"></a><span class="ss">- </span>Your voices have been heard:</span>
-<span id="cb4-63"><a href="#cb4-63"></a></span>
-<span id="cb4-64"><a href="#cb4-64"></a><span class="at">&gt; I think failing my systems class was the best thing that happened to me.</span></span>
-<span id="cb4-65"><a href="#cb4-65"></a></span>
-<span id="cb4-66"><a href="#cb4-66"></a><span class="at">&gt; This course demanded strong self-motivation... Thus, I didn't learn as much as I might've if grading mattered more.</span></span>
-<span id="cb4-67"><a href="#cb4-67"></a></span>
-<span id="cb4-68"><a href="#cb4-68"></a><span class="fu">## Specification Grading</span></span>
-<span id="cb4-69"><a href="#cb4-69"></a></span>
-<span id="cb4-70"><a href="#cb4-70"></a><span class="ss">- </span>All the rage. I was never fan but tell me what you think.</span>
-<span id="cb4-71"><a href="#cb4-71"></a><span class="ss">- </span>Basically, I will assign some stuff but you don't have to do all of it perfectly.</span>
-<span id="cb4-72"><a href="#cb4-72"></a><span class="ss">    - </span>No partial credit, everything is yes/no grading.</span>
-<span id="cb4-73"><a href="#cb4-73"></a><span class="ss">- </span>I took distributions over final, midterm, and Lab/HW</span>
-<span id="cb4-74"><a href="#cb4-74"></a></span>
-<span id="cb4-75"><a href="#cb4-75"></a><span class="fu">## It pays to get A's</span></span>
-<span id="cb4-76"><a href="#cb4-76"></a></span>
-<span id="cb4-77"><a href="#cb4-77"></a>|Grade|Requirements|</span>
-<span id="cb4-78"><a href="#cb4-78"></a>|:----------:|------|</span>
-<span id="cb4-79"><a href="#cb4-79"></a>|A|Final meets spec|</span>
-<span id="cb4-80"><a href="#cb4-80"></a>|A|90% ave HW/Lab/Midterm, Final compiles|</span>
-<span id="cb4-81"><a href="#cb4-81"></a>|A-|90% ave HW/Lab, Midterm/Final compile|</span>
-<span id="cb4-82"><a href="#cb4-82"></a>|A-|Midterm meets spec, Final compiles|</span>
-<span id="cb4-83"><a href="#cb4-83"></a></span>
-<span id="cb4-84"><a href="#cb4-84"></a><span class="fu">## But B's are the Knees</span></span>
-<span id="cb4-85"><a href="#cb4-85"></a></span>
-<span id="cb4-86"><a href="#cb4-86"></a>|Grade|Requirements|</span>
-<span id="cb4-87"><a href="#cb4-87"></a>|:----------:|------|</span>
-<span id="cb4-88"><a href="#cb4-88"></a>|B+|90% ave HW/Lab, Midterm compiles|</span>
-<span id="cb4-89"><a href="#cb4-89"></a>|B| 80% ave HW/Lab, Midterm compiles|</span>
-<span id="cb4-90"><a href="#cb4-90"></a>|B-|80% ave HW/Lab|</span>
-<span id="cb4-91"><a href="#cb4-91"></a></span>
-<span id="cb4-92"><a href="#cb4-92"></a><span class="fu">## These may (???) earn degrees</span></span>
-<span id="cb4-93"><a href="#cb4-93"></a></span>
-<span id="cb4-94"><a href="#cb4-94"></a>|Grade|Requirements|</span>
-<span id="cb4-95"><a href="#cb4-95"></a>|:----------:|------|</span>
-<span id="cb4-96"><a href="#cb4-96"></a>|C|80% ave Lab|</span>
-<span id="cb4-97"><a href="#cb4-97"></a>|D|60% ave Lab|</span>
-<span id="cb4-98"><a href="#cb4-98"></a>|F|Anything else|</span>
-<span id="cb4-99"><a href="#cb4-99"></a></span>
-<span id="cb4-100"><a href="#cb4-100"></a><span class="fu">## Lab Grading</span></span>
-<span id="cb4-101"><a href="#cb4-101"></a></span>
-<span id="cb4-102"><a href="#cb4-102"></a><span class="ss">- </span>"A" (=100%)</span>
-<span id="cb4-103"><a href="#cb4-103"></a><span class="ss">    - </span>Meets spec by end of class</span>
-<span id="cb4-104"><a href="#cb4-104"></a><span class="ss">- </span>"B" (=90%)</span>
-<span id="cb4-105"><a href="#cb4-105"></a><span class="ss">    - </span>Compiles at end of class</span>
-<span id="cb4-106"><a href="#cb4-106"></a><span class="ss">- </span>"F" (=0%)</span>
-<span id="cb4-107"><a href="#cb4-107"></a><span class="ss">    - </span>Anything else</span>
-<span id="cb4-108"><a href="#cb4-108"></a>    </span>
-<span id="cb4-109"><a href="#cb4-109"></a><span class="fu">## HW Grading</span></span>
-<span id="cb4-110"><a href="#cb4-110"></a></span>
-<span id="cb4-111"><a href="#cb4-111"></a><span class="ss">- </span>"A" (=100%)</span>
-<span id="cb4-112"><a href="#cb4-112"></a><span class="ss">    - </span>On time</span>
-<span id="cb4-113"><a href="#cb4-113"></a><span class="ss">    - </span>Passes autograder.</span>
-<span id="cb4-114"><a href="#cb4-114"></a><span class="ss">        - </span>I lack confidence I can make excellent autograders for all stages, so give me some grace here.</span>
-<span id="cb4-115"><a href="#cb4-115"></a><span class="ss">- </span>"B" (=90%)</span>
-<span id="cb4-116"><a href="#cb4-116"></a><span class="ss">    - </span>On time</span>
-<span id="cb4-117"><a href="#cb4-117"></a><span class="ss">    - </span>Compiles</span>
-<span id="cb4-118"><a href="#cb4-118"></a><span class="ss">- </span>"F" (=0%)</span>
-<span id="cb4-119"><a href="#cb4-119"></a><span class="ss">    - </span>Anything else</span>
-<span id="cb4-120"><a href="#cb4-120"></a>    </span>
-<span id="cb4-121"><a href="#cb4-121"></a><span class="fu">## Final</span></span>
-<span id="cb4-122"><a href="#cb4-122"></a></span>
-<span id="cb4-123"><a href="#cb4-123"></a><span class="ss">- </span>Create, document, and publish an operating system... in Rust!</span>
-<span id="cb4-124"><a href="#cb4-124"></a><span class="ss">    - </span>Free-standing binary</span>
-<span id="cb4-125"><a href="#cb4-125"></a><span class="ss">    - </span>Faults/exceptions/interrupts</span>
-<span id="cb4-126"><a href="#cb4-126"></a><span class="ss">    - </span>Memory management</span>
-<span id="cb4-127"><a href="#cb4-127"></a>    </span>
-<span id="cb4-128"><a href="#cb4-128"></a><span class="fu">## Late Work Policy</span></span>
-<span id="cb4-129"><a href="#cb4-129"></a></span>
-<span id="cb4-130"><a href="#cb4-130"></a><span class="ss">- </span>Late work is not accepted.</span>
-<span id="cb4-131"><a href="#cb4-131"></a><span class="ss">    - </span>No exceptions.</span>
-<span id="cb4-132"><a href="#cb4-132"></a><span class="ss">    - </span>The specification grading framework incorpates tolerances.</span>
-<span id="cb4-133"><a href="#cb4-133"></a><span class="ss">    - </span>An OS that meets spec by end-of-term is an A, always.</span>
-<span id="cb4-134"><a href="#cb4-134"></a></span>
-<span id="cb4-135"><a href="#cb4-135"></a><span class="fu">## AI Policy</span></span>
-<span id="cb4-136"><a href="#cb4-136"></a></span>
-<span id="cb4-137"><a href="#cb4-137"></a><span class="ss">- </span>I would be shocked if it is helpful to you.</span>
-<span id="cb4-138"><a href="#cb4-138"></a><span class="ss">- </span>If you think it is helpful, that is probably not a good sign.</span>
-<span id="cb4-139"><a href="#cb4-139"></a><span class="ss">- </span>You can use it (I wouldn't)</span>
-<span id="cb4-140"><a href="#cb4-140"></a></span>
-<span id="cb4-141"><a href="#cb4-141"></a><span class="fu">## Collaboration Policy</span></span>
-<span id="cb4-142"><a href="#cb4-142"></a></span>
-<span id="cb4-143"><a href="#cb4-143"></a><span class="ss">- </span>You should chat with each other.</span>
-<span id="cb4-144"><a href="#cb4-144"></a><span class="ss">- </span>You should write your own code.</span>
-<span id="cb4-145"><a href="#cb4-145"></a><span class="ss">- </span>If someone shows you something and you don't understand it *as well as code you write yourself*, it is a waste of your time to use the code.</span>
-<span id="cb4-146"><a href="#cb4-146"></a><span class="ss">    - </span>But *not* a waste as a way to learn.</span>
-<span id="cb4-147"><a href="#cb4-147"></a></span>
-<span id="cb4-148"><a href="#cb4-148"></a><span class="fu"># On Systems</span></span>
-<span id="cb4-149"><a href="#cb4-149"></a></span>
-<span id="cb4-150"><a href="#cb4-150"></a><span class="fu">## The Hard Part</span></span>
-<span id="cb4-151"><a href="#cb4-151"></a></span>
-<span id="cb4-152"><a href="#cb4-152"></a><span class="ss">- </span>After ~10 years of systems research I've convinced myself <span class="co">[</span><span class="ot">only two things</span><span class="co">](https://www.joelonsoftware.com/2005/12/29/the-perils-of-javaschools-2/)</span> really matter:</span>
-<span id="cb4-153"><a href="#cb4-153"></a></span>
-<span id="cb4-154"><a href="#cb4-154"></a><span class="ss">  - </span>References, and</span>
-<span id="cb4-155"><a href="#cb4-155"></a><span class="ss">  - </span>Recursion </span>
-<span id="cb4-156"><a href="#cb4-156"></a></span>
-<span id="cb4-157"><a href="#cb4-157"></a><span class="ss">- </span>Recursion isn't too bad... </span>
-<span id="cb4-158"><a href="#cb4-158"></a></span>
-<span id="cb4-159"><a href="#cb4-159"></a><span class="in">```py</span></span>
-<span id="cb4-160"><a href="#cb4-160"></a><span class="op">&gt;&gt;&gt;</span> exp <span class="op">=</span> <span class="kw">lambda</span> b, n : b <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> b<span class="op">*</span>exp(b,n<span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb4-161"><a href="#cb4-161"></a><span class="op">&gt;&gt;&gt;</span> exp(<span class="dv">2</span>,<span class="dv">8</span>)</span>
-<span id="cb4-162"><a href="#cb4-162"></a><span class="dv">256</span></span>
-<span id="cb4-163"><a href="#cb4-163"></a><span class="in">```</span></span>
-<span id="cb4-164"><a href="#cb4-164"></a></span>
-<span id="cb4-165"><a href="#cb4-165"></a><span class="ss">- </span>Covered in 271 and possibly 351 and no longer interesting on its own, though will be used.</span>
-<span id="cb4-166"><a href="#cb4-166"></a></span>
-<span id="cb4-167"><a href="#cb4-167"></a><span class="fu">## References</span></span>
-<span id="cb4-168"><a href="#cb4-168"></a></span>
-<span id="cb4-169"><a href="#cb4-169"></a><span class="ss">- </span>References are a beast, but without them nothing makes sense! </span>
-<span id="cb4-170"><a href="#cb4-170"></a></span>
-<span id="cb4-171"><a href="#cb4-171"></a>:::: {.columns}</span>
-<span id="cb4-172"><a href="#cb4-172"></a></span>
-<span id="cb4-173"><a href="#cb4-173"></a>::: {.column width="50%"}</span>
-<span id="cb4-174"><a href="#cb4-174"></a><span class="in">```py</span></span>
-<span id="cb4-175"><a href="#cb4-175"></a><span class="op">&gt;&gt;&gt;</span> x <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb4-176"><a href="#cb4-176"></a><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> addx():</span>
-<span id="cb4-177"><a href="#cb4-177"></a>...     x <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb4-178"><a href="#cb4-178"></a>...</span>
-<span id="cb4-179"><a href="#cb4-179"></a><span class="op">&gt;&gt;&gt;</span> addx()</span>
-<span id="cb4-180"><a href="#cb4-180"></a><span class="pp">UnboundLocalError</span>:</span>
-<span id="cb4-181"><a href="#cb4-181"></a><span class="op">&lt;</span>blah blah blah error messages<span class="op">&gt;</span></span>
-<span id="cb4-182"><a href="#cb4-182"></a><span class="in">```</span></span>
-<span id="cb4-183"><a href="#cb4-183"></a>::: </span>
-<span id="cb4-184"><a href="#cb4-184"></a></span>
-<span id="cb4-185"><a href="#cb4-185"></a>::: {.column width="50%"}</span>
-<span id="cb4-186"><a href="#cb4-186"></a></span>
-<span id="cb4-187"><a href="#cb4-187"></a><span class="in">```py</span></span>
-<span id="cb4-188"><a href="#cb4-188"></a><span class="op">&gt;&gt;&gt;</span> x <span class="op">=</span> [<span class="dv">1</span>]</span>
-<span id="cb4-189"><a href="#cb4-189"></a><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> addx():</span>
-<span id="cb4-190"><a href="#cb4-190"></a>...     x[<span class="dv">0</span>] <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb4-191"><a href="#cb4-191"></a>...</span>
-<span id="cb4-192"><a href="#cb4-192"></a><span class="op">&gt;&gt;&gt;</span> addx()</span>
-<span id="cb4-193"><a href="#cb4-193"></a><span class="op">&gt;&gt;&gt;</span> x</span>
-<span id="cb4-194"><a href="#cb4-194"></a>[<span class="dv">2</span>]</span>
-<span id="cb4-195"><a href="#cb4-195"></a><span class="in">```</span></span>
-<span id="cb4-196"><a href="#cb4-196"></a>:::</span>
-<span id="cb4-197"><a href="#cb4-197"></a></span>
-<span id="cb4-198"><a href="#cb4-198"></a>::::</span>
-<span id="cb4-199"><a href="#cb4-199"></a></span>
-<span id="cb4-200"><a href="#cb4-200"></a><span class="fu">## Insight</span></span>
-<span id="cb4-201"><a href="#cb4-201"></a></span>
-<span id="cb4-202"><a href="#cb4-202"></a><span class="ss">- </span>**Definition:**</span>
-<span id="cb4-203"><a href="#cb4-203"></a><span class="ss">  - </span>References: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.</span>
-<span id="cb4-204"><a href="#cb4-204"></a><span class="ss">- </span>**Importance:**</span>
-<span id="cb4-205"><a href="#cb4-205"></a><span class="ss">  - </span>This key-value storage is a service provided by the operating system!</span>
-<span id="cb4-206"><a href="#cb4-206"></a></span>
-<span id="cb4-207"><a href="#cb4-207"></a><span class="fu">## Python and OSes</span></span>
-<span id="cb4-208"><a href="#cb4-208"></a></span>
-<span id="cb4-209"><a href="#cb4-209"></a><span class="ss">- </span>**Why not .py (.js, .java, .cs, .cpp, etc)?**</span>
-<span id="cb4-210"><a href="#cb4-210"></a><span class="ss">  - </span>These languages assume an underlying OS (or VM or browser).</span>
-<span id="cb4-211"><a href="#cb4-211"></a><span class="ss">  - </span>There is more to life than running code other people wrote.</span>
-<span id="cb4-212"><a href="#cb4-212"></a><span class="ss">  - </span>Good languages (except Java) but not for us</span>
-<span id="cb4-213"><a href="#cb4-213"></a><span class="ss">  - </span>The other systems language is C (and maybe C++)</span>
-<span id="cb4-214"><a href="#cb4-214"></a></span>
-<span id="cb4-215"><a href="#cb4-215"></a><span class="fu"># On Rust</span></span>
-<span id="cb4-216"><a href="#cb4-216"></a></span>
-<span id="cb4-217"><a href="#cb4-217"></a><span class="fu">## Rust and References</span></span>
-<span id="cb4-218"><a href="#cb4-218"></a></span>
-<span id="cb4-219"><a href="#cb4-219"></a><span class="ss">- </span>Rust:</span>
-<span id="cb4-220"><a href="#cb4-220"></a><span class="ss">    - </span>Obscures references, but...</span>
-<span id="cb4-221"><a href="#cb4-221"></a><span class="ss">    - </span>*Does not* obscure memory.</span>
-<span id="cb4-222"><a href="#cb4-222"></a><span class="ss">- </span>This is good!</span>
-<span id="cb4-223"><a href="#cb4-223"></a><span class="ss">    - </span>Memory matters, but pointers are historical accident.</span>
-<span id="cb4-224"><a href="#cb4-224"></a><span class="ss">- </span>You should probably use Rust in every application where correctness or performance matters.</span>
-<span id="cb4-225"><a href="#cb4-225"></a></span>
-<span id="cb4-226"><a href="#cb4-226"></a><span class="fu">## Rust and Recursion</span></span>
-<span id="cb4-227"><a href="#cb4-227"></a></span>
-<span id="cb4-228"><a href="#cb4-228"></a><span class="ss">- </span>Separately, Rust is built on one of the most exciting ongoing computer science research efforts:</span>
-<span id="cb4-229"><a href="#cb4-229"></a><span class="ss">- </span>**LLVM** (stands for LLVM)</span>
-<span id="cb4-230"><a href="#cb4-230"></a><span class="ss">- </span>Basically, a way of turning human-readable code into machine-executable code.</span>
-<span id="cb4-231"><a href="#cb4-231"></a><span class="ss">    - </span>Very good at turning recursion into iteration and/or vice versa.</span>
-<span id="cb4-232"><a href="#cb4-232"></a><span class="ss">- </span>This term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS.</span>
-<span id="cb4-233"><a href="#cb4-233"></a></span>
-<span id="cb4-234"><a href="#cb4-234"></a><span class="fu"># Course Sketch</span></span>
-<span id="cb4-235"><a href="#cb4-235"></a></span>
-<span id="cb4-236"><a href="#cb4-236"></a><span class="fu">## Citation</span></span>
-<span id="cb4-237"><a href="#cb4-237"></a></span>
-<span id="cb4-238"><a href="#cb4-238"></a><span class="ss">- </span>We will follow "Philipp Oppermann's blog" "Writing an OS in Rust" version 2.</span>
-<span id="cb4-239"><a href="#cb4-239"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more.</span><span class="co">](https://os.phil-opp.com/)</span></span>
-<span id="cb4-240"><a href="#cb4-240"></a></span>
-<span id="cb4-241"><a href="#cb4-241"></a><span class="fu">## Bare Bones</span></span>
-<span id="cb4-242"><a href="#cb4-242"></a></span>
-<span id="cb4-243"><a href="#cb4-243"></a><span class="ss">- </span>A binary that doesn't require an underlying OS.</span>
-<span id="cb4-244"><a href="#cb4-244"></a><span class="ss">- </span>Something that (1) runs and (2) prints.</span>
-<span id="cb4-245"><a href="#cb4-245"></a><span class="ss">- </span>Simple I/O</span>
-<span id="cb4-246"><a href="#cb4-246"></a><span class="ss">- </span>Unit and integration testing.</span>
-<span id="cb4-247"><a href="#cb4-247"></a></span>
-<span id="cb4-248"><a href="#cb4-248"></a><span class="fu">## Interrupts</span></span>
-<span id="cb4-249"><a href="#cb4-249"></a></span>
-<span id="cb4-250"><a href="#cb4-250"></a><span class="ss">- </span>CPU Exceptions</span>
-<span id="cb4-251"><a href="#cb4-251"></a><span class="ss">    - </span>Like division by zero.</span>
-<span id="cb4-252"><a href="#cb4-252"></a><span class="ss">- </span>Double faults</span>
-<span id="cb4-253"><a href="#cb4-253"></a><span class="ss">    - </span>Faults while handling a fault.</span>
-<span id="cb4-254"><a href="#cb4-254"></a><span class="ss">- </span>Hardware interrupts</span>
-<span id="cb4-255"><a href="#cb4-255"></a><span class="ss">    - </span>Like I/O</span>
-<span id="cb4-256"><a href="#cb4-256"></a></span>
-<span id="cb4-257"><a href="#cb4-257"></a><span class="fu">## Memory Management</span></span>
-<span id="cb4-258"><a href="#cb4-258"></a></span>
-<span id="cb4-259"><a href="#cb4-259"></a><span class="ss">- </span>Paging</span>
-<span id="cb4-260"><a href="#cb4-260"></a><span class="ss">- </span>Page tables</span>
-<span id="cb4-261"><a href="#cb4-261"></a><span class="ss">- </span>The heap</span>
-<span id="cb4-262"><a href="#cb4-262"></a><span class="ss">- </span>Heap allocation.</span>
-<span id="cb4-263"><a href="#cb4-263"></a>   </span>
-<span id="cb4-264"><a href="#cb4-264"></a></span>
-<span id="cb4-265"><a href="#cb4-265"></a><span class="fu"># Final</span></span>
-<span id="cb4-266"><a href="#cb4-266"></a></span>
-<span id="cb4-267"><a href="#cb4-267"></a><span class="fu">## Final Exam/Project</span></span>
-<span id="cb4-268"><a href="#cb4-268"></a></span>
-<span id="cb4-269"><a href="#cb4-269"></a><span class="ss">- </span>**Implement Minimal OS in Rust**</span>
-<span id="cb4-270"><a href="#cb4-270"></a><span class="ss">  - </span>Individual</span>
-<span id="cb4-271"><a href="#cb4-271"></a><span class="ss">  - </span>Under version control</span>
-<span id="cb4-272"><a href="#cb4-272"></a><span class="ss">  - </span>Compiles and runs and is tested</span>
-<span id="cb4-273"><a href="#cb4-273"></a>  </span>
-<span id="cb4-274"><a href="#cb4-274"></a><span class="fu"># On `vim`</span></span>
-<span id="cb4-275"><a href="#cb4-275"></a></span>
-<span id="cb4-276"><a href="#cb4-276"></a><span class="fu">## Vim</span></span>
-<span id="cb4-277"><a href="#cb4-277"></a></span>
-<span id="cb4-278"><a href="#cb4-278"></a><span class="ss">- </span>You should use <span class="in">`vim`</span> or another console-based editor as a component of your learning in this class.</span>
-<span id="cb4-279"><a href="#cb4-279"></a><span class="ss">- </span>This will not be assessed (how can it be) but will *likely* be expected in a non-trivial subset of settings this course material will be useful.</span>
-<span id="cb4-280"><a href="#cb4-280"></a><span class="ss">- </span>I will live-code in <span class="in">`vim`</span> probably.</span>
-<span id="cb4-281"><a href="#cb4-281"></a></span>
-<span id="cb4-282"><a href="#cb4-282"></a><span class="fu"># Derust</span></span>
-<span id="cb4-283"><a href="#cb4-283"></a></span>
-<span id="cb4-284"><a href="#cb4-284"></a><span class="fu">## Rust Features</span></span>
-<span id="cb4-285"><a href="#cb4-285"></a></span>
-<span id="cb4-286"><a href="#cb4-286"></a><span class="ss">- </span><span class="co">[</span><span class="ot">option</span><span class="co">](https://doc.rust-lang.org/core/option/)</span></span>
-<span id="cb4-287"><a href="#cb4-287"></a><span class="ss">- </span><span class="co">[</span><span class="ot">result</span><span class="co">](https://doc.rust-lang.org/core/result/)</span></span>
-<span id="cb4-288"><a href="#cb4-288"></a><span class="ss">- </span><span class="co">[</span><span class="ot">std</span><span class="co">](https://doc.rust-lang.org/std/)</span></span>
-<span id="cb4-289"><a href="#cb4-289"></a><span class="ss">- </span><span class="co">[</span><span class="ot">iterators</span><span class="co">](https://doc.rust-lang.org/book/ch13-02-iterators.html)</span></span>
-<span id="cb4-290"><a href="#cb4-290"></a><span class="ss">- </span><span class="co">[</span><span class="ot">closures</span><span class="co">](https://doc.rust-lang.org/book/ch13-01-closures.html)</span></span>
-<span id="cb4-291"><a href="#cb4-291"></a><span class="ss">- </span><span class="co">[</span><span class="ot">pattern matching</span><span class="co">](https://doc.rust-lang.org/book/ch06-00-enums.html)</span></span>
-<span id="cb4-292"><a href="#cb4-292"></a><span class="ss">- </span><span class="co">[</span><span class="ot">string formatting</span><span class="co">](https://doc.rust-lang.org/core/macro.write.html)</span></span>
-<span id="cb4-293"><a href="#cb4-293"></a><span class="ss">- </span><span class="co">[</span><span class="ot">ownership system</span><span class="co">](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)</span></span>
-<span id="cb4-294"><a href="#cb4-294"></a></span>
-<span id="cb4-295"><a href="#cb4-295"></a><span class="fu">## Options</span></span>
-<span id="cb4-296"><a href="#cb4-296"></a></span>
-<span id="cb4-297"><a href="#cb4-297"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb24-1"><a href="#cb24-1"></a><span class="co">---</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="an">title:</span><span class="co"> Derust</span></span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="co">---</span></span>
+<span id="cb24-4"><a href="#cb24-4"></a></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="ss">- </span>**Welcome** to OS in Rust</span>
+<span id="cb24-8"><a href="#cb24-8"></a><span class="ss">  - </span>The most famous systems topic...</span>
+<span id="cb24-9"><a href="#cb24-9"></a><span class="ss">  - </span>Now in Rust, your favorite language!</span>
+<span id="cb24-10"><a href="#cb24-10"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb24-11"><a href="#cb24-11"></a><span class="ss">  - </span>Access the <span class="co">[</span><span class="ot">course webpage</span><span class="co">](https://cd-rs.github.io/os/)</span></span>
+<span id="cb24-12"><a href="#cb24-12"></a><span class="ss">  - </span>Join the Discord!</span>
+<span id="cb24-13"><a href="#cb24-13"></a><span class="ss">    - </span>You should have gotten an email...</span>
+<span id="cb24-14"><a href="#cb24-14"></a><span class="ss">  - </span>Set up Linux/Rust/Git.</span>
+<span id="cb24-15"><a href="#cb24-15"></a></span>
+<span id="cb24-16"><a href="#cb24-16"></a><span class="fu">## Homework</span></span>
+<span id="cb24-17"><a href="#cb24-17"></a></span>
+<span id="cb24-18"><a href="#cb24-18"></a><span class="ss">- </span>The first homework, "LISP", is ready now.</span>
+<span id="cb24-19"><a href="#cb24-19"></a><span class="ss">  - </span>It is fun with a lot of extensions.</span>
+<span id="cb24-20"><a href="#cb24-20"></a><span class="ss">  - </span>Mostly makes sure you have everything set up.</span>
+<span id="cb24-21"><a href="#cb24-21"></a><span class="ss">- </span>Due Friday, 5 Sept. at 1440 PT.</span>
+<span id="cb24-22"><a href="#cb24-22"></a></span>
+<span id="cb24-23"><a href="#cb24-23"></a><span class="fu">## Today</span></span>
+<span id="cb24-24"><a href="#cb24-24"></a></span>
+<span id="cb24-25"><a href="#cb24-25"></a><span class="ss">- </span>Logistics</span>
+<span id="cb24-26"><a href="#cb24-26"></a><span class="ss">- </span>On Systems</span>
+<span id="cb24-27"><a href="#cb24-27"></a><span class="ss">- </span>On Rust</span>
+<span id="cb24-28"><a href="#cb24-28"></a><span class="ss">- </span>Course Sketch</span>
+<span id="cb24-29"><a href="#cb24-29"></a><span class="ss">- </span>Derust</span>
+<span id="cb24-30"><a href="#cb24-30"></a></span>
+<span id="cb24-31"><a href="#cb24-31"></a><span class="fu"># Logistics</span></span>
+<span id="cb24-32"><a href="#cb24-32"></a></span>
+<span id="cb24-33"><a href="#cb24-33"></a><span class="fu">## It me</span></span>
+<span id="cb24-34"><a href="#cb24-34"></a></span>
+<span id="cb24-35"><a href="#cb24-35"></a><span class="ss">- </span>**Name** </span>
+<span id="cb24-36"><a href="#cb24-36"></a><span class="ss">  - </span>(Prof. )?Calvin</span>
+<span id="cb24-37"><a href="#cb24-37"></a><span class="ss">- </span>**Credentials**</span>
+<span id="cb24-38"><a href="#cb24-38"></a><span class="ss">  - </span>B.A. Mathematics</span>
+<span id="cb24-39"><a href="#cb24-39"></a><span class="ss">  - </span>B.S., M.S., Ph.D. Computer Science</span>
+<span id="cb24-40"><a href="#cb24-40"></a><span class="ss">- </span>**Pronouns** </span>
+<span id="cb24-41"><a href="#cb24-41"></a><span class="ss">  - </span>they/them </span>
+<span id="cb24-42"><a href="#cb24-42"></a></span>
+<span id="cb24-43"><a href="#cb24-43"></a><span class="fu">## The Great Work</span></span>
+<span id="cb24-44"><a href="#cb24-44"></a></span>
+<span id="cb24-45"><a href="#cb24-45"></a><span class="ss">- </span>Thesis Title</span>
+<span id="cb24-46"><a href="#cb24-46"></a><span class="ss">  - </span>Mining Secure Behavior of Hardware Designs </span>
+<span id="cb24-47"><a href="#cb24-47"></a><span class="ss">- </span>Plain English</span>
+<span id="cb24-48"><a href="#cb24-48"></a><span class="ss">  - </span>Just as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs. </span>
+<span id="cb24-49"><a href="#cb24-49"></a></span>
+<span id="cb24-50"><a href="#cb24-50"></a><span class="fu">## Course Format</span></span>
+<span id="cb24-51"><a href="#cb24-51"></a></span>
+<span id="cb24-52"><a href="#cb24-52"></a><span class="ss">- </span>Lecture Monday</span>
+<span id="cb24-53"><a href="#cb24-53"></a><span class="ss">- </span>Lab Wednesday</span>
+<span id="cb24-54"><a href="#cb24-54"></a><span class="ss">- </span>Homework due Friday 1440 PT (the *next* Friday)</span>
+<span id="cb24-55"><a href="#cb24-55"></a><span class="ss">    - </span>You should all meet on Friday.</span>
+<span id="cb24-56"><a href="#cb24-56"></a><span class="ss">- </span>In-class midterm week of 3/16</span>
+<span id="cb24-57"><a href="#cb24-57"></a><span class="ss">- </span>Your OS is due whenever the final is scheduled.</span>
+<span id="cb24-58"><a href="#cb24-58"></a><span class="ss">    - </span>Waiting on registrar to announce.</span>
+<span id="cb24-59"><a href="#cb24-59"></a></span>
+<span id="cb24-60"><a href="#cb24-60"></a><span class="fu">## Grade Policy</span></span>
+<span id="cb24-61"><a href="#cb24-61"></a></span>
+<span id="cb24-62"><a href="#cb24-62"></a><span class="ss">- </span>Your voices have been heard:</span>
+<span id="cb24-63"><a href="#cb24-63"></a></span>
+<span id="cb24-64"><a href="#cb24-64"></a><span class="at">&gt; I think failing my systems class was the best thing that happened to me.</span></span>
+<span id="cb24-65"><a href="#cb24-65"></a></span>
+<span id="cb24-66"><a href="#cb24-66"></a><span class="at">&gt; This course demanded strong self-motivation... Thus, I didn't learn as much as I might've if grading mattered more.</span></span>
+<span id="cb24-67"><a href="#cb24-67"></a></span>
+<span id="cb24-68"><a href="#cb24-68"></a><span class="fu">## Specification Grading</span></span>
+<span id="cb24-69"><a href="#cb24-69"></a></span>
+<span id="cb24-70"><a href="#cb24-70"></a><span class="ss">- </span>All the rage. I was never fan but tell me what you think.</span>
+<span id="cb24-71"><a href="#cb24-71"></a><span class="ss">- </span>Basically, I will assign some stuff but you don't have to do all of it perfectly.</span>
+<span id="cb24-72"><a href="#cb24-72"></a><span class="ss">    - </span>No partial credit, everything is yes/no grading.</span>
+<span id="cb24-73"><a href="#cb24-73"></a><span class="ss">- </span>I took distributions over final, midterm, and Lab/HW</span>
+<span id="cb24-74"><a href="#cb24-74"></a></span>
+<span id="cb24-75"><a href="#cb24-75"></a><span class="fu">## It pays to get A's</span></span>
+<span id="cb24-76"><a href="#cb24-76"></a></span>
+<span id="cb24-77"><a href="#cb24-77"></a>|Grade|Requirements|</span>
+<span id="cb24-78"><a href="#cb24-78"></a>|:----------:|------|</span>
+<span id="cb24-79"><a href="#cb24-79"></a>|A|Final meets spec|</span>
+<span id="cb24-80"><a href="#cb24-80"></a>|A|90% ave HW/Lab/Midterm, Final compiles|</span>
+<span id="cb24-81"><a href="#cb24-81"></a>|A-|90% ave HW/Lab, Midterm/Final compile|</span>
+<span id="cb24-82"><a href="#cb24-82"></a>|A-|Midterm meets spec, Final compiles|</span>
+<span id="cb24-83"><a href="#cb24-83"></a></span>
+<span id="cb24-84"><a href="#cb24-84"></a><span class="fu">## But B's are the Knees</span></span>
+<span id="cb24-85"><a href="#cb24-85"></a></span>
+<span id="cb24-86"><a href="#cb24-86"></a>|Grade|Requirements|</span>
+<span id="cb24-87"><a href="#cb24-87"></a>|:----------:|------|</span>
+<span id="cb24-88"><a href="#cb24-88"></a>|B+|90% ave HW/Lab, Midterm compiles|</span>
+<span id="cb24-89"><a href="#cb24-89"></a>|B| 80% ave HW/Lab, Midterm compiles|</span>
+<span id="cb24-90"><a href="#cb24-90"></a>|B-|80% ave HW/Lab|</span>
+<span id="cb24-91"><a href="#cb24-91"></a></span>
+<span id="cb24-92"><a href="#cb24-92"></a><span class="fu">## These may (???) earn degrees</span></span>
+<span id="cb24-93"><a href="#cb24-93"></a></span>
+<span id="cb24-94"><a href="#cb24-94"></a>|Grade|Requirements|</span>
+<span id="cb24-95"><a href="#cb24-95"></a>|:----------:|------|</span>
+<span id="cb24-96"><a href="#cb24-96"></a>|C|80% ave Lab|</span>
+<span id="cb24-97"><a href="#cb24-97"></a>|D|60% ave Lab|</span>
+<span id="cb24-98"><a href="#cb24-98"></a>|F|Anything else|</span>
+<span id="cb24-99"><a href="#cb24-99"></a></span>
+<span id="cb24-100"><a href="#cb24-100"></a><span class="fu">## Lab Grading</span></span>
+<span id="cb24-101"><a href="#cb24-101"></a></span>
+<span id="cb24-102"><a href="#cb24-102"></a><span class="ss">- </span>"A" (=100%)</span>
+<span id="cb24-103"><a href="#cb24-103"></a><span class="ss">    - </span>Meets spec by end of class</span>
+<span id="cb24-104"><a href="#cb24-104"></a><span class="ss">- </span>"B" (=90%)</span>
+<span id="cb24-105"><a href="#cb24-105"></a><span class="ss">    - </span>Compiles at end of class</span>
+<span id="cb24-106"><a href="#cb24-106"></a><span class="ss">- </span>"F" (=0%)</span>
+<span id="cb24-107"><a href="#cb24-107"></a><span class="ss">    - </span>Anything else</span>
+<span id="cb24-108"><a href="#cb24-108"></a>    </span>
+<span id="cb24-109"><a href="#cb24-109"></a><span class="fu">## HW Grading</span></span>
+<span id="cb24-110"><a href="#cb24-110"></a></span>
+<span id="cb24-111"><a href="#cb24-111"></a><span class="ss">- </span>"A" (=100%)</span>
+<span id="cb24-112"><a href="#cb24-112"></a><span class="ss">    - </span>On time</span>
+<span id="cb24-113"><a href="#cb24-113"></a><span class="ss">    - </span>Passes autograder.</span>
+<span id="cb24-114"><a href="#cb24-114"></a><span class="ss">        - </span>I lack confidence I can make excellent autograders for all stages, so give me some grace here.</span>
+<span id="cb24-115"><a href="#cb24-115"></a><span class="ss">- </span>"B" (=90%)</span>
+<span id="cb24-116"><a href="#cb24-116"></a><span class="ss">    - </span>On time</span>
+<span id="cb24-117"><a href="#cb24-117"></a><span class="ss">    - </span>Compiles</span>
+<span id="cb24-118"><a href="#cb24-118"></a><span class="ss">- </span>"F" (=0%)</span>
+<span id="cb24-119"><a href="#cb24-119"></a><span class="ss">    - </span>Anything else</span>
+<span id="cb24-120"><a href="#cb24-120"></a>    </span>
+<span id="cb24-121"><a href="#cb24-121"></a><span class="fu">## Final</span></span>
+<span id="cb24-122"><a href="#cb24-122"></a></span>
+<span id="cb24-123"><a href="#cb24-123"></a><span class="ss">- </span>Create, document, and publish an operating system... in Rust!</span>
+<span id="cb24-124"><a href="#cb24-124"></a><span class="ss">    - </span>Free-standing binary</span>
+<span id="cb24-125"><a href="#cb24-125"></a><span class="ss">    - </span>Faults/exceptions/interrupts</span>
+<span id="cb24-126"><a href="#cb24-126"></a><span class="ss">    - </span>Memory management</span>
+<span id="cb24-127"><a href="#cb24-127"></a>    </span>
+<span id="cb24-128"><a href="#cb24-128"></a><span class="fu">## Late Work Policy</span></span>
+<span id="cb24-129"><a href="#cb24-129"></a></span>
+<span id="cb24-130"><a href="#cb24-130"></a><span class="ss">- </span>Late work is not accepted.</span>
+<span id="cb24-131"><a href="#cb24-131"></a><span class="ss">    - </span>No exceptions.</span>
+<span id="cb24-132"><a href="#cb24-132"></a><span class="ss">    - </span>The specification grading framework incorpates tolerances.</span>
+<span id="cb24-133"><a href="#cb24-133"></a><span class="ss">    - </span>An OS that meets spec by end-of-term is an A, always.</span>
+<span id="cb24-134"><a href="#cb24-134"></a></span>
+<span id="cb24-135"><a href="#cb24-135"></a><span class="fu">## AI Policy</span></span>
+<span id="cb24-136"><a href="#cb24-136"></a></span>
+<span id="cb24-137"><a href="#cb24-137"></a><span class="ss">- </span>I would be shocked if it is helpful to you.</span>
+<span id="cb24-138"><a href="#cb24-138"></a><span class="ss">- </span>If you think it is helpful, that is probably not a good sign.</span>
+<span id="cb24-139"><a href="#cb24-139"></a><span class="ss">- </span>You can use it (I wouldn't)</span>
+<span id="cb24-140"><a href="#cb24-140"></a></span>
+<span id="cb24-141"><a href="#cb24-141"></a><span class="fu">## Collaboration Policy</span></span>
+<span id="cb24-142"><a href="#cb24-142"></a></span>
+<span id="cb24-143"><a href="#cb24-143"></a><span class="ss">- </span>You should chat with each other.</span>
+<span id="cb24-144"><a href="#cb24-144"></a><span class="ss">- </span>You should write your own code.</span>
+<span id="cb24-145"><a href="#cb24-145"></a><span class="ss">- </span>If someone shows you something and you don't understand it *as well as code you write yourself*, it is a waste of your time to use the code.</span>
+<span id="cb24-146"><a href="#cb24-146"></a><span class="ss">    - </span>But *not* a waste as a way to learn.</span>
+<span id="cb24-147"><a href="#cb24-147"></a></span>
+<span id="cb24-148"><a href="#cb24-148"></a><span class="fu"># On Systems</span></span>
+<span id="cb24-149"><a href="#cb24-149"></a></span>
+<span id="cb24-150"><a href="#cb24-150"></a><span class="fu">## The Hard Part</span></span>
+<span id="cb24-151"><a href="#cb24-151"></a></span>
+<span id="cb24-152"><a href="#cb24-152"></a><span class="ss">- </span>After ~10 years of systems research I've convinced myself <span class="co">[</span><span class="ot">only two things</span><span class="co">](https://www.joelonsoftware.com/2005/12/29/the-perils-of-javaschools-2/)</span> really matter:</span>
+<span id="cb24-153"><a href="#cb24-153"></a></span>
+<span id="cb24-154"><a href="#cb24-154"></a><span class="ss">  - </span>References, and</span>
+<span id="cb24-155"><a href="#cb24-155"></a><span class="ss">  - </span>Recursion </span>
+<span id="cb24-156"><a href="#cb24-156"></a></span>
+<span id="cb24-157"><a href="#cb24-157"></a><span class="ss">- </span>Recursion isn't too bad... </span>
+<span id="cb24-158"><a href="#cb24-158"></a></span>
+<span id="cb24-159"><a href="#cb24-159"></a><span class="in">```py</span></span>
+<span id="cb24-160"><a href="#cb24-160"></a><span class="op">&gt;&gt;&gt;</span> exp <span class="op">=</span> <span class="kw">lambda</span> b, n : b <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span> <span class="cf">else</span> b<span class="op">*</span>exp(b,n<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb24-161"><a href="#cb24-161"></a><span class="op">&gt;&gt;&gt;</span> exp(<span class="dv">2</span>,<span class="dv">8</span>)</span>
+<span id="cb24-162"><a href="#cb24-162"></a><span class="dv">256</span></span>
+<span id="cb24-163"><a href="#cb24-163"></a><span class="in">```</span></span>
+<span id="cb24-164"><a href="#cb24-164"></a></span>
+<span id="cb24-165"><a href="#cb24-165"></a><span class="ss">- </span>Covered in 271 and possibly 351 and no longer interesting on its own, though will be used.</span>
+<span id="cb24-166"><a href="#cb24-166"></a></span>
+<span id="cb24-167"><a href="#cb24-167"></a><span class="fu">## References</span></span>
+<span id="cb24-168"><a href="#cb24-168"></a></span>
+<span id="cb24-169"><a href="#cb24-169"></a><span class="ss">- </span>References are a beast, but without them nothing makes sense! </span>
+<span id="cb24-170"><a href="#cb24-170"></a></span>
+<span id="cb24-171"><a href="#cb24-171"></a>:::: {.columns}</span>
+<span id="cb24-172"><a href="#cb24-172"></a></span>
+<span id="cb24-173"><a href="#cb24-173"></a>::: {.column width="50%"}</span>
+<span id="cb24-174"><a href="#cb24-174"></a><span class="in">```py</span></span>
+<span id="cb24-175"><a href="#cb24-175"></a><span class="op">&gt;&gt;&gt;</span> x <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb24-176"><a href="#cb24-176"></a><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> addx():</span>
+<span id="cb24-177"><a href="#cb24-177"></a>...     x <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb24-178"><a href="#cb24-178"></a>...</span>
+<span id="cb24-179"><a href="#cb24-179"></a><span class="op">&gt;&gt;&gt;</span> addx()</span>
+<span id="cb24-180"><a href="#cb24-180"></a><span class="pp">UnboundLocalError</span>:</span>
+<span id="cb24-181"><a href="#cb24-181"></a><span class="op">&lt;</span>blah blah blah error messages<span class="op">&gt;</span></span>
+<span id="cb24-182"><a href="#cb24-182"></a><span class="in">```</span></span>
+<span id="cb24-183"><a href="#cb24-183"></a>::: </span>
+<span id="cb24-184"><a href="#cb24-184"></a></span>
+<span id="cb24-185"><a href="#cb24-185"></a>::: {.column width="50%"}</span>
+<span id="cb24-186"><a href="#cb24-186"></a></span>
+<span id="cb24-187"><a href="#cb24-187"></a><span class="in">```py</span></span>
+<span id="cb24-188"><a href="#cb24-188"></a><span class="op">&gt;&gt;&gt;</span> x <span class="op">=</span> [<span class="dv">1</span>]</span>
+<span id="cb24-189"><a href="#cb24-189"></a><span class="op">&gt;&gt;&gt;</span> <span class="kw">def</span> addx():</span>
+<span id="cb24-190"><a href="#cb24-190"></a>...     x[<span class="dv">0</span>] <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb24-191"><a href="#cb24-191"></a>...</span>
+<span id="cb24-192"><a href="#cb24-192"></a><span class="op">&gt;&gt;&gt;</span> addx()</span>
+<span id="cb24-193"><a href="#cb24-193"></a><span class="op">&gt;&gt;&gt;</span> x</span>
+<span id="cb24-194"><a href="#cb24-194"></a>[<span class="dv">2</span>]</span>
+<span id="cb24-195"><a href="#cb24-195"></a><span class="in">```</span></span>
+<span id="cb24-196"><a href="#cb24-196"></a>:::</span>
+<span id="cb24-197"><a href="#cb24-197"></a></span>
+<span id="cb24-198"><a href="#cb24-198"></a>::::</span>
+<span id="cb24-199"><a href="#cb24-199"></a></span>
+<span id="cb24-200"><a href="#cb24-200"></a><span class="fu">## Insight</span></span>
+<span id="cb24-201"><a href="#cb24-201"></a></span>
+<span id="cb24-202"><a href="#cb24-202"></a><span class="ss">- </span>**Definition:**</span>
+<span id="cb24-203"><a href="#cb24-203"></a><span class="ss">  - </span>References: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.</span>
+<span id="cb24-204"><a href="#cb24-204"></a><span class="ss">- </span>**Importance:**</span>
+<span id="cb24-205"><a href="#cb24-205"></a><span class="ss">  - </span>This key-value storage is a service provided by the operating system!</span>
+<span id="cb24-206"><a href="#cb24-206"></a></span>
+<span id="cb24-207"><a href="#cb24-207"></a><span class="fu">## Python and OSes</span></span>
+<span id="cb24-208"><a href="#cb24-208"></a></span>
+<span id="cb24-209"><a href="#cb24-209"></a><span class="ss">- </span>**Why not .py (.js, .java, .cs, .cpp, etc)?**</span>
+<span id="cb24-210"><a href="#cb24-210"></a><span class="ss">  - </span>These languages assume an underlying OS (or VM or browser).</span>
+<span id="cb24-211"><a href="#cb24-211"></a><span class="ss">  - </span>There is more to life than running code other people wrote.</span>
+<span id="cb24-212"><a href="#cb24-212"></a><span class="ss">  - </span>Good languages (except Java) but not for us</span>
+<span id="cb24-213"><a href="#cb24-213"></a><span class="ss">  - </span>The other systems language is C (and maybe C++)</span>
+<span id="cb24-214"><a href="#cb24-214"></a></span>
+<span id="cb24-215"><a href="#cb24-215"></a><span class="fu"># On Rust</span></span>
+<span id="cb24-216"><a href="#cb24-216"></a></span>
+<span id="cb24-217"><a href="#cb24-217"></a><span class="fu">## Rust and References</span></span>
+<span id="cb24-218"><a href="#cb24-218"></a></span>
+<span id="cb24-219"><a href="#cb24-219"></a><span class="ss">- </span>Rust:</span>
+<span id="cb24-220"><a href="#cb24-220"></a><span class="ss">    - </span>Obscures references, but...</span>
+<span id="cb24-221"><a href="#cb24-221"></a><span class="ss">    - </span>*Does not* obscure memory.</span>
+<span id="cb24-222"><a href="#cb24-222"></a><span class="ss">- </span>This is good!</span>
+<span id="cb24-223"><a href="#cb24-223"></a><span class="ss">    - </span>Memory matters, but pointers are historical accident.</span>
+<span id="cb24-224"><a href="#cb24-224"></a><span class="ss">- </span>You should probably use Rust in every application where correctness or performance matters.</span>
+<span id="cb24-225"><a href="#cb24-225"></a></span>
+<span id="cb24-226"><a href="#cb24-226"></a><span class="fu">## Rust and Recursion</span></span>
+<span id="cb24-227"><a href="#cb24-227"></a></span>
+<span id="cb24-228"><a href="#cb24-228"></a><span class="ss">- </span>Separately, Rust is built on one of the most exciting ongoing computer science research efforts:</span>
+<span id="cb24-229"><a href="#cb24-229"></a><span class="ss">- </span>**LLVM** (stands for LLVM)</span>
+<span id="cb24-230"><a href="#cb24-230"></a><span class="ss">- </span>Basically, a way of turning human-readable code into machine-executable code.</span>
+<span id="cb24-231"><a href="#cb24-231"></a><span class="ss">    - </span>Very good at turning recursion into iteration and/or vice versa.</span>
+<span id="cb24-232"><a href="#cb24-232"></a><span class="ss">- </span>This term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS.</span>
+<span id="cb24-233"><a href="#cb24-233"></a></span>
+<span id="cb24-234"><a href="#cb24-234"></a><span class="fu"># Course Sketch</span></span>
+<span id="cb24-235"><a href="#cb24-235"></a></span>
+<span id="cb24-236"><a href="#cb24-236"></a><span class="fu">## Citation</span></span>
+<span id="cb24-237"><a href="#cb24-237"></a></span>
+<span id="cb24-238"><a href="#cb24-238"></a><span class="ss">- </span>We will follow "Philipp Oppermann's blog" "Writing an OS in Rust" version 2.</span>
+<span id="cb24-239"><a href="#cb24-239"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more.</span><span class="co">](https://os.phil-opp.com/)</span></span>
+<span id="cb24-240"><a href="#cb24-240"></a></span>
+<span id="cb24-241"><a href="#cb24-241"></a><span class="fu">## Bare Bones</span></span>
+<span id="cb24-242"><a href="#cb24-242"></a></span>
+<span id="cb24-243"><a href="#cb24-243"></a><span class="ss">- </span>A binary that doesn't require an underlying OS.</span>
+<span id="cb24-244"><a href="#cb24-244"></a><span class="ss">- </span>Something that (1) runs and (2) prints.</span>
+<span id="cb24-245"><a href="#cb24-245"></a><span class="ss">- </span>Simple I/O</span>
+<span id="cb24-246"><a href="#cb24-246"></a><span class="ss">- </span>Unit and integration testing.</span>
+<span id="cb24-247"><a href="#cb24-247"></a></span>
+<span id="cb24-248"><a href="#cb24-248"></a><span class="fu">## Interrupts</span></span>
+<span id="cb24-249"><a href="#cb24-249"></a></span>
+<span id="cb24-250"><a href="#cb24-250"></a><span class="ss">- </span>CPU Exceptions</span>
+<span id="cb24-251"><a href="#cb24-251"></a><span class="ss">    - </span>Like division by zero.</span>
+<span id="cb24-252"><a href="#cb24-252"></a><span class="ss">- </span>Double faults</span>
+<span id="cb24-253"><a href="#cb24-253"></a><span class="ss">    - </span>Faults while handling a fault.</span>
+<span id="cb24-254"><a href="#cb24-254"></a><span class="ss">- </span>Hardware interrupts</span>
+<span id="cb24-255"><a href="#cb24-255"></a><span class="ss">    - </span>Like I/O</span>
+<span id="cb24-256"><a href="#cb24-256"></a></span>
+<span id="cb24-257"><a href="#cb24-257"></a><span class="fu">## Memory Management</span></span>
+<span id="cb24-258"><a href="#cb24-258"></a></span>
+<span id="cb24-259"><a href="#cb24-259"></a><span class="ss">- </span>Paging</span>
+<span id="cb24-260"><a href="#cb24-260"></a><span class="ss">- </span>Page tables</span>
+<span id="cb24-261"><a href="#cb24-261"></a><span class="ss">- </span>The heap</span>
+<span id="cb24-262"><a href="#cb24-262"></a><span class="ss">- </span>Heap allocation.</span>
+<span id="cb24-263"><a href="#cb24-263"></a>   </span>
+<span id="cb24-264"><a href="#cb24-264"></a></span>
+<span id="cb24-265"><a href="#cb24-265"></a><span class="fu"># Final</span></span>
+<span id="cb24-266"><a href="#cb24-266"></a></span>
+<span id="cb24-267"><a href="#cb24-267"></a><span class="fu">## Final Exam/Project</span></span>
+<span id="cb24-268"><a href="#cb24-268"></a></span>
+<span id="cb24-269"><a href="#cb24-269"></a><span class="ss">- </span>**Implement Minimal OS in Rust**</span>
+<span id="cb24-270"><a href="#cb24-270"></a><span class="ss">  - </span>Individual</span>
+<span id="cb24-271"><a href="#cb24-271"></a><span class="ss">  - </span>Under version control</span>
+<span id="cb24-272"><a href="#cb24-272"></a><span class="ss">  - </span>Compiles and runs and is tested</span>
+<span id="cb24-273"><a href="#cb24-273"></a>  </span>
+<span id="cb24-274"><a href="#cb24-274"></a><span class="fu"># On `vim`</span></span>
+<span id="cb24-275"><a href="#cb24-275"></a></span>
+<span id="cb24-276"><a href="#cb24-276"></a><span class="fu">## Vim</span></span>
+<span id="cb24-277"><a href="#cb24-277"></a></span>
+<span id="cb24-278"><a href="#cb24-278"></a><span class="ss">- </span>You should use <span class="in">`vim`</span> or another console-based editor as a component of your learning in this class.</span>
+<span id="cb24-279"><a href="#cb24-279"></a><span class="ss">- </span>This will not be assessed (how can it be) but will *likely* be expected in a non-trivial subset of settings this course material will be useful.</span>
+<span id="cb24-280"><a href="#cb24-280"></a><span class="ss">- </span>I will live-code in <span class="in">`vim`</span> probably.</span>
+<span id="cb24-281"><a href="#cb24-281"></a></span>
+<span id="cb24-282"><a href="#cb24-282"></a><span class="fu"># Derust</span></span>
+<span id="cb24-283"><a href="#cb24-283"></a></span>
+<span id="cb24-284"><a href="#cb24-284"></a><span class="fu">## Rust Features</span></span>
+<span id="cb24-285"><a href="#cb24-285"></a></span>
+<span id="cb24-286"><a href="#cb24-286"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">option</span><span class="co">](https://doc.rust-lang.org/core/option/)</span></span>
+<span id="cb24-287"><a href="#cb24-287"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">result</span><span class="co">](https://doc.rust-lang.org/core/result/)</span></span>
+<span id="cb24-288"><a href="#cb24-288"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">std</span><span class="co">](https://doc.rust-lang.org/std/)</span></span>
+<span id="cb24-289"><a href="#cb24-289"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">iterators</span><span class="co">](https://doc.rust-lang.org/book/ch13-02-iterators.html)</span></span>
+<span id="cb24-290"><a href="#cb24-290"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">closures</span><span class="co">](https://doc.rust-lang.org/book/ch13-01-closures.html)</span></span>
+<span id="cb24-291"><a href="#cb24-291"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">pattern matching</span><span class="co">](https://doc.rust-lang.org/book/ch06-00-enums.html)</span></span>
+<span id="cb24-292"><a href="#cb24-292"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">`format!`</span><span class="co">](https://doc.rust-lang.org/core/macro.write.html)</span></span>
+<span id="cb24-293"><a href="#cb24-293"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">ownership </span><span class="co">](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)</span></span>
+<span id="cb24-294"><a href="#cb24-294"></a></span>
+<span id="cb24-295"><a href="#cb24-295"></a><span class="fu">## Options</span></span>
+<span id="cb24-296"><a href="#cb24-296"></a></span>
+<span id="cb24-297"><a href="#cb24-297"></a><span class="ss">- </span>Sometimes code makes sense.</span>
+<span id="cb24-298"><a href="#cb24-298"></a><span class="ss">- </span><span class="co">[</span><span class="ot">MAD</span><span class="co">](https://en.wikipedia.org/wiki/Multiply%E2%80%93accumulate_operation)</span></span>
+<span id="cb24-299"><a href="#cb24-299"></a></span>
+<span id="cb24-300"><a href="#cb24-300"></a><span class="in">```{.py}</span></span>
+<span id="cb24-301"><a href="#cb24-301"></a><span class="in">from numpy import uint64</span></span>
+<span id="cb24-302"><a href="#cb24-302"></a></span>
+<span id="cb24-303"><a href="#cb24-303"></a><span class="in"># Multiply-add operation</span></span>
+<span id="cb24-304"><a href="#cb24-304"></a><span class="in">def mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:</span></span>
+<span id="cb24-305"><a href="#cb24-305"></a><span class="in">    return a + b * c</span></span>
+<span id="cb24-306"><a href="#cb24-306"></a><span class="in">```</span></span>
+<span id="cb24-307"><a href="#cb24-307"></a></span>
+<span id="cb24-308"><a href="#cb24-308"></a><span class="fu">## Options</span></span>
+<span id="cb24-309"><a href="#cb24-309"></a></span>
+<span id="cb24-310"><a href="#cb24-310"></a><span class="ss">- </span>Sometimes it doesn't.</span>
+<span id="cb24-311"><a href="#cb24-311"></a><span class="ss">- </span>This needn't return a positive value!</span>
+<span id="cb24-312"><a href="#cb24-312"></a></span>
+<span id="cb24-313"><a href="#cb24-313"></a><span class="in">```{.py}</span></span>
+<span id="cb24-314"><a href="#cb24-314"></a><span class="in">from numpy import uint64</span></span>
+<span id="cb24-315"><a href="#cb24-315"></a></span>
+<span id="cb24-316"><a href="#cb24-316"></a><span class="in"># Multiply-sub operation</span></span>
+<span id="cb24-317"><a href="#cb24-317"></a><span class="in">def msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:</span></span>
+<span id="cb24-318"><a href="#cb24-318"></a><span class="in">    return a - b * c</span></span>
+<span id="cb24-319"><a href="#cb24-319"></a><span class="in">```</span></span>
+<span id="cb24-320"><a href="#cb24-320"></a></span>
+<span id="cb24-321"><a href="#cb24-321"></a><span class="fu">## Options</span></span>
+<span id="cb24-322"><a href="#cb24-322"></a></span>
+<span id="cb24-323"><a href="#cb24-323"></a><span class="ss">- </span>Handle your cases!</span>
+<span id="cb24-324"><a href="#cb24-324"></a><span class="ss">- </span>But this causes other problems...</span>
+<span id="cb24-325"><a href="#cb24-325"></a></span>
+<span id="cb24-326"><a href="#cb24-326"></a><span class="in">```{.py}</span></span>
+<span id="cb24-327"><a href="#cb24-327"></a><span class="in">from numpy import uint64</span></span>
+<span id="cb24-328"><a href="#cb24-328"></a></span>
+<span id="cb24-329"><a href="#cb24-329"></a><span class="in"># Multiply-sub operation</span></span>
+<span id="cb24-330"><a href="#cb24-330"></a><span class="in">def msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:</span></span>
+<span id="cb24-331"><a href="#cb24-331"></a><span class="in">    if b * c &gt; a:</span></span>
+<span id="cb24-332"><a href="#cb24-332"></a><span class="in">        return a + b * c</span></span>
+<span id="cb24-333"><a href="#cb24-333"></a><span class="in">    else:</span></span>
+<span id="cb24-334"><a href="#cb24-334"></a><span class="in">        return None</span></span>
+<span id="cb24-335"><a href="#cb24-335"></a><span class="in">```</span></span>
+<span id="cb24-336"><a href="#cb24-336"></a></span>
+<span id="cb24-337"><a href="#cb24-337"></a><span class="fu">## Options</span></span>
+<span id="cb24-338"><a href="#cb24-338"></a></span>
+<span id="cb24-339"><a href="#cb24-339"></a><span class="ss">- </span>Handle your cases!</span>
+<span id="cb24-340"><a href="#cb24-340"></a><span class="ss">- </span>But this causes other problems...</span>
+<span id="cb24-341"><a href="#cb24-341"></a></span>
+<span id="cb24-342"><a href="#cb24-342"></a><span class="in">```{.py}</span></span>
+<span id="cb24-343"><a href="#cb24-343"></a><span class="in">from numpy import uint64</span></span>
+<span id="cb24-344"><a href="#cb24-344"></a><span class="in">from typing import Union</span></span>
+<span id="cb24-345"><a href="#cb24-345"></a></span>
+<span id="cb24-346"><a href="#cb24-346"></a><span class="in"># Multiply-sub operation</span></span>
+<span id="cb24-347"><a href="#cb24-347"></a><span class="in">def msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:</span></span>
+<span id="cb24-348"><a href="#cb24-348"></a><span class="in">    if b * c &gt; a:</span></span>
+<span id="cb24-349"><a href="#cb24-349"></a><span class="in">        return a + b * c</span></span>
+<span id="cb24-350"><a href="#cb24-350"></a><span class="in">    else:</span></span>
+<span id="cb24-351"><a href="#cb24-351"></a><span class="in">        return None</span></span>
+<span id="cb24-352"><a href="#cb24-352"></a><span class="in">```</span></span>
+<span id="cb24-353"><a href="#cb24-353"></a></span>
+<span id="cb24-354"><a href="#cb24-354"></a><span class="fu">## Options</span></span>
+<span id="cb24-355"><a href="#cb24-355"></a></span>
+<span id="cb24-356"><a href="#cb24-356"></a><span class="ss">- </span>Every wish there was a nice way to handle a <span class="in">`Union[None,x]`</span> $\forall x$?</span>
+<span id="cb24-357"><a href="#cb24-357"></a><span class="ss">- </span>It's the <span class="co">[</span><span class="ot">option</span><span class="co">](https://doc.rust-lang.org/std/option/)</span> type:</span>
+<span id="cb24-358"><a href="#cb24-358"></a></span>
+<span id="cb24-359"><a href="#cb24-359"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-360"><a href="#cb24-360"></a><span class="in">fn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {</span></span>
+<span id="cb24-361"><a href="#cb24-361"></a><span class="in">    if denominator == 0.0 {</span></span>
+<span id="cb24-362"><a href="#cb24-362"></a><span class="in">        None</span></span>
+<span id="cb24-363"><a href="#cb24-363"></a><span class="in">    } else {</span></span>
+<span id="cb24-364"><a href="#cb24-364"></a><span class="in">        Some(numerator / denominator)</span></span>
+<span id="cb24-365"><a href="#cb24-365"></a><span class="in">    }</span></span>
+<span id="cb24-366"><a href="#cb24-366"></a><span class="in">}</span></span>
+<span id="cb24-367"><a href="#cb24-367"></a><span class="in">```</span></span>
+<span id="cb24-368"><a href="#cb24-368"></a></span>
+<span id="cb24-369"><a href="#cb24-369"></a><span class="fu">## Rust Features</span></span>
+<span id="cb24-370"><a href="#cb24-370"></a></span>
+<span id="cb24-371"><a href="#cb24-371"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">option</span><span class="co">](https://doc.rust-lang.org/core/option/)</span></span>
+<span id="cb24-372"><a href="#cb24-372"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">result</span><span class="co">](https://doc.rust-lang.org/core/result/)</span></span>
+<span id="cb24-373"><a href="#cb24-373"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">std</span><span class="co">](https://doc.rust-lang.org/std/)</span></span>
+<span id="cb24-374"><a href="#cb24-374"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">iterators</span><span class="co">](https://doc.rust-lang.org/book/ch13-02-iterators.html)</span></span>
+<span id="cb24-375"><a href="#cb24-375"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">closures</span><span class="co">](https://doc.rust-lang.org/book/ch13-01-closures.html)</span></span>
+<span id="cb24-376"><a href="#cb24-376"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">pattern matching</span><span class="co">](https://doc.rust-lang.org/book/ch06-00-enums.html)</span></span>
+<span id="cb24-377"><a href="#cb24-377"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">`format!`</span><span class="co">](https://doc.rust-lang.org/core/macro.write.html)</span></span>
+<span id="cb24-378"><a href="#cb24-378"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">ownership </span><span class="co">](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)</span></span>
+<span id="cb24-379"><a href="#cb24-379"></a></span>
+<span id="cb24-380"><a href="#cb24-380"></a><span class="fu">## Results</span></span>
+<span id="cb24-381"><a href="#cb24-381"></a></span>
+<span id="cb24-382"><a href="#cb24-382"></a><span class="ss">- </span>Results are basically options that incorporate error handling.</span>
+<span id="cb24-383"><a href="#cb24-383"></a></span>
+<span id="cb24-384"><a href="#cb24-384"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-385"><a href="#cb24-385"></a><span class="in">// Linux Kernel Versions, latest is 6</span></span>
+<span id="cb24-386"><a href="#cb24-386"></a><span class="in">fn check_version(val: u8) -&gt; Result&lt;u8, &amp;'static str&gt; {</span></span>
+<span id="cb24-387"><a href="#cb24-387"></a><span class="in">    if val &lt; 7 {</span></span>
+<span id="cb24-388"><a href="#cb24-388"></a><span class="in">        return Ok(val);</span></span>
+<span id="cb24-389"><a href="#cb24-389"></a><span class="in">    } else {</span></span>
+<span id="cb24-390"><a href="#cb24-390"></a><span class="in">        return Err("Not yet released.")</span></span>
+<span id="cb24-391"><a href="#cb24-391"></a><span class="in">    }</span></span>
+<span id="cb24-392"><a href="#cb24-392"></a><span class="in">}</span></span>
+<span id="cb24-393"><a href="#cb24-393"></a><span class="in">```</span></span>
+<span id="cb24-394"><a href="#cb24-394"></a></span>
+<span id="cb24-395"><a href="#cb24-395"></a><span class="fu">## Check it</span></span>
+<span id="cb24-396"><a href="#cb24-396"></a></span>
+<span id="cb24-397"><a href="#cb24-397"></a><span class="ss">- </span>Add main.</span>
+<span id="cb24-398"><a href="#cb24-398"></a></span>
+<span id="cb24-399"><a href="#cb24-399"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb24-400"><a href="#cb24-400"></a><span class="in">fn main() {</span></span>
+<span id="cb24-401"><a href="#cb24-401"></a><span class="in">    dbg!(check_version(4));</span></span>
+<span id="cb24-402"><a href="#cb24-402"></a><span class="in">    dbg!(check_version(7));</span></span>
+<span id="cb24-403"><a href="#cb24-403"></a><span class="in">}</span></span>
+<span id="cb24-404"><a href="#cb24-404"></a><span class="in">```</span></span>
+<span id="cb24-405"><a href="#cb24-405"></a></span>
+<span id="cb24-406"><a href="#cb24-406"></a><span class="ss">- </span><span class="in">`cargo r`</span></span>
+<span id="cb24-407"><a href="#cb24-407"></a><span class="in">```{.sh}</span></span>
+<span id="cb24-408"><a href="#cb24-408"></a><span class="in">[src/main.rs:10:5] check_version(4) = Ok(</span></span>
+<span id="cb24-409"><a href="#cb24-409"></a><span class="in">    4,</span></span>
+<span id="cb24-410"><a href="#cb24-410"></a><span class="in">)</span></span>
+<span id="cb24-411"><a href="#cb24-411"></a><span class="in">[src/main.rs:11:5] check_version(7) = Err(</span></span>
+<span id="cb24-412"><a href="#cb24-412"></a><span class="in">    "Not yet released.",</span></span>
+<span id="cb24-413"><a href="#cb24-413"></a><span class="in">)</span></span>
+<span id="cb24-414"><a href="#cb24-414"></a><span class="in">```</span></span>
+<span id="cb24-415"><a href="#cb24-415"></a></span>
+<span id="cb24-416"><a href="#cb24-416"></a></span>
+<span id="cb24-417"><a href="#cb24-417"></a><span class="fu">## Rust Features</span></span>
+<span id="cb24-418"><a href="#cb24-418"></a></span>
+<span id="cb24-419"><a href="#cb24-419"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">option</span><span class="co">](https://doc.rust-lang.org/core/option/)</span></span>
+<span id="cb24-420"><a href="#cb24-420"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">result</span><span class="co">](https://doc.rust-lang.org/core/result/)</span></span>
+<span id="cb24-421"><a href="#cb24-421"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">std</span><span class="co">](https://doc.rust-lang.org/std/)</span></span>
+<span id="cb24-422"><a href="#cb24-422"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">iterators</span><span class="co">](https://doc.rust-lang.org/book/ch13-02-iterators.html)</span></span>
+<span id="cb24-423"><a href="#cb24-423"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">closures</span><span class="co">](https://doc.rust-lang.org/book/ch13-01-closures.html)</span></span>
+<span id="cb24-424"><a href="#cb24-424"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">pattern matching</span><span class="co">](https://doc.rust-lang.org/book/ch06-00-enums.html)</span></span>
+<span id="cb24-425"><a href="#cb24-425"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">`format!`</span><span class="co">](https://doc.rust-lang.org/core/macro.write.html)</span></span>
+<span id="cb24-426"><a href="#cb24-426"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">ownership </span><span class="co">](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)</span></span>
+<span id="cb24-427"><a href="#cb24-427"></a></span>
+<span id="cb24-428"><a href="#cb24-428"></a><span class="fu">## `std`</span></span>
+<span id="cb24-429"><a href="#cb24-429"></a></span>
+<span id="cb24-430"><a href="#cb24-430"></a><span class="ss">- </span>Options, results, and more fun things, like vectors, are all part of <span class="in">`std`</span></span>
+<span id="cb24-431"><a href="#cb24-431"></a></span>
+<span id="cb24-432"><a href="#cb24-432"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">The Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like `Vec&lt;T&gt;` and `Option&lt;T&gt;`, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things.</span><span class="co">](https://doc.rust-lang.org/std/)</span></span>
+<span id="cb24-433"><a href="#cb24-433"></a></span>
+<span id="cb24-434"><a href="#cb24-434"></a><span class="fu">## Iterators</span></span>
+<span id="cb24-435"><a href="#cb24-435"></a></span>
+<span id="cb24-436"><a href="#cb24-436"></a><span class="ss">- </span>An iterator is pretty much a for-each loop, the Python loop type.</span>
+<span id="cb24-437"><a href="#cb24-437"></a></span>
+<span id="cb24-438"><a href="#cb24-438"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-439"><a href="#cb24-439"></a><span class="in">let v1 = vec![1, 2, 3];</span></span>
+<span id="cb24-440"><a href="#cb24-440"></a></span>
+<span id="cb24-441"><a href="#cb24-441"></a><span class="in">let v1_iter = v1.iter();</span></span>
+<span id="cb24-442"><a href="#cb24-442"></a></span>
+<span id="cb24-443"><a href="#cb24-443"></a><span class="in">for val in v1_iter {</span></span>
+<span id="cb24-444"><a href="#cb24-444"></a><span class="in">    println!("Got: {val}");</span></span>
+<span id="cb24-445"><a href="#cb24-445"></a><span class="in">}</span></span>
+<span id="cb24-446"><a href="#cb24-446"></a><span class="in">```</span></span>
+<span id="cb24-447"><a href="#cb24-447"></a></span>
+<span id="cb24-448"><a href="#cb24-448"></a><span class="ss">- </span>Oh look, <span class="in">`vec!`</span> from <span class="in">`std`</span></span>
+<span id="cb24-449"><a href="#cb24-449"></a></span>
+<span id="cb24-450"><a href="#cb24-450"></a><span class="fu">## Closures</span></span>
+<span id="cb24-451"><a href="#cb24-451"></a></span>
+<span id="cb24-452"><a href="#cb24-452"></a><span class="ss">- </span>A closure is pretty much a lambda function, like the Python <span class="in">`lambda`</span> keyword.</span>
+<span id="cb24-453"><a href="#cb24-453"></a></span>
+<span id="cb24-454"><a href="#cb24-454"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-455"><a href="#cb24-455"></a><span class="in">fn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }</span></span>
+<span id="cb24-456"><a href="#cb24-456"></a><span class="in">let add_one_v2 = |x: u32| -&gt; u32 { x + 1 };</span></span>
+<span id="cb24-457"><a href="#cb24-457"></a><span class="in">let add_one_v3 = |x|             { x + 1 };</span></span>
+<span id="cb24-458"><a href="#cb24-458"></a><span class="in">let add_one_v4 = |x|               x + 1  ;</span></span>
+<span id="cb24-459"><a href="#cb24-459"></a><span class="in">```</span></span>
+<span id="cb24-460"><a href="#cb24-460"></a></span>
+<span id="cb24-461"><a href="#cb24-461"></a><span class="ss">- </span>No one can stop you from writing <span class="in">`fn`</span>'s, not even people who actually know Rust!</span>
+<span id="cb24-462"><a href="#cb24-462"></a></span>
+<span id="cb24-463"><a href="#cb24-463"></a></span>
+<span id="cb24-464"><a href="#cb24-464"></a><span class="fu">## Pattern Matching</span></span>
+<span id="cb24-465"><a href="#cb24-465"></a></span>
+<span id="cb24-466"><a href="#cb24-466"></a><span class="ss">- </span>The language designers intend options (and results) to be handled as follows:</span>
+<span id="cb24-467"><a href="#cb24-467"></a></span>
+<span id="cb24-468"><a href="#cb24-468"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-469"><a href="#cb24-469"></a><span class="in">fn main() {</span></span>
+<span id="cb24-470"><a href="#cb24-470"></a><span class="in">    let s = "Hello, world";</span></span>
+<span id="cb24-471"><a href="#cb24-471"></a><span class="in">    match s.chars().nth(11) {</span></span>
+<span id="cb24-472"><a href="#cb24-472"></a><span class="in">        Some(c) =&gt; println!("The 11th character is {:?}", c),</span></span>
+<span id="cb24-473"><a href="#cb24-473"></a><span class="in">        None =&gt; println!("String `s` is fewer than 11 characters in length"),</span></span>
+<span id="cb24-474"><a href="#cb24-474"></a><span class="in">    }</span></span>
+<span id="cb24-475"><a href="#cb24-475"></a><span class="in">}</span></span>
+<span id="cb24-476"><a href="#cb24-476"></a><span class="in">```</span></span>
+<span id="cb24-477"><a href="#cb24-477"></a></span>
+<span id="cb24-478"><a href="#cb24-478"></a><span class="ss">- </span>Basically, if-else is "un-Rust-like" most of the time.</span>
+<span id="cb24-479"><a href="#cb24-479"></a></span>
+<span id="cb24-480"><a href="#cb24-480"></a><span class="fu">## Formatting</span></span>
+<span id="cb24-481"><a href="#cb24-481"></a></span>
+<span id="cb24-482"><a href="#cb24-482"></a><span class="ss">- </span><span class="in">`print!`</span>, <span class="in">`println!`</span>, and <span class="in">`format!`</span> are all nice ways to work with strings.</span>
+<span id="cb24-483"><a href="#cb24-483"></a><span class="ss">- </span>Handy if you are an OS and want to interface with a human.</span>
+<span id="cb24-484"><a href="#cb24-484"></a><span class="ss">- </span>Assuming you (the OS) know how to display text.</span>
+<span id="cb24-485"><a href="#cb24-485"></a><span class="ss">    - </span>We'll get there.</span>
+<span id="cb24-486"><a href="#cb24-486"></a></span>
+<span id="cb24-487"><a href="#cb24-487"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-488"><a href="#cb24-488"></a><span class="in">format!("test");                             // =&gt; "test"</span></span>
+<span id="cb24-489"><a href="#cb24-489"></a><span class="in">format!("hello {}", "world!");               // =&gt; "hello world!"</span></span>
+<span id="cb24-490"><a href="#cb24-490"></a><span class="in">format!("x = {}, y = {val}", 10, val = 30);  // =&gt; "x = 10, y = 30"</span></span>
+<span id="cb24-491"><a href="#cb24-491"></a><span class="in">let (x, y) = (1, 2);</span></span>
+<span id="cb24-492"><a href="#cb24-492"></a><span class="in">format!("{x} + {y} = 3");                    // =&gt; "1 + 2 = 3"</span></span>
+<span id="cb24-493"><a href="#cb24-493"></a><span class="in">```</span></span>
+<span id="cb24-494"><a href="#cb24-494"></a></span>
+<span id="cb24-495"><a href="#cb24-495"></a><span class="ss">- </span>Similar to Python f-strings and also every other language.</span>
+<span id="cb24-496"><a href="#cb24-496"></a></span>
+<span id="cb24-497"><a href="#cb24-497"></a><span class="fu">## Read More</span></span>
+<span id="cb24-498"><a href="#cb24-498"></a></span>
+<span id="cb24-499"><a href="#cb24-499"></a><span class="ss">- </span>I use most of these language features in two extended examples.</span>
+<span id="cb24-500"><a href="#cb24-500"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Hex reader</span><span class="co">](https://cd-c89.github.io/rs/30_bits.html#hex-reader)</span></span>
+<span id="cb24-501"><a href="#cb24-501"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Fibonacci</span><span class="co">](https://cd-c89.github.io/rs/B0_dynamic.html#fibonacci)</span></span>
+<span id="cb24-502"><a href="#cb24-502"></a></span>
+<span id="cb24-503"><a href="#cb24-503"></a><span class="fu">## Rust Features</span></span>
+<span id="cb24-504"><a href="#cb24-504"></a></span>
+<span id="cb24-505"><a href="#cb24-505"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">option</span><span class="co">](https://doc.rust-lang.org/core/option/)</span></span>
+<span id="cb24-506"><a href="#cb24-506"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">result</span><span class="co">](https://doc.rust-lang.org/core/result/)</span></span>
+<span id="cb24-507"><a href="#cb24-507"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">std</span><span class="co">](https://doc.rust-lang.org/std/)</span></span>
+<span id="cb24-508"><a href="#cb24-508"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">iterators</span><span class="co">](https://doc.rust-lang.org/book/ch13-02-iterators.html)</span></span>
+<span id="cb24-509"><a href="#cb24-509"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">closures</span><span class="co">](https://doc.rust-lang.org/book/ch13-01-closures.html)</span></span>
+<span id="cb24-510"><a href="#cb24-510"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">pattern matching</span><span class="co">](https://doc.rust-lang.org/book/ch06-00-enums.html)</span></span>
+<span id="cb24-511"><a href="#cb24-511"></a><span class="ss">- </span><span class="va">[x]</span> <span class="co">[</span><span class="ot">`format!`</span><span class="co">](https://doc.rust-lang.org/core/macro.write.html)</span></span>
+<span id="cb24-512"><a href="#cb24-512"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="co">[</span><span class="ot">ownership </span><span class="co">](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)</span></span>
+<span id="cb24-513"><a href="#cb24-513"></a></span>
+<span id="cb24-514"><a href="#cb24-514"></a><span class="fu">## Ownership</span></span>
+<span id="cb24-515"><a href="#cb24-515"></a></span>
+<span id="cb24-516"><a href="#cb24-516"></a><span class="ss">- </span>Big topic.</span>
+<span id="cb24-517"><a href="#cb24-517"></a><span class="ss">- </span>Big deal.</span>
+<span id="cb24-518"><a href="#cb24-518"></a><span class="ss">- </span>Learn by doing.</span>
+<span id="cb24-519"><a href="#cb24-519"></a><span class="ss">- </span>Quick example.</span>
+<span id="cb24-520"><a href="#cb24-520"></a></span>
+<span id="cb24-521"><a href="#cb24-521"></a></span>
+<span id="cb24-522"><a href="#cb24-522"></a><span class="fu">## Size</span></span>
+<span id="cb24-523"><a href="#cb24-523"></a></span>
+<span id="cb24-524"><a href="#cb24-524"></a><span class="ss">- </span>Versus e.g. <span class="in">`u8`</span> which was a fixed size.</span>
+<span id="cb24-525"><a href="#cb24-525"></a><span class="ss">- </span>A string is not.</span>
+<span id="cb24-526"><a href="#cb24-526"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-527"><a href="#cb24-527"></a><span class="in">// String of length 0</span></span>
+<span id="cb24-528"><a href="#cb24-528"></a><span class="in">let s = ""; </span></span>
+<span id="cb24-529"><a href="#cb24-529"></a><span class="in">// Complete text of Bhagavad Gita</span></span>
+<span id="cb24-530"><a href="#cb24-530"></a><span class="in">let t = "Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...</span></span>
+<span id="cb24-531"><a href="#cb24-531"></a><span class="in">```</span></span>
+<span id="cb24-532"><a href="#cb24-532"></a><span class="ss">- </span>And in fact, if we implemented Python integers in Rust, they would follow similar rules.</span>
+<span id="cb24-533"><a href="#cb24-533"></a><span class="ss">    - </span>Anything that has no bounded upper size, basically.</span>
+<span id="cb24-534"><a href="#cb24-534"></a>    </span>
+<span id="cb24-535"><a href="#cb24-535"></a><span class="fu">## Ownership Rules</span></span>
+<span id="cb24-536"><a href="#cb24-536"></a></span>
+<span id="cb24-537"><a href="#cb24-537"></a><span class="ss">- </span>Each value in Rust has an _owner_.</span>
+<span id="cb24-538"><a href="#cb24-538"></a><span class="ss">- </span>There can only be one owner at a time.</span>
+<span id="cb24-539"><a href="#cb24-539"></a><span class="ss">- </span>When the owner goes out of scope, the value will be dropped.</span>
+<span id="cb24-540"><a href="#cb24-540"></a></span>
+<span id="cb24-541"><a href="#cb24-541"></a><span class="fu">## Scope</span></span>
+<span id="cb24-542"><a href="#cb24-542"></a></span>
+<span id="cb24-543"><a href="#cb24-543"></a><span class="ss">- </span>Quoth Rust Book:</span>
+<span id="cb24-544"><a href="#cb24-544"></a></span>
+<span id="cb24-545"><a href="#cb24-545"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-546"><a href="#cb24-546"></a><span class="in">{                      // s is not valid here, since it's not yet declared</span></span>
+<span id="cb24-547"><a href="#cb24-547"></a><span class="in">    let s = "hello";   // s is valid from this point forward</span></span>
+<span id="cb24-548"><a href="#cb24-548"></a></span>
+<span id="cb24-549"><a href="#cb24-549"></a><span class="in">    // do stuff with s</span></span>
+<span id="cb24-550"><a href="#cb24-550"></a><span class="in">}                      // this scope is now over, and s is no longer valid</span></span>
+<span id="cb24-551"><a href="#cb24-551"></a><span class="in">```</span></span>
+<span id="cb24-552"><a href="#cb24-552"></a></span>
+<span id="cb24-553"><a href="#cb24-553"></a><span class="ss">- </span>You can experimentally verify each of the claims.</span>
+<span id="cb24-554"><a href="#cb24-554"></a><span class="ss">- </span>Basically, the memory associated with <span class="in">`s`</span> exists at some time points, but not others.</span>
+<span id="cb24-555"><a href="#cb24-555"></a><span class="ss">- </span>Think: Address of building that hasn't been made/has been condemned.</span>
+<span id="cb24-556"><a href="#cb24-556"></a></span>
+<span id="cb24-557"><a href="#cb24-557"></a><span class="fu">## Capital S String</span></span>
+<span id="cb24-558"><a href="#cb24-558"></a></span>
+<span id="cb24-559"><a href="#cb24-559"></a><span class="ss">- </span>Capital S <span class="in">`String`</span> is closer to data structure than a data type in some ways:</span>
+<span id="cb24-560"><a href="#cb24-560"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-561"><a href="#cb24-561"></a><span class="in">    let mut s = String::from("hello");</span></span>
+<span id="cb24-562"><a href="#cb24-562"></a></span>
+<span id="cb24-563"><a href="#cb24-563"></a><span class="in">    s.push_str(", world!"); // push_str() appends a literal to a String</span></span>
+<span id="cb24-564"><a href="#cb24-564"></a></span>
+<span id="cb24-565"><a href="#cb24-565"></a><span class="in">    println!("{s}"); // this will print `hello, world!`</span></span>
+<span id="cb24-566"><a href="#cb24-566"></a><span class="in">```</span></span>
+<span id="cb24-567"><a href="#cb24-567"></a><span class="ss">- </span>It accepts a push operation a la a queue/stack/list, and must be initialized with a function call.</span>
+<span id="cb24-568"><a href="#cb24-568"></a><span class="ss">- </span>A <span class="in">`String`</span> is mutable, a literal is not.</span>
+<span id="cb24-569"><a href="#cb24-569"></a></span>
+<span id="cb24-570"><a href="#cb24-570"></a><span class="fu">## It's confusing</span></span>
+<span id="cb24-571"><a href="#cb24-571"></a></span>
+<span id="cb24-572"><a href="#cb24-572"></a><span class="ss">- </span>This leads to some un-Pythonic behavior.</span>
+<span id="cb24-573"><a href="#cb24-573"></a><span class="ss">- </span>We compare *fixed size* and *variable size* types, which have distinct behavior</span>
+<span id="cb24-574"><a href="#cb24-574"></a></span>
+<span id="cb24-575"><a href="#cb24-575"></a>:::: {.columns}</span>
+<span id="cb24-576"><a href="#cb24-576"></a></span>
+<span id="cb24-577"><a href="#cb24-577"></a>::: {.column width="50%"}     </span>
+<span id="cb24-578"><a href="#cb24-578"></a></span>
+<span id="cb24-579"><a href="#cb24-579"></a><span class="ss">- </span>This works.</span>
+<span id="cb24-580"><a href="#cb24-580"></a></span>
+<span id="cb24-581"><a href="#cb24-581"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-582"><a href="#cb24-582"></a><span class="in">fn main() {</span></span>
+<span id="cb24-583"><a href="#cb24-583"></a><span class="in">    let x = 5;</span></span>
+<span id="cb24-584"><a href="#cb24-584"></a><span class="in">    let y = x;</span></span>
+<span id="cb24-585"><a href="#cb24-585"></a><span class="in">    println!("{x}");</span></span>
+<span id="cb24-586"><a href="#cb24-586"></a><span class="in">}</span></span>
+<span id="cb24-587"><a href="#cb24-587"></a><span class="in">```</span></span>
+<span id="cb24-588"><a href="#cb24-588"></a></span>
+<span id="cb24-589"><a href="#cb24-589"></a>:::</span>
+<span id="cb24-590"><a href="#cb24-590"></a></span>
+<span id="cb24-591"><a href="#cb24-591"></a>::: {.column width="50%"}</span>
+<span id="cb24-592"><a href="#cb24-592"></a></span>
+<span id="cb24-593"><a href="#cb24-593"></a><span class="ss">- </span>This doesn't.</span>
+<span id="cb24-594"><a href="#cb24-594"></a></span>
+<span id="cb24-595"><a href="#cb24-595"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-596"><a href="#cb24-596"></a><span class="in">fn main() {</span></span>
+<span id="cb24-597"><a href="#cb24-597"></a><span class="in">    let s = String::from("6");</span></span>
+<span id="cb24-598"><a href="#cb24-598"></a><span class="in">    let t = s;</span></span>
+<span id="cb24-599"><a href="#cb24-599"></a><span class="in">    println!("{s}")</span></span>
+<span id="cb24-600"><a href="#cb24-600"></a><span class="in">}</span></span>
+<span id="cb24-601"><a href="#cb24-601"></a><span class="in">```</span></span>
+<span id="cb24-602"><a href="#cb24-602"></a></span>
+<span id="cb24-603"><a href="#cb24-603"></a>:::</span>
+<span id="cb24-604"><a href="#cb24-604"></a></span>
+<span id="cb24-605"><a href="#cb24-605"></a>::::</span>
+<span id="cb24-606"><a href="#cb24-606"></a></span>
+<span id="cb24-607"><a href="#cb24-607"></a><span class="fu">## What's happening?</span></span>
+<span id="cb24-608"><a href="#cb24-608"></a></span>
+<span id="cb24-609"><a href="#cb24-609"></a><span class="ss">- </span><span class="in">`s`</span> passes "out of scope" once its value is assigned to <span class="in">`t`</span>.</span>
+<span id="cb24-610"><a href="#cb24-610"></a><span class="ss">- </span>Thereafter, there is no declared variable of name <span class="in">`s`</span>.</span>
+<span id="cb24-611"><a href="#cb24-611"></a><span class="ss">- </span>But this only happens to some types.</span>
+<span id="cb24-612"><a href="#cb24-612"></a><span class="ss">    - </span>It is unbounded types, but it's unclear that e.g. <span class="in">`String::from("6")`</span> isn't a fixed width string of lenth 1 (to me at least).</span>
+<span id="cb24-613"><a href="#cb24-613"></a></span>
+<span id="cb24-614"><a href="#cb24-614"></a><span class="fu">## Clone</span></span>
+<span id="cb24-615"><a href="#cb24-615"></a></span>
+<span id="cb24-616"><a href="#cb24-616"></a><span class="ss">- </span>My secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:</span>
+<span id="cb24-617"><a href="#cb24-617"></a></span>
+<span id="cb24-618"><a href="#cb24-618"></a><span class="at">&gt; Whenever I use Rust, I just always </span><span class="in">`.clone`</span><span class="at"> and when someone asks me about it, I say that's a performance optimization for latter.</span></span>
+<span id="cb24-619"><a href="#cb24-619"></a></span>
+<span id="cb24-620"><a href="#cb24-620"></a><span class="ss">- </span>Rust says the same thing, actually:</span>
+<span id="cb24-621"><a href="#cb24-621"></a></span>
+<span id="cb24-622"><a href="#cb24-622"></a><span class="in">```{.bash}</span></span>
+<span id="cb24-623"><a href="#cb24-623"></a><span class="in">help: consider cloning the value if the performance cost is acceptable</span></span>
+<span id="cb24-624"><a href="#cb24-624"></a><span class="in">  |</span></span>
+<span id="cb24-625"><a href="#cb24-625"></a><span class="in">6 |     let t = s.clone();</span></span>
+<span id="cb24-626"><a href="#cb24-626"></a><span class="in">  |              ++++++++</span></span>
+<span id="cb24-627"><a href="#cb24-627"></a><span class="in">```</span></span>
+<span id="cb24-628"><a href="#cb24-628"></a></span>
+<span id="cb24-629"><a href="#cb24-629"></a><span class="fu">## Example</span></span>
+<span id="cb24-630"><a href="#cb24-630"></a></span>
+<span id="cb24-631"><a href="#cb24-631"></a><span class="ss">- </span>It is reasonable to use <span class="in">`.clone`</span> on capital S <span class="in">`String`</span> for e.g. Wordle, as needed.</span>
+<span id="cb24-632"><a href="#cb24-632"></a><span class="ss">- </span>As a challenge, don't use <span class="in">`.clone`</span> (you don't need it)</span>
+<span id="cb24-633"><a href="#cb24-633"></a></span>
+<span id="cb24-634"><a href="#cb24-634"></a>:::: {.columns}</span>
+<span id="cb24-635"><a href="#cb24-635"></a></span>
+<span id="cb24-636"><a href="#cb24-636"></a>::: {.column width="50%"}     </span>
+<span id="cb24-637"><a href="#cb24-637"></a></span>
+<span id="cb24-638"><a href="#cb24-638"></a><span class="ss">- </span>This works.</span>
+<span id="cb24-639"><a href="#cb24-639"></a></span>
+<span id="cb24-640"><a href="#cb24-640"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-641"><a href="#cb24-641"></a><span class="in">fn main() {</span></span>
+<span id="cb24-642"><a href="#cb24-642"></a><span class="in">    let x = 5;</span></span>
+<span id="cb24-643"><a href="#cb24-643"></a><span class="in">    let y = x;</span></span>
+<span id="cb24-644"><a href="#cb24-644"></a><span class="in">    println!("{x}");</span></span>
+<span id="cb24-645"><a href="#cb24-645"></a><span class="in">}</span></span>
+<span id="cb24-646"><a href="#cb24-646"></a><span class="in">```</span></span>
+<span id="cb24-647"><a href="#cb24-647"></a></span>
+<span id="cb24-648"><a href="#cb24-648"></a>:::</span>
+<span id="cb24-649"><a href="#cb24-649"></a></span>
+<span id="cb24-650"><a href="#cb24-650"></a>::: {.column width="50%"}</span>
+<span id="cb24-651"><a href="#cb24-651"></a></span>
+<span id="cb24-652"><a href="#cb24-652"></a><span class="ss">- </span>This works.</span>
+<span id="cb24-653"><a href="#cb24-653"></a></span>
+<span id="cb24-654"><a href="#cb24-654"></a><span class="in">```{.rs}</span></span>
+<span id="cb24-655"><a href="#cb24-655"></a><span class="in">fn main() {</span></span>
+<span id="cb24-656"><a href="#cb24-656"></a><span class="in">    let s = String::from("6");</span></span>
+<span id="cb24-657"><a href="#cb24-657"></a><span class="in">    let t = s.clone();</span></span>
+<span id="cb24-658"><a href="#cb24-658"></a><span class="in">    println!("{s}")</span></span>
+<span id="cb24-659"><a href="#cb24-659"></a><span class="in">}</span></span>
+<span id="cb24-660"><a href="#cb24-660"></a><span class="in">```</span></span>
+<span id="cb24-661"><a href="#cb24-661"></a></span>
+<span id="cb24-662"><a href="#cb24-662"></a>:::</span>
+<span id="cb24-663"><a href="#cb24-663"></a></span>
+<span id="cb24-664"><a href="#cb24-664"></a>::::</span>
+<span id="cb24-665"><a href="#cb24-665"></a></span>
+<span id="cb24-666"><a href="#cb24-666"></a><span class="fu">## Today</span></span>
+<span id="cb24-667"><a href="#cb24-667"></a></span>
+<span id="cb24-668"><a href="#cb24-668"></a><span class="ss">- </span><span class="va">[x]</span> Logistics</span>
+<span id="cb24-669"><a href="#cb24-669"></a><span class="ss">- </span><span class="va">[x]</span> On Systems</span>
+<span id="cb24-670"><a href="#cb24-670"></a><span class="ss">- </span><span class="va">[x]</span> On Rust</span>
+<span id="cb24-671"><a href="#cb24-671"></a><span class="ss">- </span><span class="va">[x]</span> Course Sketch</span>
+<span id="cb24-672"><a href="#cb24-672"></a><span class="ss">- </span><span class="va">[x]</span> Derust</span>
+<span id="cb24-673"><a href="#cb24-673"></a></span>
+<span id="cb24-674"><a href="#cb24-674"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

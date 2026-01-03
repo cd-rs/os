@@ -57,7 +57,7 @@ title: Derust
 - Your OS is due whenever the final is scheduled.
     - Waiting on registrar to announce.
 
-## Ungrading++
+## Grade Policy
 
 - Your voices have been heard:
 
@@ -283,15 +283,392 @@ UnboundLocalError:
 
 ## Rust Features
 
-- [option](https://doc.rust-lang.org/core/option/)
-- [result](https://doc.rust-lang.org/core/result/)
-- [std](https://doc.rust-lang.org/std/)
-- [iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html)
-- [closures](https://doc.rust-lang.org/book/ch13-01-closures.html)
-- [pattern matching](https://doc.rust-lang.org/book/ch06-00-enums.html)
-- [string formatting](https://doc.rust-lang.org/core/macro.write.html)
-- [ownership system](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
+- [ ] [option](https://doc.rust-lang.org/core/option/)
+- [ ] [result](https://doc.rust-lang.org/core/result/)
+- [ ] [std](https://doc.rust-lang.org/std/)
+- [ ] [iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html)
+- [ ] [closures](https://doc.rust-lang.org/book/ch13-01-closures.html)
+- [ ] [pattern matching](https://doc.rust-lang.org/book/ch06-00-enums.html)
+- [ ] [`format!`](https://doc.rust-lang.org/core/macro.write.html)
+- [ ] [ownership ](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
 
 ## Options
+
+- Sometimes code makes sense.
+- [MAD](https://en.wikipedia.org/wiki/Multiply%E2%80%93accumulate_operation)
+
+```{.py}
+from numpy import uint64
+
+# Multiply-add operation
+def mad(a:uint64, b:uint64, c:uint64) -> uint64:
+    return a + b * c
+```
+
+## Options
+
+- Sometimes it doesn't.
+- This needn't return a positive value!
+
+```{.py}
+from numpy import uint64
+
+# Multiply-sub operation
+def msu(a:uint64, b:uint64, c:uint64) -> uint64:
+    return a - b * c
+```
+
+## Options
+
+- Handle your cases!
+- But this causes other problems...
+
+```{.py}
+from numpy import uint64
+
+# Multiply-sub operation
+def msu(a:uint64, b:uint64, c:uint64) -> uint64:
+    if b * c > a:
+        return a + b * c
+    else:
+        return None
+```
+
+## Options
+
+- Handle your cases!
+- But this causes other problems...
+
+```{.py}
+from numpy import uint64
+from typing import Union
+
+# Multiply-sub operation
+def msu(a:uint64, b:uint64, c:uint64) -> Union[None,uint64]:
+    if b * c > a:
+        return a + b * c
+    else:
+        return None
+```
+
+## Options
+
+- Every wish there was a nice way to handle a `Union[None,x]` $\forall x$?
+- It's the [option](https://doc.rust-lang.org/std/option/) type:
+
+```{.rs}
+fn divide(numerator: f64, denominator: f64) -> Option<f64> {
+    if denominator == 0.0 {
+        None
+    } else {
+        Some(numerator / denominator)
+    }
+}
+```
+
+## Rust Features
+
+- [x] [option](https://doc.rust-lang.org/core/option/)
+- [ ] [result](https://doc.rust-lang.org/core/result/)
+- [ ] [std](https://doc.rust-lang.org/std/)
+- [ ] [iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html)
+- [ ] [closures](https://doc.rust-lang.org/book/ch13-01-closures.html)
+- [ ] [pattern matching](https://doc.rust-lang.org/book/ch06-00-enums.html)
+- [ ] [`format!`](https://doc.rust-lang.org/core/macro.write.html)
+- [ ] [ownership ](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
+
+## Results
+
+- Results are basically options that incorporate error handling.
+
+```{.rs}
+// Linux Kernel Versions, latest is 6
+fn check_version(val: u8) -> Result<u8, &'static str> {
+    if val < 7 {
+        return Ok(val);
+    } else {
+        return Err("Not yet released.")
+    }
+}
+```
+
+## Check it
+
+- Add main.
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    dbg!(check_version(4));
+    dbg!(check_version(7));
+}
+```
+
+- `cargo r`
+```{.sh}
+[src/main.rs:10:5] check_version(4) = Ok(
+    4,
+)
+[src/main.rs:11:5] check_version(7) = Err(
+    "Not yet released.",
+)
+```
+
+
+## Rust Features
+
+- [x] [option](https://doc.rust-lang.org/core/option/)
+- [x] [result](https://doc.rust-lang.org/core/result/)
+- [ ] [std](https://doc.rust-lang.org/std/)
+- [ ] [iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html)
+- [ ] [closures](https://doc.rust-lang.org/book/ch13-01-closures.html)
+- [ ] [pattern matching](https://doc.rust-lang.org/book/ch06-00-enums.html)
+- [ ] [`format!`](https://doc.rust-lang.org/core/macro.write.html)
+- [ ] [ownership ](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
+
+## `std`
+
+- Options, results, and more fun things, like vectors, are all part of `std`
+
+> [The Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like `Vec<T>` and `Option<T>`, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things.](https://doc.rust-lang.org/std/)
+
+## Iterators
+
+- An iterator is pretty much a for-each loop, the Python loop type.
+
+```{.rs}
+let v1 = vec![1, 2, 3];
+
+let v1_iter = v1.iter();
+
+for val in v1_iter {
+    println!("Got: {val}");
+}
+```
+
+- Oh look, `vec!` from `std`
+
+## Closures
+
+- A closure is pretty much a lambda function, like the Python `lambda` keyword.
+
+```{.rs}
+fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+```
+
+- No one can stop you from writing `fn`'s, not even people who actually know Rust!
+
+
+## Pattern Matching
+
+- The language designers intend options (and results) to be handled as follows:
+
+```{.rs}
+fn main() {
+    let s = "Hello, world";
+    match s.chars().nth(11) {
+        Some(c) => println!("The 11th character is {:?}", c),
+        None => println!("String `s` is fewer than 11 characters in length"),
+    }
+}
+```
+
+- Basically, if-else is "un-Rust-like" most of the time.
+
+## Formatting
+
+- `print!`, `println!`, and `format!` are all nice ways to work with strings.
+- Handy if you are an OS and want to interface with a human.
+- Assuming you (the OS) know how to display text.
+    - We'll get there.
+
+```{.rs}
+format!("test");                             // => "test"
+format!("hello {}", "world!");               // => "hello world!"
+format!("x = {}, y = {val}", 10, val = 30);  // => "x = 10, y = 30"
+let (x, y) = (1, 2);
+format!("{x} + {y} = 3");                    // => "1 + 2 = 3"
+```
+
+- Similar to Python f-strings and also every other language.
+
+## Read More
+
+- I use most of these language features in two extended examples.
+    - [Hex reader](https://cd-c89.github.io/rs/30_bits.html#hex-reader)
+    - [Fibonacci](https://cd-c89.github.io/rs/B0_dynamic.html#fibonacci)
+
+## Rust Features
+
+- [x] [option](https://doc.rust-lang.org/core/option/)
+- [x] [result](https://doc.rust-lang.org/core/result/)
+- [x] [std](https://doc.rust-lang.org/std/)
+- [x] [iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html)
+- [x] [closures](https://doc.rust-lang.org/book/ch13-01-closures.html)
+- [x] [pattern matching](https://doc.rust-lang.org/book/ch06-00-enums.html)
+- [x] [`format!`](https://doc.rust-lang.org/core/macro.write.html)
+- [ ] [ownership ](https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html)
+
+## Ownership
+
+- Big topic.
+- Big deal.
+- Learn by doing.
+- Quick example.
+
+
+## Size
+
+- Versus e.g. `u8` which was a fixed size.
+- A string is not.
+```{.rs}
+// String of length 0
+let s = ""; 
+// Complete text of Bhagavad Gita
+let t = "Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...
+```
+- And in fact, if we implemented Python integers in Rust, they would follow similar rules.
+    - Anything that has no bounded upper size, basically.
+    
+## Ownership Rules
+
+- Each value in Rust has an _owner_.
+- There can only be one owner at a time.
+- When the owner goes out of scope, the value will be dropped.
+
+## Scope
+
+- Quoth Rust Book:
+
+```{.rs}
+{                      // s is not valid here, since it's not yet declared
+    let s = "hello";   // s is valid from this point forward
+
+    // do stuff with s
+}                      // this scope is now over, and s is no longer valid
+```
+
+- You can experimentally verify each of the claims.
+- Basically, the memory associated with `s` exists at some time points, but not others.
+- Think: Address of building that hasn't been made/has been condemned.
+
+## Capital S String
+
+- Capital S `String` is closer to data structure than a data type in some ways:
+```{.rs}
+    let mut s = String::from("hello");
+
+    s.push_str(", world!"); // push_str() appends a literal to a String
+
+    println!("{s}"); // this will print `hello, world!`
+```
+- It accepts a push operation a la a queue/stack/list, and must be initialized with a function call.
+- A `String` is mutable, a literal is not.
+
+## It's confusing
+
+- This leads to some un-Pythonic behavior.
+- We compare *fixed size* and *variable size* types, which have distinct behavior
+
+:::: {.columns}
+
+::: {.column width="50%"}     
+
+- This works.
+
+```{.rs}
+fn main() {
+    let x = 5;
+    let y = x;
+    println!("{x}");
+}
+```
+
+:::
+
+::: {.column width="50%"}
+
+- This doesn't.
+
+```{.rs}
+fn main() {
+    let s = String::from("6");
+    let t = s;
+    println!("{s}")
+}
+```
+
+:::
+
+::::
+
+## What's happening?
+
+- `s` passes "out of scope" once its value is assigned to `t`.
+- Thereafter, there is no declared variable of name `s`.
+- But this only happens to some types.
+    - It is unbounded types, but it's unclear that e.g. `String::from("6")` isn't a fixed width string of lenth 1 (to me at least).
+
+## Clone
+
+- My secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:
+
+> Whenever I use Rust, I just always `.clone` and when someone asks me about it, I say that's a performance optimization for latter.
+
+- Rust says the same thing, actually:
+
+```{.bash}
+help: consider cloning the value if the performance cost is acceptable
+  |
+6 |     let t = s.clone();
+  |              ++++++++
+```
+
+## Example
+
+- It is reasonable to use `.clone` on capital S `String` for e.g. Wordle, as needed.
+- As a challenge, don't use `.clone` (you don't need it)
+
+:::: {.columns}
+
+::: {.column width="50%"}     
+
+- This works.
+
+```{.rs}
+fn main() {
+    let x = 5;
+    let y = x;
+    println!("{x}");
+}
+```
+
+:::
+
+::: {.column width="50%"}
+
+- This works.
+
+```{.rs}
+fn main() {
+    let s = String::from("6");
+    let t = s.clone();
+    println!("{s}")
+}
+```
+
+:::
+
+::::
+
+## Today
+
+- [x] Logistics
+- [x] On Systems
+- [x] On Rust
+- [x] Course Sketch
+- [x] Derust
 
 # Fin

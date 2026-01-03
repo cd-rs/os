@@ -77,11 +77,11 @@
     ]
   },
   {
-    "objectID": "00_derust.html#ungrading",
-    "href": "00_derust.html#ungrading",
+    "objectID": "00_derust.html#grade-policy",
+    "href": "00_derust.html#grade-policy",
     "title": "Derust",
-    "section": "Ungrading++",
-    "text": "Ungrading++\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more.",
+    "section": "Grade Policy",
+    "text": "Grade Policy\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more.",
     "crumbs": [
       "Derust"
     ]
@@ -311,7 +311,7 @@
     "href": "00_derust.html#rust-features",
     "title": "Derust",
     "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nstring formatting\nownership system",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership",
     "crumbs": [
       "Derust"
     ]
@@ -321,7 +321,257 @@
     "href": "00_derust.html#options",
     "title": "Derust",
     "section": "Options",
-    "text": "Options",
+    "text": "Options\n\nSometimes code makes sense.\nMAD\n\nfrom numpy import uint64\n\n# Multiply-add operation\ndef mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a + b * c",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#options-1",
+    "href": "00_derust.html#options-1",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nSometimes it doesn’t.\nThis needn’t return a positive value!\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a - b * c",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#options-2",
+    "href": "00_derust.html#options-2",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#options-3",
+    "href": "00_derust.html#options-3",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\nfrom typing import Union\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#options-4",
+    "href": "00_derust.html#options-4",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nEvery wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#rust-features-1",
+    "href": "00_derust.html#rust-features-1",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#results",
+    "href": "00_derust.html#results",
+    "title": "Derust",
+    "section": "Results",
+    "text": "Results\n\nResults are basically options that incorporate error handling.\n\n// Linux Kernel Versions, latest is 6\nfn check_version(val: u8) -&gt; Result&lt;u8, &'static str&gt; {\n    if val &lt; 7 {\n        return Ok(val);\n    } else {\n        return Err(\"Not yet released.\")\n    }\n}",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#check-it",
+    "href": "00_derust.html#check-it",
+    "title": "Derust",
+    "section": "Check it",
+    "text": "Check it\n\nAdd main.\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    dbg!(check_version(4));\n    dbg!(check_version(7));\n}\n\n\ncargo r\n\n[src/main.rs:10:5] check_version(4) = Ok(\n    4,\n)\n[src/main.rs:11:5] check_version(7) = Err(\n    \"Not yet released.\",\n)",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#rust-features-2",
+    "href": "00_derust.html#rust-features-2",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#std",
+    "href": "00_derust.html#std",
+    "title": "Derust",
+    "section": "std",
+    "text": "std\n\nOptions, results, and more fun things, like vectors, are all part of std\n\n\nThe Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like Vec&lt;T&gt; and Option&lt;T&gt;, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#iterators",
+    "href": "00_derust.html#iterators",
+    "title": "Derust",
+    "section": "Iterators",
+    "text": "Iterators\n\nAn iterator is pretty much a for-each loop, the Python loop type.\n\nlet v1 = vec![1, 2, 3];\n\nlet v1_iter = v1.iter();\n\nfor val in v1_iter {\n    println!(\"Got: {val}\");\n}\n\nOh look, vec! from std",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#closures",
+    "href": "00_derust.html#closures",
+    "title": "Derust",
+    "section": "Closures",
+    "text": "Closures\n\nA closure is pretty much a lambda function, like the Python lambda keyword.\n\nfn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }\nlet add_one_v2 = |x: u32| -&gt; u32 { x + 1 };\nlet add_one_v3 = |x|             { x + 1 };\nlet add_one_v4 = |x|               x + 1  ;\n\nNo one can stop you from writing fn’s, not even people who actually know Rust!",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#pattern-matching",
+    "href": "00_derust.html#pattern-matching",
+    "title": "Derust",
+    "section": "Pattern Matching",
+    "text": "Pattern Matching\n\nThe language designers intend options (and results) to be handled as follows:\n\nfn main() {\n    let s = \"Hello, world\";\n    match s.chars().nth(11) {\n        Some(c) =&gt; println!(\"The 11th character is {:?}\", c),\n        None =&gt; println!(\"String `s` is fewer than 11 characters in length\"),\n    }\n}\n\nBasically, if-else is “un-Rust-like” most of the time.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#formatting",
+    "href": "00_derust.html#formatting",
+    "title": "Derust",
+    "section": "Formatting",
+    "text": "Formatting\n\nprint!, println!, and format! are all nice ways to work with strings.\nHandy if you are an OS and want to interface with a human.\nAssuming you (the OS) know how to display text.\n\nWe’ll get there.\n\n\nformat!(\"test\");                             // =&gt; \"test\"\nformat!(\"hello {}\", \"world!\");               // =&gt; \"hello world!\"\nformat!(\"x = {}, y = {val}\", 10, val = 30);  // =&gt; \"x = 10, y = 30\"\nlet (x, y) = (1, 2);\nformat!(\"{x} + {y} = 3\");                    // =&gt; \"1 + 2 = 3\"\n\nSimilar to Python f-strings and also every other language.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#read-more",
+    "href": "00_derust.html#read-more",
+    "title": "Derust",
+    "section": "Read More",
+    "text": "Read More\n\nI use most of these language features in two extended examples.\n\nHex reader\nFibonacci",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#rust-features-3",
+    "href": "00_derust.html#rust-features-3",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#ownership",
+    "href": "00_derust.html#ownership",
+    "title": "Derust",
+    "section": "Ownership",
+    "text": "Ownership\n\nBig topic.\nBig deal.\nLearn by doing.\nQuick example.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#size",
+    "href": "00_derust.html#size",
+    "title": "Derust",
+    "section": "Size",
+    "text": "Size\n\nVersus e.g. u8 which was a fixed size.\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#ownership-rules",
+    "href": "00_derust.html#ownership-rules",
+    "title": "Derust",
+    "section": "Ownership Rules",
+    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#scope",
+    "href": "00_derust.html#scope",
+    "title": "Derust",
+    "section": "Scope",
+    "text": "Scope\n\nQuoth Rust Book:\n\n{                      // s is not valid here, since it's not yet declared\n    let s = \"hello\";   // s is valid from this point forward\n\n    // do stuff with s\n}                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.\nThink: Address of building that hasn’t been made/has been condemned.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#capital-s-string",
+    "href": "00_derust.html#capital-s-string",
+    "title": "Derust",
+    "section": "Capital S String",
+    "text": "Capital S String\n\nCapital S String is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#its-confusing",
+    "href": "00_derust.html#its-confusing",
+    "title": "Derust",
+    "section": "It’s confusing",
+    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#whats-happening",
+    "href": "00_derust.html#whats-happening",
+    "title": "Derust",
+    "section": "What’s happening?",
+    "text": "What’s happening?\n\ns passes “out of scope” once its value is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types.\n\nIt is unbounded types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least).",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#clone",
+    "href": "00_derust.html#clone",
+    "title": "Derust",
+    "section": "Clone",
+    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#example",
+    "href": "00_derust.html#example",
+    "title": "Derust",
+    "section": "Example",
+    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
+    "objectID": "00_derust.html#today-1",
+    "href": "00_derust.html#today-1",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust",
     "crumbs": [
       "Derust"
     ]
@@ -369,11 +619,11 @@
     "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce."
   },
   {
-    "objectID": "00_derust.rjs.html#ungrading",
-    "href": "00_derust.rjs.html#ungrading",
+    "objectID": "00_derust.rjs.html#grade-policy",
+    "href": "00_derust.rjs.html#grade-policy",
     "title": "Derust",
-    "section": "Ungrading++",
-    "text": "Ungrading++\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
+    "section": "Grade Policy",
+    "text": "Grade Policy\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
   },
   {
     "objectID": "00_derust.rjs.html#specification-grading",
@@ -534,14 +784,189 @@
     "href": "00_derust.rjs.html#rust-features",
     "title": "Derust",
     "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nstring formatting\nownership system"
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
   },
   {
     "objectID": "00_derust.rjs.html#options",
     "href": "00_derust.rjs.html#options",
     "title": "Derust",
     "section": "Options",
-    "text": "Options"
+    "text": "Options\n\nSometimes code makes sense.\nMAD\n\nfrom numpy import uint64\n\n# Multiply-add operation\ndef mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a + b * c"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-1",
+    "href": "00_derust.rjs.html#options-1",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nSometimes it doesn’t.\nThis needn’t return a positive value!\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a - b * c"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-2",
+    "href": "00_derust.rjs.html#options-2",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-3",
+    "href": "00_derust.rjs.html#options-3",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\nfrom typing import Union\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-4",
+    "href": "00_derust.rjs.html#options-4",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nEvery wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-1",
+    "href": "00_derust.rjs.html#rust-features-1",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#results",
+    "href": "00_derust.rjs.html#results",
+    "title": "Derust",
+    "section": "Results",
+    "text": "Results\n\nResults are basically options that incorporate error handling.\n\n// Linux Kernel Versions, latest is 6\nfn check_version(val: u8) -&gt; Result&lt;u8, &'static str&gt; {\n    if val &lt; 7 {\n        return Ok(val);\n    } else {\n        return Err(\"Not yet released.\")\n    }\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#check-it",
+    "href": "00_derust.rjs.html#check-it",
+    "title": "Derust",
+    "section": "Check it",
+    "text": "Check it\n\nAdd main.\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    dbg!(check_version(4));\n    dbg!(check_version(7));\n}\n\n\ncargo r\n\n[src/main.rs:10:5] check_version(4) = Ok(\n    4,\n)\n[src/main.rs:11:5] check_version(7) = Err(\n    \"Not yet released.\",\n)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-2",
+    "href": "00_derust.rjs.html#rust-features-2",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#std",
+    "href": "00_derust.rjs.html#std",
+    "title": "Derust",
+    "section": "std",
+    "text": "std\n\nOptions, results, and more fun things, like vectors, are all part of std\n\n\nThe Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like Vec&lt;T&gt; and Option&lt;T&gt;, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things."
+  },
+  {
+    "objectID": "00_derust.rjs.html#iterators",
+    "href": "00_derust.rjs.html#iterators",
+    "title": "Derust",
+    "section": "Iterators",
+    "text": "Iterators\n\nAn iterator is pretty much a for-each loop, the Python loop type.\n\nlet v1 = vec![1, 2, 3];\n\nlet v1_iter = v1.iter();\n\nfor val in v1_iter {\n    println!(\"Got: {val}\");\n}\n\nOh look, vec! from std"
+  },
+  {
+    "objectID": "00_derust.rjs.html#closures",
+    "href": "00_derust.rjs.html#closures",
+    "title": "Derust",
+    "section": "Closures",
+    "text": "Closures\n\nA closure is pretty much a lambda function, like the Python lambda keyword.\n\nfn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }\nlet add_one_v2 = |x: u32| -&gt; u32 { x + 1 };\nlet add_one_v3 = |x|             { x + 1 };\nlet add_one_v4 = |x|               x + 1  ;\n\nNo one can stop you from writing fn’s, not even people who actually know Rust!"
+  },
+  {
+    "objectID": "00_derust.rjs.html#pattern-matching",
+    "href": "00_derust.rjs.html#pattern-matching",
+    "title": "Derust",
+    "section": "Pattern Matching",
+    "text": "Pattern Matching\n\nThe language designers intend options (and results) to be handled as follows:\n\nfn main() {\n    let s = \"Hello, world\";\n    match s.chars().nth(11) {\n        Some(c) =&gt; println!(\"The 11th character is {:?}\", c),\n        None =&gt; println!(\"String `s` is fewer than 11 characters in length\"),\n    }\n}\n\nBasically, if-else is “un-Rust-like” most of the time."
+  },
+  {
+    "objectID": "00_derust.rjs.html#formatting",
+    "href": "00_derust.rjs.html#formatting",
+    "title": "Derust",
+    "section": "Formatting",
+    "text": "Formatting\n\nprint!, println!, and format! are all nice ways to work with strings.\nHandy if you are an OS and want to interface with a human.\nAssuming you (the OS) know how to display text.\n\nWe’ll get there.\n\n\nformat!(\"test\");                             // =&gt; \"test\"\nformat!(\"hello {}\", \"world!\");               // =&gt; \"hello world!\"\nformat!(\"x = {}, y = {val}\", 10, val = 30);  // =&gt; \"x = 10, y = 30\"\nlet (x, y) = (1, 2);\nformat!(\"{x} + {y} = 3\");                    // =&gt; \"1 + 2 = 3\"\n\nSimilar to Python f-strings and also every other language."
+  },
+  {
+    "objectID": "00_derust.rjs.html#read-more",
+    "href": "00_derust.rjs.html#read-more",
+    "title": "Derust",
+    "section": "Read More",
+    "text": "Read More\n\nI use most of these language features in two extended examples.\n\nHex reader\nFibonacci"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-3",
+    "href": "00_derust.rjs.html#rust-features-3",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#ownership",
+    "href": "00_derust.rjs.html#ownership",
+    "title": "Derust",
+    "section": "Ownership",
+    "text": "Ownership\n\nBig topic.\nBig deal.\nLearn by doing.\nQuick example."
+  },
+  {
+    "objectID": "00_derust.rjs.html#size",
+    "href": "00_derust.rjs.html#size",
+    "title": "Derust",
+    "section": "Size",
+    "text": "Size\n\nVersus e.g. u8 which was a fixed size.\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ownership-rules",
+    "href": "00_derust.rjs.html#ownership-rules",
+    "title": "Derust",
+    "section": "Ownership Rules",
+    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped."
+  },
+  {
+    "objectID": "00_derust.rjs.html#scope",
+    "href": "00_derust.rjs.html#scope",
+    "title": "Derust",
+    "section": "Scope",
+    "text": "Scope\n\nQuoth Rust Book:\n\n{                      // s is not valid here, since it's not yet declared\n    let s = \"hello\";   // s is valid from this point forward\n\n    // do stuff with s\n}                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.\nThink: Address of building that hasn’t been made/has been condemned."
+  },
+  {
+    "objectID": "00_derust.rjs.html#capital-s-string",
+    "href": "00_derust.rjs.html#capital-s-string",
+    "title": "Derust",
+    "section": "Capital S String",
+    "text": "Capital S String\n\nCapital S String is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not."
+  },
+  {
+    "objectID": "00_derust.rjs.html#its-confusing",
+    "href": "00_derust.rjs.html#its-confusing",
+    "title": "Derust",
+    "section": "It’s confusing",
+    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#whats-happening",
+    "href": "00_derust.rjs.html#whats-happening",
+    "title": "Derust",
+    "section": "What’s happening?",
+    "text": "What’s happening?\n\ns passes “out of scope” once its value is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types.\n\nIt is unbounded types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least)."
+  },
+  {
+    "objectID": "00_derust.rjs.html#clone",
+    "href": "00_derust.rjs.html#clone",
+    "title": "Derust",
+    "section": "Clone",
+    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++"
+  },
+  {
+    "objectID": "00_derust.rjs.html#example",
+    "href": "00_derust.rjs.html#example",
+    "title": "Derust",
+    "section": "Example",
+    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#today-1",
+    "href": "00_derust.rjs.html#today-1",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
   },
   {
     "objectID": "20_options.rjs.html#announcements",

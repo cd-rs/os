@@ -488,8 +488,8 @@
 </ul></li>
 </ul>
 </section>
-<section id="ungrading" class="slide level2">
-<h2>Ungrading++</h2>
+<section id="grade-policy" class="slide level2">
+<h2>Grade Policy</h2>
 <ul>
 <li>Your voices have been heard:</li>
 </ul>
@@ -856,19 +856,401 @@
 </section>
 <section id="rust-features" class="slide level2">
 <h2>Rust Features</h2>
-<ul>
-<li><a href="https://doc.rust-lang.org/core/option/">option</a></li>
-<li><a href="https://doc.rust-lang.org/core/result/">result</a></li>
-<li><a href="https://doc.rust-lang.org/std/">std</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></li>
-<li><a href="https://doc.rust-lang.org/core/macro.write.html">string formatting</a></li>
-<li><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership system</a></li>
+<ul class="task-list">
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
 </ul>
 </section>
 <section id="options" class="slide level2">
 <h2>Options</h2>
+<ul>
+<li>Sometimes code makes sense.</li>
+<li><a href="https://en.wikipedia.org/wiki/Multiply%E2%80%93accumulate_operation">MAD</a></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb4-2"><a></a></span>
+<span id="cb4-3"><a></a><span class="co"># Multiply-add operation</span></span>
+<span id="cb4-4"><a></a><span class="kw">def</span> mad(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> uint64:</span>
+<span id="cb4-5"><a></a>    <span class="cf">return</span> a <span class="op">+</span> b <span class="op">*</span> c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-1" class="slide level2">
+<h2>Options</h2>
+<ul>
+<li>Sometimes it doesn’t.</li>
+<li>This needn’t return a positive value!</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a><span class="co"># Multiply-sub operation</span></span>
+<span id="cb5-4"><a></a><span class="kw">def</span> msu(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> uint64:</span>
+<span id="cb5-5"><a></a>    <span class="cf">return</span> a <span class="op">-</span> b <span class="op">*</span> c</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-2" class="slide level2">
+<h2>Options</h2>
+<ul>
+<li>Handle your cases!</li>
+<li>But this causes other problems…</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a><span class="co"># Multiply-sub operation</span></span>
+<span id="cb6-4"><a></a><span class="kw">def</span> msu(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> uint64:</span>
+<span id="cb6-5"><a></a>    <span class="cf">if</span> b <span class="op">*</span> c <span class="op">&gt;</span> a:</span>
+<span id="cb6-6"><a></a>        <span class="cf">return</span> a <span class="op">+</span> b <span class="op">*</span> c</span>
+<span id="cb6-7"><a></a>    <span class="cf">else</span>:</span>
+<span id="cb6-8"><a></a>        <span class="cf">return</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-3" class="slide level2">
+<h2>Options</h2>
+<ul>
+<li>Handle your cases!</li>
+<li>But this causes other problems…</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a></a><span class="im">from</span> numpy <span class="im">import</span> uint64</span>
+<span id="cb7-2"><a></a><span class="im">from</span> typing <span class="im">import</span> Union</span>
+<span id="cb7-3"><a></a></span>
+<span id="cb7-4"><a></a><span class="co"># Multiply-sub operation</span></span>
+<span id="cb7-5"><a></a><span class="kw">def</span> msu(a:uint64, b:uint64, c:uint64) <span class="op">-&gt;</span> Union[<span class="va">None</span>,uint64]:</span>
+<span id="cb7-6"><a></a>    <span class="cf">if</span> b <span class="op">*</span> c <span class="op">&gt;</span> a:</span>
+<span id="cb7-7"><a></a>        <span class="cf">return</span> a <span class="op">+</span> b <span class="op">*</span> c</span>
+<span id="cb7-8"><a></a>    <span class="cf">else</span>:</span>
+<span id="cb7-9"><a></a>        <span class="cf">return</span> <span class="va">None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="options-4" class="slide level2">
+<h2>Options</h2>
+<ul>
+<li>Every wish there was a nice way to handle a <code>Union[None,x]</code> <span class="math inline">\(\forall x\)</span>?</li>
+<li>It’s the <a href="https://doc.rust-lang.org/std/option/">option</a> type:</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="kw">fn</span> divide(numerator<span class="op">:</span> <span class="dt">f64</span><span class="op">,</span> denominator<span class="op">:</span> <span class="dt">f64</span>) <span class="op">-&gt;</span> <span class="dt">Option</span><span class="op">&lt;</span><span class="dt">f64</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb8-2"><a></a>    <span class="cf">if</span> denominator <span class="op">==</span> <span class="dv">0.0</span> <span class="op">{</span></span>
+<span id="cb8-3"><a></a>        <span class="cn">None</span></span>
+<span id="cb8-4"><a></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb8-5"><a></a>        <span class="cn">Some</span>(numerator <span class="op">/</span> denominator)</span>
+<span id="cb8-6"><a></a>    <span class="op">}</span></span>
+<span id="cb8-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rust-features-1" class="slide level2">
+<h2>Rust Features</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
+</ul>
+</section>
+<section id="results" class="slide level2">
+<h2>Results</h2>
+<ul>
+<li>Results are basically options that incorporate error handling.</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// Linux Kernel Versions, latest is 6</span></span>
+<span id="cb9-2"><a></a><span class="kw">fn</span> check_version(val<span class="op">:</span> <span class="dt">u8</span>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span><span class="dt">u8</span><span class="op">,</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="dt">str</span><span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb9-3"><a></a>    <span class="cf">if</span> val <span class="op">&lt;</span> <span class="dv">7</span> <span class="op">{</span></span>
+<span id="cb9-4"><a></a>        <span class="cf">return</span> <span class="cn">Ok</span>(val)<span class="op">;</span></span>
+<span id="cb9-5"><a></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb9-6"><a></a>        <span class="cf">return</span> <span class="cn">Err</span>(<span class="st">"Not yet released."</span>)</span>
+<span id="cb9-7"><a></a>    <span class="op">}</span></span>
+<span id="cb9-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="check-it" class="slide level2">
+<h2>Check it</h2>
+<ul>
+<li>Add main.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a>fn main() <span class="op">{</span></span>
+<span id="cb10-2"><a></a>    <span class="pp">dbg!</span>(check_version(<span class="dv">4</span>))<span class="op">;</span></span>
+<span id="cb10-3"><a></a>    <span class="pp">dbg!</span>(check_version(<span class="dv">7</span>))<span class="op">;</span></span>
+<span id="cb10-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li><code>cargo r</code></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="ex">[src/main.rs:10:5]</span> check_version<span class="er">(</span><span class="ex">4</span><span class="kw">)</span> <span class="ex">=</span> Ok<span class="er">(</span></span>
+<span id="cb11-2"><a></a>    <span class="ex">4,</span></span>
+<span id="cb11-3"><a></a><span class="kw">)</span></span>
+<span id="cb11-4"><a></a><span class="ex">[src/main.rs:11:5]</span> check_version<span class="er">(</span><span class="ex">7</span><span class="kw">)</span> <span class="ex">=</span> Err<span class="er">(</span></span>
+<span id="cb11-5"><a></a>    <span class="st">"Not yet released."</span><span class="ex">,</span></span>
+<span id="cb11-6"><a></a><span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rust-features-2" class="slide level2">
+<h2>Rust Features</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
+</ul>
+</section>
+<section id="std" class="slide level2">
+<h2><code>std</code></h2>
+<ul>
+<li>Options, results, and more fun things, like vectors, are all part of <code>std</code></li>
+</ul>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/std/">The Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like <code>Vec&lt;T&gt;</code> and <code>Option&lt;T&gt;</code>, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things.</a></p>
+</blockquote>
+</section>
+<section id="iterators" class="slide level2">
+<h2>Iterators</h2>
+<ul>
+<li>An iterator is pretty much a for-each loop, the Python loop type.</li>
+</ul>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="kw">let</span> v1 <span class="op">=</span> <span class="pp">vec!</span>[<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">;</span></span>
+<span id="cb12-2"><a></a></span>
+<span id="cb12-3"><a></a><span class="kw">let</span> v1_iter <span class="op">=</span> v1<span class="op">.</span>iter()<span class="op">;</span></span>
+<span id="cb12-4"><a></a></span>
+<span id="cb12-5"><a></a><span class="cf">for</span> val <span class="kw">in</span> v1_iter <span class="op">{</span></span>
+<span id="cb12-6"><a></a>    <span class="pp">println!</span>(<span class="st">"Got: {val}"</span>)<span class="op">;</span></span>
+<span id="cb12-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Oh look, <code>vec!</code> from <code>std</code></li>
+</ul>
+</section>
+<section id="closures" class="slide level2">
+<h2>Closures</h2>
+<ul>
+<li>A closure is pretty much a lambda function, like the Python <code>lambda</code> keyword.</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a></a><span class="kw">fn</span>  add_one_v1   (x<span class="op">:</span> <span class="dt">u32</span>) <span class="op">-&gt;</span> <span class="dt">u32</span> <span class="op">{</span> x <span class="op">+</span> <span class="dv">1</span> <span class="op">}</span></span>
+<span id="cb13-2"><a></a><span class="kw">let</span> add_one_v2 <span class="op">=</span> <span class="op">|</span>x<span class="op">:</span> <span class="dt">u32</span><span class="op">|</span> <span class="op">-&gt;</span> <span class="dt">u32</span> <span class="op">{</span> x <span class="op">+</span> <span class="dv">1</span> <span class="op">};</span></span>
+<span id="cb13-3"><a></a><span class="kw">let</span> add_one_v3 <span class="op">=</span> <span class="op">|</span>x<span class="op">|</span>             <span class="op">{</span> x <span class="op">+</span> <span class="dv">1</span> <span class="op">};</span></span>
+<span id="cb13-4"><a></a><span class="kw">let</span> add_one_v4 <span class="op">=</span> <span class="op">|</span>x<span class="op">|</span>               x <span class="op">+</span> <span class="dv">1</span>  <span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>No one can stop you from writing <code>fn</code>’s, not even people who actually know Rust!</li>
+</ul>
+</section>
+<section id="pattern-matching" class="slide level2">
+<h2>Pattern Matching</h2>
+<ul>
+<li>The language designers intend options (and results) to be handled as follows:</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb14-1"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb14-2"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Hello, world"</span><span class="op">;</span></span>
+<span id="cb14-3"><a></a>    <span class="cf">match</span> s<span class="op">.</span>chars()<span class="op">.</span>nth(<span class="dv">11</span>) <span class="op">{</span></span>
+<span id="cb14-4"><a></a>        <span class="cn">Some</span>(c) <span class="op">=&gt;</span> <span class="pp">println!</span>(<span class="st">"The 11th character is {:?}"</span><span class="op">,</span> c)<span class="op">,</span></span>
+<span id="cb14-5"><a></a>        <span class="cn">None</span> <span class="op">=&gt;</span> <span class="pp">println!</span>(<span class="st">"String `s` is fewer than 11 characters in length"</span>)<span class="op">,</span></span>
+<span id="cb14-6"><a></a>    <span class="op">}</span></span>
+<span id="cb14-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Basically, if-else is “un-Rust-like” most of the time.</li>
+</ul>
+</section>
+<section id="formatting" class="slide level2">
+<h2>Formatting</h2>
+<ul>
+<li><code>print!</code>, <code>println!</code>, and <code>format!</code> are all nice ways to work with strings.</li>
+<li>Handy if you are an OS and want to interface with a human.</li>
+<li>Assuming you (the OS) know how to display text.
+<ul>
+<li>We’ll get there.</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="pp">format!</span>(<span class="st">"test"</span>)<span class="op">;</span>                             <span class="co">// =&gt; "test"</span></span>
+<span id="cb15-2"><a></a><span class="pp">format!</span>(<span class="st">"hello {}"</span><span class="op">,</span> <span class="st">"world!"</span>)<span class="op">;</span>               <span class="co">// =&gt; "hello world!"</span></span>
+<span id="cb15-3"><a></a><span class="pp">format!</span>(<span class="st">"x = {}, y = {val}"</span><span class="op">,</span> <span class="dv">10</span><span class="op">,</span> val <span class="op">=</span> <span class="dv">30</span>)<span class="op">;</span>  <span class="co">// =&gt; "x = 10, y = 30"</span></span>
+<span id="cb15-4"><a></a><span class="kw">let</span> (x<span class="op">,</span> y) <span class="op">=</span> (<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb15-5"><a></a><span class="pp">format!</span>(<span class="st">"{x} + {y} = 3"</span>)<span class="op">;</span>                    <span class="co">// =&gt; "1 + 2 = 3"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Similar to Python f-strings and also every other language.</li>
+</ul>
+</section>
+<section id="read-more" class="slide level2">
+<h2>Read More</h2>
+<ul>
+<li>I use most of these language features in two extended examples.
+<ul>
+<li><a href="https://cd-c89.github.io/rs/30_bits.html#hex-reader">Hex reader</a></li>
+<li><a href="https://cd-c89.github.io/rs/B0_dynamic.html#fibonacci">Fibonacci</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="rust-features-3" class="slide level2">
+<h2>Rust Features</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/option/">option</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/result/">result</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/std/">std</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></label></li>
+<li><label><input type="checkbox" checked=""><a href="https://doc.rust-lang.org/core/macro.write.html"><code>format!</code></a></label></li>
+<li><label><input type="checkbox"><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership</a></label></li>
+</ul>
+</section>
+<section id="ownership" class="slide level2">
+<h2>Ownership</h2>
+<ul>
+<li>Big topic.</li>
+<li>Big deal.</li>
+<li>Learn by doing.</li>
+<li>Quick example.</li>
+</ul>
+</section>
+<section id="size" class="slide level2">
+<h2>Size</h2>
+<ul>
+<li>Versus e.g.&nbsp;<code>u8</code> which was a fixed size.</li>
+<li>A string is not.</li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="co">// String of length 0</span></span>
+<span id="cb16-2"><a></a><span class="kw">let</span> s <span class="op">=</span> <span class="st">""</span><span class="op">;</span> </span>
+<span id="cb16-3"><a></a><span class="co">// Complete text of Bhagavad Gita</span></span>
+<span id="cb16-4"><a></a><span class="kw">let</span> t <span class="op">=</span> <span class="st">"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>And in fact, if we implemented Python integers in Rust, they would follow similar rules.
+<ul>
+<li>Anything that has no bounded upper size, basically.</li>
+</ul></li>
+</ul>
+</section>
+<section id="ownership-rules" class="slide level2">
+<h2>Ownership Rules</h2>
+<ul>
+<li>Each value in Rust has an <em>owner</em>.</li>
+<li>There can only be one owner at a time.</li>
+<li>When the owner goes out of scope, the value will be dropped.</li>
+</ul>
+</section>
+<section id="scope" class="slide level2">
+<h2>Scope</h2>
+<ul>
+<li>Quoth Rust Book:</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="op">{</span>                      <span class="co">// s is not valid here, since it's not yet declared</span></span>
+<span id="cb17-2"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"hello"</span><span class="op">;</span>   <span class="co">// s is valid from this point forward</span></span>
+<span id="cb17-3"><a></a></span>
+<span id="cb17-4"><a></a>    <span class="co">// do stuff with s</span></span>
+<span id="cb17-5"><a></a><span class="op">}</span>                      <span class="co">// this scope is now over, and s is no longer valid</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>You can experimentally verify each of the claims.</li>
+<li>Basically, the memory associated with <code>s</code> exists at some time points, but not others.</li>
+<li>Think: Address of building that hasn’t been made/has been condemned.</li>
+</ul>
+</section>
+<section id="capital-s-string" class="slide level2">
+<h2>Capital S String</h2>
+<ul>
+<li>Capital S <code>String</code> is closer to data structure than a data type in some ways:</li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> s <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">"hello"</span>)<span class="op">;</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a>    s<span class="op">.</span>push_str(<span class="st">", world!"</span>)<span class="op">;</span> <span class="co">// push_str() appends a literal to a String</span></span>
+<span id="cb18-4"><a></a></span>
+<span id="cb18-5"><a></a>    <span class="pp">println!</span>(<span class="st">"{s}"</span>)<span class="op">;</span> <span class="co">// this will print `hello, world!`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>It accepts a push operation a la a queue/stack/list, and must be initialized with a function call.</li>
+<li>A <code>String</code> is mutable, a literal is not.</li>
+</ul>
+</section>
+<section id="its-confusing" class="slide level2">
+<h2>It’s confusing</h2>
+<ul>
+<li>This leads to some un-Pythonic behavior.</li>
+<li>We compare <em>fixed size</em> and <em>variable size</em> types, which have distinct behavior</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>This works.</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb19-2"><a></a>    <span class="kw">let</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb19-3"><a></a>    <span class="kw">let</span> y <span class="op">=</span> x<span class="op">;</span></span>
+<span id="cb19-4"><a></a>    <span class="pp">println!</span>(<span class="st">"{x}"</span>)<span class="op">;</span></span>
+<span id="cb19-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>This doesn’t.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb20-2"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">"6"</span>)<span class="op">;</span></span>
+<span id="cb20-3"><a></a>    <span class="kw">let</span> t <span class="op">=</span> s<span class="op">;</span></span>
+<span id="cb20-4"><a></a>    <span class="pp">println!</span>(<span class="st">"{s}"</span>)</span>
+<span id="cb20-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+</section>
+<section id="whats-happening" class="slide level2">
+<h2>What’s happening?</h2>
+<ul>
+<li><code>s</code> passes “out of scope” once its value is assigned to <code>t</code>.</li>
+<li>Thereafter, there is no declared variable of name <code>s</code>.</li>
+<li>But this only happens to some types.
+<ul>
+<li>It is unbounded types, but it’s unclear that e.g.&nbsp;<code>String::from("6")</code> isn’t a fixed width string of lenth 1 (to me at least).</li>
+</ul></li>
+</ul>
+</section>
+<section id="clone" class="slide level2">
+<h2>Clone</h2>
+<ul>
+<li>My secret inside source with a real job (e.g.&nbsp;not professor) who writes Rust and also thought this was a bit silly:</li>
+</ul>
+<blockquote>
+<p>Whenever I use Rust, I just always <code>.clone</code> and when someone asks me about it, I say that’s a performance optimization for latter.</p>
+</blockquote>
+<ul>
+<li>Rust says the same thing, actually:</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="ex">help:</span> consider cloning the value if the performance cost is acceptable</span>
+<span id="cb21-2"><a></a>  <span class="kw">|</span></span>
+<span id="cb21-3"><a></a><span class="ex">6</span> <span class="kw">|</span>     <span class="bu">let</span> <span class="va">t</span> <span class="op">=</span> <span class="va">s</span>.clone<span class="er">(</span><span class="kw">);</span></span>
+<span id="cb21-4"><a></a>  <span class="kw">|</span>              <span class="ex">++++++++</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="example" class="slide level2">
+<h2>Example</h2>
+<ul>
+<li>It is reasonable to use <code>.clone</code> on capital S <code>String</code> for e.g.&nbsp;Wordle, as needed.</li>
+<li>As a challenge, don’t use <code>.clone</code> (you don’t need it)</li>
+</ul>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>This works.</li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb22-2"><a></a>    <span class="kw">let</span> x <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb22-3"><a></a>    <span class="kw">let</span> y <span class="op">=</span> x<span class="op">;</span></span>
+<span id="cb22-4"><a></a>    <span class="pp">println!</span>(<span class="st">"{x}"</span>)<span class="op">;</span></span>
+<span id="cb22-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div><div class="column" style="width:50%;">
+<ul>
+<li>This works.</li>
+</ul>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb23-2"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="dt">String</span><span class="pp">::</span>from(<span class="st">"6"</span>)<span class="op">;</span></span>
+<span id="cb23-3"><a></a>    <span class="kw">let</span> t <span class="op">=</span> s<span class="op">.</span>clone()<span class="op">;</span></span>
+<span id="cb23-4"><a></a>    <span class="pp">println!</span>(<span class="st">"{s}"</span>)</span>
+<span id="cb23-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></div>
+</section>
+<section id="today-1" class="slide level2">
+<h2>Today</h2>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="">Logistics</label></li>
+<li><label><input type="checkbox" checked="">On Systems</label></li>
+<li><label><input type="checkbox" checked="">On Rust</label></li>
+<li><label><input type="checkbox" checked="">Course Sketch</label></li>
+<li><label><input type="checkbox" checked="">Derust</label></li>
+</ul>
 </section></section>
 <section id="fin" class="title-slide slide level1 center">
 <h1>Fin</h1>
