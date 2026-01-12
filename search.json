@@ -1,12 +1,5 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "OS in Rust",
-    "section": "",
-    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nxor list\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\nFinal OS due whenever the final exam would finish, TBA\n\n\nLecture Recordings\nForthcoming"
-  },
-  {
     "objectID": "01_wc.html",
     "href": "01_wc.html",
     "title": "Rustup",
@@ -94,6 +87,76 @@
     "text": "Helpful Reference\n\nWhen working on projects like this, I almost always have the following reference material open.\nread_lines - Rust By Example\n\n\nfn read_lines(filename: &str) -&gt; Vec&lt;String&gt; {\n    let mut result = Vec::new();\n\n    for line in std::fs::read_to_string(filename).unwrap().lines() {\n        result.push(line.to_string())\n    }\n\n    result\n}",
     "crumbs": [
       "Rustup"
+    ]
+  },
+  {
+    "objectID": "02_cli.html",
+    "href": "02_cli.html",
+    "title": "CLI",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#homework",
+    "href": "02_cli.html#homework",
+    "title": "CLI",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#citation",
+    "href": "02_cli.html#citation",
+    "title": "CLI",
+    "section": "Citation",
+    "text": "Citation\n\nAn I/O Project: Building a Command Line Program\nIn a way, an OS is a “command line program”…",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#requirements",
+    "href": "02_cli.html#requirements",
+    "title": "CLI",
+    "section": "Requirements",
+    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and either (1) no options or a (2) options a single letter.\n\nThat is, you must support wc -c src/main.rs but not wc --files0-from=F\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#crate",
+    "href": "02_cli.html#crate",
+    "title": "CLI",
+    "section": "Crate",
+    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 02 in your 371os repository.\n\ncargo new 02 --name my_wc --vcs none\n\nI understand this is the same name as the lab.\n\nI am not as clever as I either think I am or would like to be.\n\nIf you’re stuck, read more here",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#wc",
+    "href": "02_cli.html#wc",
+    "title": "CLI",
+    "section": "wc",
+    "text": "wc\nImplement the complete functionality of wc using this crate.\n\nAccept character command line flags prefixed with -\nAccept string command line flags prefixed with --\nConfigure your my_wc to work on standard input if a file name is not provided.\n\n\nFull functionality\n\nHere is wc --help\nYour --help and --version may differ, but should otherwise be identical.\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRubric\n\nSetup - optional\n\n$ curl https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt -o book.txt\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n100  739k  100  739k    0     0  1446k      0 --:--:-- --:--:-- --:--:-- 1447k\n$ head -23 book.txt | tail -1\n*** START OF THE PROJECT GUTENBERG EBOOK PRIDE AND PREJUDICE ***\n\nCharacter flags - required\n\n$ wc book.txt\n 14911 130408 757509 book.txt\n$ wc -cl book.txt\n 14911 757509 book.txt\n$ wc -c book.txt -cl\n 14911 757509 book.txt\n$ wc -l book.txt -c\n 14911 757509 book.txt\n$ wc -Ll book.txt\n 14911    159 book.txt\n\nString flags - required\n\n$ wc --bytes -c book.txt\n757509 book.txt\n$ wc --lines -c book.txt\n 14911 757509 book.txt\n$ printf \"book.txt\" &gt; file.txt\n$ wc --lines -c --files0-from=file.txt\n 14911 757509 book.txt\n$ wc --version | head -1\nwc (GNU coreutils) 8.32\n$ wc --help | head -1\nUsage: wc [OPTION]... [FILE]...\n\nStandard I/O - required\n\n$ cat book.txt | head -100 | wc\n    100     277    2787\n$ cat book.txt | head -200 | wc\n    200    1360    9359\n$ wc book.txt | wc\n      1       4      30",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#helpful-reference",
+    "href": "02_cli.html#helpful-reference",
+    "title": "CLI",
+    "section": "Helpful Reference",
+    "text": "Helpful Reference\n\nWhile linked above, I think it will be very helpful to review the following:\nAccepting Command Line Arguments - The Rust Programming Language",
+    "crumbs": [
+      "CLI"
     ]
   },
   {
@@ -216,6 +279,13 @@
     "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn."
   },
   {
+    "objectID": "00_derust.rjs.html#a-la-151",
+    "href": "00_derust.rjs.html#a-la-151",
+    "title": "Derust",
+    "section": "a la 151",
+    "text": "a la 151\n\nThis term we will have sections\nMeet Friday 1310-1440\nMeant to help unpack learning in class and work on homework.\nSingle section/section-leader (Jimmy)\nMiss more than 4 sections and drop one “bin” on specification grading.\n\nUnless excused."
+  },
+  {
     "objectID": "00_derust.rjs.html#the-hard-part",
     "href": "00_derust.rjs.html#the-hard-part",
     "title": "Derust",
@@ -283,7 +353,7 @@
     "href": "00_derust.rjs.html#memory-management",
     "title": "Derust",
     "section": "Memory Management",
-    "text": "Memory Management\n\nPaging\nPage tables\nThe heap\nHeap allocation."
+    "text": "Memory Management\n\nPaging\nPage tables\n\nTogether, how to find things you saved for a while.\n\nThe heap\nHeap allocation.\n\nTogether, how to find things you saved while working."
   },
   {
     "objectID": "00_derust.rjs.html#final-examproject",
@@ -297,7 +367,7 @@
     "href": "00_derust.rjs.html#vim",
     "title": "Derust",
     "section": "Vim",
-    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected in a non-trivial subset of settings this course material will be useful.\nI will live-code in vim probably."
+    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected of you in life.\nI will live-code in vim probably.\n\nThis will be painful, but that is okay."
   },
   {
     "objectID": "00_derust.rjs.html#rust-features",
@@ -339,7 +409,7 @@
     "href": "00_derust.rjs.html#options-4",
     "title": "Derust",
     "section": "Options",
-    "text": "Options\n\nEvery wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
+    "text": "Options\n\nEver wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
   },
   {
     "objectID": "00_derust.rjs.html#rust-features-1",
@@ -669,6 +739,16 @@
     ]
   },
   {
+    "objectID": "00_derust.html#a-la-151",
+    "href": "00_derust.html#a-la-151",
+    "title": "Derust",
+    "section": "a la 151",
+    "text": "a la 151\n\nThis term we will have sections\nMeet Friday 1310-1440\nMeant to help unpack learning in class and work on homework.\nSingle section/section-leader (Jimmy)\nMiss more than 4 sections and drop one “bin” on specification grading.\n\nUnless excused.",
+    "crumbs": [
+      "Derust"
+    ]
+  },
+  {
     "objectID": "00_derust.html#the-hard-part",
     "href": "00_derust.html#the-hard-part",
     "title": "Derust",
@@ -763,7 +843,7 @@
     "href": "00_derust.html#memory-management",
     "title": "Derust",
     "section": "Memory Management",
-    "text": "Memory Management\n\nPaging\nPage tables\nThe heap\nHeap allocation.",
+    "text": "Memory Management\n\nPaging\nPage tables\n\nTogether, how to find things you saved for a while.\n\nThe heap\nHeap allocation.\n\nTogether, how to find things you saved while working.",
     "crumbs": [
       "Derust"
     ]
@@ -783,7 +863,7 @@
     "href": "00_derust.html#vim",
     "title": "Derust",
     "section": "Vim",
-    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected in a non-trivial subset of settings this course material will be useful.\nI will live-code in vim probably.",
+    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected of you in life.\nI will live-code in vim probably.\n\nThis will be painful, but that is okay.",
     "crumbs": [
       "Derust"
     ]
@@ -843,7 +923,7 @@
     "href": "00_derust.html#options-4",
     "title": "Derust",
     "section": "Options",
-    "text": "Options\n\nEvery wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}",
+    "text": "Options\n\nEver wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}",
     "crumbs": [
       "Derust"
     ]
@@ -1059,73 +1139,10 @@
     ]
   },
   {
-    "objectID": "02_cli.html",
-    "href": "02_cli.html",
-    "title": "CLI",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "OS in Rust",
     "section": "",
-    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#homework",
-    "href": "02_cli.html#homework",
-    "title": "CLI",
-    "section": "",
-    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#citation",
-    "href": "02_cli.html#citation",
-    "title": "CLI",
-    "section": "Citation",
-    "text": "Citation\n\nAn I/O Project: Building a Command Line Program\nIn a way, an OS is a “command line program”…",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#requirements",
-    "href": "02_cli.html#requirements",
-    "title": "CLI",
-    "section": "Requirements",
-    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and either (1) no options or a (2) options a single letter.\n\nThat is, you must support wc -c src/main.rs but not wc --files0-from=F\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#crate",
-    "href": "02_cli.html#crate",
-    "title": "CLI",
-    "section": "Crate",
-    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 02 in your 371os repository.\n\ncargo new 02 --name my_wc --vcs none\n\nI understand this is the same name as the lab.\n\nI am not as clever as I either think I am or would like to be.\n\nIf you’re stuck, read more here",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#wc",
-    "href": "02_cli.html#wc",
-    "title": "CLI",
-    "section": "wc",
-    "text": "wc\nImplement the complete functionality of wc using this crate.\n\nAccept character command line flags prefixed with -\nAccept string command line flags prefixed with --\nConfigure your my_wc to work on standard input if a file name is not provided.\n\n\nFull functionality\n\nHere is wc --help\nYour --help and --version may differ, but should otherwise be identical.\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRubric\n\nSetup - optional\n\n$ curl https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt -o book.txt\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n100  739k  100  739k    0     0  1446k      0 --:--:-- --:--:-- --:--:-- 1447k\n$ head -23 book.txt | tail -1\n*** START OF THE PROJECT GUTENBERG EBOOK PRIDE AND PREJUDICE ***\n\nCharacter flags - required\n\n$ wc book.txt\n 14911 130408 757509 book.txt\n$ wc -cl book.txt\n 14911 757509 book.txt\n$ wc -c book.txt -cl\n 14911 757509 book.txt\n$ wc -l book.txt -c\n 14911 757509 book.txt\n$ wc -Ll book.txt\n 14911    159 book.txt\n\nString flags - required\n\n$ wc --bytes -c book.txt\n757509 book.txt\n$ wc --lines -c book.txt\n 14911 757509 book.txt\n$ printf \"book.txt\" &gt; file.txt\n$ wc --lines -c --files0-from=file.txt\n 14911 757509 book.txt\n$ wc --version | head -1\nwc (GNU coreutils) 8.32\n$ wc --help | head -1\nUsage: wc [OPTION]... [FILE]...\n\nStandard I/O - required\n\n$ cat book.txt | head -100 | wc\n    100     277    2787\n$ cat book.txt | head -200 | wc\n    200    1360    9359\n$ wc book.txt | wc\n      1       4      30",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#helpful-reference",
-    "href": "02_cli.html#helpful-reference",
-    "title": "CLI",
-    "section": "Helpful Reference",
-    "text": "Helpful Reference\n\nWhile linked above, I think it will be very helpful to review the following:\nAccepting Command Line Arguments - The Rust Programming Language",
-    "crumbs": [
-      "CLI"
-    ]
+    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nxor list\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\nFinal OS due whenever the final exam would finish, TBA\n\n\nLecture Recordings\nForthcoming"
   }
 ]
