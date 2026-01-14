@@ -14,6 +14,7 @@ title: Unsafe
 
 - Unsafe
 - UB
+- Dereferencing
 
 # Unsafe
 
@@ -226,3 +227,91 @@ fn main() {
 > Breaking the pointer aliasing rules. The exact aliasing rules are not determined yet, but here is an outline of the general principles:
 
 > Violating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented. 
+
+# Dangling
+
+## Previously in Rust
+
+- *Safe* Rust ensures that references are always valid
+  	- That is, borrows via `&`
+	- These always have some plausible correct value in them (if the code compiles)
+
+## The Frontier
+
+- At the edge of Safe and Unsafe Rust are *raw* pointers.
+	- Can be immutable `*const T` or mutable `*mut T`.
+	- Vs. C, the asterisk is part of the name and not an operator.
+	  	- This is annoying.
+- Raw pointers are inherently unsafe, so they can be created in safe Rust.
+
+## Differences
+
+- These *raw* pointers:
+  - Are allowed to ignore the borrowing rules by having both immutable and
+  mutable pointers or multiple mutable pointers to the same location
+  - Aren’t guaranteed to point to valid memory
+  - Are allowed to be null
+  - Don’t implement any automatic cleanup
+
+## Example
+
+```{.rs}
+    let mut num = 5;
+
+    let r1 = &raw const num;
+    let r2 = &raw mut num;
+```
+
+## This is safe!
+
+- There is nothing unsafe and creating a variable that refers to some value.
+- After all, what's the worst thing that can happen?
+- These lines of code only facilitate novel possible ways of interfacing with the underlying data.
+- In this case, we *know* these pointers are valid and point to 5.
+
+## Casts
+
+- We can get a potentially invalid reference using "casts" with the `as` keyword.
+  	- We take a numeric value and treat it as a reference.
+	- This numerical value represents a location in numerical organized computer memory.
+
+```{.rs}
+    let address = 0x012345usize;
+    let r = address as *const i32;
+```
+- This is still safe so far!
+
+## Dereference
+
+- We now can use the dereference asterisk `*` operator.
+- This is decidedly unsafe.
+
+```{.rs}
+    let mut num = 5;
+
+    let r1 = &raw const num;
+    let r2 = &raw mut num;
+
+    unsafe {
+        println!("r1 is: {}", *r1);
+        println!("r2 is: {}", *r2);
+    }
+```
+- Unsafe *to Rust* but we know it will work.
+
+## Runtime Crash
+
+- This is both unsafe and (almost certainly) won't work.
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    let address = 0x0usize;
+    let r = address as *const i32;
+    unsafe {
+        dbg!(*r);
+    }
+}
+```
+- Fun exercise: try to take the deferences out of the `unsafe` block.
+
+# Fin

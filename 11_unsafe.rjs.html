@@ -216,6 +216,7 @@
 <ul>
 <li>Unsafe</li>
 <li>UB</li>
+<li>Dereferencing</li>
 </ul>
 </section>
 <section>
@@ -475,9 +476,124 @@
 <blockquote>
 <p>Violating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented.</p>
 </blockquote>
-
-
 </section></section>
+<section>
+<section id="dangling-1" class="title-slide slide level1 center">
+<h1>Dangling</h1>
+
+</section>
+<section id="previously-in-rust" class="slide level2">
+<h2>Previously in Rust</h2>
+<ul>
+<li><em>Safe</em> Rust ensures that references are always valid
+<ul>
+<li>That is, borrows via <code>&amp;</code></li>
+<li>These always have some plausible correct value in them (if the code compiles)</li>
+</ul></li>
+</ul>
+</section>
+<section id="the-frontier" class="slide level2">
+<h2>The Frontier</h2>
+<ul>
+<li>At the edge of Safe and Unsafe Rust are <em>raw</em> pointers.
+<ul>
+<li>Can be immutable <code>*const T</code> or mutable <code>*mut T</code>.</li>
+<li>Vs. C, the asterisk is part of the name and not an operator.
+<ul>
+<li>This is annoying.</li>
+</ul></li>
+</ul></li>
+<li>Raw pointers are inherently unsafe, so they can be created in safe Rust.</li>
+</ul>
+</section>
+<section id="differences" class="slide level2">
+<h2>Differences</h2>
+<ul>
+<li>These <em>raw</em> pointers:
+<ul>
+<li>Are allowed to ignore the borrowing rules by having both immutable and mutable pointers or multiple mutable pointers to the same location</li>
+<li>Aren’t guaranteed to point to valid memory</li>
+<li>Are allowed to be null</li>
+<li>Don’t implement any automatic cleanup</li>
+</ul></li>
+</ul>
+</section>
+<section id="example" class="slide level2">
+<h2>Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> num <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">const</span> num<span class="op">;</span></span>
+<span id="cb5-4"><a></a>    <span class="kw">let</span> r2 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">mut</span> num<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="this-is-safe" class="slide level2">
+<h2>This is safe!</h2>
+<ul>
+<li>There is nothing unsafe and creating a variable that refers to some value.</li>
+<li>After all, what’s the worst thing that can happen?</li>
+<li>These lines of code only facilitate novel possible ways of interfacing with the underlying data.</li>
+<li>In this case, we <em>know</em> these pointers are valid and point to 5.</li>
+</ul>
+</section>
+<section id="casts" class="slide level2">
+<h2>Casts</h2>
+<ul>
+<li>We can get a potentially invalid reference using “casts” with the <code>as</code> keyword.
+<ul>
+<li>We take a numeric value and treat it as a reference.</li>
+<li>This numerical value represents a location in numerical organized computer memory.</li>
+</ul></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a>    <span class="kw">let</span> address <span class="op">=</span> <span class="dv">0x012345usize</span><span class="op">;</span></span>
+<span id="cb6-2"><a></a>    <span class="kw">let</span> r <span class="op">=</span> address <span class="kw">as</span> <span class="op">*</span><span class="kw">const</span> <span class="dt">i32</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>This is still safe so far!</li>
+</ul>
+</section>
+<section id="dereference" class="slide level2">
+<h2>Dereference</h2>
+<ul>
+<li>We now can use the dereference asterisk <code>*</code> operator.</li>
+<li>This is decidedly unsafe.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> num <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb7-2"><a></a></span>
+<span id="cb7-3"><a></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">const</span> num<span class="op">;</span></span>
+<span id="cb7-4"><a></a>    <span class="kw">let</span> r2 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">mut</span> num<span class="op">;</span></span>
+<span id="cb7-5"><a></a></span>
+<span id="cb7-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb7-7"><a></a>        <span class="pp">println!</span>(<span class="st">"r1 is: {}"</span><span class="op">,</span> <span class="op">*</span>r1)<span class="op">;</span></span>
+<span id="cb7-8"><a></a>        <span class="pp">println!</span>(<span class="st">"r2 is: {}"</span><span class="op">,</span> <span class="op">*</span>r2)<span class="op">;</span></span>
+<span id="cb7-9"><a></a>    <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Unsafe <em>to Rust</em> but we know it will work.</li>
+</ul>
+</section>
+<section id="runtime-crash" class="slide level2">
+<h2>Runtime Crash</h2>
+<ul>
+<li>This is both unsafe and (almost certainly) won’t work.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb8-2"><a></a>    <span class="kw">let</span> address <span class="op">=</span> <span class="dv">0x0usize</span><span class="op">;</span></span>
+<span id="cb8-3"><a></a>    <span class="kw">let</span> r <span class="op">=</span> address <span class="kw">as</span> <span class="op">*</span><span class="kw">const</span> <span class="dt">i32</span><span class="op">;</span></span>
+<span id="cb8-4"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb8-5"><a></a>        <span class="pp">dbg!</span>(<span class="op">*</span>r)<span class="op">;</span></span>
+<span id="cb8-6"><a></a>    <span class="op">}</span></span>
+<span id="cb8-7"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li>Fun exercise: try to take the deferences out of the <code>unsafe</code> block.</li>
+</ul>
+</section></section>
+<section id="fin" class="title-slide slide level1 center">
+<h1>Fin</h1>
+
+
+</section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">

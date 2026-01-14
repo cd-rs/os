@@ -65,6 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./12_split_at.html" rel="next">
 <link href="./02_cli.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -165,6 +166,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Unsafe</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Homework</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -204,6 +211,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#dangling" id="toc-dangling" class="nav-link" data-scroll-target="#dangling">Dangling</a></li>
   <li><a href="#the-reference" id="toc-the-reference" class="nav-link" data-scroll-target="#the-reference">The Reference</a></li>
   </ul></li>
+  <li><a href="#dangling-1" id="toc-dangling-1" class="nav-link" data-scroll-target="#dangling-1">Dangling</a>
+  <ul class="collapse">
+  <li><a href="#previously-in-rust" id="toc-previously-in-rust" class="nav-link" data-scroll-target="#previously-in-rust">Previously in Rust</a></li>
+  <li><a href="#the-frontier" id="toc-the-frontier" class="nav-link" data-scroll-target="#the-frontier">The Frontier</a></li>
+  <li><a href="#differences" id="toc-differences" class="nav-link" data-scroll-target="#differences">Differences</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  <li><a href="#this-is-safe" id="toc-this-is-safe" class="nav-link" data-scroll-target="#this-is-safe">This is safe!</a></li>
+  <li><a href="#casts" id="toc-casts" class="nav-link" data-scroll-target="#casts">Casts</a></li>
+  <li><a href="#dereference" id="toc-dereference" class="nav-link" data-scroll-target="#dereference">Dereference</a></li>
+  <li><a href="#runtime-crash" id="toc-runtime-crash" class="nav-link" data-scroll-target="#runtime-crash">Runtime Crash</a></li>
+  </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="11_unsafe.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
     </div>
@@ -247,6 +266,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Unsafe</li>
 <li>UB</li>
+<li>Dereferencing</li>
 </ul>
 </section>
 <section id="unsafe" class="level1">
@@ -501,11 +521,124 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <blockquote class="blockquote">
 <p>Violating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented.</p>
 </blockquote>
+</section>
+</section>
+<section id="dangling-1" class="level1">
+<h1>Dangling</h1>
+<section id="previously-in-rust" class="level2">
+<h2 class="anchored" data-anchor-id="previously-in-rust">Previously in Rust</h2>
+<ul>
+<li><em>Safe</em> Rust ensures that references are always valid
+<ul>
+<li>That is, borrows via <code>&amp;</code></li>
+<li>These always have some plausible correct value in them (if the code compiles)</li>
+</ul></li>
+</ul>
+</section>
+<section id="the-frontier" class="level2">
+<h2 class="anchored" data-anchor-id="the-frontier">The Frontier</h2>
+<ul>
+<li>At the edge of Safe and Unsafe Rust are <em>raw</em> pointers.
+<ul>
+<li>Can be immutable <code>*const T</code> or mutable <code>*mut T</code>.</li>
+<li>Vs. C, the asterisk is part of the name and not an operator.
+<ul>
+<li>This is annoying.</li>
+</ul></li>
+</ul></li>
+<li>Raw pointers are inherently unsafe, so they can be created in safe Rust.</li>
+</ul>
+</section>
+<section id="differences" class="level2">
+<h2 class="anchored" data-anchor-id="differences">Differences</h2>
+<ul>
+<li>These <em>raw</em> pointers:
+<ul>
+<li>Are allowed to ignore the borrowing rules by having both immutable and mutable pointers or multiple mutable pointers to the same location</li>
+<li>Aren’t guaranteed to point to valid memory</li>
+<li>Are allowed to be null</li>
+<li>Don’t implement any automatic cleanup</li>
+</ul></li>
+</ul>
+</section>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> num <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">const</span> num<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="kw">let</span> r2 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">mut</span> num<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="this-is-safe" class="level2">
+<h2 class="anchored" data-anchor-id="this-is-safe">This is safe!</h2>
+<ul>
+<li>There is nothing unsafe and creating a variable that refers to some value.</li>
+<li>After all, what’s the worst thing that can happen?</li>
+<li>These lines of code only facilitate novel possible ways of interfacing with the underlying data.</li>
+<li>In this case, we <em>know</em> these pointers are valid and point to 5.</li>
+</ul>
+</section>
+<section id="casts" class="level2">
+<h2 class="anchored" data-anchor-id="casts">Casts</h2>
+<ul>
+<li>We can get a potentially invalid reference using “casts” with the <code>as</code> keyword.
+<ul>
+<li>We take a numeric value and treat it as a reference.</li>
+<li>This numerical value represents a location in numerical organized computer memory.</li>
+</ul></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a>    <span class="kw">let</span> address <span class="op">=</span> <span class="dv">0x012345usize</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>    <span class="kw">let</span> r <span class="op">=</span> address <span class="kw">as</span> <span class="op">*</span><span class="kw">const</span> <span class="dt">i32</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>This is still safe so far!</li>
+</ul>
+</section>
+<section id="dereference" class="level2">
+<h2 class="anchored" data-anchor-id="dereference">Dereference</h2>
+<ul>
+<li>We now can use the dereference asterisk <code>*</code> operator.</li>
+<li>This is decidedly unsafe.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a>    <span class="kw">let</span> <span class="kw">mut</span> num <span class="op">=</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a>    <span class="kw">let</span> r1 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">const</span> num<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>    <span class="kw">let</span> r2 <span class="op">=</span> <span class="op">&amp;</span>raw <span class="kw">mut</span> num<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a>        <span class="pp">println!</span>(<span class="st">"r1 is: {}"</span><span class="op">,</span> <span class="op">*</span>r1)<span class="op">;</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>        <span class="pp">println!</span>(<span class="st">"r2 is: {}"</span><span class="op">,</span> <span class="op">*</span>r2)<span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a>    <span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>Unsafe <em>to Rust</em> but we know it will work.</li>
+</ul>
+</section>
+<section id="runtime-crash" class="level2">
+<h2 class="anchored" data-anchor-id="runtime-crash">Runtime Crash</h2>
+<ul>
+<li>This is both unsafe and (almost certainly) won’t work.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>    <span class="kw">let</span> address <span class="op">=</span> <span class="dv">0x0usize</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="kw">let</span> r <span class="op">=</span> address <span class="kw">as</span> <span class="op">*</span><span class="kw">const</span> <span class="dt">i32</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>        <span class="pp">dbg!</span>(<span class="op">*</span>r)<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li>Fun exercise: try to take the deferences out of the <code>unsafe</code> block.</li>
+</ul>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>Fin</h1>
 
 
 <!-- -->
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -967,236 +1100,328 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./12_split_at.html" class="pagination-link" aria-label="Homework">
+        <span class="nav-page-text">Homework</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">---</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="an">title:</span><span class="co"> Unsafe</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="co">---</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a></span>
-<span id="cb5-5"><a href="#cb5-5"></a><span class="fu">## Announcements</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a></span>
-<span id="cb5-7"><a href="#cb5-7"></a><span class="ss">- </span>**Welcome** to OS in Rust</span>
-<span id="cb5-8"><a href="#cb5-8"></a><span class="ss">- </span>**Action Items**:</span>
-<span id="cb5-9"><a href="#cb5-9"></a><span class="ss">  - </span><span class="in">`wc`</span> ongoing.</span>
-<span id="cb5-10"><a href="#cb5-10"></a><span class="ss">  - </span>Due Friday, 5 Sept. at 1440 PT.</span>
-<span id="cb5-11"><a href="#cb5-11"></a><span class="ss">  - </span>No novel homework this week (partial week)</span>
-<span id="cb5-12"><a href="#cb5-12"></a></span>
-<span id="cb5-13"><a href="#cb5-13"></a><span class="fu">## Today</span></span>
-<span id="cb5-14"><a href="#cb5-14"></a></span>
-<span id="cb5-15"><a href="#cb5-15"></a><span class="ss">- </span>Unsafe</span>
-<span id="cb5-16"><a href="#cb5-16"></a><span class="ss">- </span>UB</span>
-<span id="cb5-17"><a href="#cb5-17"></a></span>
-<span id="cb5-18"><a href="#cb5-18"></a><span class="fu"># Unsafe</span></span>
-<span id="cb5-19"><a href="#cb5-19"></a></span>
-<span id="cb5-20"><a href="#cb5-20"></a><span class="fu">## The Dark Arts of Unsafe Rust</span></span>
-<span id="cb5-21"><a href="#cb5-21"></a></span>
-<span id="cb5-22"><a href="#cb5-22"></a><span class="at">&gt; THE KNOWLEDGE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS.</span></span>
-<span id="cb5-23"><a href="#cb5-23"></a></span>
-<span id="cb5-24"><a href="#cb5-24"></a><span class="fu">## Motivation</span></span>
-<span id="cb5-25"><a href="#cb5-25"></a></span>
-<span id="cb5-26"><a href="#cb5-26"></a><span class="ss">- </span>Often we don't worry about low-level implementation details.</span>
-<span id="cb5-27"><a href="#cb5-27"></a><span class="ss">    - </span>How many bits is an integer in Python?</span>
-<span id="cb5-28"><a href="#cb5-28"></a><span class="ss">    - </span>How many bits is this array in Rust?</span>
-<span id="cb5-29"><a href="#cb5-29"></a></span>
-<span id="cb5-30"><a href="#cb5-30"></a><span class="in">```{.rs}</span></span>
-<span id="cb5-31"><a href="#cb5-31"></a>let mut array<span class="sc">:</span> [i32; <span class="dv">3</span>] <span class="ot">=</span> [<span class="dv">0</span>; <span class="dv">3</span>];</span>
-<span id="cb5-32"><a href="#cb5-32"></a><span class="in">```</span> </span>
-<span id="cb5-33"><a href="#cb5-33"></a><span class="ss">- </span>Who could possibly care how much space the empty tuple occupies? </span>
-<span id="cb5-34"><a href="#cb5-34"></a></span>
-<span id="cb5-35"><a href="#cb5-35"></a><span class="fu">## Sometimes it matters...</span></span>
-<span id="cb5-36"><a href="#cb5-36"></a></span>
-<span id="cb5-37"><a href="#cb5-37"></a><span class="ss">- </span>The most common reason is performance, but </span>
-<span id="cb5-38"><a href="#cb5-38"></a><span class="ss">- </span>More importantly, these details can become a matter of correctness when interfacing</span>
-<span id="cb5-39"><a href="#cb5-39"></a>directly with </span>
-<span id="cb5-40"><a href="#cb5-40"></a><span class="ss">    - </span>hardware, </span>
-<span id="cb5-41"><a href="#cb5-41"></a><span class="ss">    - </span>operating systems, or </span>
-<span id="cb5-42"><a href="#cb5-42"></a><span class="ss">    - </span>other languages (by which we mean C)</span>
-<span id="cb5-43"><a href="#cb5-43"></a></span>
-<span id="cb5-44"><a href="#cb5-44"></a><span class="fu">## Legacy</span></span>
-<span id="cb5-45"><a href="#cb5-45"></a></span>
-<span id="cb5-46"><a href="#cb5-46"></a>When implementation details start to matter in a safe programming language,</span>
-<span id="cb5-47"><a href="#cb5-47"></a>programmers usually have three options:</span>
-<span id="cb5-48"><a href="#cb5-48"></a></span>
-<span id="cb5-49"><a href="#cb5-49"></a><span class="ss">* </span>fiddle with the code to "encourage" the compiler/runtime to perform an optimization</span>
-<span id="cb5-50"><a href="#cb5-50"></a><span class="ss">* </span>adopt a more unidiomatic or cumbersome design to get the desired implementation</span>
-<span id="cb5-51"><a href="#cb5-51"></a><span class="ss">* </span>rewrite the implementation in a language  that lets you deal with those details</span>
-<span id="cb5-52"><a href="#cb5-52"></a></span>
-<span id="cb5-53"><a href="#cb5-53"></a><span class="fu">## Rust on C</span></span>
-<span id="cb5-54"><a href="#cb5-54"></a></span>
-<span id="cb5-55"><a href="#cb5-55"></a><span class="at">&gt; Unfortunately, C is incredibly unsafe to use (sometimes for good reason),</span></span>
-<span id="cb5-56"><a href="#cb5-56"></a><span class="at">and this unsafety is magnified when trying to interoperate with another</span></span>
-<span id="cb5-57"><a href="#cb5-57"></a><span class="at">language. Care must be taken to ensure C and the other language agree on</span></span>
-<span id="cb5-58"><a href="#cb5-58"></a><span class="at">what's happening, and that they don't step on each other's toes.</span></span>
-<span id="cb5-59"><a href="#cb5-59"></a></span>
-<span id="cb5-60"><a href="#cb5-60"></a><span class="fu">## Both, and</span></span>
-<span id="cb5-61"><a href="#cb5-61"></a></span>
-<span id="cb5-62"><a href="#cb5-62"></a><span class="ss">- </span>So what does this have to do with Rust?</span>
-<span id="cb5-63"><a href="#cb5-63"></a><span class="ss">    - </span>Well, unlike C, Rust is a safe programming language.</span>
-<span id="cb5-64"><a href="#cb5-64"></a><span class="ss">    - </span>But, like C, Rust is an unsafe programming language.</span>
-<span id="cb5-65"><a href="#cb5-65"></a><span class="ss">- </span>More accurately, Rust *contains* both a safe and unsafe programming language.</span>
-<span id="cb5-66"><a href="#cb5-66"></a></span>
-<span id="cb5-67"><a href="#cb5-67"></a><span class="at">&gt; Rust can be thought of as a combination of two programming languages: *Safe</span></span>
-<span id="cb5-68"><a href="#cb5-68"></a><span class="at">Rust* and *Unsafe Rust*. </span></span>
-<span id="cb5-69"><a href="#cb5-69"></a></span>
-<span id="cb5-70"><a href="#cb5-70"></a><span class="fu">## Safe Rust</span></span>
-<span id="cb5-71"><a href="#cb5-71"></a></span>
-<span id="cb5-72"><a href="#cb5-72"></a><span class="ss">- </span>The default case</span>
-<span id="cb5-73"><a href="#cb5-73"></a><span class="ss">- </span>What we've used to far, at least officially</span>
-<span id="cb5-74"><a href="#cb5-74"></a><span class="ss">    - </span>You may have incidentally dabbled in unsafe.</span>
-<span id="cb5-75"><a href="#cb5-75"></a><span class="ss">    - </span>Good for you.</span>
-<span id="cb5-76"><a href="#cb5-76"></a><span class="ss">- </span>Safe Rust only really makes *one* guarantee.</span>
-<span id="cb5-77"><a href="#cb5-77"></a></span>
-<span id="cb5-78"><a href="#cb5-78"></a><span class="at">&gt; Rust’s memory safety guarantees enforced at compile time</span></span>
-<span id="cb5-79"><a href="#cb5-79"></a></span>
-<span id="cb5-80"><a href="#cb5-80"></a><span class="ss">- </span>That is, you can never try to read something that doesn't exist.</span>
-<span id="cb5-81"><a href="#cb5-81"></a></span>
-<span id="cb5-82"><a href="#cb5-82"></a><span class="fu">## Unsafe Rust</span></span>
-<span id="cb5-83"><a href="#cb5-83"></a></span>
-<span id="cb5-84"><a href="#cb5-84"></a><span class="ss">- </span>Sometimes, you may want to have two reference to an object that are both mutable.</span>
-<span id="cb5-85"><a href="#cb5-85"></a><span class="ss">    - </span>For example, if you are implementing a suffix tree, a task I didn't assign last term because it was *miserable* in safe Rust.</span>
-<span id="cb5-86"><a href="#cb5-86"></a><span class="ss">- </span>Sometimes, you want to do so in a way that can't possibly break anything.</span>
-<span id="cb5-87"><a href="#cb5-87"></a><span class="ss">    - </span>For example, you may only be using provably correct algorithms (whatever that means).</span>
-<span id="cb5-88"><a href="#cb5-88"></a><span class="ss">    - </span>But of course, <span class="in">`rustc`</span> isn't a theorem prover...</span>
-<span id="cb5-89"><a href="#cb5-89"></a>    </span>
-<span id="cb5-90"><a href="#cb5-90"></a><span class="fu">## Warning</span></span>
-<span id="cb5-91"><a href="#cb5-91"></a></span>
-<span id="cb5-92"><a href="#cb5-92"></a><span class="at">&gt; Unsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us</span></span>
-<span id="cb5-93"><a href="#cb5-93"></a><span class="at">do some *really* unsafe things. Things the Rust authors will implore you not to</span></span>
-<span id="cb5-94"><a href="#cb5-94"></a><span class="at">do, but we'll do anyway.</span></span>
-<span id="cb5-95"><a href="#cb5-95"></a></span>
-<span id="cb5-96"><a href="#cb5-96"></a><span class="fu">## True Rust</span></span>
-<span id="cb5-97"><a href="#cb5-97"></a></span>
-<span id="cb5-98"><a href="#cb5-98"></a><span class="ss">- </span>Safe Rust is the *true* Rust programming language. </span>
-<span id="cb5-99"><a href="#cb5-99"></a><span class="ss">- </span>If all you do is write Safe</span>
-<span id="cb5-100"><a href="#cb5-100"></a>Rust, you will never have to worry about type-safety or memory-safety. </span>
-<span id="cb5-101"><a href="#cb5-101"></a><span class="ss">- </span>You will</span>
-<span id="cb5-102"><a href="#cb5-102"></a>never endure </span>
-<span id="cb5-103"><a href="#cb5-103"></a><span class="ss">    - </span>a dangling pointer, </span>
-<span id="cb5-104"><a href="#cb5-104"></a><span class="ss">    - </span>a use-after-free, or </span>
-<span id="cb5-105"><a href="#cb5-105"></a><span class="ss">    - </span>any other kind of Undefined Behavior (a.k.a. UB).</span>
-<span id="cb5-106"><a href="#cb5-106"></a>   </span>
-<span id="cb5-107"><a href="#cb5-107"></a></span>
-<span id="cb5-108"><a href="#cb5-108"></a></span>
-<span id="cb5-109"><a href="#cb5-109"></a><span class="fu">## `std`</span></span>
-<span id="cb5-110"><a href="#cb5-110"></a></span>
-<span id="cb5-111"><a href="#cb5-111"></a><span class="ss">- </span>The standard library also gives you enough utilities out of the box that you'll</span>
-<span id="cb5-112"><a href="#cb5-112"></a>be able to write high-performance applications and libraries in pure idiomatic</span>
-<span id="cb5-113"><a href="#cb5-113"></a>Safe Rust.</span>
-<span id="cb5-114"><a href="#cb5-114"></a><span class="ss">- </span>Assuming, of course, you are working on a system where <span class="in">`std`</span> is already implemented.</span>
-<span id="cb5-115"><a href="#cb5-115"></a><span class="ss">- </span>Not, you know, writing your own OS or own <span class="in">`std`</span>.</span>
-<span id="cb5-116"><a href="#cb5-116"></a></span>
-<span id="cb5-117"><a href="#cb5-117"></a><span class="fu">## Twinsies</span></span>
-<span id="cb5-118"><a href="#cb5-118"></a></span>
-<span id="cb5-119"><a href="#cb5-119"></a><span class="ss">- </span>Unsafe Rust is exactly like Safe Rust with all the same rules and semantics.</span>
-<span id="cb5-120"><a href="#cb5-120"></a><span class="ss">- </span>It just lets you do some *extra* things that are Definitely Not Safe.</span>
-<span id="cb5-121"><a href="#cb5-121"></a></span>
-<span id="cb5-122"><a href="#cb5-122"></a><span class="fu">## Payoffs</span></span>
-<span id="cb5-123"><a href="#cb5-123"></a></span>
-<span id="cb5-124"><a href="#cb5-124"></a><span class="ss">- </span>The value of this separation is that we gain the benefits of using an unsafe</span>
-<span id="cb5-125"><a href="#cb5-125"></a>language like C </span>
-<span id="cb5-126"><a href="#cb5-126"></a><span class="ss">    - </span>low level control over implementation details</span>
-<span id="cb5-127"><a href="#cb5-127"></a></span>
-<span id="cb5-128"><a href="#cb5-128"></a><span class="ss">- </span>...without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.</span>
-<span id="cb5-129"><a href="#cb5-129"></a></span>
-<span id="cb5-130"><a href="#cb5-130"></a><span class="fu"># Undefined Behavior</span></span>
-<span id="cb5-131"><a href="#cb5-131"></a></span>
-<span id="cb5-132"><a href="#cb5-132"></a><span class="fu">## Safe Rust</span></span>
-<span id="cb5-133"><a href="#cb5-133"></a></span>
-<span id="cb5-134"><a href="#cb5-134"></a><span class="ss">- </span>Safe Rust guarantees certain things about your code.</span>
-<span id="cb5-135"><a href="#cb5-135"></a><span class="ss">  - </span>Most of these won't even make sense to you unless you write C</span>
-<span id="cb5-136"><a href="#cb5-136"></a></span>
-<span id="cb5-137"><a href="#cb5-137"></a><span class="fu">## Safe Prevents</span></span>
-<span id="cb5-138"><a href="#cb5-138"></a></span>
-<span id="cb5-139"><a href="#cb5-139"></a><span class="ss">- </span>Dereferencing (using the <span class="in">`*`</span> operator on) dangling or unaligned pointers (see below)</span>
-<span id="cb5-140"><a href="#cb5-140"></a><span class="ss">- </span>Breaking the "pointer aliasing rules" using <span class="in">`&amp;`</span> (borrow) and <span class="in">`mut`</span></span>
-<span id="cb5-141"><a href="#cb5-141"></a><span class="ss">- </span>Calling a function with the wrong call types </span>
-<span id="cb5-142"><a href="#cb5-142"></a><span class="ss">- </span>Causing a data race when multithreading</span>
-<span id="cb5-143"><a href="#cb5-143"></a><span class="ss">- </span>Executing code compiled for hardware other than currently hosting the process</span>
-<span id="cb5-144"><a href="#cb5-144"></a> not support</span>
-<span id="cb5-145"><a href="#cb5-145"></a><span class="ss">- </span>Producing invalid values like something other than <span class="in">`0`</span> or <span class="in">`1`</span> for a boolean.</span>
-<span id="cb5-146"><a href="#cb5-146"></a></span>
-<span id="cb5-147"><a href="#cb5-147"></a><span class="fu">## Safe Allows</span></span>
-<span id="cb5-148"><a href="#cb5-148"></a></span>
-<span id="cb5-149"><a href="#cb5-149"></a></span>
-<span id="cb5-150"><a href="#cb5-150"></a><span class="ss">-    </span>Deadlocks when multithreading</span>
-<span id="cb5-151"><a href="#cb5-151"></a><span class="ss">-    </span>Leaks of memory and other resources</span>
-<span id="cb5-152"><a href="#cb5-152"></a><span class="ss">-    </span>Exiting without calling destructors</span>
-<span id="cb5-153"><a href="#cb5-153"></a><span class="ss">-    </span>Exposing randomized base addresses through pointer leaks</span>
-<span id="cb5-154"><a href="#cb5-154"></a><span class="ss">-    </span>Integer overflow (recall SHA wrapping)</span>
-<span id="cb5-155"><a href="#cb5-155"></a><span class="ss">-    </span>Logic errors</span>
-<span id="cb5-156"><a href="#cb5-156"></a><span class="in">```{.rs}</span></span>
-<span id="cb5-157"><a href="#cb5-157"></a>let val <span class="ot">=</span> <span class="dv">7</span>;</span>
-<span id="cb5-158"><a href="#cb5-158"></a>let val_is_even <span class="ot">=</span> <span class="cf">if</span> val % <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span> { true } <span class="cf">else</span> { false }; </span>
-<span id="cb5-159"><a href="#cb5-159"></a><span class="in">```</span></span>
-<span id="cb5-160"><a href="#cb5-160"></a></span>
-<span id="cb5-161"><a href="#cb5-161"></a><span class="fu">## Unsafe allows:</span></span>
-<span id="cb5-162"><a href="#cb5-162"></a></span>
-<span id="cb5-163"><a href="#cb5-163"></a><span class="ss">1. </span>Dereference a raw pointer.</span>
-<span id="cb5-164"><a href="#cb5-164"></a><span class="ss">1. </span>Call an unsafe function or method.</span>
-<span id="cb5-165"><a href="#cb5-165"></a><span class="ss">1. </span>Access or modify a mutable static variable.</span>
-<span id="cb5-166"><a href="#cb5-166"></a><span class="ss">1. </span>Implement an unsafe trait.</span>
-<span id="cb5-167"><a href="#cb5-167"></a><span class="ss">1. </span>Access fields of <span class="in">`union`</span>s.</span>
-<span id="cb5-168"><a href="#cb5-168"></a></span>
-<span id="cb5-169"><a href="#cb5-169"></a></span>
-<span id="cb5-170"><a href="#cb5-170"></a><span class="fu">## Simply...</span></span>
-<span id="cb5-171"><a href="#cb5-171"></a></span>
-<span id="cb5-172"><a href="#cb5-172"></a><span class="ss">1. </span>Write Rust code normally.</span>
-<span id="cb5-173"><a href="#cb5-173"></a><span class="ss">2. </span>If you are doing something unsafe, include it in an <span class="in">`unsafe`</span> block.</span>
-<span id="cb5-174"><a href="#cb5-174"></a></span>
-<span id="cb5-175"><a href="#cb5-175"></a><span class="fu">## Unions</span></span>
-<span id="cb5-176"><a href="#cb5-176"></a></span>
-<span id="cb5-177"><a href="#cb5-177"></a><span class="in">```{.rs}</span></span>
-<span id="cb5-178"><a href="#cb5-178"></a>union MyUnion {</span>
-<span id="cb5-179"><a href="#cb5-179"></a>    f<span class="sc">:</span> f32,</span>
-<span id="cb5-180"><a href="#cb5-180"></a>    u<span class="sc">:</span> u32,</span>
-<span id="cb5-181"><a href="#cb5-181"></a>}</span>
-<span id="cb5-182"><a href="#cb5-182"></a></span>
-<span id="cb5-183"><a href="#cb5-183"></a>fn <span class="fu">main</span>() {</span>
-<span id="cb5-184"><a href="#cb5-184"></a>    let mut u <span class="ot">=</span> MyUnion { f<span class="sc">:</span> <span class="fl">0.0</span> };</span>
-<span id="cb5-185"><a href="#cb5-185"></a></span>
-<span id="cb5-186"><a href="#cb5-186"></a>    unsafe {</span>
-<span id="cb5-187"><a href="#cb5-187"></a>        println<span class="sc">!</span>(<span class="st">"Bits as float: {}"</span>, u.f);</span>
-<span id="cb5-188"><a href="#cb5-188"></a>        println<span class="sc">!</span>(<span class="st">"Bits as integer: {:#x}"</span>, u.u);</span>
-<span id="cb5-189"><a href="#cb5-189"></a>    }</span>
-<span id="cb5-190"><a href="#cb5-190"></a></span>
-<span id="cb5-191"><a href="#cb5-191"></a>    u.u <span class="ot">=</span> <span class="dv">0x3F800000</span>; <span class="sc">/</span><span class="er">/</span> This is the bit pattern <span class="cf">for</span> <span class="fl">1.0</span> <span class="cf">in</span> IEEE <span class="dv">754</span></span>
-<span id="cb5-192"><a href="#cb5-192"></a></span>
-<span id="cb5-193"><a href="#cb5-193"></a>    unsafe {</span>
-<span id="cb5-194"><a href="#cb5-194"></a>        println<span class="sc">!</span>(<span class="st">"After manual bit update, float is: {}"</span>, u.f);</span>
-<span id="cb5-195"><a href="#cb5-195"></a>    }</span>
-<span id="cb5-196"><a href="#cb5-196"></a>}</span>
-<span id="cb5-197"><a href="#cb5-197"></a><span class="in">```</span></span>
-<span id="cb5-198"><a href="#cb5-198"></a></span>
-<span id="cb5-199"><a href="#cb5-199"></a><span class="fu">## Dangling</span></span>
-<span id="cb5-200"><a href="#cb5-200"></a></span>
-<span id="cb5-201"><a href="#cb5-201"></a><span class="ss">- </span>This worked fine for me, but technically isn't supported.</span>
-<span id="cb5-202"><a href="#cb5-202"></a></span>
-<span id="cb5-203"><a href="#cb5-203"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb5-204"><a href="#cb5-204"></a>fn <span class="fu">main</span>() {    </span>
-<span id="cb5-205"><a href="#cb5-205"></a>    let ptr<span class="sc">:</span> <span class="er">*</span>const i32;</span>
-<span id="cb5-206"><a href="#cb5-206"></a></span>
-<span id="cb5-207"><a href="#cb5-207"></a>    {</span>
-<span id="cb5-208"><a href="#cb5-208"></a>        let x <span class="ot">=</span> <span class="dv">1234</span>;</span>
-<span id="cb5-209"><a href="#cb5-209"></a>        ptr <span class="ot">=</span> <span class="er">&amp;</span>x as <span class="sc">*</span>const i32;</span>
-<span id="cb5-210"><a href="#cb5-210"></a>        unsafe {</span>
-<span id="cb5-211"><a href="#cb5-211"></a>            println<span class="sc">!</span>(<span class="st">"Value at ptr: {}"</span>, <span class="sc">*</span>ptr);</span>
-<span id="cb5-212"><a href="#cb5-212"></a>        }</span>
-<span id="cb5-213"><a href="#cb5-213"></a>    }</span>
-<span id="cb5-214"><a href="#cb5-214"></a></span>
-<span id="cb5-215"><a href="#cb5-215"></a>    unsafe {</span>
-<span id="cb5-216"><a href="#cb5-216"></a>        println<span class="sc">!</span>(<span class="st">"Value at ptr: {}"</span>, <span class="sc">*</span>ptr);</span>
-<span id="cb5-217"><a href="#cb5-217"></a>    }</span>
-<span id="cb5-218"><a href="#cb5-218"></a>}</span>
-<span id="cb5-219"><a href="#cb5-219"></a><span class="in">```</span></span>
-<span id="cb5-220"><a href="#cb5-220"></a></span>
-<span id="cb5-221"><a href="#cb5-221"></a><span class="fu">## The Reference</span></span>
-<span id="cb5-222"><a href="#cb5-222"></a></span>
-<span id="cb5-223"><a href="#cb5-223"></a><span class="ss">- </span>The reference is much more... verbose.</span>
-<span id="cb5-224"><a href="#cb5-224"></a><span class="ss">- </span>It's <span class="co">[</span><span class="ot">here</span><span class="co">](https://doc.rust-lang.org/reference/behavior-considered-undefined.html)</span></span>
-<span id="cb5-225"><a href="#cb5-225"></a></span>
-<span id="cb5-226"><a href="#cb5-226"></a><span class="at">&gt; Breaking the pointer aliasing rules. The exact aliasing rules are not determined yet, but here is an outline of the general principles:</span></span>
-<span id="cb5-227"><a href="#cb5-227"></a></span>
-<span id="cb5-228"><a href="#cb5-228"></a><span class="at">&gt; Violating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented. </span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">---</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="an">title:</span><span class="co"> Unsafe</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">---</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="ss">- </span>**Welcome** to OS in Rust</span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="ss">  - </span><span class="in">`wc`</span> ongoing.</span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="ss">  - </span>Due Friday, 5 Sept. at 1440 PT.</span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="ss">  - </span>No novel homework this week (partial week)</span>
+<span id="cb9-12"><a href="#cb9-12"></a></span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="fu">## Today</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="ss">- </span>Unsafe</span>
+<span id="cb9-16"><a href="#cb9-16"></a><span class="ss">- </span>UB</span>
+<span id="cb9-17"><a href="#cb9-17"></a><span class="ss">- </span>Dereferencing</span>
+<span id="cb9-18"><a href="#cb9-18"></a></span>
+<span id="cb9-19"><a href="#cb9-19"></a><span class="fu"># Unsafe</span></span>
+<span id="cb9-20"><a href="#cb9-20"></a></span>
+<span id="cb9-21"><a href="#cb9-21"></a><span class="fu">## The Dark Arts of Unsafe Rust</span></span>
+<span id="cb9-22"><a href="#cb9-22"></a></span>
+<span id="cb9-23"><a href="#cb9-23"></a><span class="at">&gt; THE KNOWLEDGE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS.</span></span>
+<span id="cb9-24"><a href="#cb9-24"></a></span>
+<span id="cb9-25"><a href="#cb9-25"></a><span class="fu">## Motivation</span></span>
+<span id="cb9-26"><a href="#cb9-26"></a></span>
+<span id="cb9-27"><a href="#cb9-27"></a><span class="ss">- </span>Often we don't worry about low-level implementation details.</span>
+<span id="cb9-28"><a href="#cb9-28"></a><span class="ss">    - </span>How many bits is an integer in Python?</span>
+<span id="cb9-29"><a href="#cb9-29"></a><span class="ss">    - </span>How many bits is this array in Rust?</span>
+<span id="cb9-30"><a href="#cb9-30"></a></span>
+<span id="cb9-31"><a href="#cb9-31"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-32"><a href="#cb9-32"></a>let mut array<span class="sc">:</span> [i32; <span class="dv">3</span>] <span class="ot">=</span> [<span class="dv">0</span>; <span class="dv">3</span>];</span>
+<span id="cb9-33"><a href="#cb9-33"></a><span class="in">```</span> </span>
+<span id="cb9-34"><a href="#cb9-34"></a><span class="ss">- </span>Who could possibly care how much space the empty tuple occupies? </span>
+<span id="cb9-35"><a href="#cb9-35"></a></span>
+<span id="cb9-36"><a href="#cb9-36"></a><span class="fu">## Sometimes it matters...</span></span>
+<span id="cb9-37"><a href="#cb9-37"></a></span>
+<span id="cb9-38"><a href="#cb9-38"></a><span class="ss">- </span>The most common reason is performance, but </span>
+<span id="cb9-39"><a href="#cb9-39"></a><span class="ss">- </span>More importantly, these details can become a matter of correctness when interfacing</span>
+<span id="cb9-40"><a href="#cb9-40"></a>directly with </span>
+<span id="cb9-41"><a href="#cb9-41"></a><span class="ss">    - </span>hardware, </span>
+<span id="cb9-42"><a href="#cb9-42"></a><span class="ss">    - </span>operating systems, or </span>
+<span id="cb9-43"><a href="#cb9-43"></a><span class="ss">    - </span>other languages (by which we mean C)</span>
+<span id="cb9-44"><a href="#cb9-44"></a></span>
+<span id="cb9-45"><a href="#cb9-45"></a><span class="fu">## Legacy</span></span>
+<span id="cb9-46"><a href="#cb9-46"></a></span>
+<span id="cb9-47"><a href="#cb9-47"></a>When implementation details start to matter in a safe programming language,</span>
+<span id="cb9-48"><a href="#cb9-48"></a>programmers usually have three options:</span>
+<span id="cb9-49"><a href="#cb9-49"></a></span>
+<span id="cb9-50"><a href="#cb9-50"></a><span class="ss">* </span>fiddle with the code to "encourage" the compiler/runtime to perform an optimization</span>
+<span id="cb9-51"><a href="#cb9-51"></a><span class="ss">* </span>adopt a more unidiomatic or cumbersome design to get the desired implementation</span>
+<span id="cb9-52"><a href="#cb9-52"></a><span class="ss">* </span>rewrite the implementation in a language  that lets you deal with those details</span>
+<span id="cb9-53"><a href="#cb9-53"></a></span>
+<span id="cb9-54"><a href="#cb9-54"></a><span class="fu">## Rust on C</span></span>
+<span id="cb9-55"><a href="#cb9-55"></a></span>
+<span id="cb9-56"><a href="#cb9-56"></a><span class="at">&gt; Unfortunately, C is incredibly unsafe to use (sometimes for good reason),</span></span>
+<span id="cb9-57"><a href="#cb9-57"></a><span class="at">and this unsafety is magnified when trying to interoperate with another</span></span>
+<span id="cb9-58"><a href="#cb9-58"></a><span class="at">language. Care must be taken to ensure C and the other language agree on</span></span>
+<span id="cb9-59"><a href="#cb9-59"></a><span class="at">what's happening, and that they don't step on each other's toes.</span></span>
+<span id="cb9-60"><a href="#cb9-60"></a></span>
+<span id="cb9-61"><a href="#cb9-61"></a><span class="fu">## Both, and</span></span>
+<span id="cb9-62"><a href="#cb9-62"></a></span>
+<span id="cb9-63"><a href="#cb9-63"></a><span class="ss">- </span>So what does this have to do with Rust?</span>
+<span id="cb9-64"><a href="#cb9-64"></a><span class="ss">    - </span>Well, unlike C, Rust is a safe programming language.</span>
+<span id="cb9-65"><a href="#cb9-65"></a><span class="ss">    - </span>But, like C, Rust is an unsafe programming language.</span>
+<span id="cb9-66"><a href="#cb9-66"></a><span class="ss">- </span>More accurately, Rust *contains* both a safe and unsafe programming language.</span>
+<span id="cb9-67"><a href="#cb9-67"></a></span>
+<span id="cb9-68"><a href="#cb9-68"></a><span class="at">&gt; Rust can be thought of as a combination of two programming languages: *Safe</span></span>
+<span id="cb9-69"><a href="#cb9-69"></a><span class="at">Rust* and *Unsafe Rust*. </span></span>
+<span id="cb9-70"><a href="#cb9-70"></a></span>
+<span id="cb9-71"><a href="#cb9-71"></a><span class="fu">## Safe Rust</span></span>
+<span id="cb9-72"><a href="#cb9-72"></a></span>
+<span id="cb9-73"><a href="#cb9-73"></a><span class="ss">- </span>The default case</span>
+<span id="cb9-74"><a href="#cb9-74"></a><span class="ss">- </span>What we've used to far, at least officially</span>
+<span id="cb9-75"><a href="#cb9-75"></a><span class="ss">    - </span>You may have incidentally dabbled in unsafe.</span>
+<span id="cb9-76"><a href="#cb9-76"></a><span class="ss">    - </span>Good for you.</span>
+<span id="cb9-77"><a href="#cb9-77"></a><span class="ss">- </span>Safe Rust only really makes *one* guarantee.</span>
+<span id="cb9-78"><a href="#cb9-78"></a></span>
+<span id="cb9-79"><a href="#cb9-79"></a><span class="at">&gt; Rust’s memory safety guarantees enforced at compile time</span></span>
+<span id="cb9-80"><a href="#cb9-80"></a></span>
+<span id="cb9-81"><a href="#cb9-81"></a><span class="ss">- </span>That is, you can never try to read something that doesn't exist.</span>
+<span id="cb9-82"><a href="#cb9-82"></a></span>
+<span id="cb9-83"><a href="#cb9-83"></a><span class="fu">## Unsafe Rust</span></span>
+<span id="cb9-84"><a href="#cb9-84"></a></span>
+<span id="cb9-85"><a href="#cb9-85"></a><span class="ss">- </span>Sometimes, you may want to have two reference to an object that are both mutable.</span>
+<span id="cb9-86"><a href="#cb9-86"></a><span class="ss">    - </span>For example, if you are implementing a suffix tree, a task I didn't assign last term because it was *miserable* in safe Rust.</span>
+<span id="cb9-87"><a href="#cb9-87"></a><span class="ss">- </span>Sometimes, you want to do so in a way that can't possibly break anything.</span>
+<span id="cb9-88"><a href="#cb9-88"></a><span class="ss">    - </span>For example, you may only be using provably correct algorithms (whatever that means).</span>
+<span id="cb9-89"><a href="#cb9-89"></a><span class="ss">    - </span>But of course, <span class="in">`rustc`</span> isn't a theorem prover...</span>
+<span id="cb9-90"><a href="#cb9-90"></a>    </span>
+<span id="cb9-91"><a href="#cb9-91"></a><span class="fu">## Warning</span></span>
+<span id="cb9-92"><a href="#cb9-92"></a></span>
+<span id="cb9-93"><a href="#cb9-93"></a><span class="at">&gt; Unsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us</span></span>
+<span id="cb9-94"><a href="#cb9-94"></a><span class="at">do some *really* unsafe things. Things the Rust authors will implore you not to</span></span>
+<span id="cb9-95"><a href="#cb9-95"></a><span class="at">do, but we'll do anyway.</span></span>
+<span id="cb9-96"><a href="#cb9-96"></a></span>
+<span id="cb9-97"><a href="#cb9-97"></a><span class="fu">## True Rust</span></span>
+<span id="cb9-98"><a href="#cb9-98"></a></span>
+<span id="cb9-99"><a href="#cb9-99"></a><span class="ss">- </span>Safe Rust is the *true* Rust programming language. </span>
+<span id="cb9-100"><a href="#cb9-100"></a><span class="ss">- </span>If all you do is write Safe</span>
+<span id="cb9-101"><a href="#cb9-101"></a>Rust, you will never have to worry about type-safety or memory-safety. </span>
+<span id="cb9-102"><a href="#cb9-102"></a><span class="ss">- </span>You will</span>
+<span id="cb9-103"><a href="#cb9-103"></a>never endure </span>
+<span id="cb9-104"><a href="#cb9-104"></a><span class="ss">    - </span>a dangling pointer, </span>
+<span id="cb9-105"><a href="#cb9-105"></a><span class="ss">    - </span>a use-after-free, or </span>
+<span id="cb9-106"><a href="#cb9-106"></a><span class="ss">    - </span>any other kind of Undefined Behavior (a.k.a. UB).</span>
+<span id="cb9-107"><a href="#cb9-107"></a>   </span>
+<span id="cb9-108"><a href="#cb9-108"></a></span>
+<span id="cb9-109"><a href="#cb9-109"></a></span>
+<span id="cb9-110"><a href="#cb9-110"></a><span class="fu">## `std`</span></span>
+<span id="cb9-111"><a href="#cb9-111"></a></span>
+<span id="cb9-112"><a href="#cb9-112"></a><span class="ss">- </span>The standard library also gives you enough utilities out of the box that you'll</span>
+<span id="cb9-113"><a href="#cb9-113"></a>be able to write high-performance applications and libraries in pure idiomatic</span>
+<span id="cb9-114"><a href="#cb9-114"></a>Safe Rust.</span>
+<span id="cb9-115"><a href="#cb9-115"></a><span class="ss">- </span>Assuming, of course, you are working on a system where <span class="in">`std`</span> is already implemented.</span>
+<span id="cb9-116"><a href="#cb9-116"></a><span class="ss">- </span>Not, you know, writing your own OS or own <span class="in">`std`</span>.</span>
+<span id="cb9-117"><a href="#cb9-117"></a></span>
+<span id="cb9-118"><a href="#cb9-118"></a><span class="fu">## Twinsies</span></span>
+<span id="cb9-119"><a href="#cb9-119"></a></span>
+<span id="cb9-120"><a href="#cb9-120"></a><span class="ss">- </span>Unsafe Rust is exactly like Safe Rust with all the same rules and semantics.</span>
+<span id="cb9-121"><a href="#cb9-121"></a><span class="ss">- </span>It just lets you do some *extra* things that are Definitely Not Safe.</span>
+<span id="cb9-122"><a href="#cb9-122"></a></span>
+<span id="cb9-123"><a href="#cb9-123"></a><span class="fu">## Payoffs</span></span>
+<span id="cb9-124"><a href="#cb9-124"></a></span>
+<span id="cb9-125"><a href="#cb9-125"></a><span class="ss">- </span>The value of this separation is that we gain the benefits of using an unsafe</span>
+<span id="cb9-126"><a href="#cb9-126"></a>language like C </span>
+<span id="cb9-127"><a href="#cb9-127"></a><span class="ss">    - </span>low level control over implementation details</span>
+<span id="cb9-128"><a href="#cb9-128"></a></span>
+<span id="cb9-129"><a href="#cb9-129"></a><span class="ss">- </span>...without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.</span>
+<span id="cb9-130"><a href="#cb9-130"></a></span>
+<span id="cb9-131"><a href="#cb9-131"></a><span class="fu"># Undefined Behavior</span></span>
+<span id="cb9-132"><a href="#cb9-132"></a></span>
+<span id="cb9-133"><a href="#cb9-133"></a><span class="fu">## Safe Rust</span></span>
+<span id="cb9-134"><a href="#cb9-134"></a></span>
+<span id="cb9-135"><a href="#cb9-135"></a><span class="ss">- </span>Safe Rust guarantees certain things about your code.</span>
+<span id="cb9-136"><a href="#cb9-136"></a><span class="ss">  - </span>Most of these won't even make sense to you unless you write C</span>
+<span id="cb9-137"><a href="#cb9-137"></a></span>
+<span id="cb9-138"><a href="#cb9-138"></a><span class="fu">## Safe Prevents</span></span>
+<span id="cb9-139"><a href="#cb9-139"></a></span>
+<span id="cb9-140"><a href="#cb9-140"></a><span class="ss">- </span>Dereferencing (using the <span class="in">`*`</span> operator on) dangling or unaligned pointers (see below)</span>
+<span id="cb9-141"><a href="#cb9-141"></a><span class="ss">- </span>Breaking the "pointer aliasing rules" using <span class="in">`&amp;`</span> (borrow) and <span class="in">`mut`</span></span>
+<span id="cb9-142"><a href="#cb9-142"></a><span class="ss">- </span>Calling a function with the wrong call types </span>
+<span id="cb9-143"><a href="#cb9-143"></a><span class="ss">- </span>Causing a data race when multithreading</span>
+<span id="cb9-144"><a href="#cb9-144"></a><span class="ss">- </span>Executing code compiled for hardware other than currently hosting the process</span>
+<span id="cb9-145"><a href="#cb9-145"></a> not support</span>
+<span id="cb9-146"><a href="#cb9-146"></a><span class="ss">- </span>Producing invalid values like something other than <span class="in">`0`</span> or <span class="in">`1`</span> for a boolean.</span>
+<span id="cb9-147"><a href="#cb9-147"></a></span>
+<span id="cb9-148"><a href="#cb9-148"></a><span class="fu">## Safe Allows</span></span>
+<span id="cb9-149"><a href="#cb9-149"></a></span>
+<span id="cb9-150"><a href="#cb9-150"></a></span>
+<span id="cb9-151"><a href="#cb9-151"></a><span class="ss">-    </span>Deadlocks when multithreading</span>
+<span id="cb9-152"><a href="#cb9-152"></a><span class="ss">-    </span>Leaks of memory and other resources</span>
+<span id="cb9-153"><a href="#cb9-153"></a><span class="ss">-    </span>Exiting without calling destructors</span>
+<span id="cb9-154"><a href="#cb9-154"></a><span class="ss">-    </span>Exposing randomized base addresses through pointer leaks</span>
+<span id="cb9-155"><a href="#cb9-155"></a><span class="ss">-    </span>Integer overflow (recall SHA wrapping)</span>
+<span id="cb9-156"><a href="#cb9-156"></a><span class="ss">-    </span>Logic errors</span>
+<span id="cb9-157"><a href="#cb9-157"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-158"><a href="#cb9-158"></a>let val <span class="ot">=</span> <span class="dv">7</span>;</span>
+<span id="cb9-159"><a href="#cb9-159"></a>let val_is_even <span class="ot">=</span> <span class="cf">if</span> val % <span class="dv">2</span> <span class="sc">==</span> <span class="dv">1</span> { true } <span class="cf">else</span> { false }; </span>
+<span id="cb9-160"><a href="#cb9-160"></a><span class="in">```</span></span>
+<span id="cb9-161"><a href="#cb9-161"></a></span>
+<span id="cb9-162"><a href="#cb9-162"></a><span class="fu">## Unsafe allows:</span></span>
+<span id="cb9-163"><a href="#cb9-163"></a></span>
+<span id="cb9-164"><a href="#cb9-164"></a><span class="ss">1. </span>Dereference a raw pointer.</span>
+<span id="cb9-165"><a href="#cb9-165"></a><span class="ss">1. </span>Call an unsafe function or method.</span>
+<span id="cb9-166"><a href="#cb9-166"></a><span class="ss">1. </span>Access or modify a mutable static variable.</span>
+<span id="cb9-167"><a href="#cb9-167"></a><span class="ss">1. </span>Implement an unsafe trait.</span>
+<span id="cb9-168"><a href="#cb9-168"></a><span class="ss">1. </span>Access fields of <span class="in">`union`</span>s.</span>
+<span id="cb9-169"><a href="#cb9-169"></a></span>
+<span id="cb9-170"><a href="#cb9-170"></a></span>
+<span id="cb9-171"><a href="#cb9-171"></a><span class="fu">## Simply...</span></span>
+<span id="cb9-172"><a href="#cb9-172"></a></span>
+<span id="cb9-173"><a href="#cb9-173"></a><span class="ss">1. </span>Write Rust code normally.</span>
+<span id="cb9-174"><a href="#cb9-174"></a><span class="ss">2. </span>If you are doing something unsafe, include it in an <span class="in">`unsafe`</span> block.</span>
+<span id="cb9-175"><a href="#cb9-175"></a></span>
+<span id="cb9-176"><a href="#cb9-176"></a><span class="fu">## Unions</span></span>
+<span id="cb9-177"><a href="#cb9-177"></a></span>
+<span id="cb9-178"><a href="#cb9-178"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-179"><a href="#cb9-179"></a>union MyUnion {</span>
+<span id="cb9-180"><a href="#cb9-180"></a>    f<span class="sc">:</span> f32,</span>
+<span id="cb9-181"><a href="#cb9-181"></a>    u<span class="sc">:</span> u32,</span>
+<span id="cb9-182"><a href="#cb9-182"></a>}</span>
+<span id="cb9-183"><a href="#cb9-183"></a></span>
+<span id="cb9-184"><a href="#cb9-184"></a>fn <span class="fu">main</span>() {</span>
+<span id="cb9-185"><a href="#cb9-185"></a>    let mut u <span class="ot">=</span> MyUnion { f<span class="sc">:</span> <span class="fl">0.0</span> };</span>
+<span id="cb9-186"><a href="#cb9-186"></a></span>
+<span id="cb9-187"><a href="#cb9-187"></a>    unsafe {</span>
+<span id="cb9-188"><a href="#cb9-188"></a>        println<span class="sc">!</span>(<span class="st">"Bits as float: {}"</span>, u.f);</span>
+<span id="cb9-189"><a href="#cb9-189"></a>        println<span class="sc">!</span>(<span class="st">"Bits as integer: {:#x}"</span>, u.u);</span>
+<span id="cb9-190"><a href="#cb9-190"></a>    }</span>
+<span id="cb9-191"><a href="#cb9-191"></a></span>
+<span id="cb9-192"><a href="#cb9-192"></a>    u.u <span class="ot">=</span> <span class="dv">0x3F800000</span>; <span class="sc">/</span><span class="er">/</span> This is the bit pattern <span class="cf">for</span> <span class="fl">1.0</span> <span class="cf">in</span> IEEE <span class="dv">754</span></span>
+<span id="cb9-193"><a href="#cb9-193"></a></span>
+<span id="cb9-194"><a href="#cb9-194"></a>    unsafe {</span>
+<span id="cb9-195"><a href="#cb9-195"></a>        println<span class="sc">!</span>(<span class="st">"After manual bit update, float is: {}"</span>, u.f);</span>
+<span id="cb9-196"><a href="#cb9-196"></a>    }</span>
+<span id="cb9-197"><a href="#cb9-197"></a>}</span>
+<span id="cb9-198"><a href="#cb9-198"></a><span class="in">```</span></span>
+<span id="cb9-199"><a href="#cb9-199"></a></span>
+<span id="cb9-200"><a href="#cb9-200"></a><span class="fu">## Dangling</span></span>
+<span id="cb9-201"><a href="#cb9-201"></a></span>
+<span id="cb9-202"><a href="#cb9-202"></a><span class="ss">- </span>This worked fine for me, but technically isn't supported.</span>
+<span id="cb9-203"><a href="#cb9-203"></a></span>
+<span id="cb9-204"><a href="#cb9-204"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb9-205"><a href="#cb9-205"></a>fn <span class="fu">main</span>() {    </span>
+<span id="cb9-206"><a href="#cb9-206"></a>    let ptr<span class="sc">:</span> <span class="er">*</span>const i32;</span>
+<span id="cb9-207"><a href="#cb9-207"></a></span>
+<span id="cb9-208"><a href="#cb9-208"></a>    {</span>
+<span id="cb9-209"><a href="#cb9-209"></a>        let x <span class="ot">=</span> <span class="dv">1234</span>;</span>
+<span id="cb9-210"><a href="#cb9-210"></a>        ptr <span class="ot">=</span> <span class="er">&amp;</span>x as <span class="sc">*</span>const i32;</span>
+<span id="cb9-211"><a href="#cb9-211"></a>        unsafe {</span>
+<span id="cb9-212"><a href="#cb9-212"></a>            println<span class="sc">!</span>(<span class="st">"Value at ptr: {}"</span>, <span class="sc">*</span>ptr);</span>
+<span id="cb9-213"><a href="#cb9-213"></a>        }</span>
+<span id="cb9-214"><a href="#cb9-214"></a>    }</span>
+<span id="cb9-215"><a href="#cb9-215"></a></span>
+<span id="cb9-216"><a href="#cb9-216"></a>    unsafe {</span>
+<span id="cb9-217"><a href="#cb9-217"></a>        println<span class="sc">!</span>(<span class="st">"Value at ptr: {}"</span>, <span class="sc">*</span>ptr);</span>
+<span id="cb9-218"><a href="#cb9-218"></a>    }</span>
+<span id="cb9-219"><a href="#cb9-219"></a>}</span>
+<span id="cb9-220"><a href="#cb9-220"></a><span class="in">```</span></span>
+<span id="cb9-221"><a href="#cb9-221"></a></span>
+<span id="cb9-222"><a href="#cb9-222"></a><span class="fu">## The Reference</span></span>
+<span id="cb9-223"><a href="#cb9-223"></a></span>
+<span id="cb9-224"><a href="#cb9-224"></a><span class="ss">- </span>The reference is much more... verbose.</span>
+<span id="cb9-225"><a href="#cb9-225"></a><span class="ss">- </span>It's <span class="co">[</span><span class="ot">here</span><span class="co">](https://doc.rust-lang.org/reference/behavior-considered-undefined.html)</span></span>
+<span id="cb9-226"><a href="#cb9-226"></a></span>
+<span id="cb9-227"><a href="#cb9-227"></a><span class="at">&gt; Breaking the pointer aliasing rules. The exact aliasing rules are not determined yet, but here is an outline of the general principles:</span></span>
+<span id="cb9-228"><a href="#cb9-228"></a></span>
+<span id="cb9-229"><a href="#cb9-229"></a><span class="at">&gt; Violating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented. </span></span>
+<span id="cb9-230"><a href="#cb9-230"></a></span>
+<span id="cb9-231"><a href="#cb9-231"></a><span class="fu"># Dangling</span></span>
+<span id="cb9-232"><a href="#cb9-232"></a></span>
+<span id="cb9-233"><a href="#cb9-233"></a><span class="fu">## Previously in Rust</span></span>
+<span id="cb9-234"><a href="#cb9-234"></a></span>
+<span id="cb9-235"><a href="#cb9-235"></a><span class="ss">- </span>*Safe* Rust ensures that references are always valid</span>
+<span id="cb9-236"><a href="#cb9-236"></a><span class="ss">    - </span>That is, borrows via <span class="in">`&amp;`</span></span>
+<span id="cb9-237"><a href="#cb9-237"></a><span class="ss">    - </span>These always have some plausible correct value in them (if the code compiles)</span>
+<span id="cb9-238"><a href="#cb9-238"></a></span>
+<span id="cb9-239"><a href="#cb9-239"></a><span class="fu">## The Frontier</span></span>
+<span id="cb9-240"><a href="#cb9-240"></a></span>
+<span id="cb9-241"><a href="#cb9-241"></a><span class="ss">- </span>At the edge of Safe and Unsafe Rust are *raw* pointers.</span>
+<span id="cb9-242"><a href="#cb9-242"></a><span class="ss">    - </span>Can be immutable <span class="in">`*const T`</span> or mutable <span class="in">`*mut T`</span>.</span>
+<span id="cb9-243"><a href="#cb9-243"></a><span class="ss">    - </span>Vs. C, the asterisk is part of the name and not an operator.</span>
+<span id="cb9-244"><a href="#cb9-244"></a><span class="ss">        - </span>This is annoying.</span>
+<span id="cb9-245"><a href="#cb9-245"></a><span class="ss">- </span>Raw pointers are inherently unsafe, so they can be created in safe Rust.</span>
+<span id="cb9-246"><a href="#cb9-246"></a></span>
+<span id="cb9-247"><a href="#cb9-247"></a><span class="fu">## Differences</span></span>
+<span id="cb9-248"><a href="#cb9-248"></a></span>
+<span id="cb9-249"><a href="#cb9-249"></a><span class="ss">- </span>These *raw* pointers:</span>
+<span id="cb9-250"><a href="#cb9-250"></a><span class="ss">  - </span>Are allowed to ignore the borrowing rules by having both immutable and</span>
+<span id="cb9-251"><a href="#cb9-251"></a>  mutable pointers or multiple mutable pointers to the same location</span>
+<span id="cb9-252"><a href="#cb9-252"></a><span class="ss">  - </span>Aren’t guaranteed to point to valid memory</span>
+<span id="cb9-253"><a href="#cb9-253"></a><span class="ss">  - </span>Are allowed to be null</span>
+<span id="cb9-254"><a href="#cb9-254"></a><span class="ss">  - </span>Don’t implement any automatic cleanup</span>
+<span id="cb9-255"><a href="#cb9-255"></a></span>
+<span id="cb9-256"><a href="#cb9-256"></a><span class="fu">## Example</span></span>
+<span id="cb9-257"><a href="#cb9-257"></a></span>
+<span id="cb9-258"><a href="#cb9-258"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-259"><a href="#cb9-259"></a>    let mut num <span class="ot">=</span> <span class="dv">5</span>;</span>
+<span id="cb9-260"><a href="#cb9-260"></a></span>
+<span id="cb9-261"><a href="#cb9-261"></a>    let r1 <span class="ot">=</span> <span class="er">&amp;</span>raw const num;</span>
+<span id="cb9-262"><a href="#cb9-262"></a>    let r2 <span class="ot">=</span> <span class="er">&amp;</span>raw mut num;</span>
+<span id="cb9-263"><a href="#cb9-263"></a><span class="in">```</span></span>
+<span id="cb9-264"><a href="#cb9-264"></a></span>
+<span id="cb9-265"><a href="#cb9-265"></a><span class="fu">## This is safe!</span></span>
+<span id="cb9-266"><a href="#cb9-266"></a></span>
+<span id="cb9-267"><a href="#cb9-267"></a><span class="ss">- </span>There is nothing unsafe and creating a variable that refers to some value.</span>
+<span id="cb9-268"><a href="#cb9-268"></a><span class="ss">- </span>After all, what's the worst thing that can happen?</span>
+<span id="cb9-269"><a href="#cb9-269"></a><span class="ss">- </span>These lines of code only facilitate novel possible ways of interfacing with the underlying data.</span>
+<span id="cb9-270"><a href="#cb9-270"></a><span class="ss">- </span>In this case, we *know* these pointers are valid and point to 5.</span>
+<span id="cb9-271"><a href="#cb9-271"></a></span>
+<span id="cb9-272"><a href="#cb9-272"></a><span class="fu">## Casts</span></span>
+<span id="cb9-273"><a href="#cb9-273"></a></span>
+<span id="cb9-274"><a href="#cb9-274"></a><span class="ss">- </span>We can get a potentially invalid reference using "casts" with the <span class="in">`as`</span> keyword.</span>
+<span id="cb9-275"><a href="#cb9-275"></a><span class="ss">    - </span>We take a numeric value and treat it as a reference.</span>
+<span id="cb9-276"><a href="#cb9-276"></a><span class="ss">    - </span>This numerical value represents a location in numerical organized computer memory.</span>
+<span id="cb9-277"><a href="#cb9-277"></a></span>
+<span id="cb9-278"><a href="#cb9-278"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-279"><a href="#cb9-279"></a>    let address <span class="ot">=</span> <span class="dv">0x012345</span>usize;</span>
+<span id="cb9-280"><a href="#cb9-280"></a>    let r <span class="ot">=</span> address as <span class="sc">*</span>const i32;</span>
+<span id="cb9-281"><a href="#cb9-281"></a><span class="in">```</span></span>
+<span id="cb9-282"><a href="#cb9-282"></a><span class="ss">- </span>This is still safe so far!</span>
+<span id="cb9-283"><a href="#cb9-283"></a></span>
+<span id="cb9-284"><a href="#cb9-284"></a><span class="fu">## Dereference</span></span>
+<span id="cb9-285"><a href="#cb9-285"></a></span>
+<span id="cb9-286"><a href="#cb9-286"></a><span class="ss">- </span>We now can use the dereference asterisk <span class="in">`*`</span> operator.</span>
+<span id="cb9-287"><a href="#cb9-287"></a><span class="ss">- </span>This is decidedly unsafe.</span>
+<span id="cb9-288"><a href="#cb9-288"></a></span>
+<span id="cb9-289"><a href="#cb9-289"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-290"><a href="#cb9-290"></a>    let mut num <span class="ot">=</span> <span class="dv">5</span>;</span>
+<span id="cb9-291"><a href="#cb9-291"></a></span>
+<span id="cb9-292"><a href="#cb9-292"></a>    let r1 <span class="ot">=</span> <span class="er">&amp;</span>raw const num;</span>
+<span id="cb9-293"><a href="#cb9-293"></a>    let r2 <span class="ot">=</span> <span class="er">&amp;</span>raw mut num;</span>
+<span id="cb9-294"><a href="#cb9-294"></a></span>
+<span id="cb9-295"><a href="#cb9-295"></a>    unsafe {</span>
+<span id="cb9-296"><a href="#cb9-296"></a>        println<span class="sc">!</span>(<span class="st">"r1 is: {}"</span>, <span class="sc">*</span>r1);</span>
+<span id="cb9-297"><a href="#cb9-297"></a>        println<span class="sc">!</span>(<span class="st">"r2 is: {}"</span>, <span class="sc">*</span>r2);</span>
+<span id="cb9-298"><a href="#cb9-298"></a>    }</span>
+<span id="cb9-299"><a href="#cb9-299"></a><span class="in">```</span></span>
+<span id="cb9-300"><a href="#cb9-300"></a><span class="ss">- </span>Unsafe *to Rust* but we know it will work.</span>
+<span id="cb9-301"><a href="#cb9-301"></a></span>
+<span id="cb9-302"><a href="#cb9-302"></a><span class="fu">## Runtime Crash</span></span>
+<span id="cb9-303"><a href="#cb9-303"></a></span>
+<span id="cb9-304"><a href="#cb9-304"></a><span class="ss">- </span>This is both unsafe and (almost certainly) won't work.</span>
+<span id="cb9-305"><a href="#cb9-305"></a></span>
+<span id="cb9-306"><a href="#cb9-306"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb9-307"><a href="#cb9-307"></a>fn <span class="fu">main</span>() {</span>
+<span id="cb9-308"><a href="#cb9-308"></a>    let address <span class="ot">=</span> <span class="dv">0x0</span>usize;</span>
+<span id="cb9-309"><a href="#cb9-309"></a>    let r <span class="ot">=</span> address as <span class="sc">*</span>const i32;</span>
+<span id="cb9-310"><a href="#cb9-310"></a>    unsafe {</span>
+<span id="cb9-311"><a href="#cb9-311"></a>        dbg<span class="sc">!</span>(<span class="sc">*</span>r);</span>
+<span id="cb9-312"><a href="#cb9-312"></a>    }</span>
+<span id="cb9-313"><a href="#cb9-313"></a>}</span>
+<span id="cb9-314"><a href="#cb9-314"></a><span class="in">```</span></span>
+<span id="cb9-315"><a href="#cb9-315"></a><span class="ss">- </span>Fun exercise: try to take the deferences out of the <span class="in">`unsafe`</span> block.</span>
+<span id="cb9-316"><a href="#cb9-316"></a></span>
+<span id="cb9-317"><a href="#cb9-317"></a><span class="fu"># Fin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

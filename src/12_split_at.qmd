@@ -1,0 +1,132 @@
+---
+name: split_at
+format: html
+---
+
+## Homework
+
+- Homeworks are due on the Friday *after* the week they correspond to lecture.
+- So 9 days after the corresponding lab.
+
+## Citation
+
+- [Calling an Unsafe Function or Method](https://raw.githubusercontent.com/rust-lang/book/refs/heads/main/src/ch20-01-unsafe-rust.md)
+- In a way, an OS is an unsafe function or method... (this is a stretch)
+
+## Requirements
+
+- [ ] Update repository for this course.
+- [ ] New crate for this homework.
+- [ ] Follow the write-up 
+
+# Preamble
+
+## Unsafe
+
+- Here is an unsafe function named `dangerous` that doesn’t do anything in its body:
+
+```{.rs}
+    unsafe fn dangerous() {}
+
+    unsafe {
+        dangerous();
+    }
+```
+
+- We must call the `dangerous` function within a separate `unsafe` block. 
+- If we try to call `dangerous` without the `unsafe` block, we’ll get an error.
+
+## Creating a Safe Abstraction over Unsafe Code
+
+- Just because a function contains unsafe code doesn’t mean we need to mark the entire function as unsafe.
+  - This blew my mind.
+- In fact, wrapping unsafe code in a safe function is a common abstraction. 
+- As an example, let’s study the `split_at_mut` function from the standard library, which requires some unsafe code. 
+
+
+### No Safe Way
+
+*People scared of Portland refer to Safeway I shop at as the "[Unsafeway](https://www.reddit.com/r/Portland/comments/pfyd42/pearl_safeway/)" which I think is hilarious*
+
+- We’ll explore how we might implement it. 
+- This safe method is defined on mutable slices: 
+  - It takes one slice and makes it two by splitting the slice at the index given as an argument. 
+- Here's an example.
+
+```{.rs}
+    let mut v = vec![1, 2, 3, 4, 5, 6];
+
+    let r = &mut v[..];
+
+    let (a, b) = r.split_at_mut(3);
+```
+
+- There's no safe way to do this.
+
+*This won't work*
+
+```{.rs}
+fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+    let len = values.len();
+
+    assert!(mid <= len);
+
+    (&mut values[..mid], &mut values[mid..])
+}
+```
+
+- It explodes:
+
+```email
+$ cargo run
+   Compiling unsafe-example v0.1.0 (file:///projects/unsafe-example)
+error[E0499]: cannot borrow `*values` as mutable more than once at a time
+ --> src/main.rs:6:31
+  |
+1 | fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+  |                         - let's call the lifetime of this reference `'1`
+...
+6 |     (&mut values[..mid], &mut values[mid..])
+  |     --------------------------^^^^^^--------
+  |     |     |                   |
+  |     |     |                   second mutable borrow occurs here
+  |     |     first mutable borrow occurs here
+  |     returning this value requires that `*values` is borrowed for `'1`
+  |
+  = help: use `.split_at_mut(position)` to obtain two mutable non-overlapping sub-slices
+
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `unsafe-example` (bin "unsafe-example") due to 1 previous error
+```
+
+### Enter the Borrow Checker
+
+- Rust’s borrow checker can’t understand that we’re borrowing different parts of the slice
+  - It only knows that we’re borrowing from the same slice twice. 
+- Borrowing different parts of a slice is fundamentally okay because the two slices aren’t overlapping, but...
+  - `rustc` isn’t smart enough to know this. 
+- When we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.
+
+```{.rs}
+use std::slice;
+
+fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
+
+    let ptr = values.as_mut_ptr();
+
+    unsafe {
+        (
+            slice::from_raw_parts_mut(ptr, mid),
+            slice::from_raw_parts_mut(ptr.add(mid), len - mid),
+        )
+    }
+}
+```
+
+# Deliverable
+
+- Create a crate which:
+	- Contains an unsafe `split_at_mut` that you have written in `lib.rs`
+	- Contains a usage of `split_at_mut` in `main.rs`
+	- Abstracts all `unsafe` blocks to `lib.rs` but successful calls unsafe code from `main.rs`
+	- You may use the exact provided code but most put it together in a way that actually works with `cargo r`
