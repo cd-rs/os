@@ -1,93 +1,10 @@
 [
   {
-    "objectID": "01_wc.html",
-    "href": "01_wc.html",
-    "title": "Rustup",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "OS in Rust",
     "section": "",
-    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#announcements",
-    "href": "01_wc.html#announcements",
-    "title": "Rustup",
-    "section": "",
-    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#homework",
-    "href": "01_wc.html#homework",
-    "title": "Rustup",
-    "section": "Homework",
-    "text": "Homework\n\n“Minigrep” is just this lab but more complete.\n\nWindows officially no longer supported.\n\nDue Friday, 23 Jan. at 1440 ET.\n\nPlan to hang out as a class 1310-1440 on Fridays, probably.",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#setup",
-    "href": "01_wc.html#setup",
-    "title": "Rustup",
-    "section": "Setup",
-    "text": "Setup\n\nIf you are stuck setting up Rust, following this\nAt the end you should have:\n\ncargo, git, and at least one of gcc or clang on your system.\nA repository named 371os on Github that is either (1) public or (2) shared with [cd-public](https://github.com/cd-public",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#requirements",
-    "href": "01_wc.html#requirements",
-    "title": "Rustup",
-    "section": "Requirements",
-    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and no options.\n\nThat is, you must support wc src/main.rs but not wc --files0-from=F src/main.rs\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#repository",
-    "href": "01_wc.html#repository",
-    "title": "Rustup",
-    "section": "Repository",
-    "text": "Repository\n\nCreate a repository for this class.\nRequirements\n\nName is 371os\nMay be public or private to you and me (cd-public).\n\nRead more\n\nMust email me a link to your repository from your @willamette.edu email, e.g.:\n\nhttps://github.com/cd-example/371os\nIf you’re stuck, read more here",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#crate",
-    "href": "01_wc.html#crate",
-    "title": "Rustup",
-    "section": "Crate",
-    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 01 in your 371os repository.\n\ncargo new 01 --name my_wc --vcs none\n\nIf you’re stuck, read more here",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#wc",
-    "href": "01_wc.html#wc",
-    "title": "Rustup",
-    "section": "wc",
-    "text": "wc\n\nImplement the minimal base functionality of wc using this crate.\n\n\nFull functionality\n\nHere is wc --help\nYou do not need to do all of this!\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRequired functionality\n\nThat is more than required, you need only implement:\n\nUsage: wc [FILE]\nPrint newline, word, and byte counts for each FILE. A word is a \nnon-zero-length sequence of characters delimited by white space.\n\nThis can be trivially tested with some of the following:\n\n$ wc src/main.rs\n 12  30 229 src/main.rs\n$ cargo build release\n$ ./target/release/my_wc src/main.rs\n 12  30 229 src/main.rs\n\nYour src/main.rs need not be of any particular size, and you needn’t implement all code within src/main.rs, but you should get the same counts from wc and from your release binary.",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#helpful-reference",
-    "href": "01_wc.html#helpful-reference",
-    "title": "Rustup",
-    "section": "Helpful Reference",
-    "text": "Helpful Reference\n\nWhen working on projects like this, I almost always have the following reference material open.\nread_lines - Rust By Example\n\n\nfn read_lines(filename: &str) -&gt; Vec&lt;String&gt; {\n    let mut result = Vec::new();\n\n    for line in std::fs::read_to_string(filename).unwrap().lines() {\n        result.push(line.to_string())\n    }\n\n    result\n}",
-    "crumbs": [
-      "Rustup"
-    ]
+    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nxor list\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\n\nFinal OS due whenever the final exam would finish, TBA\n\n\nLecture Recordings\nForthcoming"
   },
   {
     "objectID": "02_cli.html",
@@ -158,405 +75,6 @@
     "crumbs": [
       "CLI"
     ]
-  },
-  {
-    "objectID": "00_derust.rjs.html#announcements",
-    "href": "00_derust.rjs.html#announcements",
-    "title": "Derust",
-    "section": "Announcements",
-    "text": "Announcements\n\nWelcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nWe’ll use CSSA.\n\nSet up Linux/Rust/Git."
-  },
-  {
-    "objectID": "00_derust.rjs.html#homework",
-    "href": "00_derust.rjs.html#homework",
-    "title": "Derust",
-    "section": "Homework",
-    "text": "Homework\n\nThe first homework, wc, is ready now.\n\nMostly just Rust practice.\n\nDue Friday, 23 Jan at 1440 PT.\n\nFriday of next week."
-  },
-  {
-    "objectID": "00_derust.rjs.html#today",
-    "href": "00_derust.rjs.html#today",
-    "title": "Derust",
-    "section": "Today",
-    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
-  },
-  {
-    "objectID": "00_derust.rjs.html#it-me",
-    "href": "00_derust.rjs.html#it-me",
-    "title": "Derust",
-    "section": "It me",
-    "text": "It me\n\nName\n\n(Prof. )?Calvin\n\nCredentials\n\nB.A. Mathematics\nB.S., M.S., Ph.D. Computer Science\n\nPronouns\n\nthey/them"
-  },
-  {
-    "objectID": "00_derust.rjs.html#the-great-work",
-    "href": "00_derust.rjs.html#the-great-work",
-    "title": "Derust",
-    "section": "The Great Work",
-    "text": "The Great Work\n\nThesis Title\n\nMining Secure Behavior of Hardware Designs\n\nPlain English\n\nJust as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs."
-  },
-  {
-    "objectID": "00_derust.rjs.html#course-format",
-    "href": "00_derust.rjs.html#course-format",
-    "title": "Derust",
-    "section": "Course Format",
-    "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce."
-  },
-  {
-    "objectID": "00_derust.rjs.html#grade-policy",
-    "href": "00_derust.rjs.html#grade-policy",
-    "title": "Derust",
-    "section": "Grade Policy",
-    "text": "Grade Policy\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
-  },
-  {
-    "objectID": "00_derust.rjs.html#specification-grading",
-    "href": "00_derust.rjs.html#specification-grading",
-    "title": "Derust",
-    "section": "Specification Grading",
-    "text": "Specification Grading\n\nBasically, I will assign some stuff but you don’t have to do all of it perfectly.\n\nNo partial credit, everything is boolean grading.\n\nI took distributions over final, midterm, and Lab/HW"
-  },
-  {
-    "objectID": "00_derust.rjs.html#it-pays-to-get-as",
-    "href": "00_derust.rjs.html#it-pays-to-get-as",
-    "title": "Derust",
-    "section": "It pays to get A’s",
-    "text": "It pays to get A’s\n\n\n\nGrade\nRequirements\n\n\n\n\nA\nFinal meets spec\n\n\nA\n90% ave HW/Lab/Midterm, Final compiles\n\n\nA-\n90% ave HW/Lab, Midterm/Final compile\n\n\nA-\nMidterm meets spec, Final compiles"
-  },
-  {
-    "objectID": "00_derust.rjs.html#but-bs-are-the-knees",
-    "href": "00_derust.rjs.html#but-bs-are-the-knees",
-    "title": "Derust",
-    "section": "But B’s are the Knees",
-    "text": "But B’s are the Knees\n\n\n\nGrade\nRequirements\n\n\n\n\nB+\n90% ave HW/Lab, Midterm compiles\n\n\nB\n80% ave HW/Lab, Midterm compiles\n\n\nB-\n80% ave HW/Lab"
-  },
-  {
-    "objectID": "00_derust.rjs.html#these-may-earn-degrees",
-    "href": "00_derust.rjs.html#these-may-earn-degrees",
-    "title": "Derust",
-    "section": "These may (???) earn degrees",
-    "text": "These may (???) earn degrees\n\n\n\nGrade\nRequirements\n\n\n\n\nC\n80% ave Lab\n\n\nD\n60% ave Lab\n\n\nF\nAnything else"
-  },
-  {
-    "objectID": "00_derust.rjs.html#lab-grading",
-    "href": "00_derust.rjs.html#lab-grading",
-    "title": "Derust",
-    "section": "Lab Grading",
-    "text": "Lab Grading\n\n“A” (=100%)\n\nMeets spec by end of class\n\n“B” (=90%)\n\nCompiles at end of class\n\n“F” (=0%)\n\nAnything else"
-  },
-  {
-    "objectID": "00_derust.rjs.html#hw-grading",
-    "href": "00_derust.rjs.html#hw-grading",
-    "title": "Derust",
-    "section": "HW Grading",
-    "text": "HW Grading\n\n“A” (=100%)\n\nOn time\nPasses autograder.\n\nI lack confidence I can make excellent autograders for all stages, so give me some grace here.\n\n\n“B” (=90%)\n\nOn time\nCompiles\n\n“F” (=0%)\n\nAnything else"
-  },
-  {
-    "objectID": "00_derust.rjs.html#final",
-    "href": "00_derust.rjs.html#final",
-    "title": "Derust",
-    "section": "Final",
-    "text": "Final\n\nCreate, document, and publish an operating system… in Rust!\n\nFree-standing binary\nFaults/exceptions/interrupts\nMemory management"
-  },
-  {
-    "objectID": "00_derust.rjs.html#late-work-policy",
-    "href": "00_derust.rjs.html#late-work-policy",
-    "title": "Derust",
-    "section": "Late Work Policy",
-    "text": "Late Work Policy\n\nLate work is not accepted.\n\nNo exceptions.\nThe specification grading framework incorpates tolerances.\nAn OS that meets spec by end-of-term is an A, always."
-  },
-  {
-    "objectID": "00_derust.rjs.html#ai-policy",
-    "href": "00_derust.rjs.html#ai-policy",
-    "title": "Derust",
-    "section": "AI Policy",
-    "text": "AI Policy\n\nI would be shocked if it is helpful to you.\nIf you think it is helpful, that is probably not a good sign.\nYou can use it (I wouldn’t)"
-  },
-  {
-    "objectID": "00_derust.rjs.html#collaboration-policy",
-    "href": "00_derust.rjs.html#collaboration-policy",
-    "title": "Derust",
-    "section": "Collaboration Policy",
-    "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn."
-  },
-  {
-    "objectID": "00_derust.rjs.html#a-la-151",
-    "href": "00_derust.rjs.html#a-la-151",
-    "title": "Derust",
-    "section": "a la 151",
-    "text": "a la 151\n\nThis term we will have sections\nMeet Friday 1310-1440\nMeant to help unpack learning in class and work on homework.\nSingle section/section-leader (Jimmy)\nMiss more than 4 sections and drop one “bin” on specification grading.\n\nUnless excused."
-  },
-  {
-    "objectID": "00_derust.rjs.html#the-hard-part",
-    "href": "00_derust.rjs.html#the-hard-part",
-    "title": "Derust",
-    "section": "The Hard Part",
-    "text": "The Hard Part\n\nAfter ~10 years of systems research I’ve convinced myself only two things really matter:\n\nReferences, and\nRecursion\n\nRecursion isn’t too bad…\n\n&gt;&gt;&gt; exp = lambda b, n : b if n == 1 else b*exp(b,n-1)\n&gt;&gt;&gt; exp(2,8)\n256\n\nCovered in 271 and possibly 351 and no longer interesting on its own, though will be used."
-  },
-  {
-    "objectID": "00_derust.rjs.html#references",
-    "href": "00_derust.rjs.html#references",
-    "title": "Derust",
-    "section": "References",
-    "text": "References\n\nReferences are a beast, but without them nothing makes sense!\n\n\n\n&gt;&gt;&gt; x = 1\n&gt;&gt;&gt; def addx():\n...     x += 1\n...\n&gt;&gt;&gt; addx()\nUnboundLocalError:\n&lt;blah blah blah error messages&gt;\n\n&gt;&gt;&gt; x = [1]\n&gt;&gt;&gt; def addx():\n...     x[0] += 1\n...\n&gt;&gt;&gt; addx()\n&gt;&gt;&gt; x\n[2]"
-  },
-  {
-    "objectID": "00_derust.rjs.html#insight",
-    "href": "00_derust.rjs.html#insight",
-    "title": "Derust",
-    "section": "Insight",
-    "text": "Insight\n\nDefinition:\n\nReferences: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.\n\nImportance:\n\nThis key-value storage is a service provided by the operating system!"
-  },
-  {
-    "objectID": "00_derust.rjs.html#python-and-oses",
-    "href": "00_derust.rjs.html#python-and-oses",
-    "title": "Derust",
-    "section": "Python and OSes",
-    "text": "Python and OSes\n\nWhy not .py (.js, .java, .cs, .cpp, etc)?\n\nThese languages assume an underlying OS (or VM or browser).\nThere is more to life than running code other people wrote.\nGood languages (except Java) but not for us\nThe other systems language is C (and maybe C++)"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-and-references",
-    "href": "00_derust.rjs.html#rust-and-references",
-    "title": "Derust",
-    "section": "Rust and References",
-    "text": "Rust and References\n\nRust:\n\nObscures references, but…\nDoes not obscure memory.\n\nThis is good!\n\nMemory matters, but pointers are historical accident.\n\nYou should probably use Rust in every application where correctness or performance matters."
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-and-recursion",
-    "href": "00_derust.rjs.html#rust-and-recursion",
-    "title": "Derust",
-    "section": "Rust and Recursion",
-    "text": "Rust and Recursion\n\nSeparately, Rust is built on one of the most exciting ongoing computer science research efforts:\nLLVM (stands for LLVM)\nBasically, a way of turning human-readable code into machine-executable code.\n\nVery good at turning recursion into iteration and/or vice versa.\n\nThis term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS."
-  },
-  {
-    "objectID": "00_derust.rjs.html#citation",
-    "href": "00_derust.rjs.html#citation",
-    "title": "Derust",
-    "section": "Citation",
-    "text": "Citation\n\nWe will follow “Philipp Oppermann’s blog” “Writing an OS in Rust” version 2.\nRead more."
-  },
-  {
-    "objectID": "00_derust.rjs.html#bare-bones",
-    "href": "00_derust.rjs.html#bare-bones",
-    "title": "Derust",
-    "section": "Bare Bones",
-    "text": "Bare Bones\n\nA binary that doesn’t require an underlying OS.\nSomething that (1) runs and (2) prints.\nSimple I/O\nUnit and integration testing."
-  },
-  {
-    "objectID": "00_derust.rjs.html#interrupts",
-    "href": "00_derust.rjs.html#interrupts",
-    "title": "Derust",
-    "section": "Interrupts",
-    "text": "Interrupts\n\nCPU Exceptions\n\nLike division by zero.\n\nDouble faults\n\nFaults while handling a fault.\n\nHardware interrupts\n\nLike I/O"
-  },
-  {
-    "objectID": "00_derust.rjs.html#memory-management",
-    "href": "00_derust.rjs.html#memory-management",
-    "title": "Derust",
-    "section": "Memory Management",
-    "text": "Memory Management\n\nPaging\nPage tables\n\nTogether, how to find things you saved for a while.\n\nThe heap\nHeap allocation.\n\nTogether, how to find things you saved while working."
-  },
-  {
-    "objectID": "00_derust.rjs.html#final-examproject",
-    "href": "00_derust.rjs.html#final-examproject",
-    "title": "Derust",
-    "section": "Final Exam/Project",
-    "text": "Final Exam/Project\n\nImplement Minimal OS in Rust\n\nIndividual\nUnder version control\nCompiles and runs and is tested"
-  },
-  {
-    "objectID": "00_derust.rjs.html#vim",
-    "href": "00_derust.rjs.html#vim",
-    "title": "Derust",
-    "section": "Vim",
-    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected of you in life.\nI will live-code in vim probably.\n\nThis will be painful, but that is okay."
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features",
-    "href": "00_derust.rjs.html#rust-features",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options",
-    "href": "00_derust.rjs.html#options",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nSometimes code makes sense.\nMAD\n\nfrom numpy import uint64\n\n# Multiply-add operation\ndef mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a + b * c"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-1",
-    "href": "00_derust.rjs.html#options-1",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nSometimes it doesn’t.\nThis needn’t return a positive value!\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a - b * c"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-2",
-    "href": "00_derust.rjs.html#options-2",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-3",
-    "href": "00_derust.rjs.html#options-3",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\nfrom typing import Union\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-4",
-    "href": "00_derust.rjs.html#options-4",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nEver wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features-1",
-    "href": "00_derust.rjs.html#rust-features-1",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#results",
-    "href": "00_derust.rjs.html#results",
-    "title": "Derust",
-    "section": "Results",
-    "text": "Results\n\nResults are basically options that incorporate error handling.\n\n// Linux Kernel Versions, latest is 6\nfn check_version(val: u8) -&gt; Result&lt;u8, &'static str&gt; {\n    if val &lt; 7 {\n        return Ok(val);\n    } else {\n        return Err(\"Not yet released.\")\n    }\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#check-it",
-    "href": "00_derust.rjs.html#check-it",
-    "title": "Derust",
-    "section": "Check it",
-    "text": "Check it\n\nAdd main.\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    dbg!(check_version(4));\n    dbg!(check_version(7));\n}\n\n\ncargo r\n\n[src/main.rs:10:5] check_version(4) = Ok(\n    4,\n)\n[src/main.rs:11:5] check_version(7) = Err(\n    \"Not yet released.\",\n)"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features-2",
-    "href": "00_derust.rjs.html#rust-features-2",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#std",
-    "href": "00_derust.rjs.html#std",
-    "title": "Derust",
-    "section": "std",
-    "text": "std\n\nOptions, results, and more fun things, like vectors, are all part of std\n\n\nThe Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like Vec&lt;T&gt; and Option&lt;T&gt;, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things."
-  },
-  {
-    "objectID": "00_derust.rjs.html#iterators",
-    "href": "00_derust.rjs.html#iterators",
-    "title": "Derust",
-    "section": "Iterators",
-    "text": "Iterators\n\nAn iterator is pretty much a for-each loop, the Python loop type.\n\nlet v1 = vec![1, 2, 3];\n\nlet v1_iter = v1.iter();\n\nfor val in v1_iter {\n    println!(\"Got: {val}\");\n}\n\nOh look, vec! from std"
-  },
-  {
-    "objectID": "00_derust.rjs.html#closures",
-    "href": "00_derust.rjs.html#closures",
-    "title": "Derust",
-    "section": "Closures",
-    "text": "Closures\n\nA closure is pretty much a lambda function, like the Python lambda keyword.\n\nfn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }\nlet add_one_v2 = |x: u32| -&gt; u32 { x + 1 };\nlet add_one_v3 = |x|             { x + 1 };\nlet add_one_v4 = |x|               x + 1  ;\n\nNo one can stop you from writing fn’s, not even people who actually know Rust!"
-  },
-  {
-    "objectID": "00_derust.rjs.html#pattern-matching",
-    "href": "00_derust.rjs.html#pattern-matching",
-    "title": "Derust",
-    "section": "Pattern Matching",
-    "text": "Pattern Matching\n\nThe language designers intend options (and results) to be handled as follows:\n\nfn main() {\n    let s = \"Hello, world\";\n    match s.chars().nth(11) {\n        Some(c) =&gt; println!(\"The 11th character is {:?}\", c),\n        None =&gt; println!(\"String `s` is fewer than 11 characters in length\"),\n    }\n}\n\nBasically, if-else is “un-Rust-like” most of the time."
-  },
-  {
-    "objectID": "00_derust.rjs.html#formatting",
-    "href": "00_derust.rjs.html#formatting",
-    "title": "Derust",
-    "section": "Formatting",
-    "text": "Formatting\n\nprint!, println!, and format! are all nice ways to work with strings.\nHandy if you are an OS and want to interface with a human.\nAssuming you (the OS) know how to display text.\n\nWe’ll get there.\n\n\nformat!(\"test\");                             // =&gt; \"test\"\nformat!(\"hello {}\", \"world!\");               // =&gt; \"hello world!\"\nformat!(\"x = {}, y = {val}\", 10, val = 30);  // =&gt; \"x = 10, y = 30\"\nlet (x, y) = (1, 2);\nformat!(\"{x} + {y} = 3\");                    // =&gt; \"1 + 2 = 3\"\n\nSimilar to Python f-strings and also every other language."
-  },
-  {
-    "objectID": "00_derust.rjs.html#read-more",
-    "href": "00_derust.rjs.html#read-more",
-    "title": "Derust",
-    "section": "Read More",
-    "text": "Read More\n\nI use most of these language features in two extended examples.\n\nHex reader\nFibonacci"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features-3",
-    "href": "00_derust.rjs.html#rust-features-3",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#ownership",
-    "href": "00_derust.rjs.html#ownership",
-    "title": "Derust",
-    "section": "Ownership",
-    "text": "Ownership\n\nBig topic.\nBig deal.\nLearn by doing.\nQuick example."
-  },
-  {
-    "objectID": "00_derust.rjs.html#size",
-    "href": "00_derust.rjs.html#size",
-    "title": "Derust",
-    "section": "Size",
-    "text": "Size\n\nVersus e.g. u8 which was a fixed size.\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically."
-  },
-  {
-    "objectID": "00_derust.rjs.html#ownership-rules",
-    "href": "00_derust.rjs.html#ownership-rules",
-    "title": "Derust",
-    "section": "Ownership Rules",
-    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped."
-  },
-  {
-    "objectID": "00_derust.rjs.html#scope",
-    "href": "00_derust.rjs.html#scope",
-    "title": "Derust",
-    "section": "Scope",
-    "text": "Scope\n\nQuoth Rust Book:\n\n{                      // s is not valid here, since it's not yet declared\n    let s = \"hello\";   // s is valid from this point forward\n\n    // do stuff with s\n}                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.\nThink: Address of building that hasn’t been made/has been condemned."
-  },
-  {
-    "objectID": "00_derust.rjs.html#capital-s-string",
-    "href": "00_derust.rjs.html#capital-s-string",
-    "title": "Derust",
-    "section": "Capital S String",
-    "text": "Capital S String\n\nCapital S String is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not."
-  },
-  {
-    "objectID": "00_derust.rjs.html#its-confusing",
-    "href": "00_derust.rjs.html#its-confusing",
-    "title": "Derust",
-    "section": "It’s confusing",
-    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#whats-happening",
-    "href": "00_derust.rjs.html#whats-happening",
-    "title": "Derust",
-    "section": "What’s happening?",
-    "text": "What’s happening?\n\ns passes “out of scope” once its value is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types.\n\nIt is unbounded types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least)."
-  },
-  {
-    "objectID": "00_derust.rjs.html#clone",
-    "href": "00_derust.rjs.html#clone",
-    "title": "Derust",
-    "section": "Clone",
-    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++"
-  },
-  {
-    "objectID": "00_derust.rjs.html#example",
-    "href": "00_derust.rjs.html#example",
-    "title": "Derust",
-    "section": "Example",
-    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#today-1",
-    "href": "00_derust.rjs.html#today-1",
-    "title": "Derust",
-    "section": "Today",
-    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
   },
   {
     "objectID": "00_derust.html",
@@ -1139,10 +657,757 @@
     ]
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "OS in Rust",
+    "objectID": "00_derust.rjs.html#announcements",
+    "href": "00_derust.rjs.html#announcements",
+    "title": "Derust",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nWe’ll use CSSA.\n\nSet up Linux/Rust/Git."
+  },
+  {
+    "objectID": "00_derust.rjs.html#homework",
+    "href": "00_derust.rjs.html#homework",
+    "title": "Derust",
+    "section": "Homework",
+    "text": "Homework\n\nThe first homework, wc, is ready now.\n\nMostly just Rust practice.\n\nDue Friday, 23 Jan at 1440 PT.\n\nFriday of next week."
+  },
+  {
+    "objectID": "00_derust.rjs.html#today",
+    "href": "00_derust.rjs.html#today",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
+  },
+  {
+    "objectID": "00_derust.rjs.html#it-me",
+    "href": "00_derust.rjs.html#it-me",
+    "title": "Derust",
+    "section": "It me",
+    "text": "It me\n\nName\n\n(Prof. )?Calvin\n\nCredentials\n\nB.A. Mathematics\nB.S., M.S., Ph.D. Computer Science\n\nPronouns\n\nthey/them"
+  },
+  {
+    "objectID": "00_derust.rjs.html#the-great-work",
+    "href": "00_derust.rjs.html#the-great-work",
+    "title": "Derust",
+    "section": "The Great Work",
+    "text": "The Great Work\n\nThesis Title\n\nMining Secure Behavior of Hardware Designs\n\nPlain English\n\nJust as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs."
+  },
+  {
+    "objectID": "00_derust.rjs.html#course-format",
+    "href": "00_derust.rjs.html#course-format",
+    "title": "Derust",
+    "section": "Course Format",
+    "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce."
+  },
+  {
+    "objectID": "00_derust.rjs.html#grade-policy",
+    "href": "00_derust.rjs.html#grade-policy",
+    "title": "Derust",
+    "section": "Grade Policy",
+    "text": "Grade Policy\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
+  },
+  {
+    "objectID": "00_derust.rjs.html#specification-grading",
+    "href": "00_derust.rjs.html#specification-grading",
+    "title": "Derust",
+    "section": "Specification Grading",
+    "text": "Specification Grading\n\nBasically, I will assign some stuff but you don’t have to do all of it perfectly.\n\nNo partial credit, everything is boolean grading.\n\nI took distributions over final, midterm, and Lab/HW"
+  },
+  {
+    "objectID": "00_derust.rjs.html#it-pays-to-get-as",
+    "href": "00_derust.rjs.html#it-pays-to-get-as",
+    "title": "Derust",
+    "section": "It pays to get A’s",
+    "text": "It pays to get A’s\n\n\n\nGrade\nRequirements\n\n\n\n\nA\nFinal meets spec\n\n\nA\n90% ave HW/Lab/Midterm, Final compiles\n\n\nA-\n90% ave HW/Lab, Midterm/Final compile\n\n\nA-\nMidterm meets spec, Final compiles"
+  },
+  {
+    "objectID": "00_derust.rjs.html#but-bs-are-the-knees",
+    "href": "00_derust.rjs.html#but-bs-are-the-knees",
+    "title": "Derust",
+    "section": "But B’s are the Knees",
+    "text": "But B’s are the Knees\n\n\n\nGrade\nRequirements\n\n\n\n\nB+\n90% ave HW/Lab, Midterm compiles\n\n\nB\n80% ave HW/Lab, Midterm compiles\n\n\nB-\n80% ave HW/Lab"
+  },
+  {
+    "objectID": "00_derust.rjs.html#these-may-earn-degrees",
+    "href": "00_derust.rjs.html#these-may-earn-degrees",
+    "title": "Derust",
+    "section": "These may (???) earn degrees",
+    "text": "These may (???) earn degrees\n\n\n\nGrade\nRequirements\n\n\n\n\nC\n80% ave Lab\n\n\nD\n60% ave Lab\n\n\nF\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#lab-grading",
+    "href": "00_derust.rjs.html#lab-grading",
+    "title": "Derust",
+    "section": "Lab Grading",
+    "text": "Lab Grading\n\n“A” (=100%)\n\nMeets spec by end of class\n\n“B” (=90%)\n\nCompiles at end of class\n\n“F” (=0%)\n\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#hw-grading",
+    "href": "00_derust.rjs.html#hw-grading",
+    "title": "Derust",
+    "section": "HW Grading",
+    "text": "HW Grading\n\n“A” (=100%)\n\nOn time\nPasses autograder.\n\nI lack confidence I can make excellent autograders for all stages, so give me some grace here.\n\n\n“B” (=90%)\n\nOn time\nCompiles\n\n“F” (=0%)\n\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#final",
+    "href": "00_derust.rjs.html#final",
+    "title": "Derust",
+    "section": "Final",
+    "text": "Final\n\nCreate, document, and publish an operating system… in Rust!\n\nFree-standing binary\nFaults/exceptions/interrupts\nMemory management"
+  },
+  {
+    "objectID": "00_derust.rjs.html#late-work-policy",
+    "href": "00_derust.rjs.html#late-work-policy",
+    "title": "Derust",
+    "section": "Late Work Policy",
+    "text": "Late Work Policy\n\nLate work is not accepted.\n\nNo exceptions.\nThe specification grading framework incorpates tolerances.\nAn OS that meets spec by end-of-term is an A, always."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ai-policy",
+    "href": "00_derust.rjs.html#ai-policy",
+    "title": "Derust",
+    "section": "AI Policy",
+    "text": "AI Policy\n\nI would be shocked if it is helpful to you.\nIf you think it is helpful, that is probably not a good sign.\nYou can use it (I wouldn’t)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#collaboration-policy",
+    "href": "00_derust.rjs.html#collaboration-policy",
+    "title": "Derust",
+    "section": "Collaboration Policy",
+    "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn."
+  },
+  {
+    "objectID": "00_derust.rjs.html#a-la-151",
+    "href": "00_derust.rjs.html#a-la-151",
+    "title": "Derust",
+    "section": "a la 151",
+    "text": "a la 151\n\nThis term we will have sections\nMeet Friday 1310-1440\nMeant to help unpack learning in class and work on homework.\nSingle section/section-leader (Jimmy)\nMiss more than 4 sections and drop one “bin” on specification grading.\n\nUnless excused."
+  },
+  {
+    "objectID": "00_derust.rjs.html#the-hard-part",
+    "href": "00_derust.rjs.html#the-hard-part",
+    "title": "Derust",
+    "section": "The Hard Part",
+    "text": "The Hard Part\n\nAfter ~10 years of systems research I’ve convinced myself only two things really matter:\n\nReferences, and\nRecursion\n\nRecursion isn’t too bad…\n\n&gt;&gt;&gt; exp = lambda b, n : b if n == 1 else b*exp(b,n-1)\n&gt;&gt;&gt; exp(2,8)\n256\n\nCovered in 271 and possibly 351 and no longer interesting on its own, though will be used."
+  },
+  {
+    "objectID": "00_derust.rjs.html#references",
+    "href": "00_derust.rjs.html#references",
+    "title": "Derust",
+    "section": "References",
+    "text": "References\n\nReferences are a beast, but without them nothing makes sense!\n\n\n\n&gt;&gt;&gt; x = 1\n&gt;&gt;&gt; def addx():\n...     x += 1\n...\n&gt;&gt;&gt; addx()\nUnboundLocalError:\n&lt;blah blah blah error messages&gt;\n\n&gt;&gt;&gt; x = [1]\n&gt;&gt;&gt; def addx():\n...     x[0] += 1\n...\n&gt;&gt;&gt; addx()\n&gt;&gt;&gt; x\n[2]"
+  },
+  {
+    "objectID": "00_derust.rjs.html#insight",
+    "href": "00_derust.rjs.html#insight",
+    "title": "Derust",
+    "section": "Insight",
+    "text": "Insight\n\nDefinition:\n\nReferences: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.\n\nImportance:\n\nThis key-value storage is a service provided by the operating system!"
+  },
+  {
+    "objectID": "00_derust.rjs.html#python-and-oses",
+    "href": "00_derust.rjs.html#python-and-oses",
+    "title": "Derust",
+    "section": "Python and OSes",
+    "text": "Python and OSes\n\nWhy not .py (.js, .java, .cs, .cpp, etc)?\n\nThese languages assume an underlying OS (or VM or browser).\nThere is more to life than running code other people wrote.\nGood languages (except Java) but not for us\nThe other systems language is C (and maybe C++)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-and-references",
+    "href": "00_derust.rjs.html#rust-and-references",
+    "title": "Derust",
+    "section": "Rust and References",
+    "text": "Rust and References\n\nRust:\n\nObscures references, but…\nDoes not obscure memory.\n\nThis is good!\n\nMemory matters, but pointers are historical accident.\n\nYou should probably use Rust in every application where correctness or performance matters."
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-and-recursion",
+    "href": "00_derust.rjs.html#rust-and-recursion",
+    "title": "Derust",
+    "section": "Rust and Recursion",
+    "text": "Rust and Recursion\n\nSeparately, Rust is built on one of the most exciting ongoing computer science research efforts:\nLLVM (stands for LLVM)\nBasically, a way of turning human-readable code into machine-executable code.\n\nVery good at turning recursion into iteration and/or vice versa.\n\nThis term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS."
+  },
+  {
+    "objectID": "00_derust.rjs.html#citation",
+    "href": "00_derust.rjs.html#citation",
+    "title": "Derust",
+    "section": "Citation",
+    "text": "Citation\n\nWe will follow “Philipp Oppermann’s blog” “Writing an OS in Rust” version 2.\nRead more."
+  },
+  {
+    "objectID": "00_derust.rjs.html#bare-bones",
+    "href": "00_derust.rjs.html#bare-bones",
+    "title": "Derust",
+    "section": "Bare Bones",
+    "text": "Bare Bones\n\nA binary that doesn’t require an underlying OS.\nSomething that (1) runs and (2) prints.\nSimple I/O\nUnit and integration testing."
+  },
+  {
+    "objectID": "00_derust.rjs.html#interrupts",
+    "href": "00_derust.rjs.html#interrupts",
+    "title": "Derust",
+    "section": "Interrupts",
+    "text": "Interrupts\n\nCPU Exceptions\n\nLike division by zero.\n\nDouble faults\n\nFaults while handling a fault.\n\nHardware interrupts\n\nLike I/O"
+  },
+  {
+    "objectID": "00_derust.rjs.html#memory-management",
+    "href": "00_derust.rjs.html#memory-management",
+    "title": "Derust",
+    "section": "Memory Management",
+    "text": "Memory Management\n\nPaging\nPage tables\n\nTogether, how to find things you saved for a while.\n\nThe heap\nHeap allocation.\n\nTogether, how to find things you saved while working."
+  },
+  {
+    "objectID": "00_derust.rjs.html#final-examproject",
+    "href": "00_derust.rjs.html#final-examproject",
+    "title": "Derust",
+    "section": "Final Exam/Project",
+    "text": "Final Exam/Project\n\nImplement Minimal OS in Rust\n\nIndividual\nUnder version control\nCompiles and runs and is tested"
+  },
+  {
+    "objectID": "00_derust.rjs.html#vim",
+    "href": "00_derust.rjs.html#vim",
+    "title": "Derust",
+    "section": "Vim",
+    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected of you in life.\nI will live-code in vim probably.\n\nThis will be painful, but that is okay."
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features",
+    "href": "00_derust.rjs.html#rust-features",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options",
+    "href": "00_derust.rjs.html#options",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nSometimes code makes sense.\nMAD\n\nfrom numpy import uint64\n\n# Multiply-add operation\ndef mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a + b * c"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-1",
+    "href": "00_derust.rjs.html#options-1",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nSometimes it doesn’t.\nThis needn’t return a positive value!\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a - b * c"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-2",
+    "href": "00_derust.rjs.html#options-2",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-3",
+    "href": "00_derust.rjs.html#options-3",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\nfrom typing import Union\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-4",
+    "href": "00_derust.rjs.html#options-4",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nEver wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-1",
+    "href": "00_derust.rjs.html#rust-features-1",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#results",
+    "href": "00_derust.rjs.html#results",
+    "title": "Derust",
+    "section": "Results",
+    "text": "Results\n\nResults are basically options that incorporate error handling.\n\n// Linux Kernel Versions, latest is 6\nfn check_version(val: u8) -&gt; Result&lt;u8, &'static str&gt; {\n    if val &lt; 7 {\n        return Ok(val);\n    } else {\n        return Err(\"Not yet released.\")\n    }\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#check-it",
+    "href": "00_derust.rjs.html#check-it",
+    "title": "Derust",
+    "section": "Check it",
+    "text": "Check it\n\nAdd main.\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    dbg!(check_version(4));\n    dbg!(check_version(7));\n}\n\n\ncargo r\n\n[src/main.rs:10:5] check_version(4) = Ok(\n    4,\n)\n[src/main.rs:11:5] check_version(7) = Err(\n    \"Not yet released.\",\n)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-2",
+    "href": "00_derust.rjs.html#rust-features-2",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#std",
+    "href": "00_derust.rjs.html#std",
+    "title": "Derust",
+    "section": "std",
+    "text": "std\n\nOptions, results, and more fun things, like vectors, are all part of std\n\n\nThe Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like Vec&lt;T&gt; and Option&lt;T&gt;, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things."
+  },
+  {
+    "objectID": "00_derust.rjs.html#iterators",
+    "href": "00_derust.rjs.html#iterators",
+    "title": "Derust",
+    "section": "Iterators",
+    "text": "Iterators\n\nAn iterator is pretty much a for-each loop, the Python loop type.\n\nlet v1 = vec![1, 2, 3];\n\nlet v1_iter = v1.iter();\n\nfor val in v1_iter {\n    println!(\"Got: {val}\");\n}\n\nOh look, vec! from std"
+  },
+  {
+    "objectID": "00_derust.rjs.html#closures",
+    "href": "00_derust.rjs.html#closures",
+    "title": "Derust",
+    "section": "Closures",
+    "text": "Closures\n\nA closure is pretty much a lambda function, like the Python lambda keyword.\n\nfn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }\nlet add_one_v2 = |x: u32| -&gt; u32 { x + 1 };\nlet add_one_v3 = |x|             { x + 1 };\nlet add_one_v4 = |x|               x + 1  ;\n\nNo one can stop you from writing fn’s, not even people who actually know Rust!"
+  },
+  {
+    "objectID": "00_derust.rjs.html#pattern-matching",
+    "href": "00_derust.rjs.html#pattern-matching",
+    "title": "Derust",
+    "section": "Pattern Matching",
+    "text": "Pattern Matching\n\nThe language designers intend options (and results) to be handled as follows:\n\nfn main() {\n    let s = \"Hello, world\";\n    match s.chars().nth(11) {\n        Some(c) =&gt; println!(\"The 11th character is {:?}\", c),\n        None =&gt; println!(\"String `s` is fewer than 11 characters in length\"),\n    }\n}\n\nBasically, if-else is “un-Rust-like” most of the time."
+  },
+  {
+    "objectID": "00_derust.rjs.html#formatting",
+    "href": "00_derust.rjs.html#formatting",
+    "title": "Derust",
+    "section": "Formatting",
+    "text": "Formatting\n\nprint!, println!, and format! are all nice ways to work with strings.\nHandy if you are an OS and want to interface with a human.\nAssuming you (the OS) know how to display text.\n\nWe’ll get there.\n\n\nformat!(\"test\");                             // =&gt; \"test\"\nformat!(\"hello {}\", \"world!\");               // =&gt; \"hello world!\"\nformat!(\"x = {}, y = {val}\", 10, val = 30);  // =&gt; \"x = 10, y = 30\"\nlet (x, y) = (1, 2);\nformat!(\"{x} + {y} = 3\");                    // =&gt; \"1 + 2 = 3\"\n\nSimilar to Python f-strings and also every other language."
+  },
+  {
+    "objectID": "00_derust.rjs.html#read-more",
+    "href": "00_derust.rjs.html#read-more",
+    "title": "Derust",
+    "section": "Read More",
+    "text": "Read More\n\nI use most of these language features in two extended examples.\n\nHex reader\nFibonacci"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-3",
+    "href": "00_derust.rjs.html#rust-features-3",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#ownership",
+    "href": "00_derust.rjs.html#ownership",
+    "title": "Derust",
+    "section": "Ownership",
+    "text": "Ownership\n\nBig topic.\nBig deal.\nLearn by doing.\nQuick example."
+  },
+  {
+    "objectID": "00_derust.rjs.html#size",
+    "href": "00_derust.rjs.html#size",
+    "title": "Derust",
+    "section": "Size",
+    "text": "Size\n\nVersus e.g. u8 which was a fixed size.\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ownership-rules",
+    "href": "00_derust.rjs.html#ownership-rules",
+    "title": "Derust",
+    "section": "Ownership Rules",
+    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped."
+  },
+  {
+    "objectID": "00_derust.rjs.html#scope",
+    "href": "00_derust.rjs.html#scope",
+    "title": "Derust",
+    "section": "Scope",
+    "text": "Scope\n\nQuoth Rust Book:\n\n{                      // s is not valid here, since it's not yet declared\n    let s = \"hello\";   // s is valid from this point forward\n\n    // do stuff with s\n}                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.\nThink: Address of building that hasn’t been made/has been condemned."
+  },
+  {
+    "objectID": "00_derust.rjs.html#capital-s-string",
+    "href": "00_derust.rjs.html#capital-s-string",
+    "title": "Derust",
+    "section": "Capital S String",
+    "text": "Capital S String\n\nCapital S String is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not."
+  },
+  {
+    "objectID": "00_derust.rjs.html#its-confusing",
+    "href": "00_derust.rjs.html#its-confusing",
+    "title": "Derust",
+    "section": "It’s confusing",
+    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#whats-happening",
+    "href": "00_derust.rjs.html#whats-happening",
+    "title": "Derust",
+    "section": "What’s happening?",
+    "text": "What’s happening?\n\ns passes “out of scope” once its value is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types.\n\nIt is unbounded types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least)."
+  },
+  {
+    "objectID": "00_derust.rjs.html#clone",
+    "href": "00_derust.rjs.html#clone",
+    "title": "Derust",
+    "section": "Clone",
+    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++"
+  },
+  {
+    "objectID": "00_derust.rjs.html#example",
+    "href": "00_derust.rjs.html#example",
+    "title": "Derust",
+    "section": "Example",
+    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#today-1",
+    "href": "00_derust.rjs.html#today-1",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
+  },
+  {
+    "objectID": "01_wc.html",
+    "href": "01_wc.html",
+    "title": "Rustup",
     "section": "",
-    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nxor list\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\nFinal OS due whenever the final exam would finish, TBA\n\n\nLecture Recordings\nForthcoming"
+    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#announcements",
+    "href": "01_wc.html#announcements",
+    "title": "Rustup",
+    "section": "",
+    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#homework",
+    "href": "01_wc.html#homework",
+    "title": "Rustup",
+    "section": "Homework",
+    "text": "Homework\n\n“Minigrep” is just this lab but more complete.\n\nWindows officially no longer supported.\n\nDue Friday, 23 Jan. at 1440 ET.\n\nPlan to hang out as a class 1310-1440 on Fridays, probably.",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#setup",
+    "href": "01_wc.html#setup",
+    "title": "Rustup",
+    "section": "Setup",
+    "text": "Setup\n\nIf you are stuck setting up Rust, following this\nAt the end you should have:\n\ncargo, git, and at least one of gcc or clang on your system.\nA repository named 371os on Github that is either (1) public or (2) shared with [cd-public](https://github.com/cd-public",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#requirements",
+    "href": "01_wc.html#requirements",
+    "title": "Rustup",
+    "section": "Requirements",
+    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and no options.\n\nThat is, you must support wc src/main.rs but not wc --files0-from=F src/main.rs\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#repository",
+    "href": "01_wc.html#repository",
+    "title": "Rustup",
+    "section": "Repository",
+    "text": "Repository\n\nCreate a repository for this class.\nRequirements\n\nName is 371os\nMay be public or private to you and me (cd-public).\n\nRead more\n\nMust email me a link to your repository from your @willamette.edu email, e.g.:\n\nhttps://github.com/cd-example/371os\nIf you’re stuck, read more here",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#crate",
+    "href": "01_wc.html#crate",
+    "title": "Rustup",
+    "section": "Crate",
+    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 01 in your 371os repository.\n\ncargo new 01 --name my_wc --vcs none\n\nIf you’re stuck, read more here",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#wc",
+    "href": "01_wc.html#wc",
+    "title": "Rustup",
+    "section": "wc",
+    "text": "wc\n\nImplement the minimal base functionality of wc using this crate.\n\n\nFull functionality\n\nHere is wc --help\nYou do not need to do all of this!\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRequired functionality\n\nThat is more than required, you need only implement:\n\nUsage: wc [FILE]\nPrint newline, word, and byte counts for each FILE. A word is a \nnon-zero-length sequence of characters delimited by white space.\n\nThis can be trivially tested with some of the following:\n\n$ wc src/main.rs\n 12  30 229 src/main.rs\n$ cargo build release\n$ ./target/release/my_wc src/main.rs\n 12  30 229 src/main.rs\n\nYour src/main.rs need not be of any particular size, and you needn’t implement all code within src/main.rs, but you should get the same counts from wc and from your release binary.",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#helpful-reference",
+    "href": "01_wc.html#helpful-reference",
+    "title": "Rustup",
+    "section": "Helpful Reference",
+    "text": "Helpful Reference\n\nWhen working on projects like this, I almost always have the following reference material open.\nread_lines - Rust By Example\n\n\nfn read_lines(filename: &str) -&gt; Vec&lt;String&gt; {\n    let mut result = Vec::new();\n\n    for line in std::fs::read_to_string(filename).unwrap().lines() {\n        result.push(line.to_string())\n    }\n\n    result\n}",
+    "crumbs": [
+      "Rustup"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#announcements",
+    "href": "11_unsafe.rjs.html#announcements",
+    "title": "Unsafe",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#today",
+    "href": "11_unsafe.rjs.html#today",
+    "title": "Unsafe",
+    "section": "Today",
+    "text": "Today\n\nDereference a raw pointer.\nCall an unsafe function or method.\nAccess or modify a mutable static variable.\nImplement an unsafe trait.\nAccess fields of unions."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#the-dark-arts-of-unsafe-rust",
+    "href": "11_unsafe.rjs.html#the-dark-arts-of-unsafe-rust",
+    "title": "Unsafe",
+    "section": "The Dark Arts of Unsafe Rust",
+    "text": "The Dark Arts of Unsafe Rust\n\nTHE KNOWLEDGE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#motivation",
+    "href": "11_unsafe.rjs.html#motivation",
+    "title": "Unsafe",
+    "section": "Motivation",
+    "text": "Motivation\n\nOften we don’t worry about low-level implementation details.\n\nHow many bits is an integer in Python?\nHow many bits is this array in Rust?\n\n\nlet mut array: [i32; 3] = [0; 3];\n\nWho could possibly care how much space the empty tuple occupies?"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#sometimes-it-matters",
+    "href": "11_unsafe.rjs.html#sometimes-it-matters",
+    "title": "Unsafe",
+    "section": "Sometimes it matters…",
+    "text": "Sometimes it matters…\n\nThe most common reason is performance, but\nMore importantly, these details can become a matter of correctness when interfacing directly with\n\nhardware,\noperating systems, or\nother languages (by which we mean C)"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#legacy",
+    "href": "11_unsafe.rjs.html#legacy",
+    "title": "Unsafe",
+    "section": "Legacy",
+    "text": "Legacy\nWhen implementation details start to matter in a safe programming language, programmers usually have three options:\n\nfiddle with the code to “encourage” the compiler/runtime to perform an optimization\nadopt a more unidiomatic or cumbersome design to get the desired implementation\nrewrite the implementation in a language that lets you deal with those details"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#rust-on-c",
+    "href": "11_unsafe.rjs.html#rust-on-c",
+    "title": "Unsafe",
+    "section": "Rust on C",
+    "text": "Rust on C\n\nUnfortunately, C is incredibly unsafe to use (sometimes for good reason), and this unsafety is magnified when trying to interoperate with another language. Care must be taken to ensure C and the other language agree on what’s happening, and that they don’t step on each other’s toes."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#both-and",
+    "href": "11_unsafe.rjs.html#both-and",
+    "title": "Unsafe",
+    "section": "Both, and",
+    "text": "Both, and\n\nSo what does this have to do with Rust?\n\nWell, unlike C, Rust is a safe programming language.\nBut, like C, Rust is an unsafe programming language.\n\nMore accurately, Rust contains both a safe and unsafe programming language.\n\n\nRust can be thought of as a combination of two programming languages: Safe Rust and Unsafe Rust."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#safe-rust",
+    "href": "11_unsafe.rjs.html#safe-rust",
+    "title": "Unsafe",
+    "section": "Safe Rust",
+    "text": "Safe Rust\n\nThe default case\nWhat we’ve used to far, at least officially\n\nYou may have incidentally dabbled in unsafe.\nGood for you.\n\nSafe Rust only really makes one guarantee.\n\n\nRust’s memory safety guarantees enforced at compile time\n\n\nThat is, you can never try to read something that doesn’t exist."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#unsafe-rust",
+    "href": "11_unsafe.rjs.html#unsafe-rust",
+    "title": "Unsafe",
+    "section": "Unsafe Rust",
+    "text": "Unsafe Rust\n\nSometimes, you may want to have two reference to an object that are both mutable.\n\nFor example, if you are implementing a suffix tree, a task I didn’t assign last term because it was miserable in safe Rust.\n\nSometimes, you want to do so in a way that can’t possibly break anything.\n\nFor example, you may only be using provably correct algorithms (whatever that means).\nBut of course, rustc isn’t a theorem prover, it’s a compiler, so it can’t tell."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#warning",
+    "href": "11_unsafe.rjs.html#warning",
+    "title": "Unsafe",
+    "section": "Warning",
+    "text": "Warning\n\nUnsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us do some really unsafe things. Things the Rust authors will implore you not to do, but we’ll do anyway."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#true-rust",
+    "href": "11_unsafe.rjs.html#true-rust",
+    "title": "Unsafe",
+    "section": "True Rust",
+    "text": "True Rust\n\nSafe Rust is the true Rust programming language.\nIf all you do is write Safe Rust, you will never have to worry about type-safety or memory-safety.\nYou will never endure\n\na dangling pointer,\na use-after-free, or\nany other kind of Undefined Behavior (a.k.a. UB)."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#std",
+    "href": "11_unsafe.rjs.html#std",
+    "title": "Unsafe",
+    "section": "std",
+    "text": "std\n\nThe standard library also gives you enough utilities out of the box that you’ll be able to write high-performance applications and libraries in pure idiomatic Safe Rust.\nAssuming, of course, you are working on a system where std is already implemented.\nNot, you know, writing your own OS or own std."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#twinsies",
+    "href": "11_unsafe.rjs.html#twinsies",
+    "title": "Unsafe",
+    "section": "Twinsies",
+    "text": "Twinsies\n\nUnsafe Rust is exactly like Safe Rust with all the same rules and semantics.\nIt just lets you do some extra things that are Definitely Not Safe."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#payoffs",
+    "href": "11_unsafe.rjs.html#payoffs",
+    "title": "Unsafe",
+    "section": "Payoffs",
+    "text": "Payoffs\n\nThe value of this separation is that we gain the benefits of using an unsafe language like C — low level control over implementation details — …without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.\n\nThere are still some problems — most notably, we must become aware of properties that the type system assumes and audit them in any code that interacts with Unsafe Rust. That’s the purpose of this book: to teach you about these assumptions and how to manage them."
+  },
+  {
+    "objectID": "11_unsafe.html",
+    "href": "11_unsafe.html",
+    "title": "Unsafe",
+    "section": "",
+    "text": "Welcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#announcements",
+    "href": "11_unsafe.html#announcements",
+    "title": "Unsafe",
+    "section": "",
+    "text": "Welcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#today",
+    "href": "11_unsafe.html#today",
+    "title": "Unsafe",
+    "section": "Today",
+    "text": "Today\n\nDereference a raw pointer.\nCall an unsafe function or method.\nAccess or modify a mutable static variable.\nImplement an unsafe trait.\nAccess fields of unions.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#the-dark-arts-of-unsafe-rust",
+    "href": "11_unsafe.html#the-dark-arts-of-unsafe-rust",
+    "title": "Unsafe",
+    "section": "The Dark Arts of Unsafe Rust",
+    "text": "The Dark Arts of Unsafe Rust\n\nTHE KNOWLEDGE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#motivation",
+    "href": "11_unsafe.html#motivation",
+    "title": "Unsafe",
+    "section": "Motivation",
+    "text": "Motivation\n\nOften we don’t worry about low-level implementation details.\n\nHow many bits is an integer in Python?\nHow many bits is this array in Rust?\n\n\nlet mut array: [i32; 3] = [0; 3];\n\nWho could possibly care how much space the empty tuple occupies?",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#sometimes-it-matters",
+    "href": "11_unsafe.html#sometimes-it-matters",
+    "title": "Unsafe",
+    "section": "Sometimes it matters…",
+    "text": "Sometimes it matters…\n\nThe most common reason is performance, but\nMore importantly, these details can become a matter of correctness when interfacing directly with\n\nhardware,\noperating systems, or\nother languages (by which we mean C)",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#legacy",
+    "href": "11_unsafe.html#legacy",
+    "title": "Unsafe",
+    "section": "Legacy",
+    "text": "Legacy\nWhen implementation details start to matter in a safe programming language, programmers usually have three options:\n\nfiddle with the code to “encourage” the compiler/runtime to perform an optimization\nadopt a more unidiomatic or cumbersome design to get the desired implementation\nrewrite the implementation in a language that lets you deal with those details",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#rust-on-c",
+    "href": "11_unsafe.html#rust-on-c",
+    "title": "Unsafe",
+    "section": "Rust on C",
+    "text": "Rust on C\n\nUnfortunately, C is incredibly unsafe to use (sometimes for good reason), and this unsafety is magnified when trying to interoperate with another language. Care must be taken to ensure C and the other language agree on what’s happening, and that they don’t step on each other’s toes.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#both-and",
+    "href": "11_unsafe.html#both-and",
+    "title": "Unsafe",
+    "section": "Both, and",
+    "text": "Both, and\n\nSo what does this have to do with Rust?\n\nWell, unlike C, Rust is a safe programming language.\nBut, like C, Rust is an unsafe programming language.\n\nMore accurately, Rust contains both a safe and unsafe programming language.\n\n\nRust can be thought of as a combination of two programming languages: Safe Rust and Unsafe Rust.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#safe-rust",
+    "href": "11_unsafe.html#safe-rust",
+    "title": "Unsafe",
+    "section": "Safe Rust",
+    "text": "Safe Rust\n\nThe default case\nWhat we’ve used to far, at least officially\n\nYou may have incidentally dabbled in unsafe.\nGood for you.\n\nSafe Rust only really makes one guarantee.\n\n\nRust’s memory safety guarantees enforced at compile time\n\n\nThat is, you can never try to read something that doesn’t exist.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#unsafe-rust",
+    "href": "11_unsafe.html#unsafe-rust",
+    "title": "Unsafe",
+    "section": "Unsafe Rust",
+    "text": "Unsafe Rust\n\nSometimes, you may want to have two reference to an object that are both mutable.\n\nFor example, if you are implementing a suffix tree, a task I didn’t assign last term because it was miserable in safe Rust.\n\nSometimes, you want to do so in a way that can’t possibly break anything.\n\nFor example, you may only be using provably correct algorithms (whatever that means).\nBut of course, rustc isn’t a theorem prover, it’s a compiler, so it can’t tell.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#warning",
+    "href": "11_unsafe.html#warning",
+    "title": "Unsafe",
+    "section": "Warning",
+    "text": "Warning\n\nUnsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us do some really unsafe things. Things the Rust authors will implore you not to do, but we’ll do anyway.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#true-rust",
+    "href": "11_unsafe.html#true-rust",
+    "title": "Unsafe",
+    "section": "True Rust",
+    "text": "True Rust\n\nSafe Rust is the true Rust programming language.\nIf all you do is write Safe Rust, you will never have to worry about type-safety or memory-safety.\nYou will never endure\n\na dangling pointer,\na use-after-free, or\nany other kind of Undefined Behavior (a.k.a. UB).",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#std",
+    "href": "11_unsafe.html#std",
+    "title": "Unsafe",
+    "section": "std",
+    "text": "std\n\nThe standard library also gives you enough utilities out of the box that you’ll be able to write high-performance applications and libraries in pure idiomatic Safe Rust.\nAssuming, of course, you are working on a system where std is already implemented.\nNot, you know, writing your own OS or own std.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#twinsies",
+    "href": "11_unsafe.html#twinsies",
+    "title": "Unsafe",
+    "section": "Twinsies",
+    "text": "Twinsies\n\nUnsafe Rust is exactly like Safe Rust with all the same rules and semantics.\nIt just lets you do some extra things that are Definitely Not Safe.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#payoffs",
+    "href": "11_unsafe.html#payoffs",
+    "title": "Unsafe",
+    "section": "Payoffs",
+    "text": "Payoffs\n\nThe value of this separation is that we gain the benefits of using an unsafe language like C — low level control over implementation details — …without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.\n\nThere are still some problems — most notably, we must become aware of properties that the type system assumes and audit them in any code that interacts with Unsafe Rust. That’s the purpose of this book: to teach you about these assumptions and how to manage them.",
+    "crumbs": [
+      "Unsafe"
+    ]
   }
 ]

@@ -1,0 +1,135 @@
+---
+title: Unsafe
+---
+
+## Announcements
+
+- **Welcome** to OS in Rust
+- **Action Items**:
+  - `wc` ongoing.
+  - Due Friday, 5 Sept. at 1440 PT.
+  - No novel homework this week (partial week)
+
+## Today
+
+1. Dereference a raw pointer.
+1. Call an unsafe function or method.
+1. Access or modify a mutable static variable.
+1. Implement an unsafe trait.
+1. Access fields of `union`s.
+
+# Unsafe
+
+## The Dark Arts of Unsafe Rust
+
+> THE KNOWLEDGE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS.
+
+## Motivation
+
+- Often we don't worry about low-level implementation details.
+    - How many bits is an integer in Python?
+    - How many bits is this array in Rust?
+
+```{.rs}
+let mut array: [i32; 3] = [0; 3];
+``` 
+- Who could possibly care how much space the empty tuple occupies? 
+
+## Sometimes it matters...
+
+- The most common reason is performance, but 
+- More importantly, these details can become a matter of correctness when interfacing
+directly with 
+    - hardware, 
+    - operating systems, or 
+    - other languages (by which we mean C)
+
+## Legacy
+
+When implementation details start to matter in a safe programming language,
+programmers usually have three options:
+
+* fiddle with the code to "encourage" the compiler/runtime to perform an optimization
+* adopt a more unidiomatic or cumbersome design to get the desired implementation
+* rewrite the implementation in a language  that lets you deal with those details
+
+## Rust on C
+
+> Unfortunately, C is incredibly unsafe to use (sometimes for good reason),
+and this unsafety is magnified when trying to interoperate with another
+language. Care must be taken to ensure C and the other language agree on
+what's happening, and that they don't step on each other's toes.
+
+## Both, and
+
+- So what does this have to do with Rust?
+    - Well, unlike C, Rust is a safe programming language.
+    - But, like C, Rust is an unsafe programming language.
+- More accurately, Rust *contains* both a safe and unsafe programming language.
+
+> Rust can be thought of as a combination of two programming languages: *Safe
+Rust* and *Unsafe Rust*. 
+
+## Safe Rust
+
+- The default case
+- What we've used to far, at least officially
+    - You may have incidentally dabbled in unsafe.
+    - Good for you.
+- Safe Rust only really makes *one* guarantee.
+
+> Rust’s memory safety guarantees enforced at compile time
+
+- That is, you can never try to read something that doesn't exist.
+
+## Unsafe Rust
+
+- Sometimes, you may want to have two reference to an object that are both mutable.
+    - For example, if you are implementing a suffix tree, a task I didn't assign last term because it was *miserable* in safe Rust.
+- Sometimes, you want to do so in a way that can't possibly break anything.
+    - For example, you may only be using provably correct algorithms (whatever that means).
+    - But of course, `rustc` isn't a theorem prover, it's a compiler, so it can't tell.
+    
+## Warning
+
+> Unsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us
+do some *really* unsafe things. Things the Rust authors will implore you not to
+do, but we'll do anyway.
+
+## True Rust
+
+- Safe Rust is the *true* Rust programming language. 
+- If all you do is write Safe
+Rust, you will never have to worry about type-safety or memory-safety. 
+- You will
+never endure 
+    - a dangling pointer, 
+    - a use-after-free, or 
+    - any other kind of Undefined Behavior (a.k.a. UB).
+    
+## `std`
+
+- The standard library also gives you enough utilities out of the box that you'll
+be able to write high-performance applications and libraries in pure idiomatic
+Safe Rust.
+- Assuming, of course, you are working on a system where `std` is already implemented.
+- Not, you know, writing your own OS or own `std`.
+
+## Twinsies
+
+- Unsafe Rust is exactly like Safe Rust with all the same rules and semantics.
+- It just lets you do some *extra* things that are Definitely Not Safe.
+
+## Payoffs
+
+- The value of this separation is that we gain the benefits of using an unsafe
+language like C 
+    — low level control over implementation details 
+— ...without most (citation needed)
+of the problems that come with trying to integrate it with a completely
+different safe language.
+
+There are still some problems — most notably, we must become aware of properties
+that the type system assumes and audit them in any code that interacts with
+Unsafe Rust. That's the purpose of this book: to teach you about these assumptions
+and how to manage them.

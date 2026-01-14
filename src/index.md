@@ -48,6 +48,25 @@ format: html
 |0xD|04/20|Allocators|[`None`](https://my.willamette.edu/site/ssrd)||
 |0xE|04/29|`async`||`None`|
 
+<!--
+os
+    wc
+        ANY wc is lab
+        add options for HW
+        
+    unsafe (from book)
+        hw is xorlist, no lab
+        
+    binary
+        lab is linker
+        hw is do it
+
+    kernel
+        lab is qemu
+        hw is do it
+
+-->
+
 *Final OS due whenever the final exam would finish, TBA*
 
 
