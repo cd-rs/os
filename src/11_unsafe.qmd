@@ -12,11 +12,8 @@ title: Unsafe
 
 ## Today
 
-1. Dereference a raw pointer.
-1. Call an unsafe function or method.
-1. Access or modify a mutable static variable.
-1. Implement an unsafe trait.
-1. Access fields of `union`s.
+- Unsafe
+- UB
 
 # Unsafe
 
@@ -88,7 +85,7 @@ Rust* and *Unsafe Rust*.
     - For example, if you are implementing a suffix tree, a task I didn't assign last term because it was *miserable* in safe Rust.
 - Sometimes, you want to do so in a way that can't possibly break anything.
     - For example, you may only be using provably correct algorithms (whatever that means).
-    - But of course, `rustc` isn't a theorem prover, it's a compiler, so it can't tell.
+    - But of course, `rustc` isn't a theorem prover...
     
 ## Warning
 
@@ -106,7 +103,9 @@ never endure
     - a dangling pointer, 
     - a use-after-free, or 
     - any other kind of Undefined Behavior (a.k.a. UB).
-    
+   
+
+
 ## `std`
 
 - The standard library also gives you enough utilities out of the box that you'll
@@ -124,12 +123,106 @@ Safe Rust.
 
 - The value of this separation is that we gain the benefits of using an unsafe
 language like C 
-    — low level control over implementation details 
-— ...without most (citation needed)
-of the problems that come with trying to integrate it with a completely
-different safe language.
+    - low level control over implementation details
 
-There are still some problems — most notably, we must become aware of properties
-that the type system assumes and audit them in any code that interacts with
-Unsafe Rust. That's the purpose of this book: to teach you about these assumptions
-and how to manage them.
+- ...without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.
+
+# Undefined Behavior
+
+## Safe Rust
+
+- Safe Rust guarantees certain things about your code.
+  - Most of these won't even make sense to you unless you write C
+
+## Safe Prevents
+
+- Dereferencing (using the `*` operator on) dangling or unaligned pointers (see below)
+- Breaking the "pointer aliasing rules" using `&` (borrow) and `mut`
+- Calling a function with the wrong call types 
+- Causing a data race when multithreading
+- Executing code compiled for hardware other than currently hosting the process
+ not support
+- Producing invalid values like something other than `0` or `1` for a boolean.
+
+## Safe Allows
+
+
+-    Deadlocks when multithreading
+-    Leaks of memory and other resources
+-    Exiting without calling destructors
+-    Exposing randomized base addresses through pointer leaks
+-    Integer overflow (recall SHA wrapping)
+-    Logic errors
+```{.rs}
+let val = 7;
+let val_is_even = if val % 2 == 1 { true } else { false }; 
+```
+
+## Unsafe allows:
+
+1. Dereference a raw pointer.
+1. Call an unsafe function or method.
+1. Access or modify a mutable static variable.
+1. Implement an unsafe trait.
+1. Access fields of `union`s.
+
+
+## Simply...
+
+1. Write Rust code normally.
+2. If you are doing something unsafe, include it in an `unsafe` block.
+
+## Unions
+
+```{.rs}
+union MyUnion {
+    f: f32,
+    u: u32,
+}
+
+fn main() {
+    let mut u = MyUnion { f: 0.0 };
+
+    unsafe {
+        println!("Bits as float: {}", u.f);
+        println!("Bits as integer: {:#x}", u.u);
+    }
+
+    u.u = 0x3F800000; // This is the bit pattern for 1.0 in IEEE 754
+
+    unsafe {
+        println!("After manual bit update, float is: {}", u.f);
+    }
+}
+```
+
+## Dangling
+
+- This worked fine for me, but technically isn't supported.
+
+```{.rs filename="src/main.rs"}
+fn main() {    
+    let ptr: *const i32;
+
+    {
+        let x = 1234;
+        ptr = &x as *const i32;
+        unsafe {
+            println!("Value at ptr: {}", *ptr);
+        }
+    }
+
+    unsafe {
+        println!("Value at ptr: {}", *ptr);
+    }
+}
+```
+
+## The Reference
+
+- The reference is much more... verbose.
+- It's [here](https://doc.rust-lang.org/reference/behavior-considered-undefined.html)
+
+> Breaking the pointer aliasing rules. The exact aliasing rules are not determined yet, but here is an outline of the general principles:
+
+> Violating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented. 

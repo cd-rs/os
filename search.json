@@ -1,80 +1,411 @@
 [
   {
+    "objectID": "11_unsafe.html",
+    "href": "11_unsafe.html",
+    "title": "Unsafe",
+    "section": "",
+    "text": "Welcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#announcements",
+    "href": "11_unsafe.html#announcements",
+    "title": "Unsafe",
+    "section": "",
+    "text": "Welcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#today",
+    "href": "11_unsafe.html#today",
+    "title": "Unsafe",
+    "section": "Today",
+    "text": "Today\n\nUnsafe\nUB",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#the-dark-arts-of-unsafe-rust",
+    "href": "11_unsafe.html#the-dark-arts-of-unsafe-rust",
+    "title": "Unsafe",
+    "section": "The Dark Arts of Unsafe Rust",
+    "text": "The Dark Arts of Unsafe Rust\n\nTHE KNOWLEDGE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#motivation",
+    "href": "11_unsafe.html#motivation",
+    "title": "Unsafe",
+    "section": "Motivation",
+    "text": "Motivation\n\nOften we don’t worry about low-level implementation details.\n\nHow many bits is an integer in Python?\nHow many bits is this array in Rust?\n\n\nlet mut array: [i32; 3] = [0; 3];\n\nWho could possibly care how much space the empty tuple occupies?",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#sometimes-it-matters",
+    "href": "11_unsafe.html#sometimes-it-matters",
+    "title": "Unsafe",
+    "section": "Sometimes it matters…",
+    "text": "Sometimes it matters…\n\nThe most common reason is performance, but\nMore importantly, these details can become a matter of correctness when interfacing directly with\n\nhardware,\noperating systems, or\nother languages (by which we mean C)",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#legacy",
+    "href": "11_unsafe.html#legacy",
+    "title": "Unsafe",
+    "section": "Legacy",
+    "text": "Legacy\nWhen implementation details start to matter in a safe programming language, programmers usually have three options:\n\nfiddle with the code to “encourage” the compiler/runtime to perform an optimization\nadopt a more unidiomatic or cumbersome design to get the desired implementation\nrewrite the implementation in a language that lets you deal with those details",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#rust-on-c",
+    "href": "11_unsafe.html#rust-on-c",
+    "title": "Unsafe",
+    "section": "Rust on C",
+    "text": "Rust on C\n\nUnfortunately, C is incredibly unsafe to use (sometimes for good reason), and this unsafety is magnified when trying to interoperate with another language. Care must be taken to ensure C and the other language agree on what’s happening, and that they don’t step on each other’s toes.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#both-and",
+    "href": "11_unsafe.html#both-and",
+    "title": "Unsafe",
+    "section": "Both, and",
+    "text": "Both, and\n\nSo what does this have to do with Rust?\n\nWell, unlike C, Rust is a safe programming language.\nBut, like C, Rust is an unsafe programming language.\n\nMore accurately, Rust contains both a safe and unsafe programming language.\n\n\nRust can be thought of as a combination of two programming languages: Safe Rust and Unsafe Rust.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#safe-rust",
+    "href": "11_unsafe.html#safe-rust",
+    "title": "Unsafe",
+    "section": "Safe Rust",
+    "text": "Safe Rust\n\nThe default case\nWhat we’ve used to far, at least officially\n\nYou may have incidentally dabbled in unsafe.\nGood for you.\n\nSafe Rust only really makes one guarantee.\n\n\nRust’s memory safety guarantees enforced at compile time\n\n\nThat is, you can never try to read something that doesn’t exist.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#unsafe-rust",
+    "href": "11_unsafe.html#unsafe-rust",
+    "title": "Unsafe",
+    "section": "Unsafe Rust",
+    "text": "Unsafe Rust\n\nSometimes, you may want to have two reference to an object that are both mutable.\n\nFor example, if you are implementing a suffix tree, a task I didn’t assign last term because it was miserable in safe Rust.\n\nSometimes, you want to do so in a way that can’t possibly break anything.\n\nFor example, you may only be using provably correct algorithms (whatever that means).\nBut of course, rustc isn’t a theorem prover…",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#warning",
+    "href": "11_unsafe.html#warning",
+    "title": "Unsafe",
+    "section": "Warning",
+    "text": "Warning\n\nUnsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us do some really unsafe things. Things the Rust authors will implore you not to do, but we’ll do anyway.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#true-rust",
+    "href": "11_unsafe.html#true-rust",
+    "title": "Unsafe",
+    "section": "True Rust",
+    "text": "True Rust\n\nSafe Rust is the true Rust programming language.\nIf all you do is write Safe Rust, you will never have to worry about type-safety or memory-safety.\nYou will never endure\n\na dangling pointer,\na use-after-free, or\nany other kind of Undefined Behavior (a.k.a. UB).",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#std",
+    "href": "11_unsafe.html#std",
+    "title": "Unsafe",
+    "section": "std",
+    "text": "std\n\nThe standard library also gives you enough utilities out of the box that you’ll be able to write high-performance applications and libraries in pure idiomatic Safe Rust.\nAssuming, of course, you are working on a system where std is already implemented.\nNot, you know, writing your own OS or own std.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#twinsies",
+    "href": "11_unsafe.html#twinsies",
+    "title": "Unsafe",
+    "section": "Twinsies",
+    "text": "Twinsies\n\nUnsafe Rust is exactly like Safe Rust with all the same rules and semantics.\nIt just lets you do some extra things that are Definitely Not Safe.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#payoffs",
+    "href": "11_unsafe.html#payoffs",
+    "title": "Unsafe",
+    "section": "Payoffs",
+    "text": "Payoffs\n\nThe value of this separation is that we gain the benefits of using an unsafe language like C\n\nlow level control over implementation details\n\n…without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#safe-rust-1",
+    "href": "11_unsafe.html#safe-rust-1",
+    "title": "Unsafe",
+    "section": "Safe Rust",
+    "text": "Safe Rust\n\nSafe Rust guarantees certain things about your code.\n\nMost of these won’t even make sense to you unless you write C",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#safe-prevents",
+    "href": "11_unsafe.html#safe-prevents",
+    "title": "Unsafe",
+    "section": "Safe Prevents",
+    "text": "Safe Prevents\n\nDereferencing (using the * operator on) dangling or unaligned pointers (see below)\nBreaking the “pointer aliasing rules” using & (borrow) and mut\nCalling a function with the wrong call types\nCausing a data race when multithreading\nExecuting code compiled for hardware other than currently hosting the process not support\nProducing invalid values like something other than 0 or 1 for a boolean.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#safe-allows",
+    "href": "11_unsafe.html#safe-allows",
+    "title": "Unsafe",
+    "section": "Safe Allows",
+    "text": "Safe Allows\n\nDeadlocks when multithreading\nLeaks of memory and other resources\nExiting without calling destructors\nExposing randomized base addresses through pointer leaks\nInteger overflow (recall SHA wrapping)\nLogic errors\n\nlet val = 7;\nlet val_is_even = if val % 2 == 1 { true } else { false };",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#unsafe-allows",
+    "href": "11_unsafe.html#unsafe-allows",
+    "title": "Unsafe",
+    "section": "Unsafe allows:",
+    "text": "Unsafe allows:\n\nDereference a raw pointer.\nCall an unsafe function or method.\nAccess or modify a mutable static variable.\nImplement an unsafe trait.\nAccess fields of unions.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#simply",
+    "href": "11_unsafe.html#simply",
+    "title": "Unsafe",
+    "section": "Simply…",
+    "text": "Simply…\n\nWrite Rust code normally.\nIf you are doing something unsafe, include it in an unsafe block.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#unions",
+    "href": "11_unsafe.html#unions",
+    "title": "Unsafe",
+    "section": "Unions",
+    "text": "Unions\nunion MyUnion {\n    f: f32,\n    u: u32,\n}\n\nfn main() {\n    let mut u = MyUnion { f: 0.0 };\n\n    unsafe {\n        println!(\"Bits as float: {}\", u.f);\n        println!(\"Bits as integer: {:#x}\", u.u);\n    }\n\n    u.u = 0x3F800000; // This is the bit pattern for 1.0 in IEEE 754\n\n    unsafe {\n        println!(\"After manual bit update, float is: {}\", u.f);\n    }\n}",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#dangling",
+    "href": "11_unsafe.html#dangling",
+    "title": "Unsafe",
+    "section": "Dangling",
+    "text": "Dangling\n\nThis worked fine for me, but technically isn’t supported.\n\n\n\nsrc/main.rs\n\nfn main() {    \n    let ptr: *const i32;\n\n    {\n        let x = 1234;\n        ptr = &x as *const i32;\n        unsafe {\n            println!(\"Value at ptr: {}\", *ptr);\n        }\n    }\n\n    unsafe {\n        println!(\"Value at ptr: {}\", *ptr);\n    }\n}",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.html#the-reference",
+    "href": "11_unsafe.html#the-reference",
+    "title": "Unsafe",
+    "section": "The Reference",
+    "text": "The Reference\n\nThe reference is much more… verbose.\nIt’s here\n\n\nBreaking the pointer aliasing rules. The exact aliasing rules are not determined yet, but here is an outline of the general principles:\n\n\nViolating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented.",
+    "crumbs": [
+      "Unsafe"
+    ]
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#announcements",
+    "href": "11_unsafe.rjs.html#announcements",
+    "title": "Unsafe",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#today",
+    "href": "11_unsafe.rjs.html#today",
+    "title": "Unsafe",
+    "section": "Today",
+    "text": "Today\n\nUnsafe\nUB"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#the-dark-arts-of-unsafe-rust",
+    "href": "11_unsafe.rjs.html#the-dark-arts-of-unsafe-rust",
+    "title": "Unsafe",
+    "section": "The Dark Arts of Unsafe Rust",
+    "text": "The Dark Arts of Unsafe Rust\n\nTHE KNOWLEDGE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#motivation",
+    "href": "11_unsafe.rjs.html#motivation",
+    "title": "Unsafe",
+    "section": "Motivation",
+    "text": "Motivation\n\nOften we don’t worry about low-level implementation details.\n\nHow many bits is an integer in Python?\nHow many bits is this array in Rust?\n\n\nlet mut array: [i32; 3] = [0; 3];\n\nWho could possibly care how much space the empty tuple occupies?"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#sometimes-it-matters",
+    "href": "11_unsafe.rjs.html#sometimes-it-matters",
+    "title": "Unsafe",
+    "section": "Sometimes it matters…",
+    "text": "Sometimes it matters…\n\nThe most common reason is performance, but\nMore importantly, these details can become a matter of correctness when interfacing directly with\n\nhardware,\noperating systems, or\nother languages (by which we mean C)"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#legacy",
+    "href": "11_unsafe.rjs.html#legacy",
+    "title": "Unsafe",
+    "section": "Legacy",
+    "text": "Legacy\nWhen implementation details start to matter in a safe programming language, programmers usually have three options:\n\nfiddle with the code to “encourage” the compiler/runtime to perform an optimization\nadopt a more unidiomatic or cumbersome design to get the desired implementation\nrewrite the implementation in a language that lets you deal with those details"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#rust-on-c",
+    "href": "11_unsafe.rjs.html#rust-on-c",
+    "title": "Unsafe",
+    "section": "Rust on C",
+    "text": "Rust on C\n\nUnfortunately, C is incredibly unsafe to use (sometimes for good reason), and this unsafety is magnified when trying to interoperate with another language. Care must be taken to ensure C and the other language agree on what’s happening, and that they don’t step on each other’s toes."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#both-and",
+    "href": "11_unsafe.rjs.html#both-and",
+    "title": "Unsafe",
+    "section": "Both, and",
+    "text": "Both, and\n\nSo what does this have to do with Rust?\n\nWell, unlike C, Rust is a safe programming language.\nBut, like C, Rust is an unsafe programming language.\n\nMore accurately, Rust contains both a safe and unsafe programming language.\n\n\nRust can be thought of as a combination of two programming languages: Safe Rust and Unsafe Rust."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#safe-rust",
+    "href": "11_unsafe.rjs.html#safe-rust",
+    "title": "Unsafe",
+    "section": "Safe Rust",
+    "text": "Safe Rust\n\nThe default case\nWhat we’ve used to far, at least officially\n\nYou may have incidentally dabbled in unsafe.\nGood for you.\n\nSafe Rust only really makes one guarantee.\n\n\nRust’s memory safety guarantees enforced at compile time\n\n\nThat is, you can never try to read something that doesn’t exist."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#unsafe-rust",
+    "href": "11_unsafe.rjs.html#unsafe-rust",
+    "title": "Unsafe",
+    "section": "Unsafe Rust",
+    "text": "Unsafe Rust\n\nSometimes, you may want to have two reference to an object that are both mutable.\n\nFor example, if you are implementing a suffix tree, a task I didn’t assign last term because it was miserable in safe Rust.\n\nSometimes, you want to do so in a way that can’t possibly break anything.\n\nFor example, you may only be using provably correct algorithms (whatever that means).\nBut of course, rustc isn’t a theorem prover…"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#warning",
+    "href": "11_unsafe.rjs.html#warning",
+    "title": "Unsafe",
+    "section": "Warning",
+    "text": "Warning\n\nUnsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us do some really unsafe things. Things the Rust authors will implore you not to do, but we’ll do anyway."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#true-rust",
+    "href": "11_unsafe.rjs.html#true-rust",
+    "title": "Unsafe",
+    "section": "True Rust",
+    "text": "True Rust\n\nSafe Rust is the true Rust programming language.\nIf all you do is write Safe Rust, you will never have to worry about type-safety or memory-safety.\nYou will never endure\n\na dangling pointer,\na use-after-free, or\nany other kind of Undefined Behavior (a.k.a. UB)."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#std",
+    "href": "11_unsafe.rjs.html#std",
+    "title": "Unsafe",
+    "section": "std",
+    "text": "std\n\nThe standard library also gives you enough utilities out of the box that you’ll be able to write high-performance applications and libraries in pure idiomatic Safe Rust.\nAssuming, of course, you are working on a system where std is already implemented.\nNot, you know, writing your own OS or own std."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#twinsies",
+    "href": "11_unsafe.rjs.html#twinsies",
+    "title": "Unsafe",
+    "section": "Twinsies",
+    "text": "Twinsies\n\nUnsafe Rust is exactly like Safe Rust with all the same rules and semantics.\nIt just lets you do some extra things that are Definitely Not Safe."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#payoffs",
+    "href": "11_unsafe.rjs.html#payoffs",
+    "title": "Unsafe",
+    "section": "Payoffs",
+    "text": "Payoffs\n\nThe value of this separation is that we gain the benefits of using an unsafe language like C\n\nlow level control over implementation details\n\n…without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#safe-rust-1",
+    "href": "11_unsafe.rjs.html#safe-rust-1",
+    "title": "Unsafe",
+    "section": "Safe Rust",
+    "text": "Safe Rust\n\nSafe Rust guarantees certain things about your code.\n\nMost of these won’t even make sense to you unless you write C"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#safe-prevents",
+    "href": "11_unsafe.rjs.html#safe-prevents",
+    "title": "Unsafe",
+    "section": "Safe Prevents",
+    "text": "Safe Prevents\n\nDereferencing (using the * operator on) dangling or unaligned pointers (see below)\nBreaking the “pointer aliasing rules” using & (borrow) and mut\nCalling a function with the wrong call types\nCausing a data race when multithreading\nExecuting code compiled for hardware other than currently hosting the process not support\nProducing invalid values like something other than 0 or 1 for a boolean."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#safe-allows",
+    "href": "11_unsafe.rjs.html#safe-allows",
+    "title": "Unsafe",
+    "section": "Safe Allows",
+    "text": "Safe Allows\n\nDeadlocks when multithreading\nLeaks of memory and other resources\nExiting without calling destructors\nExposing randomized base addresses through pointer leaks\nInteger overflow (recall SHA wrapping)\nLogic errors\n\nlet val = 7;\nlet val_is_even = if val % 2 == 1 { true } else { false };"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#unsafe-allows",
+    "href": "11_unsafe.rjs.html#unsafe-allows",
+    "title": "Unsafe",
+    "section": "Unsafe allows:",
+    "text": "Unsafe allows:\n\nDereference a raw pointer.\nCall an unsafe function or method.\nAccess or modify a mutable static variable.\nImplement an unsafe trait.\nAccess fields of unions."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#simply",
+    "href": "11_unsafe.rjs.html#simply",
+    "title": "Unsafe",
+    "section": "Simply…",
+    "text": "Simply…\n\nWrite Rust code normally.\nIf you are doing something unsafe, include it in an unsafe block."
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#unions",
+    "href": "11_unsafe.rjs.html#unions",
+    "title": "Unsafe",
+    "section": "Unions",
+    "text": "Unions\nunion MyUnion {\n    f: f32,\n    u: u32,\n}\n\nfn main() {\n    let mut u = MyUnion { f: 0.0 };\n\n    unsafe {\n        println!(\"Bits as float: {}\", u.f);\n        println!(\"Bits as integer: {:#x}\", u.u);\n    }\n\n    u.u = 0x3F800000; // This is the bit pattern for 1.0 in IEEE 754\n\n    unsafe {\n        println!(\"After manual bit update, float is: {}\", u.f);\n    }\n}"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#dangling",
+    "href": "11_unsafe.rjs.html#dangling",
+    "title": "Unsafe",
+    "section": "Dangling",
+    "text": "Dangling\n\nThis worked fine for me, but technically isn’t supported.\n\n\n\nsrc/main.rs\n\nfn main() {    \n    let ptr: *const i32;\n\n    {\n        let x = 1234;\n        ptr = &x as *const i32;\n        unsafe {\n            println!(\"Value at ptr: {}\", *ptr);\n        }\n    }\n\n    unsafe {\n        println!(\"Value at ptr: {}\", *ptr);\n    }\n}"
+  },
+  {
+    "objectID": "11_unsafe.rjs.html#the-reference",
+    "href": "11_unsafe.rjs.html#the-reference",
+    "title": "Unsafe",
+    "section": "The Reference",
+    "text": "The Reference\n\nThe reference is much more… verbose.\nIt’s here\n\n\nBreaking the pointer aliasing rules. The exact aliasing rules are not determined yet, but here is an outline of the general principles:\n\n\nViolating assumptions of the Rust runtime. Most assumptions of the Rust runtime are currently not explicitly documented."
+  },
+  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "OS in Rust",
     "section": "",
     "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nxor list\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\n\nFinal OS due whenever the final exam would finish, TBA\n\n\nLecture Recordings\nForthcoming"
-  },
-  {
-    "objectID": "02_cli.html",
-    "href": "02_cli.html",
-    "title": "CLI",
-    "section": "",
-    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#homework",
-    "href": "02_cli.html#homework",
-    "title": "CLI",
-    "section": "",
-    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#citation",
-    "href": "02_cli.html#citation",
-    "title": "CLI",
-    "section": "Citation",
-    "text": "Citation\n\nAn I/O Project: Building a Command Line Program\nIn a way, an OS is a “command line program”…",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#requirements",
-    "href": "02_cli.html#requirements",
-    "title": "CLI",
-    "section": "Requirements",
-    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and either (1) no options or a (2) options a single letter.\n\nThat is, you must support wc -c src/main.rs but not wc --files0-from=F\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#crate",
-    "href": "02_cli.html#crate",
-    "title": "CLI",
-    "section": "Crate",
-    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 02 in your 371os repository.\n\ncargo new 02 --name my_wc --vcs none\n\nI understand this is the same name as the lab.\n\nI am not as clever as I either think I am or would like to be.\n\nIf you’re stuck, read more here",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#wc",
-    "href": "02_cli.html#wc",
-    "title": "CLI",
-    "section": "wc",
-    "text": "wc\nImplement the complete functionality of wc using this crate.\n\nAccept character command line flags prefixed with -\nAccept string command line flags prefixed with --\nConfigure your my_wc to work on standard input if a file name is not provided.\n\n\nFull functionality\n\nHere is wc --help\nYour --help and --version may differ, but should otherwise be identical.\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRubric\n\nSetup - optional\n\n$ curl https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt -o book.txt\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n100  739k  100  739k    0     0  1446k      0 --:--:-- --:--:-- --:--:-- 1447k\n$ head -23 book.txt | tail -1\n*** START OF THE PROJECT GUTENBERG EBOOK PRIDE AND PREJUDICE ***\n\nCharacter flags - required\n\n$ wc book.txt\n 14911 130408 757509 book.txt\n$ wc -cl book.txt\n 14911 757509 book.txt\n$ wc -c book.txt -cl\n 14911 757509 book.txt\n$ wc -l book.txt -c\n 14911 757509 book.txt\n$ wc -Ll book.txt\n 14911    159 book.txt\n\nString flags - required\n\n$ wc --bytes -c book.txt\n757509 book.txt\n$ wc --lines -c book.txt\n 14911 757509 book.txt\n$ printf \"book.txt\" &gt; file.txt\n$ wc --lines -c --files0-from=file.txt\n 14911 757509 book.txt\n$ wc --version | head -1\nwc (GNU coreutils) 8.32\n$ wc --help | head -1\nUsage: wc [OPTION]... [FILE]...\n\nStandard I/O - required\n\n$ cat book.txt | head -100 | wc\n    100     277    2787\n$ cat book.txt | head -200 | wc\n    200    1360    9359\n$ wc book.txt | wc\n      1       4      30",
-    "crumbs": [
-      "CLI"
-    ]
-  },
-  {
-    "objectID": "02_cli.html#helpful-reference",
-    "href": "02_cli.html#helpful-reference",
-    "title": "CLI",
-    "section": "Helpful Reference",
-    "text": "Helpful Reference\n\nWhile linked above, I think it will be very helpful to review the following:\nAccepting Command Line Arguments - The Rust Programming Language",
-    "crumbs": [
-      "CLI"
-    ]
   },
   {
     "objectID": "00_derust.html",
@@ -1056,6 +1387,76 @@
     "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
   },
   {
+    "objectID": "02_cli.html",
+    "href": "02_cli.html",
+    "title": "CLI",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#homework",
+    "href": "02_cli.html#homework",
+    "title": "CLI",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#citation",
+    "href": "02_cli.html#citation",
+    "title": "CLI",
+    "section": "Citation",
+    "text": "Citation\n\nAn I/O Project: Building a Command Line Program\nIn a way, an OS is a “command line program”…",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#requirements",
+    "href": "02_cli.html#requirements",
+    "title": "CLI",
+    "section": "Requirements",
+    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and either (1) no options or a (2) options a single letter.\n\nThat is, you must support wc -c src/main.rs but not wc --files0-from=F\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#crate",
+    "href": "02_cli.html#crate",
+    "title": "CLI",
+    "section": "Crate",
+    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 02 in your 371os repository.\n\ncargo new 02 --name my_wc --vcs none\n\nI understand this is the same name as the lab.\n\nI am not as clever as I either think I am or would like to be.\n\nIf you’re stuck, read more here",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#wc",
+    "href": "02_cli.html#wc",
+    "title": "CLI",
+    "section": "wc",
+    "text": "wc\nImplement the complete functionality of wc using this crate.\n\nAccept character command line flags prefixed with -\nAccept string command line flags prefixed with --\nConfigure your my_wc to work on standard input if a file name is not provided.\n\n\nFull functionality\n\nHere is wc --help\nYour --help and --version may differ, but should otherwise be identical.\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRubric\n\nSetup - optional\n\n$ curl https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt -o book.txt\n  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n100  739k  100  739k    0     0  1446k      0 --:--:-- --:--:-- --:--:-- 1447k\n$ head -23 book.txt | tail -1\n*** START OF THE PROJECT GUTENBERG EBOOK PRIDE AND PREJUDICE ***\n\nCharacter flags - required\n\n$ wc book.txt\n 14911 130408 757509 book.txt\n$ wc -cl book.txt\n 14911 757509 book.txt\n$ wc -c book.txt -cl\n 14911 757509 book.txt\n$ wc -l book.txt -c\n 14911 757509 book.txt\n$ wc -Ll book.txt\n 14911    159 book.txt\n\nString flags - required\n\n$ wc --bytes -c book.txt\n757509 book.txt\n$ wc --lines -c book.txt\n 14911 757509 book.txt\n$ printf \"book.txt\" &gt; file.txt\n$ wc --lines -c --files0-from=file.txt\n 14911 757509 book.txt\n$ wc --version | head -1\nwc (GNU coreutils) 8.32\n$ wc --help | head -1\nUsage: wc [OPTION]... [FILE]...\n\nStandard I/O - required\n\n$ cat book.txt | head -100 | wc\n    100     277    2787\n$ cat book.txt | head -200 | wc\n    200    1360    9359\n$ wc book.txt | wc\n      1       4      30",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
+    "objectID": "02_cli.html#helpful-reference",
+    "href": "02_cli.html#helpful-reference",
+    "title": "CLI",
+    "section": "Helpful Reference",
+    "text": "Helpful Reference\n\nWhile linked above, I think it will be very helpful to review the following:\nAccepting Command Line Arguments - The Rust Programming Language",
+    "crumbs": [
+      "CLI"
+    ]
+  },
+  {
     "objectID": "01_wc.html",
     "href": "01_wc.html",
     "title": "Rustup",
@@ -1143,271 +1544,6 @@
     "text": "Helpful Reference\n\nWhen working on projects like this, I almost always have the following reference material open.\nread_lines - Rust By Example\n\n\nfn read_lines(filename: &str) -&gt; Vec&lt;String&gt; {\n    let mut result = Vec::new();\n\n    for line in std::fs::read_to_string(filename).unwrap().lines() {\n        result.push(line.to_string())\n    }\n\n    result\n}",
     "crumbs": [
       "Rustup"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#announcements",
-    "href": "11_unsafe.rjs.html#announcements",
-    "title": "Unsafe",
-    "section": "Announcements",
-    "text": "Announcements\n\nWelcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)"
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#today",
-    "href": "11_unsafe.rjs.html#today",
-    "title": "Unsafe",
-    "section": "Today",
-    "text": "Today\n\nDereference a raw pointer.\nCall an unsafe function or method.\nAccess or modify a mutable static variable.\nImplement an unsafe trait.\nAccess fields of unions."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#the-dark-arts-of-unsafe-rust",
-    "href": "11_unsafe.rjs.html#the-dark-arts-of-unsafe-rust",
-    "title": "Unsafe",
-    "section": "The Dark Arts of Unsafe Rust",
-    "text": "The Dark Arts of Unsafe Rust\n\nTHE KNOWLEDGE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#motivation",
-    "href": "11_unsafe.rjs.html#motivation",
-    "title": "Unsafe",
-    "section": "Motivation",
-    "text": "Motivation\n\nOften we don’t worry about low-level implementation details.\n\nHow many bits is an integer in Python?\nHow many bits is this array in Rust?\n\n\nlet mut array: [i32; 3] = [0; 3];\n\nWho could possibly care how much space the empty tuple occupies?"
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#sometimes-it-matters",
-    "href": "11_unsafe.rjs.html#sometimes-it-matters",
-    "title": "Unsafe",
-    "section": "Sometimes it matters…",
-    "text": "Sometimes it matters…\n\nThe most common reason is performance, but\nMore importantly, these details can become a matter of correctness when interfacing directly with\n\nhardware,\noperating systems, or\nother languages (by which we mean C)"
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#legacy",
-    "href": "11_unsafe.rjs.html#legacy",
-    "title": "Unsafe",
-    "section": "Legacy",
-    "text": "Legacy\nWhen implementation details start to matter in a safe programming language, programmers usually have three options:\n\nfiddle with the code to “encourage” the compiler/runtime to perform an optimization\nadopt a more unidiomatic or cumbersome design to get the desired implementation\nrewrite the implementation in a language that lets you deal with those details"
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#rust-on-c",
-    "href": "11_unsafe.rjs.html#rust-on-c",
-    "title": "Unsafe",
-    "section": "Rust on C",
-    "text": "Rust on C\n\nUnfortunately, C is incredibly unsafe to use (sometimes for good reason), and this unsafety is magnified when trying to interoperate with another language. Care must be taken to ensure C and the other language agree on what’s happening, and that they don’t step on each other’s toes."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#both-and",
-    "href": "11_unsafe.rjs.html#both-and",
-    "title": "Unsafe",
-    "section": "Both, and",
-    "text": "Both, and\n\nSo what does this have to do with Rust?\n\nWell, unlike C, Rust is a safe programming language.\nBut, like C, Rust is an unsafe programming language.\n\nMore accurately, Rust contains both a safe and unsafe programming language.\n\n\nRust can be thought of as a combination of two programming languages: Safe Rust and Unsafe Rust."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#safe-rust",
-    "href": "11_unsafe.rjs.html#safe-rust",
-    "title": "Unsafe",
-    "section": "Safe Rust",
-    "text": "Safe Rust\n\nThe default case\nWhat we’ve used to far, at least officially\n\nYou may have incidentally dabbled in unsafe.\nGood for you.\n\nSafe Rust only really makes one guarantee.\n\n\nRust’s memory safety guarantees enforced at compile time\n\n\nThat is, you can never try to read something that doesn’t exist."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#unsafe-rust",
-    "href": "11_unsafe.rjs.html#unsafe-rust",
-    "title": "Unsafe",
-    "section": "Unsafe Rust",
-    "text": "Unsafe Rust\n\nSometimes, you may want to have two reference to an object that are both mutable.\n\nFor example, if you are implementing a suffix tree, a task I didn’t assign last term because it was miserable in safe Rust.\n\nSometimes, you want to do so in a way that can’t possibly break anything.\n\nFor example, you may only be using provably correct algorithms (whatever that means).\nBut of course, rustc isn’t a theorem prover, it’s a compiler, so it can’t tell."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#warning",
-    "href": "11_unsafe.rjs.html#warning",
-    "title": "Unsafe",
-    "section": "Warning",
-    "text": "Warning\n\nUnsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us do some really unsafe things. Things the Rust authors will implore you not to do, but we’ll do anyway."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#true-rust",
-    "href": "11_unsafe.rjs.html#true-rust",
-    "title": "Unsafe",
-    "section": "True Rust",
-    "text": "True Rust\n\nSafe Rust is the true Rust programming language.\nIf all you do is write Safe Rust, you will never have to worry about type-safety or memory-safety.\nYou will never endure\n\na dangling pointer,\na use-after-free, or\nany other kind of Undefined Behavior (a.k.a. UB)."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#std",
-    "href": "11_unsafe.rjs.html#std",
-    "title": "Unsafe",
-    "section": "std",
-    "text": "std\n\nThe standard library also gives you enough utilities out of the box that you’ll be able to write high-performance applications and libraries in pure idiomatic Safe Rust.\nAssuming, of course, you are working on a system where std is already implemented.\nNot, you know, writing your own OS or own std."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#twinsies",
-    "href": "11_unsafe.rjs.html#twinsies",
-    "title": "Unsafe",
-    "section": "Twinsies",
-    "text": "Twinsies\n\nUnsafe Rust is exactly like Safe Rust with all the same rules and semantics.\nIt just lets you do some extra things that are Definitely Not Safe."
-  },
-  {
-    "objectID": "11_unsafe.rjs.html#payoffs",
-    "href": "11_unsafe.rjs.html#payoffs",
-    "title": "Unsafe",
-    "section": "Payoffs",
-    "text": "Payoffs\n\nThe value of this separation is that we gain the benefits of using an unsafe language like C — low level control over implementation details — …without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.\n\nThere are still some problems — most notably, we must become aware of properties that the type system assumes and audit them in any code that interacts with Unsafe Rust. That’s the purpose of this book: to teach you about these assumptions and how to manage them."
-  },
-  {
-    "objectID": "11_unsafe.html",
-    "href": "11_unsafe.html",
-    "title": "Unsafe",
-    "section": "",
-    "text": "Welcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#announcements",
-    "href": "11_unsafe.html#announcements",
-    "title": "Unsafe",
-    "section": "",
-    "text": "Welcome to OS in Rust\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nNo novel homework this week (partial week)",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#today",
-    "href": "11_unsafe.html#today",
-    "title": "Unsafe",
-    "section": "Today",
-    "text": "Today\n\nDereference a raw pointer.\nCall an unsafe function or method.\nAccess or modify a mutable static variable.\nImplement an unsafe trait.\nAccess fields of unions.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#the-dark-arts-of-unsafe-rust",
-    "href": "11_unsafe.html#the-dark-arts-of-unsafe-rust",
-    "title": "Unsafe",
-    "section": "The Dark Arts of Unsafe Rust",
-    "text": "The Dark Arts of Unsafe Rust\n\nTHE KNOWLEDGE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF UNLEASHING INDESCRIBABLE HORRORS THAT SHATTER YOUR PSYCHE AND SET YOUR MIND ADRIFT IN THE UNKNOWABLY INFINITE COSMOS.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#motivation",
-    "href": "11_unsafe.html#motivation",
-    "title": "Unsafe",
-    "section": "Motivation",
-    "text": "Motivation\n\nOften we don’t worry about low-level implementation details.\n\nHow many bits is an integer in Python?\nHow many bits is this array in Rust?\n\n\nlet mut array: [i32; 3] = [0; 3];\n\nWho could possibly care how much space the empty tuple occupies?",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#sometimes-it-matters",
-    "href": "11_unsafe.html#sometimes-it-matters",
-    "title": "Unsafe",
-    "section": "Sometimes it matters…",
-    "text": "Sometimes it matters…\n\nThe most common reason is performance, but\nMore importantly, these details can become a matter of correctness when interfacing directly with\n\nhardware,\noperating systems, or\nother languages (by which we mean C)",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#legacy",
-    "href": "11_unsafe.html#legacy",
-    "title": "Unsafe",
-    "section": "Legacy",
-    "text": "Legacy\nWhen implementation details start to matter in a safe programming language, programmers usually have three options:\n\nfiddle with the code to “encourage” the compiler/runtime to perform an optimization\nadopt a more unidiomatic or cumbersome design to get the desired implementation\nrewrite the implementation in a language that lets you deal with those details",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#rust-on-c",
-    "href": "11_unsafe.html#rust-on-c",
-    "title": "Unsafe",
-    "section": "Rust on C",
-    "text": "Rust on C\n\nUnfortunately, C is incredibly unsafe to use (sometimes for good reason), and this unsafety is magnified when trying to interoperate with another language. Care must be taken to ensure C and the other language agree on what’s happening, and that they don’t step on each other’s toes.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#both-and",
-    "href": "11_unsafe.html#both-and",
-    "title": "Unsafe",
-    "section": "Both, and",
-    "text": "Both, and\n\nSo what does this have to do with Rust?\n\nWell, unlike C, Rust is a safe programming language.\nBut, like C, Rust is an unsafe programming language.\n\nMore accurately, Rust contains both a safe and unsafe programming language.\n\n\nRust can be thought of as a combination of two programming languages: Safe Rust and Unsafe Rust.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#safe-rust",
-    "href": "11_unsafe.html#safe-rust",
-    "title": "Unsafe",
-    "section": "Safe Rust",
-    "text": "Safe Rust\n\nThe default case\nWhat we’ve used to far, at least officially\n\nYou may have incidentally dabbled in unsafe.\nGood for you.\n\nSafe Rust only really makes one guarantee.\n\n\nRust’s memory safety guarantees enforced at compile time\n\n\nThat is, you can never try to read something that doesn’t exist.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#unsafe-rust",
-    "href": "11_unsafe.html#unsafe-rust",
-    "title": "Unsafe",
-    "section": "Unsafe Rust",
-    "text": "Unsafe Rust\n\nSometimes, you may want to have two reference to an object that are both mutable.\n\nFor example, if you are implementing a suffix tree, a task I didn’t assign last term because it was miserable in safe Rust.\n\nSometimes, you want to do so in a way that can’t possibly break anything.\n\nFor example, you may only be using provably correct algorithms (whatever that means).\nBut of course, rustc isn’t a theorem prover, it’s a compiler, so it can’t tell.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#warning",
-    "href": "11_unsafe.html#warning",
-    "title": "Unsafe",
-    "section": "Warning",
-    "text": "Warning\n\nUnsafe Rust is, well, not (safe). In fact, Unsafe Rust lets us do some really unsafe things. Things the Rust authors will implore you not to do, but we’ll do anyway.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#true-rust",
-    "href": "11_unsafe.html#true-rust",
-    "title": "Unsafe",
-    "section": "True Rust",
-    "text": "True Rust\n\nSafe Rust is the true Rust programming language.\nIf all you do is write Safe Rust, you will never have to worry about type-safety or memory-safety.\nYou will never endure\n\na dangling pointer,\na use-after-free, or\nany other kind of Undefined Behavior (a.k.a. UB).",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#std",
-    "href": "11_unsafe.html#std",
-    "title": "Unsafe",
-    "section": "std",
-    "text": "std\n\nThe standard library also gives you enough utilities out of the box that you’ll be able to write high-performance applications and libraries in pure idiomatic Safe Rust.\nAssuming, of course, you are working on a system where std is already implemented.\nNot, you know, writing your own OS or own std.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#twinsies",
-    "href": "11_unsafe.html#twinsies",
-    "title": "Unsafe",
-    "section": "Twinsies",
-    "text": "Twinsies\n\nUnsafe Rust is exactly like Safe Rust with all the same rules and semantics.\nIt just lets you do some extra things that are Definitely Not Safe.",
-    "crumbs": [
-      "Unsafe"
-    ]
-  },
-  {
-    "objectID": "11_unsafe.html#payoffs",
-    "href": "11_unsafe.html#payoffs",
-    "title": "Unsafe",
-    "section": "Payoffs",
-    "text": "Payoffs\n\nThe value of this separation is that we gain the benefits of using an unsafe language like C — low level control over implementation details — …without most (citation needed) of the problems that come with trying to integrate it with a completely different safe language.\n\nThere are still some problems — most notably, we must become aware of properties that the type system assumes and audit them in any code that interacts with Unsafe Rust. That’s the purpose of this book: to teach you about these assumptions and how to manage them.",
-    "crumbs": [
-      "Unsafe"
     ]
   }
 ]
