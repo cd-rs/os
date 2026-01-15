@@ -32,7 +32,7 @@ format: html
 |Week|Date (M)|Lecture (M)|Lab (W)|HW (F)|
 |:--:|:---|:----|:-------|:-------|
 |0x0|01/12|[Derust](00_derust.qmd)|[`wc`](01_wc.md)|[CLI](02_cli.md)|
-|0x1|01/19|[`None`](https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf)|[Unsafe](11_unsafe.qmd)|[`split_at`(12_split_at.qmd)|
+|0x1|01/19|[`None`](https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf)|[Unsafe](11_unsafe.qmd)|[Splits](12_split_at.qmd)|
 |0x2|01/26|OSes|`bash`|`scm.sh`|
 |0x3|02/02|Binary|
 |0x4|02/09|Kernel|
@@ -67,9 +67,9 @@ os
 
 -->
 
-*Final OS due whenever the final exam would finish, TBA*
+*Final OS due [Tuesday, May 5th, from 2:00 pm - 5:00 pm](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations) (5 PM ET on 5/5)*
 
 
 # Lecture Recordings
 
-*Forthcoming*
+<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=bvtnSylucjMxr3PM&amp;list=PLu3KAnn4RkATSGCaGGAiBBKJhtplKfp-m" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
