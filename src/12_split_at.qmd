@@ -10,7 +10,7 @@ format: html
 
 ## Citation
 
-- [Calling an Unsafe Function or Method](https://raw.githubusercontent.com/rust-lang/book/refs/heads/main/src/ch20-01-unsafe-rust.md)
+- [Calling an Unsafe Function or Method](https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html)
 - In a way, an OS is an unsafe function or method... (this is a stretch)
 
 ## Requirements
@@ -113,6 +113,9 @@ use std::slice;
 fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
 
     let ptr = values.as_mut_ptr();
+    let len = values.len();
+
+    assert!(mid <= len);
 
     unsafe {
         (
