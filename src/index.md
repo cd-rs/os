@@ -33,7 +33,7 @@ format: html
 |:--:|:---|:----|:-------|:-------|
 |0x0|01/12|[Derust](00_derust.qmd)|[`wc`](01_wc.md)|[CLI](02_cli.md)|
 |0x1|01/19|[`None`](https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf)|[Unsafe](11_unsafe.qmd)|[Splits](12_split_at.qmd)|
-|0x2|01/26|OSes|`bash`|`scm.sh`|
+|0x2|01/26|OSes|`bash`|`scm.sh`| <!-- https://ocw.mit.edu/courses/6-1810-operating-system-engineering-fall-2023/ -->
 |0x3|02/02|Binary|
 |0x4|02/09|Kernel|
 |0x5|02/16|Text|
