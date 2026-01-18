@@ -544,53 +544,63 @@
     "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
   },
   {
+    "objectID": "12_split_at.html",
+    "href": "12_split_at.html",
+    "title": "Splits",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
     "objectID": "12_split_at.html#homework",
     "href": "12_split_at.html#homework",
-    "title": "",
-    "section": "Homework",
-    "text": "Homework\n\nHomeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "title": "Splits",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
     "crumbs": [
-      "Homework"
+      "Splits"
     ]
   },
   {
     "objectID": "12_split_at.html#citation",
     "href": "12_split_at.html#citation",
-    "title": "",
+    "title": "Splits",
     "section": "Citation",
     "text": "Citation\n\nCalling an Unsafe Function or Method\nIn a way, an OS is an unsafe function or method… (this is a stretch)",
     "crumbs": [
-      "Homework"
+      "Splits"
     ]
   },
   {
     "objectID": "12_split_at.html#requirements",
     "href": "12_split_at.html#requirements",
-    "title": "",
+    "title": "Splits",
     "section": "Requirements",
     "text": "Requirements\n\nUpdate repository for this course.\nNew crate for this homework.\nFollow the write-up",
     "crumbs": [
-      "Homework"
+      "Splits"
     ]
   },
   {
     "objectID": "12_split_at.html#unsafe",
     "href": "12_split_at.html#unsafe",
-    "title": "",
+    "title": "Splits",
     "section": "Unsafe",
     "text": "Unsafe\n\nHere is an unsafe function named dangerous that doesn’t do anything in its body:\n\n    unsafe fn dangerous() {}\n\n    unsafe {\n        dangerous();\n    }\n\nWe must call the dangerous function within a separate unsafe block.\nIf we try to call dangerous without the unsafe block, we’ll get an error.",
     "crumbs": [
-      "Homework"
+      "Splits"
     ]
   },
   {
     "objectID": "12_split_at.html#creating-a-safe-abstraction-over-unsafe-code",
     "href": "12_split_at.html#creating-a-safe-abstraction-over-unsafe-code",
-    "title": "",
+    "title": "Splits",
     "section": "Creating a Safe Abstraction over Unsafe Code",
     "text": "Creating a Safe Abstraction over Unsafe Code\n\nJust because a function contains unsafe code doesn’t mean we need to mark the entire function as unsafe.\n\nThis blew my mind.\n\nIn fact, wrapping unsafe code in a safe function is a common abstraction.\nAs an example, let’s study the split_at_mut function from the standard library, which requires some unsafe code.\n\n\nNo Safe Way\nPeople scared of Portland refer to Safeway I shop at as the “Unsafeway” which I think is hilarious\n\nWe’ll explore how we might implement it.\nThis safe method is defined on mutable slices:\n\nIt takes one slice and makes it two by splitting the slice at the index given as an argument.\n\nHere’s an example.\n\n    let mut v = vec![1, 2, 3, 4, 5, 6];\n\n    let r = &mut v[..];\n\n    let (a, b) = r.split_at_mut(3);\n\nThere’s no safe way to do this.\n\nThis won’t work\nfn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n    let len = values.len();\n\n    assert!(mid &lt;= len);\n\n    (&mut values[..mid], &mut values[mid..])\n}\n\nIt explodes:\n\n$ cargo run\n   Compiling unsafe-example v0.1.0 (file:///projects/unsafe-example)\nerror[E0499]: cannot borrow `*values` as mutable more than once at a time\n --&gt; src/main.rs:6:31\n  |\n1 | fn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n  |                         - let's call the lifetime of this reference `'1`\n...\n6 |     (&mut values[..mid], &mut values[mid..])\n  |     --------------------------^^^^^^--------\n  |     |     |                   |\n  |     |     |                   second mutable borrow occurs here\n  |     |     first mutable borrow occurs here\n  |     returning this value requires that `*values` is borrowed for `'1`\n  |\n  = help: use `.split_at_mut(position)` to obtain two mutable non-overlapping sub-slices\n\nFor more information about this error, try `rustc --explain E0499`.\nerror: could not compile `unsafe-example` (bin \"unsafe-example\") due to 1 previous error\n\n\nEnter the Borrow Checker\n\nRust’s borrow checker can’t understand that we’re borrowing different parts of the slice\n\nIt only knows that we’re borrowing from the same slice twice.\n\nBorrowing different parts of a slice is fundamentally okay because the two slices aren’t overlapping, but…\n\nrustc isn’t smart enough to know this.\n\nWhen we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.\n\nfn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n\n    let ptr = values.as_mut_ptr();\n    let mid = std::cmp::min(values.len(), mid);\n\n    unsafe {\n        (\n            std::slice::from_raw_parts_mut(ptr, mid),\n            std::slice::from_raw_parts_mut(ptr.add(mid), values.len() - mid),\n        )\n    }\n}",
     "crumbs": [
-      "Homework"
+      "Splits"
     ]
   },
   {
