@@ -1,5 +1,5 @@
 ---
-name: Splits
+title: Splits
 format: html
 ---
 
@@ -108,22 +108,19 @@ error: could not compile `unsafe-example` (bin "unsafe-example") due to 1 previo
 - When we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.
 
 ```{.rs}
-use std::slice;
-
 fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
 
     let ptr = values.as_mut_ptr();
-    let len = values.len();
-
-    assert!(mid <= len);
+    let mid = std::cmp::min(values.len(), mid);
 
     unsafe {
         (
-            slice::from_raw_parts_mut(ptr, mid),
-            slice::from_raw_parts_mut(ptr.add(mid), len - mid),
+            std::slice::from_raw_parts_mut(ptr, mid),
+            std::slice::from_raw_parts_mut(ptr.add(mid), values.len() - mid),
         )
     }
 }
+
 ```
 
 # Deliverable
@@ -131,5 +128,6 @@ fn split_at_mut(values: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
 - Create a crate which:
 	- Contains an unsafe `split_at_mut` that you have written in `lib.rs`
 	- Contains a usage of `split_at_mut` in `main.rs`
-	- Abstracts all `unsafe` blocks to `lib.rs` but successful calls unsafe code from `main.rs`
+	- Abstracts all `unsafe` blocks to `lib.rs` but successfully calls unsafe code from `main.rs`
 	- You may use the exact provided code but most put it together in a way that actually works with `cargo r`
+	- You should be able to explain the difference between my code and the Rustbook code if you consult both.

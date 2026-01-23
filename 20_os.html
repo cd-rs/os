@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>OS – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./12_split_at.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./20_os.html">OS</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rustup</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#today" id="toc-today" class="nav-link" data-scroll-target="#today">Today</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a>
+  <ul class="collapse">
+  <li><a href="#arriving-at-os" id="toc-arriving-at-os" class="nav-link" data-scroll-target="#arriving-at-os">Arriving at OS</a></li>
+  </ul></li>
+  <li><a href="#architecture" id="toc-architecture" class="nav-link" data-scroll-target="#architecture">Architecture</a>
+  <ul class="collapse">
+  <li><a href="#the-device" id="toc-the-device" class="nav-link" data-scroll-target="#the-device">The Device</a></li>
+  <li><a href="#architecture---alu" id="toc-architecture---alu" class="nav-link" data-scroll-target="#architecture---alu">Architecture - ALU</a></li>
+  <li><a href="#architecture---mmu" id="toc-architecture---mmu" class="nav-link" data-scroll-target="#architecture---mmu">Architecture - MMU</a></li>
+  <li><a href="#picture" id="toc-picture" class="nav-link" data-scroll-target="#picture">Picture</a></li>
+  <li><a href="#architecture-1" id="toc-architecture-1" class="nav-link" data-scroll-target="#architecture-1">Architecture</a></li>
+  <li><a href="#von-neumann-formally" id="toc-von-neumann-formally" class="nav-link" data-scroll-target="#von-neumann-formally">Von Neumann, Formally</a></li>
+  <li><a href="#competing-formulation" id="toc-competing-formulation" class="nav-link" data-scroll-target="#competing-formulation">Competing Formulation</a></li>
+  <li><a href="#harvard-architecture" id="toc-harvard-architecture" class="nav-link" data-scroll-target="#harvard-architecture">Harvard Architecture</a></li>
+  <li><a href="#historical-use-case" id="toc-historical-use-case" class="nav-link" data-scroll-target="#historical-use-case">Historical use case</a></li>
+  <li><a href="#von-neumann---aside" id="toc-von-neumann---aside" class="nav-link" data-scroll-target="#von-neumann---aside">Von Neumann - Aside</a></li>
+  </ul></li>
+  <li><a href="#abstraction" id="toc-abstraction" class="nav-link" data-scroll-target="#abstraction">Abstraction</a>
+  <ul class="collapse">
+  <li><a href="#hardware-doesnt-matter" id="toc-hardware-doesnt-matter" class="nav-link" data-scroll-target="#hardware-doesnt-matter">Hardware “doesn’t matter”</a></li>
+  <li><a href="#thinking-about-a-tm" id="toc-thinking-about-a-tm" class="nav-link" data-scroll-target="#thinking-about-a-tm">Thinking about a TM</a></li>
+  <li><a href="#vs.-hardware" id="toc-vs.-hardware" class="nav-link" data-scroll-target="#vs.-hardware">Vs. Hardware</a></li>
+  <li><a href="#say-we-build-a-tm" id="toc-say-we-build-a-tm" class="nav-link" data-scroll-target="#say-we-build-a-tm">Say we build a TM</a></li>
+  <li><a href="#all-roads" id="toc-all-roads" class="nav-link" data-scroll-target="#all-roads">All Roads</a></li>
+  <li><a href="#different-topics" id="toc-different-topics" class="nav-link" data-scroll-target="#different-topics">Different Topics</a></li>
+  </ul></li>
+  <li><a href="#bus" id="toc-bus" class="nav-link" data-scroll-target="#bus">Bus</a>
+  <ul class="collapse">
+  <li><a href="#bus-1" id="toc-bus-1" class="nav-link" data-scroll-target="#bus-1">Bus</a></li>
+  <li><a href="#shorter" id="toc-shorter" class="nav-link" data-scroll-target="#shorter">Shorter</a></li>
+  <li><a href="#i-imagine" id="toc-i-imagine" class="nav-link" data-scroll-target="#i-imagine">I imagine…</a></li>
+  <li><a href="#i-imagine-1" id="toc-i-imagine-1" class="nav-link" data-scroll-target="#i-imagine-1">I imagine…</a></li>
+  <li><a href="#within-a-device" id="toc-within-a-device" class="nav-link" data-scroll-target="#within-a-device">Within a Device</a></li>
+  <li><a href="#within-a-bus" id="toc-within-a-bus" class="nav-link" data-scroll-target="#within-a-bus">Within a Bus</a></li>
+  <li><a href="#signal-processing" id="toc-signal-processing" class="nav-link" data-scroll-target="#signal-processing">Signal Processing</a></li>
+  <li><a href="#signal-processing-1" id="toc-signal-processing-1" class="nav-link" data-scroll-target="#signal-processing-1">Signal Processing</a></li>
+  </ul></li>
+  <li><a href="#address-space" id="toc-address-space" class="nav-link" data-scroll-target="#address-space">Address Space</a>
+  <ul class="collapse">
+  <li><a href="#given-a-bus" id="toc-given-a-bus" class="nav-link" data-scroll-target="#given-a-bus">Given a bus</a></li>
+  <li><a href="#throwback" id="toc-throwback" class="nav-link" data-scroll-target="#throwback">Throwback</a></li>
+  <li><a href="#so" id="toc-so" class="nav-link" data-scroll-target="#so">So…</a></li>
+  <li><a href="#the-big-idea" id="toc-the-big-idea" class="nav-link" data-scroll-target="#the-big-idea">The Big Idea</a></li>
+  <li><a href="#for-the-alu" id="toc-for-the-alu" class="nav-link" data-scroll-target="#for-the-alu">For the ALU</a></li>
+  <li><a href="#wrinkles" id="toc-wrinkles" class="nav-link" data-scroll-target="#wrinkles">Wrinkles</a></li>
+  <li><a href="#gaps" id="toc-gaps" class="nav-link" data-scroll-target="#gaps">Gaps</a></li>
+  <li><a href="#gaps-1" id="toc-gaps-1" class="nav-link" data-scroll-target="#gaps-1">Gaps</a></li>
+  <li><a href="#permissions" id="toc-permissions" class="nav-link" data-scroll-target="#permissions">Permissions</a></li>
+  <li><a href="#permissions-1" id="toc-permissions-1" class="nav-link" data-scroll-target="#permissions-1">Permissions</a></li>
+  <li><a href="#multiple-devices" id="toc-multiple-devices" class="nav-link" data-scroll-target="#multiple-devices">Multiple Devices</a></li>
+  <li><a href="#multiple-devices-1" id="toc-multiple-devices-1" class="nav-link" data-scroll-target="#multiple-devices-1">Multiple Devices</a></li>
+  <li><a href="#further" id="toc-further" class="nav-link" data-scroll-target="#further">Further</a></li>
+  </ul></li>
+  <li><a href="#stack-heap" id="toc-stack-heap" class="nav-link" data-scroll-target="#stack-heap">Stack &amp; Heap</a>
+  <ul class="collapse">
+  <li><a href="#recall" id="toc-recall" class="nav-link" data-scroll-target="#recall">Recall</a></li>
+  </ul></li>
+  <li><a href="#languages" id="toc-languages" class="nav-link" data-scroll-target="#languages">Languages</a>
+  <ul class="collapse">
+  <li><a href="#python" id="toc-python" class="nav-link" data-scroll-target="#python">Python</a></li>
+  <li><a href="#rust" id="toc-rust" class="nav-link" data-scroll-target="#rust">Rust</a></li>
+  <li><a href="#c" id="toc-c" class="nav-link" data-scroll-target="#c">C</a></li>
+  <li><a href="#all-of-these" id="toc-all-of-these" class="nav-link" data-scroll-target="#all-of-these">All of these…</a></li>
+  <li><a href="#today-1" id="toc-today-1" class="nav-link" data-scroll-target="#today-1">Today</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="20_os.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">OS</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li><strong>Welcome</strong> to OS in Rust
+<ul>
+<li>Actual OS week.</li>
+</ul></li>
+<li><strong>Action Items</strong>:
+<ul>
+<li>Finish working through <code>split_at</code>
+<ul>
+<li>Form a strong opinion on <code>assert</code></li>
+<li>Good anecdote for job interviews.</li>
+</ul></li>
+<li>Nominally ready for next homework after this lecture.
+<ul>
+<li>Can wait for lab/section.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="today" class="level2">
+<h2 class="anchored" data-anchor-id="today">Today</h2>
+<ul>
+<li>Motivation
+<ul>
+<li>Architecture</li>
+<li>Abstraction level</li>
+</ul></li>
+<li>OS
+<ul>
+<li>Bus</li>
+<li>Address space</li>
+<li>Stack/heap</li>
+<li>Languages</li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>Borrowed a bit from:
+<ul>
+<li><a href="https://ics.uci.edu/~swjun/courses/2021W-CS152/slides/lec9%20-%20OS.pdf">MIT via UIC</a></li>
+<li><a href="https://pdos.csail.mit.edu/6.1810/2023/lec/l-c_slides.pdf">MIT via OCW</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="motivation" class="level1">
+<h1>Motivation</h1>
+<section id="arriving-at-os" class="level2">
+<h2 class="anchored" data-anchor-id="arriving-at-os">Arriving at OS</h2>
+<ul>
+<li>We can arrive at OS from two ways:
+<ul>
+<li>We can look at <em>physic</em>al hardware an infer the need for a control system.</li>
+<li>We can look at <em>formal</em> descriptions of computing, such as automata, and infer the need for abstractions to practically use the system.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="architecture" class="level1">
+<h1>Architecture</h1>
+<section id="the-device" class="level2">
+<h2 class="anchored" data-anchor-id="the-device">The Device</h2>
+<ul>
+<li>We imagine some minimal device.
+<ul>
+<li>What are the minimum requirements to be a computer?</li>
+</ul></li>
+</ul>
+</section>
+<section id="architecture---alu" class="level2">
+<h2 class="anchored" data-anchor-id="architecture---alu">Architecture - ALU</h2>
+<ul>
+<li>We imagine some minimal device.
+<ul>
+<li>It contains an <em>arithmetic/logic unit</em> (ALU).
+<ul>
+<li>Can perform e.g.&nbsp;logical AND, bitwise AND, and numeric ADD</li>
+<li>Can load/store numeric values to/from numeric addresses</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="architecture---mmu" class="level2">
+<h2 class="anchored" data-anchor-id="architecture---mmu">Architecture - MMU</h2>
+<ul>
+<li>We imagine some minimal device.
+<ul>
+<li>It contains “memory”, perhaps via a <em>memory management unit</em> (MMU)
+<ul>
+<li>Persists numeric values associated with numeric addresses</li>
+<li>Physically separated from the ALU</li>
+<li>Geniuses will say this is key-value storage</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="picture" class="level2">
+<h2 class="anchored" data-anchor-id="picture">Picture</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 103.34 132.80" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 128.8)">
+<title>graphgraph</title>
+<!-- ALU -->
+<g id="node1" class="node">
+<title>ALU</title>
+<polygon fill="none" stroke="white" points="54,-124.8 0,-124.8 0,-88.8 54,-88.8 54,-124.8"></polygon>
+<text text-anchor="middle" x="27" y="-102.6" font-family="Times,serif" font-size="14.00" fill="white">ALU</text>
+</g>
+<!-- ALU&#45;&gt;ALU -->
+<g id="edge3" class="edge">
+<title>ALU-&gt;ALU</title>
+<path fill="none" stroke="white" d="M54.24,-115.04C64.02,-115.22 72,-112.47 72,-106.8 72,-103.34 69.04,-100.97 64.51,-99.69"></path>
+<polygon fill="white" stroke="white" points="64.56,-96.17 54.24,-98.56 63.8,-103.13 64.56,-96.17"></polygon>
+<text text-anchor="middle" x="83.67" y="-102.6" font-family="Times,serif" font-size="14.00" fill="white">plus</text>
+</g>
+<!-- MMU -->
+<g id="node2" class="node">
+<title>MMU</title>
+<polygon fill="none" stroke="white" points="54,-36 0,-36 0,0 54,0 54,-36"></polygon>
+<text text-anchor="middle" x="27" y="-13.8" font-family="Times,serif" font-size="14.00" fill="white">MMU</text>
+</g>
+<!-- ALU&#45;&gt;MMU -->
+<g id="edge1" class="edge">
+<title>ALU-&gt;MMU</title>
+<path fill="none" stroke="white" d="M12.97,-88.63C9.37,-83.25 5.99,-77.06 4.12,-70.8 1.99,-63.64 1.99,-61.16 4.12,-54 5.03,-50.97 6.29,-47.95 7.75,-45.04"></path>
+<polygon fill="white" stroke="white" points="10.92,-46.56 12.97,-36.17 4.88,-43.01 10.92,-46.56"></polygon>
+<text text-anchor="middle" x="17.44" y="-58.2" font-family="Times,serif" font-size="14.00" fill="white">save</text>
+</g>
+<!-- MMU&#45;&gt;ALU -->
+<g id="edge2" class="edge">
+<title>MMU-&gt;ALU</title>
+<path fill="none" stroke="white" d="M28.17,-36.08C28.51,-41.78 28.83,-48.16 29,-54 29.21,-61.46 29.21,-63.34 29,-70.8 28.93,-73.36 28.82,-76.01 28.7,-78.67"></path>
+<polygon fill="white" stroke="white" points="25.21,-78.55 28.17,-88.72 32.2,-78.92 25.21,-78.55"></polygon>
+<text text-anchor="middle" x="41.05" y="-58.2" font-family="Times,serif" font-size="14.00" fill="white">load</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="architecture-1" class="level2">
+<h2 class="anchored" data-anchor-id="architecture-1">Architecture</h2>
+<ul>
+<li>This is the now-legendary Von Neumann architecture.</li>
+</ul>
+<center>
+<a href="https://en.wikipedia.org/wiki/Von_Neumann_architecture"> <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Von_Neumann_Architecture.svg" style="filter:invert(1)"> </a>
+</center>
+</section>
+<section id="von-neumann-formally" class="level2">
+<h2 class="anchored" data-anchor-id="von-neumann-formally">Von Neumann, Formally</h2>
+<ul>
+<li>A central arithmetic unit to perform arithmetic operations;</li>
+<li>A central control unit to sequence operations performed by the machine;</li>
+<li>Memory that stores data and instructions;</li>
+<li>An “outside recording medium” to store input to and output from the machine;</li>
+<li>Input and output mechanisms to transfer data between the memory and the outside recording medium.</li>
+</ul>
+</section>
+<section id="competing-formulation" class="level2">
+<h2 class="anchored" data-anchor-id="competing-formulation">Competing Formulation</h2>
+<p>The competing formulation known as the <em>Harvard architecture</em> differed in that information describing actions (say, <em>executables</em> or “stored memory programs” or “instructions”) and information for read-write (say <em>data files</em> or just “data”) had distinct storage mediums.</p>
+<ul>
+<li>As far as I know, none of these were ever made.</li>
+<li>Theoretical idea.</li>
+</ul>
+</section>
+<section id="harvard-architecture" class="level2">
+<h2 class="anchored" data-anchor-id="harvard-architecture">Harvard Architecture</h2>
+<center>
+<a href="https://en.wikipedia.org/wiki/Harvard_architecture"> <img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Harvard_architecture.svg" style="filter:invert(1)"> </a>
+</center>
+</section>
+<section id="historical-use-case" class="level2">
+<h2 class="anchored" data-anchor-id="historical-use-case">Historical use case</h2>
+<ul>
+<li>Historical computing devices had no onboard storage and programs lived on e.g.&nbsp;external tapes.
+<ul>
+<li>The Harvard architecture is a helpful model in this case.</li>
+</ul></li>
+<li>Today, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)
+<ul>
+<li>Hence Von Neumann</li>
+</ul></li>
+</ul>
+</section>
+<section id="von-neumann---aside" class="level2">
+<h2 class="anchored" data-anchor-id="von-neumann---aside">Von Neumann - Aside</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>Be advised this is a Manhattan Project member and form your own opinion about that.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<center>
+<a href="https://en.wikipedia.org/wiki/Harvard_architecture"> <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/JohnvonNeumann-LosAlamos.gif"> </a>
+</center>
+</div>
+</div>
+</section>
+</section>
+<section id="abstraction" class="level1">
+<h1>Abstraction</h1>
+<section id="hardware-doesnt-matter" class="level2">
+<h2 class="anchored" data-anchor-id="hardware-doesnt-matter">Hardware “doesn’t matter”</h2>
+<ul>
+<li>We can regard as a historical accident that hardware exists in any particular form.
+<ul>
+<li>Perhaps the first computers could’ve been biological vs.&nbsp;mechanical vs.&nbsp;electric.</li>
+</ul></li>
+<li>We then regard the automata, principly the <em>Turing Machine</em>, as ground truth.
+<ul>
+<li>TMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday…</li>
+<li><a href="https://cd-public.github.io/compute/11_tm.rjs.html#/turing-machines-tm-1936">Read more</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="thinking-about-a-tm" class="level2">
+<h2 class="anchored" data-anchor-id="thinking-about-a-tm">Thinking about a TM</h2>
+<div class="r-stack">
+<p><a style="filter:invert(1)" title="Nynexman4464 at the English Wikipedia, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Turing_machine_2b.svg"><img width="512" alt="Turing machine 2b" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Turing_machine_2b.svg/512px-Turing_machine_2b.svg.png?20100627114200"></a></p>
+</div>
+<ol type="1">
+<li>Head can <em>read and write</em></li>
+<li>Head is <em>two-way</em></li>
+<li>Tape is <em>infinite</em></li>
+<li>Infinitely many blanks(<code>0</code>) follow input</li>
+<li>Can accept/reject <em>at any time</em></li>
+</ol>
+</section>
+<section id="vs.-hardware" class="level2">
+<h2 class="anchored" data-anchor-id="vs.-hardware">Vs. Hardware</h2>
+<ul>
+<li>The TM assumes infinite memory
+<ul>
+<li>Not a big deal, you’ll never actually use infinite memory.</li>
+</ul></li>
+<li>The TM makes no considerations of performance
+<ul>
+<li>Tapes are slower than wires, but perhaps easier to imagine.</li>
+</ul></li>
+<li>The TM does not necessarily use binary
+<ul>
+<li>But then again, before-Turing, neither did computers…</li>
+</ul></li>
+</ul>
+</section>
+<section id="say-we-build-a-tm" class="level2">
+<h2 class="anchored" data-anchor-id="say-we-build-a-tm">Say we build a TM</h2>
+<ul>
+<li>Well, someone we have to <em>model</em> an “infinite tape” of memory.
+<ul>
+<li>Perhaps by… creating a bijection to the natural numbers.</li>
+<li>We could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)</li>
+<li>Wait that is the same key-value storage as the MMU.</li>
+</ul></li>
+</ul>
+</section>
+<section id="all-roads" class="level2">
+<h2 class="anchored" data-anchor-id="all-roads">All Roads</h2>
+<ul>
+<li>…lead to a series of <em>abstractions</em> allowing <em>higher-level users</em> to use, but not implement, memory.</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 387.24 49.60" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 45.6)">
+<title>G</title>
+<!-- n1 -->
+<g id="node1" class="node">
+<title>n1</title>
+<polygon fill="none" stroke="white" points="64.32,-41.4 -0.11,-41.4 -0.11,-0.2 64.32,-0.2 64.32,-41.4"></polygon>
+<text text-anchor="middle" x="32.11" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Physical</text>
+<text text-anchor="middle" x="32.11" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">Memory</text>
+</g>
+<!-- n2 -->
+<g id="node2" class="node">
+<title>n2</title>
+<polygon fill="none" stroke="white" points="162.04,-41.4 100.27,-41.4 100.27,-0.2 162.04,-0.2 162.04,-41.4"></polygon>
+<text text-anchor="middle" x="131.16" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Address</text>
+<text text-anchor="middle" x="131.16" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">Spaces</text>
+</g>
+<!-- n1&#45;&gt;n2 -->
+<g id="edge1" class="edge">
+<title>n1-&gt;n2</title>
+<path fill="none" stroke="white" d="M64.35,-20.8C72.46,-20.8 81.32,-20.8 89.83,-20.8"></path>
+<polygon fill="white" stroke="white" points="89.97,-24.3 99.97,-20.8 89.97,-17.3 89.97,-24.3"></polygon>
+</g>
+<!-- n3 -->
+<g id="node3" class="node">
+<title>n3</title>
+<polygon fill="none" stroke="white" points="268.82,-41.4 198.19,-41.4 198.19,-0.2 268.82,-0.2 268.82,-41.4"></polygon>
+<text text-anchor="middle" x="233.51" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Stack and</text>
+<text text-anchor="middle" x="233.51" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">Heap</text>
+</g>
+<!-- n2&#45;&gt;n3 -->
+<g id="edge2" class="edge">
+<title>n2-&gt;n3</title>
+<path fill="none" stroke="white" d="M162.26,-20.8C170.23,-20.8 179,-20.8 187.56,-20.8"></path>
+<polygon fill="white" stroke="white" points="187.84,-24.3 197.84,-20.8 187.84,-17.3 187.84,-24.3"></polygon>
+</g>
+<!-- n4 -->
+<g id="node4" class="node">
+<title>n4</title>
+<polygon fill="none" stroke="white" points="379.4,-41.4 304.75,-41.4 304.75,-0.2 379.4,-0.2 379.4,-41.4"></polygon>
+<text text-anchor="middle" x="342.08" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Garbage</text>
+<text text-anchor="middle" x="342.08" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">Collection</text>
+</g>
+<!-- n3&#45;&gt;n4 -->
+<g id="edge3" class="edge">
+<title>n3-&gt;n4</title>
+<path fill="none" stroke="white" d="M269.11,-20.8C277.23,-20.8 286.02,-20.8 294.57,-20.8"></path>
+<polygon fill="white" stroke="white" points="294.82,-24.3 304.82,-20.8 294.82,-17.3 294.82,-24.3"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="different-topics" class="level2">
+<h2 class="anchored" data-anchor-id="different-topics">Different Topics</h2>
+<ul>
+<li>As we layer abstractions, writing code is more efficent and running code is less efficient.
+<ul>
+<li>Until mature technologies outcompete humans.</li>
+</ul></li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 437.35 109.60" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 105.6)">
+<title>G</title>
+<!-- m1 -->
+<g id="node1" class="node">
+<title>m1</title>
+<polygon fill="none" stroke="white" points="84.63,-41.4 -0.21,-41.4 -0.21,-0.2 84.63,-0.2 84.63,-41.4"></polygon>
+<text text-anchor="middle" x="42.21" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Electrical</text>
+<text text-anchor="middle" x="42.21" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">Engineering</text>
+</g>
+<!-- m2 -->
+<g id="node2" class="node">
+<title>m2</title>
+<polygon fill="none" stroke="white" points="206.36,-41.4 120.44,-41.4 120.44,-0.2 206.36,-0.2 206.36,-41.4"></polygon>
+<text text-anchor="middle" x="163.4" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Architecture</text>
+<text text-anchor="middle" x="163.4" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">and OSes</text>
+</g>
+<!-- m1&#45;&gt;m2 -->
+<g id="edge1" class="edge">
+<title>m1-&gt;m2</title>
+<path fill="none" stroke="white" d="M84.56,-20.8C92.78,-20.8 101.52,-20.8 110.05,-20.8"></path>
+<polygon fill="white" stroke="white" points="110.31,-24.3 120.31,-20.8 110.31,-17.3 110.31,-24.3"></polygon>
+</g>
+<!-- m3 -->
+<g id="node3" class="node">
+<title>m3</title>
+<polygon fill="none" stroke="white" points="316.88,-41.4 242.21,-41.4 242.21,-0.2 316.88,-0.2 316.88,-41.4"></polygon>
+<text text-anchor="middle" x="279.55" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Compilers</text>
+<text text-anchor="middle" x="279.55" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">(or std)</text>
+</g>
+<!-- m2&#45;&gt;m3 -->
+<g id="edge2" class="edge">
+<title>m2-&gt;m3</title>
+<path fill="none" stroke="white" d="M206.58,-20.8C214.89,-20.8 223.65,-20.8 232.09,-20.8"></path>
+<polygon fill="white" stroke="white" points="232.17,-24.3 242.17,-20.8 232.17,-17.3 232.17,-24.3"></polygon>
+</g>
+<!-- m4 -->
+<g id="node4" class="node">
+<title>m4</title>
+<polygon fill="none" stroke="white" points="429.17,-41.4 352.89,-41.4 352.89,-0.2 429.17,-0.2 429.17,-41.4"></polygon>
+<text text-anchor="middle" x="391.03" y="-25" font-family="Times,serif" font-size="14.00" fill="white">Scripting</text>
+<text text-anchor="middle" x="391.03" y="-8.2" font-family="Times,serif" font-size="14.00" fill="white">Languages</text>
+</g>
+<!-- m3&#45;&gt;m4 -->
+<g id="edge3" class="edge">
+<title>m3-&gt;m4</title>
+<path fill="none" stroke="white" d="M317,-20.8C325.14,-20.8 333.89,-20.8 342.4,-20.8"></path>
+<polygon fill="white" stroke="white" points="342.61,-24.3 352.61,-20.8 342.61,-17.3 342.61,-24.3"></polygon>
+</g>
+<!-- n1 -->
+<g id="node5" class="node">
+<title>n1</title>
+<polygon fill="none" stroke="white" points="74.42,-101.4 10,-101.4 10,-60.2 74.42,-60.2 74.42,-101.4"></polygon>
+<text text-anchor="middle" x="42.21" y="-85" font-family="Times,serif" font-size="14.00" fill="white">Physical</text>
+<text text-anchor="middle" x="42.21" y="-68.2" font-family="Times,serif" font-size="14.00" fill="white">Memory</text>
+</g>
+<!-- n2 -->
+<g id="node6" class="node">
+<title>n2</title>
+<polygon fill="none" stroke="white" points="194.28,-101.4 132.52,-101.4 132.52,-60.2 194.28,-60.2 194.28,-101.4"></polygon>
+<text text-anchor="middle" x="163.4" y="-85" font-family="Times,serif" font-size="14.00" fill="white">Address</text>
+<text text-anchor="middle" x="163.4" y="-68.2" font-family="Times,serif" font-size="14.00" fill="white">Spaces</text>
+</g>
+<!-- n1&#45;&gt;n2 -->
+<g id="edge4" class="edge">
+<title>n1-&gt;n2</title>
+<path fill="none" stroke="white" d="M74.53,-80.8C88.98,-80.8 106.33,-80.8 121.78,-80.8"></path>
+<polygon fill="white" stroke="white" points="122.12,-84.3 132.12,-80.8 122.12,-77.3 122.12,-84.3"></polygon>
+</g>
+<!-- n3 -->
+<g id="node7" class="node">
+<title>n3</title>
+<polygon fill="none" stroke="white" points="314.86,-101.4 244.23,-101.4 244.23,-60.2 314.86,-60.2 314.86,-101.4"></polygon>
+<text text-anchor="middle" x="279.55" y="-85" font-family="Times,serif" font-size="14.00" fill="white">Stack and</text>
+<text text-anchor="middle" x="279.55" y="-68.2" font-family="Times,serif" font-size="14.00" fill="white">Heap</text>
+</g>
+<!-- n2&#45;&gt;n3 -->
+<g id="edge5" class="edge">
+<title>n2-&gt;n3</title>
+<path fill="none" stroke="white" d="M194.39,-80.8C206.38,-80.8 220.44,-80.8 233.6,-80.8"></path>
+<polygon fill="white" stroke="white" points="233.91,-84.3 243.91,-80.8 233.91,-77.3 233.91,-84.3"></polygon>
+</g>
+<!-- n4 -->
+<g id="node8" class="node">
+<title>n4</title>
+<polygon fill="none" stroke="white" points="428.36,-101.4 353.71,-101.4 353.71,-60.2 428.36,-60.2 428.36,-101.4"></polygon>
+<text text-anchor="middle" x="391.03" y="-85" font-family="Times,serif" font-size="14.00" fill="white">Garbage</text>
+<text text-anchor="middle" x="391.03" y="-68.2" font-family="Times,serif" font-size="14.00" fill="white">Collection</text>
+</g>
+<!-- n3&#45;&gt;n4 -->
+<g id="edge6" class="edge">
+<title>n3-&gt;n4</title>
+<path fill="none" stroke="white" d="M314.89,-80.8C323.91,-80.8 333.8,-80.8 343.36,-80.8"></path>
+<polygon fill="white" stroke="white" points="343.54,-84.3 353.54,-80.8 343.54,-77.3 343.54,-84.3"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="bus" class="level1">
+<h1>Bus</h1>
+<section id="bus-1" class="level2">
+<h2 class="anchored" data-anchor-id="bus-1">Bus</h2>
+<blockquote class="blockquote">
+<p><a href="https://en.wikipedia.org/wiki/Bus_(computing)">In computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate.</a></p>
+</blockquote>
+</section>
+<section id="shorter" class="level2">
+<h2 class="anchored" data-anchor-id="shorter">Shorter</h2>
+<ul>
+<li>A bus is a bundle of wires that transfers bits.</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 193.28 152.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 148)">
+<title>G</title>
+<!-- cpu -->
+<g id="node1" class="node">
+<title>cpu</title>
+<polygon fill="none" stroke="white" points="122.95,-144 68.95,-144 68.95,-108 122.95,-108 122.95,-144"></polygon>
+<text text-anchor="middle" x="95.95" y="-121.8" font-family="Times,serif" font-size="14.00" fill="white">CPU</text>
+</g>
+<!-- bus_middle -->
+<g id="node2" class="node">
+<title>bus_middle</title>
+<ellipse fill="white" stroke="white" cx="95.95" cy="-72" rx="0" ry="0"></ellipse>
+</g>
+<!-- cpu&#45;&gt;bus_middle -->
+<g id="edge1" class="edge">
+<title>cpu-&gt;bus_middle</title>
+<path fill="none" stroke="white" d="M95.95,-107.72C95.95,-107.72 95.95,-82.06 95.95,-82.06"></path>
+<polygon fill="white" stroke="white" points="99.45,-82.06 95.95,-72.06 92.45,-82.06 99.45,-82.06"></polygon>
+</g>
+<!-- bus_right -->
+<g id="node4" class="node">
+<title>bus_right</title>
+<ellipse fill="white" stroke="white" cx="167.95" cy="-72" rx="0" ry="0"></ellipse>
+</g>
+<!-- bus_middle&#45;&gt;bus_right -->
+<g id="edge3" class="edge">
+<title>bus_middle-&gt;bus_right</title>
+<path fill="none" stroke="white" d="M96,-72C98.15,-72 165.78,-72 167.9,-72"></path>
+</g>
+<!-- bus_left -->
+<g id="node3" class="node">
+<title>bus_left</title>
+<ellipse fill="white" stroke="white" cx="23.95" cy="-72" rx="0" ry="0"></ellipse>
+</g>
+<!-- bus_left&#45;&gt;bus_middle -->
+<g id="edge2" class="edge">
+<title>bus_left-&gt;bus_middle</title>
+<path fill="none" stroke="white" d="M24,-72C26.15,-72 93.78,-72 95.9,-72"></path>
+</g>
+<!-- ram -->
+<g id="node5" class="node">
+<title>ram</title>
+<polygon fill="none" stroke="white" points="47.84,-36 0.05,-36 0.05,0 47.84,0 47.84,-36"></polygon>
+<text text-anchor="middle" x="23.95" y="-13.8" font-family="Times,serif" font-size="14.00" fill="white">RAM</text>
+</g>
+<!-- bus_left&#45;&gt;ram -->
+<g id="edge4" class="edge">
+<title>bus_left-&gt;ram</title>
+<path fill="none" stroke="white" d="M23.95,-71.85C23.95,-71.85 23.95,-46.22 23.95,-46.22"></path>
+<polygon fill="white" stroke="white" points="27.45,-46.22 23.95,-36.22 20.45,-46.22 27.45,-46.22"></polygon>
+</g>
+<!-- io -->
+<g id="node6" class="node">
+<title>io</title>
+<polygon fill="none" stroke="white" points="185.11,-36 150.78,-36 150.78,0 185.11,0 185.11,-36"></polygon>
+<text text-anchor="middle" x="167.95" y="-13.8" font-family="Times,serif" font-size="14.00" fill="white">I/O</text>
+</g>
+<!-- bus_right&#45;&gt;io -->
+<g id="edge5" class="edge">
+<title>bus_right-&gt;io</title>
+<path fill="none" stroke="white" d="M167.95,-71.85C167.95,-71.85 167.95,-46.22 167.95,-46.22"></path>
+<polygon fill="white" stroke="white" points="171.45,-46.22 167.95,-36.22 164.45,-46.22 171.45,-46.22"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="i-imagine" class="level2">
+<h2 class="anchored" data-anchor-id="i-imagine">I imagine…</h2>
+<ul>
+<li>Two registers (an ordered collection of bits) are populated by some device on a bus.
+<ul>
+<li>One for a numeric value.</li>
+<li>One for a numeric address.</li>
+</ul></li>
+</ul>
+</section>
+<section id="i-imagine-1" class="level2">
+<h2 class="anchored" data-anchor-id="i-imagine-1">I imagine…</h2>
+<ul>
+<li>That device writes:
+<ul>
+<li>A numerical address to bus
+<ul>
+<li>All other devices listen, and see if they “own” the address</li>
+</ul></li>
+<li>A numerical value to the bus
+<ul>
+<li>The relevant device records the bits to an internal register
+<ul>
+<li>Then saves or loads or displays or whatever.</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="within-a-device" class="level2">
+<h2 class="anchored" data-anchor-id="within-a-device">Within a Device</h2>
+<ul>
+<li>Within devices, numerical values are separated spatially.</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 192.00 45.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 41)">
+<title>G</title>
+<!-- node0 -->
+<g id="node1" class="node">
+<title>node0</title>
+<polygon fill="none" stroke="white" points="0,-0.5 0,-36.5 184,-36.5 184,-0.5 0,-0.5"></polygon>
+<text text-anchor="middle" x="11.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">0</text>
+<polyline fill="none" stroke="white" points="23,-0.5 23,-36.5 "></polyline>
+<text text-anchor="middle" x="34.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">0</text>
+<polyline fill="none" stroke="white" points="46,-0.5 46,-36.5 "></polyline>
+<text text-anchor="middle" x="57.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">1</text>
+<polyline fill="none" stroke="white" points="69,-0.5 69,-36.5 "></polyline>
+<text text-anchor="middle" x="80.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">1</text>
+<polyline fill="none" stroke="white" points="92,-0.5 92,-36.5 "></polyline>
+<text text-anchor="middle" x="103.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">0</text>
+<polyline fill="none" stroke="white" points="115,-0.5 115,-36.5 "></polyline>
+<text text-anchor="middle" x="126.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">1</text>
+<polyline fill="none" stroke="white" points="138,-0.5 138,-36.5 "></polyline>
+<text text-anchor="middle" x="149.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">1</text>
+<polyline fill="none" stroke="white" points="161,-0.5 161,-36.5 "></polyline>
+<text text-anchor="middle" x="172.5" y="-14.3" font-family="Times,serif" font-size="14.00" fill="white">0</text>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="within-a-bus" class="level2">
+<h2 class="anchored" data-anchor-id="within-a-bus">Within a Bus</h2>
+<ul>
+<li>On the bus, the wire is either, say, “high” or “low” and these values are interpreted as “one” or “zero”.
+<ul>
+<li>We term this “digital”</li>
+</ul></li>
+</ul>
+<blockquote class="blockquote">
+<p><a href="https://www.merriam-webster.com/dictionary/digital">composed of data in the form of especially binary digits</a></p>
+</blockquote>
+</section>
+<section id="signal-processing" class="level2">
+<h2 class="anchored" data-anchor-id="signal-processing">Signal Processing</h2>
+<ul>
+<li>E.g. sine wave with some recording window.</li>
+</ul>
+<p><img src="https://i.sstatic.net/MN1ay.png" class="img-fluid"> <a href="https://electronics.stackexchange.com/questions/163253/sine-wave-to-square-wave-schmitt-trigger">Source</a></p>
+</section>
+<section id="signal-processing-1" class="level2">
+<h2 class="anchored" data-anchor-id="signal-processing-1">Signal Processing</h2>
+<ul>
+<li>Out of scope
+<ul>
+<li>Physics/Electrical Engineering topic</li>
+<li>Seen in Data in the Cosmos and Computer Vision</li>
+<li>Ludicrously radical</li>
+</ul></li>
+<li>We handwave it here, and only introduce so you understand what the hardware/OS has to deal with.</li>
+</ul>
+</section>
+</section>
+<section id="address-space" class="level1">
+<h1>Address Space</h1>
+<section id="given-a-bus" class="level2">
+<h2 class="anchored" data-anchor-id="given-a-bus">Given a bus</h2>
+<ul>
+<li>Say we have both a keyboard and an MMU on a bus with our ALU/CPU
+<ul>
+<li>Say I input <code>d</code>, ASCII 100/0x64, on my keyboard</li>
+<li>The keyboard broadcasts onto bus</li>
+<li>The ALU and MMU read it
+<ul>
+<li>How is the signal interpreted?</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="throwback" class="level2">
+<h2 class="anchored" data-anchor-id="throwback">Throwback</h2>
+<ul>
+<li>Device writes:
+<ul>
+<li>A numerical address to bus
+<ul>
+<li>All other devices listen, and see if they “own” the address</li>
+</ul></li>
+<li>A numerical value to the bus
+<ul>
+<li>The relevant device records the bits to an internal register
+<ul>
+<li>Then saves or loads or displays or whatever.</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="so" class="level2">
+<h2 class="anchored" data-anchor-id="so">So…</h2>
+<ul>
+<li>The keyboard doesn’t <em>just</em> blast a `0b1100100’ onto bus.</li>
+<li>Rather, it broadcasts some pre-determined “address” corresponding to keyboard input.
+<ul>
+<li>The ALU sees this and knows to prepare a register to store the incoming value.</li>
+<li>The MMU sees this and knows to hit a snooze.</li>
+</ul></li>
+<li>So the keyboard prepends the numeric value with a numeric address.
+<ul>
+<li>This is the importance of an address space.</li>
+</ul></li>
+</ul>
+</section>
+<section id="the-big-idea" class="level2">
+<h2 class="anchored" data-anchor-id="the-big-idea">The Big Idea</h2>
+<ul>
+<li>Imagine the bus is an array.</li>
+<li>Each array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.</li>
+<li>Each array element has some numeric address.</li>
+</ul>
+</section>
+<section id="for-the-alu" class="level2">
+<h2 class="anchored" data-anchor-id="for-the-alu">For the ALU</h2>
+<ul>
+<li>When the ALU wants to write to memory
+<ul>
+<li>Address the MMU, either as
+<ul>
+<li>A region as large as physical memory</li>
+<li>One address then a key-value pair</li>
+</ul></li>
+<li>The ALU writes a value to an address
+<ul>
+<li>The MMU sees this on bus and acts accordingly</li>
+<li>The keyboard does whatever</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="wrinkles" class="level2">
+<h2 class="anchored" data-anchor-id="wrinkles">Wrinkles</h2>
+<ul>
+<li>Sounds easy?</li>
+<li>We can optimize</li>
+</ul>
+</section>
+<section id="gaps" class="level2">
+<h2 class="anchored" data-anchor-id="gaps">Gaps</h2>
+<ul>
+<li>Usually address space is much larger than RAM</li>
+<li>Addresses that can be accessed are referred to as “mapped”</li>
+<li>And holes that can’t be accessed are “unmapped”</li>
+<li>What happens if the CPU loads or stores to an unmapped region</li>
+</ul>
+</section>
+<section id="gaps-1" class="level2">
+<h2 class="anchored" data-anchor-id="gaps-1">Gaps</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 169.20 133.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 129)">
+<title>G</title>
+<!-- node0 -->
+<g id="node1" class="node">
+<title>node0</title>
+<polygon fill="none" stroke="white" points="0,-0.5 0,-124.5 54,-124.5 54,-0.5 0,-0.5"></polygon>
+<text text-anchor="middle" x="27" y="-107.9" font-family="Times,serif" font-size="14.00" fill="white">0x10</text>
+<polyline fill="none" stroke="white" points="0,-99.7 54,-99.7 "></polyline>
+<text text-anchor="middle" x="26.67" y="-83.1" font-family="Times,serif" font-size="14.00" fill="white">0x0C</text>
+<polyline fill="none" stroke="white" points="0,-74.9 54,-74.9 "></polyline>
+<text text-anchor="middle" x="27" y="-58.3" font-family="Times,serif" font-size="14.00" fill="white">0x08</text>
+<polyline fill="none" stroke="white" points="0,-50.1 54,-50.1 "></polyline>
+<text text-anchor="middle" x="27" y="-33.5" font-family="Times,serif" font-size="14.00" fill="white">0x04</text>
+<polyline fill="none" stroke="white" points="0,-25.3 54,-25.3 "></polyline>
+<text text-anchor="middle" x="27" y="-8.7" font-family="Times,serif" font-size="14.00" fill="white">0x00</text>
+</g>
+<!-- node1 -->
+<g id="node2" class="node">
+<title>node1</title>
+<polygon fill="none" stroke="white" points="90,-0.5 90,-124.5 161.2,-124.5 161.2,-0.5 90,-0.5"></polygon>
+<text text-anchor="middle" x="125.44" y="-107.9" font-family="Times,serif" font-size="14.00" fill="white">Monitor</text>
+<polyline fill="none" stroke="white" points="90,-99.7 161.2,-99.7 "></polyline>
+<text text-anchor="middle" x="125.25" y="-83.1" font-family="Times,serif" font-size="14.00" fill="white"> </text>
+<polyline fill="none" stroke="white" points="90,-74.9 161.2,-74.9 "></polyline>
+<text text-anchor="middle" x="125.5" y="-58.3" font-family="Times,serif" font-size="14.00" fill="white">GPU</text>
+<polyline fill="none" stroke="white" points="90,-50.1 161.2,-50.1 "></polyline>
+<text text-anchor="middle" x="125.11" y="-33.5" font-family="Times,serif" font-size="14.00" fill="white">Memory</text>
+<polyline fill="none" stroke="white" points="90,-25.3 161.2,-25.3 "></polyline>
+<text text-anchor="middle" x="125.6" y="-8.7" font-family="Times,serif" font-size="14.00" fill="white">Keyboard</text>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge1" class="edge">
+<title>node0:5-&gt;node1:5</title>
+<path fill="none" stroke="white" d="M54,-112.5C66,-112.5 71.25,-112.5 79.88,-112.5"></path>
+<polygon fill="white" stroke="white" points="80,-116 90,-112.5 80,-109 80,-116"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge2" class="edge">
+<title>node0:4-&gt;node1:4</title>
+<path fill="none" stroke="white" d="M54,-87.5C66,-87.5 71.25,-87.5 79.88,-87.5"></path>
+<polygon fill="white" stroke="white" points="80,-91 90,-87.5 80,-84 80,-91"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge3" class="edge">
+<title>node0:3-&gt;node1:3</title>
+<path fill="none" stroke="white" d="M54,-62.5C66,-62.5 71.25,-62.5 79.88,-62.5"></path>
+<polygon fill="white" stroke="white" points="80,-66 90,-62.5 80,-59 80,-66"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge4" class="edge">
+<title>node0:2-&gt;node1:2</title>
+<path fill="none" stroke="white" d="M54,-37.5C66,-37.5 71.25,-37.5 79.88,-37.5"></path>
+<polygon fill="white" stroke="white" points="80,-41 90,-37.5 80,-34 80,-41"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge5" class="edge">
+<title>node0:1-&gt;node1:1</title>
+<path fill="none" stroke="white" d="M54,-12.5C66,-12.5 71.25,-12.5 79.88,-12.5"></path>
+<polygon fill="white" stroke="white" points="80,-16 90,-12.5 80,-9 80,-16"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="permissions" class="level2">
+<h2 class="anchored" data-anchor-id="permissions">Permissions</h2>
+<ul>
+<li>Usually as RWX
+<ul>
+<li><strong>R</strong>ead</li>
+<li><strong>W</strong>rite</li>
+<li>E<strong>X</strong>ecute</li>
+<li>The dastardly von Neumann model rears its ugly head etc.</li>
+</ul></li>
+<li>Why have these, and</li>
+<li>What if they are violated</li>
+</ul>
+</section>
+<section id="permissions-1" class="level2">
+<h2 class="anchored" data-anchor-id="permissions-1">Permissions</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 188.81 133.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 129)">
+<title>G</title>
+<!-- node0 -->
+<g id="node1" class="node">
+<title>node0</title>
+<polygon fill="none" stroke="white" points="0,-0.5 0,-124.5 90.81,-124.5 90.81,-0.5 0,-0.5"></polygon>
+<text text-anchor="middle" x="24.8" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">0x10</text>
+<polyline fill="none" stroke="white" points="49.61,-99.7 49.61,-124.5 "></polyline>
+<text text-anchor="middle" x="70.21" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">R__</text>
+<polyline fill="none" stroke="white" points="0,-99.7 90.81,-99.7 "></polyline>
+<text text-anchor="middle" x="24.8" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">0x0C</text>
+<polyline fill="none" stroke="white" points="49.61,-74.9 49.61,-99.7 "></polyline>
+<text text-anchor="middle" x="70.21" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">RW_</text>
+<polyline fill="none" stroke="white" points="0,-74.9 90.81,-74.9 "></polyline>
+<text text-anchor="middle" x="24.8" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">0x08</text>
+<polyline fill="none" stroke="white" points="49.61,-50.1 49.61,-74.9 "></polyline>
+<text text-anchor="middle" x="70.21" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">R_X</text>
+<polyline fill="none" stroke="white" points="0,-50.1 90.81,-50.1 "></polyline>
+<text text-anchor="middle" x="24.8" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">0x04</text>
+<polyline fill="none" stroke="white" points="49.61,-25.3 49.61,-50.1 "></polyline>
+<text text-anchor="middle" x="70.21" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">R__</text>
+<polyline fill="none" stroke="white" points="0,-25.3 90.81,-25.3 "></polyline>
+<text text-anchor="middle" x="24.8" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">0x00</text>
+<polyline fill="none" stroke="white" points="49.61,-0.5 49.61,-25.3 "></polyline>
+<text text-anchor="middle" x="70.21" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">RWX</text>
+</g>
+<!-- node1 -->
+<g id="node2" class="node">
+<title>node1</title>
+<polygon fill="none" stroke="white" points="126.81,-0.5 126.81,-124.5 180.81,-124.5 180.81,-0.5 126.81,-0.5"></polygon>
+<text text-anchor="middle" x="153.61" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">.ini</text>
+<polyline fill="none" stroke="white" points="126.81,-99.7 180.81,-99.7 "></polyline>
+<text text-anchor="middle" x="153.61" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">.txt</text>
+<polyline fill="none" stroke="white" points="126.81,-74.9 180.81,-74.9 "></polyline>
+<text text-anchor="middle" x="153.61" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">.exe</text>
+<polyline fill="none" stroke="white" points="126.81,-50.1 180.81,-50.1 "></polyline>
+<text text-anchor="middle" x="153.61" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">.log</text>
+<polyline fill="none" stroke="white" points="126.81,-25.3 180.81,-25.3 "></polyline>
+<text text-anchor="middle" x="153.41" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">.sh</text>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge1" class="edge">
+<title>node0:5-&gt;node1:5</title>
+<path fill="none" stroke="white" d="M90.81,-112.5C102.81,-112.5 108.06,-112.5 116.68,-112.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-116 126.81,-112.5 116.81,-109 116.81,-116"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge2" class="edge">
+<title>node0:4-&gt;node1:4</title>
+<path fill="none" stroke="white" d="M90.81,-87.5C102.81,-87.5 108.06,-87.5 116.68,-87.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-91 126.81,-87.5 116.81,-84 116.81,-91"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge3" class="edge">
+<title>node0:3-&gt;node1:3</title>
+<path fill="none" stroke="white" d="M90.81,-62.5C102.81,-62.5 108.06,-62.5 116.68,-62.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-66 126.81,-62.5 116.81,-59 116.81,-66"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge4" class="edge">
+<title>node0:2-&gt;node1:2</title>
+<path fill="none" stroke="white" d="M90.81,-37.5C102.81,-37.5 108.06,-37.5 116.68,-37.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-41 126.81,-37.5 116.81,-34 116.81,-41"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge5" class="edge">
+<title>node0:1-&gt;node1:1</title>
+<path fill="none" stroke="white" d="M90.81,-12.5C102.81,-12.5 108.06,-12.5 116.68,-12.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-16 126.81,-12.5 116.81,-9 116.81,-16"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="multiple-devices" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-devices">Multiple Devices</h2>
+<ul>
+<li>Treat code and data as the same.</li>
+<li>Be unfathomably based.</li>
+<li>The keyboard is just memory.</li>
+<li>So is the CPU/GPU</li>
+<li>So is the internet (Network interface controller)
+<ul>
+<li>We can execute the internet?</li>
+</ul></li>
+</ul>
+</section>
+<section id="multiple-devices-1" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-devices-1">Multiple Devices</h2>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<svg width="672" height="480" viewbox="0.00 0.00 225.62 133.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 129)">
+<title>G</title>
+<!-- node0 -->
+<g id="node1" class="node">
+<title>node0</title>
+<polygon fill="none" stroke="white" points="0,-0.5 0,-124.5 90.81,-124.5 90.81,-0.5 0,-0.5"></polygon>
+<text text-anchor="middle" x="24.8" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">0x10</text>
+<polyline fill="none" stroke="white" points="49.61,-99.7 49.61,-124.5 "></polyline>
+<text text-anchor="middle" x="70.21" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">R__</text>
+<polyline fill="none" stroke="white" points="0,-99.7 90.81,-99.7 "></polyline>
+<text text-anchor="middle" x="24.8" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">0x0C</text>
+<polyline fill="none" stroke="white" points="49.61,-74.9 49.61,-99.7 "></polyline>
+<text text-anchor="middle" x="70.21" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">RW_</text>
+<polyline fill="none" stroke="white" points="0,-74.9 90.81,-74.9 "></polyline>
+<text text-anchor="middle" x="24.8" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">0x08</text>
+<polyline fill="none" stroke="white" points="49.61,-50.1 49.61,-74.9 "></polyline>
+<text text-anchor="middle" x="70.21" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">R_X</text>
+<polyline fill="none" stroke="white" points="0,-50.1 90.81,-50.1 "></polyline>
+<text text-anchor="middle" x="24.8" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">0x04</text>
+<polyline fill="none" stroke="white" points="49.61,-25.3 49.61,-50.1 "></polyline>
+<text text-anchor="middle" x="70.21" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">R__</text>
+<polyline fill="none" stroke="white" points="0,-25.3 90.81,-25.3 "></polyline>
+<text text-anchor="middle" x="24.8" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">0x00</text>
+<polyline fill="none" stroke="white" points="49.61,-0.5 49.61,-25.3 "></polyline>
+<text text-anchor="middle" x="70.21" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">RWX</text>
+</g>
+<!-- node1 -->
+<g id="node2" class="node">
+<title>node1</title>
+<polygon fill="none" stroke="white" points="126.81,-0.5 126.81,-124.5 217.62,-124.5 217.62,-0.5 126.81,-0.5"></polygon>
+<text text-anchor="middle" x="147.41" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">I/O</text>
+<polyline fill="none" stroke="white" points="168.01,-99.7 168.01,-124.5 "></polyline>
+<text text-anchor="middle" x="192.82" y="-107.9" font-family="Courier,monospace" font-size="14.00" fill="white">keys</text>
+<polyline fill="none" stroke="white" points="126.81,-99.7 217.62,-99.7 "></polyline>
+<text text-anchor="middle" x="147.41" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">MMU</text>
+<polyline fill="none" stroke="white" points="168.01,-74.9 168.01,-99.7 "></polyline>
+<text text-anchor="middle" x="192.82" y="-83.1" font-family="Courier,monospace" font-size="14.00" fill="white">.txt</text>
+<polyline fill="none" stroke="white" points="126.81,-74.9 217.62,-74.9 "></polyline>
+<text text-anchor="middle" x="147.41" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">MMU</text>
+<polyline fill="none" stroke="white" points="168.01,-50.1 168.01,-74.9 "></polyline>
+<text text-anchor="middle" x="192.82" y="-58.3" font-family="Courier,monospace" font-size="14.00" fill="white">.exe</text>
+<polyline fill="none" stroke="white" points="126.81,-50.1 217.62,-50.1 "></polyline>
+<text text-anchor="middle" x="147.41" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">NIC</text>
+<polyline fill="none" stroke="white" points="168.01,-25.3 168.01,-50.1 "></polyline>
+<text text-anchor="middle" x="192.82" y="-33.5" font-family="Courier,monospace" font-size="14.00" fill="white">.htm</text>
+<polyline fill="none" stroke="white" points="126.81,-25.3 217.62,-25.3 "></polyline>
+<text text-anchor="middle" x="147.41" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">NIC</text>
+<polyline fill="none" stroke="white" points="168.01,-0.5 168.01,-25.3 "></polyline>
+<text text-anchor="middle" x="192.82" y="-8.7" font-family="Courier,monospace" font-size="14.00" fill="white">.jsx</text>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge1" class="edge">
+<title>node0:5-&gt;node1:5</title>
+<path fill="none" stroke="white" d="M90.81,-112.5C102.81,-112.5 108.06,-112.5 116.68,-112.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-116 126.81,-112.5 116.81,-109 116.81,-116"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge2" class="edge">
+<title>node0:4-&gt;node1:4</title>
+<path fill="none" stroke="white" d="M90.81,-87.5C102.81,-87.5 108.06,-87.5 116.68,-87.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-91 126.81,-87.5 116.81,-84 116.81,-91"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge3" class="edge">
+<title>node0:3-&gt;node1:3</title>
+<path fill="none" stroke="white" d="M90.81,-62.5C102.81,-62.5 108.06,-62.5 116.68,-62.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-66 126.81,-62.5 116.81,-59 116.81,-66"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge4" class="edge">
+<title>node0:2-&gt;node1:2</title>
+<path fill="none" stroke="white" d="M90.81,-37.5C102.81,-37.5 108.06,-37.5 116.68,-37.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-41 126.81,-37.5 116.81,-34 116.81,-41"></polygon>
+</g>
+<!-- node0&#45;&gt;node1 -->
+<g id="edge5" class="edge">
+<title>node0:1-&gt;node1:1</title>
+<path fill="none" stroke="white" d="M90.81,-12.5C102.81,-12.5 108.06,-12.5 116.68,-12.5"></path>
+<polygon fill="white" stroke="white" points="116.81,-16 126.81,-12.5 116.81,-9 116.81,-16"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="further" class="level2">
+<h2 class="anchored" data-anchor-id="further">Further</h2>
+<ul>
+<li>Physical vs.&nbsp;virtual address
+<ul>
+<li>Usually computers can describe more memory locations than the MMU can retain.</li>
+</ul></li>
+<li>Caching
+<ul>
+<li>Usually read/write is slow but repeated, so save common requests to deload devices and bus</li>
+</ul></li>
+<li>Block size
+<ul>
+<li>Bits and even words are are two small, usually pages (4KB) or blocks (cloud scale)</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="stack-heap" class="level1">
+<h1>Stack &amp; Heap</h1>
+<section id="recall" class="level2">
+<h2 class="anchored" data-anchor-id="recall">Recall</h2>
+<ul>
+<li>You have already been a client of the stack/heap
+<ul>
+<li><a href="https://cd-public.github.io/crypto/qmd/malloc.html#/heap-example">In C</a></li>
+<li><a href="https://cd-c89.github.io/rs/90_stack.rjs.html#/heap-memory-fundamentals">In Rust</a></li>
+</ul></li>
+<li>Quoth me:</li>
+</ul>
+<blockquote class="blockquote">
+<p><a href="https://cd-c89.github.io/rs/90_stack.rjs.html#/citation-1">It’s the OS’s problem. And therefore our problem next term.</a></p>
+</blockquote>
+</section>
+</section>
+<section id="languages" class="level1">
+<h1>Languages</h1>
+<section id="python" class="level2">
+<h2 class="anchored" data-anchor-id="python">Python</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="im">import</span> ctypes</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="im">import</span> gc </span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a>di <span class="op">=</span> <span class="kw">lambda</span> obj_id : _ctypes.PyObj_FromPtr(obj_id)</span>
+<span id="cb1-5"><a href="#cb1-5"></a>free <span class="op">=</span> gc.collect</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="rust" class="level2">
+<h2 class="anchored" data-anchor-id="rust">Rust</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">fn</span> main() <span class="op">{</span>    </span>
+<span id="cb2-2"><a href="#cb2-2"></a>    <span class="kw">let</span> ptr<span class="op">:</span> <span class="op">*</span><span class="kw">const</span> <span class="dt">i32</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="op">{</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>        <span class="kw">let</span> x <span class="op">=</span> <span class="dv">1234</span><span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>        ptr <span class="op">=</span> <span class="op">&amp;</span>x <span class="kw">as</span> <span class="op">*</span><span class="kw">const</span> <span class="dt">i32</span><span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>            <span class="pp">println!</span>(<span class="st">"Value at ptr: {}"</span><span class="op">,</span> <span class="op">*</span>ptr)<span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>        <span class="op">}</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="op">}</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a>        <span class="pp">println!</span>(<span class="st">"Value at ptr: {}"</span><span class="op">,</span> <span class="op">*</span>ptr)<span class="op">;</span></span>
+<span id="cb2-14"><a href="#cb2-14"></a>    <span class="op">}</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="c" class="level2">
+<h2 class="anchored" data-anchor-id="c"><a href="https://cd-public.github.io/crypto/qmd/malloc.html#/fix-it">C</a></h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource c number-lines code-with-copy"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1"></a><span class="pp">#include </span><span class="im">&lt;stdlib.h&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="dt">void</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>        <span class="dt">int</span> <span class="op">*</span>p <span class="op">=</span> <span class="op">(</span><span class="dt">int</span> <span class="op">*)</span>malloc<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">int</span><span class="op">));</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>        <span class="dt">int</span> <span class="op">*</span>q <span class="op">=</span> <span class="op">(</span><span class="dt">int</span> <span class="op">*)</span>malloc<span class="op">(</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">int</span><span class="op">));</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>        free<span class="op">(</span>p<span class="op">);</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>        p <span class="op">=</span> q<span class="op">;</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="all-of-these" class="level2">
+<h2 class="anchored" data-anchor-id="all-of-these">All of these…</h2>
+<ul>
+<li>Are your problem now.</li>
+<li>There is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.</li>
+<li>On to the lab/homework!</li>
+</ul>
+</section>
+<section id="today-1" class="level2">
+<h2 class="anchored" data-anchor-id="today-1">Today</h2>
+<ul>
+<li>Motivation
+<ul>
+<li>Architecture</li>
+<li>Abstraction level</li>
+</ul></li>
+<li>OS
+<ul>
+<li>Bus</li>
+<li>Address space</li>
+<li>Stack/heap</li>
+<li>Languages</li>
+</ul></li>
+</ul>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./12_split_at.html" class="pagination-link" aria-label="Splits">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Splits</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">---</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="an">title:</span><span class="co"> OS</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="co">---</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="ss">- </span>**Welcome** to OS in Rust</span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="ss">  - </span>Actual OS week.</span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb4-10"><a href="#cb4-10"></a><span class="ss">  - </span>Finish working through <span class="in">`split_at`</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="ss">    - </span>Form a strong opinion on <span class="in">`assert`</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="ss">    - </span>Good anecdote for job interviews.</span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="ss">  - </span>Nominally ready for next homework after this lecture.</span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="ss">    - </span>Can wait for lab/section.</span>
+<span id="cb4-15"><a href="#cb4-15"></a></span>
+<span id="cb4-16"><a href="#cb4-16"></a></span>
+<span id="cb4-17"><a href="#cb4-17"></a><span class="fu">## Today</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a></span>
+<span id="cb4-19"><a href="#cb4-19"></a><span class="ss">- </span>Motivation</span>
+<span id="cb4-20"><a href="#cb4-20"></a><span class="ss">    - </span>Architecture</span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="ss">    - </span>Abstraction level</span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="ss">- </span>OS</span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="ss">    - </span>Bus</span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="ss">    - </span>Address space</span>
+<span id="cb4-25"><a href="#cb4-25"></a><span class="ss">    - </span>Stack/heap</span>
+<span id="cb4-26"><a href="#cb4-26"></a><span class="ss">    - </span>Languages</span>
+<span id="cb4-27"><a href="#cb4-27"></a>    </span>
+<span id="cb4-28"><a href="#cb4-28"></a><span class="fu">## Citations</span></span>
+<span id="cb4-29"><a href="#cb4-29"></a></span>
+<span id="cb4-30"><a href="#cb4-30"></a><span class="ss">- </span>Borrowed a bit from:</span>
+<span id="cb4-31"><a href="#cb4-31"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">MIT via UIC</span><span class="co">](https://ics.uci.edu/~swjun/courses/2021W-CS152/slides/lec9%20-%20OS.pdf)</span></span>
+<span id="cb4-32"><a href="#cb4-32"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">MIT via OCW</span><span class="co">](https://pdos.csail.mit.edu/6.1810/2023/lec/l-c_slides.pdf)</span></span>
+<span id="cb4-33"><a href="#cb4-33"></a></span>
+<span id="cb4-34"><a href="#cb4-34"></a><span class="fu"># Motivation</span></span>
+<span id="cb4-35"><a href="#cb4-35"></a></span>
+<span id="cb4-36"><a href="#cb4-36"></a><span class="fu">## Arriving at OS</span></span>
+<span id="cb4-37"><a href="#cb4-37"></a></span>
+<span id="cb4-38"><a href="#cb4-38"></a><span class="ss">- </span>We can arrive at OS from two ways:</span>
+<span id="cb4-39"><a href="#cb4-39"></a><span class="ss">    - </span>We can look at *physic*al hardware an infer the need for a control system.</span>
+<span id="cb4-40"><a href="#cb4-40"></a><span class="ss">    - </span>We can look at *formal* descriptions of computing, such as automata, and infer the need for abstractions to practically use the system.</span>
+<span id="cb4-41"><a href="#cb4-41"></a>    </span>
+<span id="cb4-42"><a href="#cb4-42"></a><span class="fu"># Architecture</span></span>
+<span id="cb4-43"><a href="#cb4-43"></a></span>
+<span id="cb4-44"><a href="#cb4-44"></a><span class="fu">## The Device</span></span>
+<span id="cb4-45"><a href="#cb4-45"></a></span>
+<span id="cb4-46"><a href="#cb4-46"></a><span class="ss">- </span>We imagine some minimal device.</span>
+<span id="cb4-47"><a href="#cb4-47"></a><span class="ss">    - </span>What are the minimum requirements to be a computer?</span>
+<span id="cb4-48"><a href="#cb4-48"></a>  </span>
+<span id="cb4-49"><a href="#cb4-49"></a><span class="fu">## Architecture - ALU</span></span>
+<span id="cb4-50"><a href="#cb4-50"></a></span>
+<span id="cb4-51"><a href="#cb4-51"></a><span class="ss">- </span>We imagine some minimal device.</span>
+<span id="cb4-52"><a href="#cb4-52"></a><span class="ss">    - </span>It contains an *arithmetic/logic unit* (ALU).</span>
+<span id="cb4-53"><a href="#cb4-53"></a><span class="ss">        - </span>Can perform e.g. logical AND, bitwise AND, and numeric ADD</span>
+<span id="cb4-54"><a href="#cb4-54"></a><span class="ss">        - </span>Can load/store numeric values to/from numeric addresses</span>
+<span id="cb4-55"><a href="#cb4-55"></a>        </span>
+<span id="cb4-56"><a href="#cb4-56"></a><span class="fu">## Architecture - MMU</span></span>
+<span id="cb4-57"><a href="#cb4-57"></a></span>
+<span id="cb4-58"><a href="#cb4-58"></a><span class="ss">- </span>We imagine some minimal device.</span>
+<span id="cb4-59"><a href="#cb4-59"></a><span class="ss">    - </span>It contains "memory", perhaps via a *memory management unit* (MMU)</span>
+<span id="cb4-60"><a href="#cb4-60"></a><span class="ss">        - </span>Persists numeric values associated with numeric addresses</span>
+<span id="cb4-61"><a href="#cb4-61"></a><span class="ss">        - </span>Physically separated from the ALU</span>
+<span id="cb4-62"><a href="#cb4-62"></a><span class="ss">        - </span>Geniuses will say this is key-value storage</span>
+<span id="cb4-63"><a href="#cb4-63"></a>  </span>
+<span id="cb4-64"><a href="#cb4-64"></a><span class="fu">## Picture</span></span>
+<span id="cb4-65"><a href="#cb4-65"></a></span>
+<span id="cb4-68"><a href="#cb4-68"></a><span class="in">```{dot}</span></span>
+<span id="cb4-69"><a href="#cb4-69"></a><span class="in">digraph graphgraph {</span></span>
+<span id="cb4-70"><a href="#cb4-70"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-71"><a href="#cb4-71"></a><span class="in">    node [shape=box,  fontcolor="white", color="white"];</span></span>
+<span id="cb4-72"><a href="#cb4-72"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-73"><a href="#cb4-73"></a><span class="in">    </span></span>
+<span id="cb4-74"><a href="#cb4-74"></a><span class="in">    ALU -&gt; MMU [label="save"]</span></span>
+<span id="cb4-75"><a href="#cb4-75"></a><span class="in">    MMU -&gt; ALU [label="load"]</span></span>
+<span id="cb4-76"><a href="#cb4-76"></a><span class="in">    ALU -&gt; ALU [label="plus"]</span></span>
+<span id="cb4-77"><a href="#cb4-77"></a><span class="in">}</span></span>
+<span id="cb4-78"><a href="#cb4-78"></a><span class="in">```</span></span>
+<span id="cb4-79"><a href="#cb4-79"></a></span>
+<span id="cb4-80"><a href="#cb4-80"></a><span class="fu">## Architecture</span></span>
+<span id="cb4-81"><a href="#cb4-81"></a></span>
+<span id="cb4-82"><a href="#cb4-82"></a><span class="ss">- </span>This is the now-legendary Von Neumann architecture.</span>
+<span id="cb4-83"><a href="#cb4-83"></a></span>
+<span id="cb4-84"><a href="#cb4-84"></a>&lt;center&gt;</span>
+<span id="cb4-85"><a href="#cb4-85"></a>&lt;a href="https://en.wikipedia.org/wiki/Von_Neumann_architecture"&gt;</span>
+<span id="cb4-86"><a href="#cb4-86"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Von_Neumann_Architecture.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb4-87"><a href="#cb4-87"></a>&lt;/a&gt;</span>
+<span id="cb4-88"><a href="#cb4-88"></a>&lt;/center&gt;</span>
+<span id="cb4-89"><a href="#cb4-89"></a></span>
+<span id="cb4-90"><a href="#cb4-90"></a><span class="fu">## Von Neumann, Formally</span></span>
+<span id="cb4-91"><a href="#cb4-91"></a></span>
+<span id="cb4-92"><a href="#cb4-92"></a><span class="ss">- </span>A central arithmetic unit to perform arithmetic operations;</span>
+<span id="cb4-93"><a href="#cb4-93"></a><span class="ss">- </span>A central control unit to sequence operations performed by the machine;</span>
+<span id="cb4-94"><a href="#cb4-94"></a><span class="ss">- </span>Memory that stores data and instructions;</span>
+<span id="cb4-95"><a href="#cb4-95"></a><span class="ss">- </span>An "outside recording medium" to store input to and output from the machine;</span>
+<span id="cb4-96"><a href="#cb4-96"></a><span class="ss">- </span>Input and output mechanisms to transfer data between the memory and the outside recording medium.</span>
+<span id="cb4-97"><a href="#cb4-97"></a></span>
+<span id="cb4-98"><a href="#cb4-98"></a><span class="fu">## Competing Formulation</span></span>
+<span id="cb4-99"><a href="#cb4-99"></a></span>
+<span id="cb4-100"><a href="#cb4-100"></a>The competing formulation known as the *Harvard architecture* differed in that information describing actions (say, *executables* or "stored memory programs" or "instructions") and information for read-write (say *data files* or just "data") had distinct storage mediums.</span>
+<span id="cb4-101"><a href="#cb4-101"></a></span>
+<span id="cb4-102"><a href="#cb4-102"></a><span class="ss">- </span>As far as I know, none of these were ever made.</span>
+<span id="cb4-103"><a href="#cb4-103"></a><span class="ss">- </span>Theoretical idea.</span>
+<span id="cb4-104"><a href="#cb4-104"></a></span>
+<span id="cb4-105"><a href="#cb4-105"></a><span class="fu">## Harvard Architecture</span></span>
+<span id="cb4-106"><a href="#cb4-106"></a></span>
+<span id="cb4-107"><a href="#cb4-107"></a>&lt;center&gt;</span>
+<span id="cb4-108"><a href="#cb4-108"></a>&lt;a href="https://en.wikipedia.org/wiki/Harvard_architecture"&gt;</span>
+<span id="cb4-109"><a href="#cb4-109"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Harvard_architecture.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb4-110"><a href="#cb4-110"></a>&lt;/a&gt;</span>
+<span id="cb4-111"><a href="#cb4-111"></a>&lt;/center&gt;</span>
+<span id="cb4-112"><a href="#cb4-112"></a></span>
+<span id="cb4-113"><a href="#cb4-113"></a><span class="fu">## Historical use case</span></span>
+<span id="cb4-114"><a href="#cb4-114"></a></span>
+<span id="cb4-115"><a href="#cb4-115"></a><span class="ss">- </span>Historical computing devices had no onboard storage and programs lived on e.g. external tapes.</span>
+<span id="cb4-116"><a href="#cb4-116"></a><span class="ss">    - </span>The Harvard architecture is a helpful model in this case.</span>
+<span id="cb4-117"><a href="#cb4-117"></a><span class="ss">- </span>Today, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)</span>
+<span id="cb4-118"><a href="#cb4-118"></a><span class="ss">    - </span>Hence Von Neumann</span>
+<span id="cb4-119"><a href="#cb4-119"></a>    </span>
+<span id="cb4-120"><a href="#cb4-120"></a><span class="fu">## Von Neumann - Aside</span></span>
+<span id="cb4-121"><a href="#cb4-121"></a></span>
+<span id="cb4-122"><a href="#cb4-122"></a>:::: {.columns}</span>
+<span id="cb4-123"><a href="#cb4-123"></a></span>
+<span id="cb4-124"><a href="#cb4-124"></a>::: {.column width="50%"}</span>
+<span id="cb4-125"><a href="#cb4-125"></a></span>
+<span id="cb4-126"><a href="#cb4-126"></a><span class="ss">- </span>Be advised this is a Manhattan Project member and form your own opinion about that.</span>
+<span id="cb4-127"><a href="#cb4-127"></a></span>
+<span id="cb4-128"><a href="#cb4-128"></a>:::</span>
+<span id="cb4-129"><a href="#cb4-129"></a></span>
+<span id="cb4-130"><a href="#cb4-130"></a>::: {.column width="50%"}</span>
+<span id="cb4-131"><a href="#cb4-131"></a></span>
+<span id="cb4-132"><a href="#cb4-132"></a>&lt;center&gt;</span>
+<span id="cb4-133"><a href="#cb4-133"></a>&lt;a href="https://en.wikipedia.org/wiki/Harvard_architecture"&gt;</span>
+<span id="cb4-134"><a href="#cb4-134"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/JohnvonNeumann-LosAlamos.gif"&gt;</span>
+<span id="cb4-135"><a href="#cb4-135"></a>&lt;/a&gt;</span>
+<span id="cb4-136"><a href="#cb4-136"></a>&lt;/center&gt;</span>
+<span id="cb4-137"><a href="#cb4-137"></a></span>
+<span id="cb4-138"><a href="#cb4-138"></a>:::</span>
+<span id="cb4-139"><a href="#cb4-139"></a></span>
+<span id="cb4-140"><a href="#cb4-140"></a>::::</span>
+<span id="cb4-141"><a href="#cb4-141"></a></span>
+<span id="cb4-142"><a href="#cb4-142"></a><span class="fu"># Abstraction</span></span>
+<span id="cb4-143"><a href="#cb4-143"></a></span>
+<span id="cb4-144"><a href="#cb4-144"></a><span class="fu">## Hardware "doesn't matter"</span></span>
+<span id="cb4-145"><a href="#cb4-145"></a></span>
+<span id="cb4-146"><a href="#cb4-146"></a><span class="ss">- </span>We can regard as a historical accident that hardware exists in any particular form.</span>
+<span id="cb4-147"><a href="#cb4-147"></a><span class="ss">    - </span>Perhaps the first computers could've been biological vs. mechanical vs. electric.</span>
+<span id="cb4-148"><a href="#cb4-148"></a><span class="ss">- </span>We then regard the automata, principly the *Turing Machine*, as ground truth.</span>
+<span id="cb4-149"><a href="#cb4-149"></a><span class="ss">    - </span>TMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday...</span>
+<span id="cb4-150"><a href="#cb4-150"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://cd-public.github.io/compute/11_tm.rjs.html#/turing-machines-tm-1936)</span></span>
+<span id="cb4-151"><a href="#cb4-151"></a>    </span>
+<span id="cb4-152"><a href="#cb4-152"></a><span class="fu">## Thinking about a TM</span></span>
+<span id="cb4-153"><a href="#cb4-153"></a></span>
+<span id="cb4-154"><a href="#cb4-154"></a>:::{.r-stack}</span>
+<span id="cb4-155"><a href="#cb4-155"></a>&lt;a style="filter:invert(1)" title="Nynexman4464 at the English Wikipedia, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Turing_machine_2b.svg"&gt;&lt;img width="512" alt="Turing machine 2b" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Turing_machine_2b.svg/512px-Turing_machine_2b.svg.png?20100627114200"&gt;&lt;/a&gt;</span>
+<span id="cb4-156"><a href="#cb4-156"></a>:::</span>
+<span id="cb4-157"><a href="#cb4-157"></a></span>
+<span id="cb4-158"><a href="#cb4-158"></a><span class="ss">1. </span>Head can *read and write*</span>
+<span id="cb4-159"><a href="#cb4-159"></a><span class="ss">2. </span>Head is *two-way*</span>
+<span id="cb4-160"><a href="#cb4-160"></a><span class="ss">3. </span>Tape is *infinite*</span>
+<span id="cb4-161"><a href="#cb4-161"></a><span class="ss">4. </span>Infinitely many blanks(<span class="in">`0`</span>) follow input</span>
+<span id="cb4-162"><a href="#cb4-162"></a><span class="ss">5. </span>Can accept/reject *at any time*</span>
+<span id="cb4-163"><a href="#cb4-163"></a></span>
+<span id="cb4-164"><a href="#cb4-164"></a><span class="fu">## Vs. Hardware</span></span>
+<span id="cb4-165"><a href="#cb4-165"></a></span>
+<span id="cb4-166"><a href="#cb4-166"></a><span class="ss">- </span>The TM assumes infinite memory</span>
+<span id="cb4-167"><a href="#cb4-167"></a><span class="ss">    - </span>Not a big deal, you'll never actually use infinite memory.</span>
+<span id="cb4-168"><a href="#cb4-168"></a><span class="ss">- </span>The TM makes no considerations of performance</span>
+<span id="cb4-169"><a href="#cb4-169"></a><span class="ss">    - </span>Tapes are slower than wires, but perhaps easier to imagine.</span>
+<span id="cb4-170"><a href="#cb4-170"></a><span class="ss">- </span>The TM does not necessarily use binary</span>
+<span id="cb4-171"><a href="#cb4-171"></a><span class="ss">    - </span>But then again, before-Turing, neither did computers...</span>
+<span id="cb4-172"><a href="#cb4-172"></a></span>
+<span id="cb4-173"><a href="#cb4-173"></a><span class="fu">## Say we build a TM</span></span>
+<span id="cb4-174"><a href="#cb4-174"></a></span>
+<span id="cb4-175"><a href="#cb4-175"></a><span class="ss">- </span>Well, someone we have to *model* an "infinite tape" of memory.</span>
+<span id="cb4-176"><a href="#cb4-176"></a><span class="ss">    - </span>Perhaps by... creating a bijection to the natural numbers.</span>
+<span id="cb4-177"><a href="#cb4-177"></a><span class="ss">    - </span>We could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)</span>
+<span id="cb4-178"><a href="#cb4-178"></a><span class="ss">    - </span>Wait that is the same key-value storage as the MMU.</span>
+<span id="cb4-179"><a href="#cb4-179"></a>    </span>
+<span id="cb4-180"><a href="#cb4-180"></a><span class="fu">## All Roads</span></span>
+<span id="cb4-181"><a href="#cb4-181"></a></span>
+<span id="cb4-182"><a href="#cb4-182"></a><span class="ss">- </span>...lead to a series of *abstractions* allowing *higher-level users* to use, but not implement, memory.</span>
+<span id="cb4-183"><a href="#cb4-183"></a></span>
+<span id="cb4-184"><a href="#cb4-184"></a></span>
+<span id="cb4-187"><a href="#cb4-187"></a><span class="in">```{dot}</span></span>
+<span id="cb4-188"><a href="#cb4-188"></a><span class="in">digraph G {</span></span>
+<span id="cb4-189"><a href="#cb4-189"></a><span class="in">    rankdir=LR;</span></span>
+<span id="cb4-190"><a href="#cb4-190"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-191"><a href="#cb4-191"></a><span class="in">    node [shape=box,  fontcolor="white", color="white"];</span></span>
+<span id="cb4-192"><a href="#cb4-192"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-193"><a href="#cb4-193"></a></span>
+<span id="cb4-194"><a href="#cb4-194"></a><span class="in">    // Node definitions with xlabels for the category names below</span></span>
+<span id="cb4-195"><a href="#cb4-195"></a><span class="in">    n1 [label="Physical\nMemory"];</span></span>
+<span id="cb4-196"><a href="#cb4-196"></a><span class="in">    n2 [label="Address\nSpaces"];</span></span>
+<span id="cb4-197"><a href="#cb4-197"></a><span class="in">    n3 [label="Stack and\nHeap"];</span></span>
+<span id="cb4-198"><a href="#cb4-198"></a><span class="in">    n4 [label="Garbage\nCollection"];</span></span>
+<span id="cb4-199"><a href="#cb4-199"></a></span>
+<span id="cb4-200"><a href="#cb4-200"></a><span class="in">    n1 -&gt; n2 -&gt; n3 -&gt; n4;</span></span>
+<span id="cb4-201"><a href="#cb4-201"></a><span class="in">}</span></span>
+<span id="cb4-202"><a href="#cb4-202"></a><span class="in">```</span></span>
+<span id="cb4-203"><a href="#cb4-203"></a></span>
+<span id="cb4-204"><a href="#cb4-204"></a><span class="fu">## Different Topics</span></span>
+<span id="cb4-205"><a href="#cb4-205"></a></span>
+<span id="cb4-206"><a href="#cb4-206"></a><span class="ss">- </span>As we layer abstractions, writing code is more efficent and running code is less efficient.</span>
+<span id="cb4-207"><a href="#cb4-207"></a><span class="ss">    - </span>Until mature technologies outcompete humans.</span>
+<span id="cb4-208"><a href="#cb4-208"></a></span>
+<span id="cb4-211"><a href="#cb4-211"></a><span class="in">```{dot}</span></span>
+<span id="cb4-212"><a href="#cb4-212"></a><span class="in">digraph G {</span></span>
+<span id="cb4-213"><a href="#cb4-213"></a><span class="in">    rankdir=LR;</span></span>
+<span id="cb4-214"><a href="#cb4-214"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-215"><a href="#cb4-215"></a><span class="in">    node [shape=box,  fontcolor="white", color="white"];</span></span>
+<span id="cb4-216"><a href="#cb4-216"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-217"><a href="#cb4-217"></a></span>
+<span id="cb4-218"><a href="#cb4-218"></a><span class="in">    // Node definitions with xlabels for the category names below</span></span>
+<span id="cb4-219"><a href="#cb4-219"></a><span class="in">    m1 [label="Electrical\nEngineering"];</span></span>
+<span id="cb4-220"><a href="#cb4-220"></a><span class="in">    m2 [label="Architecture\nand OSes"];</span></span>
+<span id="cb4-221"><a href="#cb4-221"></a><span class="in">    m3 [label="Compilers\n(or std)"];</span></span>
+<span id="cb4-222"><a href="#cb4-222"></a><span class="in">    m4 [label="Scripting\nLanguages"];</span></span>
+<span id="cb4-223"><a href="#cb4-223"></a><span class="in">    </span></span>
+<span id="cb4-224"><a href="#cb4-224"></a><span class="in">    m1 -&gt; m2 -&gt; m3 -&gt; m4;</span></span>
+<span id="cb4-225"><a href="#cb4-225"></a><span class="in">    </span></span>
+<span id="cb4-226"><a href="#cb4-226"></a><span class="in">    n1 [label="Physical\nMemory"];</span></span>
+<span id="cb4-227"><a href="#cb4-227"></a><span class="in">    n2 [label="Address\nSpaces"];</span></span>
+<span id="cb4-228"><a href="#cb4-228"></a><span class="in">    n3 [label="Stack and\nHeap"];</span></span>
+<span id="cb4-229"><a href="#cb4-229"></a><span class="in">    n4 [label="Garbage\nCollection"];</span></span>
+<span id="cb4-230"><a href="#cb4-230"></a></span>
+<span id="cb4-231"><a href="#cb4-231"></a><span class="in">    n1 -&gt; n2 -&gt; n3 -&gt; n4;</span></span>
+<span id="cb4-232"><a href="#cb4-232"></a><span class="in">}</span></span>
+<span id="cb4-233"><a href="#cb4-233"></a><span class="in">```</span></span>
+<span id="cb4-234"><a href="#cb4-234"></a></span>
+<span id="cb4-235"><a href="#cb4-235"></a><span class="fu"># Bus</span></span>
+<span id="cb4-236"><a href="#cb4-236"></a></span>
+<span id="cb4-237"><a href="#cb4-237"></a><span class="fu">## Bus</span></span>
+<span id="cb4-238"><a href="#cb4-238"></a></span>
+<span id="cb4-239"><a href="#cb4-239"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate.</span><span class="co">]</span><span class="at">(https://en.wikipedia.org/wiki/Bus_(computing))</span></span>
+<span id="cb4-240"><a href="#cb4-240"></a></span>
+<span id="cb4-241"><a href="#cb4-241"></a><span class="fu">## Shorter</span></span>
+<span id="cb4-242"><a href="#cb4-242"></a></span>
+<span id="cb4-243"><a href="#cb4-243"></a><span class="ss">- </span>A bus is a bundle of wires that transfers bits.</span>
+<span id="cb4-244"><a href="#cb4-244"></a></span>
+<span id="cb4-245"><a href="#cb4-245"></a></span>
+<span id="cb4-248"><a href="#cb4-248"></a><span class="in">```{dot}</span></span>
+<span id="cb4-249"><a href="#cb4-249"></a><span class="in">digraph G {</span></span>
+<span id="cb4-250"><a href="#cb4-250"></a><span class="in">    rankdir=TD;</span></span>
+<span id="cb4-251"><a href="#cb4-251"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-252"><a href="#cb4-252"></a><span class="in">    node [shape=box,  fontcolor="white", color="white"];</span></span>
+<span id="cb4-253"><a href="#cb4-253"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-254"><a href="#cb4-254"></a></span>
+<span id="cb4-255"><a href="#cb4-255"></a><span class="in">    graph [splines=ortho, nodesep=1];</span></span>
+<span id="cb4-256"><a href="#cb4-256"></a></span>
+<span id="cb4-257"><a href="#cb4-257"></a><span class="in">    // CPU at the top</span></span>
+<span id="cb4-258"><a href="#cb4-258"></a><span class="in">    cpu [label="CPU"];</span></span>
+<span id="cb4-259"><a href="#cb4-259"></a><span class="in">    </span></span>
+<span id="cb4-260"><a href="#cb4-260"></a><span class="in">    node [shape=point, width=0, label=""];</span></span>
+<span id="cb4-261"><a href="#cb4-261"></a><span class="in">    bus_middle</span></span>
+<span id="cb4-262"><a href="#cb4-262"></a><span class="in">    bus_left;</span></span>
+<span id="cb4-263"><a href="#cb4-263"></a><span class="in">    bus_right;</span></span>
+<span id="cb4-264"><a href="#cb4-264"></a></span>
+<span id="cb4-265"><a href="#cb4-265"></a><span class="in">    // Devices at the bottom</span></span>
+<span id="cb4-266"><a href="#cb4-266"></a><span class="in">    node [shape=box];</span></span>
+<span id="cb4-267"><a href="#cb4-267"></a><span class="in">    ram [label="RAM"];</span></span>
+<span id="cb4-268"><a href="#cb4-268"></a><span class="in">    io [label="I/O"];</span></span>
+<span id="cb4-269"><a href="#cb4-269"></a></span>
+<span id="cb4-270"><a href="#cb4-270"></a><span class="in">    </span></span>
+<span id="cb4-271"><a href="#cb4-271"></a><span class="in">    // 2. Define the horizontal Bus line</span></span>
+<span id="cb4-272"><a href="#cb4-272"></a><span class="in">    { rank=same; bus_left; bus_right; bus_middle; }</span></span>
+<span id="cb4-273"><a href="#cb4-273"></a><span class="in">    cpu -&gt; bus_middle;</span></span>
+<span id="cb4-274"><a href="#cb4-274"></a><span class="in">    bus_left -&gt; bus_middle [dir=none]</span></span>
+<span id="cb4-275"><a href="#cb4-275"></a><span class="in">    bus_middle -&gt; bus_right [dir=none];</span></span>
+<span id="cb4-276"><a href="#cb4-276"></a></span>
+<span id="cb4-277"><a href="#cb4-277"></a><span class="in">    // 4. Vertical drops to the components</span></span>
+<span id="cb4-278"><a href="#cb4-278"></a><span class="in">    bus_left -&gt; ram;</span></span>
+<span id="cb4-279"><a href="#cb4-279"></a><span class="in">    bus_right -&gt; io;</span></span>
+<span id="cb4-280"><a href="#cb4-280"></a></span>
+<span id="cb4-281"><a href="#cb4-281"></a><span class="in">    // Constraints to keep it tidy</span></span>
+<span id="cb4-282"><a href="#cb4-282"></a><span class="in">    { rank=same; ram; io; }</span></span>
+<span id="cb4-283"><a href="#cb4-283"></a><span class="in">}</span></span>
+<span id="cb4-284"><a href="#cb4-284"></a><span class="in">```</span></span>
+<span id="cb4-285"><a href="#cb4-285"></a></span>
+<span id="cb4-286"><a href="#cb4-286"></a><span class="fu">## I imagine...</span></span>
+<span id="cb4-287"><a href="#cb4-287"></a></span>
+<span id="cb4-288"><a href="#cb4-288"></a><span class="ss">- </span>Two registers (an ordered collection of bits) are populated by some device on a bus.</span>
+<span id="cb4-289"><a href="#cb4-289"></a><span class="ss">    - </span>One for a numeric value.</span>
+<span id="cb4-290"><a href="#cb4-290"></a><span class="ss">    - </span>One for a numeric address.</span>
+<span id="cb4-291"><a href="#cb4-291"></a>    </span>
+<span id="cb4-292"><a href="#cb4-292"></a><span class="fu">## I imagine...</span></span>
+<span id="cb4-293"><a href="#cb4-293"></a>    </span>
+<span id="cb4-294"><a href="#cb4-294"></a><span class="ss">- </span>That device writes:</span>
+<span id="cb4-295"><a href="#cb4-295"></a><span class="ss">    - </span>A numerical address to bus</span>
+<span id="cb4-296"><a href="#cb4-296"></a><span class="ss">        - </span>All other devices listen, and see if they "own" the address</span>
+<span id="cb4-297"><a href="#cb4-297"></a><span class="ss">    - </span>A numerical value to the bus</span>
+<span id="cb4-298"><a href="#cb4-298"></a><span class="ss">        - </span>The relevant device records the bits to an internal register</span>
+<span id="cb4-299"><a href="#cb4-299"></a><span class="ss">            - </span>Then saves or loads or displays or whatever.</span>
+<span id="cb4-300"><a href="#cb4-300"></a>            </span>
+<span id="cb4-301"><a href="#cb4-301"></a><span class="fu">## Within a Device</span></span>
+<span id="cb4-302"><a href="#cb4-302"></a></span>
+<span id="cb4-303"><a href="#cb4-303"></a><span class="ss">- </span>Within devices, numerical values are separated spatially.</span>
+<span id="cb4-304"><a href="#cb4-304"></a></span>
+<span id="cb4-307"><a href="#cb4-307"></a><span class="in">```{dot}</span></span>
+<span id="cb4-308"><a href="#cb4-308"></a><span class="in">digraph G {</span></span>
+<span id="cb4-309"><a href="#cb4-309"></a><span class="in">    rankdir=TD;</span></span>
+<span id="cb4-310"><a href="#cb4-310"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-311"><a href="#cb4-311"></a><span class="in">    node [shape=record,  fontcolor="white", color="white"];</span></span>
+<span id="cb4-312"><a href="#cb4-312"></a><span class="in">    "node0" [label = "0|0|1|1|0|1|1|0"];</span></span>
+<span id="cb4-313"><a href="#cb4-313"></a><span class="in">}</span></span>
+<span id="cb4-314"><a href="#cb4-314"></a><span class="in">```</span></span>
+<span id="cb4-315"><a href="#cb4-315"></a></span>
+<span id="cb4-316"><a href="#cb4-316"></a><span class="fu">## Within a Bus</span></span>
+<span id="cb4-317"><a href="#cb4-317"></a></span>
+<span id="cb4-318"><a href="#cb4-318"></a><span class="ss">- </span>On the bus, the wire is either, say, "high" or "low" and these values are interpreted as "one" or "zero".</span>
+<span id="cb4-319"><a href="#cb4-319"></a><span class="ss">    - </span>We term this "digital"</span>
+<span id="cb4-320"><a href="#cb4-320"></a></span>
+<span id="cb4-321"><a href="#cb4-321"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">composed of data in the form of especially binary digits</span><span class="co">](https://www.merriam-webster.com/dictionary/digital)</span></span>
+<span id="cb4-322"><a href="#cb4-322"></a></span>
+<span id="cb4-323"><a href="#cb4-323"></a><span class="fu">## Signal Processing</span></span>
+<span id="cb4-324"><a href="#cb4-324"></a></span>
+<span id="cb4-325"><a href="#cb4-325"></a><span class="ss">- </span>E.g. sine wave with some recording window.</span>
+<span id="cb4-326"><a href="#cb4-326"></a></span>
+<span id="cb4-327"><a href="#cb4-327"></a><span class="al">![](https://i.sstatic.net/MN1ay.png)</span></span>
+<span id="cb4-328"><a href="#cb4-328"></a><span class="co">[</span><span class="ot">Source</span><span class="co">](https://electronics.stackexchange.com/questions/163253/sine-wave-to-square-wave-schmitt-trigger)</span></span>
+<span id="cb4-329"><a href="#cb4-329"></a></span>
+<span id="cb4-330"><a href="#cb4-330"></a><span class="fu">## Signal Processing</span></span>
+<span id="cb4-331"><a href="#cb4-331"></a></span>
+<span id="cb4-332"><a href="#cb4-332"></a><span class="ss">- </span>Out of scope</span>
+<span id="cb4-333"><a href="#cb4-333"></a><span class="ss">    - </span>Physics/Electrical Engineering topic</span>
+<span id="cb4-334"><a href="#cb4-334"></a><span class="ss">    - </span>Seen in Data in the Cosmos and Computer Vision</span>
+<span id="cb4-335"><a href="#cb4-335"></a><span class="ss">    - </span>Ludicrously radical</span>
+<span id="cb4-336"><a href="#cb4-336"></a><span class="ss">- </span>We handwave it here, and only introduce so you understand what the hardware/OS has to deal with.</span>
+<span id="cb4-337"><a href="#cb4-337"></a></span>
+<span id="cb4-338"><a href="#cb4-338"></a><span class="fu"># Address Space</span></span>
+<span id="cb4-339"><a href="#cb4-339"></a></span>
+<span id="cb4-340"><a href="#cb4-340"></a><span class="fu">## Given a bus</span></span>
+<span id="cb4-341"><a href="#cb4-341"></a></span>
+<span id="cb4-342"><a href="#cb4-342"></a><span class="ss">- </span>Say we have both a keyboard and an MMU on a bus with our ALU/CPU</span>
+<span id="cb4-343"><a href="#cb4-343"></a><span class="ss">    - </span>Say I input <span class="in">`d`</span>, ASCII 100/0x64, on my keyboard</span>
+<span id="cb4-344"><a href="#cb4-344"></a><span class="ss">    - </span>The keyboard broadcasts onto bus</span>
+<span id="cb4-345"><a href="#cb4-345"></a><span class="ss">    - </span>The ALU and MMU read it</span>
+<span id="cb4-346"><a href="#cb4-346"></a><span class="ss">        - </span>How is the signal interpreted?</span>
+<span id="cb4-347"><a href="#cb4-347"></a>        </span>
+<span id="cb4-348"><a href="#cb4-348"></a><span class="fu">## Throwback</span></span>
+<span id="cb4-349"><a href="#cb4-349"></a></span>
+<span id="cb4-350"><a href="#cb4-350"></a><span class="ss">- </span>Device writes:</span>
+<span id="cb4-351"><a href="#cb4-351"></a><span class="ss">    - </span>A numerical address to bus</span>
+<span id="cb4-352"><a href="#cb4-352"></a><span class="ss">        - </span>All other devices listen, and see if they "own" the address</span>
+<span id="cb4-353"><a href="#cb4-353"></a><span class="ss">    - </span>A numerical value to the bus</span>
+<span id="cb4-354"><a href="#cb4-354"></a><span class="ss">        - </span>The relevant device records the bits to an internal register</span>
+<span id="cb4-355"><a href="#cb4-355"></a><span class="ss">            - </span>Then saves or loads or displays or whatever.</span>
+<span id="cb4-356"><a href="#cb4-356"></a>            </span>
+<span id="cb4-357"><a href="#cb4-357"></a><span class="fu">## So...</span></span>
+<span id="cb4-358"><a href="#cb4-358"></a></span>
+<span id="cb4-359"><a href="#cb4-359"></a><span class="ss">- </span>The keyboard doesn't *just* blast a `0b1100100' onto bus.</span>
+<span id="cb4-360"><a href="#cb4-360"></a><span class="ss">- </span>Rather, it broadcasts some pre-determined "address" corresponding to keyboard input.</span>
+<span id="cb4-361"><a href="#cb4-361"></a><span class="ss">    - </span>The ALU sees this and knows to prepare a register to store the incoming value.</span>
+<span id="cb4-362"><a href="#cb4-362"></a><span class="ss">    - </span>The MMU sees this and knows to hit a snooze.</span>
+<span id="cb4-363"><a href="#cb4-363"></a><span class="ss">- </span>So the keyboard prepends the numeric value with a numeric address.</span>
+<span id="cb4-364"><a href="#cb4-364"></a><span class="ss">    - </span>This is the importance of an address space.</span>
+<span id="cb4-365"><a href="#cb4-365"></a>    </span>
+<span id="cb4-366"><a href="#cb4-366"></a><span class="fu">## The Big Idea</span></span>
+<span id="cb4-367"><a href="#cb4-367"></a></span>
+<span id="cb4-368"><a href="#cb4-368"></a><span class="ss">- </span>Imagine the bus is an array.</span>
+<span id="cb4-369"><a href="#cb4-369"></a><span class="ss">- </span>Each array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.</span>
+<span id="cb4-370"><a href="#cb4-370"></a><span class="ss">- </span>Each array element has some numeric address.</span>
+<span id="cb4-371"><a href="#cb4-371"></a></span>
+<span id="cb4-372"><a href="#cb4-372"></a><span class="fu">## For the ALU</span></span>
+<span id="cb4-373"><a href="#cb4-373"></a></span>
+<span id="cb4-374"><a href="#cb4-374"></a><span class="ss">- </span>When the ALU wants to write to memory</span>
+<span id="cb4-375"><a href="#cb4-375"></a><span class="ss">    - </span>Address the MMU, either as</span>
+<span id="cb4-376"><a href="#cb4-376"></a><span class="ss">        - </span>A region as large as physical memory</span>
+<span id="cb4-377"><a href="#cb4-377"></a><span class="ss">        - </span>One address then a key-value pair </span>
+<span id="cb4-378"><a href="#cb4-378"></a><span class="ss">    - </span>The ALU writes a value to an address</span>
+<span id="cb4-379"><a href="#cb4-379"></a><span class="ss">        - </span>The MMU sees this on bus and acts accordingly</span>
+<span id="cb4-380"><a href="#cb4-380"></a><span class="ss">        - </span>The keyboard does whatever</span>
+<span id="cb4-381"><a href="#cb4-381"></a>        </span>
+<span id="cb4-382"><a href="#cb4-382"></a><span class="fu">## Wrinkles</span></span>
+<span id="cb4-383"><a href="#cb4-383"></a></span>
+<span id="cb4-384"><a href="#cb4-384"></a><span class="ss">- </span>Sounds easy?</span>
+<span id="cb4-385"><a href="#cb4-385"></a><span class="ss">- </span>We can optimize</span>
+<span id="cb4-386"><a href="#cb4-386"></a></span>
+<span id="cb4-387"><a href="#cb4-387"></a><span class="fu">## Gaps</span></span>
+<span id="cb4-388"><a href="#cb4-388"></a></span>
+<span id="cb4-389"><a href="#cb4-389"></a><span class="ss">- </span>Usually address space is much larger than</span>
+<span id="cb4-390"><a href="#cb4-390"></a>RAM</span>
+<span id="cb4-391"><a href="#cb4-391"></a><span class="ss">- </span>Addresses that can be accessed are</span>
+<span id="cb4-392"><a href="#cb4-392"></a>referred to as “mapped”</span>
+<span id="cb4-393"><a href="#cb4-393"></a><span class="ss">-  </span>And holes that can’t be accessed are</span>
+<span id="cb4-394"><a href="#cb4-394"></a>“unmapped”</span>
+<span id="cb4-395"><a href="#cb4-395"></a><span class="ss">- </span>What happens if the CPU loads or</span>
+<span id="cb4-396"><a href="#cb4-396"></a>stores to an unmapped region</span>
+<span id="cb4-397"><a href="#cb4-397"></a></span>
+<span id="cb4-398"><a href="#cb4-398"></a></span>
+<span id="cb4-399"><a href="#cb4-399"></a><span class="fu">## Gaps</span></span>
+<span id="cb4-400"><a href="#cb4-400"></a></span>
+<span id="cb4-403"><a href="#cb4-403"></a><span class="in">```{dot}</span></span>
+<span id="cb4-404"><a href="#cb4-404"></a><span class="in">digraph G {</span></span>
+<span id="cb4-405"><a href="#cb4-405"></a><span class="in">    rankdir=LR;</span></span>
+<span id="cb4-406"><a href="#cb4-406"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-407"><a href="#cb4-407"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-408"><a href="#cb4-408"></a><span class="in">    node [shape=record,  fontcolor="white", color="white"];</span></span>
+<span id="cb4-409"><a href="#cb4-409"></a><span class="in">    "node0" [label = "{&lt;5&gt;0x10}|{&lt;4&gt;0x0C}|{&lt;3&gt;0x08}|{&lt;2&gt;0x04}|{&lt;1&gt;0x00}"];</span></span>
+<span id="cb4-410"><a href="#cb4-410"></a><span class="in">    "node1" [label = "{&lt;5&gt;Monitor}|{&lt;4&gt;}|{&lt;3&gt;GPU}|{&lt;2&gt;Memory}|{&lt;1&gt;Keyboard}"];</span></span>
+<span id="cb4-411"><a href="#cb4-411"></a><span class="in">    node0:5-&gt;node1:5</span></span>
+<span id="cb4-412"><a href="#cb4-412"></a><span class="in">    node0:4-&gt;node1:4</span></span>
+<span id="cb4-413"><a href="#cb4-413"></a><span class="in">    node0:3-&gt;node1:3</span></span>
+<span id="cb4-414"><a href="#cb4-414"></a><span class="in">    node0:2-&gt;node1:2</span></span>
+<span id="cb4-415"><a href="#cb4-415"></a><span class="in">    node0:1-&gt;node1:1</span></span>
+<span id="cb4-416"><a href="#cb4-416"></a><span class="in">}</span></span>
+<span id="cb4-417"><a href="#cb4-417"></a><span class="in">```</span></span>
+<span id="cb4-418"><a href="#cb4-418"></a></span>
+<span id="cb4-419"><a href="#cb4-419"></a><span class="fu">## Permissions</span></span>
+<span id="cb4-420"><a href="#cb4-420"></a></span>
+<span id="cb4-421"><a href="#cb4-421"></a><span class="ss">- </span>Usually as RWX</span>
+<span id="cb4-422"><a href="#cb4-422"></a><span class="ss">    - </span>**R**ead</span>
+<span id="cb4-423"><a href="#cb4-423"></a><span class="ss">    - </span>**W**rite</span>
+<span id="cb4-424"><a href="#cb4-424"></a><span class="ss">    - </span>E**X**ecute</span>
+<span id="cb4-425"><a href="#cb4-425"></a><span class="ss">    - </span>The dastardly von Neumann model rears its ugly head etc.</span>
+<span id="cb4-426"><a href="#cb4-426"></a><span class="ss">- </span>Why have these, and</span>
+<span id="cb4-427"><a href="#cb4-427"></a><span class="ss">- </span>What if they are violated</span>
+<span id="cb4-428"><a href="#cb4-428"></a></span>
+<span id="cb4-429"><a href="#cb4-429"></a></span>
+<span id="cb4-430"><a href="#cb4-430"></a><span class="fu">## Permissions</span></span>
+<span id="cb4-431"><a href="#cb4-431"></a></span>
+<span id="cb4-434"><a href="#cb4-434"></a><span class="in">```{dot}</span></span>
+<span id="cb4-435"><a href="#cb4-435"></a><span class="in">digraph G {</span></span>
+<span id="cb4-436"><a href="#cb4-436"></a><span class="in">    rankdir=LR;</span></span>
+<span id="cb4-437"><a href="#cb4-437"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-438"><a href="#cb4-438"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-439"><a href="#cb4-439"></a><span class="in">    node [shape=record,  fontcolor="white", color="white", fontname="Courier"];</span></span>
+<span id="cb4-440"><a href="#cb4-440"></a><span class="in">    "node0" [label = "{0x10|&lt;5&gt;R__}|{0x0C|&lt;4&gt;RW_}|{0x08|&lt;3&gt;R_X}|{0x04|&lt;2&gt;R__}|{0x00|&lt;1&gt;RWX}"];</span></span>
+<span id="cb4-441"><a href="#cb4-441"></a><span class="in">    "node1" [label = "{&lt;5&gt;.ini}|{&lt;4&gt;.txt}|{&lt;3&gt;.exe}|{&lt;2&gt;.log}|{&lt;1&gt;.sh}"];</span></span>
+<span id="cb4-442"><a href="#cb4-442"></a><span class="in">    node0:5-&gt;node1:5</span></span>
+<span id="cb4-443"><a href="#cb4-443"></a><span class="in">    node0:4-&gt;node1:4</span></span>
+<span id="cb4-444"><a href="#cb4-444"></a><span class="in">    node0:3-&gt;node1:3</span></span>
+<span id="cb4-445"><a href="#cb4-445"></a><span class="in">    node0:2-&gt;node1:2</span></span>
+<span id="cb4-446"><a href="#cb4-446"></a><span class="in">    node0:1-&gt;node1:1</span></span>
+<span id="cb4-447"><a href="#cb4-447"></a><span class="in">}</span></span>
+<span id="cb4-448"><a href="#cb4-448"></a><span class="in">```</span></span>
+<span id="cb4-449"><a href="#cb4-449"></a></span>
+<span id="cb4-450"><a href="#cb4-450"></a></span>
+<span id="cb4-451"><a href="#cb4-451"></a></span>
+<span id="cb4-452"><a href="#cb4-452"></a><span class="fu">## Multiple Devices</span></span>
+<span id="cb4-453"><a href="#cb4-453"></a></span>
+<span id="cb4-454"><a href="#cb4-454"></a><span class="ss">- </span>Treat code and data as the same.</span>
+<span id="cb4-455"><a href="#cb4-455"></a><span class="ss">- </span>Be unfathomably based.</span>
+<span id="cb4-456"><a href="#cb4-456"></a><span class="ss">- </span>The keyboard is just memory.</span>
+<span id="cb4-457"><a href="#cb4-457"></a><span class="ss">- </span>So is the CPU/GPU</span>
+<span id="cb4-458"><a href="#cb4-458"></a><span class="ss">- </span>So is the internet (Network interface controller)</span>
+<span id="cb4-459"><a href="#cb4-459"></a><span class="ss">    - </span>We can execute the internet?</span>
+<span id="cb4-460"><a href="#cb4-460"></a></span>
+<span id="cb4-461"><a href="#cb4-461"></a><span class="fu">## Multiple Devices</span></span>
+<span id="cb4-462"><a href="#cb4-462"></a></span>
+<span id="cb4-465"><a href="#cb4-465"></a><span class="in">```{dot}</span></span>
+<span id="cb4-466"><a href="#cb4-466"></a><span class="in">digraph G {</span></span>
+<span id="cb4-467"><a href="#cb4-467"></a><span class="in">    rankdir=LR;</span></span>
+<span id="cb4-468"><a href="#cb4-468"></a><span class="in">    bgcolor="transparent"</span></span>
+<span id="cb4-469"><a href="#cb4-469"></a><span class="in">    edge [color="white", fontcolor="white"];</span></span>
+<span id="cb4-470"><a href="#cb4-470"></a><span class="in">    node [shape=record,  fontcolor="white", color="white", fontname="Courier"];</span></span>
+<span id="cb4-471"><a href="#cb4-471"></a><span class="in">    "node0" [label = "{0x10|&lt;5&gt;R__}|{0x0C|&lt;4&gt;RW_}|{0x08|&lt;3&gt;R_X}|{0x04|&lt;2&gt;R__}|{0x00|&lt;1&gt;RWX}"];</span></span>
+<span id="cb4-472"><a href="#cb4-472"></a><span class="in">    "node1" [label = "{&lt;5&gt;I/O|keys}|{&lt;4&gt;MMU|.txt}|{&lt;3&gt;MMU|.exe}|{&lt;2&gt;NIC|.htm}|{&lt;1&gt;NIC|.jsx}"];</span></span>
+<span id="cb4-473"><a href="#cb4-473"></a><span class="in">    node0:5-&gt;node1:5</span></span>
+<span id="cb4-474"><a href="#cb4-474"></a><span class="in">    node0:4-&gt;node1:4</span></span>
+<span id="cb4-475"><a href="#cb4-475"></a><span class="in">    node0:3-&gt;node1:3</span></span>
+<span id="cb4-476"><a href="#cb4-476"></a><span class="in">    node0:2-&gt;node1:2</span></span>
+<span id="cb4-477"><a href="#cb4-477"></a><span class="in">    node0:1-&gt;node1:1</span></span>
+<span id="cb4-478"><a href="#cb4-478"></a><span class="in">}</span></span>
+<span id="cb4-479"><a href="#cb4-479"></a><span class="in">```</span></span>
+<span id="cb4-480"><a href="#cb4-480"></a></span>
+<span id="cb4-481"><a href="#cb4-481"></a><span class="fu">## Further</span></span>
+<span id="cb4-482"><a href="#cb4-482"></a></span>
+<span id="cb4-483"><a href="#cb4-483"></a><span class="ss">- </span>Physical vs. virtual address</span>
+<span id="cb4-484"><a href="#cb4-484"></a><span class="ss">    - </span>Usually computers can describe more memory locations than the MMU can retain.</span>
+<span id="cb4-485"><a href="#cb4-485"></a><span class="ss">- </span>Caching</span>
+<span id="cb4-486"><a href="#cb4-486"></a><span class="ss">    - </span>Usually read/write is slow but repeated, so save common requests to deload devices and bus</span>
+<span id="cb4-487"><a href="#cb4-487"></a><span class="ss">- </span>Block size</span>
+<span id="cb4-488"><a href="#cb4-488"></a><span class="ss">    - </span>Bits and even words are are two small, usually pages (4KB) or blocks (cloud scale)</span>
+<span id="cb4-489"><a href="#cb4-489"></a>    </span>
+<span id="cb4-490"><a href="#cb4-490"></a><span class="fu"># Stack &amp; Heap</span></span>
+<span id="cb4-491"><a href="#cb4-491"></a></span>
+<span id="cb4-492"><a href="#cb4-492"></a><span class="fu">## Recall</span></span>
+<span id="cb4-493"><a href="#cb4-493"></a></span>
+<span id="cb4-494"><a href="#cb4-494"></a><span class="ss">- </span>You have already been a client of the stack/heap</span>
+<span id="cb4-495"><a href="#cb4-495"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">In C</span><span class="co">](https://cd-public.github.io/crypto/qmd/malloc.html#/heap-example)</span></span>
+<span id="cb4-496"><a href="#cb4-496"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">In Rust</span><span class="co">](https://cd-c89.github.io/rs/90_stack.rjs.html#/heap-memory-fundamentals)</span></span>
+<span id="cb4-497"><a href="#cb4-497"></a><span class="ss">- </span>Quoth me:</span>
+<span id="cb4-498"><a href="#cb4-498"></a></span>
+<span id="cb4-499"><a href="#cb4-499"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">It’s the OS’s problem. And therefore our problem next term.</span><span class="co">](https://cd-c89.github.io/rs/90_stack.rjs.html#/citation-1)</span></span>
+<span id="cb4-500"><a href="#cb4-500"></a></span>
+<span id="cb4-501"><a href="#cb4-501"></a><span class="fu"># Languages</span></span>
+<span id="cb4-502"><a href="#cb4-502"></a></span>
+<span id="cb4-503"><a href="#cb4-503"></a><span class="fu">## Python</span></span>
+<span id="cb4-504"><a href="#cb4-504"></a></span>
+<span id="cb4-505"><a href="#cb4-505"></a><span class="in">```{.py}</span></span>
+<span id="cb4-506"><a href="#cb4-506"></a><span class="in">import ctypes</span></span>
+<span id="cb4-507"><a href="#cb4-507"></a><span class="in">import gc </span></span>
+<span id="cb4-508"><a href="#cb4-508"></a></span>
+<span id="cb4-509"><a href="#cb4-509"></a><span class="in">di = lambda obj_id : _ctypes.PyObj_FromPtr(obj_id)</span></span>
+<span id="cb4-510"><a href="#cb4-510"></a><span class="in">free = gc.collect</span></span>
+<span id="cb4-511"><a href="#cb4-511"></a><span class="in">```</span></span>
+<span id="cb4-512"><a href="#cb4-512"></a></span>
+<span id="cb4-513"><a href="#cb4-513"></a><span class="fu">## Rust</span></span>
+<span id="cb4-514"><a href="#cb4-514"></a></span>
+<span id="cb4-515"><a href="#cb4-515"></a></span>
+<span id="cb4-516"><a href="#cb4-516"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb4-517"><a href="#cb4-517"></a><span class="in">fn main() {    </span></span>
+<span id="cb4-518"><a href="#cb4-518"></a><span class="in">    let ptr: *const i32;</span></span>
+<span id="cb4-519"><a href="#cb4-519"></a></span>
+<span id="cb4-520"><a href="#cb4-520"></a><span class="in">    {</span></span>
+<span id="cb4-521"><a href="#cb4-521"></a><span class="in">        let x = 1234;</span></span>
+<span id="cb4-522"><a href="#cb4-522"></a><span class="in">        ptr = &amp;x as *const i32;</span></span>
+<span id="cb4-523"><a href="#cb4-523"></a><span class="in">        unsafe {</span></span>
+<span id="cb4-524"><a href="#cb4-524"></a><span class="in">            println!("Value at ptr: {}", *ptr);</span></span>
+<span id="cb4-525"><a href="#cb4-525"></a><span class="in">        }</span></span>
+<span id="cb4-526"><a href="#cb4-526"></a><span class="in">    }</span></span>
+<span id="cb4-527"><a href="#cb4-527"></a></span>
+<span id="cb4-528"><a href="#cb4-528"></a><span class="in">    unsafe {</span></span>
+<span id="cb4-529"><a href="#cb4-529"></a><span class="in">        println!("Value at ptr: {}", *ptr);</span></span>
+<span id="cb4-530"><a href="#cb4-530"></a><span class="in">    }</span></span>
+<span id="cb4-531"><a href="#cb4-531"></a><span class="in">}</span></span>
+<span id="cb4-532"><a href="#cb4-532"></a><span class="in">```</span></span>
+<span id="cb4-533"><a href="#cb4-533"></a></span>
+<span id="cb4-534"><a href="#cb4-534"></a><span class="fu">## [C](https://cd-public.github.io/crypto/qmd/malloc.html#/fix-it)</span></span>
+<span id="cb4-535"><a href="#cb4-535"></a></span>
+<span id="cb4-536"><a href="#cb4-536"></a><span class="in">```{.c}</span></span>
+<span id="cb4-537"><a href="#cb4-537"></a><span class="in">#include &lt;stdlib.h&gt;</span></span>
+<span id="cb4-538"><a href="#cb4-538"></a></span>
+<span id="cb4-539"><a href="#cb4-539"></a><span class="in">void main() {</span></span>
+<span id="cb4-540"><a href="#cb4-540"></a><span class="in">        int *p = (int *)malloc(sizeof(int));</span></span>
+<span id="cb4-541"><a href="#cb4-541"></a><span class="in">        int *q = (int *)malloc(sizeof(int));</span></span>
+<span id="cb4-542"><a href="#cb4-542"></a><span class="in">        free(p);</span></span>
+<span id="cb4-543"><a href="#cb4-543"></a><span class="in">        p = q;</span></span>
+<span id="cb4-544"><a href="#cb4-544"></a><span class="in">}</span></span>
+<span id="cb4-545"><a href="#cb4-545"></a><span class="in">```</span></span>
+<span id="cb4-546"><a href="#cb4-546"></a></span>
+<span id="cb4-547"><a href="#cb4-547"></a><span class="fu">## All of these...</span></span>
+<span id="cb4-548"><a href="#cb4-548"></a></span>
+<span id="cb4-549"><a href="#cb4-549"></a><span class="ss">- </span>Are your problem now.</span>
+<span id="cb4-550"><a href="#cb4-550"></a><span class="ss">- </span>There is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.</span>
+<span id="cb4-551"><a href="#cb4-551"></a><span class="ss">- </span>On to the lab/homework!</span>
+<span id="cb4-552"><a href="#cb4-552"></a></span>
+<span id="cb4-553"><a href="#cb4-553"></a><span class="fu">## Today</span></span>
+<span id="cb4-554"><a href="#cb4-554"></a></span>
+<span id="cb4-555"><a href="#cb4-555"></a><span class="ss">- </span>Motivation</span>
+<span id="cb4-556"><a href="#cb4-556"></a><span class="ss">    - </span>Architecture</span>
+<span id="cb4-557"><a href="#cb4-557"></a><span class="ss">    - </span>Abstraction level</span>
+<span id="cb4-558"><a href="#cb4-558"></a><span class="ss">- </span>OS</span>
+<span id="cb4-559"><a href="#cb4-559"></a><span class="ss">    - </span>Bus</span>
+<span id="cb4-560"><a href="#cb4-560"></a><span class="ss">    - </span>Address space</span>
+<span id="cb4-561"><a href="#cb4-561"></a><span class="ss">    - </span>Stack/heap</span>
+<span id="cb4-562"><a href="#cb4-562"></a><span class="ss">    - </span>Languages</span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

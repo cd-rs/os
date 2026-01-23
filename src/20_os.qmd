@@ -1,0 +1,546 @@
+---
+title: OS
+---
+
+## Announcements
+
+- **Welcome** to OS in Rust
+  - Actual OS week.
+- **Action Items**:
+  - Finish working through `split_at`
+    - Form a strong opinion on `assert`
+    - Good anecdote for job interviews.
+  - Nominally ready for next homework after this lecture.
+    - Can wait for lab/section.
+
+
+## Today
+
+- Motivation
+    - Architecture
+    - Abstraction level
+- OS
+    - Bus
+    - Address space
+    - Stack/heap
+    - Languages
+    
+## Citations
+
+- Borrowed a bit from:
+    - [MIT via UIC](https://ics.uci.edu/~swjun/courses/2021W-CS152/slides/lec9%20-%20OS.pdf)
+    - [MIT via OCW](https://pdos.csail.mit.edu/6.1810/2023/lec/l-c_slides.pdf)
+
+# Motivation
+
+## Arriving at OS
+
+- We can arrive at OS from two ways:
+    - We can look at *physic*al hardware an infer the need for a control system.
+    - We can look at *formal* descriptions of computing, such as automata, and infer the need for abstractions to practically use the system.
+    
+# Architecture
+
+## The Device
+
+- We imagine some minimal device.
+    - What are the minimum requirements to be a computer?
+  
+## Architecture - ALU
+
+- We imagine some minimal device.
+    - It contains an *arithmetic/logic unit* (ALU).
+        - Can perform e.g. logical AND, bitwise AND, and numeric ADD
+        - Can load/store numeric values to/from numeric addresses
+        
+## Architecture - MMU
+
+- We imagine some minimal device.
+    - It contains "memory", perhaps via a *memory management unit* (MMU)
+        - Persists numeric values associated with numeric addresses
+        - Physically separated from the ALU
+        - Geniuses will say this is key-value storage
+  
+## Picture
+
+```{dot}
+digraph graphgraph {
+    bgcolor="transparent"
+    node [shape=box,  fontcolor="white", color="white"];
+    edge [color="white", fontcolor="white"];
+    
+    ALU -> MMU [label="save"]
+    MMU -> ALU [label="load"]
+    ALU -> ALU [label="plus"]
+}
+```
+
+## Architecture
+
+- This is the now-legendary Von Neumann architecture.
+
+<center>
+<a href="https://en.wikipedia.org/wiki/Von_Neumann_architecture">
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/Von_Neumann_Architecture.svg" style="filter:invert(1)">
+</a>
+</center>
+
+## Von Neumann, Formally
+
+- A central arithmetic unit to perform arithmetic operations;
+- A central control unit to sequence operations performed by the machine;
+- Memory that stores data and instructions;
+- An "outside recording medium" to store input to and output from the machine;
+- Input and output mechanisms to transfer data between the memory and the outside recording medium.
+
+## Competing Formulation
+
+The competing formulation known as the *Harvard architecture* differed in that information describing actions (say, *executables* or "stored memory programs" or "instructions") and information for read-write (say *data files* or just "data") had distinct storage mediums.
+
+- As far as I know, none of these were ever made.
+- Theoretical idea.
+
+## Harvard Architecture
+
+<center>
+<a href="https://en.wikipedia.org/wiki/Harvard_architecture">
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/3f/Harvard_architecture.svg" style="filter:invert(1)">
+</a>
+</center>
+
+## Historical use case
+
+- Historical computing devices had no onboard storage and programs lived on e.g. external tapes.
+    - The Harvard architecture is a helpful model in this case.
+- Today, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)
+    - Hence Von Neumann
+    
+## Von Neumann - Aside
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+- Be advised this is a Manhattan Project member and form your own opinion about that.
+
+:::
+
+::: {.column width="50%"}
+
+<center>
+<a href="https://en.wikipedia.org/wiki/Harvard_architecture">
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/JohnvonNeumann-LosAlamos.gif">
+</a>
+</center>
+
+:::
+
+::::
+
+# Abstraction
+
+## Hardware "doesn't matter"
+
+- We can regard as a historical accident that hardware exists in any particular form.
+    - Perhaps the first computers could've been biological vs. mechanical vs. electric.
+- We then regard the automata, principly the *Turing Machine*, as ground truth.
+    - TMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday...
+    - [Read more](https://cd-public.github.io/compute/11_tm.rjs.html#/turing-machines-tm-1936)
+    
+## Thinking about a TM
+
+:::{.r-stack}
+<a style="filter:invert(1)" title="Nynexman4464 at the English Wikipedia, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Turing_machine_2b.svg"><img width="512" alt="Turing machine 2b" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Turing_machine_2b.svg/512px-Turing_machine_2b.svg.png?20100627114200"></a>
+:::
+
+1. Head can *read and write*
+2. Head is *two-way*
+3. Tape is *infinite*
+4. Infinitely many blanks(`0`) follow input
+5. Can accept/reject *at any time*
+
+## Vs. Hardware
+
+- The TM assumes infinite memory
+    - Not a big deal, you'll never actually use infinite memory.
+- The TM makes no considerations of performance
+    - Tapes are slower than wires, but perhaps easier to imagine.
+- The TM does not necessarily use binary
+    - But then again, before-Turing, neither did computers...
+
+## Say we build a TM
+
+- Well, someone we have to *model* an "infinite tape" of memory.
+    - Perhaps by... creating a bijection to the natural numbers.
+    - We could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)
+    - Wait that is the same key-value storage as the MMU.
+    
+## All Roads
+
+- ...lead to a series of *abstractions* allowing *higher-level users* to use, but not implement, memory.
+
+
+```{dot}
+digraph G {
+    rankdir=LR;
+    bgcolor="transparent"
+    node [shape=box,  fontcolor="white", color="white"];
+    edge [color="white", fontcolor="white"];
+
+    // Node definitions with xlabels for the category names below
+    n1 [label="Physical\nMemory"];
+    n2 [label="Address\nSpaces"];
+    n3 [label="Stack and\nHeap"];
+    n4 [label="Garbage\nCollection"];
+
+    n1 -> n2 -> n3 -> n4;
+}
+```
+
+## Different Topics
+
+- As we layer abstractions, writing code is more efficent and running code is less efficient.
+    - Until mature technologies outcompete humans.
+
+```{dot}
+digraph G {
+    rankdir=LR;
+    bgcolor="transparent"
+    node [shape=box,  fontcolor="white", color="white"];
+    edge [color="white", fontcolor="white"];
+
+    // Node definitions with xlabels for the category names below
+    m1 [label="Electrical\nEngineering"];
+    m2 [label="Architecture\nand OSes"];
+    m3 [label="Compilers\n(or std)"];
+    m4 [label="Scripting\nLanguages"];
+    
+    m1 -> m2 -> m3 -> m4;
+    
+    n1 [label="Physical\nMemory"];
+    n2 [label="Address\nSpaces"];
+    n3 [label="Stack and\nHeap"];
+    n4 [label="Garbage\nCollection"];
+
+    n1 -> n2 -> n3 -> n4;
+}
+```
+
+# Bus
+
+## Bus
+
+> [In computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate.](https://en.wikipedia.org/wiki/Bus_(computing))
+
+## Shorter
+
+- A bus is a bundle of wires that transfers bits.
+
+
+```{dot}
+digraph G {
+    rankdir=TD;
+    bgcolor="transparent"
+    node [shape=box,  fontcolor="white", color="white"];
+    edge [color="white", fontcolor="white"];
+
+    graph [splines=ortho, nodesep=1];
+
+    // CPU at the top
+    cpu [label="CPU"];
+    
+    node [shape=point, width=0, label=""];
+    bus_middle
+    bus_left;
+    bus_right;
+
+    // Devices at the bottom
+    node [shape=box];
+    ram [label="RAM"];
+    io [label="I/O"];
+
+    
+    // 2. Define the horizontal Bus line
+    { rank=same; bus_left; bus_right; bus_middle; }
+    cpu -> bus_middle;
+    bus_left -> bus_middle [dir=none]
+    bus_middle -> bus_right [dir=none];
+
+    // 4. Vertical drops to the components
+    bus_left -> ram;
+    bus_right -> io;
+
+    // Constraints to keep it tidy
+    { rank=same; ram; io; }
+}
+```
+
+## I imagine...
+
+- Two registers (an ordered collection of bits) are populated by some device on a bus.
+    - One for a numeric value.
+    - One for a numeric address.
+    
+## I imagine...
+    
+- That device writes:
+    - A numerical address to bus
+        - All other devices listen, and see if they "own" the address
+    - A numerical value to the bus
+        - The relevant device records the bits to an internal register
+            - Then saves or loads or displays or whatever.
+            
+## Within a Device
+
+- Within devices, numerical values are separated spatially.
+
+```{dot}
+digraph G {
+    rankdir=TD;
+    bgcolor="transparent"
+    node [shape=record,  fontcolor="white", color="white"];
+    "node0" [label = "0|0|1|1|0|1|1|0"];
+}
+```
+
+## Within a Bus
+
+- On the bus, the wire is either, say, "high" or "low" and these values are interpreted as "one" or "zero".
+    - We term this "digital"
+
+> [composed of data in the form of especially binary digits](https://www.merriam-webster.com/dictionary/digital)
+
+## Signal Processing
+
+- E.g. sine wave with some recording window.
+
+![](https://i.sstatic.net/MN1ay.png)
+[Source](https://electronics.stackexchange.com/questions/163253/sine-wave-to-square-wave-schmitt-trigger)
+
+## Signal Processing
+
+- Out of scope
+    - Physics/Electrical Engineering topic
+    - Seen in Data in the Cosmos and Computer Vision
+    - Ludicrously radical
+- We handwave it here, and only introduce so you understand what the hardware/OS has to deal with.
+
+# Address Space
+
+## Given a bus
+
+- Say we have both a keyboard and an MMU on a bus with our ALU/CPU
+    - Say I input `d`, ASCII 100/0x64, on my keyboard
+    - The keyboard broadcasts onto bus
+    - The ALU and MMU read it
+        - How is the signal interpreted?
+        
+## Throwback
+
+- Device writes:
+    - A numerical address to bus
+        - All other devices listen, and see if they "own" the address
+    - A numerical value to the bus
+        - The relevant device records the bits to an internal register
+            - Then saves or loads or displays or whatever.
+            
+## So...
+
+- The keyboard doesn't *just* blast a `0b1100100' onto bus.
+- Rather, it broadcasts some pre-determined "address" corresponding to keyboard input.
+    - The ALU sees this and knows to prepare a register to store the incoming value.
+    - The MMU sees this and knows to hit a snooze.
+- So the keyboard prepends the numeric value with a numeric address.
+    - This is the importance of an address space.
+    
+## The Big Idea
+
+- Imagine the bus is an array.
+- Each array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.
+- Each array element has some numeric address.
+
+## For the ALU
+
+- When the ALU wants to write to memory
+    - Address the MMU, either as
+        - A region as large as physical memory
+        - One address then a key-value pair 
+    - The ALU writes a value to an address
+        - The MMU sees this on bus and acts accordingly
+        - The keyboard does whatever
+        
+## Wrinkles
+
+- Sounds easy?
+- We can optimize
+
+## Gaps
+
+- Usually address space is much larger than
+RAM
+- Addresses that can be accessed are
+referred to as “mapped”
+-  And holes that can’t be accessed are
+“unmapped”
+- What happens if the CPU loads or
+stores to an unmapped region
+
+
+## Gaps
+
+```{dot}
+digraph G {
+    rankdir=LR;
+    bgcolor="transparent"
+    edge [color="white", fontcolor="white"];
+    node [shape=record,  fontcolor="white", color="white"];
+    "node0" [label = "{<5>0x10}|{<4>0x0C}|{<3>0x08}|{<2>0x04}|{<1>0x00}"];
+    "node1" [label = "{<5>Monitor}|{<4>}|{<3>GPU}|{<2>Memory}|{<1>Keyboard}"];
+    node0:5->node1:5
+    node0:4->node1:4
+    node0:3->node1:3
+    node0:2->node1:2
+    node0:1->node1:1
+}
+```
+
+## Permissions
+
+- Usually as RWX
+    - **R**ead
+    - **W**rite
+    - E**X**ecute
+    - The dastardly von Neumann model rears its ugly head etc.
+- Why have these, and
+- What if they are violated
+
+
+## Permissions
+
+```{dot}
+digraph G {
+    rankdir=LR;
+    bgcolor="transparent"
+    edge [color="white", fontcolor="white"];
+    node [shape=record,  fontcolor="white", color="white", fontname="Courier"];
+    "node0" [label = "{0x10|<5>R__}|{0x0C|<4>RW_}|{0x08|<3>R_X}|{0x04|<2>R__}|{0x00|<1>RWX}"];
+    "node1" [label = "{<5>.ini}|{<4>.txt}|{<3>.exe}|{<2>.log}|{<1>.sh}"];
+    node0:5->node1:5
+    node0:4->node1:4
+    node0:3->node1:3
+    node0:2->node1:2
+    node0:1->node1:1
+}
+```
+
+
+
+## Multiple Devices
+
+- Treat code and data as the same.
+- Be unfathomably based.
+- The keyboard is just memory.
+- So is the CPU/GPU
+- So is the internet (Network interface controller)
+    - We can execute the internet?
+
+## Multiple Devices
+
+```{dot}
+digraph G {
+    rankdir=LR;
+    bgcolor="transparent"
+    edge [color="white", fontcolor="white"];
+    node [shape=record,  fontcolor="white", color="white", fontname="Courier"];
+    "node0" [label = "{0x10|<5>R__}|{0x0C|<4>RW_}|{0x08|<3>R_X}|{0x04|<2>R__}|{0x00|<1>RWX}"];
+    "node1" [label = "{<5>I/O|keys}|{<4>MMU|.txt}|{<3>MMU|.exe}|{<2>NIC|.htm}|{<1>NIC|.jsx}"];
+    node0:5->node1:5
+    node0:4->node1:4
+    node0:3->node1:3
+    node0:2->node1:2
+    node0:1->node1:1
+}
+```
+
+## Further
+
+- Physical vs. virtual address
+    - Usually computers can describe more memory locations than the MMU can retain.
+- Caching
+    - Usually read/write is slow but repeated, so save common requests to deload devices and bus
+- Block size
+    - Bits and even words are are two small, usually pages (4KB) or blocks (cloud scale)
+    
+# Stack & Heap
+
+## Recall
+
+- You have already been a client of the stack/heap
+    - [In C](https://cd-public.github.io/crypto/qmd/malloc.html#/heap-example)
+    - [In Rust](https://cd-c89.github.io/rs/90_stack.rjs.html#/heap-memory-fundamentals)
+- Quoth me:
+
+> [It’s the OS’s problem. And therefore our problem next term.](https://cd-c89.github.io/rs/90_stack.rjs.html#/citation-1)
+
+# Languages
+
+## Python
+
+```{.py}
+import ctypes
+import gc 
+
+di = lambda obj_id : _ctypes.PyObj_FromPtr(obj_id)
+free = gc.collect
+```
+
+## Rust
+
+
+```{.rs filename="src/main.rs"}
+fn main() {    
+    let ptr: *const i32;
+
+    {
+        let x = 1234;
+        ptr = &x as *const i32;
+        unsafe {
+            println!("Value at ptr: {}", *ptr);
+        }
+    }
+
+    unsafe {
+        println!("Value at ptr: {}", *ptr);
+    }
+}
+```
+
+## [C](https://cd-public.github.io/crypto/qmd/malloc.html#/fix-it)
+
+```{.c}
+#include <stdlib.h>
+
+void main() {
+        int *p = (int *)malloc(sizeof(int));
+        int *q = (int *)malloc(sizeof(int));
+        free(p);
+        p = q;
+}
+```
+
+## All of these...
+
+- Are your problem now.
+- There is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.
+- On to the lab/homework!
+
+## Today
+
+- Motivation
+    - Architecture
+    - Abstraction level
+- OS
+    - Bus
+    - Address space
+    - Stack/heap
+    - Languages

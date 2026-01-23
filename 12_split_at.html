@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>split_at – OS in Rust</title>
+<title>Splits – OS in Rust</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,6 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./20_os.html" rel="next">
 <link href="./11_unsafe.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -73,7 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-70c9a4798e5f6abb0636bcdc3eed0e90.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -114,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./12_split_at.html">Homework</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./12_split_at.html">Splits</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -166,7 +167,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./12_split_at.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Homework</span></a>
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
   </div>
 </li>
     </ul>
@@ -196,10 +203,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><div class="quarto-title-block"><div class="quarto-title-tools-only"><h1></h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Splits</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
 <p class="subtitle lead">OS in Rust</p>
 </div>
 
@@ -329,22 +337,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 <li>When we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">use</span> <span class="pp">std::</span>slice<span class="op">;</span></span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">fn</span> split_at_mut(values<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> [<span class="dt">i32</span>]<span class="op">,</span> mid<span class="op">:</span> <span class="dt">usize</span>) <span class="op">-&gt;</span> (<span class="op">&amp;</span><span class="kw">mut</span> [<span class="dt">i32</span>]<span class="op">,</span> <span class="op">&amp;</span><span class="kw">mut</span> [<span class="dt">i32</span>]) <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="kw">fn</span> split_at_mut(values<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> [<span class="dt">i32</span>]<span class="op">,</span> mid<span class="op">:</span> <span class="dt">usize</span>) <span class="op">-&gt;</span> (<span class="op">&amp;</span><span class="kw">mut</span> [<span class="dt">i32</span>]<span class="op">,</span> <span class="op">&amp;</span><span class="kw">mut</span> [<span class="dt">i32</span>]) <span class="op">{</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a></span>
-<span id="cb5-5"><a href="#cb5-5"></a>    <span class="kw">let</span> ptr <span class="op">=</span> values<span class="op">.</span>as_mut_ptr()<span class="op">;</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a>    <span class="kw">let</span> len <span class="op">=</span> values<span class="op">.</span>len()<span class="op">;</span></span>
-<span id="cb5-7"><a href="#cb5-7"></a></span>
-<span id="cb5-8"><a href="#cb5-8"></a>    <span class="pp">assert!</span>(mid <span class="op">&lt;=</span> len)<span class="op">;</span></span>
-<span id="cb5-9"><a href="#cb5-9"></a></span>
-<span id="cb5-10"><a href="#cb5-10"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb5-11"><a href="#cb5-11"></a>        (</span>
-<span id="cb5-12"><a href="#cb5-12"></a>            <span class="pp">slice::</span>from_raw_parts_mut(ptr<span class="op">,</span> mid)<span class="op">,</span></span>
-<span id="cb5-13"><a href="#cb5-13"></a>            <span class="pp">slice::</span>from_raw_parts_mut(ptr<span class="op">.</span>add(mid)<span class="op">,</span> len <span class="op">-</span> mid)<span class="op">,</span></span>
-<span id="cb5-14"><a href="#cb5-14"></a>        )</span>
-<span id="cb5-15"><a href="#cb5-15"></a>    <span class="op">}</span></span>
-<span id="cb5-16"><a href="#cb5-16"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-3"><a href="#cb5-3"></a>    <span class="kw">let</span> ptr <span class="op">=</span> values<span class="op">.</span>as_mut_ptr()<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="kw">let</span> mid <span class="op">=</span> <span class="pp">std::cmp::</span>min(values<span class="op">.</span>len()<span class="op">,</span> mid)<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a>        (</span>
+<span id="cb5-8"><a href="#cb5-8"></a>            <span class="pp">std::slice::</span>from_raw_parts_mut(ptr<span class="op">,</span> mid)<span class="op">,</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a>            <span class="pp">std::slice::</span>from_raw_parts_mut(ptr<span class="op">.</span>add(mid)<span class="op">,</span> values<span class="op">.</span>len() <span class="op">-</span> mid)<span class="op">,</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>        )</span>
+<span id="cb5-11"><a href="#cb5-11"></a>    <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 </section>
@@ -355,8 +359,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Contains an unsafe <code>split_at_mut</code> that you have written in <code>lib.rs</code></li>
 <li>Contains a usage of <code>split_at_mut</code> in <code>main.rs</code></li>
-<li>Abstracts all <code>unsafe</code> blocks to <code>lib.rs</code> but successful calls unsafe code from <code>main.rs</code></li>
+<li>Abstracts all <code>unsafe</code> blocks to <code>lib.rs</code> but successfully calls unsafe code from <code>main.rs</code></li>
 <li>You may use the exact provided code but most put it together in a way that actually works with <code>cargo r</code></li>
+<li>You should be able to explain the difference between my code and the Rustbook code if you consult both.</li>
 </ul></li>
 </ul>
 
@@ -844,10 +849,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./20_os.html" class="pagination-link" aria-label="OS">
+        <span class="nav-page-text">OS</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="an">name:</span><span class="co"> Splits</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="an">title:</span><span class="co"> Splits</span></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="an">format:</span><span class="co"> html</span></span>
 <span id="cb6-4"><a href="#cb6-4"></a><span class="co">---</span></span>
 <span id="cb6-5"><a href="#cb6-5"></a></span>
@@ -956,31 +964,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb6-108"><a href="#cb6-108"></a><span class="ss">- </span>When we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.</span>
 <span id="cb6-109"><a href="#cb6-109"></a></span>
 <span id="cb6-110"><a href="#cb6-110"></a><span class="in">```{.rs}</span></span>
-<span id="cb6-111"><a href="#cb6-111"></a><span class="in">use std::slice;</span></span>
+<span id="cb6-111"><a href="#cb6-111"></a><span class="in">fn split_at_mut(values: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) {</span></span>
 <span id="cb6-112"><a href="#cb6-112"></a></span>
-<span id="cb6-113"><a href="#cb6-113"></a><span class="in">fn split_at_mut(values: &amp;mut [i32], mid: usize) -&gt; (&amp;mut [i32], &amp;mut [i32]) {</span></span>
-<span id="cb6-114"><a href="#cb6-114"></a></span>
-<span id="cb6-115"><a href="#cb6-115"></a><span class="in">    let ptr = values.as_mut_ptr();</span></span>
-<span id="cb6-116"><a href="#cb6-116"></a><span class="in">    let len = values.len();</span></span>
-<span id="cb6-117"><a href="#cb6-117"></a></span>
-<span id="cb6-118"><a href="#cb6-118"></a><span class="in">    assert!(mid &lt;= len);</span></span>
-<span id="cb6-119"><a href="#cb6-119"></a></span>
-<span id="cb6-120"><a href="#cb6-120"></a><span class="in">    unsafe {</span></span>
-<span id="cb6-121"><a href="#cb6-121"></a><span class="in">        (</span></span>
-<span id="cb6-122"><a href="#cb6-122"></a><span class="in">            slice::from_raw_parts_mut(ptr, mid),</span></span>
-<span id="cb6-123"><a href="#cb6-123"></a><span class="in">            slice::from_raw_parts_mut(ptr.add(mid), len - mid),</span></span>
-<span id="cb6-124"><a href="#cb6-124"></a><span class="in">        )</span></span>
-<span id="cb6-125"><a href="#cb6-125"></a><span class="in">    }</span></span>
-<span id="cb6-126"><a href="#cb6-126"></a><span class="in">}</span></span>
-<span id="cb6-127"><a href="#cb6-127"></a><span class="in">```</span></span>
-<span id="cb6-128"><a href="#cb6-128"></a></span>
-<span id="cb6-129"><a href="#cb6-129"></a><span class="fu"># Deliverable</span></span>
-<span id="cb6-130"><a href="#cb6-130"></a></span>
-<span id="cb6-131"><a href="#cb6-131"></a><span class="ss">- </span>Create a crate which:</span>
-<span id="cb6-132"><a href="#cb6-132"></a><span class="ss">    - </span>Contains an unsafe <span class="in">`split_at_mut`</span> that you have written in <span class="in">`lib.rs`</span></span>
-<span id="cb6-133"><a href="#cb6-133"></a><span class="ss">    - </span>Contains a usage of <span class="in">`split_at_mut`</span> in <span class="in">`main.rs`</span></span>
-<span id="cb6-134"><a href="#cb6-134"></a><span class="ss">    - </span>Abstracts all <span class="in">`unsafe`</span> blocks to <span class="in">`lib.rs`</span> but successful calls unsafe code from <span class="in">`main.rs`</span></span>
-<span id="cb6-135"><a href="#cb6-135"></a><span class="ss">    - </span>You may use the exact provided code but most put it together in a way that actually works with <span class="in">`cargo r`</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb6-113"><a href="#cb6-113"></a><span class="in">    let ptr = values.as_mut_ptr();</span></span>
+<span id="cb6-114"><a href="#cb6-114"></a><span class="in">    let mid = std::cmp::min(values.len(), mid);</span></span>
+<span id="cb6-115"><a href="#cb6-115"></a></span>
+<span id="cb6-116"><a href="#cb6-116"></a><span class="in">    unsafe {</span></span>
+<span id="cb6-117"><a href="#cb6-117"></a><span class="in">        (</span></span>
+<span id="cb6-118"><a href="#cb6-118"></a><span class="in">            std::slice::from_raw_parts_mut(ptr, mid),</span></span>
+<span id="cb6-119"><a href="#cb6-119"></a><span class="in">            std::slice::from_raw_parts_mut(ptr.add(mid), values.len() - mid),</span></span>
+<span id="cb6-120"><a href="#cb6-120"></a><span class="in">        )</span></span>
+<span id="cb6-121"><a href="#cb6-121"></a><span class="in">    }</span></span>
+<span id="cb6-122"><a href="#cb6-122"></a><span class="in">}</span></span>
+<span id="cb6-123"><a href="#cb6-123"></a></span>
+<span id="cb6-124"><a href="#cb6-124"></a><span class="in">```</span></span>
+<span id="cb6-125"><a href="#cb6-125"></a></span>
+<span id="cb6-126"><a href="#cb6-126"></a><span class="fu"># Deliverable</span></span>
+<span id="cb6-127"><a href="#cb6-127"></a></span>
+<span id="cb6-128"><a href="#cb6-128"></a><span class="ss">- </span>Create a crate which:</span>
+<span id="cb6-129"><a href="#cb6-129"></a><span class="ss">    - </span>Contains an unsafe <span class="in">`split_at_mut`</span> that you have written in <span class="in">`lib.rs`</span></span>
+<span id="cb6-130"><a href="#cb6-130"></a><span class="ss">    - </span>Contains a usage of <span class="in">`split_at_mut`</span> in <span class="in">`main.rs`</span></span>
+<span id="cb6-131"><a href="#cb6-131"></a><span class="ss">    - </span>Abstracts all <span class="in">`unsafe`</span> blocks to <span class="in">`lib.rs`</span> but successfully calls unsafe code from <span class="in">`main.rs`</span></span>
+<span id="cb6-132"><a href="#cb6-132"></a><span class="ss">    - </span>You may use the exact provided code but most put it together in a way that actually works with <span class="in">`cargo r`</span></span>
+<span id="cb6-133"><a href="#cb6-133"></a><span class="ss">    - </span>You should be able to explain the difference between my code and the Rustbook code if you consult both.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
