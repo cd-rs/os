@@ -1,69 +1,901 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "OS in Rust",
+    "objectID": "20_os.html",
+    "href": "20_os.html",
+    "title": "OS",
     "section": "",
-    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
-  },
-  {
-    "objectID": "12_split_at.html",
-    "href": "12_split_at.html",
-    "title": "Splits",
-    "section": "",
-    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "text": "Welcome to OS in Rust\n\nActual OS week.\n\nAction Items:\n\nFinish working through split_at\n\nForm a strong opinion on assert\nGood anecdote for job interviews.\n\nNominally ready for next homework after this lecture.\n\nCan wait for lab/section.",
     "crumbs": [
-      "Splits"
+      "OS"
     ]
   },
   {
-    "objectID": "12_split_at.html#homework",
-    "href": "12_split_at.html#homework",
-    "title": "Splits",
+    "objectID": "20_os.html#announcements",
+    "href": "20_os.html#announcements",
+    "title": "OS",
     "section": "",
-    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "text": "Welcome to OS in Rust\n\nActual OS week.\n\nAction Items:\n\nFinish working through split_at\n\nForm a strong opinion on assert\nGood anecdote for job interviews.\n\nNominally ready for next homework after this lecture.\n\nCan wait for lab/section.",
     "crumbs": [
-      "Splits"
+      "OS"
     ]
   },
   {
-    "objectID": "12_split_at.html#citation",
-    "href": "12_split_at.html#citation",
-    "title": "Splits",
-    "section": "Citation",
-    "text": "Citation\n\nCalling an Unsafe Function or Method\nIn a way, an OS is an unsafe function or method… (this is a stretch)",
+    "objectID": "20_os.html#today",
+    "href": "20_os.html#today",
+    "title": "OS",
+    "section": "Today",
+    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages",
     "crumbs": [
-      "Splits"
+      "OS"
     ]
   },
   {
-    "objectID": "12_split_at.html#requirements",
-    "href": "12_split_at.html#requirements",
-    "title": "Splits",
+    "objectID": "20_os.html#citations",
+    "href": "20_os.html#citations",
+    "title": "OS",
+    "section": "Citations",
+    "text": "Citations\n\nBorrowed a bit from:\n\nMIT via UIC\nMIT via OCW",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#arriving-at-os",
+    "href": "20_os.html#arriving-at-os",
+    "title": "OS",
+    "section": "Arriving at OS",
+    "text": "Arriving at OS\n\nWe can arrive at OS from two ways:\n\nWe can look at physical hardware an infer the need for a control system.\nWe can look at formal descriptions of computing, such as automata, and infer the need for abstractions to practically use the system.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#the-device",
+    "href": "20_os.html#the-device",
+    "title": "OS",
+    "section": "The Device",
+    "text": "The Device\n\nWe imagine some minimal device.\n\nWhat are the minimum requirements to be a computer?",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#architecture---alu",
+    "href": "20_os.html#architecture---alu",
+    "title": "OS",
+    "section": "Architecture - ALU",
+    "text": "Architecture - ALU\n\nWe imagine some minimal device.\n\nIt contains an arithmetic/logic unit (ALU).\n\nCan perform e.g. logical AND, bitwise AND, and numeric ADD\nCan load/store numeric values to/from numeric addresses",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#architecture---mmu",
+    "href": "20_os.html#architecture---mmu",
+    "title": "OS",
+    "section": "Architecture - MMU",
+    "text": "Architecture - MMU\n\nWe imagine some minimal device.\n\nIt contains “memory”, perhaps via a memory management unit (MMU)\n\nPersists numeric values associated with numeric addresses\nPhysically separated from the ALU\nGeniuses will say this is key-value storage",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#picture",
+    "href": "20_os.html#picture",
+    "title": "OS",
+    "section": "Picture",
+    "text": "Picture\n\n\n\n\n\n\n\ngraphgraph\n\n\nALU\n\nALU\n\n\n\nALU-&gt;ALU\n\n\nplus\n\n\n\nMMU\n\nMMU\n\n\n\nALU-&gt;MMU\n\n\nsave\n\n\n\nMMU-&gt;ALU\n\n\nload",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#architecture-1",
+    "href": "20_os.html#architecture-1",
+    "title": "OS",
+    "section": "Architecture",
+    "text": "Architecture\n\nThis is the now-legendary Von Neumann architecture.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#von-neumann-formally",
+    "href": "20_os.html#von-neumann-formally",
+    "title": "OS",
+    "section": "Von Neumann, Formally",
+    "text": "Von Neumann, Formally\n\nA central arithmetic unit to perform arithmetic operations;\nA central control unit to sequence operations performed by the machine;\nMemory that stores data and instructions;\nAn “outside recording medium” to store input to and output from the machine;\nInput and output mechanisms to transfer data between the memory and the outside recording medium.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#competing-formulation",
+    "href": "20_os.html#competing-formulation",
+    "title": "OS",
+    "section": "Competing Formulation",
+    "text": "Competing Formulation\nThe competing formulation known as the Harvard architecture differed in that information describing actions (say, executables or “stored memory programs” or “instructions”) and information for read-write (say data files or just “data”) had distinct storage mediums.\n\nAs far as I know, none of these were ever made.\nTheoretical idea.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#harvard-architecture",
+    "href": "20_os.html#harvard-architecture",
+    "title": "OS",
+    "section": "Harvard Architecture",
+    "text": "Harvard Architecture",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#historical-use-case",
+    "href": "20_os.html#historical-use-case",
+    "title": "OS",
+    "section": "Historical use case",
+    "text": "Historical use case\n\nHistorical computing devices had no onboard storage and programs lived on e.g. external tapes.\n\nThe Harvard architecture is a helpful model in this case.\n\nToday, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)\n\nHence Von Neumann",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#von-neumann---aside",
+    "href": "20_os.html#von-neumann---aside",
+    "title": "OS",
+    "section": "Von Neumann - Aside",
+    "text": "Von Neumann - Aside\n\n\n\nBe advised this is a Manhattan Project member and form your own opinion about that.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#hardware-doesnt-matter",
+    "href": "20_os.html#hardware-doesnt-matter",
+    "title": "OS",
+    "section": "Hardware “doesn’t matter”",
+    "text": "Hardware “doesn’t matter”\n\nWe can regard as a historical accident that hardware exists in any particular form.\n\nPerhaps the first computers could’ve been biological vs. mechanical vs. electric.\n\nWe then regard the automata, principly the Turing Machine, as ground truth.\n\nTMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday…\nRead more",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#thinking-about-a-tm",
+    "href": "20_os.html#thinking-about-a-tm",
+    "title": "OS",
+    "section": "Thinking about a TM",
+    "text": "Thinking about a TM\n\n\n\n\nHead can read and write\nHead is two-way\nTape is infinite\nInfinitely many blanks(0) follow input\nCan accept/reject at any time",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#vs.-hardware",
+    "href": "20_os.html#vs.-hardware",
+    "title": "OS",
+    "section": "Vs. Hardware",
+    "text": "Vs. Hardware\n\nThe TM assumes infinite memory\n\nNot a big deal, you’ll never actually use infinite memory.\n\nThe TM makes no considerations of performance\n\nTapes are slower than wires, but perhaps easier to imagine.\n\nThe TM does not necessarily use binary\n\nBut then again, before-Turing, neither did computers…",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#say-we-build-a-tm",
+    "href": "20_os.html#say-we-build-a-tm",
+    "title": "OS",
+    "section": "Say we build a TM",
+    "text": "Say we build a TM\n\nWell, someone we have to model an “infinite tape” of memory.\n\nPerhaps by… creating a bijection to the natural numbers.\nWe could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)\nWait that is the same key-value storage as the MMU.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#all-roads",
+    "href": "20_os.html#all-roads",
+    "title": "OS",
+    "section": "All Roads",
+    "text": "All Roads\n\n…lead to a series of abstractions allowing higher-level users to use, but not implement, memory.\n\n\n\n\n\n\n\n\nG\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#different-topics",
+    "href": "20_os.html#different-topics",
+    "title": "OS",
+    "section": "Different Topics",
+    "text": "Different Topics\n\nAs we layer abstractions, writing code is more efficent and running code is less efficient.\n\nUntil mature technologies outcompete humans.\n\n\n\n\n\n\n\n\n\nG\n\n\nm1\n\nElectrical\nEngineering\n\n\n\nm2\n\nArchitecture\nand OSes\n\n\n\nm1-&gt;m2\n\n\n\n\n\nm3\n\nCompilers\n(or std)\n\n\n\nm2-&gt;m3\n\n\n\n\n\nm4\n\nScripting\nLanguages\n\n\n\nm3-&gt;m4\n\n\n\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#bus-1",
+    "href": "20_os.html#bus-1",
+    "title": "OS",
+    "section": "Bus",
+    "text": "Bus\n\nIn computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#shorter",
+    "href": "20_os.html#shorter",
+    "title": "OS",
+    "section": "Shorter",
+    "text": "Shorter\n\nA bus is a bundle of wires that transfers bits.\n\n\n\n\n\n\n\n\nG\n\n\ncpu\n\nCPU\n\n\n\nbus_middle\n\n\n\n\ncpu-&gt;bus_middle\n\n\n\n\n\nbus_right\n\n\n\n\nbus_middle-&gt;bus_right\n\n\n\n\nbus_left\n\n\n\n\nbus_left-&gt;bus_middle\n\n\n\n\nram\n\nRAM\n\n\n\nbus_left-&gt;ram\n\n\n\n\n\nio\n\nI/O\n\n\n\nbus_right-&gt;io",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#i-imagine",
+    "href": "20_os.html#i-imagine",
+    "title": "OS",
+    "section": "I imagine…",
+    "text": "I imagine…\n\nTwo registers (an ordered collection of bits) are populated by some device on a bus.\n\nOne for a numeric value.\nOne for a numeric address.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#i-imagine-1",
+    "href": "20_os.html#i-imagine-1",
+    "title": "OS",
+    "section": "I imagine…",
+    "text": "I imagine…\n\nThat device writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#within-a-device",
+    "href": "20_os.html#within-a-device",
+    "title": "OS",
+    "section": "Within a Device",
+    "text": "Within a Device\n\nWithin devices, numerical values are separated spatially.\n\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0\n\n0\n\n1\n\n1\n\n0\n\n1\n\n1\n\n0",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#within-a-bus",
+    "href": "20_os.html#within-a-bus",
+    "title": "OS",
+    "section": "Within a Bus",
+    "text": "Within a Bus\n\nOn the bus, the wire is either, say, “high” or “low” and these values are interpreted as “one” or “zero”.\n\nWe term this “digital”\n\n\n\ncomposed of data in the form of especially binary digits",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#signal-processing",
+    "href": "20_os.html#signal-processing",
+    "title": "OS",
+    "section": "Signal Processing",
+    "text": "Signal Processing\n\nE.g. sine wave with some recording window.\n\n Source",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#signal-processing-1",
+    "href": "20_os.html#signal-processing-1",
+    "title": "OS",
+    "section": "Signal Processing",
+    "text": "Signal Processing\n\nOut of scope\n\nPhysics/Electrical Engineering topic\nSeen in Data in the Cosmos and Computer Vision\nLudicrously radical\n\nWe handwave it here, and only introduce so you understand what the hardware/OS has to deal with.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#given-a-bus",
+    "href": "20_os.html#given-a-bus",
+    "title": "OS",
+    "section": "Given a bus",
+    "text": "Given a bus\n\nSay we have both a keyboard and an MMU on a bus with our ALU/CPU\n\nSay I input d, ASCII 100/0x64, on my keyboard\nThe keyboard broadcasts onto bus\nThe ALU and MMU read it\n\nHow is the signal interpreted?",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#throwback",
+    "href": "20_os.html#throwback",
+    "title": "OS",
+    "section": "Throwback",
+    "text": "Throwback\n\nDevice writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#so",
+    "href": "20_os.html#so",
+    "title": "OS",
+    "section": "So…",
+    "text": "So…\n\nThe keyboard doesn’t just blast a `0b1100100’ onto bus.\nRather, it broadcasts some pre-determined “address” corresponding to keyboard input.\n\nThe ALU sees this and knows to prepare a register to store the incoming value.\nThe MMU sees this and knows to hit a snooze.\n\nSo the keyboard prepends the numeric value with a numeric address.\n\nThis is the importance of an address space.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#the-big-idea",
+    "href": "20_os.html#the-big-idea",
+    "title": "OS",
+    "section": "The Big Idea",
+    "text": "The Big Idea\n\nImagine the bus is an array.\nEach array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.\nEach array element has some numeric address.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#for-the-alu",
+    "href": "20_os.html#for-the-alu",
+    "title": "OS",
+    "section": "For the ALU",
+    "text": "For the ALU\n\nWhen the ALU wants to write to memory\n\nAddress the MMU, either as\n\nA region as large as physical memory\nOne address then a key-value pair\n\nThe ALU writes a value to an address\n\nThe MMU sees this on bus and acts accordingly\nThe keyboard does whatever",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#wrinkles",
+    "href": "20_os.html#wrinkles",
+    "title": "OS",
+    "section": "Wrinkles",
+    "text": "Wrinkles\n\nSounds easy?\nWe can optimize",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#gaps",
+    "href": "20_os.html#gaps",
+    "title": "OS",
+    "section": "Gaps",
+    "text": "Gaps\n\nUsually address space is much larger than RAM\nAddresses that can be accessed are referred to as “mapped”\nAnd holes that can’t be accessed are “unmapped”\nWhat happens if the CPU loads or stores to an unmapped region",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#gaps-1",
+    "href": "20_os.html#gaps-1",
+    "title": "OS",
+    "section": "Gaps",
+    "text": "Gaps\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\n0x0C\n\n0x08\n\n0x04\n\n0x00\n\n\n\nnode1\n\nMonitor\n\n \n\nGPU\n\nMemory\n\nKeyboard\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#permissions",
+    "href": "20_os.html#permissions",
+    "title": "OS",
+    "section": "Permissions",
+    "text": "Permissions\n\nUsually as RWX\n\nRead\nWrite\nEXecute\nThe dastardly von Neumann model rears its ugly head etc.\n\nWhy have these, and\nWhat if they are violated",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#permissions-1",
+    "href": "20_os.html#permissions-1",
+    "title": "OS",
+    "section": "Permissions",
+    "text": "Permissions\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\n.ini\n\n.txt\n\n.exe\n\n.log\n\n.sh\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#multiple-devices",
+    "href": "20_os.html#multiple-devices",
+    "title": "OS",
+    "section": "Multiple Devices",
+    "text": "Multiple Devices\n\nTreat code and data as the same.\nBe unfathomably based.\nThe keyboard is just memory.\nSo is the CPU/GPU\nSo is the internet (Network interface controller)\n\nWe can execute the internet?",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#multiple-devices-1",
+    "href": "20_os.html#multiple-devices-1",
+    "title": "OS",
+    "section": "Multiple Devices",
+    "text": "Multiple Devices\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\nI/O\n\nkeys\n\nMMU\n\n.txt\n\nMMU\n\n.exe\n\nNIC\n\n.htm\n\nNIC\n\n.jsx\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#further",
+    "href": "20_os.html#further",
+    "title": "OS",
+    "section": "Further",
+    "text": "Further\n\nPhysical vs. virtual address\n\nUsually computers can describe more memory locations than the MMU can retain.\n\nCaching\n\nUsually read/write is slow but repeated, so save common requests to deload devices and bus\n\nBlock size\n\nBits and even words are are two small, usually pages (4KB) or blocks (cloud scale)",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#recall",
+    "href": "20_os.html#recall",
+    "title": "OS",
+    "section": "Recall",
+    "text": "Recall\n\nYou have already been a client of the stack/heap\n\nIn C\nIn Rust\n\nQuoth me:\n\n\nIt’s the OS’s problem. And therefore our problem next term.",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#python",
+    "href": "20_os.html#python",
+    "title": "OS",
+    "section": "Python",
+    "text": "Python\nimport ctypes\nimport gc \n\ndi = lambda obj_id : _ctypes.PyObj_FromPtr(obj_id)\nfree = gc.collect",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#rust",
+    "href": "20_os.html#rust",
+    "title": "OS",
+    "section": "Rust",
+    "text": "Rust\n\n\nsrc/main.rs\n\nfn main() {    \n    let ptr: *const i32;\n\n    {\n        let x = 1234;\n        ptr = &x as *const i32;\n        unsafe {\n            println!(\"Value at ptr: {}\", *ptr);\n        }\n    }\n\n    unsafe {\n        println!(\"Value at ptr: {}\", *ptr);\n    }\n}",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#c",
+    "href": "20_os.html#c",
+    "title": "OS",
+    "section": "C",
+    "text": "C\n#include &lt;stdlib.h&gt;\n\nvoid main() {\n        int *p = (int *)malloc(sizeof(int));\n        int *q = (int *)malloc(sizeof(int));\n        free(p);\n        p = q;\n}",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#all-of-these",
+    "href": "20_os.html#all-of-these",
+    "title": "OS",
+    "section": "All of these…",
+    "text": "All of these…\n\nAre your problem now.\nThere is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.\nOn to the lab/homework!",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.html#today-1",
+    "href": "20_os.html#today-1",
+    "title": "OS",
+    "section": "Today",
+    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages",
+    "crumbs": [
+      "OS"
+    ]
+  },
+  {
+    "objectID": "20_os.rjs.html#announcements",
+    "href": "20_os.rjs.html#announcements",
+    "title": "OS",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to OS in Rust\n\nActual OS week.\n\nAction Items:\n\nFinish working through split_at\n\nForm a strong opinion on assert\nGood anecdote for job interviews.\n\nNominally ready for next homework after this lecture.\n\nCan wait for lab/section."
+  },
+  {
+    "objectID": "20_os.rjs.html#today",
+    "href": "20_os.rjs.html#today",
+    "title": "OS",
+    "section": "Today",
+    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages"
+  },
+  {
+    "objectID": "20_os.rjs.html#citations",
+    "href": "20_os.rjs.html#citations",
+    "title": "OS",
+    "section": "Citations",
+    "text": "Citations\n\nBorrowed a bit from:\n\nMIT via UIC\nMIT via OCW"
+  },
+  {
+    "objectID": "20_os.rjs.html#arriving-at-os",
+    "href": "20_os.rjs.html#arriving-at-os",
+    "title": "OS",
+    "section": "Arriving at OS",
+    "text": "Arriving at OS\n\nWe can arrive at OS from two ways:\n\nWe can look at physical hardware an infer the need for a control system.\nWe can look at formal descriptions of computing, such as automata, and infer the need for abstractions to practically use the system."
+  },
+  {
+    "objectID": "20_os.rjs.html#the-device",
+    "href": "20_os.rjs.html#the-device",
+    "title": "OS",
+    "section": "The Device",
+    "text": "The Device\n\nWe imagine some minimal device.\n\nWhat are the minimum requirements to be a computer?"
+  },
+  {
+    "objectID": "20_os.rjs.html#architecture---alu",
+    "href": "20_os.rjs.html#architecture---alu",
+    "title": "OS",
+    "section": "Architecture - ALU",
+    "text": "Architecture - ALU\n\nWe imagine some minimal device.\n\nIt contains an arithmetic/logic unit (ALU).\n\nCan perform e.g. logical AND, bitwise AND, and numeric ADD\nCan load/store numeric values to/from numeric addresses"
+  },
+  {
+    "objectID": "20_os.rjs.html#architecture---mmu",
+    "href": "20_os.rjs.html#architecture---mmu",
+    "title": "OS",
+    "section": "Architecture - MMU",
+    "text": "Architecture - MMU\n\nWe imagine some minimal device.\n\nIt contains “memory”, perhaps via a memory management unit (MMU)\n\nPersists numeric values associated with numeric addresses\nPhysically separated from the ALU\nGeniuses will say this is key-value storage"
+  },
+  {
+    "objectID": "20_os.rjs.html#picture",
+    "href": "20_os.rjs.html#picture",
+    "title": "OS",
+    "section": "Picture",
+    "text": "Picture\n\n\n\n\n\n\n\ngraphgraph\n\n\nALU\n\nALU\n\n\n\nALU-&gt;ALU\n\n\nplus\n\n\n\nMMU\n\nMMU\n\n\n\nALU-&gt;MMU\n\n\nsave\n\n\n\nMMU-&gt;ALU\n\n\nload"
+  },
+  {
+    "objectID": "20_os.rjs.html#architecture-1",
+    "href": "20_os.rjs.html#architecture-1",
+    "title": "OS",
+    "section": "Architecture",
+    "text": "Architecture\n\nThis is the now-legendary Von Neumann architecture."
+  },
+  {
+    "objectID": "20_os.rjs.html#von-neumann-formally",
+    "href": "20_os.rjs.html#von-neumann-formally",
+    "title": "OS",
+    "section": "Von Neumann, Formally",
+    "text": "Von Neumann, Formally\n\nA central arithmetic unit to perform arithmetic operations;\nA central control unit to sequence operations performed by the machine;\nMemory that stores data and instructions;\nAn “outside recording medium” to store input to and output from the machine;\nInput and output mechanisms to transfer data between the memory and the outside recording medium."
+  },
+  {
+    "objectID": "20_os.rjs.html#competing-formulation",
+    "href": "20_os.rjs.html#competing-formulation",
+    "title": "OS",
+    "section": "Competing Formulation",
+    "text": "Competing Formulation\nThe competing formulation known as the Harvard architecture differed in that information describing actions (say, executables or “stored memory programs” or “instructions”) and information for read-write (say data files or just “data”) had distinct storage mediums.\n\nAs far as I know, none of these were ever made.\nTheoretical idea."
+  },
+  {
+    "objectID": "20_os.rjs.html#harvard-architecture",
+    "href": "20_os.rjs.html#harvard-architecture",
+    "title": "OS",
+    "section": "Harvard Architecture",
+    "text": "Harvard Architecture"
+  },
+  {
+    "objectID": "20_os.rjs.html#historical-use-case",
+    "href": "20_os.rjs.html#historical-use-case",
+    "title": "OS",
+    "section": "Historical use case",
+    "text": "Historical use case\n\nHistorical computing devices had no onboard storage and programs lived on e.g. external tapes.\n\nThe Harvard architecture is a helpful model in this case.\n\nToday, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)\n\nHence Von Neumann"
+  },
+  {
+    "objectID": "20_os.rjs.html#von-neumann---aside",
+    "href": "20_os.rjs.html#von-neumann---aside",
+    "title": "OS",
+    "section": "Von Neumann - Aside",
+    "text": "Von Neumann - Aside\n\n\n\nBe advised this is a Manhattan Project member and form your own opinion about that."
+  },
+  {
+    "objectID": "20_os.rjs.html#hardware-doesnt-matter",
+    "href": "20_os.rjs.html#hardware-doesnt-matter",
+    "title": "OS",
+    "section": "Hardware “doesn’t matter”",
+    "text": "Hardware “doesn’t matter”\n\nWe can regard as a historical accident that hardware exists in any particular form.\n\nPerhaps the first computers could’ve been biological vs. mechanical vs. electric.\n\nWe then regard the automata, principly the Turing Machine, as ground truth.\n\nTMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday…\nRead more"
+  },
+  {
+    "objectID": "20_os.rjs.html#thinking-about-a-tm",
+    "href": "20_os.rjs.html#thinking-about-a-tm",
+    "title": "OS",
+    "section": "Thinking about a TM",
+    "text": "Thinking about a TM\n\n\n\n\nHead can read and write\nHead is two-way\nTape is infinite\nInfinitely many blanks(0) follow input\nCan accept/reject at any time"
+  },
+  {
+    "objectID": "20_os.rjs.html#vs.-hardware",
+    "href": "20_os.rjs.html#vs.-hardware",
+    "title": "OS",
+    "section": "Vs. Hardware",
+    "text": "Vs. Hardware\n\nThe TM assumes infinite memory\n\nNot a big deal, you’ll never actually use infinite memory.\n\nThe TM makes no considerations of performance\n\nTapes are slower than wires, but perhaps easier to imagine.\n\nThe TM does not necessarily use binary\n\nBut then again, before-Turing, neither did computers…"
+  },
+  {
+    "objectID": "20_os.rjs.html#say-we-build-a-tm",
+    "href": "20_os.rjs.html#say-we-build-a-tm",
+    "title": "OS",
+    "section": "Say we build a TM",
+    "text": "Say we build a TM\n\nWell, someone we have to model an “infinite tape” of memory.\n\nPerhaps by… creating a bijection to the natural numbers.\nWe could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)\nWait that is the same key-value storage as the MMU."
+  },
+  {
+    "objectID": "20_os.rjs.html#all-roads",
+    "href": "20_os.rjs.html#all-roads",
+    "title": "OS",
+    "section": "All Roads",
+    "text": "All Roads\n\n…lead to a series of abstractions allowing higher-level users to use, but not implement, memory.\n\n\n\n\n\n\n\n\nG\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4"
+  },
+  {
+    "objectID": "20_os.rjs.html#different-topics",
+    "href": "20_os.rjs.html#different-topics",
+    "title": "OS",
+    "section": "Different Topics",
+    "text": "Different Topics\n\nAs we layer abstractions, writing code is more efficent and running code is less efficient.\n\nUntil mature technologies outcompete humans.\n\n\n\n\n\n\n\n\n\nG\n\n\nm1\n\nElectrical\nEngineering\n\n\n\nm2\n\nArchitecture\nand OSes\n\n\n\nm1-&gt;m2\n\n\n\n\n\nm3\n\nCompilers\n(or std)\n\n\n\nm2-&gt;m3\n\n\n\n\n\nm4\n\nScripting\nLanguages\n\n\n\nm3-&gt;m4\n\n\n\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4"
+  },
+  {
+    "objectID": "20_os.rjs.html#bus-1",
+    "href": "20_os.rjs.html#bus-1",
+    "title": "OS",
+    "section": "Bus",
+    "text": "Bus\n\nIn computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate."
+  },
+  {
+    "objectID": "20_os.rjs.html#shorter",
+    "href": "20_os.rjs.html#shorter",
+    "title": "OS",
+    "section": "Shorter",
+    "text": "Shorter\n\nA bus is a bundle of wires that transfers bits.\n\n\n\n\n\n\n\n\nG\n\n\ncpu\n\nCPU\n\n\n\nbus_middle\n\n\n\n\ncpu-&gt;bus_middle\n\n\n\n\n\nbus_right\n\n\n\n\nbus_middle-&gt;bus_right\n\n\n\n\nbus_left\n\n\n\n\nbus_left-&gt;bus_middle\n\n\n\n\nram\n\nRAM\n\n\n\nbus_left-&gt;ram\n\n\n\n\n\nio\n\nI/O\n\n\n\nbus_right-&gt;io"
+  },
+  {
+    "objectID": "20_os.rjs.html#i-imagine",
+    "href": "20_os.rjs.html#i-imagine",
+    "title": "OS",
+    "section": "I imagine…",
+    "text": "I imagine…\n\nTwo registers (an ordered collection of bits) are populated by some device on a bus.\n\nOne for a numeric value.\nOne for a numeric address."
+  },
+  {
+    "objectID": "20_os.rjs.html#i-imagine-1",
+    "href": "20_os.rjs.html#i-imagine-1",
+    "title": "OS",
+    "section": "I imagine…",
+    "text": "I imagine…\n\nThat device writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever."
+  },
+  {
+    "objectID": "20_os.rjs.html#within-a-device",
+    "href": "20_os.rjs.html#within-a-device",
+    "title": "OS",
+    "section": "Within a Device",
+    "text": "Within a Device\n\nWithin devices, numerical values are separated spatially.\n\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0\n\n0\n\n1\n\n1\n\n0\n\n1\n\n1\n\n0"
+  },
+  {
+    "objectID": "20_os.rjs.html#within-a-bus",
+    "href": "20_os.rjs.html#within-a-bus",
+    "title": "OS",
+    "section": "Within a Bus",
+    "text": "Within a Bus\n\nOn the bus, the wire is either, say, “high” or “low” and these values are interpreted as “one” or “zero”.\n\nWe term this “digital”\n\n\n\ncomposed of data in the form of especially binary digits"
+  },
+  {
+    "objectID": "20_os.rjs.html#signal-processing",
+    "href": "20_os.rjs.html#signal-processing",
+    "title": "OS",
+    "section": "Signal Processing",
+    "text": "Signal Processing\n\nE.g. sine wave with some recording window.\n\n Source"
+  },
+  {
+    "objectID": "20_os.rjs.html#signal-processing-1",
+    "href": "20_os.rjs.html#signal-processing-1",
+    "title": "OS",
+    "section": "Signal Processing",
+    "text": "Signal Processing\n\nOut of scope\n\nPhysics/Electrical Engineering topic\nSeen in Data in the Cosmos and Computer Vision\nLudicrously radical\n\nWe handwave it here, and only introduce so you understand what the hardware/OS has to deal with."
+  },
+  {
+    "objectID": "20_os.rjs.html#given-a-bus",
+    "href": "20_os.rjs.html#given-a-bus",
+    "title": "OS",
+    "section": "Given a bus",
+    "text": "Given a bus\n\nSay we have both a keyboard and an MMU on a bus with our ALU/CPU\n\nSay I input d, ASCII 100/0x64, on my keyboard\nThe keyboard broadcasts onto bus\nThe ALU and MMU read it\n\nHow is the signal interpreted?"
+  },
+  {
+    "objectID": "20_os.rjs.html#throwback",
+    "href": "20_os.rjs.html#throwback",
+    "title": "OS",
+    "section": "Throwback",
+    "text": "Throwback\n\nDevice writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever."
+  },
+  {
+    "objectID": "20_os.rjs.html#so",
+    "href": "20_os.rjs.html#so",
+    "title": "OS",
+    "section": "So…",
+    "text": "So…\n\nThe keyboard doesn’t just blast a `0b1100100’ onto bus.\nRather, it broadcasts some pre-determined “address” corresponding to keyboard input.\n\nThe ALU sees this and knows to prepare a register to store the incoming value.\nThe MMU sees this and knows to hit a snooze.\n\nSo the keyboard prepends the numeric value with a numeric address.\n\nThis is the importance of an address space."
+  },
+  {
+    "objectID": "20_os.rjs.html#the-big-idea",
+    "href": "20_os.rjs.html#the-big-idea",
+    "title": "OS",
+    "section": "The Big Idea",
+    "text": "The Big Idea\n\nImagine the bus is an array.\nEach array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.\nEach array element has some numeric address."
+  },
+  {
+    "objectID": "20_os.rjs.html#for-the-alu",
+    "href": "20_os.rjs.html#for-the-alu",
+    "title": "OS",
+    "section": "For the ALU",
+    "text": "For the ALU\n\nWhen the ALU wants to write to memory\n\nAddress the MMU, either as\n\nA region as large as physical memory\nOne address then a key-value pair\n\nThe ALU writes a value to an address\n\nThe MMU sees this on bus and acts accordingly\nThe keyboard does whatever"
+  },
+  {
+    "objectID": "20_os.rjs.html#wrinkles",
+    "href": "20_os.rjs.html#wrinkles",
+    "title": "OS",
+    "section": "Wrinkles",
+    "text": "Wrinkles\n\nSounds easy?\nWe can optimize"
+  },
+  {
+    "objectID": "20_os.rjs.html#gaps",
+    "href": "20_os.rjs.html#gaps",
+    "title": "OS",
+    "section": "Gaps",
+    "text": "Gaps\n\nUsually address space is much larger than RAM\nAddresses that can be accessed are referred to as “mapped”\nAnd holes that can’t be accessed are “unmapped”\nWhat happens if the CPU loads or stores to an unmapped region"
+  },
+  {
+    "objectID": "20_os.rjs.html#gaps-1",
+    "href": "20_os.rjs.html#gaps-1",
+    "title": "OS",
+    "section": "Gaps",
+    "text": "Gaps\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\n0x0C\n\n0x08\n\n0x04\n\n0x00\n\n\n\nnode1\n\nMonitor\n\n \n\nGPU\n\nMemory\n\nKeyboard\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1"
+  },
+  {
+    "objectID": "20_os.rjs.html#permissions",
+    "href": "20_os.rjs.html#permissions",
+    "title": "OS",
+    "section": "Permissions",
+    "text": "Permissions\n\nUsually as RWX\n\nRead\nWrite\nEXecute\nThe dastardly von Neumann model rears its ugly head etc.\n\nWhy have these, and\nWhat if they are violated"
+  },
+  {
+    "objectID": "20_os.rjs.html#permissions-1",
+    "href": "20_os.rjs.html#permissions-1",
+    "title": "OS",
+    "section": "Permissions",
+    "text": "Permissions\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\n.ini\n\n.txt\n\n.exe\n\n.log\n\n.sh\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1"
+  },
+  {
+    "objectID": "20_os.rjs.html#multiple-devices",
+    "href": "20_os.rjs.html#multiple-devices",
+    "title": "OS",
+    "section": "Multiple Devices",
+    "text": "Multiple Devices\n\nTreat code and data as the same.\nBe unfathomably based.\nThe keyboard is just memory.\nSo is the CPU/GPU\nSo is the internet (Network interface controller)\n\nWe can execute the internet?"
+  },
+  {
+    "objectID": "20_os.rjs.html#multiple-devices-1",
+    "href": "20_os.rjs.html#multiple-devices-1",
+    "title": "OS",
+    "section": "Multiple Devices",
+    "text": "Multiple Devices\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\nI/O\n\nkeys\n\nMMU\n\n.txt\n\nMMU\n\n.exe\n\nNIC\n\n.htm\n\nNIC\n\n.jsx\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1"
+  },
+  {
+    "objectID": "20_os.rjs.html#further",
+    "href": "20_os.rjs.html#further",
+    "title": "OS",
+    "section": "Further",
+    "text": "Further\n\nPhysical vs. virtual address\n\nUsually computers can describe more memory locations than the MMU can retain.\n\nCaching\n\nUsually read/write is slow but repeated, so save common requests to deload devices and bus\n\nBlock size\n\nBits and even words are are two small, usually pages (4KB) or blocks (cloud scale)"
+  },
+  {
+    "objectID": "20_os.rjs.html#recall",
+    "href": "20_os.rjs.html#recall",
+    "title": "OS",
+    "section": "Recall",
+    "text": "Recall\n\nYou have already been a client of the stack/heap\n\nIn C\nIn Rust\n\nQuoth me:\n\n\nIt’s the OS’s problem. And therefore our problem next term."
+  },
+  {
+    "objectID": "20_os.rjs.html#python",
+    "href": "20_os.rjs.html#python",
+    "title": "OS",
+    "section": "Python",
+    "text": "Python\nimport ctypes\nimport gc \n\ndi = lambda obj_id : _ctypes.PyObj_FromPtr(obj_id)\nfree = gc.collect"
+  },
+  {
+    "objectID": "20_os.rjs.html#rust",
+    "href": "20_os.rjs.html#rust",
+    "title": "OS",
+    "section": "Rust",
+    "text": "Rust\n\n\nsrc/main.rs\n\nfn main() {    \n    let ptr: *const i32;\n\n    {\n        let x = 1234;\n        ptr = &x as *const i32;\n        unsafe {\n            println!(\"Value at ptr: {}\", *ptr);\n        }\n    }\n\n    unsafe {\n        println!(\"Value at ptr: {}\", *ptr);\n    }\n}"
+  },
+  {
+    "objectID": "20_os.rjs.html#c",
+    "href": "20_os.rjs.html#c",
+    "title": "OS",
+    "section": "C",
+    "text": "C\n#include &lt;stdlib.h&gt;\n\nvoid main() {\n        int *p = (int *)malloc(sizeof(int));\n        int *q = (int *)malloc(sizeof(int));\n        free(p);\n        p = q;\n}"
+  },
+  {
+    "objectID": "20_os.rjs.html#all-of-these",
+    "href": "20_os.rjs.html#all-of-these",
+    "title": "OS",
+    "section": "All of these…",
+    "text": "All of these…\n\nAre your problem now.\nThere is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.\nOn to the lab/homework!"
+  },
+  {
+    "objectID": "20_os.rjs.html#today-1",
+    "href": "20_os.rjs.html#today-1",
+    "title": "OS",
+    "section": "Today",
+    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages"
+  },
+  {
+    "objectID": "01_wc.html",
+    "href": "01_wc.html",
+    "title": "wc",
+    "section": "",
+    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
+    "crumbs": [
+      "wc"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#announcements",
+    "href": "01_wc.html#announcements",
+    "title": "wc",
+    "section": "",
+    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
+    "crumbs": [
+      "wc"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#homework",
+    "href": "01_wc.html#homework",
+    "title": "wc",
+    "section": "Homework",
+    "text": "Homework\n\n“CLI” is just this lab but more complete.\n\nWindows officially no longer supported.\n\nDue Friday, 23 Jan. at 1440 ET.\n\nPlan to hang out as a class 1310-1440 on Fridays, probably.",
+    "crumbs": [
+      "wc"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#setup",
+    "href": "01_wc.html#setup",
+    "title": "wc",
+    "section": "Setup",
+    "text": "Setup\n\nIf you are stuck setting up Rust, following this\nAt the end you should have:\n\ncargo, git, and at least one of gcc or clang on your system.\nA repository named 371os on Github that is either (1) public or (2) shared with [cd-public](https://github.com/cd-public",
+    "crumbs": [
+      "wc"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#requirements",
+    "href": "01_wc.html#requirements",
+    "title": "wc",
     "section": "Requirements",
-    "text": "Requirements\n\nUpdate repository for this course.\nNew crate for this homework.\nFollow the write-up",
+    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and no options.\n\nThat is, you must support wc src/main.rs but not wc --files0-from=F src/main.rs\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
     "crumbs": [
-      "Splits"
+      "wc"
     ]
   },
   {
-    "objectID": "12_split_at.html#unsafe",
-    "href": "12_split_at.html#unsafe",
-    "title": "Splits",
-    "section": "Unsafe",
-    "text": "Unsafe\n\nHere is an unsafe function named dangerous that doesn’t do anything in its body:\n\n    unsafe fn dangerous() {}\n\n    unsafe {\n        dangerous();\n    }\n\nWe must call the dangerous function within a separate unsafe block.\nIf we try to call dangerous without the unsafe block, we’ll get an error.",
+    "objectID": "01_wc.html#repository",
+    "href": "01_wc.html#repository",
+    "title": "wc",
+    "section": "Repository",
+    "text": "Repository\n\nCreate a repository for this class.\nRequirements\n\nName is 371os\nMay be public or private to you and me (cd-public).\n\nRead more\n\nMust email me a link to your repository from your @willamette.edu email, e.g.:\n\nhttps://github.com/cd-example/371os\nIf you’re stuck, read more here",
     "crumbs": [
-      "Splits"
+      "wc"
     ]
   },
   {
-    "objectID": "12_split_at.html#creating-a-safe-abstraction-over-unsafe-code",
-    "href": "12_split_at.html#creating-a-safe-abstraction-over-unsafe-code",
-    "title": "Splits",
-    "section": "Creating a Safe Abstraction over Unsafe Code",
-    "text": "Creating a Safe Abstraction over Unsafe Code\n\nJust because a function contains unsafe code doesn’t mean we need to mark the entire function as unsafe.\n\nThis blew my mind.\n\nIn fact, wrapping unsafe code in a safe function is a common abstraction.\nAs an example, let’s study the split_at_mut function from the standard library, which requires some unsafe code.\n\n\nNo Safe Way\nPeople scared of Portland refer to Safeway I shop at as the “Unsafeway” which I think is hilarious\n\nWe’ll explore how we might implement it.\nThis safe method is defined on mutable slices:\n\nIt takes one slice and makes it two by splitting the slice at the index given as an argument.\n\nHere’s an example.\n\n    let mut v = vec![1, 2, 3, 4, 5, 6];\n\n    let r = &mut v[..];\n\n    let (a, b) = r.split_at_mut(3);\n\nThere’s no safe way to do this.\n\nThis won’t work\nfn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n    let len = values.len();\n\n    assert!(mid &lt;= len);\n\n    (&mut values[..mid], &mut values[mid..])\n}\n\nIt explodes:\n\n$ cargo run\n   Compiling unsafe-example v0.1.0 (file:///projects/unsafe-example)\nerror[E0499]: cannot borrow `*values` as mutable more than once at a time\n --&gt; src/main.rs:6:31\n  |\n1 | fn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n  |                         - let's call the lifetime of this reference `'1`\n...\n6 |     (&mut values[..mid], &mut values[mid..])\n  |     --------------------------^^^^^^--------\n  |     |     |                   |\n  |     |     |                   second mutable borrow occurs here\n  |     |     first mutable borrow occurs here\n  |     returning this value requires that `*values` is borrowed for `'1`\n  |\n  = help: use `.split_at_mut(position)` to obtain two mutable non-overlapping sub-slices\n\nFor more information about this error, try `rustc --explain E0499`.\nerror: could not compile `unsafe-example` (bin \"unsafe-example\") due to 1 previous error\n\n\nEnter the Borrow Checker\n\nRust’s borrow checker can’t understand that we’re borrowing different parts of the slice\n\nIt only knows that we’re borrowing from the same slice twice.\n\nBorrowing different parts of a slice is fundamentally okay because the two slices aren’t overlapping, but…\n\nrustc isn’t smart enough to know this.\n\nWhen we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.\n\nfn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n\n    let ptr = values.as_mut_ptr();\n    let mid = std::cmp::min(values.len(), mid);\n\n    unsafe {\n        (\n            std::slice::from_raw_parts_mut(ptr, mid),\n            std::slice::from_raw_parts_mut(ptr.add(mid), values.len() - mid),\n        )\n    }\n}",
+    "objectID": "01_wc.html#crate",
+    "href": "01_wc.html#crate",
+    "title": "wc",
+    "section": "Crate",
+    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 01 in your 371os repository.\n\ncargo new 01 --name my_wc --vcs none\n\nIf you’re stuck, read more here",
     "crumbs": [
-      "Splits"
+      "wc"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#wc",
+    "href": "01_wc.html#wc",
+    "title": "wc",
+    "section": "wc",
+    "text": "wc\n\nImplement the minimal base functionality of wc using this crate.\n\n\nFull functionality\n\nHere is wc --help\nYou do not need to do all of this!\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRequired functionality\n\nThat is more than required, you need only implement:\n\nUsage: wc [FILE]\nPrint newline, word, and byte counts for each FILE. A word is a \nnon-zero-length sequence of characters delimited by white space.\n\nThis can be trivially tested with some of the following:\n\n$ wc src/main.rs\n 12  30 229 src/main.rs\n$ cargo build release\n$ ./target/release/my_wc src/main.rs\n 12  30 229 src/main.rs\n\nYour src/main.rs need not be of any particular size, and you needn’t implement all code within src/main.rs, but you should get the same counts from wc and from your release binary.",
+    "crumbs": [
+      "wc"
+    ]
+  },
+  {
+    "objectID": "01_wc.html#helpful-reference",
+    "href": "01_wc.html#helpful-reference",
+    "title": "wc",
+    "section": "Helpful Reference",
+    "text": "Helpful Reference\n\nWhen working on projects like this, I almost always have the following reference material open.\nread_lines - Rust By Example\n\n\nfn read_lines(filename: &str) -&gt; Vec&lt;String&gt; {\n    let mut result = Vec::new();\n\n    for line in std::fs::read_to_string(filename).unwrap().lines() {\n        result.push(line.to_string())\n    }\n\n    result\n}",
+    "crumbs": [
+      "wc"
     ]
   },
   {
@@ -135,6 +967,465 @@
     "crumbs": [
       "CLI"
     ]
+  },
+  {
+    "objectID": "12_split_at.html",
+    "href": "12_split_at.html",
+    "title": "Splits",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
+    "objectID": "12_split_at.html#homework",
+    "href": "12_split_at.html#homework",
+    "title": "Splits",
+    "section": "",
+    "text": "Homeworks are due on the Friday after the week they correspond to lecture.\nSo 9 days after the corresponding lab.",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
+    "objectID": "12_split_at.html#citation",
+    "href": "12_split_at.html#citation",
+    "title": "Splits",
+    "section": "Citation",
+    "text": "Citation\n\nCalling an Unsafe Function or Method\nIn a way, an OS is an unsafe function or method… (this is a stretch)",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
+    "objectID": "12_split_at.html#requirements",
+    "href": "12_split_at.html#requirements",
+    "title": "Splits",
+    "section": "Requirements",
+    "text": "Requirements\n\nUpdate repository for this course.\nNew crate for this homework.\nFollow the write-up",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
+    "objectID": "12_split_at.html#unsafe",
+    "href": "12_split_at.html#unsafe",
+    "title": "Splits",
+    "section": "Unsafe",
+    "text": "Unsafe\n\nHere is an unsafe function named dangerous that doesn’t do anything in its body:\n\n    unsafe fn dangerous() {}\n\n    unsafe {\n        dangerous();\n    }\n\nWe must call the dangerous function within a separate unsafe block.\nIf we try to call dangerous without the unsafe block, we’ll get an error.",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
+    "objectID": "12_split_at.html#creating-a-safe-abstraction-over-unsafe-code",
+    "href": "12_split_at.html#creating-a-safe-abstraction-over-unsafe-code",
+    "title": "Splits",
+    "section": "Creating a Safe Abstraction over Unsafe Code",
+    "text": "Creating a Safe Abstraction over Unsafe Code\n\nJust because a function contains unsafe code doesn’t mean we need to mark the entire function as unsafe.\n\nThis blew my mind.\n\nIn fact, wrapping unsafe code in a safe function is a common abstraction.\nAs an example, let’s study the split_at_mut function from the standard library, which requires some unsafe code.\n\n\nNo Safe Way\nPeople scared of Portland refer to Safeway I shop at as the “Unsafeway” which I think is hilarious\n\nWe’ll explore how we might implement it.\nThis safe method is defined on mutable slices:\n\nIt takes one slice and makes it two by splitting the slice at the index given as an argument.\n\nHere’s an example.\n\n    let mut v = vec![1, 2, 3, 4, 5, 6];\n\n    let r = &mut v[..];\n\n    let (a, b) = r.split_at_mut(3);\n\nThere’s no safe way to do this.\n\nThis won’t work\nfn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n    let len = values.len();\n\n    assert!(mid &lt;= len);\n\n    (&mut values[..mid], &mut values[mid..])\n}\n\nIt explodes:\n\n$ cargo run\n   Compiling unsafe-example v0.1.0 (file:///projects/unsafe-example)\nerror[E0499]: cannot borrow `*values` as mutable more than once at a time\n --&gt; src/main.rs:6:31\n  |\n1 | fn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n  |                         - let's call the lifetime of this reference `'1`\n...\n6 |     (&mut values[..mid], &mut values[mid..])\n  |     --------------------------^^^^^^--------\n  |     |     |                   |\n  |     |     |                   second mutable borrow occurs here\n  |     |     first mutable borrow occurs here\n  |     returning this value requires that `*values` is borrowed for `'1`\n  |\n  = help: use `.split_at_mut(position)` to obtain two mutable non-overlapping sub-slices\n\nFor more information about this error, try `rustc --explain E0499`.\nerror: could not compile `unsafe-example` (bin \"unsafe-example\") due to 1 previous error\n\n\nEnter the Borrow Checker\n\nRust’s borrow checker can’t understand that we’re borrowing different parts of the slice\n\nIt only knows that we’re borrowing from the same slice twice.\n\nBorrowing different parts of a slice is fundamentally okay because the two slices aren’t overlapping, but…\n\nrustc isn’t smart enough to know this.\n\nWhen we know code is okay, but Rust doesn’t, it’s time to reach for unsafe code.\n\nfn split_at_mut(values: &mut [i32], mid: usize) -&gt; (&mut [i32], &mut [i32]) {\n\n    let ptr = values.as_mut_ptr();\n    let mid = std::cmp::min(values.len(), mid);\n\n    unsafe {\n        (\n            std::slice::from_raw_parts_mut(ptr, mid),\n            std::slice::from_raw_parts_mut(ptr.add(mid), values.len() - mid),\n        )\n    }\n}",
+    "crumbs": [
+      "Splits"
+    ]
+  },
+  {
+    "objectID": "00_derust.rjs.html#announcements",
+    "href": "00_derust.rjs.html#announcements",
+    "title": "Derust",
+    "section": "Announcements",
+    "text": "Announcements\n\nWelcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nWe’ll use CSSA.\n\nSet up Linux/Rust/Git."
+  },
+  {
+    "objectID": "00_derust.rjs.html#homework",
+    "href": "00_derust.rjs.html#homework",
+    "title": "Derust",
+    "section": "Homework",
+    "text": "Homework\n\nThe first homework, wc, is ready now.\n\nMostly just Rust practice.\n\nDue Friday, 23 Jan at 1440 PT.\n\nFriday of next week."
+  },
+  {
+    "objectID": "00_derust.rjs.html#today",
+    "href": "00_derust.rjs.html#today",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
+  },
+  {
+    "objectID": "00_derust.rjs.html#it-me",
+    "href": "00_derust.rjs.html#it-me",
+    "title": "Derust",
+    "section": "It me",
+    "text": "It me\n\nName\n\n(Prof. )?Calvin\n\nCredentials\n\nB.A. Mathematics\nB.S., M.S., Ph.D. Computer Science\n\nPronouns\n\nthey/them"
+  },
+  {
+    "objectID": "00_derust.rjs.html#the-great-work",
+    "href": "00_derust.rjs.html#the-great-work",
+    "title": "Derust",
+    "section": "The Great Work",
+    "text": "The Great Work\n\nThesis Title\n\nMining Secure Behavior of Hardware Designs\n\nPlain English\n\nJust as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs."
+  },
+  {
+    "objectID": "00_derust.rjs.html#course-format",
+    "href": "00_derust.rjs.html#course-format",
+    "title": "Derust",
+    "section": "Course Format",
+    "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce."
+  },
+  {
+    "objectID": "00_derust.rjs.html#grade-policy",
+    "href": "00_derust.rjs.html#grade-policy",
+    "title": "Derust",
+    "section": "Grade Policy",
+    "text": "Grade Policy\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
+  },
+  {
+    "objectID": "00_derust.rjs.html#specification-grading",
+    "href": "00_derust.rjs.html#specification-grading",
+    "title": "Derust",
+    "section": "Specification Grading",
+    "text": "Specification Grading\n\nBasically, I will assign some stuff but you don’t have to do all of it perfectly.\n\nNo partial credit, everything is boolean grading.\n\nI took distributions over final, midterm, and Lab/HW"
+  },
+  {
+    "objectID": "00_derust.rjs.html#it-pays-to-get-as",
+    "href": "00_derust.rjs.html#it-pays-to-get-as",
+    "title": "Derust",
+    "section": "It pays to get A’s",
+    "text": "It pays to get A’s\n\n\n\nGrade\nRequirements\n\n\n\n\nA\nFinal meets spec\n\n\nA\n90% ave HW/Lab/Midterm, Final compiles\n\n\nA-\n90% ave HW/Lab, Midterm/Final compile\n\n\nA-\nMidterm meets spec, Final compiles"
+  },
+  {
+    "objectID": "00_derust.rjs.html#but-bs-are-the-knees",
+    "href": "00_derust.rjs.html#but-bs-are-the-knees",
+    "title": "Derust",
+    "section": "But B’s are the Knees",
+    "text": "But B’s are the Knees\n\n\n\nGrade\nRequirements\n\n\n\n\nB+\n90% ave HW/Lab, Midterm compiles\n\n\nB\n80% ave HW/Lab, Midterm compiles\n\n\nB-\n80% ave HW/Lab"
+  },
+  {
+    "objectID": "00_derust.rjs.html#these-may-earn-degrees",
+    "href": "00_derust.rjs.html#these-may-earn-degrees",
+    "title": "Derust",
+    "section": "These may (???) earn degrees",
+    "text": "These may (???) earn degrees\n\n\n\nGrade\nRequirements\n\n\n\n\nC\n80% ave Lab\n\n\nD\n60% ave Lab\n\n\nF\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#lab-grading",
+    "href": "00_derust.rjs.html#lab-grading",
+    "title": "Derust",
+    "section": "Lab Grading",
+    "text": "Lab Grading\n\n“A” (=100%)\n\nMeets spec by end of class\n\n“B” (=90%)\n\nCompiles at end of class\n\n“F” (=0%)\n\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#hw-grading",
+    "href": "00_derust.rjs.html#hw-grading",
+    "title": "Derust",
+    "section": "HW Grading",
+    "text": "HW Grading\n\n“A” (=100%)\n\nOn time\nPasses autograder.\n\nI lack confidence I can make excellent autograders for all stages, so give me some grace here.\n\n\n“B” (=90%)\n\nOn time\nCompiles\n\n“F” (=0%)\n\nAnything else"
+  },
+  {
+    "objectID": "00_derust.rjs.html#final",
+    "href": "00_derust.rjs.html#final",
+    "title": "Derust",
+    "section": "Final",
+    "text": "Final\n\nCreate, document, and publish an operating system… in Rust!\n\nFree-standing binary\nFaults/exceptions/interrupts\nMemory management"
+  },
+  {
+    "objectID": "00_derust.rjs.html#late-work-policy",
+    "href": "00_derust.rjs.html#late-work-policy",
+    "title": "Derust",
+    "section": "Late Work Policy",
+    "text": "Late Work Policy\n\nLate work is not accepted.\n\nNo exceptions.\nThe specification grading framework incorpates tolerances.\nAn OS that meets spec by end-of-term is an A, always."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ai-policy",
+    "href": "00_derust.rjs.html#ai-policy",
+    "title": "Derust",
+    "section": "AI Policy",
+    "text": "AI Policy\n\nI would be shocked if it is helpful to you.\nIf you think it is helpful, that is probably not a good sign.\nYou can use it (I wouldn’t)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#collaboration-policy",
+    "href": "00_derust.rjs.html#collaboration-policy",
+    "title": "Derust",
+    "section": "Collaboration Policy",
+    "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn."
+  },
+  {
+    "objectID": "00_derust.rjs.html#a-la-151",
+    "href": "00_derust.rjs.html#a-la-151",
+    "title": "Derust",
+    "section": "a la 151",
+    "text": "a la 151\n\nThis term we will have sections\nMeet Friday 1310-1440\nMeant to help unpack learning in class and work on homework.\nSingle section/section-leader (Jimmy)\nMiss more than 4 sections and drop one “bin” on specification grading.\n\nUnless excused."
+  },
+  {
+    "objectID": "00_derust.rjs.html#the-hard-part",
+    "href": "00_derust.rjs.html#the-hard-part",
+    "title": "Derust",
+    "section": "The Hard Part",
+    "text": "The Hard Part\n\nAfter ~10 years of systems research I’ve convinced myself only two things really matter:\n\nReferences, and\nRecursion\n\nRecursion isn’t too bad…\n\n&gt;&gt;&gt; exp = lambda b, n : b if n == 1 else b*exp(b,n-1)\n&gt;&gt;&gt; exp(2,8)\n256\n\nCovered in 271 and possibly 351 and no longer interesting on its own, though will be used."
+  },
+  {
+    "objectID": "00_derust.rjs.html#references",
+    "href": "00_derust.rjs.html#references",
+    "title": "Derust",
+    "section": "References",
+    "text": "References\n\nReferences are a beast, but without them nothing makes sense!\n\n\n\n&gt;&gt;&gt; x = 1\n&gt;&gt;&gt; def addx():\n...     x += 1\n...\n&gt;&gt;&gt; addx()\nUnboundLocalError:\n&lt;blah blah blah error messages&gt;\n\n&gt;&gt;&gt; x = [1]\n&gt;&gt;&gt; def addx():\n...     x[0] += 1\n...\n&gt;&gt;&gt; addx()\n&gt;&gt;&gt; x\n[2]"
+  },
+  {
+    "objectID": "00_derust.rjs.html#insight",
+    "href": "00_derust.rjs.html#insight",
+    "title": "Derust",
+    "section": "Insight",
+    "text": "Insight\n\nDefinition:\n\nReferences: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.\n\nImportance:\n\nThis key-value storage is a service provided by the operating system!"
+  },
+  {
+    "objectID": "00_derust.rjs.html#python-and-oses",
+    "href": "00_derust.rjs.html#python-and-oses",
+    "title": "Derust",
+    "section": "Python and OSes",
+    "text": "Python and OSes\n\nWhy not .py (.js, .java, .cs, .cpp, etc)?\n\nThese languages assume an underlying OS (or VM or browser).\nThere is more to life than running code other people wrote.\nGood languages (except Java) but not for us\nThe other systems language is C (and maybe C++)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-and-references",
+    "href": "00_derust.rjs.html#rust-and-references",
+    "title": "Derust",
+    "section": "Rust and References",
+    "text": "Rust and References\n\nRust:\n\nObscures references, but…\nDoes not obscure memory.\n\nThis is good!\n\nMemory matters, but pointers are historical accident.\n\nYou should probably use Rust in every application where correctness or performance matters."
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-and-recursion",
+    "href": "00_derust.rjs.html#rust-and-recursion",
+    "title": "Derust",
+    "section": "Rust and Recursion",
+    "text": "Rust and Recursion\n\nSeparately, Rust is built on one of the most exciting ongoing computer science research efforts:\nLLVM (stands for LLVM)\nBasically, a way of turning human-readable code into machine-executable code.\n\nVery good at turning recursion into iteration and/or vice versa.\n\nThis term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS."
+  },
+  {
+    "objectID": "00_derust.rjs.html#citation",
+    "href": "00_derust.rjs.html#citation",
+    "title": "Derust",
+    "section": "Citation",
+    "text": "Citation\n\nWe will follow “Philipp Oppermann’s blog” “Writing an OS in Rust” version 2.\nRead more."
+  },
+  {
+    "objectID": "00_derust.rjs.html#bare-bones",
+    "href": "00_derust.rjs.html#bare-bones",
+    "title": "Derust",
+    "section": "Bare Bones",
+    "text": "Bare Bones\n\nA binary that doesn’t require an underlying OS.\nSomething that (1) runs and (2) prints.\nSimple I/O\nUnit and integration testing."
+  },
+  {
+    "objectID": "00_derust.rjs.html#interrupts",
+    "href": "00_derust.rjs.html#interrupts",
+    "title": "Derust",
+    "section": "Interrupts",
+    "text": "Interrupts\n\nCPU Exceptions\n\nLike division by zero.\n\nDouble faults\n\nFaults while handling a fault.\n\nHardware interrupts\n\nLike I/O"
+  },
+  {
+    "objectID": "00_derust.rjs.html#memory-management",
+    "href": "00_derust.rjs.html#memory-management",
+    "title": "Derust",
+    "section": "Memory Management",
+    "text": "Memory Management\n\nPaging\nPage tables\n\nTogether, how to find things you saved for a while.\n\nThe heap\nHeap allocation.\n\nTogether, how to find things you saved while working."
+  },
+  {
+    "objectID": "00_derust.rjs.html#final-examproject",
+    "href": "00_derust.rjs.html#final-examproject",
+    "title": "Derust",
+    "section": "Final Exam/Project",
+    "text": "Final Exam/Project\n\nImplement Minimal OS in Rust\n\nIndividual\nUnder version control\nCompiles and runs and is tested"
+  },
+  {
+    "objectID": "00_derust.rjs.html#vim",
+    "href": "00_derust.rjs.html#vim",
+    "title": "Derust",
+    "section": "Vim",
+    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected of you in life.\nI will live-code in vim probably.\n\nThis will be painful, but that is okay."
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features",
+    "href": "00_derust.rjs.html#rust-features",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options",
+    "href": "00_derust.rjs.html#options",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nSometimes code makes sense.\nMAD\n\nfrom numpy import uint64\n\n# Multiply-add operation\ndef mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a + b * c"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-1",
+    "href": "00_derust.rjs.html#options-1",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nSometimes it doesn’t.\nThis needn’t return a positive value!\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a - b * c"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-2",
+    "href": "00_derust.rjs.html#options-2",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-3",
+    "href": "00_derust.rjs.html#options-3",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\nfrom typing import Union\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
+  },
+  {
+    "objectID": "00_derust.rjs.html#options-4",
+    "href": "00_derust.rjs.html#options-4",
+    "title": "Derust",
+    "section": "Options",
+    "text": "Options\n\nEver wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-1",
+    "href": "00_derust.rjs.html#rust-features-1",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#results",
+    "href": "00_derust.rjs.html#results",
+    "title": "Derust",
+    "section": "Results",
+    "text": "Results\n\nResults are basically options that incorporate error handling.\n\n// Linux Kernel Versions, latest is 6\nfn check_version(val: u8) -&gt; Result&lt;u8, &'static str&gt; {\n    if val &lt; 7 {\n        return Ok(val);\n    } else {\n        return Err(\"Not yet released.\")\n    }\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#check-it",
+    "href": "00_derust.rjs.html#check-it",
+    "title": "Derust",
+    "section": "Check it",
+    "text": "Check it\n\nAdd main.\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    dbg!(check_version(4));\n    dbg!(check_version(7));\n}\n\n\ncargo r\n\n[src/main.rs:10:5] check_version(4) = Ok(\n    4,\n)\n[src/main.rs:11:5] check_version(7) = Err(\n    \"Not yet released.\",\n)"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-2",
+    "href": "00_derust.rjs.html#rust-features-2",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#std",
+    "href": "00_derust.rjs.html#std",
+    "title": "Derust",
+    "section": "std",
+    "text": "std\n\nOptions, results, and more fun things, like vectors, are all part of std\n\n\nThe Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like Vec&lt;T&gt; and Option&lt;T&gt;, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things."
+  },
+  {
+    "objectID": "00_derust.rjs.html#iterators",
+    "href": "00_derust.rjs.html#iterators",
+    "title": "Derust",
+    "section": "Iterators",
+    "text": "Iterators\n\nAn iterator is pretty much a for-each loop, the Python loop type.\n\nlet v1 = vec![1, 2, 3];\n\nlet v1_iter = v1.iter();\n\nfor val in v1_iter {\n    println!(\"Got: {val}\");\n}\n\nOh look, vec! from std"
+  },
+  {
+    "objectID": "00_derust.rjs.html#closures",
+    "href": "00_derust.rjs.html#closures",
+    "title": "Derust",
+    "section": "Closures",
+    "text": "Closures\n\nA closure is pretty much a lambda function, like the Python lambda keyword.\n\nfn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }\nlet add_one_v2 = |x: u32| -&gt; u32 { x + 1 };\nlet add_one_v3 = |x|             { x + 1 };\nlet add_one_v4 = |x|               x + 1  ;\n\nNo one can stop you from writing fn’s, not even people who actually know Rust!"
+  },
+  {
+    "objectID": "00_derust.rjs.html#pattern-matching",
+    "href": "00_derust.rjs.html#pattern-matching",
+    "title": "Derust",
+    "section": "Pattern Matching",
+    "text": "Pattern Matching\n\nThe language designers intend options (and results) to be handled as follows:\n\nfn main() {\n    let s = \"Hello, world\";\n    match s.chars().nth(11) {\n        Some(c) =&gt; println!(\"The 11th character is {:?}\", c),\n        None =&gt; println!(\"String `s` is fewer than 11 characters in length\"),\n    }\n}\n\nBasically, if-else is “un-Rust-like” most of the time."
+  },
+  {
+    "objectID": "00_derust.rjs.html#formatting",
+    "href": "00_derust.rjs.html#formatting",
+    "title": "Derust",
+    "section": "Formatting",
+    "text": "Formatting\n\nprint!, println!, and format! are all nice ways to work with strings.\nHandy if you are an OS and want to interface with a human.\nAssuming you (the OS) know how to display text.\n\nWe’ll get there.\n\n\nformat!(\"test\");                             // =&gt; \"test\"\nformat!(\"hello {}\", \"world!\");               // =&gt; \"hello world!\"\nformat!(\"x = {}, y = {val}\", 10, val = 30);  // =&gt; \"x = 10, y = 30\"\nlet (x, y) = (1, 2);\nformat!(\"{x} + {y} = 3\");                    // =&gt; \"1 + 2 = 3\"\n\nSimilar to Python f-strings and also every other language."
+  },
+  {
+    "objectID": "00_derust.rjs.html#read-more",
+    "href": "00_derust.rjs.html#read-more",
+    "title": "Derust",
+    "section": "Read More",
+    "text": "Read More\n\nI use most of these language features in two extended examples.\n\nHex reader\nFibonacci"
+  },
+  {
+    "objectID": "00_derust.rjs.html#rust-features-3",
+    "href": "00_derust.rjs.html#rust-features-3",
+    "title": "Derust",
+    "section": "Rust Features",
+    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
+  },
+  {
+    "objectID": "00_derust.rjs.html#ownership",
+    "href": "00_derust.rjs.html#ownership",
+    "title": "Derust",
+    "section": "Ownership",
+    "text": "Ownership\n\nBig topic.\nBig deal.\nLearn by doing.\nQuick example."
+  },
+  {
+    "objectID": "00_derust.rjs.html#size",
+    "href": "00_derust.rjs.html#size",
+    "title": "Derust",
+    "section": "Size",
+    "text": "Size\n\nVersus e.g. u8 which was a fixed size.\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically."
+  },
+  {
+    "objectID": "00_derust.rjs.html#ownership-rules",
+    "href": "00_derust.rjs.html#ownership-rules",
+    "title": "Derust",
+    "section": "Ownership Rules",
+    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped."
+  },
+  {
+    "objectID": "00_derust.rjs.html#scope",
+    "href": "00_derust.rjs.html#scope",
+    "title": "Derust",
+    "section": "Scope",
+    "text": "Scope\n\nQuoth Rust Book:\n\n{                      // s is not valid here, since it's not yet declared\n    let s = \"hello\";   // s is valid from this point forward\n\n    // do stuff with s\n}                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.\nThink: Address of building that hasn’t been made/has been condemned."
+  },
+  {
+    "objectID": "00_derust.rjs.html#capital-s-string",
+    "href": "00_derust.rjs.html#capital-s-string",
+    "title": "Derust",
+    "section": "Capital S String",
+    "text": "Capital S String\n\nCapital S String is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not."
+  },
+  {
+    "objectID": "00_derust.rjs.html#its-confusing",
+    "href": "00_derust.rjs.html#its-confusing",
+    "title": "Derust",
+    "section": "It’s confusing",
+    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#whats-happening",
+    "href": "00_derust.rjs.html#whats-happening",
+    "title": "Derust",
+    "section": "What’s happening?",
+    "text": "What’s happening?\n\ns passes “out of scope” once its value is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types.\n\nIt is unbounded types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least)."
+  },
+  {
+    "objectID": "00_derust.rjs.html#clone",
+    "href": "00_derust.rjs.html#clone",
+    "title": "Derust",
+    "section": "Clone",
+    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++"
+  },
+  {
+    "objectID": "00_derust.rjs.html#example",
+    "href": "00_derust.rjs.html#example",
+    "title": "Derust",
+    "section": "Example",
+    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}"
+  },
+  {
+    "objectID": "00_derust.rjs.html#today-1",
+    "href": "00_derust.rjs.html#today-1",
+    "title": "Derust",
+    "section": "Today",
+    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
   },
   {
     "objectID": "00_derust.html",
@@ -717,493 +2008,71 @@
     ]
   },
   {
-    "objectID": "00_derust.rjs.html#announcements",
-    "href": "00_derust.rjs.html#announcements",
-    "title": "Derust",
-    "section": "Announcements",
-    "text": "Announcements\n\nWelcome to OS in Rust\n\nThe most famous systems topic…\nNow in Rust, your favorite language!\n\nAction Items:\n\nAccess the course webpage\nJoin the Discord!\n\nWe’ll use CSSA.\n\nSet up Linux/Rust/Git."
-  },
-  {
-    "objectID": "00_derust.rjs.html#homework",
-    "href": "00_derust.rjs.html#homework",
-    "title": "Derust",
-    "section": "Homework",
-    "text": "Homework\n\nThe first homework, wc, is ready now.\n\nMostly just Rust practice.\n\nDue Friday, 23 Jan at 1440 PT.\n\nFriday of next week."
-  },
-  {
-    "objectID": "00_derust.rjs.html#today",
-    "href": "00_derust.rjs.html#today",
-    "title": "Derust",
-    "section": "Today",
-    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
-  },
-  {
-    "objectID": "00_derust.rjs.html#it-me",
-    "href": "00_derust.rjs.html#it-me",
-    "title": "Derust",
-    "section": "It me",
-    "text": "It me\n\nName\n\n(Prof. )?Calvin\n\nCredentials\n\nB.A. Mathematics\nB.S., M.S., Ph.D. Computer Science\n\nPronouns\n\nthey/them"
-  },
-  {
-    "objectID": "00_derust.rjs.html#the-great-work",
-    "href": "00_derust.rjs.html#the-great-work",
-    "title": "Derust",
-    "section": "The Great Work",
-    "text": "The Great Work\n\nThesis Title\n\nMining Secure Behavior of Hardware Designs\n\nPlain English\n\nJust as there are bugs in code that makes software, modern hardware is also written in code and therefore may contain bugs. I find these bugs."
-  },
-  {
-    "objectID": "00_derust.rjs.html#course-format",
-    "href": "00_derust.rjs.html#course-format",
-    "title": "Derust",
-    "section": "Course Format",
-    "text": "Course Format\n\nLecture Monday\nLab Wednesday\nHomework due Friday 1440 PT (the next Friday)\n\nYou should all meet on Friday.\n\nIn-class midterm week of 3/16\nYour OS is due whenever the final is scheduled.\n\nWaiting on registrar to announce."
-  },
-  {
-    "objectID": "00_derust.rjs.html#grade-policy",
-    "href": "00_derust.rjs.html#grade-policy",
-    "title": "Derust",
-    "section": "Grade Policy",
-    "text": "Grade Policy\n\nYour voices have been heard:\n\n\nI think failing my systems class was the best thing that happened to me.\n\n\nThis course demanded strong self-motivation… Thus, I didn’t learn as much as I might’ve if grading mattered more."
-  },
-  {
-    "objectID": "00_derust.rjs.html#specification-grading",
-    "href": "00_derust.rjs.html#specification-grading",
-    "title": "Derust",
-    "section": "Specification Grading",
-    "text": "Specification Grading\n\nBasically, I will assign some stuff but you don’t have to do all of it perfectly.\n\nNo partial credit, everything is boolean grading.\n\nI took distributions over final, midterm, and Lab/HW"
-  },
-  {
-    "objectID": "00_derust.rjs.html#it-pays-to-get-as",
-    "href": "00_derust.rjs.html#it-pays-to-get-as",
-    "title": "Derust",
-    "section": "It pays to get A’s",
-    "text": "It pays to get A’s\n\n\n\nGrade\nRequirements\n\n\n\n\nA\nFinal meets spec\n\n\nA\n90% ave HW/Lab/Midterm, Final compiles\n\n\nA-\n90% ave HW/Lab, Midterm/Final compile\n\n\nA-\nMidterm meets spec, Final compiles"
-  },
-  {
-    "objectID": "00_derust.rjs.html#but-bs-are-the-knees",
-    "href": "00_derust.rjs.html#but-bs-are-the-knees",
-    "title": "Derust",
-    "section": "But B’s are the Knees",
-    "text": "But B’s are the Knees\n\n\n\nGrade\nRequirements\n\n\n\n\nB+\n90% ave HW/Lab, Midterm compiles\n\n\nB\n80% ave HW/Lab, Midterm compiles\n\n\nB-\n80% ave HW/Lab"
-  },
-  {
-    "objectID": "00_derust.rjs.html#these-may-earn-degrees",
-    "href": "00_derust.rjs.html#these-may-earn-degrees",
-    "title": "Derust",
-    "section": "These may (???) earn degrees",
-    "text": "These may (???) earn degrees\n\n\n\nGrade\nRequirements\n\n\n\n\nC\n80% ave Lab\n\n\nD\n60% ave Lab\n\n\nF\nAnything else"
-  },
-  {
-    "objectID": "00_derust.rjs.html#lab-grading",
-    "href": "00_derust.rjs.html#lab-grading",
-    "title": "Derust",
-    "section": "Lab Grading",
-    "text": "Lab Grading\n\n“A” (=100%)\n\nMeets spec by end of class\n\n“B” (=90%)\n\nCompiles at end of class\n\n“F” (=0%)\n\nAnything else"
-  },
-  {
-    "objectID": "00_derust.rjs.html#hw-grading",
-    "href": "00_derust.rjs.html#hw-grading",
-    "title": "Derust",
-    "section": "HW Grading",
-    "text": "HW Grading\n\n“A” (=100%)\n\nOn time\nPasses autograder.\n\nI lack confidence I can make excellent autograders for all stages, so give me some grace here.\n\n\n“B” (=90%)\n\nOn time\nCompiles\n\n“F” (=0%)\n\nAnything else"
-  },
-  {
-    "objectID": "00_derust.rjs.html#final",
-    "href": "00_derust.rjs.html#final",
-    "title": "Derust",
-    "section": "Final",
-    "text": "Final\n\nCreate, document, and publish an operating system… in Rust!\n\nFree-standing binary\nFaults/exceptions/interrupts\nMemory management"
-  },
-  {
-    "objectID": "00_derust.rjs.html#late-work-policy",
-    "href": "00_derust.rjs.html#late-work-policy",
-    "title": "Derust",
-    "section": "Late Work Policy",
-    "text": "Late Work Policy\n\nLate work is not accepted.\n\nNo exceptions.\nThe specification grading framework incorpates tolerances.\nAn OS that meets spec by end-of-term is an A, always."
-  },
-  {
-    "objectID": "00_derust.rjs.html#ai-policy",
-    "href": "00_derust.rjs.html#ai-policy",
-    "title": "Derust",
-    "section": "AI Policy",
-    "text": "AI Policy\n\nI would be shocked if it is helpful to you.\nIf you think it is helpful, that is probably not a good sign.\nYou can use it (I wouldn’t)"
-  },
-  {
-    "objectID": "00_derust.rjs.html#collaboration-policy",
-    "href": "00_derust.rjs.html#collaboration-policy",
-    "title": "Derust",
-    "section": "Collaboration Policy",
-    "text": "Collaboration Policy\n\nYou should chat with each other.\nYou should write your own code.\nIf someone shows you something and you don’t understand it as well as code you write yourself, it is a waste of your time to use the code.\n\nBut not a waste as a way to learn."
-  },
-  {
-    "objectID": "00_derust.rjs.html#a-la-151",
-    "href": "00_derust.rjs.html#a-la-151",
-    "title": "Derust",
-    "section": "a la 151",
-    "text": "a la 151\n\nThis term we will have sections\nMeet Friday 1310-1440\nMeant to help unpack learning in class and work on homework.\nSingle section/section-leader (Jimmy)\nMiss more than 4 sections and drop one “bin” on specification grading.\n\nUnless excused."
-  },
-  {
-    "objectID": "00_derust.rjs.html#the-hard-part",
-    "href": "00_derust.rjs.html#the-hard-part",
-    "title": "Derust",
-    "section": "The Hard Part",
-    "text": "The Hard Part\n\nAfter ~10 years of systems research I’ve convinced myself only two things really matter:\n\nReferences, and\nRecursion\n\nRecursion isn’t too bad…\n\n&gt;&gt;&gt; exp = lambda b, n : b if n == 1 else b*exp(b,n-1)\n&gt;&gt;&gt; exp(2,8)\n256\n\nCovered in 271 and possibly 351 and no longer interesting on its own, though will be used."
-  },
-  {
-    "objectID": "00_derust.rjs.html#references",
-    "href": "00_derust.rjs.html#references",
-    "title": "Derust",
-    "section": "References",
-    "text": "References\n\nReferences are a beast, but without them nothing makes sense!\n\n\n\n&gt;&gt;&gt; x = 1\n&gt;&gt;&gt; def addx():\n...     x += 1\n...\n&gt;&gt;&gt; addx()\nUnboundLocalError:\n&lt;blah blah blah error messages&gt;\n\n&gt;&gt;&gt; x = [1]\n&gt;&gt;&gt; def addx():\n...     x[0] += 1\n...\n&gt;&gt;&gt; addx()\n&gt;&gt;&gt; x\n[2]"
-  },
-  {
-    "objectID": "00_derust.rjs.html#insight",
-    "href": "00_derust.rjs.html#insight",
-    "title": "Derust",
-    "section": "Insight",
-    "text": "Insight\n\nDefinition:\n\nReferences: Values that are meaningful only as keys to values in key-value memory storage, as a memory addresses.\n\nImportance:\n\nThis key-value storage is a service provided by the operating system!"
-  },
-  {
-    "objectID": "00_derust.rjs.html#python-and-oses",
-    "href": "00_derust.rjs.html#python-and-oses",
-    "title": "Derust",
-    "section": "Python and OSes",
-    "text": "Python and OSes\n\nWhy not .py (.js, .java, .cs, .cpp, etc)?\n\nThese languages assume an underlying OS (or VM or browser).\nThere is more to life than running code other people wrote.\nGood languages (except Java) but not for us\nThe other systems language is C (and maybe C++)"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-and-references",
-    "href": "00_derust.rjs.html#rust-and-references",
-    "title": "Derust",
-    "section": "Rust and References",
-    "text": "Rust and References\n\nRust:\n\nObscures references, but…\nDoes not obscure memory.\n\nThis is good!\n\nMemory matters, but pointers are historical accident.\n\nYou should probably use Rust in every application where correctness or performance matters."
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-and-recursion",
-    "href": "00_derust.rjs.html#rust-and-recursion",
-    "title": "Derust",
-    "section": "Rust and Recursion",
-    "text": "Rust and Recursion\n\nSeparately, Rust is built on one of the most exciting ongoing computer science research efforts:\nLLVM (stands for LLVM)\nBasically, a way of turning human-readable code into machine-executable code.\n\nVery good at turning recursion into iteration and/or vice versa.\n\nThis term, we benefit from LLVM in that we can make Rust programs for platforms without an underlying OS."
-  },
-  {
-    "objectID": "00_derust.rjs.html#citation",
-    "href": "00_derust.rjs.html#citation",
-    "title": "Derust",
-    "section": "Citation",
-    "text": "Citation\n\nWe will follow “Philipp Oppermann’s blog” “Writing an OS in Rust” version 2.\nRead more."
-  },
-  {
-    "objectID": "00_derust.rjs.html#bare-bones",
-    "href": "00_derust.rjs.html#bare-bones",
-    "title": "Derust",
-    "section": "Bare Bones",
-    "text": "Bare Bones\n\nA binary that doesn’t require an underlying OS.\nSomething that (1) runs and (2) prints.\nSimple I/O\nUnit and integration testing."
-  },
-  {
-    "objectID": "00_derust.rjs.html#interrupts",
-    "href": "00_derust.rjs.html#interrupts",
-    "title": "Derust",
-    "section": "Interrupts",
-    "text": "Interrupts\n\nCPU Exceptions\n\nLike division by zero.\n\nDouble faults\n\nFaults while handling a fault.\n\nHardware interrupts\n\nLike I/O"
-  },
-  {
-    "objectID": "00_derust.rjs.html#memory-management",
-    "href": "00_derust.rjs.html#memory-management",
-    "title": "Derust",
-    "section": "Memory Management",
-    "text": "Memory Management\n\nPaging\nPage tables\n\nTogether, how to find things you saved for a while.\n\nThe heap\nHeap allocation.\n\nTogether, how to find things you saved while working."
-  },
-  {
-    "objectID": "00_derust.rjs.html#final-examproject",
-    "href": "00_derust.rjs.html#final-examproject",
-    "title": "Derust",
-    "section": "Final Exam/Project",
-    "text": "Final Exam/Project\n\nImplement Minimal OS in Rust\n\nIndividual\nUnder version control\nCompiles and runs and is tested"
-  },
-  {
-    "objectID": "00_derust.rjs.html#vim",
-    "href": "00_derust.rjs.html#vim",
-    "title": "Derust",
-    "section": "Vim",
-    "text": "Vim\n\nYou should use vim or another console-based editor as a component of your learning in this class.\nThis will not be assessed (how can it be) but will likely be expected of you in life.\nI will live-code in vim probably.\n\nThis will be painful, but that is okay."
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features",
-    "href": "00_derust.rjs.html#rust-features",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options",
-    "href": "00_derust.rjs.html#options",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nSometimes code makes sense.\nMAD\n\nfrom numpy import uint64\n\n# Multiply-add operation\ndef mad(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a + b * c"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-1",
-    "href": "00_derust.rjs.html#options-1",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nSometimes it doesn’t.\nThis needn’t return a positive value!\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    return a - b * c"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-2",
-    "href": "00_derust.rjs.html#options-2",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; uint64:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-3",
-    "href": "00_derust.rjs.html#options-3",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nHandle your cases!\nBut this causes other problems…\n\nfrom numpy import uint64\nfrom typing import Union\n\n# Multiply-sub operation\ndef msu(a:uint64, b:uint64, c:uint64) -&gt; Union[None,uint64]:\n    if b * c &gt; a:\n        return a + b * c\n    else:\n        return None"
-  },
-  {
-    "objectID": "00_derust.rjs.html#options-4",
-    "href": "00_derust.rjs.html#options-4",
-    "title": "Derust",
-    "section": "Options",
-    "text": "Options\n\nEver wish there was a nice way to handle a Union[None,x] \\(\\forall x\\)?\nIt’s the option type:\n\nfn divide(numerator: f64, denominator: f64) -&gt; Option&lt;f64&gt; {\n    if denominator == 0.0 {\n        None\n    } else {\n        Some(numerator / denominator)\n    }\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features-1",
-    "href": "00_derust.rjs.html#rust-features-1",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#results",
-    "href": "00_derust.rjs.html#results",
-    "title": "Derust",
-    "section": "Results",
-    "text": "Results\n\nResults are basically options that incorporate error handling.\n\n// Linux Kernel Versions, latest is 6\nfn check_version(val: u8) -&gt; Result&lt;u8, &'static str&gt; {\n    if val &lt; 7 {\n        return Ok(val);\n    } else {\n        return Err(\"Not yet released.\")\n    }\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#check-it",
-    "href": "00_derust.rjs.html#check-it",
-    "title": "Derust",
-    "section": "Check it",
-    "text": "Check it\n\nAdd main.\n\n\n\nsrc/main.rs\n\n\u0016fn main() {\n    dbg!(check_version(4));\n    dbg!(check_version(7));\n}\n\n\ncargo r\n\n[src/main.rs:10:5] check_version(4) = Ok(\n    4,\n)\n[src/main.rs:11:5] check_version(7) = Err(\n    \"Not yet released.\",\n)"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features-2",
-    "href": "00_derust.rjs.html#rust-features-2",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#std",
-    "href": "00_derust.rjs.html#std",
-    "title": "Derust",
-    "section": "std",
-    "text": "std\n\nOptions, results, and more fun things, like vectors, are all part of std\n\n\nThe Rust Standard Library is the foundation of portable Rust software, a set of minimal and battle-tested shared abstractions for the broader Rust ecosystem. It offers core types, like Vec&lt;T&gt; and Option&lt;T&gt;, library-defined operations on language primitives, standard macros, I/O and multithreading, among many other things."
-  },
-  {
-    "objectID": "00_derust.rjs.html#iterators",
-    "href": "00_derust.rjs.html#iterators",
-    "title": "Derust",
-    "section": "Iterators",
-    "text": "Iterators\n\nAn iterator is pretty much a for-each loop, the Python loop type.\n\nlet v1 = vec![1, 2, 3];\n\nlet v1_iter = v1.iter();\n\nfor val in v1_iter {\n    println!(\"Got: {val}\");\n}\n\nOh look, vec! from std"
-  },
-  {
-    "objectID": "00_derust.rjs.html#closures",
-    "href": "00_derust.rjs.html#closures",
-    "title": "Derust",
-    "section": "Closures",
-    "text": "Closures\n\nA closure is pretty much a lambda function, like the Python lambda keyword.\n\nfn  add_one_v1   (x: u32) -&gt; u32 { x + 1 }\nlet add_one_v2 = |x: u32| -&gt; u32 { x + 1 };\nlet add_one_v3 = |x|             { x + 1 };\nlet add_one_v4 = |x|               x + 1  ;\n\nNo one can stop you from writing fn’s, not even people who actually know Rust!"
-  },
-  {
-    "objectID": "00_derust.rjs.html#pattern-matching",
-    "href": "00_derust.rjs.html#pattern-matching",
-    "title": "Derust",
-    "section": "Pattern Matching",
-    "text": "Pattern Matching\n\nThe language designers intend options (and results) to be handled as follows:\n\nfn main() {\n    let s = \"Hello, world\";\n    match s.chars().nth(11) {\n        Some(c) =&gt; println!(\"The 11th character is {:?}\", c),\n        None =&gt; println!(\"String `s` is fewer than 11 characters in length\"),\n    }\n}\n\nBasically, if-else is “un-Rust-like” most of the time."
-  },
-  {
-    "objectID": "00_derust.rjs.html#formatting",
-    "href": "00_derust.rjs.html#formatting",
-    "title": "Derust",
-    "section": "Formatting",
-    "text": "Formatting\n\nprint!, println!, and format! are all nice ways to work with strings.\nHandy if you are an OS and want to interface with a human.\nAssuming you (the OS) know how to display text.\n\nWe’ll get there.\n\n\nformat!(\"test\");                             // =&gt; \"test\"\nformat!(\"hello {}\", \"world!\");               // =&gt; \"hello world!\"\nformat!(\"x = {}, y = {val}\", 10, val = 30);  // =&gt; \"x = 10, y = 30\"\nlet (x, y) = (1, 2);\nformat!(\"{x} + {y} = 3\");                    // =&gt; \"1 + 2 = 3\"\n\nSimilar to Python f-strings and also every other language."
-  },
-  {
-    "objectID": "00_derust.rjs.html#read-more",
-    "href": "00_derust.rjs.html#read-more",
-    "title": "Derust",
-    "section": "Read More",
-    "text": "Read More\n\nI use most of these language features in two extended examples.\n\nHex reader\nFibonacci"
-  },
-  {
-    "objectID": "00_derust.rjs.html#rust-features-3",
-    "href": "00_derust.rjs.html#rust-features-3",
-    "title": "Derust",
-    "section": "Rust Features",
-    "text": "Rust Features\n\noption\nresult\nstd\niterators\nclosures\npattern matching\nformat!\nownership"
-  },
-  {
-    "objectID": "00_derust.rjs.html#ownership",
-    "href": "00_derust.rjs.html#ownership",
-    "title": "Derust",
-    "section": "Ownership",
-    "text": "Ownership\n\nBig topic.\nBig deal.\nLearn by doing.\nQuick example."
-  },
-  {
-    "objectID": "00_derust.rjs.html#size",
-    "href": "00_derust.rjs.html#size",
-    "title": "Derust",
-    "section": "Size",
-    "text": "Size\n\nVersus e.g. u8 which was a fixed size.\nA string is not.\n\n// String of length 0\nlet s = \"\"; \n// Complete text of Bhagavad Gita\nlet t = \"Dhritarashtra said: O Sanjay, after gathering on the holy field of Kurukshetra, and desiring to fight, what did my sons and the sons of Pandu do? ...\n\nAnd in fact, if we implemented Python integers in Rust, they would follow similar rules.\n\nAnything that has no bounded upper size, basically."
-  },
-  {
-    "objectID": "00_derust.rjs.html#ownership-rules",
-    "href": "00_derust.rjs.html#ownership-rules",
-    "title": "Derust",
-    "section": "Ownership Rules",
-    "text": "Ownership Rules\n\nEach value in Rust has an owner.\nThere can only be one owner at a time.\nWhen the owner goes out of scope, the value will be dropped."
-  },
-  {
-    "objectID": "00_derust.rjs.html#scope",
-    "href": "00_derust.rjs.html#scope",
-    "title": "Derust",
-    "section": "Scope",
-    "text": "Scope\n\nQuoth Rust Book:\n\n{                      // s is not valid here, since it's not yet declared\n    let s = \"hello\";   // s is valid from this point forward\n\n    // do stuff with s\n}                      // this scope is now over, and s is no longer valid\n\nYou can experimentally verify each of the claims.\nBasically, the memory associated with s exists at some time points, but not others.\nThink: Address of building that hasn’t been made/has been condemned."
-  },
-  {
-    "objectID": "00_derust.rjs.html#capital-s-string",
-    "href": "00_derust.rjs.html#capital-s-string",
-    "title": "Derust",
-    "section": "Capital S String",
-    "text": "Capital S String\n\nCapital S String is closer to data structure than a data type in some ways:\n\n    let mut s = String::from(\"hello\");\n\n    s.push_str(\", world!\"); // push_str() appends a literal to a String\n\n    println!(\"{s}\"); // this will print `hello, world!`\n\nIt accepts a push operation a la a queue/stack/list, and must be initialized with a function call.\nA String is mutable, a literal is not."
-  },
-  {
-    "objectID": "00_derust.rjs.html#its-confusing",
-    "href": "00_derust.rjs.html#its-confusing",
-    "title": "Derust",
-    "section": "It’s confusing",
-    "text": "It’s confusing\n\nThis leads to some un-Pythonic behavior.\nWe compare fixed size and variable size types, which have distinct behavior\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis doesn’t.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s;\n    println!(\"{s}\")\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#whats-happening",
-    "href": "00_derust.rjs.html#whats-happening",
-    "title": "Derust",
-    "section": "What’s happening?",
-    "text": "What’s happening?\n\ns passes “out of scope” once its value is assigned to t.\nThereafter, there is no declared variable of name s.\nBut this only happens to some types.\n\nIt is unbounded types, but it’s unclear that e.g. String::from(\"6\") isn’t a fixed width string of lenth 1 (to me at least)."
-  },
-  {
-    "objectID": "00_derust.rjs.html#clone",
-    "href": "00_derust.rjs.html#clone",
-    "title": "Derust",
-    "section": "Clone",
-    "text": "Clone\n\nMy secret inside source with a real job (e.g. not professor) who writes Rust and also thought this was a bit silly:\n\n\nWhenever I use Rust, I just always .clone and when someone asks me about it, I say that’s a performance optimization for latter.\n\n\nRust says the same thing, actually:\n\nhelp: consider cloning the value if the performance cost is acceptable\n  |\n6 |     let t = s.clone();\n  |              ++++++++"
-  },
-  {
-    "objectID": "00_derust.rjs.html#example",
-    "href": "00_derust.rjs.html#example",
-    "title": "Derust",
-    "section": "Example",
-    "text": "Example\n\nIt is reasonable to use .clone on capital S String for e.g. Wordle, as needed.\nAs a challenge, don’t use .clone (you don’t need it)\n\n\n\n\nThis works.\n\nfn main() {\n    let x = 5;\n    let y = x;\n    println!(\"{x}\");\n}\n\n\nThis works.\n\nfn main() {\n    let s = String::from(\"6\");\n    let t = s.clone();\n    println!(\"{s}\")\n}"
-  },
-  {
-    "objectID": "00_derust.rjs.html#today-1",
-    "href": "00_derust.rjs.html#today-1",
-    "title": "Derust",
-    "section": "Today",
-    "text": "Today\n\nLogistics\nOn Systems\nOn Rust\nCourse Sketch\nDerust"
-  },
-  {
-    "objectID": "01_wc.html",
-    "href": "01_wc.html",
-    "title": "Rustup",
+    "objectID": "21_xmute.html",
+    "href": "21_xmute.html",
+    "title": "Transmute",
     "section": "",
-    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
+    "text": "Lab Day\n\nPlay with memory\nUse unsafe",
     "crumbs": [
-      "Rustup"
+      "Transmute"
     ]
   },
   {
-    "objectID": "01_wc.html#announcements",
-    "href": "01_wc.html#announcements",
-    "title": "Rustup",
+    "objectID": "21_xmute.html#announcements",
+    "href": "21_xmute.html#announcements",
+    "title": "Transmute",
     "section": "",
-    "text": "Lab Day\n\nSet up environment\nBuilding a command line program",
+    "text": "Lab Day\n\nPlay with memory\nUse unsafe",
     "crumbs": [
-      "Rustup"
+      "Transmute"
     ]
   },
   {
-    "objectID": "01_wc.html#homework",
-    "href": "01_wc.html#homework",
-    "title": "Rustup",
+    "objectID": "21_xmute.html#homework",
+    "href": "21_xmute.html#homework",
+    "title": "Transmute",
     "section": "Homework",
-    "text": "Homework\n\n“CLI” is just this lab but more complete.\n\nWindows officially no longer supported.\n\nDue Friday, 23 Jan. at 1440 ET.\n\nPlan to hang out as a class 1310-1440 on Fridays, probably.",
+    "text": "Homework\n\nmalloc is this lab just more complete\n\nCool, good, fun.\n\nDue Friday, 06 Feb. at 1440 ET.\n\nAnd also covered in section.",
     "crumbs": [
-      "Rustup"
+      "Transmute"
     ]
   },
   {
-    "objectID": "01_wc.html#setup",
-    "href": "01_wc.html#setup",
-    "title": "Rustup",
-    "section": "Setup",
-    "text": "Setup\n\nIf you are stuck setting up Rust, following this\nAt the end you should have:\n\ncargo, git, and at least one of gcc or clang on your system.\nA repository named 371os on Github that is either (1) public or (2) shared with [cd-public](https://github.com/cd-public",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#requirements",
-    "href": "01_wc.html#requirements",
-    "title": "Rustup",
+    "objectID": "21_xmute.html#requirements",
+    "href": "21_xmute.html#requirements",
+    "title": "Transmute",
     "section": "Requirements",
-    "text": "Requirements\n\nNew repository for this course.\nNew crate for this lab.\nCrate when built creates an executable that behaves identically to GNU Coreutils wc when provided with a file name and no options.\n\nThat is, you must support wc src/main.rs but not wc --files0-from=F src/main.rs\nCheck out wc and wc --help (which you don’t need to provide) to get a sense of the task.",
+    "text": "Requirements\n\nChange the interpretation of numeric values with transmute on values\nChange the interpretation of memory with transmute on references.\nWrite a “Hello world!” program that uses no string or character data.",
     "crumbs": [
-      "Rustup"
+      "Transmute"
     ]
   },
   {
-    "objectID": "01_wc.html#repository",
-    "href": "01_wc.html#repository",
-    "title": "Rustup",
-    "section": "Repository",
-    "text": "Repository\n\nCreate a repository for this class.\nRequirements\n\nName is 371os\nMay be public or private to you and me (cd-public).\n\nRead more\n\nMust email me a link to your repository from your @willamette.edu email, e.g.:\n\nhttps://github.com/cd-example/371os\nIf you’re stuck, read more here",
-    "crumbs": [
-      "Rustup"
-    ]
-  },
-  {
-    "objectID": "01_wc.html#crate",
-    "href": "01_wc.html#crate",
-    "title": "Rustup",
+    "objectID": "21_xmute.html#crate",
+    "href": "21_xmute.html#crate",
+    "title": "Transmute",
     "section": "Crate",
-    "text": "Crate\n\nTo complete the lab today, create a crate named my_wc in a folder named 01 in your 371os repository.\n\ncargo new 01 --name my_wc --vcs none\n\nIf you’re stuck, read more here",
+    "text": "Crate\n\nTo complete the lab today, create a crate named helloworld in a folder named 21 in your 371os repository.\n\ncargo new 21 --name hello_world --vcs none",
     "crumbs": [
-      "Rustup"
+      "Transmute"
     ]
   },
   {
-    "objectID": "01_wc.html#wc",
-    "href": "01_wc.html#wc",
-    "title": "Rustup",
-    "section": "wc",
-    "text": "wc\n\nImplement the minimal base functionality of wc using this crate.\n\n\nFull functionality\n\nHere is wc --help\nYou do not need to do all of this!\n\nUsage: wc [OPTION]... [FILE]...\n  or:  wc [OPTION]... --files0-from=F\nPrint newline, word, and byte counts for each FILE, and a total line if\nmore than one FILE is specified.  A word is a non-zero-length sequence of\ncharacters delimited by white space.\n\nWith no FILE, or when FILE is -, read standard input.\n\nThe options below may be used to select which counts are printed, always in\nthe following order: newline, word, character, byte, maximum line length.\n  -c, --bytes            print the byte counts\n  -m, --chars            print the character counts\n  -l, --lines            print the newline counts\n      --files0-from=F    read input from the files specified by\n                           NUL-terminated names in file F;\n                           If F is - then read names from standard input\n  -L, --max-line-length  print the maximum display width\n  -w, --words            print the word counts\n      --help     display this help and exit\n      --version  output version information and exit\n\nGNU coreutils online help: &lt;https://www.gnu.org/software/coreutils/&gt;\nReport any translation bugs to &lt;https://translationproject.org/team/&gt;\nFull documentation &lt;https://www.gnu.org/software/coreutils/wc&gt;\nor available locally via: info '(coreutils) wc invocation'\n\n\nRequired functionality\n\nThat is more than required, you need only implement:\n\nUsage: wc [FILE]\nPrint newline, word, and byte counts for each FILE. A word is a \nnon-zero-length sequence of characters delimited by white space.\n\nThis can be trivially tested with some of the following:\n\n$ wc src/main.rs\n 12  30 229 src/main.rs\n$ cargo build release\n$ ./target/release/my_wc src/main.rs\n 12  30 229 src/main.rs\n\nYour src/main.rs need not be of any particular size, and you needn’t implement all code within src/main.rs, but you should get the same counts from wc and from your release binary.",
+    "objectID": "21_xmute.html#hello-world",
+    "href": "21_xmute.html#hello-world",
+    "title": "Transmute",
+    "section": "“Hello world!”",
+    "text": "“Hello world!”\n\nImplement “Hello world!” using this crate.\nUse i32 to store the “Hello world” data.\nWhile you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and i32 literals.\n\ncalvin@calvin:~/tmp/helloworld$ wc src/main.rs # 2 lines main, 2 lines unsafe, 1 line code\n  5  15 174 src/main.rs\ncalvin@calvin:~/tmp/helloworld$ grep world src/main.rs # no plaintext in file\ncalvin@calvin:~/tmp/helloworld$ cargo r --release\n   Compiling helloworld v0.1.0 (/home/calvin/tmp/oneone)\n    Finished `release` profile [optimized] target(s) in 0.14s\n     Running `target/release/helloworld`\nHello world!\n\nI love Python\n\nThe following may be useful here, to the interested student.\n\npython3 -c '[print(ord(a)) for a in \"Hello world!\"]'\n\nThis is probably insufficient for your purposes and will require some hacking.\n\n\n\nTransmute\n\nSince it is more idiomatic to use code other people have written in Rust…\n\nI have an opinion on this.\n\n…while it is possible to conduct this exercise using only raw pointers and casts…\n\n(in the voice of Palpatine) “Do it!”\n\n…it is my professional responsibility to recommend you use transmute.\n\npub const unsafe fn transmute&lt;Src, Dst&gt;(src: Src) -&gt; Dst\n\nRead more\n\n\n\nRaw Pointers\n\nAlso can use raw pointers here.\nWill get in the way of a single-line solution but that is okay - you should do you!\n\n\n\nNumeric Values\n\nOne obvious way to use transmute is to change one type of data into another, without altering the underlying numeric values that exist in memory.\nFor example, we can convert an array of u8s to an i32.\n\nunsafe {\n    let bytes: [u8;4] = [0x12,0x34,0x56,0x78];\n    let num: i32 = std::mem::transmute(bytes);\n    println!(\"{:x}\", num);\n}\n\nI drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what rustc wanted, so I didn’t worry about it.\n\n\n\nEndianness\n\nThe warning refers to the topic of endianness.\n\nBig deal in C, kinda not in Rust actually.\n\nPrecisely because of that warning basically.\nThis lab was very involved. Endian\n\n\nRead more\n\n\nIn computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness.\n\n\nRegard an i32 as a word and a u8 as a bit.\nTake note of the endianness revealed by the prior code.\n\n\n\nNumeric Address\n\nOne possibly more advanced use of transmute is upon numeric addresses\n\nThe key, the numeric value of the address, stays the same.\nThe value, the numeric value in the memory location decribed by the address, stays the same.\nThe interpretation - how Rust understands the value at that location - changes.\n\n\nunsafe {\n    let nats: &[u32] = &[0x3F800000];\n    let nums: &[f32] = std::mem::transmute(nats);\n    println!(\"{}\", nums[0]);\n}\n\nRecall the meaning of 0x3F8000000\nI usually do this on arrays but I guess I’m not sure why.\n\nTry things out.\nVectors are definitely banned though, that is way too high level.",
     "crumbs": [
-      "Rustup"
+      "Transmute"
     ]
   },
   {
-    "objectID": "01_wc.html#helpful-reference",
-    "href": "01_wc.html#helpful-reference",
-    "title": "Rustup",
-    "section": "Helpful Reference",
-    "text": "Helpful Reference\n\nWhen working on projects like this, I almost always have the following reference material open.\nread_lines - Rust By Example\n\n\nfn read_lines(filename: &str) -&gt; Vec&lt;String&gt; {\n    let mut result = Vec::new();\n\n    for line in std::fs::read_to_string(filename).unwrap().lines() {\n        result.push(line.to_string())\n    }\n\n    result\n}",
-    "crumbs": [
-      "Rustup"
-    ]
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "OS in Rust",
+    "section": "",
+    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nbash\nscm.sh\n\n\n0x3\n02/02\nBinary\n\n\n\n\n0x4\n02/09\nKernel\n\n\n\n\n0x5\n02/16\nText\n\n\n\n\n0x6\n02/23\nTesting\n\n\n\n\n0x7\n03/02\nExceptions\n\n\n\n\n0x8\n03/09\nFaults\n\n\n\n\n0x9\n03/16\nInterrupts\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nPaging\n\n\n\n\n0xB\n03/06\nPage Tables\n\n\n\n\n0xC\n04/13\nThe Heap\n\n\n\n\n0xD\n04/20\nAllocators\nNone\n\n\n\n0xE\n04/29\nasync\n\nNone\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
   },
   {
     "objectID": "11_unsafe.rjs.html#announcements",
@@ -1757,815 +2626,6 @@
     "text": "Announcements\n\nAction Items:\n\nwc ongoing.\nDue Friday, 5 Sept. at 1440 PT.\nJust a quick demo for HW this week, check it out whenever.",
     "crumbs": [
       "Unsafe"
-    ]
-  },
-  {
-    "objectID": "20_os.rjs.html#announcements",
-    "href": "20_os.rjs.html#announcements",
-    "title": "OS",
-    "section": "Announcements",
-    "text": "Announcements\n\nWelcome to OS in Rust\n\nActual OS week.\n\nAction Items:\n\nFinish working through split_at\n\nForm a strong opinion on assert\nGood anecdote for job interviews.\n\nNominally ready for next homework after this lecture.\n\nCan wait for lab/section."
-  },
-  {
-    "objectID": "20_os.rjs.html#today",
-    "href": "20_os.rjs.html#today",
-    "title": "OS",
-    "section": "Today",
-    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages"
-  },
-  {
-    "objectID": "20_os.rjs.html#citations",
-    "href": "20_os.rjs.html#citations",
-    "title": "OS",
-    "section": "Citations",
-    "text": "Citations\n\nBorrowed a bit from:\n\nMIT via UIC\nMIT via OCW"
-  },
-  {
-    "objectID": "20_os.rjs.html#arriving-at-os",
-    "href": "20_os.rjs.html#arriving-at-os",
-    "title": "OS",
-    "section": "Arriving at OS",
-    "text": "Arriving at OS\n\nWe can arrive at OS from two ways:\n\nWe can look at physical hardware an infer the need for a control system.\nWe can look at formal descriptions of computing, such as automata, and infer the need for abstractions to practically use the system."
-  },
-  {
-    "objectID": "20_os.rjs.html#the-device",
-    "href": "20_os.rjs.html#the-device",
-    "title": "OS",
-    "section": "The Device",
-    "text": "The Device\n\nWe imagine some minimal device.\n\nWhat are the minimum requirements to be a computer?"
-  },
-  {
-    "objectID": "20_os.rjs.html#architecture---alu",
-    "href": "20_os.rjs.html#architecture---alu",
-    "title": "OS",
-    "section": "Architecture - ALU",
-    "text": "Architecture - ALU\n\nWe imagine some minimal device.\n\nIt contains an arithmetic/logic unit (ALU).\n\nCan perform e.g. logical AND, bitwise AND, and numeric ADD\nCan load/store numeric values to/from numeric addresses"
-  },
-  {
-    "objectID": "20_os.rjs.html#architecture---mmu",
-    "href": "20_os.rjs.html#architecture---mmu",
-    "title": "OS",
-    "section": "Architecture - MMU",
-    "text": "Architecture - MMU\n\nWe imagine some minimal device.\n\nIt contains “memory”, perhaps via a memory management unit (MMU)\n\nPersists numeric values associated with numeric addresses\nPhysically separated from the ALU\nGeniuses will say this is key-value storage"
-  },
-  {
-    "objectID": "20_os.rjs.html#picture",
-    "href": "20_os.rjs.html#picture",
-    "title": "OS",
-    "section": "Picture",
-    "text": "Picture\n\n\n\n\n\n\n\ngraphgraph\n\n\nALU\n\nALU\n\n\n\nALU-&gt;ALU\n\n\nplus\n\n\n\nMMU\n\nMMU\n\n\n\nALU-&gt;MMU\n\n\nsave\n\n\n\nMMU-&gt;ALU\n\n\nload"
-  },
-  {
-    "objectID": "20_os.rjs.html#architecture-1",
-    "href": "20_os.rjs.html#architecture-1",
-    "title": "OS",
-    "section": "Architecture",
-    "text": "Architecture\n\nThis is the now-legendary Von Neumann architecture."
-  },
-  {
-    "objectID": "20_os.rjs.html#von-neumann-formally",
-    "href": "20_os.rjs.html#von-neumann-formally",
-    "title": "OS",
-    "section": "Von Neumann, Formally",
-    "text": "Von Neumann, Formally\n\nA central arithmetic unit to perform arithmetic operations;\nA central control unit to sequence operations performed by the machine;\nMemory that stores data and instructions;\nAn “outside recording medium” to store input to and output from the machine;\nInput and output mechanisms to transfer data between the memory and the outside recording medium."
-  },
-  {
-    "objectID": "20_os.rjs.html#competing-formulation",
-    "href": "20_os.rjs.html#competing-formulation",
-    "title": "OS",
-    "section": "Competing Formulation",
-    "text": "Competing Formulation\nThe competing formulation known as the Harvard architecture differed in that information describing actions (say, executables or “stored memory programs” or “instructions”) and information for read-write (say data files or just “data”) had distinct storage mediums.\n\nAs far as I know, none of these were ever made.\nTheoretical idea."
-  },
-  {
-    "objectID": "20_os.rjs.html#harvard-architecture",
-    "href": "20_os.rjs.html#harvard-architecture",
-    "title": "OS",
-    "section": "Harvard Architecture",
-    "text": "Harvard Architecture"
-  },
-  {
-    "objectID": "20_os.rjs.html#historical-use-case",
-    "href": "20_os.rjs.html#historical-use-case",
-    "title": "OS",
-    "section": "Historical use case",
-    "text": "Historical use case\n\nHistorical computing devices had no onboard storage and programs lived on e.g. external tapes.\n\nThe Harvard architecture is a helpful model in this case.\n\nToday, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)\n\nHence Von Neumann"
-  },
-  {
-    "objectID": "20_os.rjs.html#von-neumann---aside",
-    "href": "20_os.rjs.html#von-neumann---aside",
-    "title": "OS",
-    "section": "Von Neumann - Aside",
-    "text": "Von Neumann - Aside\n\n\n\nBe advised this is a Manhattan Project member and form your own opinion about that."
-  },
-  {
-    "objectID": "20_os.rjs.html#hardware-doesnt-matter",
-    "href": "20_os.rjs.html#hardware-doesnt-matter",
-    "title": "OS",
-    "section": "Hardware “doesn’t matter”",
-    "text": "Hardware “doesn’t matter”\n\nWe can regard as a historical accident that hardware exists in any particular form.\n\nPerhaps the first computers could’ve been biological vs. mechanical vs. electric.\n\nWe then regard the automata, principly the Turing Machine, as ground truth.\n\nTMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday…\nRead more"
-  },
-  {
-    "objectID": "20_os.rjs.html#thinking-about-a-tm",
-    "href": "20_os.rjs.html#thinking-about-a-tm",
-    "title": "OS",
-    "section": "Thinking about a TM",
-    "text": "Thinking about a TM\n\n\n\n\nHead can read and write\nHead is two-way\nTape is infinite\nInfinitely many blanks(0) follow input\nCan accept/reject at any time"
-  },
-  {
-    "objectID": "20_os.rjs.html#vs.-hardware",
-    "href": "20_os.rjs.html#vs.-hardware",
-    "title": "OS",
-    "section": "Vs. Hardware",
-    "text": "Vs. Hardware\n\nThe TM assumes infinite memory\n\nNot a big deal, you’ll never actually use infinite memory.\n\nThe TM makes no considerations of performance\n\nTapes are slower than wires, but perhaps easier to imagine.\n\nThe TM does not necessarily use binary\n\nBut then again, before-Turing, neither did computers…"
-  },
-  {
-    "objectID": "20_os.rjs.html#say-we-build-a-tm",
-    "href": "20_os.rjs.html#say-we-build-a-tm",
-    "title": "OS",
-    "section": "Say we build a TM",
-    "text": "Say we build a TM\n\nWell, someone we have to model an “infinite tape” of memory.\n\nPerhaps by… creating a bijection to the natural numbers.\nWe could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)\nWait that is the same key-value storage as the MMU."
-  },
-  {
-    "objectID": "20_os.rjs.html#all-roads",
-    "href": "20_os.rjs.html#all-roads",
-    "title": "OS",
-    "section": "All Roads",
-    "text": "All Roads\n\n…lead to a series of abstractions allowing higher-level users to use, but not implement, memory.\n\n\n\n\n\n\n\n\nG\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4"
-  },
-  {
-    "objectID": "20_os.rjs.html#different-topics",
-    "href": "20_os.rjs.html#different-topics",
-    "title": "OS",
-    "section": "Different Topics",
-    "text": "Different Topics\n\nAs we layer abstractions, writing code is more efficent and running code is less efficient.\n\nUntil mature technologies outcompete humans.\n\n\n\n\n\n\n\n\n\nG\n\n\nm1\n\nElectrical\nEngineering\n\n\n\nm2\n\nArchitecture\nand OSes\n\n\n\nm1-&gt;m2\n\n\n\n\n\nm3\n\nCompilers\n(or std)\n\n\n\nm2-&gt;m3\n\n\n\n\n\nm4\n\nScripting\nLanguages\n\n\n\nm3-&gt;m4\n\n\n\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4"
-  },
-  {
-    "objectID": "20_os.rjs.html#bus-1",
-    "href": "20_os.rjs.html#bus-1",
-    "title": "OS",
-    "section": "Bus",
-    "text": "Bus\n\nIn computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate."
-  },
-  {
-    "objectID": "20_os.rjs.html#shorter",
-    "href": "20_os.rjs.html#shorter",
-    "title": "OS",
-    "section": "Shorter",
-    "text": "Shorter\n\nA bus is a bundle of wires that transfers bits.\n\n\n\n\n\n\n\n\nG\n\n\ncpu\n\nCPU\n\n\n\nbus_middle\n\n\n\n\ncpu-&gt;bus_middle\n\n\n\n\n\nbus_right\n\n\n\n\nbus_middle-&gt;bus_right\n\n\n\n\nbus_left\n\n\n\n\nbus_left-&gt;bus_middle\n\n\n\n\nram\n\nRAM\n\n\n\nbus_left-&gt;ram\n\n\n\n\n\nio\n\nI/O\n\n\n\nbus_right-&gt;io"
-  },
-  {
-    "objectID": "20_os.rjs.html#i-imagine",
-    "href": "20_os.rjs.html#i-imagine",
-    "title": "OS",
-    "section": "I imagine…",
-    "text": "I imagine…\n\nTwo registers (an ordered collection of bits) are populated by some device on a bus.\n\nOne for a numeric value.\nOne for a numeric address."
-  },
-  {
-    "objectID": "20_os.rjs.html#i-imagine-1",
-    "href": "20_os.rjs.html#i-imagine-1",
-    "title": "OS",
-    "section": "I imagine…",
-    "text": "I imagine…\n\nThat device writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever."
-  },
-  {
-    "objectID": "20_os.rjs.html#within-a-device",
-    "href": "20_os.rjs.html#within-a-device",
-    "title": "OS",
-    "section": "Within a Device",
-    "text": "Within a Device\n\nWithin devices, numerical values are separated spatially.\n\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0\n\n0\n\n1\n\n1\n\n0\n\n1\n\n1\n\n0"
-  },
-  {
-    "objectID": "20_os.rjs.html#within-a-bus",
-    "href": "20_os.rjs.html#within-a-bus",
-    "title": "OS",
-    "section": "Within a Bus",
-    "text": "Within a Bus\n\nOn the bus, the wire is either, say, “high” or “low” and these values are interpreted as “one” or “zero”.\n\nWe term this “digital”\n\n\n\ncomposed of data in the form of especially binary digits"
-  },
-  {
-    "objectID": "20_os.rjs.html#signal-processing",
-    "href": "20_os.rjs.html#signal-processing",
-    "title": "OS",
-    "section": "Signal Processing",
-    "text": "Signal Processing\n\nE.g. sine wave with some recording window.\n\n Source"
-  },
-  {
-    "objectID": "20_os.rjs.html#signal-processing-1",
-    "href": "20_os.rjs.html#signal-processing-1",
-    "title": "OS",
-    "section": "Signal Processing",
-    "text": "Signal Processing\n\nOut of scope\n\nPhysics/Electrical Engineering topic\nSeen in Data in the Cosmos and Computer Vision\nLudicrously radical\n\nWe handwave it here, and only introduce so you understand what the hardware/OS has to deal with."
-  },
-  {
-    "objectID": "20_os.rjs.html#given-a-bus",
-    "href": "20_os.rjs.html#given-a-bus",
-    "title": "OS",
-    "section": "Given a bus",
-    "text": "Given a bus\n\nSay we have both a keyboard and an MMU on a bus with our ALU/CPU\n\nSay I input d, ASCII 100/0x64, on my keyboard\nThe keyboard broadcasts onto bus\nThe ALU and MMU read it\n\nHow is the signal interpreted?"
-  },
-  {
-    "objectID": "20_os.rjs.html#throwback",
-    "href": "20_os.rjs.html#throwback",
-    "title": "OS",
-    "section": "Throwback",
-    "text": "Throwback\n\nDevice writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever."
-  },
-  {
-    "objectID": "20_os.rjs.html#so",
-    "href": "20_os.rjs.html#so",
-    "title": "OS",
-    "section": "So…",
-    "text": "So…\n\nThe keyboard doesn’t just blast a `0b1100100’ onto bus.\nRather, it broadcasts some pre-determined “address” corresponding to keyboard input.\n\nThe ALU sees this and knows to prepare a register to store the incoming value.\nThe MMU sees this and knows to hit a snooze.\n\nSo the keyboard prepends the numeric value with a numeric address.\n\nThis is the importance of an address space."
-  },
-  {
-    "objectID": "20_os.rjs.html#the-big-idea",
-    "href": "20_os.rjs.html#the-big-idea",
-    "title": "OS",
-    "section": "The Big Idea",
-    "text": "The Big Idea\n\nImagine the bus is an array.\nEach array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.\nEach array element has some numeric address."
-  },
-  {
-    "objectID": "20_os.rjs.html#for-the-alu",
-    "href": "20_os.rjs.html#for-the-alu",
-    "title": "OS",
-    "section": "For the ALU",
-    "text": "For the ALU\n\nWhen the ALU wants to write to memory\n\nAddress the MMU, either as\n\nA region as large as physical memory\nOne address then a key-value pair\n\nThe ALU writes a value to an address\n\nThe MMU sees this on bus and acts accordingly\nThe keyboard does whatever"
-  },
-  {
-    "objectID": "20_os.rjs.html#wrinkles",
-    "href": "20_os.rjs.html#wrinkles",
-    "title": "OS",
-    "section": "Wrinkles",
-    "text": "Wrinkles\n\nSounds easy?\nWe can optimize"
-  },
-  {
-    "objectID": "20_os.rjs.html#gaps",
-    "href": "20_os.rjs.html#gaps",
-    "title": "OS",
-    "section": "Gaps",
-    "text": "Gaps\n\nUsually address space is much larger than RAM\nAddresses that can be accessed are referred to as “mapped”\nAnd holes that can’t be accessed are “unmapped”\nWhat happens if the CPU loads or stores to an unmapped region"
-  },
-  {
-    "objectID": "20_os.rjs.html#gaps-1",
-    "href": "20_os.rjs.html#gaps-1",
-    "title": "OS",
-    "section": "Gaps",
-    "text": "Gaps\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\n0x0C\n\n0x08\n\n0x04\n\n0x00\n\n\n\nnode1\n\nMonitor\n\n \n\nGPU\n\nMemory\n\nKeyboard\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1"
-  },
-  {
-    "objectID": "20_os.rjs.html#permissions",
-    "href": "20_os.rjs.html#permissions",
-    "title": "OS",
-    "section": "Permissions",
-    "text": "Permissions\n\nUsually as RWX\n\nRead\nWrite\nEXecute\nThe dastardly von Neumann model rears its ugly head etc.\n\nWhy have these, and\nWhat if they are violated"
-  },
-  {
-    "objectID": "20_os.rjs.html#permissions-1",
-    "href": "20_os.rjs.html#permissions-1",
-    "title": "OS",
-    "section": "Permissions",
-    "text": "Permissions\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\n.ini\n\n.txt\n\n.exe\n\n.log\n\n.sh\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1"
-  },
-  {
-    "objectID": "20_os.rjs.html#multiple-devices",
-    "href": "20_os.rjs.html#multiple-devices",
-    "title": "OS",
-    "section": "Multiple Devices",
-    "text": "Multiple Devices\n\nTreat code and data as the same.\nBe unfathomably based.\nThe keyboard is just memory.\nSo is the CPU/GPU\nSo is the internet (Network interface controller)\n\nWe can execute the internet?"
-  },
-  {
-    "objectID": "20_os.rjs.html#multiple-devices-1",
-    "href": "20_os.rjs.html#multiple-devices-1",
-    "title": "OS",
-    "section": "Multiple Devices",
-    "text": "Multiple Devices\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\nI/O\n\nkeys\n\nMMU\n\n.txt\n\nMMU\n\n.exe\n\nNIC\n\n.htm\n\nNIC\n\n.jsx\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1"
-  },
-  {
-    "objectID": "20_os.rjs.html#further",
-    "href": "20_os.rjs.html#further",
-    "title": "OS",
-    "section": "Further",
-    "text": "Further\n\nPhysical vs. virtual address\n\nUsually computers can describe more memory locations than the MMU can retain.\n\nCaching\n\nUsually read/write is slow but repeated, so save common requests to deload devices and bus\n\nBlock size\n\nBits and even words are are two small, usually pages (4KB) or blocks (cloud scale)"
-  },
-  {
-    "objectID": "20_os.rjs.html#recall",
-    "href": "20_os.rjs.html#recall",
-    "title": "OS",
-    "section": "Recall",
-    "text": "Recall\n\nYou have already been a client of the stack/heap\n\nIn C\nIn Rust\n\nQuoth me:\n\n\nIt’s the OS’s problem. And therefore our problem next term."
-  },
-  {
-    "objectID": "20_os.rjs.html#python",
-    "href": "20_os.rjs.html#python",
-    "title": "OS",
-    "section": "Python",
-    "text": "Python\nimport ctypes\nimport gc \n\ndi = lambda obj_id : _ctypes.PyObj_FromPtr(obj_id)\nfree = gc.collect"
-  },
-  {
-    "objectID": "20_os.rjs.html#rust",
-    "href": "20_os.rjs.html#rust",
-    "title": "OS",
-    "section": "Rust",
-    "text": "Rust\n\n\nsrc/main.rs\n\nfn main() {    \n    let ptr: *const i32;\n\n    {\n        let x = 1234;\n        ptr = &x as *const i32;\n        unsafe {\n            println!(\"Value at ptr: {}\", *ptr);\n        }\n    }\n\n    unsafe {\n        println!(\"Value at ptr: {}\", *ptr);\n    }\n}"
-  },
-  {
-    "objectID": "20_os.rjs.html#c",
-    "href": "20_os.rjs.html#c",
-    "title": "OS",
-    "section": "C",
-    "text": "C\n#include &lt;stdlib.h&gt;\n\nvoid main() {\n        int *p = (int *)malloc(sizeof(int));\n        int *q = (int *)malloc(sizeof(int));\n        free(p);\n        p = q;\n}"
-  },
-  {
-    "objectID": "20_os.rjs.html#all-of-these",
-    "href": "20_os.rjs.html#all-of-these",
-    "title": "OS",
-    "section": "All of these…",
-    "text": "All of these…\n\nAre your problem now.\nThere is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.\nOn to the lab/homework!"
-  },
-  {
-    "objectID": "20_os.rjs.html#today-1",
-    "href": "20_os.rjs.html#today-1",
-    "title": "OS",
-    "section": "Today",
-    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages"
-  },
-  {
-    "objectID": "20_os.html",
-    "href": "20_os.html",
-    "title": "OS",
-    "section": "",
-    "text": "Welcome to OS in Rust\n\nActual OS week.\n\nAction Items:\n\nFinish working through split_at\n\nForm a strong opinion on assert\nGood anecdote for job interviews.\n\nNominally ready for next homework after this lecture.\n\nCan wait for lab/section.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#announcements",
-    "href": "20_os.html#announcements",
-    "title": "OS",
-    "section": "",
-    "text": "Welcome to OS in Rust\n\nActual OS week.\n\nAction Items:\n\nFinish working through split_at\n\nForm a strong opinion on assert\nGood anecdote for job interviews.\n\nNominally ready for next homework after this lecture.\n\nCan wait for lab/section.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#today",
-    "href": "20_os.html#today",
-    "title": "OS",
-    "section": "Today",
-    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#citations",
-    "href": "20_os.html#citations",
-    "title": "OS",
-    "section": "Citations",
-    "text": "Citations\n\nBorrowed a bit from:\n\nMIT via UIC\nMIT via OCW",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#arriving-at-os",
-    "href": "20_os.html#arriving-at-os",
-    "title": "OS",
-    "section": "Arriving at OS",
-    "text": "Arriving at OS\n\nWe can arrive at OS from two ways:\n\nWe can look at physical hardware an infer the need for a control system.\nWe can look at formal descriptions of computing, such as automata, and infer the need for abstractions to practically use the system.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#the-device",
-    "href": "20_os.html#the-device",
-    "title": "OS",
-    "section": "The Device",
-    "text": "The Device\n\nWe imagine some minimal device.\n\nWhat are the minimum requirements to be a computer?",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#architecture---alu",
-    "href": "20_os.html#architecture---alu",
-    "title": "OS",
-    "section": "Architecture - ALU",
-    "text": "Architecture - ALU\n\nWe imagine some minimal device.\n\nIt contains an arithmetic/logic unit (ALU).\n\nCan perform e.g. logical AND, bitwise AND, and numeric ADD\nCan load/store numeric values to/from numeric addresses",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#architecture---mmu",
-    "href": "20_os.html#architecture---mmu",
-    "title": "OS",
-    "section": "Architecture - MMU",
-    "text": "Architecture - MMU\n\nWe imagine some minimal device.\n\nIt contains “memory”, perhaps via a memory management unit (MMU)\n\nPersists numeric values associated with numeric addresses\nPhysically separated from the ALU\nGeniuses will say this is key-value storage",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#picture",
-    "href": "20_os.html#picture",
-    "title": "OS",
-    "section": "Picture",
-    "text": "Picture\n\n\n\n\n\n\n\ngraphgraph\n\n\nALU\n\nALU\n\n\n\nALU-&gt;ALU\n\n\nplus\n\n\n\nMMU\n\nMMU\n\n\n\nALU-&gt;MMU\n\n\nsave\n\n\n\nMMU-&gt;ALU\n\n\nload",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#architecture-1",
-    "href": "20_os.html#architecture-1",
-    "title": "OS",
-    "section": "Architecture",
-    "text": "Architecture\n\nThis is the now-legendary Von Neumann architecture.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#von-neumann-formally",
-    "href": "20_os.html#von-neumann-formally",
-    "title": "OS",
-    "section": "Von Neumann, Formally",
-    "text": "Von Neumann, Formally\n\nA central arithmetic unit to perform arithmetic operations;\nA central control unit to sequence operations performed by the machine;\nMemory that stores data and instructions;\nAn “outside recording medium” to store input to and output from the machine;\nInput and output mechanisms to transfer data between the memory and the outside recording medium.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#competing-formulation",
-    "href": "20_os.html#competing-formulation",
-    "title": "OS",
-    "section": "Competing Formulation",
-    "text": "Competing Formulation\nThe competing formulation known as the Harvard architecture differed in that information describing actions (say, executables or “stored memory programs” or “instructions”) and information for read-write (say data files or just “data”) had distinct storage mediums.\n\nAs far as I know, none of these were ever made.\nTheoretical idea.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#harvard-architecture",
-    "href": "20_os.html#harvard-architecture",
-    "title": "OS",
-    "section": "Harvard Architecture",
-    "text": "Harvard Architecture",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#historical-use-case",
-    "href": "20_os.html#historical-use-case",
-    "title": "OS",
-    "section": "Historical use case",
-    "text": "Historical use case\n\nHistorical computing devices had no onboard storage and programs lived on e.g. external tapes.\n\nThe Harvard architecture is a helpful model in this case.\n\nToday, everything lives on a SSD (OS, browser, audo/video files, debug logs, etc.)\n\nHence Von Neumann",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#von-neumann---aside",
-    "href": "20_os.html#von-neumann---aside",
-    "title": "OS",
-    "section": "Von Neumann - Aside",
-    "text": "Von Neumann - Aside\n\n\n\nBe advised this is a Manhattan Project member and form your own opinion about that.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#hardware-doesnt-matter",
-    "href": "20_os.html#hardware-doesnt-matter",
-    "title": "OS",
-    "section": "Hardware “doesn’t matter”",
-    "text": "Hardware “doesn’t matter”\n\nWe can regard as a historical accident that hardware exists in any particular form.\n\nPerhaps the first computers could’ve been biological vs. mechanical vs. electric.\n\nWe then regard the automata, principly the Turing Machine, as ground truth.\n\nTMs are out-of-scope for this class but probably should be a required topic in a post-Algorithms class, someday…\nRead more",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#thinking-about-a-tm",
-    "href": "20_os.html#thinking-about-a-tm",
-    "title": "OS",
-    "section": "Thinking about a TM",
-    "text": "Thinking about a TM\n\n\n\n\nHead can read and write\nHead is two-way\nTape is infinite\nInfinitely many blanks(0) follow input\nCan accept/reject at any time",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#vs.-hardware",
-    "href": "20_os.html#vs.-hardware",
-    "title": "OS",
-    "section": "Vs. Hardware",
-    "text": "Vs. Hardware\n\nThe TM assumes infinite memory\n\nNot a big deal, you’ll never actually use infinite memory.\n\nThe TM makes no considerations of performance\n\nTapes are slower than wires, but perhaps easier to imagine.\n\nThe TM does not necessarily use binary\n\nBut then again, before-Turing, neither did computers…",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#say-we-build-a-tm",
-    "href": "20_os.html#say-we-build-a-tm",
-    "title": "OS",
-    "section": "Say we build a TM",
-    "text": "Say we build a TM\n\nWell, someone we have to model an “infinite tape” of memory.\n\nPerhaps by… creating a bijection to the natural numbers.\nWe could then have numeric locations on the type correspond to written values (which may be numeric or linguistic)\nWait that is the same key-value storage as the MMU.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#all-roads",
-    "href": "20_os.html#all-roads",
-    "title": "OS",
-    "section": "All Roads",
-    "text": "All Roads\n\n…lead to a series of abstractions allowing higher-level users to use, but not implement, memory.\n\n\n\n\n\n\n\n\nG\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#different-topics",
-    "href": "20_os.html#different-topics",
-    "title": "OS",
-    "section": "Different Topics",
-    "text": "Different Topics\n\nAs we layer abstractions, writing code is more efficent and running code is less efficient.\n\nUntil mature technologies outcompete humans.\n\n\n\n\n\n\n\n\n\nG\n\n\nm1\n\nElectrical\nEngineering\n\n\n\nm2\n\nArchitecture\nand OSes\n\n\n\nm1-&gt;m2\n\n\n\n\n\nm3\n\nCompilers\n(or std)\n\n\n\nm2-&gt;m3\n\n\n\n\n\nm4\n\nScripting\nLanguages\n\n\n\nm3-&gt;m4\n\n\n\n\n\nn1\n\nPhysical\nMemory\n\n\n\nn2\n\nAddress\nSpaces\n\n\n\nn1-&gt;n2\n\n\n\n\n\nn3\n\nStack and\nHeap\n\n\n\nn2-&gt;n3\n\n\n\n\n\nn4\n\nGarbage\nCollection\n\n\n\nn3-&gt;n4",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#bus-1",
-    "href": "20_os.html#bus-1",
-    "title": "OS",
-    "section": "Bus",
-    "text": "Bus\n\nIn computer architecture, a bus (historically also called a data highway or databus) is a communication system that transfers data between components inside a computer or between computers. It encompasses both hardware (e.g., wires, optical fiber) and software, including communication protocols. At its core, a bus is a shared physical pathway, typically composed of wires, traces on a circuit board, or busbars, that allows multiple devices to communicate.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#shorter",
-    "href": "20_os.html#shorter",
-    "title": "OS",
-    "section": "Shorter",
-    "text": "Shorter\n\nA bus is a bundle of wires that transfers bits.\n\n\n\n\n\n\n\n\nG\n\n\ncpu\n\nCPU\n\n\n\nbus_middle\n\n\n\n\ncpu-&gt;bus_middle\n\n\n\n\n\nbus_right\n\n\n\n\nbus_middle-&gt;bus_right\n\n\n\n\nbus_left\n\n\n\n\nbus_left-&gt;bus_middle\n\n\n\n\nram\n\nRAM\n\n\n\nbus_left-&gt;ram\n\n\n\n\n\nio\n\nI/O\n\n\n\nbus_right-&gt;io",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#i-imagine",
-    "href": "20_os.html#i-imagine",
-    "title": "OS",
-    "section": "I imagine…",
-    "text": "I imagine…\n\nTwo registers (an ordered collection of bits) are populated by some device on a bus.\n\nOne for a numeric value.\nOne for a numeric address.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#i-imagine-1",
-    "href": "20_os.html#i-imagine-1",
-    "title": "OS",
-    "section": "I imagine…",
-    "text": "I imagine…\n\nThat device writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#within-a-device",
-    "href": "20_os.html#within-a-device",
-    "title": "OS",
-    "section": "Within a Device",
-    "text": "Within a Device\n\nWithin devices, numerical values are separated spatially.\n\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0\n\n0\n\n1\n\n1\n\n0\n\n1\n\n1\n\n0",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#within-a-bus",
-    "href": "20_os.html#within-a-bus",
-    "title": "OS",
-    "section": "Within a Bus",
-    "text": "Within a Bus\n\nOn the bus, the wire is either, say, “high” or “low” and these values are interpreted as “one” or “zero”.\n\nWe term this “digital”\n\n\n\ncomposed of data in the form of especially binary digits",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#signal-processing",
-    "href": "20_os.html#signal-processing",
-    "title": "OS",
-    "section": "Signal Processing",
-    "text": "Signal Processing\n\nE.g. sine wave with some recording window.\n\n Source",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#signal-processing-1",
-    "href": "20_os.html#signal-processing-1",
-    "title": "OS",
-    "section": "Signal Processing",
-    "text": "Signal Processing\n\nOut of scope\n\nPhysics/Electrical Engineering topic\nSeen in Data in the Cosmos and Computer Vision\nLudicrously radical\n\nWe handwave it here, and only introduce so you understand what the hardware/OS has to deal with.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#given-a-bus",
-    "href": "20_os.html#given-a-bus",
-    "title": "OS",
-    "section": "Given a bus",
-    "text": "Given a bus\n\nSay we have both a keyboard and an MMU on a bus with our ALU/CPU\n\nSay I input d, ASCII 100/0x64, on my keyboard\nThe keyboard broadcasts onto bus\nThe ALU and MMU read it\n\nHow is the signal interpreted?",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#throwback",
-    "href": "20_os.html#throwback",
-    "title": "OS",
-    "section": "Throwback",
-    "text": "Throwback\n\nDevice writes:\n\nA numerical address to bus\n\nAll other devices listen, and see if they “own” the address\n\nA numerical value to the bus\n\nThe relevant device records the bits to an internal register\n\nThen saves or loads or displays or whatever.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#so",
-    "href": "20_os.html#so",
-    "title": "OS",
-    "section": "So…",
-    "text": "So…\n\nThe keyboard doesn’t just blast a `0b1100100’ onto bus.\nRather, it broadcasts some pre-determined “address” corresponding to keyboard input.\n\nThe ALU sees this and knows to prepare a register to store the incoming value.\nThe MMU sees this and knows to hit a snooze.\n\nSo the keyboard prepends the numeric value with a numeric address.\n\nThis is the importance of an address space.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#the-big-idea",
-    "href": "20_os.html#the-big-idea",
-    "title": "OS",
-    "section": "The Big Idea",
-    "text": "The Big Idea\n\nImagine the bus is an array.\nEach array element is some word size, say 8 (cringe), 32 (mid), 64 (based), or 128 (excessive) bits.\nEach array element has some numeric address.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#for-the-alu",
-    "href": "20_os.html#for-the-alu",
-    "title": "OS",
-    "section": "For the ALU",
-    "text": "For the ALU\n\nWhen the ALU wants to write to memory\n\nAddress the MMU, either as\n\nA region as large as physical memory\nOne address then a key-value pair\n\nThe ALU writes a value to an address\n\nThe MMU sees this on bus and acts accordingly\nThe keyboard does whatever",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#wrinkles",
-    "href": "20_os.html#wrinkles",
-    "title": "OS",
-    "section": "Wrinkles",
-    "text": "Wrinkles\n\nSounds easy?\nWe can optimize",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#gaps",
-    "href": "20_os.html#gaps",
-    "title": "OS",
-    "section": "Gaps",
-    "text": "Gaps\n\nUsually address space is much larger than RAM\nAddresses that can be accessed are referred to as “mapped”\nAnd holes that can’t be accessed are “unmapped”\nWhat happens if the CPU loads or stores to an unmapped region",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#gaps-1",
-    "href": "20_os.html#gaps-1",
-    "title": "OS",
-    "section": "Gaps",
-    "text": "Gaps\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\n0x0C\n\n0x08\n\n0x04\n\n0x00\n\n\n\nnode1\n\nMonitor\n\n \n\nGPU\n\nMemory\n\nKeyboard\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#permissions",
-    "href": "20_os.html#permissions",
-    "title": "OS",
-    "section": "Permissions",
-    "text": "Permissions\n\nUsually as RWX\n\nRead\nWrite\nEXecute\nThe dastardly von Neumann model rears its ugly head etc.\n\nWhy have these, and\nWhat if they are violated",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#permissions-1",
-    "href": "20_os.html#permissions-1",
-    "title": "OS",
-    "section": "Permissions",
-    "text": "Permissions\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\n.ini\n\n.txt\n\n.exe\n\n.log\n\n.sh\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#multiple-devices",
-    "href": "20_os.html#multiple-devices",
-    "title": "OS",
-    "section": "Multiple Devices",
-    "text": "Multiple Devices\n\nTreat code and data as the same.\nBe unfathomably based.\nThe keyboard is just memory.\nSo is the CPU/GPU\nSo is the internet (Network interface controller)\n\nWe can execute the internet?",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#multiple-devices-1",
-    "href": "20_os.html#multiple-devices-1",
-    "title": "OS",
-    "section": "Multiple Devices",
-    "text": "Multiple Devices\n\n\n\n\n\n\n\nG\n\n\nnode0\n\n0x10\n\nR__\n\n0x0C\n\nRW_\n\n0x08\n\nR_X\n\n0x04\n\nR__\n\n0x00\n\nRWX\n\n\n\nnode1\n\nI/O\n\nkeys\n\nMMU\n\n.txt\n\nMMU\n\n.exe\n\nNIC\n\n.htm\n\nNIC\n\n.jsx\n\n\n\nnode0:5-&gt;node1:5\n\n\n\n\n\nnode0:4-&gt;node1:4\n\n\n\n\n\nnode0:3-&gt;node1:3\n\n\n\n\n\nnode0:2-&gt;node1:2\n\n\n\n\n\nnode0:1-&gt;node1:1",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#further",
-    "href": "20_os.html#further",
-    "title": "OS",
-    "section": "Further",
-    "text": "Further\n\nPhysical vs. virtual address\n\nUsually computers can describe more memory locations than the MMU can retain.\n\nCaching\n\nUsually read/write is slow but repeated, so save common requests to deload devices and bus\n\nBlock size\n\nBits and even words are are two small, usually pages (4KB) or blocks (cloud scale)",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#recall",
-    "href": "20_os.html#recall",
-    "title": "OS",
-    "section": "Recall",
-    "text": "Recall\n\nYou have already been a client of the stack/heap\n\nIn C\nIn Rust\n\nQuoth me:\n\n\nIt’s the OS’s problem. And therefore our problem next term.",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#python",
-    "href": "20_os.html#python",
-    "title": "OS",
-    "section": "Python",
-    "text": "Python\nimport ctypes\nimport gc \n\ndi = lambda obj_id : _ctypes.PyObj_FromPtr(obj_id)\nfree = gc.collect",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#rust",
-    "href": "20_os.html#rust",
-    "title": "OS",
-    "section": "Rust",
-    "text": "Rust\n\n\nsrc/main.rs\n\nfn main() {    \n    let ptr: *const i32;\n\n    {\n        let x = 1234;\n        ptr = &x as *const i32;\n        unsafe {\n            println!(\"Value at ptr: {}\", *ptr);\n        }\n    }\n\n    unsafe {\n        println!(\"Value at ptr: {}\", *ptr);\n    }\n}",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#c",
-    "href": "20_os.html#c",
-    "title": "OS",
-    "section": "C",
-    "text": "C\n#include &lt;stdlib.h&gt;\n\nvoid main() {\n        int *p = (int *)malloc(sizeof(int));\n        int *q = (int *)malloc(sizeof(int));\n        free(p);\n        p = q;\n}",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#all-of-these",
-    "href": "20_os.html#all-of-these",
-    "title": "OS",
-    "section": "All of these…",
-    "text": "All of these…\n\nAre your problem now.\nThere is also a stack (less theoretically complicated, more implementation complicated) which we have also covered.\nOn to the lab/homework!",
-    "crumbs": [
-      "OS"
-    ]
-  },
-  {
-    "objectID": "20_os.html#today-1",
-    "href": "20_os.html#today-1",
-    "title": "OS",
-    "section": "Today",
-    "text": "Today\n\nMotivation\n\nArchitecture\nAbstraction level\n\nOS\n\nBus\nAddress space\nStack/heap\nLanguages",
-    "crumbs": [
-      "OS"
     ]
   }
 ]

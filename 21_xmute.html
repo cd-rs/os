@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>wc – OS in Rust</title>
+<title>Transmute – OS in Rust</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,8 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./02_cli.html" rel="next">
-<link href="./00_derust.html" rel="prev">
+<link href="./20_os.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
@@ -118,7 +117,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_wc.html">wc</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./21_xmute.html">Transmute</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -150,7 +149,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./01_wc.html" class="sidebar-item-text sidebar-link active">
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">wc</span></a>
   </div>
 </li>
@@ -180,7 +179,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Transmute</span></a>
   </div>
 </li>
@@ -196,18 +195,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
   <li><a href="#homework" id="toc-homework" class="nav-link" data-scroll-target="#homework">Homework</a></li>
-  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
   <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
   <li><a href="#exercise" id="toc-exercise" class="nav-link" data-scroll-target="#exercise">Exercise</a>
   <ul class="collapse">
-  <li><a href="#repository" id="toc-repository" class="nav-link" data-scroll-target="#repository">Repository</a></li>
   <li><a href="#crate" id="toc-crate" class="nav-link" data-scroll-target="#crate">Crate</a></li>
-  <li><a href="#wc" id="toc-wc" class="nav-link" data-scroll-target="#wc"><code>wc</code></a>
+  <li><a href="#hello-world" id="toc-hello-world" class="nav-link" data-scroll-target="#hello-world">“Hello world!”</a>
   <ul class="collapse">
-  <li><a href="#full-functionality" id="toc-full-functionality" class="nav-link" data-scroll-target="#full-functionality">Full functionality</a></li>
-  <li><a href="#required-functionality" id="toc-required-functionality" class="nav-link" data-scroll-target="#required-functionality">Required functionality</a></li>
+  <li><a href="#i-love-python" id="toc-i-love-python" class="nav-link" data-scroll-target="#i-love-python">I love Python</a></li>
+  <li><a href="#transmute" id="toc-transmute" class="nav-link" data-scroll-target="#transmute">Transmute</a></li>
+  <li><a href="#raw-pointers" id="toc-raw-pointers" class="nav-link" data-scroll-target="#raw-pointers">Raw Pointers</a></li>
+  <li><a href="#numeric-values" id="toc-numeric-values" class="nav-link" data-scroll-target="#numeric-values">Numeric Values</a></li>
+  <li><a href="#endianness" id="toc-endianness" class="nav-link" data-scroll-target="#endianness">Endianness</a></li>
+  <li><a href="#numeric-address" id="toc-numeric-address" class="nav-link" data-scroll-target="#numeric-address">Numeric Address</a></li>
   </ul></li>
-  <li><a href="#helpful-reference" id="toc-helpful-reference" class="nav-link" data-scroll-target="#helpful-reference">Helpful Reference</a></li>
   </ul></li>
   <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
   </ul>
@@ -218,7 +218,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">wc</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Transmute</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
 <p class="subtitle lead">OS in Rust</p>
 </div>
 
@@ -241,154 +241,158 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Lab Day
 <ul>
-<li>Set up environment</li>
-<li>Building a command line program</li>
+<li>Play with memory</li>
+<li>Use <code>unsafe</code></li>
 </ul></li>
 </ul>
 </section>
 <section id="homework" class="level2">
 <h2 class="anchored" data-anchor-id="homework">Homework</h2>
 <ul>
-<li>“CLI” is just this lab but more complete.
+<li><code>malloc</code> is this lab just more complete
 <ul>
-<li>Windows officially no longer supported.</li>
+<li>Cool, good, fun.</li>
 </ul></li>
-<li>Due Friday, 23 Jan.&nbsp;at 1440 ET.
+<li>Due Friday, 06 Feb.&nbsp;at 1440 ET.
 <ul>
-<li>Plan to hang out as a class 1310-1440 on Fridays, probably.</li>
-</ul></li>
-</ul>
-</section>
-<section id="setup" class="level2">
-<h2 class="anchored" data-anchor-id="setup">Setup</h2>
-<ul>
-<li>If you are stuck setting up Rust, following <a href="https://cd-c89.github.io/rs/01_rustup.html">this</a></li>
-<li>At the end you should have:
-<ul>
-<li><code>cargo</code>, <code>git</code>, and at least one of <code>gcc</code> or <code>clang</code> on your system.</li>
-<li>A repository named <code>371os</code> on Github that is either (1) public or (2) shared with [cd-public](https://github.com/cd-public</li>
+<li>And also covered in section.</li>
 </ul></li>
 </ul>
 </section>
 <section id="requirements" class="level2">
 <h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
 <ul class="task-list">
-<li><label><input type="checkbox">New repository for this course.</label></li>
-<li><label><input type="checkbox">New crate for this lab.</label></li>
-<li><label><input type="checkbox">Crate when built creates an executable that behaves identically to GNU Coreutils <code>wc</code> when provided with a file name and no options.</label>
-<ul>
-<li>That is, you must support <code>wc src/main.rs</code> but not <code>wc --files0-from=F src/main.rs</code></li>
-<li>Check out <code>wc</code> and <code>wc --help</code> (which <em>you</em> don’t need to provide) to get a sense of the task.</li>
-</ul></li>
+<li><label><input type="checkbox">Change the interpretation of numeric <em>values</em> with transmute on values</label></li>
+<li><label><input type="checkbox">Change the interpretation of <em>memory</em> with transmute on references.</label></li>
+<li><label><input type="checkbox">Write a “Hello world!” program that uses no string or character data.</label></li>
 </ul>
 </section>
 <section id="exercise" class="level1">
 <h1>Exercise</h1>
-<section id="repository" class="level2">
-<h2 class="anchored" data-anchor-id="repository">Repository</h2>
-<ul>
-<li>Create a repository for this class.</li>
-<li>Requirements
-<ul>
-<li>Name is <code>371os</code></li>
-<li>May be public or private to you and me (<a href="https://github.com/cd-public/">cd-public</a>).
-<ul>
-<li><a href="https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository">Read more</a></li>
-</ul></li>
-<li>Must email me a link to your repository from your <span class="citation" data-cites="willamette.edu">@willamette.edu</span> email, e.g.:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb1-1"><a href="#cb1-1"></a>https://github.com/cd-example/371os</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div></li>
-<li>If you’re stuck, read more <a href="https://cd-c89.github.io/rs/01_rustup.html">here</a></li>
-</ul>
-</section>
 <section id="crate" class="level2">
 <h2 class="anchored" data-anchor-id="crate">Crate</h2>
 <ul>
-<li>To complete the lab today, create a crate named <code>my_wc</code> in a folder named <code>01</code> in your <code>371os</code> repository.</li>
+<li>To complete the lab today, create a crate named <code>helloworld</code> in a folder named <code>21</code> in your <code>371os</code> repository.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">cargo</span> new 01 <span class="at">--name</span> my_wc <span class="at">--vcs</span> none</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="ex">cargo</span> new 21 <span class="at">--name</span> hello_world <span class="at">--vcs</span> none</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="hello-world" class="level2">
+<h2 class="anchored" data-anchor-id="hello-world">“Hello world!”</h2>
 <ul>
-<li>If you’re stuck, read more <a href="https://cd-c89.github.io/rs/11_packages.html#option-1-names">here</a></li>
+<li>Implement “Hello world!” using this crate.</li>
+<li>Use <code>i32</code> to store the “Hello world” data.</li>
+<li>While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and <code>i32</code> literals.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> wc src/main.rs <span class="co"># 2 lines main, 2 lines unsafe, 1 line code</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>  <span class="ex">5</span>  15 174 src/main.rs</span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> grep world src/main.rs <span class="co"># no plaintext in file</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> cargo r <span class="at">--release</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>   <span class="ex">Compiling</span> helloworld v0.1.0 <span class="er">(</span><span class="ex">/home/calvin/tmp/oneone</span><span class="kw">)</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile <span class="pp">[</span><span class="ss">optimized</span><span class="pp">]</span> target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.14s</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>     <span class="ex">Running</span> <span class="kw">`</span><span class="ex">target/release/helloworld</span><span class="kw">`</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="ex">Hello</span> world!</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="i-love-python" class="level3">
+<h3 class="anchored" data-anchor-id="i-love-python">I love Python</h3>
+<ul>
+<li>The following may be useful here, to the interested student.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'[print(ord(a)) for a in "Hello world!"]'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>This is probably insufficient for your purposes and will require some hacking.</li>
 </ul>
 </section>
-<section id="wc" class="level2">
-<h2 class="anchored" data-anchor-id="wc"><code>wc</code></h2>
+<section id="transmute" class="level3">
+<h3 class="anchored" data-anchor-id="transmute">Transmute</h3>
 <ul>
-<li>Implement the minimal base functionality of <code>wc</code> using this crate.</li>
+<li>Since it is more idiomatic to use code other people have written in Rust…
+<ul>
+<li>I have an opinion on this.</li>
+</ul></li>
+<li>…while it is possible to conduct this exercise using only raw pointers and casts…
+<ul>
+<li>(in the voice of Palpatine) “Do it!”</li>
+</ul></li>
+<li>…it is my professional responsibility to recommend you use <code>transmute</code>.</li>
 </ul>
-<section id="full-functionality" class="level3">
-<h3 class="anchored" data-anchor-id="full-functionality">Full functionality</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> transmute<span class="op">&lt;</span>Src<span class="op">,</span> Dst<span class="op">&gt;</span>(src<span class="op">:</span> Src) <span class="op">-&gt;</span> Dst</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <ul>
-<li>Here is <code>wc --help</code></li>
-<li>You do not need to do all of this!</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">Usage:</span> wc <span class="pp">[</span><span class="ss">OPTION</span><span class="pp">]</span>... <span class="pp">[</span><span class="ss">FILE</span><span class="pp">]</span>...</span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="ex">or:</span>  wc <span class="pp">[</span><span class="ss">OPTION</span><span class="pp">]</span>... <span class="at">--files0-from</span><span class="op">=</span>F</span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="ex">Print</span> newline, word, and byte counts for each FILE, and a total line if</span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="fu">more</span> than one FILE is specified.  A word is a non-zero-length sequence of</span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">characters</span> delimited by white space.</span>
-<span id="cb3-6"><a href="#cb3-6"></a></span>
-<span id="cb3-7"><a href="#cb3-7"></a><span class="ex">With</span> no FILE, or when FILE is <span class="at">-,</span> read standard input.</span>
-<span id="cb3-8"><a href="#cb3-8"></a></span>
-<span id="cb3-9"><a href="#cb3-9"></a><span class="ex">The</span> options below may be used to select which counts are printed, always in</span>
-<span id="cb3-10"><a href="#cb3-10"></a><span class="ex">the</span> following order: newline, word, character, byte, maximum line length.</span>
-<span id="cb3-11"><a href="#cb3-11"></a>  <span class="ex">-c,</span> <span class="at">--bytes</span>            print the byte counts</span>
-<span id="cb3-12"><a href="#cb3-12"></a>  <span class="ex">-m,</span> <span class="at">--chars</span>            print the character counts</span>
-<span id="cb3-13"><a href="#cb3-13"></a>  <span class="ex">-l,</span> <span class="at">--lines</span>            print the newline counts</span>
-<span id="cb3-14"><a href="#cb3-14"></a>      <span class="ex">--files0-from=F</span>    read input from the files specified by</span>
-<span id="cb3-15"><a href="#cb3-15"></a>                           <span class="ex">NUL-terminated</span> names in file F<span class="kw">;</span></span>
-<span id="cb3-16"><a href="#cb3-16"></a>                           <span class="ex">If</span> F is <span class="at">-</span> then read names from standard input</span>
-<span id="cb3-17"><a href="#cb3-17"></a>  <span class="ex">-L,</span> <span class="at">--max-line-length</span>  print the maximum display width</span>
-<span id="cb3-18"><a href="#cb3-18"></a>  <span class="ex">-w,</span> <span class="at">--words</span>            print the word counts</span>
-<span id="cb3-19"><a href="#cb3-19"></a>      <span class="ex">--help</span>     display this help and exit</span>
-<span id="cb3-20"><a href="#cb3-20"></a>      <span class="ex">--version</span>  output version information and exit</span>
-<span id="cb3-21"><a href="#cb3-21"></a></span>
-<span id="cb3-22"><a href="#cb3-22"></a><span class="ex">GNU</span> coreutils online help: <span class="op">&lt;</span>https://www.gnu.org/software/coreutils/<span class="op">&gt;</span></span>
-<span id="cb3-23"><a href="#cb3-23"></a><span class="ex">Report</span> any translation bugs to <span class="op">&lt;</span>https://translationproject.org/team/<span class="op">&gt;</span></span>
-<span id="cb3-24"><a href="#cb3-24"></a><span class="ex">Full</span> documentation <span class="op">&lt;</span>https://www.gnu.org/software/coreutils/wc<span class="op">&gt;</span></span>
-<span id="cb3-25"><a href="#cb3-25"></a><span class="ex">or</span> available locally via: info <span class="st">'(coreutils) wc invocation'</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="required-functionality" class="level3">
-<h3 class="anchored" data-anchor-id="required-functionality">Required functionality</h3>
-<ul>
-<li>That is more than required, you need only implement:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="ex">Usage:</span> wc <span class="pp">[</span><span class="ss">FILE</span><span class="pp">]</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="ex">Print</span> newline, word, and byte counts for each FILE. A word is a </span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="ex">non-zero-length</span> sequence of characters delimited by white space.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>This can be trivially tested with some of the following:</li>
-</ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">$</span> wc src/main.rs</span>
-<span id="cb5-2"><a href="#cb5-2"></a> <span class="ex">12</span>  30 229 src/main.rs</span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="ex">$</span> cargo build release</span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="ex">$</span> ./target/release/my_wc src/main.rs</span>
-<span id="cb5-5"><a href="#cb5-5"></a> <span class="ex">12</span>  30 229 src/main.rs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<ul>
-<li>Your <code>src/main.rs</code> need not be of any particular size, and you needn’t implement all code within <code>src/main.rs</code>, but you should get the same counts from <code>wc</code> and from your release binary.</li>
+<li><a href="doc.rust-lang.org/std/mem/fn.transmute.html">Read more</a></li>
 </ul>
 </section>
-</section>
-<section id="helpful-reference" class="level2">
-<h2 class="anchored" data-anchor-id="helpful-reference">Helpful Reference</h2>
+<section id="raw-pointers" class="level3">
+<h3 class="anchored" data-anchor-id="raw-pointers">Raw Pointers</h3>
 <ul>
-<li>When working on projects like this, I almost always have the following reference material open.</li>
-<li><a href="https://doc.rust-lang.org/rust-by-example/std_misc/file/read_lines.html">read_lines - Rust By Example</a></li>
+<li>Also can use raw pointers here.</li>
+<li>Will get in the way of a single-line solution but that is okay - you should do you!</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a></span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">fn</span> read_lines(filename<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="dt">Vec</span><span class="op">&lt;</span><span class="dt">String</span><span class="op">&gt;</span> <span class="op">{</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a>    <span class="kw">let</span> <span class="kw">mut</span> result <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a></span>
-<span id="cb6-5"><a href="#cb6-5"></a>    <span class="cf">for</span> line <span class="kw">in</span> <span class="pp">std::fs::</span>read_to_string(filename)<span class="op">.</span>unwrap()<span class="op">.</span>lines() <span class="op">{</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a>        result<span class="op">.</span>push(line<span class="op">.</span>to_string())</span>
-<span id="cb6-7"><a href="#cb6-7"></a>    <span class="op">}</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a></span>
-<span id="cb6-9"><a href="#cb6-9"></a>    result</span>
-<span id="cb6-10"><a href="#cb6-10"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="numeric-values" class="level3">
+<h3 class="anchored" data-anchor-id="numeric-values">Numeric Values</h3>
+<ul>
+<li>One obvious way to use <code>transmute</code> is to change one type of data into another, without altering the underlying numeric values that exist in memory.</li>
+<li>For example, we can convert an array of <code>u8</code>s to an <code>i32</code>.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>    <span class="kw">let</span> bytes<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span><span class="dv">4</span>] <span class="op">=</span> [<span class="dv">0x12</span><span class="op">,</span><span class="dv">0x34</span><span class="op">,</span><span class="dv">0x56</span><span class="op">,</span><span class="dv">0x78</span>]<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>    <span class="kw">let</span> num<span class="op">:</span> <span class="dt">i32</span> <span class="op">=</span> <span class="pp">std::mem::</span>transmute(bytes)<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="pp">println!</span>(<span class="st">"{:x}"</span><span class="op">,</span> num)<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what <code>rustc</code> wanted, so I didn’t worry about it.</li>
+</ul>
+</section>
+<section id="endianness" class="level3">
+<h3 class="anchored" data-anchor-id="endianness">Endianness</h3>
+<ul>
+<li>The warning refers to the topic of <em>endianness</em>.
+<ul>
+<li>Big deal in C, kinda not in Rust actually.
+<ul>
+<li>Precisely because of that warning basically.</li>
+<li>This lab was very involved. <a href="https://cd-public.github.io/courses/old/c89s25/qmd/endian.html">Endian</a></li>
+</ul></li>
+</ul></li>
+<li><a href="https://en.wikipedia.org/wiki/Endianness">Read more</a></li>
+</ul>
+<blockquote class="blockquote">
+<p>In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness.</p>
+</blockquote>
+<ul>
+<li>Regard an <code>i32</code> as a word and a <code>u8</code> as a bit.</li>
+<li>Take note of the endianness revealed by the prior code.</li>
+</ul>
+</section>
+<section id="numeric-address" class="level3">
+<h3 class="anchored" data-anchor-id="numeric-address">Numeric Address</h3>
+<ul>
+<li>One possibly more advanced use of transmute is upon numeric addresses
+<ul>
+<li>The <em>key</em>, the numeric value of the address, stays the same.</li>
+<li>The value, the numeric value in the memory location decribed by the address, stays the same.</li>
+<li>The interpretation - how Rust understands the value at that location - changes.</li>
+</ul></li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>    <span class="kw">let</span> nats<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u32</span>] <span class="op">=</span> <span class="op">&amp;</span>[<span class="dv">0x3F800000</span>]<span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a>    <span class="kw">let</span> nums<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">f32</span>] <span class="op">=</span> <span class="pp">std::mem::</span>transmute(nats)<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> nums[<span class="dv">0</span>])<span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li><a href="./11_unsafe.html#/unions">Recall the meaning of 0x3F8000000</a></li>
+<li>I usually do this on arrays but I guess I’m not sure why.
+<ul>
+<li>Try things out.</li>
+<li>Vectors are definitely banned though, that is way too high level.</li>
+</ul></li>
+</ul>
+</section>
 </section>
 </section>
 <section id="fin" class="level1">
 <h1>Fin</h1>
+<ul>
+<li>To be continued in the homework.</li>
+</ul>
 
 
 <!-- -->
@@ -849,150 +853,143 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./00_derust.html" class="pagination-link" aria-label="Derust">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Derust</span>
+      <a href="./20_os.html" class="pagination-link" aria-label="OS">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">OS</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./02_cli.html" class="pagination-link" aria-label="CLI">
-        <span class="nav-page-text">CLI</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">---</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="an">title:</span><span class="co"> wc </span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="an">title:</span><span class="co"> Transmute </span></span>
 <span id="cb7-3"><a href="#cb7-3"></a><span class="an">format:</span><span class="co"> html</span></span>
 <span id="cb7-4"><a href="#cb7-4"></a><span class="co">---</span></span>
 <span id="cb7-5"><a href="#cb7-5"></a></span>
 <span id="cb7-6"><a href="#cb7-6"></a><span class="fu">## Announcements</span></span>
 <span id="cb7-7"><a href="#cb7-7"></a></span>
 <span id="cb7-8"><a href="#cb7-8"></a><span class="ss">- </span>Lab Day</span>
-<span id="cb7-9"><a href="#cb7-9"></a><span class="ss">    - </span>Set up environment</span>
-<span id="cb7-10"><a href="#cb7-10"></a><span class="ss">    - </span>Building a command line program</span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="ss">    - </span>Play with memory</span>
+<span id="cb7-10"><a href="#cb7-10"></a><span class="ss">    - </span>Use <span class="in">`unsafe`</span></span>
 <span id="cb7-11"><a href="#cb7-11"></a></span>
 <span id="cb7-12"><a href="#cb7-12"></a><span class="fu">## Homework</span></span>
 <span id="cb7-13"><a href="#cb7-13"></a></span>
-<span id="cb7-14"><a href="#cb7-14"></a><span class="ss">- </span>"CLI" is just this lab but more complete.</span>
-<span id="cb7-15"><a href="#cb7-15"></a><span class="ss">  - </span>Windows officially no longer supported.</span>
-<span id="cb7-16"><a href="#cb7-16"></a><span class="ss">- </span>Due Friday, 23 Jan. at 1440 ET.</span>
-<span id="cb7-17"><a href="#cb7-17"></a><span class="ss">  - </span>Plan to hang out as a class 1310-1440 on Fridays, probably.</span>
+<span id="cb7-14"><a href="#cb7-14"></a><span class="ss">- </span><span class="in">`malloc`</span> is this lab just more complete </span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="ss">  - </span>Cool, good, fun.</span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="ss">- </span>Due Friday, 06 Feb. at 1440 ET.</span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="ss">  - </span>And also covered in section. </span>
 <span id="cb7-18"><a href="#cb7-18"></a></span>
-<span id="cb7-19"><a href="#cb7-19"></a><span class="fu">## Setup</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a><span class="fu">## Requirements</span></span>
 <span id="cb7-20"><a href="#cb7-20"></a></span>
-<span id="cb7-21"><a href="#cb7-21"></a><span class="ss">- </span>If you are stuck setting up Rust, following <span class="co">[</span><span class="ot">this</span><span class="co">](https://cd-c89.github.io/rs/01_rustup.html)</span></span>
-<span id="cb7-22"><a href="#cb7-22"></a><span class="ss">- </span>At the end you should have:</span>
-<span id="cb7-23"><a href="#cb7-23"></a><span class="ss">    - </span><span class="in">`cargo`</span>, <span class="in">`git`</span>, and at least one of <span class="in">`gcc`</span> or <span class="in">`clang`</span> on your system.</span>
-<span id="cb7-24"><a href="#cb7-24"></a><span class="ss">    - </span>A repository named <span class="in">`371os`</span> on Github that is either (1) public or (2) shared with <span class="co">[</span><span class="ot">cd-public</span><span class="co">]</span>(https://github.com/cd-public</span>
-<span id="cb7-25"><a href="#cb7-25"></a></span>
-<span id="cb7-26"><a href="#cb7-26"></a><span class="fu">## Requirements</span></span>
-<span id="cb7-27"><a href="#cb7-27"></a></span>
-<span id="cb7-28"><a href="#cb7-28"></a><span class="ss">- </span><span class="va">[ ]</span> New repository for this course.</span>
-<span id="cb7-29"><a href="#cb7-29"></a><span class="ss">- </span><span class="va">[ ]</span> New crate for this lab.</span>
-<span id="cb7-30"><a href="#cb7-30"></a><span class="ss">- </span><span class="va">[ ]</span> Crate when built creates an executable that behaves identically to GNU Coreutils <span class="in">`wc`</span> when provided with a file name and no options.</span>
-<span id="cb7-31"><a href="#cb7-31"></a><span class="ss">    - </span>That is, you must support <span class="in">`wc src/main.rs`</span> but not <span class="in">`wc --files0-from=F src/main.rs`</span></span>
-<span id="cb7-32"><a href="#cb7-32"></a><span class="ss">    - </span>Check out <span class="in">`wc`</span> and <span class="in">`wc --help`</span> (which *you* don't need to provide) to get a sense of the task.</span>
+<span id="cb7-21"><a href="#cb7-21"></a><span class="ss">- </span><span class="va">[ ]</span> Change the interpretation of numeric *values* with transmute on values</span>
+<span id="cb7-22"><a href="#cb7-22"></a><span class="ss">- </span><span class="va">[ ]</span> Change the interpretation of *memory* with transmute on references.</span>
+<span id="cb7-23"><a href="#cb7-23"></a><span class="ss">- </span><span class="va">[ ]</span> Write a "Hello world!" program that uses no string or character data.</span>
+<span id="cb7-24"><a href="#cb7-24"></a></span>
+<span id="cb7-25"><a href="#cb7-25"></a><span class="fu"># Exercise</span></span>
+<span id="cb7-26"><a href="#cb7-26"></a></span>
+<span id="cb7-27"><a href="#cb7-27"></a><span class="fu">## Crate</span></span>
+<span id="cb7-28"><a href="#cb7-28"></a></span>
+<span id="cb7-29"><a href="#cb7-29"></a><span class="ss">- </span>To complete the lab today, create a crate named <span class="in">`helloworld`</span> in a folder named <span class="in">`21`</span> in your <span class="in">`371os`</span> repository.</span>
+<span id="cb7-30"><a href="#cb7-30"></a><span class="in">```{.bash}</span></span>
+<span id="cb7-31"><a href="#cb7-31"></a><span class="ex">cargo</span> new 21 <span class="at">--name</span> hello_world <span class="at">--vcs</span> none</span>
+<span id="cb7-32"><a href="#cb7-32"></a><span class="in">```</span></span>
 <span id="cb7-33"><a href="#cb7-33"></a></span>
-<span id="cb7-34"><a href="#cb7-34"></a><span class="fu"># Exercise</span></span>
+<span id="cb7-34"><a href="#cb7-34"></a><span class="fu">## "Hello world!" </span></span>
 <span id="cb7-35"><a href="#cb7-35"></a></span>
-<span id="cb7-36"><a href="#cb7-36"></a><span class="fu">## Repository</span></span>
-<span id="cb7-37"><a href="#cb7-37"></a></span>
-<span id="cb7-38"><a href="#cb7-38"></a><span class="ss">- </span>Create a repository for this class.</span>
-<span id="cb7-39"><a href="#cb7-39"></a><span class="ss">- </span>Requirements</span>
-<span id="cb7-40"><a href="#cb7-40"></a><span class="ss">    - </span>Name is <span class="in">`371os`</span></span>
-<span id="cb7-41"><a href="#cb7-41"></a><span class="ss">    - </span>May be public or private to you and me (<span class="co">[</span><span class="ot">cd-public</span><span class="co">](https://github.com/cd-public/)</span>).</span>
-<span id="cb7-42"><a href="#cb7-42"></a><span class="ss">        - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository)</span></span>
-<span id="cb7-43"><a href="#cb7-43"></a><span class="ss">    - </span>Must email me a link to your repository from your @willamette.edu email, e.g.:</span>
-<span id="cb7-44"><a href="#cb7-44"></a><span class="in">```{.email}</span></span>
-<span id="cb7-45"><a href="#cb7-45"></a>https://github.com/cd-example/371os</span>
-<span id="cb7-46"><a href="#cb7-46"></a><span class="in">```</span></span>
-<span id="cb7-47"><a href="#cb7-47"></a><span class="ss">- </span>If you're stuck, read more <span class="co">[</span><span class="ot">here</span><span class="co">](https://cd-c89.github.io/rs/01_rustup.html)</span></span>
-<span id="cb7-48"><a href="#cb7-48"></a></span>
-<span id="cb7-49"><a href="#cb7-49"></a><span class="fu">## Crate</span></span>
+<span id="cb7-36"><a href="#cb7-36"></a><span class="ss">- </span>Implement "Hello world!" using this crate.</span>
+<span id="cb7-37"><a href="#cb7-37"></a><span class="ss">- </span>Use <span class="in">`i32`</span> to store the "Hello world" data.</span>
+<span id="cb7-38"><a href="#cb7-38"></a><span class="ss">- </span>While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and <span class="in">`i32`</span> literals.</span>
+<span id="cb7-39"><a href="#cb7-39"></a></span>
+<span id="cb7-40"><a href="#cb7-40"></a><span class="in">```{.sh}</span></span>
+<span id="cb7-41"><a href="#cb7-41"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> wc src/main.rs <span class="co"># 2 lines main, 2 lines unsafe, 1 line code</span></span>
+<span id="cb7-42"><a href="#cb7-42"></a>  <span class="ex">5</span>  15 174 src/main.rs</span>
+<span id="cb7-43"><a href="#cb7-43"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> grep world src/main.rs <span class="co"># no plaintext in file</span></span>
+<span id="cb7-44"><a href="#cb7-44"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> cargo r <span class="at">--release</span></span>
+<span id="cb7-45"><a href="#cb7-45"></a>   <span class="ex">Compiling</span> helloworld v0.1.0 <span class="er">(</span><span class="ex">/home/calvin/tmp/oneone</span><span class="kw">)</span></span>
+<span id="cb7-46"><a href="#cb7-46"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile <span class="pp">[</span><span class="ss">optimized</span><span class="pp">]</span> target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.14s</span></span>
+<span id="cb7-47"><a href="#cb7-47"></a>     <span class="ex">Running</span> <span class="kw">`</span><span class="ex">target/release/helloworld</span><span class="kw">`</span></span>
+<span id="cb7-48"><a href="#cb7-48"></a><span class="ex">Hello</span> world!</span>
+<span id="cb7-49"><a href="#cb7-49"></a><span class="in">```</span></span>
 <span id="cb7-50"><a href="#cb7-50"></a></span>
-<span id="cb7-51"><a href="#cb7-51"></a><span class="ss">- </span>To complete the lab today, create a crate named <span class="in">`my_wc`</span> in a folder named <span class="in">`01`</span> in your <span class="in">`371os`</span> repository.</span>
-<span id="cb7-52"><a href="#cb7-52"></a><span class="in">```{.bash}</span></span>
-<span id="cb7-53"><a href="#cb7-53"></a><span class="ex">cargo</span> new 01 <span class="at">--name</span> my_wc <span class="at">--vcs</span> none</span>
-<span id="cb7-54"><a href="#cb7-54"></a><span class="in">```</span></span>
-<span id="cb7-55"><a href="#cb7-55"></a><span class="ss">- </span>If you're stuck, read more <span class="co">[</span><span class="ot">here</span><span class="co">](https://cd-c89.github.io/rs/11_packages.html#option-1-names)</span></span>
-<span id="cb7-56"><a href="#cb7-56"></a></span>
-<span id="cb7-57"><a href="#cb7-57"></a><span class="fu">## `wc`</span></span>
+<span id="cb7-51"><a href="#cb7-51"></a><span class="fu">### I love Python</span></span>
+<span id="cb7-52"><a href="#cb7-52"></a></span>
+<span id="cb7-53"><a href="#cb7-53"></a><span class="ss">- </span>The following may be useful here, to the interested student.</span>
+<span id="cb7-54"><a href="#cb7-54"></a></span>
+<span id="cb7-55"><a href="#cb7-55"></a><span class="in">```{.sh}</span></span>
+<span id="cb7-56"><a href="#cb7-56"></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'[print(ord(a)) for a in "Hello world!"]'</span></span>
+<span id="cb7-57"><a href="#cb7-57"></a><span class="in">```</span></span>
 <span id="cb7-58"><a href="#cb7-58"></a></span>
-<span id="cb7-59"><a href="#cb7-59"></a><span class="ss">- </span>Implement the minimal base functionality of <span class="in">`wc`</span> using this crate.</span>
+<span id="cb7-59"><a href="#cb7-59"></a><span class="ss">- </span>This is probably insufficient for your purposes and will require some hacking.</span>
 <span id="cb7-60"><a href="#cb7-60"></a></span>
-<span id="cb7-61"><a href="#cb7-61"></a><span class="fu">### Full functionality</span></span>
+<span id="cb7-61"><a href="#cb7-61"></a><span class="fu">### Transmute</span></span>
 <span id="cb7-62"><a href="#cb7-62"></a></span>
-<span id="cb7-63"><a href="#cb7-63"></a><span class="ss">- </span>Here is <span class="in">`wc --help`</span></span>
-<span id="cb7-64"><a href="#cb7-64"></a><span class="ss">- </span>You do not need to do all of this!</span>
-<span id="cb7-65"><a href="#cb7-65"></a></span>
-<span id="cb7-66"><a href="#cb7-66"></a><span class="in">```{.sh}</span></span>
-<span id="cb7-67"><a href="#cb7-67"></a><span class="ex">Usage:</span> wc <span class="pp">[</span><span class="ss">OPTION</span><span class="pp">]</span>... <span class="pp">[</span><span class="ss">FILE</span><span class="pp">]</span>...</span>
-<span id="cb7-68"><a href="#cb7-68"></a>  <span class="ex">or:</span>  wc <span class="pp">[</span><span class="ss">OPTION</span><span class="pp">]</span>... <span class="at">--files0-from</span><span class="op">=</span>F</span>
-<span id="cb7-69"><a href="#cb7-69"></a><span class="ex">Print</span> newline, word, and byte counts for each FILE, and a total line if</span>
-<span id="cb7-70"><a href="#cb7-70"></a><span class="fu">more</span> than one FILE is specified.  A word is a non-zero-length sequence of</span>
-<span id="cb7-71"><a href="#cb7-71"></a><span class="ex">characters</span> delimited by white space.</span>
+<span id="cb7-63"><a href="#cb7-63"></a><span class="ss">- </span>Since it is more idiomatic to use code other people have written in Rust...</span>
+<span id="cb7-64"><a href="#cb7-64"></a><span class="ss">    - </span>I have an opinion on this.</span>
+<span id="cb7-65"><a href="#cb7-65"></a><span class="ss">- </span>...while it is possible to conduct this exercise using only raw pointers and casts...</span>
+<span id="cb7-66"><a href="#cb7-66"></a><span class="ss">    - </span>(in the voice of Palpatine) "Do it!"</span>
+<span id="cb7-67"><a href="#cb7-67"></a><span class="ss">- </span>...it is my professional responsibility to recommend you use <span class="in">`transmute`</span>.</span>
+<span id="cb7-68"><a href="#cb7-68"></a></span>
+<span id="cb7-69"><a href="#cb7-69"></a><span class="in">```{.rs}</span></span>
+<span id="cb7-70"><a href="#cb7-70"></a>pub const unsafe fn transmute<span class="sc">&lt;</span>Src, Dst<span class="sc">&gt;</span>(src<span class="sc">:</span> Src) <span class="ot">-&gt;</span> Dst</span>
+<span id="cb7-71"><a href="#cb7-71"></a><span class="in">```</span></span>
 <span id="cb7-72"><a href="#cb7-72"></a></span>
-<span id="cb7-73"><a href="#cb7-73"></a><span class="ex">With</span> no FILE, or when FILE is <span class="at">-,</span> read standard input.</span>
+<span id="cb7-73"><a href="#cb7-73"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](doc.rust-lang.org/std/mem/fn.transmute.html)</span></span>
 <span id="cb7-74"><a href="#cb7-74"></a></span>
-<span id="cb7-75"><a href="#cb7-75"></a><span class="ex">The</span> options below may be used to select which counts are printed, always in</span>
-<span id="cb7-76"><a href="#cb7-76"></a><span class="ex">the</span> following order: newline, word, character, byte, maximum line length.</span>
-<span id="cb7-77"><a href="#cb7-77"></a>  <span class="ex">-c,</span> <span class="at">--bytes</span>            print the byte counts</span>
-<span id="cb7-78"><a href="#cb7-78"></a>  <span class="ex">-m,</span> <span class="at">--chars</span>            print the character counts</span>
-<span id="cb7-79"><a href="#cb7-79"></a>  <span class="ex">-l,</span> <span class="at">--lines</span>            print the newline counts</span>
-<span id="cb7-80"><a href="#cb7-80"></a>      <span class="ex">--files0-from=F</span>    read input from the files specified by</span>
-<span id="cb7-81"><a href="#cb7-81"></a>                           <span class="ex">NUL-terminated</span> names in file F<span class="kw">;</span></span>
-<span id="cb7-82"><a href="#cb7-82"></a>                           <span class="ex">If</span> F is <span class="at">-</span> then read names from standard input</span>
-<span id="cb7-83"><a href="#cb7-83"></a>  <span class="ex">-L,</span> <span class="at">--max-line-length</span>  print the maximum display width</span>
-<span id="cb7-84"><a href="#cb7-84"></a>  <span class="ex">-w,</span> <span class="at">--words</span>            print the word counts</span>
-<span id="cb7-85"><a href="#cb7-85"></a>      <span class="ex">--help</span>     display this help and exit</span>
-<span id="cb7-86"><a href="#cb7-86"></a>      <span class="ex">--version</span>  output version information and exit</span>
-<span id="cb7-87"><a href="#cb7-87"></a></span>
-<span id="cb7-88"><a href="#cb7-88"></a><span class="ex">GNU</span> coreutils online help: <span class="op">&lt;</span>https://www.gnu.org/software/coreutils/<span class="op">&gt;</span></span>
-<span id="cb7-89"><a href="#cb7-89"></a><span class="ex">Report</span> any translation bugs to <span class="op">&lt;</span>https://translationproject.org/team/<span class="op">&gt;</span></span>
-<span id="cb7-90"><a href="#cb7-90"></a><span class="ex">Full</span> documentation <span class="op">&lt;</span>https://www.gnu.org/software/coreutils/wc<span class="op">&gt;</span></span>
-<span id="cb7-91"><a href="#cb7-91"></a><span class="ex">or</span> available locally via: info <span class="st">'(coreutils) wc invocation'</span></span>
-<span id="cb7-92"><a href="#cb7-92"></a><span class="in">```</span></span>
-<span id="cb7-93"><a href="#cb7-93"></a></span>
-<span id="cb7-94"><a href="#cb7-94"></a><span class="fu">### Required functionality</span></span>
-<span id="cb7-95"><a href="#cb7-95"></a></span>
-<span id="cb7-96"><a href="#cb7-96"></a><span class="ss">- </span>That is more than required, you need only implement:</span>
-<span id="cb7-97"><a href="#cb7-97"></a></span>
-<span id="cb7-98"><a href="#cb7-98"></a><span class="in">```{.sh}</span></span>
-<span id="cb7-99"><a href="#cb7-99"></a><span class="ex">Usage:</span> wc <span class="pp">[</span><span class="ss">FILE</span><span class="pp">]</span></span>
-<span id="cb7-100"><a href="#cb7-100"></a><span class="ex">Print</span> newline, word, and byte counts for each FILE. A word is a </span>
-<span id="cb7-101"><a href="#cb7-101"></a><span class="ex">non-zero-length</span> sequence of characters delimited by white space.</span>
-<span id="cb7-102"><a href="#cb7-102"></a><span class="in">```</span></span>
-<span id="cb7-103"><a href="#cb7-103"></a></span>
-<span id="cb7-104"><a href="#cb7-104"></a><span class="ss">- </span>This can be trivially tested with some of the following:</span>
-<span id="cb7-105"><a href="#cb7-105"></a></span>
-<span id="cb7-106"><a href="#cb7-106"></a><span class="in">```{.sh}</span></span>
-<span id="cb7-107"><a href="#cb7-107"></a><span class="ex">$</span> wc src/main.rs</span>
-<span id="cb7-108"><a href="#cb7-108"></a> <span class="ex">12</span>  30 229 src/main.rs</span>
-<span id="cb7-109"><a href="#cb7-109"></a><span class="ex">$</span> cargo build release</span>
-<span id="cb7-110"><a href="#cb7-110"></a><span class="ex">$</span> ./target/release/my_wc src/main.rs</span>
-<span id="cb7-111"><a href="#cb7-111"></a> <span class="ex">12</span>  30 229 src/main.rs</span>
-<span id="cb7-112"><a href="#cb7-112"></a><span class="in">```</span></span>
-<span id="cb7-113"><a href="#cb7-113"></a></span>
-<span id="cb7-114"><a href="#cb7-114"></a><span class="ss">- </span>Your <span class="in">`src/main.rs`</span> need not be of any particular size, and you needn't implement all code within <span class="in">`src/main.rs`</span>, but you should get the same counts from <span class="in">`wc`</span> and from your release binary.</span>
-<span id="cb7-115"><a href="#cb7-115"></a></span>
-<span id="cb7-116"><a href="#cb7-116"></a><span class="fu">## Helpful Reference</span></span>
-<span id="cb7-117"><a href="#cb7-117"></a></span>
-<span id="cb7-118"><a href="#cb7-118"></a><span class="ss">- </span>When working on projects like this, I almost always have the following reference material open.</span>
-<span id="cb7-119"><a href="#cb7-119"></a><span class="ss">- </span><span class="co">[</span><span class="ot">read_lines - Rust By Example</span><span class="co">](https://doc.rust-lang.org/rust-by-example/std_misc/file/read_lines.html)</span></span>
-<span id="cb7-120"><a href="#cb7-120"></a></span>
-<span id="cb7-121"><a href="#cb7-121"></a><span class="in">```{.rs}</span></span>
+<span id="cb7-75"><a href="#cb7-75"></a><span class="fu">### Raw Pointers</span></span>
+<span id="cb7-76"><a href="#cb7-76"></a></span>
+<span id="cb7-77"><a href="#cb7-77"></a><span class="ss">- </span>Also can use raw pointers here.</span>
+<span id="cb7-78"><a href="#cb7-78"></a><span class="ss">- </span>Will get in the way of a single-line solution but that is okay - you should do you!</span>
+<span id="cb7-79"><a href="#cb7-79"></a></span>
+<span id="cb7-80"><a href="#cb7-80"></a><span class="fu">### Numeric Values</span></span>
+<span id="cb7-81"><a href="#cb7-81"></a></span>
+<span id="cb7-82"><a href="#cb7-82"></a><span class="ss">- </span>One obvious way to use <span class="in">`transmute`</span> is to change one type of data into another, without altering the underlying numeric values that exist in memory.</span>
+<span id="cb7-83"><a href="#cb7-83"></a><span class="ss">- </span>For example, we can convert an array of <span class="in">`u8`</span>s to an <span class="in">`i32`</span>.</span>
+<span id="cb7-84"><a href="#cb7-84"></a></span>
+<span id="cb7-85"><a href="#cb7-85"></a><span class="in">```{.rs}</span></span>
+<span id="cb7-86"><a href="#cb7-86"></a>unsafe {</span>
+<span id="cb7-87"><a href="#cb7-87"></a>    let bytes<span class="sc">:</span> [u8;<span class="dv">4</span>] <span class="ot">=</span> [<span class="dv">0x12</span>,<span class="dv">0x34</span>,<span class="dv">0x56</span>,<span class="dv">0x78</span>];</span>
+<span id="cb7-88"><a href="#cb7-88"></a>    let num<span class="sc">:</span> i32 <span class="ot">=</span> std<span class="sc">::</span>mem<span class="sc">::</span><span class="fu">transmute</span>(bytes);</span>
+<span id="cb7-89"><a href="#cb7-89"></a>    println<span class="sc">!</span>(<span class="st">"{:x}"</span>, num);</span>
+<span id="cb7-90"><a href="#cb7-90"></a>}</span>
+<span id="cb7-91"><a href="#cb7-91"></a><span class="in">```</span></span>
+<span id="cb7-92"><a href="#cb7-92"></a></span>
+<span id="cb7-93"><a href="#cb7-93"></a><span class="ss">- </span>I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what <span class="in">`rustc`</span> wanted, so I didn't worry about it. </span>
+<span id="cb7-94"><a href="#cb7-94"></a></span>
+<span id="cb7-95"><a href="#cb7-95"></a><span class="fu">### Endianness</span></span>
+<span id="cb7-96"><a href="#cb7-96"></a></span>
+<span id="cb7-97"><a href="#cb7-97"></a><span class="ss">- </span>The warning refers to the topic of *endianness*.</span>
+<span id="cb7-98"><a href="#cb7-98"></a><span class="ss">    - </span>Big deal in C, kinda not in Rust actually.</span>
+<span id="cb7-99"><a href="#cb7-99"></a><span class="ss">        - </span>Precisely because of that warning basically.</span>
+<span id="cb7-100"><a href="#cb7-100"></a><span class="ss">        - </span>This lab was very involved.  <span class="co">[</span><span class="ot">Endian</span><span class="co">](https://cd-public.github.io/courses/old/c89s25/qmd/endian.html)</span></span>
+<span id="cb7-101"><a href="#cb7-101"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/Endianness)</span></span>
+<span id="cb7-102"><a href="#cb7-102"></a></span>
+<span id="cb7-103"><a href="#cb7-103"></a><span class="at">&gt; In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness. </span></span>
+<span id="cb7-104"><a href="#cb7-104"></a></span>
+<span id="cb7-105"><a href="#cb7-105"></a><span class="ss">- </span>Regard an <span class="in">`i32`</span> as a word and a <span class="in">`u8`</span> as a bit.</span>
+<span id="cb7-106"><a href="#cb7-106"></a><span class="ss">- </span>Take note of the endianness revealed by the prior code.</span>
+<span id="cb7-107"><a href="#cb7-107"></a></span>
+<span id="cb7-108"><a href="#cb7-108"></a><span class="fu">### Numeric Address</span></span>
+<span id="cb7-109"><a href="#cb7-109"></a></span>
+<span id="cb7-110"><a href="#cb7-110"></a><span class="ss">- </span>One possibly more advanced use of transmute is upon numeric addresses</span>
+<span id="cb7-111"><a href="#cb7-111"></a><span class="ss">    - </span>The *key*, the numeric value of the address, stays the same.</span>
+<span id="cb7-112"><a href="#cb7-112"></a><span class="ss">    - </span>The value, the numeric value in the memory location decribed by the address, stays the same.</span>
+<span id="cb7-113"><a href="#cb7-113"></a><span class="ss">    - </span>The interpretation - how Rust understands the value at that location - changes.</span>
+<span id="cb7-114"><a href="#cb7-114"></a></span>
+<span id="cb7-115"><a href="#cb7-115"></a><span class="in">```{.rs}</span></span>
+<span id="cb7-116"><a href="#cb7-116"></a>unsafe {</span>
+<span id="cb7-117"><a href="#cb7-117"></a>    let nats<span class="sc">:</span> <span class="er">&amp;</span>[u32] <span class="ot">=</span> <span class="er">&amp;</span>[<span class="dv">0x3F800000</span>];</span>
+<span id="cb7-118"><a href="#cb7-118"></a>    let nums<span class="sc">:</span> <span class="er">&amp;</span>[f32] <span class="ot">=</span> std<span class="sc">::</span>mem<span class="sc">::</span><span class="fu">transmute</span>(nats);</span>
+<span id="cb7-119"><a href="#cb7-119"></a>    println<span class="sc">!</span>(<span class="st">"{}"</span>, nums[<span class="dv">0</span>]);</span>
+<span id="cb7-120"><a href="#cb7-120"></a>}</span>
+<span id="cb7-121"><a href="#cb7-121"></a><span class="in">```</span></span>
 <span id="cb7-122"><a href="#cb7-122"></a></span>
-<span id="cb7-123"><a href="#cb7-123"></a>fn <span class="fu">read_lines</span>(filename<span class="sc">:</span> <span class="er">&amp;</span>str) <span class="ot">-&gt;</span> Vec<span class="sc">&lt;</span>String<span class="sc">&gt;</span> {</span>
-<span id="cb7-124"><a href="#cb7-124"></a>    let mut result <span class="ot">=</span> Vec<span class="sc">::</span><span class="fu">new</span>();</span>
-<span id="cb7-125"><a href="#cb7-125"></a></span>
-<span id="cb7-126"><a href="#cb7-126"></a>    <span class="cf">for</span> line <span class="cf">in</span> std<span class="sc">::</span>fs<span class="sc">::</span><span class="fu">read_to_string</span>(filename)<span class="fu">.unwrap</span>()<span class="fu">.lines</span>() {</span>
-<span id="cb7-127"><a href="#cb7-127"></a>        <span class="fu">result.push</span>(<span class="fu">line.to_string</span>())</span>
-<span id="cb7-128"><a href="#cb7-128"></a>    }</span>
+<span id="cb7-123"><a href="#cb7-123"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Recall the meaning of 0x3F8000000</span><span class="co">](11_unsafe.qmd#/unions)</span></span>
+<span id="cb7-124"><a href="#cb7-124"></a><span class="ss">- </span>I usually do this on arrays but I guess I'm not sure why.</span>
+<span id="cb7-125"><a href="#cb7-125"></a><span class="ss">    - </span>Try things out.</span>
+<span id="cb7-126"><a href="#cb7-126"></a><span class="ss">    - </span>Vectors are definitely banned though, that is way too high level.</span>
+<span id="cb7-127"><a href="#cb7-127"></a></span>
+<span id="cb7-128"><a href="#cb7-128"></a><span class="fu"># Fin</span></span>
 <span id="cb7-129"><a href="#cb7-129"></a></span>
-<span id="cb7-130"><a href="#cb7-130"></a>    result</span>
-<span id="cb7-131"><a href="#cb7-131"></a>}</span>
-<span id="cb7-132"><a href="#cb7-132"></a><span class="in">```</span></span>
-<span id="cb7-133"><a href="#cb7-133"></a></span>
-<span id="cb7-134"><a href="#cb7-134"></a><span class="fu"># Fin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb7-130"><a href="#cb7-130"></a><span class="ss">- </span>To be continued in the homework.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
