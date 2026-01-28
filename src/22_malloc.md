@@ -8,11 +8,6 @@ format: html
 - Homeworks are due on the Friday *after* the week they correspond to lecture.
 - So 9 days after the corresponding lab.
 
-## Citation
-
-- [An I/O Project: Building a Command Line Program](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)
-- In a way, an OS is a "command line program"...
-
 ## Requirements
 
 - [ ] `371rs/22` crate; I named mine "malloc"
