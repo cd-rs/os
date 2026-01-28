@@ -23,6 +23,18 @@ format: html
 
 ## Code
 
+::: {.callout-note appearance="simple"}
+
+## Update: Don't Assume `i32`
+
+An early submitted solution trivialized the autograder by assuming all provided values to `getter` and `setter` would be of type `i32`.
+
+This assumption side-steps the core learning objective of working with memory objects of arbitrary size.
+
+Ensure your solution does not assume `i32`, and make some effort to test. You may want to test collection types as well (like `Vec<T>` and `String`).
+
+:::
+
 ```{.rs filename="src/main.rs"}
 use malloc::*; // crate name
 
@@ -160,6 +172,7 @@ fn main() {
         - You are permitted have overhead costs as high as 1-in-4 if you need them.
     - However, I had to mark within that bitmask *that the bitmask was already using memory*.
     - This formed my `init`.
+
 ```{.rs filename="src/lib.rs"}
 // Zero the array except the mask.
 fn init() {
@@ -205,3 +218,44 @@ fn init() {
 - We note that `setter` does not ask have an argument for the size of memory being set.
     - It is your responsibility to infer this size using the type of the arguments.
     - This is to learn Rust, not to learn about memory, so a secondary objective but one I found worthwhile.
+
+```{.rs filename="src/lib.rs"}
+// Place val at loc
+// No safety checks so good luck out there.
+pub fn setter<T>(val: T, loc: usize) {
+    unsafe {
+        < 4 lines >
+    }
+    return;
+}
+```
+
+- The instructional staff is diligently working to infer the most graceful way to handle this operation, and many current solutions potentially introduce undefined behavior.
+- I summarize my approach as follows:
+    - I cast a reference to the value as a raw pointer.
+    - I cast that raw pointer to `usize`.
+    - I use a for loop to performing an assignment operation.
+        - I use `size_of_val` to determine how many times to loop.
+        - I assign a location in the `BUS` to be equal to *something*.
+            - That *something* is the relevant byte, which I reach through a combination of casts and arithmetic.
+
+### Getter
+
+- After the calls to "set" values, there are calls to retrieve the values (for latter inspection).
+- Really I shouldn't have had to use `Default` and if you don't do that I will respect you more.
+    - Sure was easier though!
+    - Nominally the correct way to do this is [MaybeUninit](https://doc.rust-lang.org/std/mem/union.MaybeUninit.html)
+
+```{.rs filename="src/main.rs"}
+// Should check the validity bitmask here...
+pub fn getter<T: Default>(loc: usize) -> T {
+    unsafe {
+        let mut val = T::default();
+        < 3 lines >
+        return val;
+    }
+}
+```
+
+- My code was quite similar to setting, but with the updates in the opposite direction.
+    - I used an internal `u8` array that was larger than necessary but had a finite bound.
