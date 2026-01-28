@@ -208,19 +208,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#malloc" id="toc-malloc" class="nav-link" data-scroll-target="#malloc">Malloc</a></li>
   <li><a href="#static-mut" id="toc-static-mut" class="nav-link" data-scroll-target="#static-mut">Static mut</a></li>
   <li><a href="#initialization" id="toc-initialization" class="nav-link" data-scroll-target="#initialization">Initialization</a></li>
-  </ul></li>
-  <li><a href="#crate" id="toc-crate" class="nav-link" data-scroll-target="#crate">Crate</a></li>
-  <li><a href="#hello-world" id="toc-hello-world" class="nav-link" data-scroll-target="#hello-world">“Hello world!”</a>
-  <ul class="collapse">
-  <li><a href="#i-love-python" id="toc-i-love-python" class="nav-link" data-scroll-target="#i-love-python">I love Python</a></li>
-  <li><a href="#transmute" id="toc-transmute" class="nav-link" data-scroll-target="#transmute">Transmute</a></li>
-  <li><a href="#raw-pointers" id="toc-raw-pointers" class="nav-link" data-scroll-target="#raw-pointers">Raw Pointers</a></li>
-  <li><a href="#numeric-values" id="toc-numeric-values" class="nav-link" data-scroll-target="#numeric-values">Numeric Values</a></li>
-  <li><a href="#endianness" id="toc-endianness" class="nav-link" data-scroll-target="#endianness">Endianness</a></li>
-  <li><a href="#numeric-address" id="toc-numeric-address" class="nav-link" data-scroll-target="#numeric-address">Numeric Address</a></li>
+  <li><a href="#setter" id="toc-setter" class="nav-link" data-scroll-target="#setter">Setter</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
   </ul>
 </nav>
     </div>
@@ -266,6 +256,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul class="task-list">
 <li><label><input type="checkbox"><code>371rs/22</code> crate; I named mine “malloc”</label></li>
 <li><label><input type="checkbox">You write <code>src/lib.rs</code> that implements functions in the <code>src/main.rs</code> I provide.</label></li>
+<li><label><input type="checkbox">Regard it as “unsporting” to use <code>Vector</code> or any other Rust built-in data structure.</label>
+<ul>
+<li><strong>Unless</strong> you are storing it.</li>
+<li>Use arrays and raw pointers.</li>
+<li>If you can’t solve it without them, use them, but…</li>
+<li>…at least understand why it’s hard and that there’s an alternative.</li>
+<li><em>If you hand-implement a vector-like on top of static mut within the overhead allowance, you may use <strong>your own</strong> vectors</em></li>
+</ul></li>
 </ul>
 </section>
 <section id="main" class="level1">
@@ -445,6 +443,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>If a bit is set to 1, the corresponding byte is in use.</li>
 <li>So a 1-in-8 overhead cost.</li>
 <li>This is why 64 bit words are popular.</li>
+<li>You are permitted have overhead costs as high as 1-in-4 if you need them.</li>
 </ul></li>
 <li>However, I had to mark within that bitmask <em>that the bitmask was already using memory</em>.</li>
 <li>This formed my <code>init</code>.</li>
@@ -475,135 +474,50 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div></li>
 </ul>
 </section>
-</section>
-<section id="crate" class="level2">
-<h2 class="anchored" data-anchor-id="crate">Crate</h2>
+<section id="setter" class="level3">
+<h3 class="anchored" data-anchor-id="setter">Setter</h3>
 <ul>
-<li>To complete the lab today, create a crate named <code>helloworld</code> in a folder named <code>21</code> in your <code>371os</code> repository.</li>
+<li>After the calls to <code>malloc</code> within main, we use a wrapping function <code>setter</code> to set memory at the location reserved by the malloc to have certain values.</li>
 </ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="ex">cargo</span> new 21 <span class="at">--name</span> hello_world <span class="at">--vcs</span> none</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="hello-world" class="level2">
-<h2 class="anchored" data-anchor-id="hello-world">“Hello world!”</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a>    <span class="kw">let</span> x <span class="op">=</span> <span class="dv">0x44332211</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>    <span class="kw">let</span> y <span class="op">=</span> <span class="dv">0x12345678</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>    setter(x<span class="op">,</span> p0)<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>    setter(y<span class="op">,</span> p1)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <ul>
-<li>Implement “Hello world!” using this crate.</li>
-<li>Use <code>i32</code> to store the “Hello world” data.</li>
-<li>While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and <code>i32</code> literals.</li>
-</ul>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> wc src/main.rs <span class="co"># 2 lines main, 2 lines unsafe, 1 line code</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a>  <span class="ex">5</span>  15 174 src/main.rs</span>
-<span id="cb8-3"><a href="#cb8-3"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> grep world src/main.rs <span class="co"># no plaintext in file</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> cargo r <span class="at">--release</span></span>
-<span id="cb8-5"><a href="#cb8-5"></a>   <span class="ex">Compiling</span> helloworld v0.1.0 <span class="er">(</span><span class="ex">/home/calvin/tmp/oneone</span><span class="kw">)</span></span>
-<span id="cb8-6"><a href="#cb8-6"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile <span class="pp">[</span><span class="ss">optimized</span><span class="pp">]</span> target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.14s</span></span>
-<span id="cb8-7"><a href="#cb8-7"></a>     <span class="ex">Running</span> <span class="kw">`</span><span class="ex">target/release/helloworld</span><span class="kw">`</span></span>
-<span id="cb8-8"><a href="#cb8-8"></a><span class="ex">Hello</span> world!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="i-love-python" class="level3">
-<h3 class="anchored" data-anchor-id="i-love-python">I love Python</h3>
+<li>This maybe isn’t the most typical way to access memory.
 <ul>
-<li>The following may be useful here, to the interested student.</li>
-</ul>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'[print(ord(a)) for a in "Hello world!"]'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<li>A more common metaphor is <code>lw</code> and <code>sw</code> <a href="https://stackoverflow.com/questions/54136371/understanding-how-lw-and-sw-actually-work-in-a-mips-program">more</a></li>
+<li>I found this metaphor more interesting.
 <ul>
-<li>This is probably insufficient for your purposes and will require some hacking.</li>
-</ul>
-</section>
-<section id="transmute" class="level3">
-<h3 class="anchored" data-anchor-id="transmute">Transmute</h3>
-<ul>
-<li>Since it is more idiomatic to use code other people have written in Rust…
-<ul>
-<li>I have an opinion on this.</li>
-</ul></li>
-<li>…while it is possible to conduct this exercise using only raw pointers and casts…
-<ul>
-<li>(in the voice of Palpatine) “Do it!”</li>
-</ul></li>
-<li>…it is my professional responsibility to recommend you use <code>transmute</code>.</li>
-</ul>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> transmute<span class="op">&lt;</span>Src<span class="op">,</span> Dst<span class="op">&gt;</span>(src<span class="op">:</span> Src) <span class="op">-&gt;</span> Dst</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li><a href="doc.rust-lang.org/std/mem/fn.transmute.html">Read more</a></li>
-</ul>
-</section>
-<section id="raw-pointers" class="level3">
-<h3 class="anchored" data-anchor-id="raw-pointers">Raw Pointers</h3>
-<ul>
-<li>Also can use raw pointers here.</li>
-<li>Will get in the way of a single-line solution but that is okay - you should do you!</li>
-</ul>
-</section>
-<section id="numeric-values" class="level3">
-<h3 class="anchored" data-anchor-id="numeric-values">Numeric Values</h3>
-<ul>
-<li>One obvious way to use <code>transmute</code> is to change one type of data into another, without altering the underlying numeric values that exist in memory.</li>
-<li>For example, we can convert an array of <code>u8</code>s to an <code>i32</code>.</li>
-</ul>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb11-2"><a href="#cb11-2"></a>    <span class="kw">let</span> bytes<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span><span class="dv">4</span>] <span class="op">=</span> [<span class="dv">0x12</span><span class="op">,</span><span class="dv">0x34</span><span class="op">,</span><span class="dv">0x56</span><span class="op">,</span><span class="dv">0x78</span>]<span class="op">;</span></span>
-<span id="cb11-3"><a href="#cb11-3"></a>    <span class="kw">let</span> num<span class="op">:</span> <span class="dt">i32</span> <span class="op">=</span> <span class="pp">std::mem::</span>transmute(bytes)<span class="op">;</span></span>
-<span id="cb11-4"><a href="#cb11-4"></a>    <span class="pp">println!</span>(<span class="st">"{:x}"</span><span class="op">,</span> num)<span class="op">;</span></span>
-<span id="cb11-5"><a href="#cb11-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li>I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what <code>rustc</code> wanted, so I didn’t worry about it.</li>
-</ul>
-</section>
-<section id="endianness" class="level3">
-<h3 class="anchored" data-anchor-id="endianness">Endianness</h3>
-<ul>
-<li>The warning refers to the topic of <em>endianness</em>.
-<ul>
-<li>Big deal in C, kinda not in Rust actually.
-<ul>
-<li>Precisely because of that warning basically.</li>
-<li>This lab was very involved. <a href="https://cd-public.github.io/courses/old/c89s25/qmd/endian.html">Endian</a></li>
+<li>Words are fixed size, and felt quite trivial.</li>
 </ul></li>
 </ul></li>
-<li><a href="https://en.wikipedia.org/wiki/Endianness">Read more</a></li>
-</ul>
-<blockquote class="blockquote">
-<p>In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness.</p>
-</blockquote>
+<li>Given some value returned by malloc, store up to that many bytes of information within the <code>BUS</code>.
 <ul>
-<li>Regard an <code>i32</code> as a word and a <code>u8</code> as a bit.</li>
-<li>Take note of the endianness revealed by the prior code.</li>
-</ul>
-</section>
-<section id="numeric-address" class="level3">
-<h3 class="anchored" data-anchor-id="numeric-address">Numeric Address</h3>
+<li><code>malloc</code> and <code>setter</code> together are responsible for ensuring the correctness and consistency of these bytes.</li>
+<li>In this case, I malloc much more than I needed (16 and 32 bytes, respectively, for 4 byte words).
 <ul>
-<li>One possibly more advanced use of transmute is upon numeric addresses
-<ul>
-<li>The <em>key</em>, the numeric value of the address, stays the same.</li>
-<li>The value, the numeric value in the memory location decribed by the address, stays the same.</li>
-<li>The interpretation - how Rust understands the value at that location - changes.</li>
+<li>This is allowed, but wasteful.</li>
+<li>It also makes testing easier.</li>
 </ul></li>
-</ul>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a>    <span class="kw">let</span> nats<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u32</span>] <span class="op">=</span> <span class="op">&amp;</span>[<span class="dv">0x3F800000</span>]<span class="op">;</span></span>
-<span id="cb12-3"><a href="#cb12-3"></a>    <span class="kw">let</span> nums<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">f32</span>] <span class="op">=</span> <span class="pp">std::mem::</span>transmute(nats)<span class="op">;</span></span>
-<span id="cb12-4"><a href="#cb12-4"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> nums[<span class="dv">0</span>])<span class="op">;</span></span>
-<span id="cb12-5"><a href="#cb12-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li><a href="./11_unsafe.html#\unions">Recall the meaning of 0x3F8000000</a></li>
-<li>I usually do this on arrays but I guess I’m not sure why.
-<ul>
-<li>Try things out.</li>
-<li>Vectors are definitely banned though, that is way too high level.</li>
 </ul></li>
-</ul>
-</section>
-</section>
-</section>
-<section id="fin" class="level1">
-<h1>Fin</h1>
+<li>We note that <code>setter</code> does not ask have an argument for the size of memory being set.
 <ul>
-<li>To be continued in the homework.</li>
+<li>It is your responsibility to infer this size using the type of the arguments.</li>
+<li>This is to learn Rust, not to learn about memory, so a secondary objective but one I found worthwhile.</li>
+</ul></li>
 </ul>
 
 
 <!-- -->
 
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1087,292 +1001,218 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-page nav-page-next">
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">---</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a><span class="an">title:</span><span class="co"> malloc</span></span>
-<span id="cb13-3"><a href="#cb13-3"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb13-4"><a href="#cb13-4"></a><span class="co">---</span></span>
-<span id="cb13-5"><a href="#cb13-5"></a></span>
-<span id="cb13-6"><a href="#cb13-6"></a><span class="fu">## Homework</span></span>
-<span id="cb13-7"><a href="#cb13-7"></a></span>
-<span id="cb13-8"><a href="#cb13-8"></a><span class="ss">- </span>Homeworks are due on the Friday *after* the week they correspond to lecture.</span>
-<span id="cb13-9"><a href="#cb13-9"></a><span class="ss">- </span>So 9 days after the corresponding lab.</span>
-<span id="cb13-10"><a href="#cb13-10"></a></span>
-<span id="cb13-11"><a href="#cb13-11"></a><span class="fu">## Citation</span></span>
-<span id="cb13-12"><a href="#cb13-12"></a></span>
-<span id="cb13-13"><a href="#cb13-13"></a><span class="ss">- </span><span class="co">[</span><span class="ot">An I/O Project: Building a Command Line Program</span><span class="co">](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)</span></span>
-<span id="cb13-14"><a href="#cb13-14"></a><span class="ss">- </span>In a way, an OS is a "command line program"...</span>
-<span id="cb13-15"><a href="#cb13-15"></a></span>
-<span id="cb13-16"><a href="#cb13-16"></a><span class="fu">## Requirements</span></span>
-<span id="cb13-17"><a href="#cb13-17"></a></span>
-<span id="cb13-18"><a href="#cb13-18"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`371rs/22`</span> crate; I named mine "malloc"</span>
-<span id="cb13-19"><a href="#cb13-19"></a><span class="ss">- </span><span class="va">[ ]</span> You write <span class="in">`src/lib.rs`</span> that implements functions in the <span class="in">`src/main.rs`</span> I provide.</span>
-<span id="cb13-20"><a href="#cb13-20"></a></span>
-<span id="cb13-21"><a href="#cb13-21"></a><span class="fu"># main</span></span>
-<span id="cb13-22"><a href="#cb13-22"></a></span>
-<span id="cb13-23"><a href="#cb13-23"></a><span class="fu">## Code</span></span>
-<span id="cb13-24"><a href="#cb13-24"></a></span>
-<span id="cb13-25"><a href="#cb13-25"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb13-26"><a href="#cb13-26"></a><span class="in">use malloc::*; // crate name</span></span>
-<span id="cb13-27"><a href="#cb13-27"></a></span>
-<span id="cb13-28"><a href="#cb13-28"></a><span class="in">fn main() {</span></span>
-<span id="cb13-29"><a href="#cb13-29"></a><span class="in">    let p0 = malloc(16).unwrap();</span></span>
-<span id="cb13-30"><a href="#cb13-30"></a><span class="in">    let p1 = malloc(32).unwrap();</span></span>
-<span id="cb13-31"><a href="#cb13-31"></a><span class="in">    let x = 0x44332211;</span></span>
-<span id="cb13-32"><a href="#cb13-32"></a><span class="in">    let y = 0x12345678;</span></span>
-<span id="cb13-33"><a href="#cb13-33"></a><span class="in">    setter(x, p0);</span></span>
-<span id="cb13-34"><a href="#cb13-34"></a><span class="in">    setter(y, p1);</span></span>
-<span id="cb13-35"><a href="#cb13-35"></a><span class="in">    let z: i32 = getter(p0);</span></span>
-<span id="cb13-36"><a href="#cb13-36"></a><span class="in">    let w: i32 = getter(p1);</span></span>
-<span id="cb13-37"><a href="#cb13-37"></a><span class="in">    assert!(x == z);</span></span>
-<span id="cb13-38"><a href="#cb13-38"></a><span class="in">    assert!(y == w);</span></span>
-<span id="cb13-39"><a href="#cb13-39"></a><span class="in">    println!("A+");</span></span>
-<span id="cb13-40"><a href="#cb13-40"></a><span class="in">    // Advanced topics.</span></span>
-<span id="cb13-41"><a href="#cb13-41"></a></span>
-<span id="cb13-42"><a href="#cb13-42"></a><span class="in">    // Big alloc should fail</span></span>
-<span id="cb13-43"><a href="#cb13-43"></a></span>
-<span id="cb13-44"><a href="#cb13-44"></a><span class="in">    assert!(malloc(2048).is_none());</span></span>
-<span id="cb13-45"><a href="#cb13-45"></a><span class="in">    println!("A++");</span></span>
-<span id="cb13-46"><a href="#cb13-46"></a></span>
-<span id="cb13-47"><a href="#cb13-47"></a><span class="in">    // Allocs totaling &gt; SIZE should fail</span></span>
-<span id="cb13-48"><a href="#cb13-48"></a></span>
-<span id="cb13-49"><a href="#cb13-49"></a><span class="in">    // We have alloc (16 + 32) * 8 = 384 of 1024</span></span>
-<span id="cb13-50"><a href="#cb13-50"></a><span class="in">    // Try annother small malloc</span></span>
-<span id="cb13-51"><a href="#cb13-51"></a><span class="in">    malloc(32).unwrap();</span></span>
-<span id="cb13-52"><a href="#cb13-52"></a><span class="in">    // And then one too large.</span></span>
-<span id="cb13-53"><a href="#cb13-53"></a><span class="in">    assert!(malloc(64).is_none());</span></span>
-<span id="cb13-54"><a href="#cb13-54"></a><span class="in">    println!("A+++");</span></span>
-<span id="cb13-55"><a href="#cb13-55"></a></span>
-<span id="cb13-56"><a href="#cb13-56"></a><span class="in">    // Easiest to test these together:</span></span>
-<span id="cb13-57"><a href="#cb13-57"></a><span class="in">    //  - Gets to uninitialized memory should fail</span></span>
-<span id="cb13-58"><a href="#cb13-58"></a><span class="in">    //  - You should write free()</span></span>
-<span id="cb13-59"><a href="#cb13-59"></a><span class="in">    // No graceful way to autotest these. Left as an exercise to the interested student.</span></span>
-<span id="cb13-60"><a href="#cb13-60"></a><span class="in">}</span></span>
-<span id="cb13-61"><a href="#cb13-61"></a><span class="in">```</span></span>
-<span id="cb13-62"><a href="#cb13-62"></a></span>
-<span id="cb13-63"><a href="#cb13-63"></a><span class="fu">## Explanation</span></span>
-<span id="cb13-64"><a href="#cb13-64"></a></span>
-<span id="cb13-65"><a href="#cb13-65"></a><span class="ss">- </span>This is based on the C language <span class="in">`malloc`</span> function.</span>
-<span id="cb13-66"><a href="#cb13-66"></a><span class="ss">    - </span>Probably the most important function.</span>
-<span id="cb13-67"><a href="#cb13-67"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">My slides on C</span><span class="co">](https://cd-public.github.io/crypto/qmd/malloc.html#/today)</span></span>
-<span id="cb13-68"><a href="#cb13-68"></a></span>
-<span id="cb13-69"><a href="#cb13-69"></a><span class="fu">### Malloc</span></span>
-<span id="cb13-70"><a href="#cb13-70"></a></span>
-<span id="cb13-71"><a href="#cb13-71"></a><span class="ss">- </span>We begin with calls to our own <span class="in">`malloc`</span>:</span>
-<span id="cb13-72"><a href="#cb13-72"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb13-73"><a href="#cb13-73"></a><span class="in">    let p0 = malloc(16).unwrap();</span></span>
-<span id="cb13-74"><a href="#cb13-74"></a><span class="in">    let p1 = malloc(32).unwrap();</span></span>
-<span id="cb13-75"><a href="#cb13-75"></a><span class="in">```</span></span>
-<span id="cb13-76"><a href="#cb13-76"></a><span class="ss">- </span><span class="in">`malloc`</span> takes one argument, a <span class="in">`usize`</span>, the number of bytes to allocate.</span>
-<span id="cb13-77"><a href="#cb13-77"></a><span class="ss">    - </span>It returns a <span class="in">`Option&lt;usize&gt;`</span>, the "offset" of those bytes from general reference point.</span>
-<span id="cb13-78"><a href="#cb13-78"></a><span class="ss">    - </span>We can regard this as the address.</span>
-<span id="cb13-79"><a href="#cb13-79"></a><span class="ss">    - </span>We can ask <span class="in">`malloc`</span> for more memory then is available, and then we get <span class="in">`None`</span>.</span>
-<span id="cb13-80"><a href="#cb13-80"></a><span class="ss">- </span>Here is my <span class="in">`malloc`</span>, with code removed.</span>
-<span id="cb13-81"><a href="#cb13-81"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
-<span id="cb13-82"><a href="#cb13-82"></a><span class="in">// Return an index in BUS of s reserved bytes</span></span>
-<span id="cb13-83"><a href="#cb13-83"></a><span class="in">pub fn malloc(s: usize) -&gt; Option&lt;usize&gt; {</span></span>
-<span id="cb13-84"><a href="#cb13-84"></a><span class="in">    unsafe {</span></span>
-<span id="cb13-85"><a href="#cb13-85"></a><span class="in">        // Ensure BUS is initialized.</span></span>
-<span id="cb13-86"><a href="#cb13-86"></a><span class="in">        &lt; 3 lines snipped &gt; </span></span>
-<span id="cb13-87"><a href="#cb13-87"></a></span>
-<span id="cb13-88"><a href="#cb13-88"></a><span class="in">        // Reserve a block of s bytes</span></span>
-<span id="cb13-89"><a href="#cb13-89"></a><span class="in">        &lt; 4 lines snipped &gt; </span></span>
-<span id="cb13-90"><a href="#cb13-90"></a></span>
-<span id="cb13-91"><a href="#cb13-91"></a><span class="in">        // Scan for a contigious region of size s</span></span>
-<span id="cb13-92"><a href="#cb13-92"></a><span class="in">        // In s &gt; 8, word level allocation</span></span>
-<span id="cb13-93"><a href="#cb13-93"></a><span class="in">        // "Could be more efficient" it's an exercise!</span></span>
-<span id="cb13-94"><a href="#cb13-94"></a><span class="in">        &lt; ~20 lines snipped&gt; </span></span>
-<span id="cb13-95"><a href="#cb13-95"></a><span class="in">    }</span></span>
-<span id="cb13-96"><a href="#cb13-96"></a><span class="in">    return None;</span></span>
-<span id="cb13-97"><a href="#cb13-97"></a><span class="in">}</span></span>
-<span id="cb13-98"><a href="#cb13-98"></a><span class="in">```</span></span>
-<span id="cb13-99"><a href="#cb13-99"></a><span class="ss">- </span>Some interest things here:</span>
-<span id="cb13-100"><a href="#cb13-100"></a><span class="ss">    - </span>This relies on a new Rust "thing", a <span class="in">`static mut`</span>.</span>
-<span id="cb13-101"><a href="#cb13-101"></a><span class="ss">        - </span>They may hold the record for being the most unsafe.</span>
-<span id="cb13-102"><a href="#cb13-102"></a><span class="ss">        - </span>Think of it maybe as a Python global.</span>
-<span id="cb13-103"><a href="#cb13-103"></a><span class="ss">        - </span>I named mine <span class="in">`BUS`</span>.</span>
-<span id="cb13-104"><a href="#cb13-104"></a><span class="ss">    - </span>This relies on a helper function to initialize <span class="in">`BUS`</span></span>
-<span id="cb13-105"><a href="#cb13-105"></a><span class="ss">        - </span>I am requiring the following implementation for your <span class="in">`BUS`</span>:</span>
-<span id="cb13-106"><a href="#cb13-106"></a><span class="ss">        - </span>For me, declared at the beginning of <span class="in">`lib`</span></span>
-<span id="cb13-107"><a href="#cb13-107"></a></span>
-<span id="cb13-108"><a href="#cb13-108"></a><span class="fu">### Static mut</span></span>
-<span id="cb13-109"><a href="#cb13-109"></a></span>
-<span id="cb13-110"><a href="#cb13-110"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
-<span id="cb13-111"><a href="#cb13-111"></a><span class="in">// Treat ourselves to a kb (1024 bits)</span></span>
-<span id="cb13-112"><a href="#cb13-112"></a><span class="in">// 1024 &gt;&gt; 3 == 128 == 0x80</span></span>
-<span id="cb13-113"><a href="#cb13-113"></a><span class="in">pub const SIZE: usize = 0x80;</span></span>
-<span id="cb13-114"><a href="#cb13-114"></a></span>
-<span id="cb13-115"><a href="#cb13-115"></a><span class="in">// Not really a BUS but we gotta call it something.</span></span>
-<span id="cb13-116"><a href="#cb13-116"></a><span class="in">static mut BUS: [u8; SIZE] = [0u8; SIZE];</span></span>
-<span id="cb13-117"><a href="#cb13-117"></a><span class="in">```</span></span>
-<span id="cb13-118"><a href="#cb13-118"></a><span class="ss">- </span>The requirements are:</span>
-<span id="cb13-119"><a href="#cb13-119"></a><span class="ss">    - </span>A <span class="in">`static mut`</span> of a fixed size <span class="in">`u8`</span> array.</span>
-<span id="cb13-120"><a href="#cb13-120"></a><span class="ss">    - </span>Must support any size which is a power of 2.</span>
-<span id="cb13-121"><a href="#cb13-121"></a><span class="ss">    - </span>May not use any other <span class="in">`static mut`</span></span>
-<span id="cb13-122"><a href="#cb13-122"></a><span class="ss">        - </span>An astute observer will note that then any tracking information related to <span class="in">`BUS`</span> *must be stored within BUS itself*</span>
-<span id="cb13-123"><a href="#cb13-123"></a><span class="ss">        - </span>This is non-trivial</span>
-<span id="cb13-124"><a href="#cb13-124"></a><span class="ss">- </span>I am not aware of high quality reference materials on <span class="in">`static mut`</span>, here is an example use apparently.</span>
-<span id="cb13-125"><a href="#cb13-125"></a></span>
-<span id="cb13-126"><a href="#cb13-126"></a><span class="in">```{.rs}</span></span>
-<span id="cb13-127"><a href="#cb13-127"></a><span class="in">static mut COUNTER: u32 = 0;</span></span>
-<span id="cb13-128"><a href="#cb13-128"></a></span>
-<span id="cb13-129"><a href="#cb13-129"></a><span class="in">fn add_to_counter(inc: u32) {</span></span>
-<span id="cb13-130"><a href="#cb13-130"></a><span class="in">    // SAFETY: There are no other threads which could be accessing `COUNTER`.</span></span>
-<span id="cb13-131"><a href="#cb13-131"></a><span class="in">    unsafe {</span></span>
-<span id="cb13-132"><a href="#cb13-132"></a><span class="in">        COUNTER += inc;</span></span>
-<span id="cb13-133"><a href="#cb13-133"></a><span class="in">    }</span></span>
-<span id="cb13-134"><a href="#cb13-134"></a><span class="in">}</span></span>
-<span id="cb13-135"><a href="#cb13-135"></a></span>
-<span id="cb13-136"><a href="#cb13-136"></a><span class="in">fn main() {</span></span>
-<span id="cb13-137"><a href="#cb13-137"></a><span class="in">    add_to_counter(42);</span></span>
-<span id="cb13-138"><a href="#cb13-138"></a></span>
-<span id="cb13-139"><a href="#cb13-139"></a><span class="in">    // SAFETY: There are no other threads which could be accessing `COUNTER`.</span></span>
-<span id="cb13-140"><a href="#cb13-140"></a><span class="in">    unsafe {</span></span>
-<span id="cb13-141"><a href="#cb13-141"></a><span class="in">        dbg!(COUNTER);</span></span>
-<span id="cb13-142"><a href="#cb13-142"></a><span class="in">    }</span></span>
-<span id="cb13-143"><a href="#cb13-143"></a><span class="in">}</span></span>
-<span id="cb13-144"><a href="#cb13-144"></a><span class="in">```</span></span>
-<span id="cb13-145"><a href="#cb13-145"></a><span class="ss">- </span>This fixed-size array of bits is meant to be consistent with underlying hardware, at least theoretically.</span>
-<span id="cb13-146"><a href="#cb13-146"></a></span>
-<span id="cb13-147"><a href="#cb13-147"></a><span class="fu">### Initialization</span></span>
-<span id="cb13-148"><a href="#cb13-148"></a></span>
-<span id="cb13-149"><a href="#cb13-149"></a><span class="ss">- </span>You are not required to use a helper for this, but I did.</span>
-<span id="cb13-150"><a href="#cb13-150"></a><span class="ss">- </span>I am permitting/encouraging an <span class="in">`assert!`</span> that enforced power-of-two sizing.</span>
-<span id="cb13-151"><a href="#cb13-151"></a><span class="ss">- </span>Naively using <span class="in">`BUS`</span> didn't work well for me.</span>
-<span id="cb13-152"><a href="#cb13-152"></a><span class="ss">    - </span>I had to check to make sure I wasn't giving away bits already in use.</span>
-<span id="cb13-153"><a href="#cb13-153"></a><span class="ss">    - </span>So I had to *persist* some *state*</span>
-<span id="cb13-154"><a href="#cb13-154"></a><span class="ss">        - </span>I had to use memory to provide memory.</span>
-<span id="cb13-155"><a href="#cb13-155"></a><span class="ss">    - </span>I just reserved some bits at the beginning of the array as a *validity bitmask*</span>
-<span id="cb13-156"><a href="#cb13-156"></a><span class="ss">        - </span>If a bit is set to 1, the corresponding byte is in use.</span>
-<span id="cb13-157"><a href="#cb13-157"></a><span class="ss">        - </span>So a 1-in-8 overhead cost.</span>
-<span id="cb13-158"><a href="#cb13-158"></a><span class="ss">        - </span>This is why 64 bit words are popular.</span>
-<span id="cb13-159"><a href="#cb13-159"></a><span class="ss">    - </span>However, I had to mark within that bitmask *that the bitmask was already using memory*.</span>
-<span id="cb13-160"><a href="#cb13-160"></a><span class="ss">    - </span>This formed my <span class="in">`init`</span>.</span>
-<span id="cb13-161"><a href="#cb13-161"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
-<span id="cb13-162"><a href="#cb13-162"></a><span class="in">// Zero the array except the mask.</span></span>
-<span id="cb13-163"><a href="#cb13-163"></a><span class="in">fn init() {</span></span>
-<span id="cb13-164"><a href="#cb13-164"></a><span class="in">    unsafe {</span></span>
-<span id="cb13-165"><a href="#cb13-165"></a><span class="in">        // Initialize mask</span></span>
-<span id="cb13-166"><a href="#cb13-166"></a><span class="in">        // The following explodes if SIZE isn't a power of 2</span></span>
-<span id="cb13-167"><a href="#cb13-167"></a><span class="in">        assert!(SIZE &amp; (SIZE - 1) == 0);</span></span>
-<span id="cb13-168"><a href="#cb13-168"></a><span class="in">        // First SIZE &gt;&gt; 3 bits are reserved as a validty byte/bit mask</span></span>
-<span id="cb13-169"><a href="#cb13-169"></a><span class="in">        &lt; snip &gt;</span></span>
-<span id="cb13-170"><a href="#cb13-170"></a><span class="in">        // Which has to reserve enough bytes for itself.</span></span>
-<span id="cb13-171"><a href="#cb13-171"></a><span class="in">        &lt; snip &gt;</span></span>
-<span id="cb13-172"><a href="#cb13-172"></a><span class="in">        // Set to 1</span></span>
-<span id="cb13-173"><a href="#cb13-173"></a><span class="in">        &lt; snip &gt;</span></span>
-<span id="cb13-174"><a href="#cb13-174"></a></span>
-<span id="cb13-175"><a href="#cb13-175"></a><span class="in">        // Initialize memory</span></span>
-<span id="cb13-176"><a href="#cb13-176"></a><span class="in">        // Set to zero.</span></span>
-<span id="cb13-177"><a href="#cb13-177"></a><span class="in">        &lt; snip &gt;</span></span>
-<span id="cb13-178"><a href="#cb13-178"></a><span class="in">    }</span></span>
-<span id="cb13-179"><a href="#cb13-179"></a><span class="in">    return;</span></span>
-<span id="cb13-180"><a href="#cb13-180"></a><span class="in">}</span></span>
-<span id="cb13-181"><a href="#cb13-181"></a><span class="in">```</span></span>
-<span id="cb13-182"><a href="#cb13-182"></a></span>
-<span id="cb13-183"><a href="#cb13-183"></a><span class="fu">## Crate</span></span>
-<span id="cb13-184"><a href="#cb13-184"></a></span>
-<span id="cb13-185"><a href="#cb13-185"></a><span class="ss">- </span>To complete the lab today, create a crate named <span class="in">`helloworld`</span> in a folder named <span class="in">`21`</span> in your <span class="in">`371os`</span> repository.</span>
-<span id="cb13-186"><a href="#cb13-186"></a><span class="in">```{.bash}</span></span>
-<span id="cb13-187"><a href="#cb13-187"></a><span class="in">cargo new 21 --name hello_world --vcs none</span></span>
-<span id="cb13-188"><a href="#cb13-188"></a><span class="in">```</span></span>
-<span id="cb13-189"><a href="#cb13-189"></a></span>
-<span id="cb13-190"><a href="#cb13-190"></a><span class="fu">## "Hello world!" </span></span>
-<span id="cb13-191"><a href="#cb13-191"></a></span>
-<span id="cb13-192"><a href="#cb13-192"></a><span class="ss">- </span>Implement "Hello world!" using this crate.</span>
-<span id="cb13-193"><a href="#cb13-193"></a><span class="ss">- </span>Use <span class="in">`i32`</span> to store the "Hello world" data.</span>
-<span id="cb13-194"><a href="#cb13-194"></a><span class="ss">- </span>While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and <span class="in">`i32`</span> literals.</span>
-<span id="cb13-195"><a href="#cb13-195"></a></span>
-<span id="cb13-196"><a href="#cb13-196"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-197"><a href="#cb13-197"></a><span class="in">calvin@calvin:~/tmp/helloworld$ wc src/main.rs # 2 lines main, 2 lines unsafe, 1 line code</span></span>
-<span id="cb13-198"><a href="#cb13-198"></a><span class="in">  5  15 174 src/main.rs</span></span>
-<span id="cb13-199"><a href="#cb13-199"></a><span class="in">calvin@calvin:~/tmp/helloworld$ grep world src/main.rs # no plaintext in file</span></span>
-<span id="cb13-200"><a href="#cb13-200"></a><span class="in">calvin@calvin:~/tmp/helloworld$ cargo r --release</span></span>
-<span id="cb13-201"><a href="#cb13-201"></a><span class="in">   Compiling helloworld v0.1.0 (/home/calvin/tmp/oneone)</span></span>
-<span id="cb13-202"><a href="#cb13-202"></a><span class="in">    Finished `release` profile [optimized] target(s) in 0.14s</span></span>
-<span id="cb13-203"><a href="#cb13-203"></a><span class="in">     Running `target/release/helloworld`</span></span>
-<span id="cb13-204"><a href="#cb13-204"></a><span class="in">Hello world!</span></span>
-<span id="cb13-205"><a href="#cb13-205"></a><span class="in">```</span></span>
-<span id="cb13-206"><a href="#cb13-206"></a></span>
-<span id="cb13-207"><a href="#cb13-207"></a><span class="fu">### I love Python</span></span>
-<span id="cb13-208"><a href="#cb13-208"></a></span>
-<span id="cb13-209"><a href="#cb13-209"></a><span class="ss">- </span>The following may be useful here, to the interested student.</span>
-<span id="cb13-210"><a href="#cb13-210"></a></span>
-<span id="cb13-211"><a href="#cb13-211"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-212"><a href="#cb13-212"></a><span class="in">python3 -c '[print(ord(a)) for a in "Hello world!"]'</span></span>
-<span id="cb13-213"><a href="#cb13-213"></a><span class="in">```</span></span>
-<span id="cb13-214"><a href="#cb13-214"></a></span>
-<span id="cb13-215"><a href="#cb13-215"></a><span class="ss">- </span>This is probably insufficient for your purposes and will require some hacking.</span>
-<span id="cb13-216"><a href="#cb13-216"></a></span>
-<span id="cb13-217"><a href="#cb13-217"></a><span class="fu">### Transmute</span></span>
-<span id="cb13-218"><a href="#cb13-218"></a></span>
-<span id="cb13-219"><a href="#cb13-219"></a><span class="ss">- </span>Since it is more idiomatic to use code other people have written in Rust...</span>
-<span id="cb13-220"><a href="#cb13-220"></a><span class="ss">    - </span>I have an opinion on this.</span>
-<span id="cb13-221"><a href="#cb13-221"></a><span class="ss">- </span>...while it is possible to conduct this exercise using only raw pointers and casts...</span>
-<span id="cb13-222"><a href="#cb13-222"></a><span class="ss">    - </span>(in the voice of Palpatine) "Do it!"</span>
-<span id="cb13-223"><a href="#cb13-223"></a><span class="ss">- </span>...it is my professional responsibility to recommend you use <span class="in">`transmute`</span>.</span>
-<span id="cb13-224"><a href="#cb13-224"></a></span>
-<span id="cb13-225"><a href="#cb13-225"></a><span class="in">```{.rs}</span></span>
-<span id="cb13-226"><a href="#cb13-226"></a><span class="in">pub const unsafe fn transmute&lt;Src, Dst&gt;(src: Src) -&gt; Dst</span></span>
-<span id="cb13-227"><a href="#cb13-227"></a><span class="in">```</span></span>
-<span id="cb13-228"><a href="#cb13-228"></a></span>
-<span id="cb13-229"><a href="#cb13-229"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](doc.rust-lang.org/std/mem/fn.transmute.html)</span></span>
-<span id="cb13-230"><a href="#cb13-230"></a></span>
-<span id="cb13-231"><a href="#cb13-231"></a><span class="fu">### Raw Pointers</span></span>
-<span id="cb13-232"><a href="#cb13-232"></a></span>
-<span id="cb13-233"><a href="#cb13-233"></a><span class="ss">- </span>Also can use raw pointers here.</span>
-<span id="cb13-234"><a href="#cb13-234"></a><span class="ss">- </span>Will get in the way of a single-line solution but that is okay - you should do you!</span>
-<span id="cb13-235"><a href="#cb13-235"></a></span>
-<span id="cb13-236"><a href="#cb13-236"></a><span class="fu">### Numeric Values</span></span>
-<span id="cb13-237"><a href="#cb13-237"></a></span>
-<span id="cb13-238"><a href="#cb13-238"></a><span class="ss">- </span>One obvious way to use <span class="in">`transmute`</span> is to change one type of data into another, without altering the underlying numeric values that exist in memory.</span>
-<span id="cb13-239"><a href="#cb13-239"></a><span class="ss">- </span>For example, we can convert an array of <span class="in">`u8`</span>s to an <span class="in">`i32`</span>.</span>
-<span id="cb13-240"><a href="#cb13-240"></a></span>
-<span id="cb13-241"><a href="#cb13-241"></a><span class="in">```{.rs}</span></span>
-<span id="cb13-242"><a href="#cb13-242"></a><span class="in">unsafe {</span></span>
-<span id="cb13-243"><a href="#cb13-243"></a><span class="in">    let bytes: [u8;4] = [0x12,0x34,0x56,0x78];</span></span>
-<span id="cb13-244"><a href="#cb13-244"></a><span class="in">    let num: i32 = std::mem::transmute(bytes);</span></span>
-<span id="cb13-245"><a href="#cb13-245"></a><span class="in">    println!("{:x}", num);</span></span>
-<span id="cb13-246"><a href="#cb13-246"></a><span class="in">}</span></span>
-<span id="cb13-247"><a href="#cb13-247"></a><span class="in">```</span></span>
-<span id="cb13-248"><a href="#cb13-248"></a></span>
-<span id="cb13-249"><a href="#cb13-249"></a><span class="ss">- </span>I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what <span class="in">`rustc`</span> wanted, so I didn't worry about it. </span>
-<span id="cb13-250"><a href="#cb13-250"></a></span>
-<span id="cb13-251"><a href="#cb13-251"></a><span class="fu">### Endianness</span></span>
-<span id="cb13-252"><a href="#cb13-252"></a></span>
-<span id="cb13-253"><a href="#cb13-253"></a><span class="ss">- </span>The warning refers to the topic of *endianness*.</span>
-<span id="cb13-254"><a href="#cb13-254"></a><span class="ss">    - </span>Big deal in C, kinda not in Rust actually.</span>
-<span id="cb13-255"><a href="#cb13-255"></a><span class="ss">        - </span>Precisely because of that warning basically.</span>
-<span id="cb13-256"><a href="#cb13-256"></a><span class="ss">        - </span>This lab was very involved.  <span class="co">[</span><span class="ot">Endian</span><span class="co">](https://cd-public.github.io/courses/old/c89s25/qmd/endian.html)</span></span>
-<span id="cb13-257"><a href="#cb13-257"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/Endianness)</span></span>
-<span id="cb13-258"><a href="#cb13-258"></a></span>
-<span id="cb13-259"><a href="#cb13-259"></a><span class="at">&gt; In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness. </span></span>
-<span id="cb13-260"><a href="#cb13-260"></a></span>
-<span id="cb13-261"><a href="#cb13-261"></a><span class="ss">- </span>Regard an <span class="in">`i32`</span> as a word and a <span class="in">`u8`</span> as a bit.</span>
-<span id="cb13-262"><a href="#cb13-262"></a><span class="ss">- </span>Take note of the endianness revealed by the prior code.</span>
-<span id="cb13-263"><a href="#cb13-263"></a></span>
-<span id="cb13-264"><a href="#cb13-264"></a><span class="fu">### Numeric Address</span></span>
-<span id="cb13-265"><a href="#cb13-265"></a></span>
-<span id="cb13-266"><a href="#cb13-266"></a><span class="ss">- </span>One possibly more advanced use of transmute is upon numeric addresses</span>
-<span id="cb13-267"><a href="#cb13-267"></a><span class="ss">    - </span>The *key*, the numeric value of the address, stays the same.</span>
-<span id="cb13-268"><a href="#cb13-268"></a><span class="ss">    - </span>The value, the numeric value in the memory location decribed by the address, stays the same.</span>
-<span id="cb13-269"><a href="#cb13-269"></a><span class="ss">    - </span>The interpretation - how Rust understands the value at that location - changes.</span>
-<span id="cb13-270"><a href="#cb13-270"></a></span>
-<span id="cb13-271"><a href="#cb13-271"></a><span class="in">```{.rs}</span></span>
-<span id="cb13-272"><a href="#cb13-272"></a><span class="in">unsafe {</span></span>
-<span id="cb13-273"><a href="#cb13-273"></a><span class="in">    let nats: &amp;[u32] = &amp;[0x3F800000];</span></span>
-<span id="cb13-274"><a href="#cb13-274"></a><span class="in">    let nums: &amp;[f32] = std::mem::transmute(nats);</span></span>
-<span id="cb13-275"><a href="#cb13-275"></a><span class="in">    println!("{}", nums[0]);</span></span>
-<span id="cb13-276"><a href="#cb13-276"></a><span class="in">}</span></span>
-<span id="cb13-277"><a href="#cb13-277"></a><span class="in">```</span></span>
-<span id="cb13-278"><a href="#cb13-278"></a></span>
-<span id="cb13-279"><a href="#cb13-279"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Recall the meaning of 0x3F8000000</span><span class="co">](11_unsafe.qmd#/unions)</span></span>
-<span id="cb13-280"><a href="#cb13-280"></a><span class="ss">- </span>I usually do this on arrays but I guess I'm not sure why.</span>
-<span id="cb13-281"><a href="#cb13-281"></a><span class="ss">    - </span>Try things out.</span>
-<span id="cb13-282"><a href="#cb13-282"></a><span class="ss">    - </span>Vectors are definitely banned though, that is way too high level.</span>
-<span id="cb13-283"><a href="#cb13-283"></a></span>
-<span id="cb13-284"><a href="#cb13-284"></a><span class="fu"># Fin</span></span>
-<span id="cb13-285"><a href="#cb13-285"></a></span>
-<span id="cb13-286"><a href="#cb13-286"></a><span class="ss">- </span>To be continued in the homework.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">---</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="an">title:</span><span class="co"> malloc</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="co">---</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="fu">## Homework</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="ss">- </span>Homeworks are due on the Friday *after* the week they correspond to lecture.</span>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="ss">- </span>So 9 days after the corresponding lab.</span>
+<span id="cb8-10"><a href="#cb8-10"></a></span>
+<span id="cb8-11"><a href="#cb8-11"></a><span class="fu">## Citation</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a></span>
+<span id="cb8-13"><a href="#cb8-13"></a><span class="ss">- </span><span class="co">[</span><span class="ot">An I/O Project: Building a Command Line Program</span><span class="co">](https://doc.rust-lang.org/book/ch12-00-an-io-project.html)</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a><span class="ss">- </span>In a way, an OS is a "command line program"...</span>
+<span id="cb8-15"><a href="#cb8-15"></a></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="fu">## Requirements</span></span>
+<span id="cb8-17"><a href="#cb8-17"></a></span>
+<span id="cb8-18"><a href="#cb8-18"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`371rs/22`</span> crate; I named mine "malloc"</span>
+<span id="cb8-19"><a href="#cb8-19"></a><span class="ss">- </span><span class="va">[ ]</span> You write <span class="in">`src/lib.rs`</span> that implements functions in the <span class="in">`src/main.rs`</span> I provide.</span>
+<span id="cb8-20"><a href="#cb8-20"></a><span class="ss">- </span><span class="va">[ ]</span> Regard it as "unsporting" to use <span class="in">`Vector`</span> or any other Rust built-in data structure.</span>
+<span id="cb8-21"><a href="#cb8-21"></a><span class="ss">    - </span>**Unless** you are storing it.</span>
+<span id="cb8-22"><a href="#cb8-22"></a><span class="ss">    - </span>Use arrays and raw pointers.</span>
+<span id="cb8-23"><a href="#cb8-23"></a><span class="ss">    - </span>If you can't solve it without them, use them, but...</span>
+<span id="cb8-24"><a href="#cb8-24"></a><span class="ss">    - </span>...at least understand why it's hard and that there's an alternative.</span>
+<span id="cb8-25"><a href="#cb8-25"></a><span class="ss">    - </span>*If you hand-implement a vector-like on top of static mut within the overhead allowance, you may use **your own** vectors*</span>
+<span id="cb8-26"><a href="#cb8-26"></a></span>
+<span id="cb8-27"><a href="#cb8-27"></a><span class="fu"># main</span></span>
+<span id="cb8-28"><a href="#cb8-28"></a></span>
+<span id="cb8-29"><a href="#cb8-29"></a><span class="fu">## Code</span></span>
+<span id="cb8-30"><a href="#cb8-30"></a></span>
+<span id="cb8-31"><a href="#cb8-31"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb8-32"><a href="#cb8-32"></a><span class="in">use malloc::*; // crate name</span></span>
+<span id="cb8-33"><a href="#cb8-33"></a></span>
+<span id="cb8-34"><a href="#cb8-34"></a><span class="in">fn main() {</span></span>
+<span id="cb8-35"><a href="#cb8-35"></a><span class="in">    let p0 = malloc(16).unwrap();</span></span>
+<span id="cb8-36"><a href="#cb8-36"></a><span class="in">    let p1 = malloc(32).unwrap();</span></span>
+<span id="cb8-37"><a href="#cb8-37"></a><span class="in">    let x = 0x44332211;</span></span>
+<span id="cb8-38"><a href="#cb8-38"></a><span class="in">    let y = 0x12345678;</span></span>
+<span id="cb8-39"><a href="#cb8-39"></a><span class="in">    setter(x, p0);</span></span>
+<span id="cb8-40"><a href="#cb8-40"></a><span class="in">    setter(y, p1);</span></span>
+<span id="cb8-41"><a href="#cb8-41"></a><span class="in">    let z: i32 = getter(p0);</span></span>
+<span id="cb8-42"><a href="#cb8-42"></a><span class="in">    let w: i32 = getter(p1);</span></span>
+<span id="cb8-43"><a href="#cb8-43"></a><span class="in">    assert!(x == z);</span></span>
+<span id="cb8-44"><a href="#cb8-44"></a><span class="in">    assert!(y == w);</span></span>
+<span id="cb8-45"><a href="#cb8-45"></a><span class="in">    println!("A+");</span></span>
+<span id="cb8-46"><a href="#cb8-46"></a><span class="in">    // Advanced topics.</span></span>
+<span id="cb8-47"><a href="#cb8-47"></a></span>
+<span id="cb8-48"><a href="#cb8-48"></a><span class="in">    // Big alloc should fail</span></span>
+<span id="cb8-49"><a href="#cb8-49"></a></span>
+<span id="cb8-50"><a href="#cb8-50"></a><span class="in">    assert!(malloc(2048).is_none());</span></span>
+<span id="cb8-51"><a href="#cb8-51"></a><span class="in">    println!("A++");</span></span>
+<span id="cb8-52"><a href="#cb8-52"></a></span>
+<span id="cb8-53"><a href="#cb8-53"></a><span class="in">    // Allocs totaling &gt; SIZE should fail</span></span>
+<span id="cb8-54"><a href="#cb8-54"></a></span>
+<span id="cb8-55"><a href="#cb8-55"></a><span class="in">    // We have alloc (16 + 32) * 8 = 384 of 1024</span></span>
+<span id="cb8-56"><a href="#cb8-56"></a><span class="in">    // Try annother small malloc</span></span>
+<span id="cb8-57"><a href="#cb8-57"></a><span class="in">    malloc(32).unwrap();</span></span>
+<span id="cb8-58"><a href="#cb8-58"></a><span class="in">    // And then one too large.</span></span>
+<span id="cb8-59"><a href="#cb8-59"></a><span class="in">    assert!(malloc(64).is_none());</span></span>
+<span id="cb8-60"><a href="#cb8-60"></a><span class="in">    println!("A+++");</span></span>
+<span id="cb8-61"><a href="#cb8-61"></a></span>
+<span id="cb8-62"><a href="#cb8-62"></a><span class="in">    // Easiest to test these together:</span></span>
+<span id="cb8-63"><a href="#cb8-63"></a><span class="in">    //  - Gets to uninitialized memory should fail</span></span>
+<span id="cb8-64"><a href="#cb8-64"></a><span class="in">    //  - You should write free()</span></span>
+<span id="cb8-65"><a href="#cb8-65"></a><span class="in">    // No graceful way to autotest these. Left as an exercise to the interested student.</span></span>
+<span id="cb8-66"><a href="#cb8-66"></a><span class="in">}</span></span>
+<span id="cb8-67"><a href="#cb8-67"></a><span class="in">```</span></span>
+<span id="cb8-68"><a href="#cb8-68"></a></span>
+<span id="cb8-69"><a href="#cb8-69"></a><span class="fu">## Explanation</span></span>
+<span id="cb8-70"><a href="#cb8-70"></a></span>
+<span id="cb8-71"><a href="#cb8-71"></a><span class="ss">- </span>This is based on the C language <span class="in">`malloc`</span> function.</span>
+<span id="cb8-72"><a href="#cb8-72"></a><span class="ss">    - </span>Probably the most important function.</span>
+<span id="cb8-73"><a href="#cb8-73"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">My slides on C</span><span class="co">](https://cd-public.github.io/crypto/qmd/malloc.html#/today)</span></span>
+<span id="cb8-74"><a href="#cb8-74"></a></span>
+<span id="cb8-75"><a href="#cb8-75"></a><span class="fu">### Malloc</span></span>
+<span id="cb8-76"><a href="#cb8-76"></a></span>
+<span id="cb8-77"><a href="#cb8-77"></a><span class="ss">- </span>We begin with calls to our own <span class="in">`malloc`</span>:</span>
+<span id="cb8-78"><a href="#cb8-78"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb8-79"><a href="#cb8-79"></a><span class="in">    let p0 = malloc(16).unwrap();</span></span>
+<span id="cb8-80"><a href="#cb8-80"></a><span class="in">    let p1 = malloc(32).unwrap();</span></span>
+<span id="cb8-81"><a href="#cb8-81"></a><span class="in">```</span></span>
+<span id="cb8-82"><a href="#cb8-82"></a><span class="ss">- </span><span class="in">`malloc`</span> takes one argument, a <span class="in">`usize`</span>, the number of bytes to allocate.</span>
+<span id="cb8-83"><a href="#cb8-83"></a><span class="ss">    - </span>It returns a <span class="in">`Option&lt;usize&gt;`</span>, the "offset" of those bytes from general reference point.</span>
+<span id="cb8-84"><a href="#cb8-84"></a><span class="ss">    - </span>We can regard this as the address.</span>
+<span id="cb8-85"><a href="#cb8-85"></a><span class="ss">    - </span>We can ask <span class="in">`malloc`</span> for more memory then is available, and then we get <span class="in">`None`</span>.</span>
+<span id="cb8-86"><a href="#cb8-86"></a><span class="ss">- </span>Here is my <span class="in">`malloc`</span>, with code removed.</span>
+<span id="cb8-87"><a href="#cb8-87"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb8-88"><a href="#cb8-88"></a><span class="in">// Return an index in BUS of s reserved bytes</span></span>
+<span id="cb8-89"><a href="#cb8-89"></a><span class="in">pub fn malloc(s: usize) -&gt; Option&lt;usize&gt; {</span></span>
+<span id="cb8-90"><a href="#cb8-90"></a><span class="in">    unsafe {</span></span>
+<span id="cb8-91"><a href="#cb8-91"></a><span class="in">        // Ensure BUS is initialized.</span></span>
+<span id="cb8-92"><a href="#cb8-92"></a><span class="in">        &lt; 3 lines snipped &gt; </span></span>
+<span id="cb8-93"><a href="#cb8-93"></a></span>
+<span id="cb8-94"><a href="#cb8-94"></a><span class="in">        // Reserve a block of s bytes</span></span>
+<span id="cb8-95"><a href="#cb8-95"></a><span class="in">        &lt; 4 lines snipped &gt; </span></span>
+<span id="cb8-96"><a href="#cb8-96"></a></span>
+<span id="cb8-97"><a href="#cb8-97"></a><span class="in">        // Scan for a contigious region of size s</span></span>
+<span id="cb8-98"><a href="#cb8-98"></a><span class="in">        // In s &gt; 8, word level allocation</span></span>
+<span id="cb8-99"><a href="#cb8-99"></a><span class="in">        // "Could be more efficient" it's an exercise!</span></span>
+<span id="cb8-100"><a href="#cb8-100"></a><span class="in">        &lt; ~20 lines snipped&gt; </span></span>
+<span id="cb8-101"><a href="#cb8-101"></a><span class="in">    }</span></span>
+<span id="cb8-102"><a href="#cb8-102"></a><span class="in">    return None;</span></span>
+<span id="cb8-103"><a href="#cb8-103"></a><span class="in">}</span></span>
+<span id="cb8-104"><a href="#cb8-104"></a><span class="in">```</span></span>
+<span id="cb8-105"><a href="#cb8-105"></a><span class="ss">- </span>Some interest things here:</span>
+<span id="cb8-106"><a href="#cb8-106"></a><span class="ss">    - </span>This relies on a new Rust "thing", a <span class="in">`static mut`</span>.</span>
+<span id="cb8-107"><a href="#cb8-107"></a><span class="ss">        - </span>They may hold the record for being the most unsafe.</span>
+<span id="cb8-108"><a href="#cb8-108"></a><span class="ss">        - </span>Think of it maybe as a Python global.</span>
+<span id="cb8-109"><a href="#cb8-109"></a><span class="ss">        - </span>I named mine <span class="in">`BUS`</span>.</span>
+<span id="cb8-110"><a href="#cb8-110"></a><span class="ss">    - </span>This relies on a helper function to initialize <span class="in">`BUS`</span></span>
+<span id="cb8-111"><a href="#cb8-111"></a><span class="ss">        - </span>I am requiring the following implementation for your <span class="in">`BUS`</span>:</span>
+<span id="cb8-112"><a href="#cb8-112"></a><span class="ss">        - </span>For me, declared at the beginning of <span class="in">`lib`</span></span>
+<span id="cb8-113"><a href="#cb8-113"></a></span>
+<span id="cb8-114"><a href="#cb8-114"></a><span class="fu">### Static mut</span></span>
+<span id="cb8-115"><a href="#cb8-115"></a></span>
+<span id="cb8-116"><a href="#cb8-116"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb8-117"><a href="#cb8-117"></a><span class="in">// Treat ourselves to a kb (1024 bits)</span></span>
+<span id="cb8-118"><a href="#cb8-118"></a><span class="in">// 1024 &gt;&gt; 3 == 128 == 0x80</span></span>
+<span id="cb8-119"><a href="#cb8-119"></a><span class="in">pub const SIZE: usize = 0x80;</span></span>
+<span id="cb8-120"><a href="#cb8-120"></a></span>
+<span id="cb8-121"><a href="#cb8-121"></a><span class="in">// Not really a BUS but we gotta call it something.</span></span>
+<span id="cb8-122"><a href="#cb8-122"></a><span class="in">static mut BUS: [u8; SIZE] = [0u8; SIZE];</span></span>
+<span id="cb8-123"><a href="#cb8-123"></a><span class="in">```</span></span>
+<span id="cb8-124"><a href="#cb8-124"></a><span class="ss">- </span>The requirements are:</span>
+<span id="cb8-125"><a href="#cb8-125"></a><span class="ss">    - </span>A <span class="in">`static mut`</span> of a fixed size <span class="in">`u8`</span> array.</span>
+<span id="cb8-126"><a href="#cb8-126"></a><span class="ss">    - </span>Must support any size which is a power of 2.</span>
+<span id="cb8-127"><a href="#cb8-127"></a><span class="ss">    - </span>May not use any other <span class="in">`static mut`</span></span>
+<span id="cb8-128"><a href="#cb8-128"></a><span class="ss">        - </span>An astute observer will note that then any tracking information related to <span class="in">`BUS`</span> *must be stored within BUS itself*</span>
+<span id="cb8-129"><a href="#cb8-129"></a><span class="ss">        - </span>This is non-trivial</span>
+<span id="cb8-130"><a href="#cb8-130"></a><span class="ss">- </span>I am not aware of high quality reference materials on <span class="in">`static mut`</span>, here is an example use apparently.</span>
+<span id="cb8-131"><a href="#cb8-131"></a></span>
+<span id="cb8-132"><a href="#cb8-132"></a><span class="in">```{.rs}</span></span>
+<span id="cb8-133"><a href="#cb8-133"></a><span class="in">static mut COUNTER: u32 = 0;</span></span>
+<span id="cb8-134"><a href="#cb8-134"></a></span>
+<span id="cb8-135"><a href="#cb8-135"></a><span class="in">fn add_to_counter(inc: u32) {</span></span>
+<span id="cb8-136"><a href="#cb8-136"></a><span class="in">    // SAFETY: There are no other threads which could be accessing `COUNTER`.</span></span>
+<span id="cb8-137"><a href="#cb8-137"></a><span class="in">    unsafe {</span></span>
+<span id="cb8-138"><a href="#cb8-138"></a><span class="in">        COUNTER += inc;</span></span>
+<span id="cb8-139"><a href="#cb8-139"></a><span class="in">    }</span></span>
+<span id="cb8-140"><a href="#cb8-140"></a><span class="in">}</span></span>
+<span id="cb8-141"><a href="#cb8-141"></a></span>
+<span id="cb8-142"><a href="#cb8-142"></a><span class="in">fn main() {</span></span>
+<span id="cb8-143"><a href="#cb8-143"></a><span class="in">    add_to_counter(42);</span></span>
+<span id="cb8-144"><a href="#cb8-144"></a></span>
+<span id="cb8-145"><a href="#cb8-145"></a><span class="in">    // SAFETY: There are no other threads which could be accessing `COUNTER`.</span></span>
+<span id="cb8-146"><a href="#cb8-146"></a><span class="in">    unsafe {</span></span>
+<span id="cb8-147"><a href="#cb8-147"></a><span class="in">        dbg!(COUNTER);</span></span>
+<span id="cb8-148"><a href="#cb8-148"></a><span class="in">    }</span></span>
+<span id="cb8-149"><a href="#cb8-149"></a><span class="in">}</span></span>
+<span id="cb8-150"><a href="#cb8-150"></a><span class="in">```</span></span>
+<span id="cb8-151"><a href="#cb8-151"></a><span class="ss">- </span>This fixed-size array of bits is meant to be consistent with underlying hardware, at least theoretically.</span>
+<span id="cb8-152"><a href="#cb8-152"></a></span>
+<span id="cb8-153"><a href="#cb8-153"></a><span class="fu">### Initialization</span></span>
+<span id="cb8-154"><a href="#cb8-154"></a></span>
+<span id="cb8-155"><a href="#cb8-155"></a><span class="ss">- </span>You are not required to use a helper for this, but I did.</span>
+<span id="cb8-156"><a href="#cb8-156"></a><span class="ss">- </span>I am permitting/encouraging an <span class="in">`assert!`</span> that enforced power-of-two sizing.</span>
+<span id="cb8-157"><a href="#cb8-157"></a><span class="ss">- </span>Naively using <span class="in">`BUS`</span> didn't work well for me.</span>
+<span id="cb8-158"><a href="#cb8-158"></a><span class="ss">    - </span>I had to check to make sure I wasn't giving away bits already in use.</span>
+<span id="cb8-159"><a href="#cb8-159"></a><span class="ss">    - </span>So I had to *persist* some *state*</span>
+<span id="cb8-160"><a href="#cb8-160"></a><span class="ss">        - </span>I had to use memory to provide memory.</span>
+<span id="cb8-161"><a href="#cb8-161"></a><span class="ss">    - </span>I just reserved some bits at the beginning of the array as a *validity bitmask*</span>
+<span id="cb8-162"><a href="#cb8-162"></a><span class="ss">        - </span>If a bit is set to 1, the corresponding byte is in use.</span>
+<span id="cb8-163"><a href="#cb8-163"></a><span class="ss">        - </span>So a 1-in-8 overhead cost.</span>
+<span id="cb8-164"><a href="#cb8-164"></a><span class="ss">        - </span>This is why 64 bit words are popular.</span>
+<span id="cb8-165"><a href="#cb8-165"></a><span class="ss">        - </span>You are permitted have overhead costs as high as 1-in-4 if you need them.</span>
+<span id="cb8-166"><a href="#cb8-166"></a><span class="ss">    - </span>However, I had to mark within that bitmask *that the bitmask was already using memory*.</span>
+<span id="cb8-167"><a href="#cb8-167"></a><span class="ss">    - </span>This formed my <span class="in">`init`</span>.</span>
+<span id="cb8-168"><a href="#cb8-168"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb8-169"><a href="#cb8-169"></a><span class="in">// Zero the array except the mask.</span></span>
+<span id="cb8-170"><a href="#cb8-170"></a><span class="in">fn init() {</span></span>
+<span id="cb8-171"><a href="#cb8-171"></a><span class="in">    unsafe {</span></span>
+<span id="cb8-172"><a href="#cb8-172"></a><span class="in">        // Initialize mask</span></span>
+<span id="cb8-173"><a href="#cb8-173"></a><span class="in">        // The following explodes if SIZE isn't a power of 2</span></span>
+<span id="cb8-174"><a href="#cb8-174"></a><span class="in">        assert!(SIZE &amp; (SIZE - 1) == 0);</span></span>
+<span id="cb8-175"><a href="#cb8-175"></a><span class="in">        // First SIZE &gt;&gt; 3 bits are reserved as a validty byte/bit mask</span></span>
+<span id="cb8-176"><a href="#cb8-176"></a><span class="in">        &lt; snip &gt;</span></span>
+<span id="cb8-177"><a href="#cb8-177"></a><span class="in">        // Which has to reserve enough bytes for itself.</span></span>
+<span id="cb8-178"><a href="#cb8-178"></a><span class="in">        &lt; snip &gt;</span></span>
+<span id="cb8-179"><a href="#cb8-179"></a><span class="in">        // Set to 1</span></span>
+<span id="cb8-180"><a href="#cb8-180"></a><span class="in">        &lt; snip &gt;</span></span>
+<span id="cb8-181"><a href="#cb8-181"></a></span>
+<span id="cb8-182"><a href="#cb8-182"></a><span class="in">        // Initialize memory</span></span>
+<span id="cb8-183"><a href="#cb8-183"></a><span class="in">        // Set to zero.</span></span>
+<span id="cb8-184"><a href="#cb8-184"></a><span class="in">        &lt; snip &gt;</span></span>
+<span id="cb8-185"><a href="#cb8-185"></a><span class="in">    }</span></span>
+<span id="cb8-186"><a href="#cb8-186"></a><span class="in">    return;</span></span>
+<span id="cb8-187"><a href="#cb8-187"></a><span class="in">}</span></span>
+<span id="cb8-188"><a href="#cb8-188"></a><span class="in">```</span></span>
+<span id="cb8-189"><a href="#cb8-189"></a></span>
+<span id="cb8-190"><a href="#cb8-190"></a><span class="fu">### Setter</span></span>
+<span id="cb8-191"><a href="#cb8-191"></a></span>
+<span id="cb8-192"><a href="#cb8-192"></a><span class="ss">- </span>After the calls to <span class="in">`malloc`</span> within main, we use a wrapping function <span class="in">`setter`</span> to set memory at the location reserved by the malloc to have certain values.</span>
+<span id="cb8-193"><a href="#cb8-193"></a></span>
+<span id="cb8-194"><a href="#cb8-194"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb8-195"><a href="#cb8-195"></a><span class="in">    let x = 0x44332211;</span></span>
+<span id="cb8-196"><a href="#cb8-196"></a><span class="in">    let y = 0x12345678;</span></span>
+<span id="cb8-197"><a href="#cb8-197"></a><span class="in">    setter(x, p0);</span></span>
+<span id="cb8-198"><a href="#cb8-198"></a><span class="in">    setter(y, p1);</span></span>
+<span id="cb8-199"><a href="#cb8-199"></a><span class="in">```</span></span>
+<span id="cb8-200"><a href="#cb8-200"></a></span>
+<span id="cb8-201"><a href="#cb8-201"></a><span class="ss">- </span>This maybe isn't the most typical way to access memory.</span>
+<span id="cb8-202"><a href="#cb8-202"></a><span class="ss">    - </span>A more common metaphor is <span class="in">`lw`</span> and <span class="in">`sw`</span> <span class="co">[</span><span class="ot">more</span><span class="co">](https://stackoverflow.com/questions/54136371/understanding-how-lw-and-sw-actually-work-in-a-mips-program)</span> </span>
+<span id="cb8-203"><a href="#cb8-203"></a><span class="ss">    - </span>I found this metaphor more interesting.</span>
+<span id="cb8-204"><a href="#cb8-204"></a><span class="ss">        - </span>Words are fixed size, and felt quite trivial.</span>
+<span id="cb8-205"><a href="#cb8-205"></a><span class="ss">- </span>Given some value returned by malloc, store up to that many bytes of information within the <span class="in">`BUS`</span>.</span>
+<span id="cb8-206"><a href="#cb8-206"></a><span class="ss">    - </span><span class="in">`malloc`</span> and <span class="in">`setter`</span> together are responsible for ensuring the correctness and consistency of these bytes.</span>
+<span id="cb8-207"><a href="#cb8-207"></a><span class="ss">    - </span>In this case, I malloc much more than I needed (16 and 32 bytes, respectively, for 4 byte words).</span>
+<span id="cb8-208"><a href="#cb8-208"></a><span class="ss">        - </span>This is allowed, but wasteful.</span>
+<span id="cb8-209"><a href="#cb8-209"></a><span class="ss">        - </span>It also makes testing easier.</span>
+<span id="cb8-210"><a href="#cb8-210"></a><span class="ss">- </span>We note that <span class="in">`setter`</span> does not ask have an argument for the size of memory being set.</span>
+<span id="cb8-211"><a href="#cb8-211"></a><span class="ss">    - </span>It is your responsibility to infer this size using the type of the arguments.</span>
+<span id="cb8-212"><a href="#cb8-212"></a><span class="ss">    - </span>This is to learn Rust, not to learn about memory, so a secondary objective but one I found worthwhile.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

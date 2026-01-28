@@ -17,6 +17,12 @@ format: html
 
 - [ ] `371rs/22` crate; I named mine "malloc"
 - [ ] You write `src/lib.rs` that implements functions in the `src/main.rs` I provide.
+- [ ] Regard it as "unsporting" to use `Vector` or any other Rust built-in data structure.
+    - **Unless** you are storing it.
+    - Use arrays and raw pointers.
+    - If you can't solve it without them, use them, but...
+    - ...at least understand why it's hard and that there's an alternative.
+    - *If you hand-implement a vector-like on top of static mut within the overhead allowance, you may use **your own** vectors*
 
 # main
 
@@ -156,6 +162,7 @@ fn main() {
         - If a bit is set to 1, the corresponding byte is in use.
         - So a 1-in-8 overhead cost.
         - This is why 64 bit words are popular.
+        - You are permitted have overhead costs as high as 1-in-4 if you need them.
     - However, I had to mark within that bitmask *that the bitmask was already using memory*.
     - This formed my `init`.
 ```{.rs filename="src/lib.rs"}
@@ -180,107 +187,26 @@ fn init() {
 }
 ```
 
-## Crate
+### Setter
 
-- To complete the lab today, create a crate named `helloworld` in a folder named `21` in your `371os` repository.
-```{.bash}
-cargo new 21 --name hello_world --vcs none
+- After the calls to `malloc` within main, we use a wrapping function `setter` to set memory at the location reserved by the malloc to have certain values.
+
+```{.rs filename="src/main.rs"}
+    let x = 0x44332211;
+    let y = 0x12345678;
+    setter(x, p0);
+    setter(y, p1);
 ```
 
-## "Hello world!" 
-
-- Implement "Hello world!" using this crate.
-- Use `i32` to store the "Hello world" data.
-- While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and `i32` literals.
-
-```{.sh}
-calvin@calvin:~/tmp/helloworld$ wc src/main.rs # 2 lines main, 2 lines unsafe, 1 line code
-  5  15 174 src/main.rs
-calvin@calvin:~/tmp/helloworld$ grep world src/main.rs # no plaintext in file
-calvin@calvin:~/tmp/helloworld$ cargo r --release
-   Compiling helloworld v0.1.0 (/home/calvin/tmp/oneone)
-    Finished `release` profile [optimized] target(s) in 0.14s
-     Running `target/release/helloworld`
-Hello world!
-```
-
-### I love Python
-
-- The following may be useful here, to the interested student.
-
-```{.sh}
-python3 -c '[print(ord(a)) for a in "Hello world!"]'
-```
-
-- This is probably insufficient for your purposes and will require some hacking.
-
-### Transmute
-
-- Since it is more idiomatic to use code other people have written in Rust...
-    - I have an opinion on this.
-- ...while it is possible to conduct this exercise using only raw pointers and casts...
-    - (in the voice of Palpatine) "Do it!"
-- ...it is my professional responsibility to recommend you use `transmute`.
-
-```{.rs}
-pub const unsafe fn transmute<Src, Dst>(src: Src) -> Dst
-```
-
-- [Read more](doc.rust-lang.org/std/mem/fn.transmute.html)
-
-### Raw Pointers
-
-- Also can use raw pointers here.
-- Will get in the way of a single-line solution but that is okay - you should do you!
-
-### Numeric Values
-
-- One obvious way to use `transmute` is to change one type of data into another, without altering the underlying numeric values that exist in memory.
-- For example, we can convert an array of `u8`s to an `i32`.
-
-```{.rs}
-unsafe {
-    let bytes: [u8;4] = [0x12,0x34,0x56,0x78];
-    let num: i32 = std::mem::transmute(bytes);
-    println!("{:x}", num);
-}
-```
-
-- I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what `rustc` wanted, so I didn't worry about it. 
-
-### Endianness
-
-- The warning refers to the topic of *endianness*.
-    - Big deal in C, kinda not in Rust actually.
-        - Precisely because of that warning basically.
-        - This lab was very involved.  [Endian](https://cd-public.github.io/courses/old/c89s25/qmd/endian.html)
-- [Read more](https://en.wikipedia.org/wiki/Endianness)
-
-> In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness. 
-
-- Regard an `i32` as a word and a `u8` as a bit.
-- Take note of the endianness revealed by the prior code.
-
-### Numeric Address
-
-- One possibly more advanced use of transmute is upon numeric addresses
-    - The *key*, the numeric value of the address, stays the same.
-    - The value, the numeric value in the memory location decribed by the address, stays the same.
-    - The interpretation - how Rust understands the value at that location - changes.
-
-```{.rs}
-unsafe {
-    let nats: &[u32] = &[0x3F800000];
-    let nums: &[f32] = std::mem::transmute(nats);
-    println!("{}", nums[0]);
-}
-```
-
-- [Recall the meaning of 0x3F8000000](11_unsafe.qmd#/unions)
-- I usually do this on arrays but I guess I'm not sure why.
-    - Try things out.
-    - Vectors are definitely banned though, that is way too high level.
-
-# Fin
-
-- To be continued in the homework.
+- This maybe isn't the most typical way to access memory.
+    - A more common metaphor is `lw` and `sw` [more](https://stackoverflow.com/questions/54136371/understanding-how-lw-and-sw-actually-work-in-a-mips-program) 
+    - I found this metaphor more interesting.
+        - Words are fixed size, and felt quite trivial.
+- Given some value returned by malloc, store up to that many bytes of information within the `BUS`.
+    - `malloc` and `setter` together are responsible for ensuring the correctness and consistency of these bytes.
+    - In this case, I malloc much more than I needed (16 and 32 bytes, respectively, for 4 byte words).
+        - This is allowed, but wasteful.
+        - It also makes testing easier.
+- We note that `setter` does not ask have an argument for the size of memory being set.
+    - It is your responsibility to infer this size using the type of the arguments.
+    - This is to learn Rust, not to learn about memory, so a secondary objective but one I found worthwhile.
