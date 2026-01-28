@@ -12,8 +12,8 @@ format: html
 
 - [ ] `371rs/22` crate; I named mine "malloc"
 - [ ] You write `src/lib.rs` that implements functions in the `src/main.rs` I provide.
-- [ ] Regard it as "unsporting" to use `Vector` or any other Rust built-in data structure.
-    - **Unless** you are storing it.
+- [ ] Regard it as "unsporting" to use `Vec<T>` or any other Rust built-in data structure.
+    - **Unless** you are storing it (e.g. as an argument to `setter`).
     - Use arrays and raw pointers.
     - If you can't solve it without them, use them, but...
     - ...at least understand why it's hard and that there's an alternative.

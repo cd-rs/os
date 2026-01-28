@@ -70,7 +70,7 @@ python3 -c '[print(ord(a)) for a in "Hello world!"]'
 pub const unsafe fn transmute<Src, Dst>(src: Src) -> Dst
 ```
 
-- [Read more](doc.rust-lang.org/std/mem/fn.transmute.html)
+- [Read more](https://doc.rust-lang.org/std/mem/fn.transmute.html)
 
 ### Raw Pointers
 
