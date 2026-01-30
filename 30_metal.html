@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Bare Metal – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./31_linker.html" rel="next">
+<link href="./22_malloc.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./30_metal.html">Bare Metal</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#today" id="toc-today" class="nav-link" data-scroll-target="#today">Today</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a>
+  <ul class="collapse">
+  <li><a href="#throwback-thmonday" id="toc-throwback-thmonday" class="nav-link" data-scroll-target="#throwback-thmonday">Throwback ThMonday</a></li>
+  <li><a href="#bare-metal" id="toc-bare-metal" class="nav-link" data-scroll-target="#bare-metal">Bare Metal</a></li>
+  </ul></li>
+  <li><a href="#binary" id="toc-binary" class="nav-link" data-scroll-target="#binary">Binary</a>
+  <ul class="collapse">
+  <li><a href="#first-steps" id="toc-first-steps" class="nav-link" data-scroll-target="#first-steps">First Steps</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#on-std" id="toc-on-std" class="nav-link" data-scroll-target="#on-std">On <code>std</code></a></li>
+  <li><a href="#we-keep" id="toc-we-keep" class="nav-link" data-scroll-target="#we-keep">We keep:</a></li>
+  <li><a href="#section" id="toc-section" class="nav-link" data-scroll-target="#section"></a></li>
+  <li><a href="#section-1" id="toc-section-1" class="nav-link" data-scroll-target="#section-1"></a></li>
+  <li><a href="#disabling-the-standard-library" id="toc-disabling-the-standard-library" class="nav-link" data-scroll-target="#disabling-the-standard-library">Disabling the Standard Library</a>
+  <ul class="collapse">
+  <li><a href="#the-no_std-attribute" id="toc-the-no_std-attribute" class="nav-link" data-scroll-target="#the-no_std-attribute">The <code>no_std</code> Attribute</a></li>
+  </ul></li>
+  <li><a href="#panic-implementation" id="toc-panic-implementation" class="nav-link" data-scroll-target="#panic-implementation">Panic Implementation</a></li>
+  <li><a href="#the-eh_personality-language-item" id="toc-the-eh_personality-language-item" class="nav-link" data-scroll-target="#the-eh_personality-language-item">The <code>eh_personality</code> Language Item</a>
+  <ul class="collapse">
+  <li><a href="#disabling-unwinding" id="toc-disabling-unwinding" class="nav-link" data-scroll-target="#disabling-unwinding">Disabling Unwinding</a></li>
+  </ul></li>
+  <li><a href="#the-start-attribute" id="toc-the-start-attribute" class="nav-link" data-scroll-target="#the-start-attribute">The <code>start</code> attribute</a>
+  <ul class="collapse">
+  <li><a href="#overwriting-the-entry-point" id="toc-overwriting-the-entry-point" class="nav-link" data-scroll-target="#overwriting-the-entry-point">Overwriting the Entry Point</a></li>
+  </ul></li>
+  <li><a href="#linker-errors" id="toc-linker-errors" class="nav-link" data-scroll-target="#linker-errors">Linker Errors</a>
+  <ul class="collapse">
+  <li><a href="#building-for-a-bare-metal-target" id="toc-building-for-a-bare-metal-target" class="nav-link" data-scroll-target="#building-for-a-bare-metal-target">Building for a Bare Metal Target</a></li>
+  <li><a href="#linker-arguments" id="toc-linker-arguments" class="nav-link" data-scroll-target="#linker-arguments">Linker Arguments</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#making-rust-analyzer-happy" id="toc-making-rust-analyzer-happy" class="nav-link" data-scroll-target="#making-rust-analyzer-happy">Making <code>rust-analyzer</code> happy</a>
+  <ul class="collapse">
+  <li><a href="#the-two-meanings-of-target" id="toc-the-two-meanings-of-target" class="nav-link" data-scroll-target="#the-two-meanings-of-target">The two meanings of “target”</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="30_metal.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Bare Metal</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li><strong>Welcome</strong> to OS in Rust
+<ul>
+<li>Bare metal</li>
+<li>Literally the absolute coolest</li>
+</ul></li>
+<li><strong>Action Items</strong>:
+<ul>
+<li><code>malloc</code> stands eternal
+<ul>
+<li>Possibly the coolest assignment ever</li>
+<li>I’m glad you all love it</li>
+</ul></li>
+<li>Homework this work is more complicated but also more supported.
+<ul>
+<li>Prioritize <code>malloc</code> I think.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="today" class="level2">
+<h2 class="anchored" data-anchor-id="today">Today</h2>
+<ul>
+<li>Bare metal
+<ul>
+<li>Bare metal</li>
+<li>Ranting about how cool this is</li>
+<li>Simulation</li>
+<li>Emulation</li>
+</ul></li>
+<li>A bare metal binary
+<ul>
+<li>Runtimes</li>
+<li><code>std</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>Outright theft:
+<ul>
+<li><a href="https://google.github.io/comprehensive-rust/bare-metal.html">Welcome to Bare Metal Rust</a></li>
+<li><a href="https://os.phil-opp.com/freestanding-rust-binary/">A Freestanding Rust Binary</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="motivation" class="level1">
+<h1>Motivation</h1>
+<section id="throwback-thmonday" class="level2">
+<h2 class="anchored" data-anchor-id="throwback-thmonday">Throwback ThMonday</h2>
+<ul>
+<li>I did this in grad school.
+<ul>
+<li><a href="https://medium.com/@rz2285/simulating-c-program-on-bare-metal-or1200-af67e2886fb8">RTL Simulation of C-Program on Bare-metal OR1200</a></li>
+</ul></li>
+<li>My researcher (Juni) did this in ’22
+<ul>
+<li><a href="https://cd-public.github.io/research/students/aphrodite.pdf">Bare-Metal Programs on RISC-V</a></li>
+</ul></li>
+<li>I did this… last week.
+<ul>
+<li><a href="https://vcd2df.github.io/pnsqc/#/demonstration">Slides including bare-metal execution in Verilog</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="bare-metal" class="level2">
+<h2 class="anchored" data-anchor-id="bare-metal">Bare Metal</h2>
+<blockquote class="blockquote">
+<p><a href="https://en.wikipedia.org/wiki/Bare_machine">A computer which has no operating system. The software executed by a bare machine, commonly called a “bare metal program” or “bare metal application”, is designed to interact directly with hardware. Bare machines are widely used in embedded systems, particularly in cases where resources are limited or high performance is required.</a></p>
+</blockquote>
+</section>
+</section>
+<section id="binary" class="level1">
+<h1>Binary</h1>
+<section id="first-steps" class="level2">
+<h2 class="anchored" data-anchor-id="first-steps">First Steps</h2>
+<p>The first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library. This makes it possible to run Rust code on the <a href="#bare-metal">bare metal</a> without an underlying operating system.</p>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>To write an operating system kernel, we need code that does not depend on any operating system features. This means that we can’t use threads, files, heap memory, the network, random numbers, standard output, or any other features requiring OS abstractions or specific hardware. Which makes sense, since we’re trying to write our own OS and our own drivers.</p>
+</section>
+<section id="on-std" class="level2">
+<h2 class="anchored" data-anchor-id="on-std">On <code>std</code></h2>
+<p>This means that we can’t use most of the <a href="https://doc.rust-lang.org/std/">Rust standard library</a>, but there are a lot of Rust features that we <em>can</em> use. For example, we can use <a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a>, <a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a>, <a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a>, <a href="https://doc.rust-lang.org/core/option/">option</a> and <a href="https://doc.rust-lang.org/core/result/">result</a>, <a href="https://doc.rust-lang.org/core/macro.write.html">string formatting</a>, and of course the <a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership system</a>. These features make it possible to write a kernel in a very expressive, high level way without worrying about <a href="https://www.nayuki.io/page/undefined-behavior-in-c-and-cplusplus-programs">undefined behavior</a> or <a href="https://tonyarcieri.com/it-s-time-for-a-memory-safety-intervention">memory safety</a>.</p>
+</section>
+<section id="we-keep" class="level2">
+<h2 class="anchored" data-anchor-id="we-keep">We keep:</h2>
+<ul>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+<li></li>
+</ul>
+</section>
+<section id="section" class="level2">
+<h2 class="anchored" data-anchor-id="section"></h2>
+<p>In order to create an OS kernel in Rust, we need to create an executable that can be run without an underlying operating system. Such an executable is often called a “freestanding” or “bare-metal” executable.</p>
+</section>
+<section id="section-1" class="level2">
+<h2 class="anchored" data-anchor-id="section-1"></h2>
+<p>This post describes the necessary steps to create a freestanding Rust binary and explains why the steps are needed. If you’re just interested in a minimal example, you can <strong><a href="#summary">jump to the summary</a></strong>.</p>
+</section>
+<section id="disabling-the-standard-library" class="level2">
+<h2 class="anchored" data-anchor-id="disabling-the-standard-library">Disabling the Standard Library</h2>
+<p>By default, all Rust crates link the <a href="https://doc.rust-lang.org/std/">standard library</a>, which depends on the operating system for features such as threads, files, or networking. It also depends on the C standard library <code>libc</code>, which closely interacts with OS services. Since our plan is to write an operating system, we can’t use any OS-dependent libraries. So we have to disable the automatic inclusion of the standard library through the <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/using-rust-without-the-standard-library.html"><code>no_std</code> attribute</a>.</p>
+<p>We start by creating a new cargo application project. The easiest way to do this is through the command line:</p>
+<pre><code>cargo new blog_os --bin --edition 2024</code></pre>
+<p>I named the project <code>blog_os</code>, but of course you can choose your own name. The <code>--bin</code> flag specifies that we want to create an executable binary (in contrast to a library) and the <code>--edition 2024</code> flag specifies that we want to use the <a href="https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html">2024 edition</a> of Rust for our crate. When we run the command, cargo creates the following directory structure for us:</p>
+<pre><code>blog_os
+├── Cargo.toml
+└── src
+    └── main.rs</code></pre>
+<p>The <code>Cargo.toml</code> contains the crate configuration, for example the crate name, the author, the <a href="https://semver.org/">semantic version</a> number, and dependencies. The <code>src/main.rs</code> file contains the root module of our crate and our <code>main</code> function. You can compile your crate through <code>cargo build</code> and then run the compiled <code>blog_os</code> binary in the <code>target/debug</code> subfolder.</p>
+<section id="the-no_std-attribute" class="level3">
+<h3 class="anchored" data-anchor-id="the-no_std-attribute">The <code>no_std</code> Attribute</h3>
+<p>Right now our crate implicitly links the standard library. Let’s try to disable this by adding the <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/using-rust-without-the-standard-library.html"><code>no_std</code> attribute</a>:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">// main.rs</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>    <span class="pp">println!</span>(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we try to build it now (by running <code>cargo build</code>), the following error occurs:</p>
+<pre><code>error: cannot find macro `println!` in this scope
+ --&gt; src/main.rs:4:5
+  |
+4 |     println!("Hello, world!");
+  |     ^^^^^^^</code></pre>
+<p>The reason for this error is that the <a href="https://doc.rust-lang.org/std/macro.println.html"><code>println</code> macro</a> is part of the standard library, which we no longer include. So we can no longer print things. This makes sense, since <code>println</code> writes to <a href="https://en.wikipedia.org/wiki/Standard_streams#Standard_output_.28stdout.29">standard output</a>, which is a special file descriptor provided by the operating system.</p>
+<p>So let’s remove the printing and try again with an empty main function:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">// main.rs</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="kw">fn</span> main() <span class="op">{}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>&gt; cargo build
+error: `#[panic_handler]` function required, but not found
+error: language item required, but not found: `eh_personality`</code></pre>
+<p>Now the compiler is missing a <code>#[panic_handler]</code> function and a <em>language item</em>.</p>
+</section>
+</section>
+<section id="panic-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="panic-implementation">Panic Implementation</h2>
+<p>The <code>panic_handler</code> attribute defines the function that the compiler should invoke when a <a href="https://doc.rust-lang.org/stable/book/ch09-01-unrecoverable-errors-with-panic.html">panic</a> occurs. The standard library provides its own panic handler function, but in a <code>no_std</code> environment we need to define it ourselves:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">// in main.rs</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <a href="https://doc.rust-lang.org/nightly/core/panic/struct.PanicInfo.html"><code>PanicInfo</code> parameter</a> contains the file and line where the panic happened and the optional panic message. The function should never return, so it is marked as a <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/functions.html#diverging-functions">diverging function</a> by returning the <a href="https://doc.rust-lang.org/nightly/std/primitive.never.html">“never” type</a> <code>!</code>. There is not much we can do in this function for now, so we just loop indefinitely.</p>
+</section>
+<section id="the-eh_personality-language-item" class="level2">
+<h2 class="anchored" data-anchor-id="the-eh_personality-language-item">The <code>eh_personality</code> Language Item</h2>
+<p>Language items are special functions and types that are required internally by the compiler. For example, the <a href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html"><code>Copy</code></a> trait is a language item that tells the compiler which types have <a href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html"><em>copy semantics</em></a>. When we look at the <a href="https://github.com/rust-lang/rust/blob/485397e49a02a3b7ff77c17e4a3f16c653925cb3/src/libcore/marker.rs#L296-L299">implementation</a>, we see it has the special <code>#[lang = "copy"]</code> attribute that defines it as a language item.</p>
+<p>While providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn’t even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.</p>
+<p>The <a href="https://github.com/rust-lang/rust/blob/edb368491551a77d77a48446d4ee88b35490c565/src/libpanic_unwind/gcc.rs#L11-L45"><code>eh_personality</code> language item</a> marks a function that is used for implementing <a href="https://www.bogotobogo.com/cplusplus/stackunwinding.php">stack unwinding</a>. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a <a href="https://doc.rust-lang.org/stable/book/ch09-01-unrecoverable-errors-with-panic.html">panic</a>. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g.&nbsp;<a href="https://www.nongnu.org/libunwind/">libunwind</a> on Linux or <a href="https://docs.microsoft.com/en-us/windows/win32/debug/structured-exception-handling">structured exception handling</a> on Windows), so we don’t want to use it for our operating system.</p>
+<section id="disabling-unwinding" class="level3">
+<h3 class="anchored" data-anchor-id="disabling-unwinding">Disabling Unwinding</h3>
+<p>There are other use cases as well for which unwinding is undesirable, so Rust provides an option to <a href="https://github.com/rust-lang/rust/pull/32900">abort on panic</a> instead. This disables the generation of unwinding symbol information and thus considerably reduces binary size. There are multiple places where we can disable unwinding. The easiest way is to add the following lines to our <code>Cargo.toml</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">[profile.dev]</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="kw">[profile.release]</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This sets the panic strategy to <code>abort</code> for both the <code>dev</code> profile (used for <code>cargo build</code>) and the <code>release</code> profile (used for <code>cargo build --release</code>). Now the <code>eh_personality</code> language item should no longer be required.</p>
+<p>Now we fixed both of the above errors. However, if we try to compile it now, another error occurs:</p>
+<pre><code>&gt; cargo build
+error: requires `start` lang_item</code></pre>
+<p>Our program is missing the <code>start</code> language item, which defines the entry point.</p>
+</section>
+</section>
+<section id="the-start-attribute" class="level2">
+<h2 class="anchored" data-anchor-id="the-start-attribute">The <code>start</code> attribute</h2>
+<p>One might think that the <code>main</code> function is the first function called when you run a program. However, most languages have a <a href="https://en.wikipedia.org/wiki/Runtime_system">runtime system</a>, which is responsible for things such as garbage collection (e.g.&nbsp;in Java) or software threads (e.g.&nbsp;goroutines in Go). This runtime needs to be called before <code>main</code>, since it needs to initialize itself.</p>
+<p>In a typical Rust binary that links the standard library, execution starts in a C runtime library called <code>crt0</code> (“C runtime zero”), which sets up the environment for a C application. This includes creating a stack and placing the arguments in the right registers. The C runtime then invokes the <a href="https://github.com/rust-lang/rust/blob/bb4d1491466d8239a7a5fd68bd605e3276e97afb/src/libstd/rt.rs#L32-L73">entry point of the Rust runtime</a>, which is marked by the <code>start</code> language item. Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic. The runtime then finally calls the <code>main</code> function.</p>
+<p>Our freestanding executable does not have access to the Rust runtime and <code>crt0</code>, so we need to define our own entry point. Implementing the <code>start</code> language item wouldn’t help, since it would still require <code>crt0</code>. Instead, we need to overwrite the <code>crt0</code> entry point directly.</p>
+<section id="overwriting-the-entry-point" class="level3">
+<h3 class="anchored" data-anchor-id="overwriting-the-entry-point">Overwriting the Entry Point</h3>
+<p>To tell the Rust compiler that we don’t want to use the normal entry point chain, we add the <code>#![no_main]</code> attribute.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You might notice that we removed the <code>main</code> function. The reason is that a <code>main</code> doesn’t make sense without an underlying runtime that calls it. Instead, we are now overwriting the operating system entry point with our own <code>_start</code> function:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>By using the <code>#[unsafe(no_mangle)]</code> attribute, we disable <a href="https://en.wikipedia.org/wiki/Name_mangling">name mangling</a> to ensure that the Rust compiler really outputs a function with the name <code>_start</code>. Without the attribute, the compiler would generate some cryptic <code>_ZN3blog_os4_start7hb173fedf945531caE</code> symbol to give every function a unique name. The attribute is required because we need to tell the name of the entry point function to the linker in the next step.</p>
+<p>We also have to mark the function as <code>extern "C"</code> to tell the compiler that it should use the <a href="https://en.wikipedia.org/wiki/Calling_convention">C calling convention</a> for this function (instead of the unspecified Rust calling convention). The reason for naming the function <code>_start</code> is that this is the default entry point name for most systems.</p>
+<p>The <code>!</code> return type means that the function is diverging, i.e.&nbsp;not allowed to ever return. This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader. So instead of returning, the entry point should e.g.&nbsp;invoke the <a href="https://en.wikipedia.org/wiki/Exit_(system_call)"><code>exit</code> system call</a> of the operating system. In our case, shutting down the machine could be a reasonable action, since there’s nothing left to do if a freestanding binary returns. For now, we fulfill the requirement by looping endlessly.</p>
+<p>When we run <code>cargo build</code> now, we get an ugly <em>linker</em> error.</p>
+</section>
+</section>
+<section id="linker-errors" class="level2">
+<h2 class="anchored" data-anchor-id="linker-errors">Linker Errors</h2>
+<p>The linker is a program that combines the generated code into an executable. Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.</p>
+<p>To solve the errors, we need to tell the linker that it should not include the C runtime. We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.</p>
+<section id="building-for-a-bare-metal-target" class="level3">
+<h3 class="anchored" data-anchor-id="building-for-a-bare-metal-target">Building for a Bare Metal Target</h3>
+<p>By default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on <code>x86_64</code>, Rust tries to build an <code>.exe</code> Windows executable that uses <code>x86_64</code> instructions. This environment is called your “host” system.</p>
+<p>To describe different environments, Rust uses a string called <a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple"><em>target triple</em></a>. You can see the target triple for your host system by running <code>rustc --version --verbose</code>:</p>
+<pre><code>rustc 1.35.0-nightly (474e7a648 2019-04-07)
+binary: rustc
+commit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab
+commit-date: 2019-04-07
+host: x86_64-unknown-linux-gnu
+release: 1.35.0-nightly
+LLVM version: 8.0</code></pre>
+<p>The above output is from a <code>x86_64</code> Linux system. We see that the <code>host</code> triple is <code>x86_64-unknown-linux-gnu</code>, which includes the CPU architecture (<code>x86_64</code>), the vendor (<code>unknown</code>), the operating system (<code>linux</code>), and the <a href="https://en.wikipedia.org/wiki/Application_binary_interface">ABI</a> (<code>gnu</code>).</p>
+<p>By compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.</p>
+<p>An example of such a bare metal environment is the <code>thumbv7em-none-eabihf</code> target triple, which describes an <a href="https://en.wikipedia.org/wiki/Embedded_system">embedded</a> <a href="https://en.wikipedia.org/wiki/ARM_architecture">ARM</a> system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the <code>none</code> in the target triple. To be able to compile for this target, we need to add it in rustup:</p>
+<pre><code>rustup target add thumbv7em-none-eabihf</code></pre>
+<p>This downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:</p>
+<pre><code>cargo build --target thumbv7em-none-eabihf</code></pre>
+<p>By passing a <code>--target</code> argument we <a href="https://en.wikipedia.org/wiki/Cross_compiler">cross compile</a> our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.</p>
+<p>This is the approach that we will use for building our OS kernel. Instead of <code>thumbv7em-none-eabihf</code>, we will use a <a href="https://doc.rust-lang.org/rustc/targets/custom.html">custom target</a> that describes a <code>x86_64</code> bare metal environment. The details will be explained in the next post.</p>
+</section>
+<section id="linker-arguments" class="level3">
+<h3 class="anchored" data-anchor-id="linker-arguments">Linker Arguments</h3>
+<p>Instead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This isn’t the approach that we will use for our kernel, therefore this section is optional and only provided for completeness. Click on <em>“Linker Arguments”</em> below to show the optional content.</p>
+<details>
+<summary>
+Linker Arguments
+</summary>
+<p>In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.</p>
+<section id="linux" class="level4">
+<h4 class="anchored" data-anchor-id="linux">Linux</h4>
+<p>On Linux the following linker error occurs (shortened):</p>
+<pre><code>error: linking with `cc` failed: exit code: 1
+  |
+  = note: "cc" […]
+  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
+          (.text+0x12): undefined reference to `__libc_csu_fini'
+          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
+          (.text+0x19): undefined reference to `__libc_csu_init'
+          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
+          (.text+0x25): undefined reference to `__libc_start_main'
+          collect2: error: ld returned 1 exit status</code></pre>
+<p>The problem is that the linker includes the startup routine of the C runtime by default, which is also called <code>_start</code>. It requires some symbols of the C standard library <code>libc</code> that we don’t include due to the <code>no_std</code> attribute, therefore the linker can’t resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the <code>-nostartfiles</code> flag.</p>
+<p>One way to pass linker attributes via cargo is the <code>cargo rustc</code> command. The command behaves exactly like <code>cargo build</code>, but allows to pass options to <code>rustc</code>, the underlying Rust compiler. <code>rustc</code> has the <code>-C link-arg</code> flag, which passes an argument to the linker. Combined, our new build command looks like this:</p>
+<pre><code>cargo rustc -- -C link-arg=-nostartfiles</code></pre>
+<p>Now our crate builds as a freestanding executable on Linux!</p>
+<p>We didn’t need to specify the name of our entry point function explicitly since the linker looks for a function with the name <code>_start</code> by default.</p>
+</section>
+<section id="windows" class="level4">
+<h4 class="anchored" data-anchor-id="windows">Windows</h4>
+<p>On Windows, a different linker error occurs (shortened):</p>
+<pre><code>error: linking with `link.exe` failed: exit code: 1561
+  |
+  = note: "C:\\Program Files (x86)\\…\\link.exe" […]
+  = note: LINK : fatal error LNK1561: entry point must be defined</code></pre>
+<p>The “entry point must be defined” error means that the linker can’t find the entry point. On Windows, the default entry point name <a href="https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol">depends on the used subsystem</a>. For the <code>CONSOLE</code> subsystem, the linker looks for a function named <code>mainCRTStartup</code> and for the <code>WINDOWS</code> subsystem, it looks for a function named <code>WinMainCRTStartup</code>. To override the default and tell the linker to look for our <code>_start</code> function instead, we can pass an <code>/ENTRY</code> argument to the linker:</p>
+<pre><code>cargo rustc -- -C link-arg=/ENTRY:_start</code></pre>
+<p>From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.</p>
+<p>Now a different linker error occurs:</p>
+<pre><code>error: linking with `link.exe` failed: exit code: 1221
+  |
+  = note: "C:\\Program Files (x86)\\…\\link.exe" […]
+  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be
+          defined</code></pre>
+<p>This error occurs because Windows executables can use different <a href="https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol">subsystems</a>. For normal programs, they are inferred depending on the entry point name: If the entry point is named <code>main</code>, the <code>CONSOLE</code> subsystem is used, and if the entry point is named <code>WinMain</code>, the <code>WINDOWS</code> subsystem is used. Since our <code>_start</code> function has a different name, we need to specify the subsystem explicitly:</p>
+<pre><code>cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"</code></pre>
+<p>We use the <code>CONSOLE</code> subsystem here, but the <code>WINDOWS</code> subsystem would work too. Instead of passing <code>-C link-arg</code> multiple times, we use <code>-C link-args</code> which takes a space separated list of arguments.</p>
+<p>With this command, our executable should build successfully on Windows.</p>
+</section>
+<section id="macos" class="level4">
+<h4 class="anchored" data-anchor-id="macos">macOS</h4>
+<p>On macOS, the following linker error occurs (shortened):</p>
+<pre><code>error: linking with `cc` failed: exit code: 1
+  |
+  = note: "cc" […]
+  = note: ld: entry point (_main) undefined. for architecture x86_64
+          clang: error: linker command failed with exit code 1 […]</code></pre>
+<p>This error message tells us that the linker can’t find an entry point function with the default name <code>main</code> (for some reason, all functions are prefixed with a <code>_</code> on macOS). To set the entry point to our <code>_start</code> function, we pass the <code>-e</code> linker argument:</p>
+<pre><code>cargo rustc -- -C link-args="-e __start"</code></pre>
+<p>The <code>-e</code> flag specifies the name of the entry point function. Since all functions have an additional <code>_</code> prefix on macOS, we need to set the entry point to <code>__start</code> instead of <code>_start</code>.</p>
+<p>Now the following linker error occurs:</p>
+<pre><code>error: linking with `cc` failed: exit code: 1
+  |
+  = note: "cc" […]
+  = note: ld: dynamic main executables must link with libSystem.dylib
+          for architecture x86_64
+          clang: error: linker command failed with exit code 1 […]</code></pre>
+<p>macOS <a href="https://developer.apple.com/library/archive/qa/qa1118/_index.html">does not officially support statically linked binaries</a> and requires programs to link the <code>libSystem</code> library by default. To override this and link a static binary, we pass the <code>-static</code> flag to the linker:</p>
+<pre><code>cargo rustc -- -C link-args="-e __start -static"</code></pre>
+<p>This still does not suffice, as a third linker error occurs:</p>
+<pre><code>error: linking with `cc` failed: exit code: 1
+  |
+  = note: "cc" […]
+  = note: ld: library not found for -lcrt0.o
+          clang: error: linker command failed with exit code 1 […]</code></pre>
+<p>This error occurs because programs on macOS link to <code>crt0</code> (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the <code>-nostartfiles</code> linker argument:</p>
+<pre><code>cargo rustc -- -C link-args="-e __start -static -nostartfiles"</code></pre>
+<p>Now our program should build successfully on macOS.</p>
+</section>
+<section id="unifying-the-build-commands" class="level4">
+<h4 class="anchored" data-anchor-id="unifying-the-build-commands">Unifying the Build Commands</h4>
+<p>Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named <code>.cargo/config.toml</code> that contains the platform-specific arguments:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb27-1"><a href="#cb27-1"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb27-2"><a href="#cb27-2"></a></span>
+<span id="cb27-3"><a href="#cb27-3"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "linux")'</span><span class="kw">]</span></span>
+<span id="cb27-4"><a href="#cb27-4"></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-arg=-nostartfiles"</span><span class="op">]</span></span>
+<span id="cb27-5"><a href="#cb27-5"></a></span>
+<span id="cb27-6"><a href="#cb27-6"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "windows")'</span><span class="kw">]</span></span>
+<span id="cb27-7"><a href="#cb27-7"></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-args=/ENTRY:_start /SUBSYSTEM:console"</span><span class="op">]</span></span>
+<span id="cb27-8"><a href="#cb27-8"></a></span>
+<span id="cb27-9"><a href="#cb27-9"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "macos")'</span><span class="kw">]</span></span>
+<span id="cb27-10"><a href="#cb27-10"></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-args=-e __start -static -nostartfiles"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>rustflags</code> key contains arguments that are automatically added to every invocation of <code>rustc</code>. For more information on the <code>.cargo/config.toml</code> file, check out the <a href="https://doc.rust-lang.org/cargo/reference/config.html">official documentation</a>.</p>
+<p>Now our program should be buildable on all three platforms with a simple <code>cargo build</code>.</p>
+</section>
+<section id="should-you-do-this" class="level4">
+<h4 class="anchored" data-anchor-id="should-you-do-this">Should You Do This?</h4>
+<p>While it’s possible to build a freestanding executable for Linux, Windows, and macOS, it’s probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the <code>_start</code> function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g.&nbsp;through a segmentation fault.</p>
+<p>If you want to create a minimal binary that runs on top of an existing operating system, including <code>libc</code> and setting the <code>#[start]</code> attribute as described <a href="https://doc.rust-lang.org/1.16.0/book/no-stdlib.html">here</a> is probably a better idea.</p>
+</section></details>
+</section>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>A minimal freestanding Rust binary looks like this:</p>
+<p><code>src/main.rs</code>:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a href="#cb28-1"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a></span>
+<span id="cb28-4"><a href="#cb28-4"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb28-5"><a href="#cb28-5"></a></span>
+<span id="cb28-6"><a href="#cb28-6"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb28-7"><a href="#cb28-7"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb28-8"><a href="#cb28-8"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb28-9"><a href="#cb28-9"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb28-10"><a href="#cb28-10"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb28-11"><a href="#cb28-11"></a><span class="op">}</span></span>
+<span id="cb28-12"><a href="#cb28-12"></a></span>
+<span id="cb28-13"><a href="#cb28-13"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb28-14"><a href="#cb28-14"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb28-15"><a href="#cb28-15"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb28-16"><a href="#cb28-16"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb28-17"><a href="#cb28-17"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>Cargo.toml</code>:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb29-1"><a href="#cb29-1"></a><span class="kw">[package]</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"crate_name"</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb29-4"><a href="#cb29-4"></a><span class="dt">authors</span> <span class="op">=</span> <span class="op">[</span><span class="st">"Author Name &lt;author@example.com&gt;"</span><span class="op">]</span></span>
+<span id="cb29-5"><a href="#cb29-5"></a></span>
+<span id="cb29-6"><a href="#cb29-6"></a><span class="co"># the profile used for `cargo build`</span></span>
+<span id="cb29-7"><a href="#cb29-7"></a><span class="kw">[profile.dev]</span></span>
+<span id="cb29-8"><a href="#cb29-8"></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span> <span class="co"># disable stack unwinding on panic</span></span>
+<span id="cb29-9"><a href="#cb29-9"></a></span>
+<span id="cb29-10"><a href="#cb29-10"></a><span class="co"># the profile used for `cargo build --release`</span></span>
+<span id="cb29-11"><a href="#cb29-11"></a><span class="kw">[profile.release]</span></span>
+<span id="cb29-12"><a href="#cb29-12"></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span> <span class="co"># disable stack unwinding on panic</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To build this binary, we need to compile for a bare metal target such as <code>thumbv7em-none-eabihf</code>:</p>
+<pre><code>cargo build --target thumbv7em-none-eabihf</code></pre>
+<p>Alternatively, we can compile it for the host system by passing additional linker arguments:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1"></a><span class="co"># Linux</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-arg=-nostartfiles</span>
+<span id="cb31-3"><a href="#cb31-3"></a><span class="co"># Windows</span></span>
+<span id="cb31-4"><a href="#cb31-4"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"/ENTRY:_start /SUBSYSTEM:console"</span></span>
+<span id="cb31-5"><a href="#cb31-5"></a><span class="co"># macOS</span></span>
+<span id="cb31-6"><a href="#cb31-6"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"-e __start -static -nostartfiles"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the <code>_start</code> function is called. <strong>So for any real use of such a binary, more steps are required</strong>.</p>
+</section>
+<section id="making-rust-analyzer-happy" class="level2">
+<h2 class="anchored" data-anchor-id="making-rust-analyzer-happy">Making <code>rust-analyzer</code> happy</h2>
+<p>The <a href="https://rust-analyzer.github.io/"><code>rust-analyzer</code></a> project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for <code>#![no_std]</code> projects too, so I recommend using it for kernel development!</p>
+<p>If you’re using the <a href="https://rust-analyzer.github.io/book/configuration.html#checkOnSave"><code>checkOnSave</code></a> feature of <code>rust-analyzer</code> (enabled by default), it might report an error for the panic function of our kernel:</p>
+<pre><code>found duplicate lang item `panic_impl`</code></pre>
+<p>The reason for this error is that <code>rust-analyzer</code> invokes <code>cargo check --all-targets</code> by default, which also tries to build the binary in <a href="https://doc.rust-lang.org/book/ch11-01-writing-tests.html">test</a> and <a href="https://doc.rust-lang.org/rustc/tests/index.html#benchmarks">benchmark</a> mode.</p>
+<section id="the-two-meanings-of-target" class="level3 note">
+<h3 class="anchored" data-anchor-id="the-two-meanings-of-target">The two meanings of “target”</h3>
+<p>The <code>--all-targets</code> flag is completely unrelated to the <code>--target</code> argument. There are two different meanings of the term “target” in <code>cargo</code>:</p>
+<ul>
+<li>The <code>--target</code> flag specifies the <strong><a href="https://doc.rust-lang.org/rustc/targets/index.html"><em>compilation target</em></a></strong> that should be passed to the <code>rustc</code> compiler. This should be set to the <a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple">target triple</a> of the machine that should run our code.</li>
+<li>The <code>--all-targets</code> flag references the <strong><a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html"><em>package target</em></a></strong> of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples">examples</a>, <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests">tests</a>, and <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks">benchmarks</a>. These package targets can co-exist, so you can build/check the same crate in e.g.&nbsp;library or test mode.</li>
+</ul>
+</section>
+<p>By default, <code>cargo check</code> only builds the <em>library</em> and <em>binary</em> package targets. However, <code>rust-analyzer</code> chooses to check all package targets by default when <a href="https://rust-analyzer.github.io/book/configuration.html#checkOnSave"><code>checkOnSave</code></a> is enabled. This is the reason that <code>rust-analyzer</code> reports the above <code>lang item</code> error that we don’t see in <code>cargo check</code>. If we run <code>cargo check --all-targets</code>, we see the error too:</p>
+<pre><code>error[E0152]: found duplicate lang item `panic_impl`
+  --&gt; src/main.rs:13:1
+   |
+13 | / fn panic(_info: &amp;PanicInfo) -&gt; ! {
+14 | |     loop {}
+15 | | }
+   | |_^
+   |
+   = note: the lang item is first defined in crate `std` (which `test` depends on)
+   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib
+   = note: second definition in the local crate (`blog_os`)</code></pre>
+<p>The first <code>note</code> tells us that the panic language item is already defined in the <code>std</code> crate, which is a dependency of the <code>test</code> crate. The <code>test</code> crate is automatically included when building a crate in <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests">test mode</a>. This does not make sense for our <code>#![no_std]</code> kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.</p>
+<p>The proper way to avoid this error is to specify in our <code>Cargo.toml</code> that our binary does not support building in <code>test</code> and <code>bench</code> modes. We can do that by adding a <code>[[bin]]</code> section to our <code>Cargo.toml</code> to <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target">configure the build</a> of our binary:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb34-1"><a href="#cb34-1"></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb34-2"><a href="#cb34-2"></a></span>
+<span id="cb34-3"><a href="#cb34-3"></a><span class="kw">[[bin]]</span></span>
+<span id="cb34-4"><a href="#cb34-4"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"blog_os"</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a><span class="dt">test</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb34-6"><a href="#cb34-6"></a><span class="dt">bench</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The double-brackets around <code>bin</code> are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the <code>[[bin]]</code> section can appear multiple times in the <code>Cargo.toml</code> as well. This is also the reason for the mandatory <code>name</code> field, which needs to match the name of the binary (so that <code>cargo</code> knows which settings should be applied to which binary).</p>
+<p>By setting the <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-test-field"><code>test</code></a> and <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-bench-field"><code>bench</code></a> fields to <code>false</code>, we instruct <code>cargo</code> to not build our binary in test or benchmark mode. Now <code>cargo check --all-targets</code> should not throw any errors anymore, and the <code>checkOnSave</code> implementation of <code>rust-analyzer</code> should be happy too.</p>
+
+
+<!-- -->
+
+</section>
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./22_malloc.html" class="pagination-link" aria-label="malloc">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">malloc</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./31_linker.html" class="pagination-link" aria-label="Linker">
+        <span class="nav-page-text">Linker</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb35" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb35-1"><a href="#cb35-1"></a><span class="co">---</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a><span class="an">title:</span><span class="co"> Bare Metal</span></span>
+<span id="cb35-3"><a href="#cb35-3"></a><span class="co">---</span></span>
+<span id="cb35-4"><a href="#cb35-4"></a></span>
+<span id="cb35-5"><a href="#cb35-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb35-6"><a href="#cb35-6"></a></span>
+<span id="cb35-7"><a href="#cb35-7"></a><span class="ss">- </span>**Welcome** to OS in Rust</span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="ss">  - </span>Bare metal</span>
+<span id="cb35-9"><a href="#cb35-9"></a><span class="ss">  - </span>Literally the absolute coolest</span>
+<span id="cb35-10"><a href="#cb35-10"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb35-11"><a href="#cb35-11"></a><span class="ss">  - </span><span class="in">`malloc`</span> stands eternal</span>
+<span id="cb35-12"><a href="#cb35-12"></a><span class="ss">    - </span>Possibly the coolest assignment ever</span>
+<span id="cb35-13"><a href="#cb35-13"></a><span class="ss">    - </span>I'm glad you all love it</span>
+<span id="cb35-14"><a href="#cb35-14"></a><span class="ss">  - </span>Homework this work is more complicated but also more supported.</span>
+<span id="cb35-15"><a href="#cb35-15"></a><span class="ss">    - </span>Prioritize <span class="in">`malloc`</span> I think.</span>
+<span id="cb35-16"><a href="#cb35-16"></a></span>
+<span id="cb35-17"><a href="#cb35-17"></a></span>
+<span id="cb35-18"><a href="#cb35-18"></a><span class="fu">## Today</span></span>
+<span id="cb35-19"><a href="#cb35-19"></a></span>
+<span id="cb35-20"><a href="#cb35-20"></a><span class="ss">- </span>Bare metal</span>
+<span id="cb35-21"><a href="#cb35-21"></a><span class="ss">    - </span>Bare metal</span>
+<span id="cb35-22"><a href="#cb35-22"></a><span class="ss">    - </span>Ranting about how cool this is</span>
+<span id="cb35-23"><a href="#cb35-23"></a><span class="ss">    - </span>Simulation</span>
+<span id="cb35-24"><a href="#cb35-24"></a><span class="ss">    - </span>Emulation</span>
+<span id="cb35-25"><a href="#cb35-25"></a><span class="ss">- </span>A bare metal binary</span>
+<span id="cb35-26"><a href="#cb35-26"></a><span class="ss">    - </span>Runtimes</span>
+<span id="cb35-27"><a href="#cb35-27"></a><span class="ss">    - </span><span class="in">`std`</span></span>
+<span id="cb35-28"><a href="#cb35-28"></a>    </span>
+<span id="cb35-29"><a href="#cb35-29"></a><span class="fu">## Citations</span></span>
+<span id="cb35-30"><a href="#cb35-30"></a></span>
+<span id="cb35-31"><a href="#cb35-31"></a><span class="ss">- </span>Outright theft:</span>
+<span id="cb35-32"><a href="#cb35-32"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Welcome to Bare Metal Rust</span><span class="co">](https://google.github.io/comprehensive-rust/bare-metal.html)</span></span>
+<span id="cb35-33"><a href="#cb35-33"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">A Freestanding Rust Binary</span><span class="co">](https://os.phil-opp.com/freestanding-rust-binary/)</span></span>
+<span id="cb35-34"><a href="#cb35-34"></a></span>
+<span id="cb35-35"><a href="#cb35-35"></a><span class="fu"># Motivation</span></span>
+<span id="cb35-36"><a href="#cb35-36"></a></span>
+<span id="cb35-37"><a href="#cb35-37"></a><span class="fu">## Throwback ThMonday</span></span>
+<span id="cb35-38"><a href="#cb35-38"></a></span>
+<span id="cb35-39"><a href="#cb35-39"></a><span class="ss">- </span>I did this in grad school.</span>
+<span id="cb35-40"><a href="#cb35-40"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">RTL Simulation of C-Program on Bare-metal OR1200</span><span class="co">](https://medium.com/@rz2285/simulating-c-program-on-bare-metal-or1200-af67e2886fb8)</span></span>
+<span id="cb35-41"><a href="#cb35-41"></a><span class="ss">- </span>My researcher (Juni) did this in '22</span>
+<span id="cb35-42"><a href="#cb35-42"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Bare-Metal Programs on RISC-V</span><span class="co">](https://cd-public.github.io/research/students/aphrodite.pdf)</span></span>
+<span id="cb35-43"><a href="#cb35-43"></a><span class="ss">- </span>I did this... last week.</span>
+<span id="cb35-44"><a href="#cb35-44"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Slides including bare-metal execution in Verilog</span><span class="co">](https://vcd2df.github.io/pnsqc/#/demonstration)</span></span>
+<span id="cb35-45"><a href="#cb35-45"></a>    </span>
+<span id="cb35-46"><a href="#cb35-46"></a><span class="fu">## Bare Metal</span></span>
+<span id="cb35-47"><a href="#cb35-47"></a></span>
+<span id="cb35-48"><a href="#cb35-48"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">A computer which has no operating system. The software executed by a bare machine, commonly called a "bare metal program" or "bare metal application", is designed to interact directly with hardware. Bare machines are widely used in embedded systems, particularly in cases where resources are limited or high performance is required.</span><span class="co">](https://en.wikipedia.org/wiki/Bare_machine)</span></span>
+<span id="cb35-49"><a href="#cb35-49"></a></span>
+<span id="cb35-50"><a href="#cb35-50"></a><span class="fu"># Binary</span></span>
+<span id="cb35-51"><a href="#cb35-51"></a></span>
+<span id="cb35-52"><a href="#cb35-52"></a><span class="fu">## First Steps</span></span>
+<span id="cb35-53"><a href="#cb35-53"></a></span>
+<span id="cb35-54"><a href="#cb35-54"></a>The first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library. This makes it possible to run Rust code on the <span class="co">[</span><span class="ot">bare metal</span><span class="co">]</span> without an underlying operating system.</span>
+<span id="cb35-55"><a href="#cb35-55"></a></span>
+<span id="cb35-56"><a href="#cb35-56"></a><span class="fu">## Introduction</span></span>
+<span id="cb35-57"><a href="#cb35-57"></a></span>
+<span id="cb35-58"><a href="#cb35-58"></a>To write an operating system kernel, we need code that does not depend on any operating system features. This means that we can't use threads, files, heap memory, the network, random numbers, standard output, or any other features requiring OS abstractions or specific hardware. Which makes sense, since we're trying to write our own OS and our own drivers.</span>
+<span id="cb35-59"><a href="#cb35-59"></a></span>
+<span id="cb35-60"><a href="#cb35-60"></a><span class="fu">## On `std`</span></span>
+<span id="cb35-61"><a href="#cb35-61"></a></span>
+<span id="cb35-62"><a href="#cb35-62"></a>This means that we can't use most of the <span class="co">[</span><span class="ot">Rust standard library</span><span class="co">]</span>, but there are a lot of Rust features that we _can_ use. For example, we can use <span class="co">[</span><span class="ot">iterators</span><span class="co">]</span>, <span class="co">[</span><span class="ot">closures</span><span class="co">]</span>, <span class="co">[</span><span class="ot">pattern matching</span><span class="co">]</span>, <span class="co">[</span><span class="ot">option</span><span class="co">]</span> and <span class="co">[</span><span class="ot">result</span><span class="co">]</span>, <span class="co">[</span><span class="ot">string formatting</span><span class="co">]</span>, and of course the <span class="co">[</span><span class="ot">ownership system</span><span class="co">]</span>. These features make it possible to write a kernel in a very expressive, high level way without worrying about <span class="co">[</span><span class="ot">undefined behavior</span><span class="co">]</span> or <span class="co">[</span><span class="ot">memory safety</span><span class="co">]</span>.</span>
+<span id="cb35-63"><a href="#cb35-63"></a></span>
+<span id="cb35-64"><a href="#cb35-64"></a><span class="fu">## We keep:</span></span>
+<span id="cb35-65"><a href="#cb35-65"></a></span>
+<span id="cb35-66"><a href="#cb35-66"></a><span class="ss">- </span><span class="co">[</span><span class="ot">option</span><span class="co">]</span>: https://doc.rust-lang.org/core/option/</span>
+<span id="cb35-67"><a href="#cb35-67"></a><span class="ss">- </span><span class="co">[</span><span class="ot">result</span><span class="co">]</span>:https://doc.rust-lang.org/core/result/</span>
+<span id="cb35-68"><a href="#cb35-68"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Rust standard library</span><span class="co">]</span>: https://doc.rust-lang.org/std/</span>
+<span id="cb35-69"><a href="#cb35-69"></a><span class="ss">- </span><span class="co">[</span><span class="ot">iterators</span><span class="co">]</span>: https://doc.rust-lang.org/book/ch13-02-iterators.html</span>
+<span id="cb35-70"><a href="#cb35-70"></a><span class="ss">- </span><span class="co">[</span><span class="ot">closures</span><span class="co">]</span>: https://doc.rust-lang.org/book/ch13-01-closures.html</span>
+<span id="cb35-71"><a href="#cb35-71"></a><span class="ss">- </span><span class="co">[</span><span class="ot">pattern matching</span><span class="co">]</span>: https://doc.rust-lang.org/book/ch06-00-enums.html</span>
+<span id="cb35-72"><a href="#cb35-72"></a><span class="ss">- </span><span class="co">[</span><span class="ot">string formatting</span><span class="co">]</span>: https://doc.rust-lang.org/core/macro.write.html</span>
+<span id="cb35-73"><a href="#cb35-73"></a><span class="ss">- </span><span class="co">[</span><span class="ot">ownership system</span><span class="co">]</span>: https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html</span>
+<span id="cb35-74"><a href="#cb35-74"></a><span class="ss">- </span><span class="co">[</span><span class="ot">undefined behavior</span><span class="co">]</span>: https://www.nayuki.io/page/undefined-behavior-in-c-and-cplusplus-programs</span>
+<span id="cb35-75"><a href="#cb35-75"></a><span class="ss">- </span><span class="co">[</span><span class="ot">memory safety</span><span class="co">]</span>: https://tonyarcieri.com/it-s-time-for-a-memory-safety-intervention</span>
+<span id="cb35-76"><a href="#cb35-76"></a></span>
+<span id="cb35-77"><a href="#cb35-77"></a><span class="fu">## </span></span>
+<span id="cb35-78"><a href="#cb35-78"></a></span>
+<span id="cb35-79"><a href="#cb35-79"></a>In order to create an OS kernel in Rust, we need to create an executable that can be run without an underlying operating system. Such an executable is often called a “freestanding” or “bare-metal” executable.</span>
+<span id="cb35-80"><a href="#cb35-80"></a></span>
+<span id="cb35-81"><a href="#cb35-81"></a><span class="fu">## </span></span>
+<span id="cb35-82"><a href="#cb35-82"></a></span>
+<span id="cb35-83"><a href="#cb35-83"></a>This post describes the necessary steps to create a freestanding Rust binary and explains why the steps are needed. If you're just interested in a minimal example, you can **[jump to the summary](#summary)**.</span>
+<span id="cb35-84"><a href="#cb35-84"></a></span>
+<span id="cb35-85"><a href="#cb35-85"></a><span class="fu">## Disabling the Standard Library</span></span>
+<span id="cb35-86"><a href="#cb35-86"></a></span>
+<span id="cb35-87"><a href="#cb35-87"></a>By default, all Rust crates link the <span class="co">[</span><span class="ot">standard library</span><span class="co">]</span>, which depends on the operating system for features such as threads, files, or networking. It also depends on the C standard library <span class="in">`libc`</span>, which closely interacts with OS services. Since our plan is to write an operating system, we can't use any OS-dependent libraries. So we have to disable the automatic inclusion of the standard library through the <span class="co">[</span><span class="ot">`no_std` attribute</span><span class="co">]</span>.</span>
+<span id="cb35-88"><a href="#cb35-88"></a></span>
+<span id="cb35-89"><a href="#cb35-89"></a><span class="ot">[standard library]: https://doc.rust-lang.org/std/</span></span>
+<span id="cb35-90"><a href="#cb35-90"></a><span class="ot">[`no_std` attribute]: https://doc.rust-lang.org/1.30.0/book/first-edition/using-rust-without-the-standard-library.html</span></span>
+<span id="cb35-91"><a href="#cb35-91"></a></span>
+<span id="cb35-92"><a href="#cb35-92"></a>We start by creating a new cargo application project. The easiest way to do this is through the command line:</span>
+<span id="cb35-93"><a href="#cb35-93"></a></span>
+<span id="cb35-94"><a href="#cb35-94"></a><span class="in">```</span></span>
+<span id="cb35-95"><a href="#cb35-95"></a><span class="in">cargo new blog_os --bin --edition 2024</span></span>
+<span id="cb35-96"><a href="#cb35-96"></a><span class="in">```</span></span>
+<span id="cb35-97"><a href="#cb35-97"></a></span>
+<span id="cb35-98"><a href="#cb35-98"></a>I named the project <span class="in">`blog_os`</span>, but of course you can choose your own name. The <span class="in">`--bin`</span> flag specifies that we want to create an executable binary (in contrast to a library) and the <span class="in">`--edition 2024`</span> flag specifies that we want to use the <span class="co">[</span><span class="ot">2024 edition</span><span class="co">]</span> of Rust for our crate. When we run the command, cargo creates the following directory structure for us:</span>
+<span id="cb35-99"><a href="#cb35-99"></a></span>
+<span id="cb35-100"><a href="#cb35-100"></a><span class="ot">[2024 edition]: https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html</span></span>
+<span id="cb35-101"><a href="#cb35-101"></a></span>
+<span id="cb35-102"><a href="#cb35-102"></a><span class="in">```</span></span>
+<span id="cb35-103"><a href="#cb35-103"></a><span class="in">blog_os</span></span>
+<span id="cb35-104"><a href="#cb35-104"></a><span class="in">├── Cargo.toml</span></span>
+<span id="cb35-105"><a href="#cb35-105"></a><span class="in">└── src</span></span>
+<span id="cb35-106"><a href="#cb35-106"></a><span class="in">    └── main.rs</span></span>
+<span id="cb35-107"><a href="#cb35-107"></a><span class="in">```</span></span>
+<span id="cb35-108"><a href="#cb35-108"></a></span>
+<span id="cb35-109"><a href="#cb35-109"></a>The <span class="in">`Cargo.toml`</span> contains the crate configuration, for example the crate name, the author, the <span class="co">[</span><span class="ot">semantic version</span><span class="co">]</span> number, and dependencies. The <span class="in">`src/main.rs`</span> file contains the root module of our crate and our <span class="in">`main`</span> function. You can compile your crate through <span class="in">`cargo build`</span> and then run the compiled <span class="in">`blog_os`</span> binary in the <span class="in">`target/debug`</span> subfolder.</span>
+<span id="cb35-110"><a href="#cb35-110"></a></span>
+<span id="cb35-111"><a href="#cb35-111"></a><span class="ot">[semantic version]: https://semver.org/</span></span>
+<span id="cb35-112"><a href="#cb35-112"></a></span>
+<span id="cb35-113"><a href="#cb35-113"></a><span class="fu">### The `no_std` Attribute</span></span>
+<span id="cb35-114"><a href="#cb35-114"></a></span>
+<span id="cb35-115"><a href="#cb35-115"></a>Right now our crate implicitly links the standard library. Let's try to disable this by adding the <span class="co">[</span><span class="ot">`no_std` attribute</span><span class="co">]</span>:</span>
+<span id="cb35-116"><a href="#cb35-116"></a></span>
+<span id="cb35-117"><a href="#cb35-117"></a><span class="in">```rust</span></span>
+<span id="cb35-118"><a href="#cb35-118"></a><span class="co">// main.rs</span></span>
+<span id="cb35-119"><a href="#cb35-119"></a></span>
+<span id="cb35-120"><a href="#cb35-120"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb35-121"><a href="#cb35-121"></a></span>
+<span id="cb35-122"><a href="#cb35-122"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb35-123"><a href="#cb35-123"></a>    <span class="pp">println!</span>(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
+<span id="cb35-124"><a href="#cb35-124"></a><span class="op">}</span></span>
+<span id="cb35-125"><a href="#cb35-125"></a><span class="in">```</span></span>
+<span id="cb35-126"><a href="#cb35-126"></a></span>
+<span id="cb35-127"><a href="#cb35-127"></a>When we try to build it now (by running <span class="in">`cargo build`</span>), the following error occurs:</span>
+<span id="cb35-128"><a href="#cb35-128"></a></span>
+<span id="cb35-129"><a href="#cb35-129"></a><span class="in">```</span></span>
+<span id="cb35-130"><a href="#cb35-130"></a><span class="in">error: cannot find macro `println!` in this scope</span></span>
+<span id="cb35-131"><a href="#cb35-131"></a><span class="in"> --&gt; src/main.rs:4:5</span></span>
+<span id="cb35-132"><a href="#cb35-132"></a><span class="in">  |</span></span>
+<span id="cb35-133"><a href="#cb35-133"></a><span class="in">4 |     println!("Hello, world!");</span></span>
+<span id="cb35-134"><a href="#cb35-134"></a><span class="in">  |     ^^^^^^^</span></span>
+<span id="cb35-135"><a href="#cb35-135"></a><span class="in">```</span></span>
+<span id="cb35-136"><a href="#cb35-136"></a></span>
+<span id="cb35-137"><a href="#cb35-137"></a>The reason for this error is that the <span class="co">[</span><span class="ot">`println` macro</span><span class="co">]</span> is part of the standard library, which we no longer include. So we can no longer print things. This makes sense, since <span class="in">`println`</span> writes to <span class="co">[</span><span class="ot">standard output</span><span class="co">]</span>, which is a special file descriptor provided by the operating system.</span>
+<span id="cb35-138"><a href="#cb35-138"></a></span>
+<span id="cb35-139"><a href="#cb35-139"></a><span class="ot">[`println` macro]: https://doc.rust-lang.org/std/macro.println.html</span></span>
+<span id="cb35-140"><a href="#cb35-140"></a><span class="ot">[standard output]: https://en.wikipedia.org/wiki/Standard_streams#Standard_output_.28stdout.29</span></span>
+<span id="cb35-141"><a href="#cb35-141"></a></span>
+<span id="cb35-142"><a href="#cb35-142"></a>So let's remove the printing and try again with an empty main function:</span>
+<span id="cb35-143"><a href="#cb35-143"></a></span>
+<span id="cb35-144"><a href="#cb35-144"></a><span class="in">```rust</span></span>
+<span id="cb35-145"><a href="#cb35-145"></a><span class="co">// main.rs</span></span>
+<span id="cb35-146"><a href="#cb35-146"></a></span>
+<span id="cb35-147"><a href="#cb35-147"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb35-148"><a href="#cb35-148"></a></span>
+<span id="cb35-149"><a href="#cb35-149"></a><span class="kw">fn</span> main() <span class="op">{}</span></span>
+<span id="cb35-150"><a href="#cb35-150"></a><span class="in">```</span></span>
+<span id="cb35-151"><a href="#cb35-151"></a></span>
+<span id="cb35-152"><a href="#cb35-152"></a><span class="in">```</span></span>
+<span id="cb35-153"><a href="#cb35-153"></a><span class="in">&gt; cargo build</span></span>
+<span id="cb35-154"><a href="#cb35-154"></a><span class="in">error: `#[panic_handler]` function required, but not found</span></span>
+<span id="cb35-155"><a href="#cb35-155"></a><span class="in">error: language item required, but not found: `eh_personality`</span></span>
+<span id="cb35-156"><a href="#cb35-156"></a><span class="in">```</span></span>
+<span id="cb35-157"><a href="#cb35-157"></a></span>
+<span id="cb35-158"><a href="#cb35-158"></a>Now the compiler is missing a <span class="in">`#[panic_handler]`</span> function and a _language item_.</span>
+<span id="cb35-159"><a href="#cb35-159"></a></span>
+<span id="cb35-160"><a href="#cb35-160"></a><span class="fu">## Panic Implementation</span></span>
+<span id="cb35-161"><a href="#cb35-161"></a></span>
+<span id="cb35-162"><a href="#cb35-162"></a>The <span class="in">`panic_handler`</span> attribute defines the function that the compiler should invoke when a <span class="co">[</span><span class="ot">panic</span><span class="co">]</span> occurs. The standard library provides its own panic handler function, but in a <span class="in">`no_std`</span> environment we need to define it ourselves:</span>
+<span id="cb35-163"><a href="#cb35-163"></a></span>
+<span id="cb35-164"><a href="#cb35-164"></a><span class="ot">[panic]: https://doc.rust-lang.org/stable/book/ch09-01-unrecoverable-errors-with-panic.html</span></span>
+<span id="cb35-165"><a href="#cb35-165"></a></span>
+<span id="cb35-166"><a href="#cb35-166"></a><span class="in">```rust</span></span>
+<span id="cb35-167"><a href="#cb35-167"></a><span class="co">// in main.rs</span></span>
+<span id="cb35-168"><a href="#cb35-168"></a></span>
+<span id="cb35-169"><a href="#cb35-169"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb35-170"><a href="#cb35-170"></a></span>
+<span id="cb35-171"><a href="#cb35-171"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb35-172"><a href="#cb35-172"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb35-173"><a href="#cb35-173"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb35-174"><a href="#cb35-174"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb35-175"><a href="#cb35-175"></a><span class="op">}</span></span>
+<span id="cb35-176"><a href="#cb35-176"></a><span class="in">```</span></span>
+<span id="cb35-177"><a href="#cb35-177"></a></span>
+<span id="cb35-178"><a href="#cb35-178"></a>The <span class="co">[</span><span class="ot">`PanicInfo` parameter</span><span class="co">][PanicInfo]</span> contains the file and line where the panic happened and the optional panic message. The function should never return, so it is marked as a <span class="co">[</span><span class="ot">diverging function</span><span class="co">]</span> by returning the <span class="co">[</span><span class="ot">“never” type</span><span class="co">]</span> <span class="in">`!`</span>. There is not much we can do in this function for now, so we just loop indefinitely.</span>
+<span id="cb35-179"><a href="#cb35-179"></a></span>
+<span id="cb35-180"><a href="#cb35-180"></a><span class="ot">[PanicInfo]: https://doc.rust-lang.org/nightly/core/panic/struct.PanicInfo.html</span></span>
+<span id="cb35-181"><a href="#cb35-181"></a><span class="ot">[diverging function]: https://doc.rust-lang.org/1.30.0/book/first-edition/functions.html#diverging-functions</span></span>
+<span id="cb35-182"><a href="#cb35-182"></a><span class="ot">[“never” type]: https://doc.rust-lang.org/nightly/std/primitive.never.html</span></span>
+<span id="cb35-183"><a href="#cb35-183"></a></span>
+<span id="cb35-184"><a href="#cb35-184"></a><span class="fu">## The `eh_personality` Language Item</span></span>
+<span id="cb35-185"><a href="#cb35-185"></a></span>
+<span id="cb35-186"><a href="#cb35-186"></a>Language items are special functions and types that are required internally by the compiler. For example, the <span class="co">[</span><span class="ot">`Copy`</span><span class="co">]</span> trait is a language item that tells the compiler which types have <span class="co">[</span><span class="ot">_copy semantics_</span><span class="co">][`Copy`]</span>. When we look at the <span class="co">[</span><span class="ot">implementation</span><span class="co">][copy code]</span>, we see it has the special <span class="in">`#[lang = "copy"]`</span> attribute that defines it as a language item.</span>
+<span id="cb35-187"><a href="#cb35-187"></a></span>
+<span id="cb35-188"><a href="#cb35-188"></a><span class="ot">[`Copy`]: https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html</span></span>
+<span id="cb35-189"><a href="#cb35-189"></a><span class="ot">[copy code]: https://github.com/rust-lang/rust/blob/485397e49a02a3b7ff77c17e4a3f16c653925cb3/src/libcore/marker.rs#L296-L299</span></span>
+<span id="cb35-190"><a href="#cb35-190"></a></span>
+<span id="cb35-191"><a href="#cb35-191"></a>While providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn't even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.</span>
+<span id="cb35-192"><a href="#cb35-192"></a></span>
+<span id="cb35-193"><a href="#cb35-193"></a>The <span class="co">[</span><span class="ot">`eh_personality` language item</span><span class="co">]</span> marks a function that is used for implementing <span class="co">[</span><span class="ot">stack unwinding</span><span class="co">]</span>. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a <span class="co">[</span><span class="ot">panic</span><span class="co">]</span>. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g. <span class="co">[</span><span class="ot">libunwind</span><span class="co">]</span> on Linux or <span class="co">[</span><span class="ot">structured exception handling</span><span class="co">]</span> on Windows), so we don't want to use it for our operating system.</span>
+<span id="cb35-194"><a href="#cb35-194"></a></span>
+<span id="cb35-195"><a href="#cb35-195"></a><span class="ot">[`eh_personality` language item]: https://github.com/rust-lang/rust/blob/edb368491551a77d77a48446d4ee88b35490c565/src/libpanic_unwind/gcc.rs#L11-L45</span></span>
+<span id="cb35-196"><a href="#cb35-196"></a><span class="ot">[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php</span></span>
+<span id="cb35-197"><a href="#cb35-197"></a><span class="ot">[libunwind]: https://www.nongnu.org/libunwind/</span></span>
+<span id="cb35-198"><a href="#cb35-198"></a><span class="ot">[structured exception handling]: https://docs.microsoft.com/en-us/windows/win32/debug/structured-exception-handling</span></span>
+<span id="cb35-199"><a href="#cb35-199"></a></span>
+<span id="cb35-200"><a href="#cb35-200"></a><span class="fu">### Disabling Unwinding</span></span>
+<span id="cb35-201"><a href="#cb35-201"></a></span>
+<span id="cb35-202"><a href="#cb35-202"></a>There are other use cases as well for which unwinding is undesirable, so Rust provides an option to <span class="co">[</span><span class="ot">abort on panic</span><span class="co">]</span> instead. This disables the generation of unwinding symbol information and thus considerably reduces binary size. There are multiple places where we can disable unwinding. The easiest way is to add the following lines to our <span class="in">`Cargo.toml`</span>:</span>
+<span id="cb35-203"><a href="#cb35-203"></a></span>
+<span id="cb35-204"><a href="#cb35-204"></a><span class="in">```toml</span></span>
+<span id="cb35-205"><a href="#cb35-205"></a><span class="in">[profile.dev]</span></span>
+<span id="cb35-206"><a href="#cb35-206"></a><span class="in">panic = "abort"</span></span>
+<span id="cb35-207"><a href="#cb35-207"></a></span>
+<span id="cb35-208"><a href="#cb35-208"></a><span class="in">[profile.release]</span></span>
+<span id="cb35-209"><a href="#cb35-209"></a><span class="in">panic = "abort"</span></span>
+<span id="cb35-210"><a href="#cb35-210"></a><span class="in">```</span></span>
+<span id="cb35-211"><a href="#cb35-211"></a></span>
+<span id="cb35-212"><a href="#cb35-212"></a>This sets the panic strategy to <span class="in">`abort`</span> for both the <span class="in">`dev`</span> profile (used for <span class="in">`cargo build`</span>) and the <span class="in">`release`</span> profile (used for <span class="in">`cargo build --release`</span>). Now the <span class="in">`eh_personality`</span> language item should no longer be required.</span>
+<span id="cb35-213"><a href="#cb35-213"></a></span>
+<span id="cb35-214"><a href="#cb35-214"></a><span class="ot">[abort on panic]: https://github.com/rust-lang/rust/pull/32900</span></span>
+<span id="cb35-215"><a href="#cb35-215"></a></span>
+<span id="cb35-216"><a href="#cb35-216"></a>Now we fixed both of the above errors. However, if we try to compile it now, another error occurs:</span>
+<span id="cb35-217"><a href="#cb35-217"></a></span>
+<span id="cb35-218"><a href="#cb35-218"></a><span class="in">```</span></span>
+<span id="cb35-219"><a href="#cb35-219"></a><span class="in">&gt; cargo build</span></span>
+<span id="cb35-220"><a href="#cb35-220"></a><span class="in">error: requires `start` lang_item</span></span>
+<span id="cb35-221"><a href="#cb35-221"></a><span class="in">```</span></span>
+<span id="cb35-222"><a href="#cb35-222"></a></span>
+<span id="cb35-223"><a href="#cb35-223"></a>Our program is missing the <span class="in">`start`</span> language item, which defines the entry point.</span>
+<span id="cb35-224"><a href="#cb35-224"></a></span>
+<span id="cb35-225"><a href="#cb35-225"></a><span class="fu">## The `start` attribute</span></span>
+<span id="cb35-226"><a href="#cb35-226"></a></span>
+<span id="cb35-227"><a href="#cb35-227"></a>One might think that the <span class="in">`main`</span> function is the first function called when you run a program. However, most languages have a <span class="co">[</span><span class="ot">runtime system</span><span class="co">]</span>, which is responsible for things such as garbage collection (e.g. in Java) or software threads (e.g. goroutines in Go). This runtime needs to be called before <span class="in">`main`</span>, since it needs to initialize itself.</span>
+<span id="cb35-228"><a href="#cb35-228"></a></span>
+<span id="cb35-229"><a href="#cb35-229"></a><span class="ot">[runtime system]: https://en.wikipedia.org/wiki/Runtime_system</span></span>
+<span id="cb35-230"><a href="#cb35-230"></a></span>
+<span id="cb35-231"><a href="#cb35-231"></a>In a typical Rust binary that links the standard library, execution starts in a C runtime library called <span class="in">`crt0`</span> (“C runtime zero”), which sets up the environment for a C application. This includes creating a stack and placing the arguments in the right registers. The C runtime then invokes the <span class="co">[</span><span class="ot">entry point of the Rust runtime</span><span class="co">][rt::lang_start]</span>, which is marked by the <span class="in">`start`</span> language item. Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic. The runtime then finally calls the <span class="in">`main`</span> function.</span>
+<span id="cb35-232"><a href="#cb35-232"></a></span>
+<span id="cb35-233"><a href="#cb35-233"></a><span class="ot">[rt::lang_start]: https://github.com/rust-lang/rust/blob/bb4d1491466d8239a7a5fd68bd605e3276e97afb/src/libstd/rt.rs#L32-L73</span></span>
+<span id="cb35-234"><a href="#cb35-234"></a></span>
+<span id="cb35-235"><a href="#cb35-235"></a>Our freestanding executable does not have access to the Rust runtime and <span class="in">`crt0`</span>, so we need to define our own entry point. Implementing the <span class="in">`start`</span> language item wouldn't help, since it would still require <span class="in">`crt0`</span>. Instead, we need to overwrite the <span class="in">`crt0`</span> entry point directly.</span>
+<span id="cb35-236"><a href="#cb35-236"></a></span>
+<span id="cb35-237"><a href="#cb35-237"></a><span class="fu">### Overwriting the Entry Point</span></span>
+<span id="cb35-238"><a href="#cb35-238"></a>To tell the Rust compiler that we don't want to use the normal entry point chain, we add the <span class="in">`#![no_main]`</span> attribute.</span>
+<span id="cb35-239"><a href="#cb35-239"></a></span>
+<span id="cb35-240"><a href="#cb35-240"></a><span class="in">```rust</span></span>
+<span id="cb35-241"><a href="#cb35-241"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb35-242"><a href="#cb35-242"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb35-243"><a href="#cb35-243"></a></span>
+<span id="cb35-244"><a href="#cb35-244"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb35-245"><a href="#cb35-245"></a></span>
+<span id="cb35-246"><a href="#cb35-246"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb35-247"><a href="#cb35-247"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb35-248"><a href="#cb35-248"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb35-249"><a href="#cb35-249"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb35-250"><a href="#cb35-250"></a><span class="op">}</span></span>
+<span id="cb35-251"><a href="#cb35-251"></a><span class="in">```</span></span>
+<span id="cb35-252"><a href="#cb35-252"></a></span>
+<span id="cb35-253"><a href="#cb35-253"></a>You might notice that we removed the <span class="in">`main`</span> function. The reason is that a <span class="in">`main`</span> doesn't make sense without an underlying runtime that calls it. Instead, we are now overwriting the operating system entry point with our own <span class="in">`_start`</span> function:</span>
+<span id="cb35-254"><a href="#cb35-254"></a></span>
+<span id="cb35-255"><a href="#cb35-255"></a><span class="in">```rust</span></span>
+<span id="cb35-256"><a href="#cb35-256"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb35-257"><a href="#cb35-257"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb35-258"><a href="#cb35-258"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb35-259"><a href="#cb35-259"></a><span class="op">}</span></span>
+<span id="cb35-260"><a href="#cb35-260"></a><span class="in">```</span></span>
+<span id="cb35-261"><a href="#cb35-261"></a></span>
+<span id="cb35-262"><a href="#cb35-262"></a>By using the <span class="in">`#[unsafe(no_mangle)]`</span> attribute, we disable <span class="co">[</span><span class="ot">name mangling</span><span class="co">]</span> to ensure that the Rust compiler really outputs a function with the name <span class="in">`_start`</span>. Without the attribute, the compiler would generate some cryptic <span class="in">`_ZN3blog_os4_start7hb173fedf945531caE`</span> symbol to give every function a unique name. The attribute is required because we need to tell the name of the entry point function to the linker in the next step.</span>
+<span id="cb35-263"><a href="#cb35-263"></a></span>
+<span id="cb35-264"><a href="#cb35-264"></a>We also have to mark the function as <span class="in">`extern "C"`</span> to tell the compiler that it should use the <span class="co">[</span><span class="ot">C calling convention</span><span class="co">]</span> for this function (instead of the unspecified Rust calling convention). The reason for naming the function <span class="in">`_start`</span> is that this is the default entry point name for most systems.</span>
+<span id="cb35-265"><a href="#cb35-265"></a></span>
+<span id="cb35-266"><a href="#cb35-266"></a><span class="ot">[name mangling]: https://en.wikipedia.org/wiki/Name_mangling</span></span>
+<span id="cb35-267"><a href="#cb35-267"></a><span class="ot">[C calling convention]: https://en.wikipedia.org/wiki/Calling_convention</span></span>
+<span id="cb35-268"><a href="#cb35-268"></a></span>
+<span id="cb35-269"><a href="#cb35-269"></a>The <span class="in">`!`</span> return type means that the function is diverging, i.e. not allowed to ever return. This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader. So instead of returning, the entry point should e.g. invoke the <span class="co">[</span><span class="ot">`exit` system call</span><span class="co">]</span> of the operating system. In our case, shutting down the machine could be a reasonable action, since there's nothing left to do if a freestanding binary returns. For now, we fulfill the requirement by looping endlessly.</span>
+<span id="cb35-270"><a href="#cb35-270"></a></span>
+<span id="cb35-271"><a href="#cb35-271"></a><span class="ot">[`exit` system call]: https://en.wikipedia.org/wiki/Exit_(system_call)</span></span>
+<span id="cb35-272"><a href="#cb35-272"></a></span>
+<span id="cb35-273"><a href="#cb35-273"></a>When we run <span class="in">`cargo build`</span> now, we get an ugly _linker_ error.</span>
+<span id="cb35-274"><a href="#cb35-274"></a></span>
+<span id="cb35-275"><a href="#cb35-275"></a><span class="fu">## Linker Errors</span></span>
+<span id="cb35-276"><a href="#cb35-276"></a></span>
+<span id="cb35-277"><a href="#cb35-277"></a>The linker is a program that combines the generated code into an executable. Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.</span>
+<span id="cb35-278"><a href="#cb35-278"></a></span>
+<span id="cb35-279"><a href="#cb35-279"></a>To solve the errors, we need to tell the linker that it should not include the C runtime. We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.</span>
+<span id="cb35-280"><a href="#cb35-280"></a></span>
+<span id="cb35-281"><a href="#cb35-281"></a><span class="fu">### Building for a Bare Metal Target</span></span>
+<span id="cb35-282"><a href="#cb35-282"></a></span>
+<span id="cb35-283"><a href="#cb35-283"></a>By default Rust tries to build an executable that is able to run in your current system environment. For example, if you're using Windows on <span class="in">`x86_64`</span>, Rust tries to build an <span class="in">`.exe`</span> Windows executable that uses <span class="in">`x86_64`</span> instructions. This environment is called your "host" system.</span>
+<span id="cb35-284"><a href="#cb35-284"></a></span>
+<span id="cb35-285"><a href="#cb35-285"></a>To describe different environments, Rust uses a string called <span class="co">[</span><span class="ot">_target triple_</span><span class="co">]</span>. You can see the target triple for your host system by running <span class="in">`rustc --version --verbose`</span>:</span>
+<span id="cb35-286"><a href="#cb35-286"></a></span>
+<span id="cb35-287"><a href="#cb35-287"></a><span class="ot">[_target triple_]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple</span></span>
+<span id="cb35-288"><a href="#cb35-288"></a></span>
+<span id="cb35-289"><a href="#cb35-289"></a><span class="in">```</span></span>
+<span id="cb35-290"><a href="#cb35-290"></a><span class="in">rustc 1.35.0-nightly (474e7a648 2019-04-07)</span></span>
+<span id="cb35-291"><a href="#cb35-291"></a><span class="in">binary: rustc</span></span>
+<span id="cb35-292"><a href="#cb35-292"></a><span class="in">commit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab</span></span>
+<span id="cb35-293"><a href="#cb35-293"></a><span class="in">commit-date: 2019-04-07</span></span>
+<span id="cb35-294"><a href="#cb35-294"></a><span class="in">host: x86_64-unknown-linux-gnu</span></span>
+<span id="cb35-295"><a href="#cb35-295"></a><span class="in">release: 1.35.0-nightly</span></span>
+<span id="cb35-296"><a href="#cb35-296"></a><span class="in">LLVM version: 8.0</span></span>
+<span id="cb35-297"><a href="#cb35-297"></a><span class="in">```</span></span>
+<span id="cb35-298"><a href="#cb35-298"></a></span>
+<span id="cb35-299"><a href="#cb35-299"></a>The above output is from a <span class="in">`x86_64`</span> Linux system. We see that the <span class="in">`host`</span> triple is <span class="in">`x86_64-unknown-linux-gnu`</span>, which includes the CPU architecture (<span class="in">`x86_64`</span>), the vendor (<span class="in">`unknown`</span>), the operating system (<span class="in">`linux`</span>), and the <span class="co">[</span><span class="ot">ABI</span><span class="co">]</span> (<span class="in">`gnu`</span>).</span>
+<span id="cb35-300"><a href="#cb35-300"></a></span>
+<span id="cb35-301"><a href="#cb35-301"></a><span class="ot">[ABI]: https://en.wikipedia.org/wiki/Application_binary_interface</span></span>
+<span id="cb35-302"><a href="#cb35-302"></a></span>
+<span id="cb35-303"><a href="#cb35-303"></a>By compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.</span>
+<span id="cb35-304"><a href="#cb35-304"></a></span>
+<span id="cb35-305"><a href="#cb35-305"></a>An example of such a bare metal environment is the <span class="in">`thumbv7em-none-eabihf`</span> target triple, which describes an <span class="co">[</span><span class="ot">embedded</span><span class="co">] [ARM]</span> system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the <span class="in">`none`</span> in the target triple. To be able to compile for this target, we need to add it in rustup:</span>
+<span id="cb35-306"><a href="#cb35-306"></a></span>
+<span id="cb35-307"><a href="#cb35-307"></a><span class="ot">[embedded]: https://en.wikipedia.org/wiki/Embedded_system</span></span>
+<span id="cb35-308"><a href="#cb35-308"></a><span class="ot">[ARM]: https://en.wikipedia.org/wiki/ARM_architecture</span></span>
+<span id="cb35-309"><a href="#cb35-309"></a></span>
+<span id="cb35-310"><a href="#cb35-310"></a><span class="in">```</span></span>
+<span id="cb35-311"><a href="#cb35-311"></a><span class="in">rustup target add thumbv7em-none-eabihf</span></span>
+<span id="cb35-312"><a href="#cb35-312"></a><span class="in">```</span></span>
+<span id="cb35-313"><a href="#cb35-313"></a></span>
+<span id="cb35-314"><a href="#cb35-314"></a>This downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:</span>
+<span id="cb35-315"><a href="#cb35-315"></a></span>
+<span id="cb35-316"><a href="#cb35-316"></a><span class="in">```</span></span>
+<span id="cb35-317"><a href="#cb35-317"></a><span class="in">cargo build --target thumbv7em-none-eabihf</span></span>
+<span id="cb35-318"><a href="#cb35-318"></a><span class="in">```</span></span>
+<span id="cb35-319"><a href="#cb35-319"></a></span>
+<span id="cb35-320"><a href="#cb35-320"></a>By passing a <span class="in">`--target`</span> argument we <span class="co">[</span><span class="ot">cross compile</span><span class="co">]</span> our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.</span>
+<span id="cb35-321"><a href="#cb35-321"></a></span>
+<span id="cb35-322"><a href="#cb35-322"></a><span class="ot">[cross compile]: https://en.wikipedia.org/wiki/Cross_compiler</span></span>
+<span id="cb35-323"><a href="#cb35-323"></a></span>
+<span id="cb35-324"><a href="#cb35-324"></a>This is the approach that we will use for building our OS kernel. Instead of <span class="in">`thumbv7em-none-eabihf`</span>, we will use a <span class="co">[</span><span class="ot">custom target</span><span class="co">]</span> that describes a <span class="in">`x86_64`</span> bare metal environment. The details will be explained in the next post.</span>
+<span id="cb35-325"><a href="#cb35-325"></a></span>
+<span id="cb35-326"><a href="#cb35-326"></a><span class="ot">[custom target]: https://doc.rust-lang.org/rustc/targets/custom.html</span></span>
+<span id="cb35-327"><a href="#cb35-327"></a></span>
+<span id="cb35-328"><a href="#cb35-328"></a><span class="fu">### Linker Arguments</span></span>
+<span id="cb35-329"><a href="#cb35-329"></a></span>
+<span id="cb35-330"><a href="#cb35-330"></a>Instead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This isn't the approach that we will use for our kernel, therefore this section is optional and only provided for completeness. Click on _"Linker Arguments"_ below to show the optional content.</span>
+<span id="cb35-331"><a href="#cb35-331"></a></span>
+<span id="cb35-332"><a href="#cb35-332"></a>&lt;details&gt;</span>
+<span id="cb35-333"><a href="#cb35-333"></a></span>
+<span id="cb35-334"><a href="#cb35-334"></a>&lt;summary&gt;Linker Arguments&lt;/summary&gt;</span>
+<span id="cb35-335"><a href="#cb35-335"></a></span>
+<span id="cb35-336"><a href="#cb35-336"></a>In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.</span>
+<span id="cb35-337"><a href="#cb35-337"></a></span>
+<span id="cb35-338"><a href="#cb35-338"></a><span class="fu">#### Linux</span></span>
+<span id="cb35-339"><a href="#cb35-339"></a></span>
+<span id="cb35-340"><a href="#cb35-340"></a>On Linux the following linker error occurs (shortened):</span>
+<span id="cb35-341"><a href="#cb35-341"></a></span>
+<span id="cb35-342"><a href="#cb35-342"></a><span class="in">```</span></span>
+<span id="cb35-343"><a href="#cb35-343"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb35-344"><a href="#cb35-344"></a><span class="in">  |</span></span>
+<span id="cb35-345"><a href="#cb35-345"></a><span class="in">  = note: "cc" […]</span></span>
+<span id="cb35-346"><a href="#cb35-346"></a><span class="in">  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
+<span id="cb35-347"><a href="#cb35-347"></a><span class="in">          (.text+0x12): undefined reference to `__libc_csu_fini'</span></span>
+<span id="cb35-348"><a href="#cb35-348"></a><span class="in">          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
+<span id="cb35-349"><a href="#cb35-349"></a><span class="in">          (.text+0x19): undefined reference to `__libc_csu_init'</span></span>
+<span id="cb35-350"><a href="#cb35-350"></a><span class="in">          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
+<span id="cb35-351"><a href="#cb35-351"></a><span class="in">          (.text+0x25): undefined reference to `__libc_start_main'</span></span>
+<span id="cb35-352"><a href="#cb35-352"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb35-353"><a href="#cb35-353"></a><span class="in">```</span></span>
+<span id="cb35-354"><a href="#cb35-354"></a></span>
+<span id="cb35-355"><a href="#cb35-355"></a>The problem is that the linker includes the startup routine of the C runtime by default, which is also called <span class="in">`_start`</span>. It requires some symbols of the C standard library <span class="in">`libc`</span> that we don't include due to the <span class="in">`no_std`</span> attribute, therefore the linker can't resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the <span class="in">`-nostartfiles`</span> flag.</span>
+<span id="cb35-356"><a href="#cb35-356"></a></span>
+<span id="cb35-357"><a href="#cb35-357"></a>One way to pass linker attributes via cargo is the <span class="in">`cargo rustc`</span> command. The command behaves exactly like <span class="in">`cargo build`</span>, but allows to pass options to <span class="in">`rustc`</span>, the underlying Rust compiler. <span class="in">`rustc`</span> has the <span class="in">`-C link-arg`</span> flag, which passes an argument to the linker. Combined, our new build command looks like this:</span>
+<span id="cb35-358"><a href="#cb35-358"></a></span>
+<span id="cb35-359"><a href="#cb35-359"></a><span class="in">```</span></span>
+<span id="cb35-360"><a href="#cb35-360"></a><span class="in">cargo rustc -- -C link-arg=-nostartfiles</span></span>
+<span id="cb35-361"><a href="#cb35-361"></a><span class="in">```</span></span>
+<span id="cb35-362"><a href="#cb35-362"></a></span>
+<span id="cb35-363"><a href="#cb35-363"></a>Now our crate builds as a freestanding executable on Linux!</span>
+<span id="cb35-364"><a href="#cb35-364"></a></span>
+<span id="cb35-365"><a href="#cb35-365"></a>We didn't need to specify the name of our entry point function explicitly since the linker looks for a function with the name <span class="in">`_start`</span> by default.</span>
+<span id="cb35-366"><a href="#cb35-366"></a></span>
+<span id="cb35-367"><a href="#cb35-367"></a><span class="fu">#### Windows</span></span>
+<span id="cb35-368"><a href="#cb35-368"></a></span>
+<span id="cb35-369"><a href="#cb35-369"></a>On Windows, a different linker error occurs (shortened):</span>
+<span id="cb35-370"><a href="#cb35-370"></a></span>
+<span id="cb35-371"><a href="#cb35-371"></a><span class="in">```</span></span>
+<span id="cb35-372"><a href="#cb35-372"></a><span class="in">error: linking with `link.exe` failed: exit code: 1561</span></span>
+<span id="cb35-373"><a href="#cb35-373"></a><span class="in">  |</span></span>
+<span id="cb35-374"><a href="#cb35-374"></a><span class="in">  = note: "C:\\Program Files (x86)\\…\\link.exe" […]</span></span>
+<span id="cb35-375"><a href="#cb35-375"></a><span class="in">  = note: LINK : fatal error LNK1561: entry point must be defined</span></span>
+<span id="cb35-376"><a href="#cb35-376"></a><span class="in">```</span></span>
+<span id="cb35-377"><a href="#cb35-377"></a></span>
+<span id="cb35-378"><a href="#cb35-378"></a>The "entry point must be defined" error means that the linker can't find the entry point. On Windows, the default entry point name <span class="co">[</span><span class="ot">depends on the used subsystem</span><span class="co">][windows-subsystems]</span>. For the <span class="in">`CONSOLE`</span> subsystem, the linker looks for a function named <span class="in">`mainCRTStartup`</span> and for the <span class="in">`WINDOWS`</span> subsystem, it looks for a function named <span class="in">`WinMainCRTStartup`</span>. To override the default and tell the linker to look for our <span class="in">`_start`</span> function instead, we can pass an <span class="in">`/ENTRY`</span> argument to the linker:</span>
+<span id="cb35-379"><a href="#cb35-379"></a></span>
+<span id="cb35-380"><a href="#cb35-380"></a><span class="ot">[windows-subsystems]: https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol</span></span>
+<span id="cb35-381"><a href="#cb35-381"></a></span>
+<span id="cb35-382"><a href="#cb35-382"></a><span class="in">```</span></span>
+<span id="cb35-383"><a href="#cb35-383"></a><span class="in">cargo rustc -- -C link-arg=/ENTRY:_start</span></span>
+<span id="cb35-384"><a href="#cb35-384"></a><span class="in">```</span></span>
+<span id="cb35-385"><a href="#cb35-385"></a></span>
+<span id="cb35-386"><a href="#cb35-386"></a>From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.</span>
+<span id="cb35-387"><a href="#cb35-387"></a></span>
+<span id="cb35-388"><a href="#cb35-388"></a>Now a different linker error occurs:</span>
+<span id="cb35-389"><a href="#cb35-389"></a></span>
+<span id="cb35-390"><a href="#cb35-390"></a><span class="in">```</span></span>
+<span id="cb35-391"><a href="#cb35-391"></a><span class="in">error: linking with `link.exe` failed: exit code: 1221</span></span>
+<span id="cb35-392"><a href="#cb35-392"></a><span class="in">  |</span></span>
+<span id="cb35-393"><a href="#cb35-393"></a><span class="in">  = note: "C:\\Program Files (x86)\\…\\link.exe" […]</span></span>
+<span id="cb35-394"><a href="#cb35-394"></a><span class="in">  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be</span></span>
+<span id="cb35-395"><a href="#cb35-395"></a><span class="in">          defined</span></span>
+<span id="cb35-396"><a href="#cb35-396"></a><span class="in">```</span></span>
+<span id="cb35-397"><a href="#cb35-397"></a></span>
+<span id="cb35-398"><a href="#cb35-398"></a>This error occurs because Windows executables can use different <span class="co">[</span><span class="ot">subsystems</span><span class="co">][windows-subsystems]</span>. For normal programs, they are inferred depending on the entry point name: If the entry point is named <span class="in">`main`</span>, the <span class="in">`CONSOLE`</span> subsystem is used, and if the entry point is named <span class="in">`WinMain`</span>, the <span class="in">`WINDOWS`</span> subsystem is used. Since our <span class="in">`_start`</span> function has a different name, we need to specify the subsystem explicitly:</span>
+<span id="cb35-399"><a href="#cb35-399"></a></span>
+<span id="cb35-400"><a href="#cb35-400"></a><span class="in">```</span></span>
+<span id="cb35-401"><a href="#cb35-401"></a><span class="in">cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"</span></span>
+<span id="cb35-402"><a href="#cb35-402"></a><span class="in">```</span></span>
+<span id="cb35-403"><a href="#cb35-403"></a></span>
+<span id="cb35-404"><a href="#cb35-404"></a>We use the <span class="in">`CONSOLE`</span> subsystem here, but the <span class="in">`WINDOWS`</span> subsystem would work too. Instead of passing <span class="in">`-C link-arg`</span> multiple times, we use <span class="in">`-C link-args`</span> which takes a space separated list of arguments.</span>
+<span id="cb35-405"><a href="#cb35-405"></a></span>
+<span id="cb35-406"><a href="#cb35-406"></a>With this command, our executable should build successfully on Windows.</span>
+<span id="cb35-407"><a href="#cb35-407"></a></span>
+<span id="cb35-408"><a href="#cb35-408"></a><span class="fu">#### macOS</span></span>
+<span id="cb35-409"><a href="#cb35-409"></a></span>
+<span id="cb35-410"><a href="#cb35-410"></a>On macOS, the following linker error occurs (shortened):</span>
+<span id="cb35-411"><a href="#cb35-411"></a></span>
+<span id="cb35-412"><a href="#cb35-412"></a><span class="in">```</span></span>
+<span id="cb35-413"><a href="#cb35-413"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb35-414"><a href="#cb35-414"></a><span class="in">  |</span></span>
+<span id="cb35-415"><a href="#cb35-415"></a><span class="in">  = note: "cc" […]</span></span>
+<span id="cb35-416"><a href="#cb35-416"></a><span class="in">  = note: ld: entry point (_main) undefined. for architecture x86_64</span></span>
+<span id="cb35-417"><a href="#cb35-417"></a><span class="in">          clang: error: linker command failed with exit code 1 […]</span></span>
+<span id="cb35-418"><a href="#cb35-418"></a><span class="in">```</span></span>
+<span id="cb35-419"><a href="#cb35-419"></a></span>
+<span id="cb35-420"><a href="#cb35-420"></a>This error message tells us that the linker can't find an entry point function with the default name <span class="in">`main`</span> (for some reason, all functions are prefixed with a <span class="in">`_`</span> on macOS). To set the entry point to our <span class="in">`_start`</span> function, we pass the <span class="in">`-e`</span> linker argument:</span>
+<span id="cb35-421"><a href="#cb35-421"></a></span>
+<span id="cb35-422"><a href="#cb35-422"></a><span class="in">```</span></span>
+<span id="cb35-423"><a href="#cb35-423"></a><span class="in">cargo rustc -- -C link-args="-e __start"</span></span>
+<span id="cb35-424"><a href="#cb35-424"></a><span class="in">```</span></span>
+<span id="cb35-425"><a href="#cb35-425"></a></span>
+<span id="cb35-426"><a href="#cb35-426"></a>The <span class="in">`-e`</span> flag specifies the name of the entry point function. Since all functions have an additional <span class="in">`_`</span> prefix on macOS, we need to set the entry point to <span class="in">`__start`</span> instead of <span class="in">`_start`</span>.</span>
+<span id="cb35-427"><a href="#cb35-427"></a></span>
+<span id="cb35-428"><a href="#cb35-428"></a>Now the following linker error occurs:</span>
+<span id="cb35-429"><a href="#cb35-429"></a></span>
+<span id="cb35-430"><a href="#cb35-430"></a><span class="in">```</span></span>
+<span id="cb35-431"><a href="#cb35-431"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb35-432"><a href="#cb35-432"></a><span class="in">  |</span></span>
+<span id="cb35-433"><a href="#cb35-433"></a><span class="in">  = note: "cc" […]</span></span>
+<span id="cb35-434"><a href="#cb35-434"></a><span class="in">  = note: ld: dynamic main executables must link with libSystem.dylib</span></span>
+<span id="cb35-435"><a href="#cb35-435"></a><span class="in">          for architecture x86_64</span></span>
+<span id="cb35-436"><a href="#cb35-436"></a><span class="in">          clang: error: linker command failed with exit code 1 […]</span></span>
+<span id="cb35-437"><a href="#cb35-437"></a><span class="in">```</span></span>
+<span id="cb35-438"><a href="#cb35-438"></a></span>
+<span id="cb35-439"><a href="#cb35-439"></a>macOS <span class="co">[</span><span class="ot">does not officially support statically linked binaries</span><span class="co">]</span> and requires programs to link the <span class="in">`libSystem`</span> library by default. To override this and link a static binary, we pass the <span class="in">`-static`</span> flag to the linker:</span>
+<span id="cb35-440"><a href="#cb35-440"></a></span>
+<span id="cb35-441"><a href="#cb35-441"></a><span class="ot">[does not officially support statically linked binaries]: https://developer.apple.com/library/archive/qa/qa1118/_index.html</span></span>
+<span id="cb35-442"><a href="#cb35-442"></a></span>
+<span id="cb35-443"><a href="#cb35-443"></a><span class="in">```</span></span>
+<span id="cb35-444"><a href="#cb35-444"></a><span class="in">cargo rustc -- -C link-args="-e __start -static"</span></span>
+<span id="cb35-445"><a href="#cb35-445"></a><span class="in">```</span></span>
+<span id="cb35-446"><a href="#cb35-446"></a></span>
+<span id="cb35-447"><a href="#cb35-447"></a>This still does not suffice, as a third linker error occurs:</span>
+<span id="cb35-448"><a href="#cb35-448"></a></span>
+<span id="cb35-449"><a href="#cb35-449"></a><span class="in">```</span></span>
+<span id="cb35-450"><a href="#cb35-450"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb35-451"><a href="#cb35-451"></a><span class="in">  |</span></span>
+<span id="cb35-452"><a href="#cb35-452"></a><span class="in">  = note: "cc" […]</span></span>
+<span id="cb35-453"><a href="#cb35-453"></a><span class="in">  = note: ld: library not found for -lcrt0.o</span></span>
+<span id="cb35-454"><a href="#cb35-454"></a><span class="in">          clang: error: linker command failed with exit code 1 […]</span></span>
+<span id="cb35-455"><a href="#cb35-455"></a><span class="in">```</span></span>
+<span id="cb35-456"><a href="#cb35-456"></a></span>
+<span id="cb35-457"><a href="#cb35-457"></a>This error occurs because programs on macOS link to <span class="in">`crt0`</span> (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the <span class="in">`-nostartfiles`</span> linker argument:</span>
+<span id="cb35-458"><a href="#cb35-458"></a></span>
+<span id="cb35-459"><a href="#cb35-459"></a><span class="in">```</span></span>
+<span id="cb35-460"><a href="#cb35-460"></a><span class="in">cargo rustc -- -C link-args="-e __start -static -nostartfiles"</span></span>
+<span id="cb35-461"><a href="#cb35-461"></a><span class="in">```</span></span>
+<span id="cb35-462"><a href="#cb35-462"></a></span>
+<span id="cb35-463"><a href="#cb35-463"></a>Now our program should build successfully on macOS.</span>
+<span id="cb35-464"><a href="#cb35-464"></a></span>
+<span id="cb35-465"><a href="#cb35-465"></a><span class="fu">#### Unifying the Build Commands</span></span>
+<span id="cb35-466"><a href="#cb35-466"></a></span>
+<span id="cb35-467"><a href="#cb35-467"></a>Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named <span class="in">`.cargo/config.toml`</span> that contains the platform-specific arguments:</span>
+<span id="cb35-468"><a href="#cb35-468"></a></span>
+<span id="cb35-469"><a href="#cb35-469"></a><span class="in">```toml</span></span>
+<span id="cb35-470"><a href="#cb35-470"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb35-471"><a href="#cb35-471"></a></span>
+<span id="cb35-472"><a href="#cb35-472"></a><span class="in">[target.'cfg(target_os = "linux")']</span></span>
+<span id="cb35-473"><a href="#cb35-473"></a><span class="in">rustflags = ["-C", "link-arg=-nostartfiles"]</span></span>
+<span id="cb35-474"><a href="#cb35-474"></a></span>
+<span id="cb35-475"><a href="#cb35-475"></a><span class="in">[target.'cfg(target_os = "windows")']</span></span>
+<span id="cb35-476"><a href="#cb35-476"></a><span class="in">rustflags = ["-C", "link-args=/ENTRY:_start /SUBSYSTEM:console"]</span></span>
+<span id="cb35-477"><a href="#cb35-477"></a></span>
+<span id="cb35-478"><a href="#cb35-478"></a><span class="in">[target.'cfg(target_os = "macos")']</span></span>
+<span id="cb35-479"><a href="#cb35-479"></a><span class="in">rustflags = ["-C", "link-args=-e __start -static -nostartfiles"]</span></span>
+<span id="cb35-480"><a href="#cb35-480"></a><span class="in">```</span></span>
+<span id="cb35-481"><a href="#cb35-481"></a></span>
+<span id="cb35-482"><a href="#cb35-482"></a>The <span class="in">`rustflags`</span> key contains arguments that are automatically added to every invocation of <span class="in">`rustc`</span>. For more information on the <span class="in">`.cargo/config.toml`</span> file, check out the <span class="co">[</span><span class="ot">official documentation</span><span class="co">](https://doc.rust-lang.org/cargo/reference/config.html)</span>.</span>
+<span id="cb35-483"><a href="#cb35-483"></a></span>
+<span id="cb35-484"><a href="#cb35-484"></a>Now our program should be buildable on all three platforms with a simple <span class="in">`cargo build`</span>.</span>
+<span id="cb35-485"><a href="#cb35-485"></a></span>
+<span id="cb35-486"><a href="#cb35-486"></a><span class="fu">#### Should You Do This?</span></span>
+<span id="cb35-487"><a href="#cb35-487"></a></span>
+<span id="cb35-488"><a href="#cb35-488"></a>While it's possible to build a freestanding executable for Linux, Windows, and macOS, it's probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the <span class="in">`_start`</span> function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.</span>
+<span id="cb35-489"><a href="#cb35-489"></a></span>
+<span id="cb35-490"><a href="#cb35-490"></a>If you want to create a minimal binary that runs on top of an existing operating system, including <span class="in">`libc`</span> and setting the <span class="in">`#[start]`</span> attribute as described <span class="co">[</span><span class="ot">here</span><span class="co">](https://doc.rust-lang.org/1.16.0/book/no-stdlib.html)</span> is probably a better idea.</span>
+<span id="cb35-491"><a href="#cb35-491"></a></span>
+<span id="cb35-492"><a href="#cb35-492"></a>&lt;/details&gt;</span>
+<span id="cb35-493"><a href="#cb35-493"></a></span>
+<span id="cb35-494"><a href="#cb35-494"></a><span class="fu">## Summary</span></span>
+<span id="cb35-495"><a href="#cb35-495"></a></span>
+<span id="cb35-496"><a href="#cb35-496"></a>A minimal freestanding Rust binary looks like this:</span>
+<span id="cb35-497"><a href="#cb35-497"></a></span>
+<span id="cb35-498"><a href="#cb35-498"></a><span class="in">`src/main.rs`</span>:</span>
+<span id="cb35-499"><a href="#cb35-499"></a></span>
+<span id="cb35-500"><a href="#cb35-500"></a><span class="in">```rust</span></span>
+<span id="cb35-501"><a href="#cb35-501"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb35-502"><a href="#cb35-502"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb35-503"><a href="#cb35-503"></a></span>
+<span id="cb35-504"><a href="#cb35-504"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb35-505"><a href="#cb35-505"></a></span>
+<span id="cb35-506"><a href="#cb35-506"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb35-507"><a href="#cb35-507"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb35-508"><a href="#cb35-508"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb35-509"><a href="#cb35-509"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb35-510"><a href="#cb35-510"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb35-511"><a href="#cb35-511"></a><span class="op">}</span></span>
+<span id="cb35-512"><a href="#cb35-512"></a></span>
+<span id="cb35-513"><a href="#cb35-513"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb35-514"><a href="#cb35-514"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb35-515"><a href="#cb35-515"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb35-516"><a href="#cb35-516"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb35-517"><a href="#cb35-517"></a><span class="op">}</span></span>
+<span id="cb35-518"><a href="#cb35-518"></a><span class="in">```</span></span>
+<span id="cb35-519"><a href="#cb35-519"></a></span>
+<span id="cb35-520"><a href="#cb35-520"></a><span class="in">`Cargo.toml`</span>:</span>
+<span id="cb35-521"><a href="#cb35-521"></a></span>
+<span id="cb35-522"><a href="#cb35-522"></a><span class="in">```toml</span></span>
+<span id="cb35-523"><a href="#cb35-523"></a><span class="in">[package]</span></span>
+<span id="cb35-524"><a href="#cb35-524"></a><span class="in">name = "crate_name"</span></span>
+<span id="cb35-525"><a href="#cb35-525"></a><span class="in">version = "0.1.0"</span></span>
+<span id="cb35-526"><a href="#cb35-526"></a><span class="in">authors = ["Author Name &lt;author@example.com&gt;"]</span></span>
+<span id="cb35-527"><a href="#cb35-527"></a></span>
+<span id="cb35-528"><a href="#cb35-528"></a><span class="in"># the profile used for `cargo build`</span></span>
+<span id="cb35-529"><a href="#cb35-529"></a><span class="in">[profile.dev]</span></span>
+<span id="cb35-530"><a href="#cb35-530"></a><span class="in">panic = "abort" # disable stack unwinding on panic</span></span>
+<span id="cb35-531"><a href="#cb35-531"></a></span>
+<span id="cb35-532"><a href="#cb35-532"></a><span class="in"># the profile used for `cargo build --release`</span></span>
+<span id="cb35-533"><a href="#cb35-533"></a><span class="in">[profile.release]</span></span>
+<span id="cb35-534"><a href="#cb35-534"></a><span class="in">panic = "abort" # disable stack unwinding on panic</span></span>
+<span id="cb35-535"><a href="#cb35-535"></a><span class="in">```</span></span>
+<span id="cb35-536"><a href="#cb35-536"></a></span>
+<span id="cb35-537"><a href="#cb35-537"></a>To build this binary, we need to compile for a bare metal target such as <span class="in">`thumbv7em-none-eabihf`</span>:</span>
+<span id="cb35-538"><a href="#cb35-538"></a></span>
+<span id="cb35-539"><a href="#cb35-539"></a><span class="in">```</span></span>
+<span id="cb35-540"><a href="#cb35-540"></a><span class="in">cargo build --target thumbv7em-none-eabihf</span></span>
+<span id="cb35-541"><a href="#cb35-541"></a><span class="in">```</span></span>
+<span id="cb35-542"><a href="#cb35-542"></a></span>
+<span id="cb35-543"><a href="#cb35-543"></a>Alternatively, we can compile it for the host system by passing additional linker arguments:</span>
+<span id="cb35-544"><a href="#cb35-544"></a></span>
+<span id="cb35-545"><a href="#cb35-545"></a><span class="in">```bash</span></span>
+<span id="cb35-546"><a href="#cb35-546"></a><span class="co"># Linux</span></span>
+<span id="cb35-547"><a href="#cb35-547"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-arg=-nostartfiles</span>
+<span id="cb35-548"><a href="#cb35-548"></a><span class="co"># Windows</span></span>
+<span id="cb35-549"><a href="#cb35-549"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"/ENTRY:_start /SUBSYSTEM:console"</span></span>
+<span id="cb35-550"><a href="#cb35-550"></a><span class="co"># macOS</span></span>
+<span id="cb35-551"><a href="#cb35-551"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"-e __start -static -nostartfiles"</span></span>
+<span id="cb35-552"><a href="#cb35-552"></a><span class="in">```</span></span>
+<span id="cb35-553"><a href="#cb35-553"></a></span>
+<span id="cb35-554"><a href="#cb35-554"></a>Note that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the <span class="in">`_start`</span> function is called. **So for any real use of such a binary, more steps are required**.</span>
+<span id="cb35-555"><a href="#cb35-555"></a></span>
+<span id="cb35-556"><a href="#cb35-556"></a><span class="fu">## Making `rust-analyzer` happy</span></span>
+<span id="cb35-557"><a href="#cb35-557"></a></span>
+<span id="cb35-558"><a href="#cb35-558"></a>The <span class="co">[</span><span class="ot">`rust-analyzer`</span><span class="co">](https://rust-analyzer.github.io/)</span> project is a great way to get code completion and "go to definition" support (and many other features) for Rust code in your editor.</span>
+<span id="cb35-559"><a href="#cb35-559"></a>It works really well for <span class="in">`#![no_std]`</span> projects too, so I recommend using it for kernel development!</span>
+<span id="cb35-560"><a href="#cb35-560"></a></span>
+<span id="cb35-561"><a href="#cb35-561"></a>If you're using the <span class="co">[</span><span class="ot">`checkOnSave`</span><span class="co">](https://rust-analyzer.github.io/book/configuration.html#checkOnSave)</span> feature of <span class="in">`rust-analyzer`</span> (enabled by default), it might report an error for the panic function of our kernel:</span>
+<span id="cb35-562"><a href="#cb35-562"></a></span>
+<span id="cb35-563"><a href="#cb35-563"></a><span class="in">```</span></span>
+<span id="cb35-564"><a href="#cb35-564"></a><span class="in">found duplicate lang item `panic_impl`</span></span>
+<span id="cb35-565"><a href="#cb35-565"></a><span class="in">```</span></span>
+<span id="cb35-566"><a href="#cb35-566"></a></span>
+<span id="cb35-567"><a href="#cb35-567"></a>The reason for this error is that <span class="in">`rust-analyzer`</span> invokes <span class="in">`cargo check --all-targets`</span> by default, which also tries to build the binary in <span class="co">[</span><span class="ot">test</span><span class="co">](https://doc.rust-lang.org/book/ch11-01-writing-tests.html)</span> and <span class="co">[</span><span class="ot">benchmark</span><span class="co">](https://doc.rust-lang.org/rustc/tests/index.html#benchmarks)</span> mode.</span>
+<span id="cb35-568"><a href="#cb35-568"></a></span>
+<span id="cb35-569"><a href="#cb35-569"></a>&lt;div class="note"&gt;</span>
+<span id="cb35-570"><a href="#cb35-570"></a></span>
+<span id="cb35-571"><a href="#cb35-571"></a><span class="fu">### The two meanings of "target"</span></span>
+<span id="cb35-572"><a href="#cb35-572"></a></span>
+<span id="cb35-573"><a href="#cb35-573"></a>The <span class="in">`--all-targets`</span> flag is completely unrelated to the <span class="in">`--target`</span> argument.</span>
+<span id="cb35-574"><a href="#cb35-574"></a>There are two different meanings of the term "target" in <span class="in">`cargo`</span>:</span>
+<span id="cb35-575"><a href="#cb35-575"></a></span>
+<span id="cb35-576"><a href="#cb35-576"></a><span class="ss">- </span>The <span class="in">`--target`</span> flag specifies the **[_compilation target_]** that should be passed to the <span class="in">`rustc`</span> compiler. This should be set to the <span class="co">[</span><span class="ot">target triple</span><span class="co">]</span> of the machine that should run our code.</span>
+<span id="cb35-577"><a href="#cb35-577"></a><span class="ss">- </span>The <span class="in">`--all-targets`</span> flag references the **[_package target_]** of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for <span class="co">[</span><span class="ot">examples</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples)</span>, <span class="co">[</span><span class="ot">tests</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests)</span>, and <span class="co">[</span><span class="ot">benchmarks</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks)</span>. These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.</span>
+<span id="cb35-578"><a href="#cb35-578"></a></span>
+<span id="cb35-579"><a href="#cb35-579"></a><span class="ot">[_compilation target_]: https://doc.rust-lang.org/rustc/targets/index.html</span></span>
+<span id="cb35-580"><a href="#cb35-580"></a><span class="ot">[target triple]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple</span></span>
+<span id="cb35-581"><a href="#cb35-581"></a><span class="ot">[_package target_]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html</span></span>
+<span id="cb35-582"><a href="#cb35-582"></a></span>
+<span id="cb35-583"><a href="#cb35-583"></a>&lt;/div&gt;</span>
+<span id="cb35-584"><a href="#cb35-584"></a></span>
+<span id="cb35-585"><a href="#cb35-585"></a>By default, <span class="in">`cargo check`</span> only builds the _library_ and _binary_ package targets.</span>
+<span id="cb35-586"><a href="#cb35-586"></a>However, <span class="in">`rust-analyzer`</span> chooses to check all package targets by default when <span class="co">[</span><span class="ot">`checkOnSave`</span><span class="co">](https://rust-analyzer.github.io/book/configuration.html#checkOnSave)</span> is enabled.</span>
+<span id="cb35-587"><a href="#cb35-587"></a>This is the reason that <span class="in">`rust-analyzer`</span> reports the above <span class="in">`lang item`</span> error that we don't see in <span class="in">`cargo check`</span>.</span>
+<span id="cb35-588"><a href="#cb35-588"></a>If we run <span class="in">`cargo check --all-targets`</span>, we see the error too:</span>
+<span id="cb35-589"><a href="#cb35-589"></a></span>
+<span id="cb35-590"><a href="#cb35-590"></a><span class="in">```</span></span>
+<span id="cb35-591"><a href="#cb35-591"></a><span class="in">error[E0152]: found duplicate lang item `panic_impl`</span></span>
+<span id="cb35-592"><a href="#cb35-592"></a><span class="in">  --&gt; src/main.rs:13:1</span></span>
+<span id="cb35-593"><a href="#cb35-593"></a><span class="in">   |</span></span>
+<span id="cb35-594"><a href="#cb35-594"></a><span class="in">13 | / fn panic(_info: &amp;PanicInfo) -&gt; ! {</span></span>
+<span id="cb35-595"><a href="#cb35-595"></a><span class="in">14 | |     loop {}</span></span>
+<span id="cb35-596"><a href="#cb35-596"></a><span class="in">15 | | }</span></span>
+<span id="cb35-597"><a href="#cb35-597"></a><span class="in">   | |_^</span></span>
+<span id="cb35-598"><a href="#cb35-598"></a><span class="in">   |</span></span>
+<span id="cb35-599"><a href="#cb35-599"></a><span class="in">   = note: the lang item is first defined in crate `std` (which `test` depends on)</span></span>
+<span id="cb35-600"><a href="#cb35-600"></a><span class="in">   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib</span></span>
+<span id="cb35-601"><a href="#cb35-601"></a><span class="in">   = note: second definition in the local crate (`blog_os`)</span></span>
+<span id="cb35-602"><a href="#cb35-602"></a><span class="in">```</span></span>
+<span id="cb35-603"><a href="#cb35-603"></a></span>
+<span id="cb35-604"><a href="#cb35-604"></a>The first <span class="in">`note`</span> tells us that the panic language item is already defined in the <span class="in">`std`</span> crate, which is a dependency of the <span class="in">`test`</span> crate.</span>
+<span id="cb35-605"><a href="#cb35-605"></a>The <span class="in">`test`</span> crate is automatically included when building a crate in <span class="co">[</span><span class="ot">test mode</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests)</span>.</span>
+<span id="cb35-606"><a href="#cb35-606"></a>This does not make sense for our <span class="in">`#![no_std]`</span> kernel as there is no way to support the standard library on bare metal.</span>
+<span id="cb35-607"><a href="#cb35-607"></a>So this error is not relevant to our project and we can safely ignore it.</span>
+<span id="cb35-608"><a href="#cb35-608"></a></span>
+<span id="cb35-609"><a href="#cb35-609"></a>The proper way to avoid this error is to specify in our <span class="in">`Cargo.toml`</span> that our binary does not support building in <span class="in">`test`</span> and <span class="in">`bench`</span> modes.</span>
+<span id="cb35-610"><a href="#cb35-610"></a>We can do that by adding a <span class="in">`[[bin]]`</span> section to our <span class="in">`Cargo.toml`</span> to <span class="co">[</span><span class="ot">configure the build</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target)</span> of our binary:</span>
+<span id="cb35-611"><a href="#cb35-611"></a></span>
+<span id="cb35-612"><a href="#cb35-612"></a><span class="in">```toml</span></span>
+<span id="cb35-613"><a href="#cb35-613"></a><span class="in"># in Cargo.toml</span></span>
+<span id="cb35-614"><a href="#cb35-614"></a></span>
+<span id="cb35-615"><a href="#cb35-615"></a><span class="in">[[bin]]</span></span>
+<span id="cb35-616"><a href="#cb35-616"></a><span class="in">name = "blog_os"</span></span>
+<span id="cb35-617"><a href="#cb35-617"></a><span class="in">test = false</span></span>
+<span id="cb35-618"><a href="#cb35-618"></a><span class="in">bench = false</span></span>
+<span id="cb35-619"><a href="#cb35-619"></a><span class="in">```</span></span>
+<span id="cb35-620"><a href="#cb35-620"></a></span>
+<span id="cb35-621"><a href="#cb35-621"></a>The double-brackets around <span class="in">`bin`</span> are not a mistake, this is how the TOML format defines keys that can appear multiple times.</span>
+<span id="cb35-622"><a href="#cb35-622"></a>Since a crate can have multiple binaries, the <span class="in">`[[bin]]`</span> section can appear multiple times in the <span class="in">`Cargo.toml`</span> as well.</span>
+<span id="cb35-623"><a href="#cb35-623"></a>This is also the reason for the mandatory <span class="in">`name`</span> field, which needs to match the name of the binary (so that <span class="in">`cargo`</span> knows which settings should be applied to which binary).</span>
+<span id="cb35-624"><a href="#cb35-624"></a></span>
+<span id="cb35-625"><a href="#cb35-625"></a>By setting the <span class="co">[</span><span class="ot">`test`</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-test-field)</span> and <span class="co">[</span><span class="ot">`bench` </span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-bench-field)</span> fields to <span class="in">`false`</span>, we instruct <span class="in">`cargo`</span> to not build our binary in test or benchmark mode.</span>
+<span id="cb35-626"><a href="#cb35-626"></a>Now <span class="in">`cargo check --all-targets`</span> should not throw any errors anymore, and the <span class="in">`checkOnSave`</span> implementation of <span class="in">`rust-analyzer`</span> should be happy too.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
