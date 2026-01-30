@@ -33,8 +33,8 @@ format: html
 |:--:|:---|:----|:-------|:-------|
 |0x0|01/12|[Derust](00_derust.qmd)|[`wc`](01_wc.md)|[CLI](02_cli.md)|
 |0x1|01/19|[`None`](https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf)|[Unsafe](11_unsafe.qmd)|[Splits](12_split_at.qmd)|
-|0x2|01/26|[OSes](20_os.qmd)|[Transmute](21_xmute.md)|malloc| 
-|0x3|02/02|Binary|
+|0x2|01/26|[OSes](20_os.qmd)|[Transmute](21_xmute.md)|[malloc](22_malloc.md)| 
+|0x3|02/02|Bare Metal|
 |0x4|02/09|Kernel|
 |0x5|02/16|Text|
 |0x6|02/23|Testing|
@@ -49,14 +49,7 @@ format: html
 |0xE|04/29|`async`||`None`|
 
 <!--
-os
-    wc
-        ANY wc is lab
-        add options for HW
-        
-    unsafe (from book)
-        hw is xorlist, no lab
-        
+os      
     binary
         lab is linker
         hw is do it

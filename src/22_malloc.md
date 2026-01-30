@@ -242,20 +242,14 @@ pub fn setter<T>(val: T, loc: usize) {
 ### Getter
 
 - After the calls to "set" values, there are calls to retrieve the values (for latter inspection).
-- Really I shouldn't have had to use `Default` and if you don't do that I will respect you more.
-    - Sure was easier though!
-    - Nominally the correct way to do this is [MaybeUninit](https://doc.rust-lang.org/std/mem/union.MaybeUninit.html)
 
 ```{.rs filename="src/main.rs"}
 // Should check the validity bitmask here...
-pub fn getter<T: Default>(loc: usize) -> T {
+pub fn getter<T>(loc: usize) -> T {
     unsafe {
-        let mut val = T::default();
-        < 3 lines >
-        return val;
+        < 5 lines >
     }
 }
 ```
 
 - My code was quite similar to setting, but with the updates in the opposite direction.
-    - I used an internal `u8` array that was larger than necessary but had a finite bound.
