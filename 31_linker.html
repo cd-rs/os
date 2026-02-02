@@ -204,8 +204,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#linker-errors" id="toc-linker-errors" class="nav-link active" data-scroll-target="#linker-errors">Linker Errors</a></li>
+  <li><a href="#solution" id="toc-solution" class="nav-link" data-scroll-target="#solution">Solution</a>
+  <ul class="collapse">
+  <li><a href="#building-for-a-bare-metal-target" id="toc-building-for-a-bare-metal-target" class="nav-link" data-scroll-target="#building-for-a-bare-metal-target">Building for a Bare Metal Target</a></li>
+  <li><a href="#linker-arguments" id="toc-linker-arguments" class="nav-link" data-scroll-target="#linker-arguments">Linker Arguments</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  <li><a href="#making-rust-analyzer-happy" id="toc-making-rust-analyzer-happy" class="nav-link" data-scroll-target="#making-rust-analyzer-happy">Making <code>rust-analyzer</code> happy</a>
+  <ul class="collapse">
+  <li><a href="#the-two-meanings-of-target" id="toc-the-two-meanings-of-target" class="nav-link" data-scroll-target="#the-two-meanings-of-target">The two meanings of “target”</a></li>
+  </ul></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -230,11 +246,134 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.</p>
-<section id="linux" class="level4">
-<h4 class="anchored" data-anchor-id="linux">Linux</h4>
-<p>On Linux the following linker error occurs (shortened):</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
+<section id="linker-errors" class="level2">
+<h2 class="anchored" data-anchor-id="linker-errors">Linker Errors</h2>
+<ul>
+<li>The linker is a program that combines the generated code into an executable.</li>
+<li>Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error.</li>
+<li>The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.</li>
+</ul>
+</section>
+<section id="solution" class="level2">
+<h2 class="anchored" data-anchor-id="solution">Solution</h2>
+<ul>
+<li>To solve the errors, we need to tell the linker that it should not include the C runtime.</li>
+<li>We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.</li>
+</ul>
+<section id="building-for-a-bare-metal-target" class="level3">
+<h3 class="anchored" data-anchor-id="building-for-a-bare-metal-target">Building for a Bare Metal Target</h3>
+<p>By default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on <code>x86_64</code>, Rust tries to build an <code>.exe</code> Windows executable that uses <code>x86_64</code> instructions. This environment is called your “host” system.</p>
+<p>To describe different environments, Rust uses a string called <a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple"><em>target triple</em></a>. You can see the target triple for your host system by running <code>rustc --version --verbose</code>:</p>
+<pre><code>rustc 1.35.0-nightly (474e7a648 2019-04-07)
+binary: rustc
+commit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab
+commit-date: 2019-04-07
+host: x86_64-unknown-linux-gnu
+release: 1.35.0-nightly
+LLVM version: 8.0</code></pre>
+<p>The above output is from a <code>x86_64</code> Linux system. We see that the <code>host</code> triple is <code>x86_64-unknown-linux-gnu</code>, which includes the CPU architecture (<code>x86_64</code>), the vendor (<code>unknown</code>), the operating system (<code>linux</code>), and the <a href="https://en.wikipedia.org/wiki/Application_binary_interface">ABI</a> (<code>gnu</code>).</p>
+<p>By compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.</p>
+<p>An example of such a bare metal environment is the <code>thumbv7em-none-eabihf</code> target triple, which describes an <a href="https://en.wikipedia.org/wiki/Embedded_system">embedded</a> <a href="https://en.wikipedia.org/wiki/ARM_architecture">ARM</a> system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the <code>none</code> in the target triple. To be able to compile for this target, we need to add it in rustup:</p>
+<pre><code>rustup target add thumbv7em-none-eabihf</code></pre>
+<p>This downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:</p>
+<pre><code>cargo build --target thumbv7em-none-eabihf</code></pre>
+<p>By passing a <code>--target</code> argument we <a href="https://en.wikipedia.org/wiki/Cross_compiler">cross compile</a> our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.</p>
+<p>This is the approach that we will use for building our OS kernel. Instead of <code>thumbv7em-none-eabihf</code>, we will use a <a href="https://doc.rust-lang.org/rustc/targets/custom.html">custom target</a> that describes a <code>x86_64</code> bare metal environment. The details will be explained in the next post.</p>
+</section>
+<section id="linker-arguments" class="level3">
+<h3 class="anchored" data-anchor-id="linker-arguments">Linker Arguments</h3>
+<p>Instead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This will be the subject of the lab this week.</p>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>A minimal freestanding Rust binary looks like this:</p>
+<p><code>src/main.rs</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="op">}</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>Cargo.toml</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">[package]</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"crate_name"</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="dt">authors</span> <span class="op">=</span> <span class="op">[</span><span class="st">"Author Name &lt;author@example.com&gt;"</span><span class="op">]</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a></span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="co"># the profile used for `cargo build`</span></span>
+<span id="cb5-7"><a href="#cb5-7"></a><span class="kw">[profile.dev]</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span> <span class="co"># disable stack unwinding on panic</span></span>
+<span id="cb5-9"><a href="#cb5-9"></a></span>
+<span id="cb5-10"><a href="#cb5-10"></a><span class="co"># the profile used for `cargo build --release`</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="kw">[profile.release]</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span> <span class="co"># disable stack unwinding on panic</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To build this binary, we need to compile for a bare metal target such as <code>thumbv7em-none-eabihf</code>:</p>
+<pre><code>cargo build --target thumbv7em-none-eabihf</code></pre>
+<p>Alternatively, we can compile it for the host system by passing additional linker arguments:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1"></a><span class="co"># Linux</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-arg=-nostartfiles</span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="co"># Windows</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"/ENTRY:_start /SUBSYSTEM:console"</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co"># macOS</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"-e __start -static -nostartfiles"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the <code>_start</code> function is called. <strong>So for any real use of such a binary, more steps are required</strong>.</p>
+</section>
+<section id="making-rust-analyzer-happy" class="level2">
+<h2 class="anchored" data-anchor-id="making-rust-analyzer-happy">Making <code>rust-analyzer</code> happy</h2>
+<p>The <a href="https://rust-analyzer.github.io/"><code>rust-analyzer</code></a> project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for <code>#![no_std]</code> projects too, so I recommend using it for kernel development!</p>
+<p>If you’re using the <a href="https://rust-analyzer.github.io/book/configuration.html#checkOnSave"><code>checkOnSave</code></a> feature of <code>rust-analyzer</code> (enabled by default), it might report an error for the panic function of our kernel:</p>
+<pre><code>found duplicate lang item `panic_impl`</code></pre>
+<p>The reason for this error is that <code>rust-analyzer</code> invokes <code>cargo check --all-targets</code> by default, which also tries to build the binary in <a href="https://doc.rust-lang.org/book/ch11-01-writing-tests.html">test</a> and <a href="https://doc.rust-lang.org/rustc/tests/index.html#benchmarks">benchmark</a> mode.</p>
+<section id="the-two-meanings-of-target" class="level3 note">
+<h3 class="anchored" data-anchor-id="the-two-meanings-of-target">The two meanings of “target”</h3>
+<p>The <code>--all-targets</code> flag is completely unrelated to the <code>--target</code> argument. There are two different meanings of the term “target” in <code>cargo</code>:</p>
+<ul>
+<li>The <code>--target</code> flag specifies the <strong><a href="https://doc.rust-lang.org/rustc/targets/index.html"><em>compilation target</em></a></strong> that should be passed to the <code>rustc</code> compiler. This should be set to the <a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple">target triple</a> of the machine that should run our code.</li>
+<li>The <code>--all-targets</code> flag references the <strong><a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html"><em>package target</em></a></strong> of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples">examples</a>, <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests">tests</a>, and <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks">benchmarks</a>. These package targets can co-exist, so you can build/check the same crate in e.g.&nbsp;library or test mode.</li>
+</ul>
+</section>
+<p>By default, <code>cargo check</code> only builds the <em>library</em> and <em>binary</em> package targets. However, <code>rust-analyzer</code> chooses to check all package targets by default when <a href="https://rust-analyzer.github.io/book/configuration.html#checkOnSave"><code>checkOnSave</code></a> is enabled. This is the reason that <code>rust-analyzer</code> reports the above <code>lang item</code> error that we don’t see in <code>cargo check</code>. If we run <code>cargo check --all-targets</code>, we see the error too:</p>
+<pre><code>error[E0152]: found duplicate lang item `panic_impl`
+  --&gt; src/main.rs:13:1
+   |
+13 | / fn panic(_info: &amp;PanicInfo) -&gt; ! {
+14 | |     loop {}
+15 | | }
+   | |_^
+   |
+   = note: the lang item is first defined in crate `std` (which `test` depends on)
+   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib
+   = note: second definition in the local crate (`blog_os`)</code></pre>
+<p>The first <code>note</code> tells us that the panic language item is already defined in the <code>std</code> crate, which is a dependency of the <code>test</code> crate. The <code>test</code> crate is automatically included when building a crate in <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests">test mode</a>. This does not make sense for our <code>#![no_std]</code> kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.</p>
+<p>The proper way to avoid this error is to specify in our <code>Cargo.toml</code> that our binary does not support building in <code>test</code> and <code>bench</code> modes. We can do that by adding a <code>[[bin]]</code> section to our <code>Cargo.toml</code> to <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target">configure the build</a> of our binary:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb10-1"><a href="#cb10-1"></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="kw">[[bin]]</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"blog_os"</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="dt">test</span> <span class="op">=</span> <span class="cn">false</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a><span class="dt">bench</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The double-brackets around <code>bin</code> are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the <code>[[bin]]</code> section can appear multiple times in the <code>Cargo.toml</code> as well. This is also the reason for the mandatory <code>name</code> field, which needs to match the name of the binary (so that <code>cargo</code> knows which settings should be applied to which binary).</p>
+<p>By setting the <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-test-field"><code>test</code></a> and <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-bench-field"><code>bench</code></a> fields to <code>false</code>, we instruct <code>cargo</code> to not build our binary in test or benchmark mode. Now <code>cargo check --all-targets</code> should not throw any errors anymore, and the <code>checkOnSave</code> implementation of <code>rust-analyzer</code> should be happy too.</p>
+<!--
+
+In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.
+
+#### Linux
+
+On Linux the following linker error occurs (shortened):
+
+```
+error: linking with `cc` failed: exit code: 1
   |
   = note: "cc" […]
   = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
@@ -243,85 +382,147 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           (.text+0x19): undefined reference to `__libc_csu_init'
           /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
           (.text+0x25): undefined reference to `__libc_start_main'
-          collect2: error: ld returned 1 exit status</code></pre>
-<p>The problem is that the linker includes the startup routine of the C runtime by default, which is also called <code>_start</code>. It requires some symbols of the C standard library <code>libc</code> that we don’t include due to the <code>no_std</code> attribute, therefore the linker can’t resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the <code>-nostartfiles</code> flag.</p>
-<p>One way to pass linker attributes via cargo is the <code>cargo rustc</code> command. The command behaves exactly like <code>cargo build</code>, but allows to pass options to <code>rustc</code>, the underlying Rust compiler. <code>rustc</code> has the <code>-C link-arg</code> flag, which passes an argument to the linker. Combined, our new build command looks like this:</p>
-<pre><code>cargo rustc -- -C link-arg=-nostartfiles</code></pre>
-<p>Now our crate builds as a freestanding executable on Linux!</p>
-<p>We didn’t need to specify the name of our entry point function explicitly since the linker looks for a function with the name <code>_start</code> by default.</p>
-</section>
-<section id="windows" class="level4">
-<h4 class="anchored" data-anchor-id="windows">Windows</h4>
-<p>On Windows, a different linker error occurs (shortened):</p>
-<pre><code>error: linking with `link.exe` failed: exit code: 1561
+          collect2: error: ld returned 1 exit status
+```
+
+The problem is that the linker includes the startup routine of the C runtime by default, which is also called `_start`. It requires some symbols of the C standard library `libc` that we don't include due to the `no_std` attribute, therefore the linker can't resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the `-nostartfiles` flag.
+
+One way to pass linker attributes via cargo is the `cargo rustc` command. The command behaves exactly like `cargo build`, but allows to pass options to `rustc`, the underlying Rust compiler. `rustc` has the `-C link-arg` flag, which passes an argument to the linker. Combined, our new build command looks like this:
+
+```
+cargo rustc -- -C link-arg=-nostartfiles
+```
+
+Now our crate builds as a freestanding executable on Linux!
+
+We didn't need to specify the name of our entry point function explicitly since the linker looks for a function with the name `_start` by default.
+
+#### Windows
+
+On Windows, a different linker error occurs (shortened):
+
+```
+error: linking with `link.exe` failed: exit code: 1561
   |
   = note: "C:\\Program Files (x86)\\…\\link.exe" […]
-  = note: LINK : fatal error LNK1561: entry point must be defined</code></pre>
-<p>The “entry point must be defined” error means that the linker can’t find the entry point. On Windows, the default entry point name <a href="https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol">depends on the used subsystem</a>. For the <code>CONSOLE</code> subsystem, the linker looks for a function named <code>mainCRTStartup</code> and for the <code>WINDOWS</code> subsystem, it looks for a function named <code>WinMainCRTStartup</code>. To override the default and tell the linker to look for our <code>_start</code> function instead, we can pass an <code>/ENTRY</code> argument to the linker:</p>
-<pre><code>cargo rustc -- -C link-arg=/ENTRY:_start</code></pre>
-<p>From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.</p>
-<p>Now a different linker error occurs:</p>
-<pre><code>error: linking with `link.exe` failed: exit code: 1221
+  = note: LINK : fatal error LNK1561: entry point must be defined
+```
+
+The "entry point must be defined" error means that the linker can't find the entry point. On Windows, the default entry point name [depends on the used subsystem][windows-subsystems]. For the `CONSOLE` subsystem, the linker looks for a function named `mainCRTStartup` and for the `WINDOWS` subsystem, it looks for a function named `WinMainCRTStartup`. To override the default and tell the linker to look for our `_start` function instead, we can pass an `/ENTRY` argument to the linker:
+
+[windows-subsystems]: https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol
+
+```
+cargo rustc -- -C link-arg=/ENTRY:_start
+```
+
+From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.
+
+Now a different linker error occurs:
+
+```
+error: linking with `link.exe` failed: exit code: 1221
   |
   = note: "C:\\Program Files (x86)\\…\\link.exe" […]
   = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be
-          defined</code></pre>
-<p>This error occurs because Windows executables can use different <a href="https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol">subsystems</a>. For normal programs, they are inferred depending on the entry point name: If the entry point is named <code>main</code>, the <code>CONSOLE</code> subsystem is used, and if the entry point is named <code>WinMain</code>, the <code>WINDOWS</code> subsystem is used. Since our <code>_start</code> function has a different name, we need to specify the subsystem explicitly:</p>
-<pre><code>cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"</code></pre>
-<p>We use the <code>CONSOLE</code> subsystem here, but the <code>WINDOWS</code> subsystem would work too. Instead of passing <code>-C link-arg</code> multiple times, we use <code>-C link-args</code> which takes a space separated list of arguments.</p>
-<p>With this command, our executable should build successfully on Windows.</p>
-</section>
-<section id="macos" class="level4">
-<h4 class="anchored" data-anchor-id="macos">macOS</h4>
-<p>On macOS, the following linker error occurs (shortened):</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
+          defined
+```
+
+This error occurs because Windows executables can use different [subsystems][windows-subsystems]. For normal programs, they are inferred depending on the entry point name: If the entry point is named `main`, the `CONSOLE` subsystem is used, and if the entry point is named `WinMain`, the `WINDOWS` subsystem is used. Since our `_start` function has a different name, we need to specify the subsystem explicitly:
+
+```
+cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"
+```
+
+We use the `CONSOLE` subsystem here, but the `WINDOWS` subsystem would work too. Instead of passing `-C link-arg` multiple times, we use `-C link-args` which takes a space separated list of arguments.
+
+With this command, our executable should build successfully on Windows.
+
+#### macOS
+
+On macOS, the following linker error occurs (shortened):
+
+```
+error: linking with `cc` failed: exit code: 1
   |
   = note: "cc" […]
   = note: ld: entry point (_main) undefined. for architecture x86_64
-          clang: error: linker command failed with exit code 1 […]</code></pre>
-<p>This error message tells us that the linker can’t find an entry point function with the default name <code>main</code> (for some reason, all functions are prefixed with a <code>_</code> on macOS). To set the entry point to our <code>_start</code> function, we pass the <code>-e</code> linker argument:</p>
-<pre><code>cargo rustc -- -C link-args="-e __start"</code></pre>
-<p>The <code>-e</code> flag specifies the name of the entry point function. Since all functions have an additional <code>_</code> prefix on macOS, we need to set the entry point to <code>__start</code> instead of <code>_start</code>.</p>
-<p>Now the following linker error occurs:</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
+          clang: error: linker command failed with exit code 1 […]
+```
+
+This error message tells us that the linker can't find an entry point function with the default name `main` (for some reason, all functions are prefixed with a `_` on macOS). To set the entry point to our `_start` function, we pass the `-e` linker argument:
+
+```
+cargo rustc -- -C link-args="-e __start"
+```
+
+The `-e` flag specifies the name of the entry point function. Since all functions have an additional `_` prefix on macOS, we need to set the entry point to `__start` instead of `_start`.
+
+Now the following linker error occurs:
+
+```
+error: linking with `cc` failed: exit code: 1
   |
   = note: "cc" […]
   = note: ld: dynamic main executables must link with libSystem.dylib
           for architecture x86_64
-          clang: error: linker command failed with exit code 1 […]</code></pre>
-<p>macOS <a href="https://developer.apple.com/library/archive/qa/qa1118/_index.html">does not officially support statically linked binaries</a> and requires programs to link the <code>libSystem</code> library by default. To override this and link a static binary, we pass the <code>-static</code> flag to the linker:</p>
-<pre><code>cargo rustc -- -C link-args="-e __start -static"</code></pre>
-<p>This still does not suffice, as a third linker error occurs:</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
+          clang: error: linker command failed with exit code 1 […]
+```
+
+macOS [does not officially support statically linked binaries] and requires programs to link the `libSystem` library by default. To override this and link a static binary, we pass the `-static` flag to the linker:
+
+[does not officially support statically linked binaries]: https://developer.apple.com/library/archive/qa/qa1118/_index.html
+
+```
+cargo rustc -- -C link-args="-e __start -static"
+```
+
+This still does not suffice, as a third linker error occurs:
+
+```
+error: linking with `cc` failed: exit code: 1
   |
   = note: "cc" […]
   = note: ld: library not found for -lcrt0.o
-          clang: error: linker command failed with exit code 1 […]</code></pre>
-<p>This error occurs because programs on macOS link to <code>crt0</code> (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the <code>-nostartfiles</code> linker argument:</p>
-<pre><code>cargo rustc -- -C link-args="-e __start -static -nostartfiles"</code></pre>
-<p>Now our program should build successfully on macOS.</p>
-</section>
-<section id="unifying-the-build-commands" class="level4">
-<h4 class="anchored" data-anchor-id="unifying-the-build-commands">Unifying the Build Commands</h4>
-<p>Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named <code>.cargo/config.toml</code> that contains the platform-specific arguments:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb13-2"><a href="#cb13-2"></a></span>
-<span id="cb13-3"><a href="#cb13-3"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "linux")'</span><span class="kw">]</span></span>
-<span id="cb13-4"><a href="#cb13-4"></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-arg=-nostartfiles"</span><span class="op">]</span></span>
-<span id="cb13-5"><a href="#cb13-5"></a></span>
-<span id="cb13-6"><a href="#cb13-6"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "windows")'</span><span class="kw">]</span></span>
-<span id="cb13-7"><a href="#cb13-7"></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-args=/ENTRY:_start /SUBSYSTEM:console"</span><span class="op">]</span></span>
-<span id="cb13-8"><a href="#cb13-8"></a></span>
-<span id="cb13-9"><a href="#cb13-9"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "macos")'</span><span class="kw">]</span></span>
-<span id="cb13-10"><a href="#cb13-10"></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-args=-e __start -static -nostartfiles"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>rustflags</code> key contains arguments that are automatically added to every invocation of <code>rustc</code>. For more information on the <code>.cargo/config.toml</code> file, check out the <a href="https://doc.rust-lang.org/cargo/reference/config.html">official documentation</a>.</p>
-<p>Now our program should be buildable on all three platforms with a simple <code>cargo build</code>.</p>
-</section>
-<section id="should-you-do-this" class="level4">
-<h4 class="anchored" data-anchor-id="should-you-do-this">Should You Do This?</h4>
-<p>While it’s possible to build a freestanding executable for Linux, Windows, and macOS, it’s probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the <code>_start</code> function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g.&nbsp;through a segmentation fault.</p>
-<p>If you want to create a minimal binary that runs on top of an existing operating system, including <code>libc</code> and setting the <code>#[start]</code> attribute as described <a href="https://doc.rust-lang.org/1.16.0/book/no-stdlib.html">here</a> is probably a better idea.</p>
+          clang: error: linker command failed with exit code 1 […]
+```
 
+This error occurs because programs on macOS link to `crt0` (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the `-nostartfiles` linker argument:
+
+```
+cargo rustc -- -C link-args="-e __start -static -nostartfiles"
+```
+
+Now our program should build successfully on macOS.
+
+#### Unifying the Build Commands
+
+Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named `.cargo/config.toml` that contains the platform-specific arguments:
+
+```toml
+# in .cargo/config.toml
+
+[target.'cfg(target_os = "linux")']
+rustflags = ["-C", "link-arg=-nostartfiles"]
+
+[target.'cfg(target_os = "windows")']
+rustflags = ["-C", "link-args=/ENTRY:_start /SUBSYSTEM:console"]
+
+[target.'cfg(target_os = "macos")']
+rustflags = ["-C", "link-args=-e __start -static -nostartfiles"]
+```
+
+The `rustflags` key contains arguments that are automatically added to every invocation of `rustc`. For more information on the `.cargo/config.toml` file, check out the [official documentation](https://doc.rust-lang.org/cargo/reference/config.html).
+
+Now our program should be buildable on all three platforms with a simple `cargo build`.
+
+#### Should You Do This?
+
+While it's possible to build a freestanding executable for Linux, Windows, and macOS, it's probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the `_start` function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.
+
+If you want to create a minimal binary that runs on top of an existing operating system, including `libc` and setting the `#[start]` attribute as described [here](https://doc.rust-lang.org/1.16.0/book/no-stdlib.html) is probably a better idea.
+
+-->
 
 
 <!-- -->
@@ -809,169 +1010,366 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-page nav-page-next">
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb14" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb14-1"><a href="#cb14-1"></a><span class="co">---</span></span>
-<span id="cb14-2"><a href="#cb14-2"></a><span class="an">title:</span><span class="co"> Linker</span></span>
-<span id="cb14-3"><a href="#cb14-3"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb14-4"><a href="#cb14-4"></a><span class="co">---</span></span>
-<span id="cb14-5"><a href="#cb14-5"></a></span>
-<span id="cb14-6"><a href="#cb14-6"></a></span>
-<span id="cb14-7"><a href="#cb14-7"></a>In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.</span>
-<span id="cb14-8"><a href="#cb14-8"></a></span>
-<span id="cb14-9"><a href="#cb14-9"></a><span class="fu">#### Linux</span></span>
-<span id="cb14-10"><a href="#cb14-10"></a></span>
-<span id="cb14-11"><a href="#cb14-11"></a>On Linux the following linker error occurs (shortened):</span>
-<span id="cb14-12"><a href="#cb14-12"></a></span>
-<span id="cb14-13"><a href="#cb14-13"></a><span class="in">```</span></span>
-<span id="cb14-14"><a href="#cb14-14"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
-<span id="cb14-15"><a href="#cb14-15"></a><span class="in">  |</span></span>
-<span id="cb14-16"><a href="#cb14-16"></a><span class="in">  = note: "cc" […]</span></span>
-<span id="cb14-17"><a href="#cb14-17"></a><span class="in">  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
-<span id="cb14-18"><a href="#cb14-18"></a><span class="in">          (.text+0x12): undefined reference to `__libc_csu_fini'</span></span>
-<span id="cb14-19"><a href="#cb14-19"></a><span class="in">          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
-<span id="cb14-20"><a href="#cb14-20"></a><span class="in">          (.text+0x19): undefined reference to `__libc_csu_init'</span></span>
-<span id="cb14-21"><a href="#cb14-21"></a><span class="in">          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
-<span id="cb14-22"><a href="#cb14-22"></a><span class="in">          (.text+0x25): undefined reference to `__libc_start_main'</span></span>
-<span id="cb14-23"><a href="#cb14-23"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
-<span id="cb14-24"><a href="#cb14-24"></a><span class="in">```</span></span>
-<span id="cb14-25"><a href="#cb14-25"></a></span>
-<span id="cb14-26"><a href="#cb14-26"></a>The problem is that the linker includes the startup routine of the C runtime by default, which is also called <span class="in">`_start`</span>. It requires some symbols of the C standard library <span class="in">`libc`</span> that we don't include due to the <span class="in">`no_std`</span> attribute, therefore the linker can't resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the <span class="in">`-nostartfiles`</span> flag.</span>
-<span id="cb14-27"><a href="#cb14-27"></a></span>
-<span id="cb14-28"><a href="#cb14-28"></a>One way to pass linker attributes via cargo is the <span class="in">`cargo rustc`</span> command. The command behaves exactly like <span class="in">`cargo build`</span>, but allows to pass options to <span class="in">`rustc`</span>, the underlying Rust compiler. <span class="in">`rustc`</span> has the <span class="in">`-C link-arg`</span> flag, which passes an argument to the linker. Combined, our new build command looks like this:</span>
-<span id="cb14-29"><a href="#cb14-29"></a></span>
-<span id="cb14-30"><a href="#cb14-30"></a><span class="in">```</span></span>
-<span id="cb14-31"><a href="#cb14-31"></a><span class="in">cargo rustc -- -C link-arg=-nostartfiles</span></span>
-<span id="cb14-32"><a href="#cb14-32"></a><span class="in">```</span></span>
-<span id="cb14-33"><a href="#cb14-33"></a></span>
-<span id="cb14-34"><a href="#cb14-34"></a>Now our crate builds as a freestanding executable on Linux!</span>
-<span id="cb14-35"><a href="#cb14-35"></a></span>
-<span id="cb14-36"><a href="#cb14-36"></a>We didn't need to specify the name of our entry point function explicitly since the linker looks for a function with the name <span class="in">`_start`</span> by default.</span>
-<span id="cb14-37"><a href="#cb14-37"></a></span>
-<span id="cb14-38"><a href="#cb14-38"></a><span class="fu">#### Windows</span></span>
-<span id="cb14-39"><a href="#cb14-39"></a></span>
-<span id="cb14-40"><a href="#cb14-40"></a>On Windows, a different linker error occurs (shortened):</span>
-<span id="cb14-41"><a href="#cb14-41"></a></span>
-<span id="cb14-42"><a href="#cb14-42"></a><span class="in">```</span></span>
-<span id="cb14-43"><a href="#cb14-43"></a><span class="in">error: linking with `link.exe` failed: exit code: 1561</span></span>
-<span id="cb14-44"><a href="#cb14-44"></a><span class="in">  |</span></span>
-<span id="cb14-45"><a href="#cb14-45"></a><span class="in">  = note: "C:\\Program Files (x86)\\…\\link.exe" […]</span></span>
-<span id="cb14-46"><a href="#cb14-46"></a><span class="in">  = note: LINK : fatal error LNK1561: entry point must be defined</span></span>
-<span id="cb14-47"><a href="#cb14-47"></a><span class="in">```</span></span>
-<span id="cb14-48"><a href="#cb14-48"></a></span>
-<span id="cb14-49"><a href="#cb14-49"></a>The "entry point must be defined" error means that the linker can't find the entry point. On Windows, the default entry point name <span class="co">[</span><span class="ot">depends on the used subsystem</span><span class="co">][windows-subsystems]</span>. For the <span class="in">`CONSOLE`</span> subsystem, the linker looks for a function named <span class="in">`mainCRTStartup`</span> and for the <span class="in">`WINDOWS`</span> subsystem, it looks for a function named <span class="in">`WinMainCRTStartup`</span>. To override the default and tell the linker to look for our <span class="in">`_start`</span> function instead, we can pass an <span class="in">`/ENTRY`</span> argument to the linker:</span>
-<span id="cb14-50"><a href="#cb14-50"></a></span>
-<span id="cb14-51"><a href="#cb14-51"></a><span class="ot">[windows-subsystems]: https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol</span></span>
-<span id="cb14-52"><a href="#cb14-52"></a></span>
-<span id="cb14-53"><a href="#cb14-53"></a><span class="in">```</span></span>
-<span id="cb14-54"><a href="#cb14-54"></a><span class="in">cargo rustc -- -C link-arg=/ENTRY:_start</span></span>
-<span id="cb14-55"><a href="#cb14-55"></a><span class="in">```</span></span>
-<span id="cb14-56"><a href="#cb14-56"></a></span>
-<span id="cb14-57"><a href="#cb14-57"></a>From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.</span>
-<span id="cb14-58"><a href="#cb14-58"></a></span>
-<span id="cb14-59"><a href="#cb14-59"></a>Now a different linker error occurs:</span>
-<span id="cb14-60"><a href="#cb14-60"></a></span>
-<span id="cb14-61"><a href="#cb14-61"></a><span class="in">```</span></span>
-<span id="cb14-62"><a href="#cb14-62"></a><span class="in">error: linking with `link.exe` failed: exit code: 1221</span></span>
-<span id="cb14-63"><a href="#cb14-63"></a><span class="in">  |</span></span>
-<span id="cb14-64"><a href="#cb14-64"></a><span class="in">  = note: "C:\\Program Files (x86)\\…\\link.exe" […]</span></span>
-<span id="cb14-65"><a href="#cb14-65"></a><span class="in">  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be</span></span>
-<span id="cb14-66"><a href="#cb14-66"></a><span class="in">          defined</span></span>
-<span id="cb14-67"><a href="#cb14-67"></a><span class="in">```</span></span>
-<span id="cb14-68"><a href="#cb14-68"></a></span>
-<span id="cb14-69"><a href="#cb14-69"></a>This error occurs because Windows executables can use different <span class="co">[</span><span class="ot">subsystems</span><span class="co">][windows-subsystems]</span>. For normal programs, they are inferred depending on the entry point name: If the entry point is named <span class="in">`main`</span>, the <span class="in">`CONSOLE`</span> subsystem is used, and if the entry point is named <span class="in">`WinMain`</span>, the <span class="in">`WINDOWS`</span> subsystem is used. Since our <span class="in">`_start`</span> function has a different name, we need to specify the subsystem explicitly:</span>
-<span id="cb14-70"><a href="#cb14-70"></a></span>
-<span id="cb14-71"><a href="#cb14-71"></a><span class="in">```</span></span>
-<span id="cb14-72"><a href="#cb14-72"></a><span class="in">cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"</span></span>
-<span id="cb14-73"><a href="#cb14-73"></a><span class="in">```</span></span>
-<span id="cb14-74"><a href="#cb14-74"></a></span>
-<span id="cb14-75"><a href="#cb14-75"></a>We use the <span class="in">`CONSOLE`</span> subsystem here, but the <span class="in">`WINDOWS`</span> subsystem would work too. Instead of passing <span class="in">`-C link-arg`</span> multiple times, we use <span class="in">`-C link-args`</span> which takes a space separated list of arguments.</span>
-<span id="cb14-76"><a href="#cb14-76"></a></span>
-<span id="cb14-77"><a href="#cb14-77"></a>With this command, our executable should build successfully on Windows.</span>
-<span id="cb14-78"><a href="#cb14-78"></a></span>
-<span id="cb14-79"><a href="#cb14-79"></a><span class="fu">#### macOS</span></span>
-<span id="cb14-80"><a href="#cb14-80"></a></span>
-<span id="cb14-81"><a href="#cb14-81"></a>On macOS, the following linker error occurs (shortened):</span>
-<span id="cb14-82"><a href="#cb14-82"></a></span>
-<span id="cb14-83"><a href="#cb14-83"></a><span class="in">```</span></span>
-<span id="cb14-84"><a href="#cb14-84"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
-<span id="cb14-85"><a href="#cb14-85"></a><span class="in">  |</span></span>
-<span id="cb14-86"><a href="#cb14-86"></a><span class="in">  = note: "cc" […]</span></span>
-<span id="cb14-87"><a href="#cb14-87"></a><span class="in">  = note: ld: entry point (_main) undefined. for architecture x86_64</span></span>
-<span id="cb14-88"><a href="#cb14-88"></a><span class="in">          clang: error: linker command failed with exit code 1 […]</span></span>
-<span id="cb14-89"><a href="#cb14-89"></a><span class="in">```</span></span>
-<span id="cb14-90"><a href="#cb14-90"></a></span>
-<span id="cb14-91"><a href="#cb14-91"></a>This error message tells us that the linker can't find an entry point function with the default name <span class="in">`main`</span> (for some reason, all functions are prefixed with a <span class="in">`_`</span> on macOS). To set the entry point to our <span class="in">`_start`</span> function, we pass the <span class="in">`-e`</span> linker argument:</span>
-<span id="cb14-92"><a href="#cb14-92"></a></span>
-<span id="cb14-93"><a href="#cb14-93"></a><span class="in">```</span></span>
-<span id="cb14-94"><a href="#cb14-94"></a><span class="in">cargo rustc -- -C link-args="-e __start"</span></span>
-<span id="cb14-95"><a href="#cb14-95"></a><span class="in">```</span></span>
-<span id="cb14-96"><a href="#cb14-96"></a></span>
-<span id="cb14-97"><a href="#cb14-97"></a>The <span class="in">`-e`</span> flag specifies the name of the entry point function. Since all functions have an additional <span class="in">`_`</span> prefix on macOS, we need to set the entry point to <span class="in">`__start`</span> instead of <span class="in">`_start`</span>.</span>
-<span id="cb14-98"><a href="#cb14-98"></a></span>
-<span id="cb14-99"><a href="#cb14-99"></a>Now the following linker error occurs:</span>
-<span id="cb14-100"><a href="#cb14-100"></a></span>
-<span id="cb14-101"><a href="#cb14-101"></a><span class="in">```</span></span>
-<span id="cb14-102"><a href="#cb14-102"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
-<span id="cb14-103"><a href="#cb14-103"></a><span class="in">  |</span></span>
-<span id="cb14-104"><a href="#cb14-104"></a><span class="in">  = note: "cc" […]</span></span>
-<span id="cb14-105"><a href="#cb14-105"></a><span class="in">  = note: ld: dynamic main executables must link with libSystem.dylib</span></span>
-<span id="cb14-106"><a href="#cb14-106"></a><span class="in">          for architecture x86_64</span></span>
-<span id="cb14-107"><a href="#cb14-107"></a><span class="in">          clang: error: linker command failed with exit code 1 […]</span></span>
-<span id="cb14-108"><a href="#cb14-108"></a><span class="in">```</span></span>
-<span id="cb14-109"><a href="#cb14-109"></a></span>
-<span id="cb14-110"><a href="#cb14-110"></a>macOS <span class="co">[</span><span class="ot">does not officially support statically linked binaries</span><span class="co">]</span> and requires programs to link the <span class="in">`libSystem`</span> library by default. To override this and link a static binary, we pass the <span class="in">`-static`</span> flag to the linker:</span>
-<span id="cb14-111"><a href="#cb14-111"></a></span>
-<span id="cb14-112"><a href="#cb14-112"></a><span class="ot">[does not officially support statically linked binaries]: https://developer.apple.com/library/archive/qa/qa1118/_index.html</span></span>
-<span id="cb14-113"><a href="#cb14-113"></a></span>
-<span id="cb14-114"><a href="#cb14-114"></a><span class="in">```</span></span>
-<span id="cb14-115"><a href="#cb14-115"></a><span class="in">cargo rustc -- -C link-args="-e __start -static"</span></span>
-<span id="cb14-116"><a href="#cb14-116"></a><span class="in">```</span></span>
-<span id="cb14-117"><a href="#cb14-117"></a></span>
-<span id="cb14-118"><a href="#cb14-118"></a>This still does not suffice, as a third linker error occurs:</span>
-<span id="cb14-119"><a href="#cb14-119"></a></span>
-<span id="cb14-120"><a href="#cb14-120"></a><span class="in">```</span></span>
-<span id="cb14-121"><a href="#cb14-121"></a><span class="in">error: linking with `cc` failed: exit code: 1</span></span>
-<span id="cb14-122"><a href="#cb14-122"></a><span class="in">  |</span></span>
-<span id="cb14-123"><a href="#cb14-123"></a><span class="in">  = note: "cc" […]</span></span>
-<span id="cb14-124"><a href="#cb14-124"></a><span class="in">  = note: ld: library not found for -lcrt0.o</span></span>
-<span id="cb14-125"><a href="#cb14-125"></a><span class="in">          clang: error: linker command failed with exit code 1 […]</span></span>
-<span id="cb14-126"><a href="#cb14-126"></a><span class="in">```</span></span>
-<span id="cb14-127"><a href="#cb14-127"></a></span>
-<span id="cb14-128"><a href="#cb14-128"></a>This error occurs because programs on macOS link to <span class="in">`crt0`</span> (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the <span class="in">`-nostartfiles`</span> linker argument:</span>
-<span id="cb14-129"><a href="#cb14-129"></a></span>
-<span id="cb14-130"><a href="#cb14-130"></a><span class="in">```</span></span>
-<span id="cb14-131"><a href="#cb14-131"></a><span class="in">cargo rustc -- -C link-args="-e __start -static -nostartfiles"</span></span>
-<span id="cb14-132"><a href="#cb14-132"></a><span class="in">```</span></span>
-<span id="cb14-133"><a href="#cb14-133"></a></span>
-<span id="cb14-134"><a href="#cb14-134"></a>Now our program should build successfully on macOS.</span>
-<span id="cb14-135"><a href="#cb14-135"></a></span>
-<span id="cb14-136"><a href="#cb14-136"></a><span class="fu">#### Unifying the Build Commands</span></span>
-<span id="cb14-137"><a href="#cb14-137"></a></span>
-<span id="cb14-138"><a href="#cb14-138"></a>Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named <span class="in">`.cargo/config.toml`</span> that contains the platform-specific arguments:</span>
-<span id="cb14-139"><a href="#cb14-139"></a></span>
-<span id="cb14-140"><a href="#cb14-140"></a><span class="in">```toml</span></span>
-<span id="cb14-141"><a href="#cb14-141"></a><span class="in"># in .cargo/config.toml</span></span>
-<span id="cb14-142"><a href="#cb14-142"></a></span>
-<span id="cb14-143"><a href="#cb14-143"></a><span class="in">[target.'cfg(target_os = "linux")']</span></span>
-<span id="cb14-144"><a href="#cb14-144"></a><span class="in">rustflags = ["-C", "link-arg=-nostartfiles"]</span></span>
-<span id="cb14-145"><a href="#cb14-145"></a></span>
-<span id="cb14-146"><a href="#cb14-146"></a><span class="in">[target.'cfg(target_os = "windows")']</span></span>
-<span id="cb14-147"><a href="#cb14-147"></a><span class="in">rustflags = ["-C", "link-args=/ENTRY:_start /SUBSYSTEM:console"]</span></span>
-<span id="cb14-148"><a href="#cb14-148"></a></span>
-<span id="cb14-149"><a href="#cb14-149"></a><span class="in">[target.'cfg(target_os = "macos")']</span></span>
-<span id="cb14-150"><a href="#cb14-150"></a><span class="in">rustflags = ["-C", "link-args=-e __start -static -nostartfiles"]</span></span>
-<span id="cb14-151"><a href="#cb14-151"></a><span class="in">```</span></span>
-<span id="cb14-152"><a href="#cb14-152"></a></span>
-<span id="cb14-153"><a href="#cb14-153"></a>The <span class="in">`rustflags`</span> key contains arguments that are automatically added to every invocation of <span class="in">`rustc`</span>. For more information on the <span class="in">`.cargo/config.toml`</span> file, check out the <span class="co">[</span><span class="ot">official documentation</span><span class="co">](https://doc.rust-lang.org/cargo/reference/config.html)</span>.</span>
-<span id="cb14-154"><a href="#cb14-154"></a></span>
-<span id="cb14-155"><a href="#cb14-155"></a>Now our program should be buildable on all three platforms with a simple <span class="in">`cargo build`</span>.</span>
-<span id="cb14-156"><a href="#cb14-156"></a></span>
-<span id="cb14-157"><a href="#cb14-157"></a><span class="fu">#### Should You Do This?</span></span>
-<span id="cb14-158"><a href="#cb14-158"></a></span>
-<span id="cb14-159"><a href="#cb14-159"></a>While it's possible to build a freestanding executable for Linux, Windows, and macOS, it's probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the <span class="in">`_start`</span> function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.</span>
-<span id="cb14-160"><a href="#cb14-160"></a></span>
-<span id="cb14-161"><a href="#cb14-161"></a>If you want to create a minimal binary that runs on top of an existing operating system, including <span class="in">`libc`</span> and setting the <span class="in">`#[start]`</span> attribute as described <span class="co">[</span><span class="ot">here</span><span class="co">](https://doc.rust-lang.org/1.16.0/book/no-stdlib.html)</span> is probably a better idea.</span>
-<span id="cb14-162"><a href="#cb14-162"></a></span>
-<span id="cb14-163"><a href="#cb14-163"></a>&lt;/details&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">---</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="an">title:</span><span class="co"> Linker</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="co">---</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a></span>
+<span id="cb11-6"><a href="#cb11-6"></a></span>
+<span id="cb11-7"><a href="#cb11-7"></a><span class="fu">## Linker Errors</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a></span>
+<span id="cb11-9"><a href="#cb11-9"></a><span class="ss">- </span>The linker is a program that combines the generated code into an executable. </span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="ss">- </span>Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. </span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="ss">- </span>The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.</span>
+<span id="cb11-12"><a href="#cb11-12"></a></span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="fu">## Solution</span></span>
+<span id="cb11-14"><a href="#cb11-14"></a></span>
+<span id="cb11-15"><a href="#cb11-15"></a><span class="ss">- </span>To solve the errors, we need to tell the linker that it should not include the C runtime. </span>
+<span id="cb11-16"><a href="#cb11-16"></a><span class="ss">- </span>We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.</span>
+<span id="cb11-17"><a href="#cb11-17"></a></span>
+<span id="cb11-18"><a href="#cb11-18"></a><span class="fu">### Building for a Bare Metal Target</span></span>
+<span id="cb11-19"><a href="#cb11-19"></a></span>
+<span id="cb11-20"><a href="#cb11-20"></a>By default Rust tries to build an executable that is able to run in your current system environment. For example, if you're using Windows on <span class="in">`x86_64`</span>, Rust tries to build an <span class="in">`.exe`</span> Windows executable that uses <span class="in">`x86_64`</span> instructions. This environment is called your "host" system.</span>
+<span id="cb11-21"><a href="#cb11-21"></a></span>
+<span id="cb11-22"><a href="#cb11-22"></a>To describe different environments, Rust uses a string called <span class="co">[</span><span class="ot">_target triple_</span><span class="co">]</span>. You can see the target triple for your host system by running <span class="in">`rustc --version --verbose`</span>:</span>
+<span id="cb11-23"><a href="#cb11-23"></a></span>
+<span id="cb11-24"><a href="#cb11-24"></a><span class="ot">[_target triple_]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a></span>
+<span id="cb11-26"><a href="#cb11-26"></a><span class="in">```</span></span>
+<span id="cb11-27"><a href="#cb11-27"></a><span class="in">rustc 1.35.0-nightly (474e7a648 2019-04-07)</span></span>
+<span id="cb11-28"><a href="#cb11-28"></a><span class="in">binary: rustc</span></span>
+<span id="cb11-29"><a href="#cb11-29"></a><span class="in">commit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab</span></span>
+<span id="cb11-30"><a href="#cb11-30"></a><span class="in">commit-date: 2019-04-07</span></span>
+<span id="cb11-31"><a href="#cb11-31"></a><span class="in">host: x86_64-unknown-linux-gnu</span></span>
+<span id="cb11-32"><a href="#cb11-32"></a><span class="in">release: 1.35.0-nightly</span></span>
+<span id="cb11-33"><a href="#cb11-33"></a><span class="in">LLVM version: 8.0</span></span>
+<span id="cb11-34"><a href="#cb11-34"></a><span class="in">```</span></span>
+<span id="cb11-35"><a href="#cb11-35"></a></span>
+<span id="cb11-36"><a href="#cb11-36"></a>The above output is from a <span class="in">`x86_64`</span> Linux system. We see that the <span class="in">`host`</span> triple is <span class="in">`x86_64-unknown-linux-gnu`</span>, which includes the CPU architecture (<span class="in">`x86_64`</span>), the vendor (<span class="in">`unknown`</span>), the operating system (<span class="in">`linux`</span>), and the <span class="co">[</span><span class="ot">ABI</span><span class="co">]</span> (<span class="in">`gnu`</span>).</span>
+<span id="cb11-37"><a href="#cb11-37"></a></span>
+<span id="cb11-38"><a href="#cb11-38"></a><span class="ot">[ABI]: https://en.wikipedia.org/wiki/Application_binary_interface</span></span>
+<span id="cb11-39"><a href="#cb11-39"></a></span>
+<span id="cb11-40"><a href="#cb11-40"></a>By compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.</span>
+<span id="cb11-41"><a href="#cb11-41"></a></span>
+<span id="cb11-42"><a href="#cb11-42"></a>An example of such a bare metal environment is the <span class="in">`thumbv7em-none-eabihf`</span> target triple, which describes an <span class="co">[</span><span class="ot">embedded</span><span class="co">] [ARM]</span> system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the <span class="in">`none`</span> in the target triple. To be able to compile for this target, we need to add it in rustup:</span>
+<span id="cb11-43"><a href="#cb11-43"></a></span>
+<span id="cb11-44"><a href="#cb11-44"></a><span class="ot">[embedded]: https://en.wikipedia.org/wiki/Embedded_system</span></span>
+<span id="cb11-45"><a href="#cb11-45"></a><span class="ot">[ARM]: https://en.wikipedia.org/wiki/ARM_architecture</span></span>
+<span id="cb11-46"><a href="#cb11-46"></a></span>
+<span id="cb11-47"><a href="#cb11-47"></a><span class="in">```</span></span>
+<span id="cb11-48"><a href="#cb11-48"></a><span class="in">rustup target add thumbv7em-none-eabihf</span></span>
+<span id="cb11-49"><a href="#cb11-49"></a><span class="in">```</span></span>
+<span id="cb11-50"><a href="#cb11-50"></a></span>
+<span id="cb11-51"><a href="#cb11-51"></a>This downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:</span>
+<span id="cb11-52"><a href="#cb11-52"></a></span>
+<span id="cb11-53"><a href="#cb11-53"></a><span class="in">```</span></span>
+<span id="cb11-54"><a href="#cb11-54"></a><span class="in">cargo build --target thumbv7em-none-eabihf</span></span>
+<span id="cb11-55"><a href="#cb11-55"></a><span class="in">```</span></span>
+<span id="cb11-56"><a href="#cb11-56"></a></span>
+<span id="cb11-57"><a href="#cb11-57"></a>By passing a <span class="in">`--target`</span> argument we <span class="co">[</span><span class="ot">cross compile</span><span class="co">]</span> our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.</span>
+<span id="cb11-58"><a href="#cb11-58"></a></span>
+<span id="cb11-59"><a href="#cb11-59"></a><span class="ot">[cross compile]: https://en.wikipedia.org/wiki/Cross_compiler</span></span>
+<span id="cb11-60"><a href="#cb11-60"></a></span>
+<span id="cb11-61"><a href="#cb11-61"></a>This is the approach that we will use for building our OS kernel. Instead of <span class="in">`thumbv7em-none-eabihf`</span>, we will use a <span class="co">[</span><span class="ot">custom target</span><span class="co">]</span> that describes a <span class="in">`x86_64`</span> bare metal environment. The details will be explained in the next post.</span>
+<span id="cb11-62"><a href="#cb11-62"></a></span>
+<span id="cb11-63"><a href="#cb11-63"></a><span class="ot">[custom target]: https://doc.rust-lang.org/rustc/targets/custom.html</span></span>
+<span id="cb11-64"><a href="#cb11-64"></a></span>
+<span id="cb11-65"><a href="#cb11-65"></a><span class="fu">### Linker Arguments</span></span>
+<span id="cb11-66"><a href="#cb11-66"></a></span>
+<span id="cb11-67"><a href="#cb11-67"></a>Instead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This will be the subject of the lab this week.</span>
+<span id="cb11-68"><a href="#cb11-68"></a></span>
+<span id="cb11-69"><a href="#cb11-69"></a></span>
+<span id="cb11-70"><a href="#cb11-70"></a><span class="fu">## Summary</span></span>
+<span id="cb11-71"><a href="#cb11-71"></a></span>
+<span id="cb11-72"><a href="#cb11-72"></a>A minimal freestanding Rust binary looks like this:</span>
+<span id="cb11-73"><a href="#cb11-73"></a></span>
+<span id="cb11-74"><a href="#cb11-74"></a><span class="in">`src/main.rs`</span>:</span>
+<span id="cb11-75"><a href="#cb11-75"></a></span>
+<span id="cb11-76"><a href="#cb11-76"></a><span class="in">```rust</span></span>
+<span id="cb11-77"><a href="#cb11-77"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb11-78"><a href="#cb11-78"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb11-79"><a href="#cb11-79"></a></span>
+<span id="cb11-80"><a href="#cb11-80"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb11-81"><a href="#cb11-81"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb11-82"><a href="#cb11-82"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb11-83"><a href="#cb11-83"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb11-84"><a href="#cb11-84"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb11-85"><a href="#cb11-85"></a><span class="op">}</span></span>
+<span id="cb11-86"><a href="#cb11-86"></a></span>
+<span id="cb11-87"><a href="#cb11-87"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb11-88"><a href="#cb11-88"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb11-89"><a href="#cb11-89"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb11-90"><a href="#cb11-90"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb11-91"><a href="#cb11-91"></a><span class="op">}</span></span>
+<span id="cb11-92"><a href="#cb11-92"></a><span class="in">```</span></span>
+<span id="cb11-93"><a href="#cb11-93"></a></span>
+<span id="cb11-94"><a href="#cb11-94"></a><span class="in">`Cargo.toml`</span>:</span>
+<span id="cb11-95"><a href="#cb11-95"></a></span>
+<span id="cb11-96"><a href="#cb11-96"></a><span class="in">```toml</span></span>
+<span id="cb11-97"><a href="#cb11-97"></a><span class="in">[package]</span></span>
+<span id="cb11-98"><a href="#cb11-98"></a><span class="in">name = "crate_name"</span></span>
+<span id="cb11-99"><a href="#cb11-99"></a><span class="in">version = "0.1.0"</span></span>
+<span id="cb11-100"><a href="#cb11-100"></a><span class="in">authors = ["Author Name &lt;author@example.com&gt;"]</span></span>
+<span id="cb11-101"><a href="#cb11-101"></a></span>
+<span id="cb11-102"><a href="#cb11-102"></a><span class="in"># the profile used for `cargo build`</span></span>
+<span id="cb11-103"><a href="#cb11-103"></a><span class="in">[profile.dev]</span></span>
+<span id="cb11-104"><a href="#cb11-104"></a><span class="in">panic = "abort" # disable stack unwinding on panic</span></span>
+<span id="cb11-105"><a href="#cb11-105"></a></span>
+<span id="cb11-106"><a href="#cb11-106"></a><span class="in"># the profile used for `cargo build --release`</span></span>
+<span id="cb11-107"><a href="#cb11-107"></a><span class="in">[profile.release]</span></span>
+<span id="cb11-108"><a href="#cb11-108"></a><span class="in">panic = "abort" # disable stack unwinding on panic</span></span>
+<span id="cb11-109"><a href="#cb11-109"></a><span class="in">```</span></span>
+<span id="cb11-110"><a href="#cb11-110"></a></span>
+<span id="cb11-111"><a href="#cb11-111"></a>To build this binary, we need to compile for a bare metal target such as <span class="in">`thumbv7em-none-eabihf`</span>:</span>
+<span id="cb11-112"><a href="#cb11-112"></a></span>
+<span id="cb11-113"><a href="#cb11-113"></a><span class="in">```</span></span>
+<span id="cb11-114"><a href="#cb11-114"></a><span class="in">cargo build --target thumbv7em-none-eabihf</span></span>
+<span id="cb11-115"><a href="#cb11-115"></a><span class="in">```</span></span>
+<span id="cb11-116"><a href="#cb11-116"></a></span>
+<span id="cb11-117"><a href="#cb11-117"></a>Alternatively, we can compile it for the host system by passing additional linker arguments:</span>
+<span id="cb11-118"><a href="#cb11-118"></a></span>
+<span id="cb11-119"><a href="#cb11-119"></a><span class="in">```bash</span></span>
+<span id="cb11-120"><a href="#cb11-120"></a><span class="co"># Linux</span></span>
+<span id="cb11-121"><a href="#cb11-121"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-arg=-nostartfiles</span>
+<span id="cb11-122"><a href="#cb11-122"></a><span class="co"># Windows</span></span>
+<span id="cb11-123"><a href="#cb11-123"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"/ENTRY:_start /SUBSYSTEM:console"</span></span>
+<span id="cb11-124"><a href="#cb11-124"></a><span class="co"># macOS</span></span>
+<span id="cb11-125"><a href="#cb11-125"></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"-e __start -static -nostartfiles"</span></span>
+<span id="cb11-126"><a href="#cb11-126"></a><span class="in">```</span></span>
+<span id="cb11-127"><a href="#cb11-127"></a></span>
+<span id="cb11-128"><a href="#cb11-128"></a>Note that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the <span class="in">`_start`</span> function is called. **So for any real use of such a binary, more steps are required**.</span>
+<span id="cb11-129"><a href="#cb11-129"></a></span>
+<span id="cb11-130"><a href="#cb11-130"></a><span class="fu">## Making `rust-analyzer` happy</span></span>
+<span id="cb11-131"><a href="#cb11-131"></a></span>
+<span id="cb11-132"><a href="#cb11-132"></a>The <span class="co">[</span><span class="ot">`rust-analyzer`</span><span class="co">](https://rust-analyzer.github.io/)</span> project is a great way to get code completion and "go to definition" support (and many other features) for Rust code in your editor.</span>
+<span id="cb11-133"><a href="#cb11-133"></a>It works really well for <span class="in">`#![no_std]`</span> projects too, so I recommend using it for kernel development!</span>
+<span id="cb11-134"><a href="#cb11-134"></a></span>
+<span id="cb11-135"><a href="#cb11-135"></a>If you're using the <span class="co">[</span><span class="ot">`checkOnSave`</span><span class="co">](https://rust-analyzer.github.io/book/configuration.html#checkOnSave)</span> feature of <span class="in">`rust-analyzer`</span> (enabled by default), it might report an error for the panic function of our kernel:</span>
+<span id="cb11-136"><a href="#cb11-136"></a></span>
+<span id="cb11-137"><a href="#cb11-137"></a><span class="in">```</span></span>
+<span id="cb11-138"><a href="#cb11-138"></a><span class="in">found duplicate lang item `panic_impl`</span></span>
+<span id="cb11-139"><a href="#cb11-139"></a><span class="in">```</span></span>
+<span id="cb11-140"><a href="#cb11-140"></a></span>
+<span id="cb11-141"><a href="#cb11-141"></a>The reason for this error is that <span class="in">`rust-analyzer`</span> invokes <span class="in">`cargo check --all-targets`</span> by default, which also tries to build the binary in <span class="co">[</span><span class="ot">test</span><span class="co">](https://doc.rust-lang.org/book/ch11-01-writing-tests.html)</span> and <span class="co">[</span><span class="ot">benchmark</span><span class="co">](https://doc.rust-lang.org/rustc/tests/index.html#benchmarks)</span> mode.</span>
+<span id="cb11-142"><a href="#cb11-142"></a></span>
+<span id="cb11-143"><a href="#cb11-143"></a>&lt;div class="note"&gt;</span>
+<span id="cb11-144"><a href="#cb11-144"></a></span>
+<span id="cb11-145"><a href="#cb11-145"></a><span class="fu">### The two meanings of "target"</span></span>
+<span id="cb11-146"><a href="#cb11-146"></a></span>
+<span id="cb11-147"><a href="#cb11-147"></a>The <span class="in">`--all-targets`</span> flag is completely unrelated to the <span class="in">`--target`</span> argument.</span>
+<span id="cb11-148"><a href="#cb11-148"></a>There are two different meanings of the term "target" in <span class="in">`cargo`</span>:</span>
+<span id="cb11-149"><a href="#cb11-149"></a></span>
+<span id="cb11-150"><a href="#cb11-150"></a><span class="ss">- </span>The <span class="in">`--target`</span> flag specifies the **[_compilation target_]** that should be passed to the <span class="in">`rustc`</span> compiler. This should be set to the <span class="co">[</span><span class="ot">target triple</span><span class="co">]</span> of the machine that should run our code.</span>
+<span id="cb11-151"><a href="#cb11-151"></a><span class="ss">- </span>The <span class="in">`--all-targets`</span> flag references the **[_package target_]** of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for <span class="co">[</span><span class="ot">examples</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples)</span>, <span class="co">[</span><span class="ot">tests</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests)</span>, and <span class="co">[</span><span class="ot">benchmarks</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks)</span>. These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.</span>
+<span id="cb11-152"><a href="#cb11-152"></a></span>
+<span id="cb11-153"><a href="#cb11-153"></a><span class="ot">[_compilation target_]: https://doc.rust-lang.org/rustc/targets/index.html</span></span>
+<span id="cb11-154"><a href="#cb11-154"></a><span class="ot">[target triple]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple</span></span>
+<span id="cb11-155"><a href="#cb11-155"></a><span class="ot">[_package target_]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html</span></span>
+<span id="cb11-156"><a href="#cb11-156"></a></span>
+<span id="cb11-157"><a href="#cb11-157"></a>&lt;/div&gt;</span>
+<span id="cb11-158"><a href="#cb11-158"></a></span>
+<span id="cb11-159"><a href="#cb11-159"></a>By default, <span class="in">`cargo check`</span> only builds the _library_ and _binary_ package targets.</span>
+<span id="cb11-160"><a href="#cb11-160"></a>However, <span class="in">`rust-analyzer`</span> chooses to check all package targets by default when <span class="co">[</span><span class="ot">`checkOnSave`</span><span class="co">](https://rust-analyzer.github.io/book/configuration.html#checkOnSave)</span> is enabled.</span>
+<span id="cb11-161"><a href="#cb11-161"></a>This is the reason that <span class="in">`rust-analyzer`</span> reports the above <span class="in">`lang item`</span> error that we don't see in <span class="in">`cargo check`</span>.</span>
+<span id="cb11-162"><a href="#cb11-162"></a>If we run <span class="in">`cargo check --all-targets`</span>, we see the error too:</span>
+<span id="cb11-163"><a href="#cb11-163"></a></span>
+<span id="cb11-164"><a href="#cb11-164"></a><span class="in">```</span></span>
+<span id="cb11-165"><a href="#cb11-165"></a><span class="in">error[E0152]: found duplicate lang item `panic_impl`</span></span>
+<span id="cb11-166"><a href="#cb11-166"></a><span class="in">  --&gt; src/main.rs:13:1</span></span>
+<span id="cb11-167"><a href="#cb11-167"></a><span class="in">   |</span></span>
+<span id="cb11-168"><a href="#cb11-168"></a><span class="in">13 | / fn panic(_info: &amp;PanicInfo) -&gt; ! {</span></span>
+<span id="cb11-169"><a href="#cb11-169"></a><span class="in">14 | |     loop {}</span></span>
+<span id="cb11-170"><a href="#cb11-170"></a><span class="in">15 | | }</span></span>
+<span id="cb11-171"><a href="#cb11-171"></a><span class="in">   | |_^</span></span>
+<span id="cb11-172"><a href="#cb11-172"></a><span class="in">   |</span></span>
+<span id="cb11-173"><a href="#cb11-173"></a><span class="in">   = note: the lang item is first defined in crate `std` (which `test` depends on)</span></span>
+<span id="cb11-174"><a href="#cb11-174"></a><span class="in">   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib</span></span>
+<span id="cb11-175"><a href="#cb11-175"></a><span class="in">   = note: second definition in the local crate (`blog_os`)</span></span>
+<span id="cb11-176"><a href="#cb11-176"></a><span class="in">```</span></span>
+<span id="cb11-177"><a href="#cb11-177"></a></span>
+<span id="cb11-178"><a href="#cb11-178"></a>The first <span class="in">`note`</span> tells us that the panic language item is already defined in the <span class="in">`std`</span> crate, which is a dependency of the <span class="in">`test`</span> crate.</span>
+<span id="cb11-179"><a href="#cb11-179"></a>The <span class="in">`test`</span> crate is automatically included when building a crate in <span class="co">[</span><span class="ot">test mode</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests)</span>.</span>
+<span id="cb11-180"><a href="#cb11-180"></a>This does not make sense for our <span class="in">`#![no_std]`</span> kernel as there is no way to support the standard library on bare metal.</span>
+<span id="cb11-181"><a href="#cb11-181"></a>So this error is not relevant to our project and we can safely ignore it.</span>
+<span id="cb11-182"><a href="#cb11-182"></a></span>
+<span id="cb11-183"><a href="#cb11-183"></a>The proper way to avoid this error is to specify in our <span class="in">`Cargo.toml`</span> that our binary does not support building in <span class="in">`test`</span> and <span class="in">`bench`</span> modes.</span>
+<span id="cb11-184"><a href="#cb11-184"></a>We can do that by adding a <span class="in">`[[bin]]`</span> section to our <span class="in">`Cargo.toml`</span> to <span class="co">[</span><span class="ot">configure the build</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target)</span> of our binary:</span>
+<span id="cb11-185"><a href="#cb11-185"></a></span>
+<span id="cb11-186"><a href="#cb11-186"></a><span class="in">```toml</span></span>
+<span id="cb11-187"><a href="#cb11-187"></a><span class="in"># in Cargo.toml</span></span>
+<span id="cb11-188"><a href="#cb11-188"></a></span>
+<span id="cb11-189"><a href="#cb11-189"></a><span class="in">[[bin]]</span></span>
+<span id="cb11-190"><a href="#cb11-190"></a><span class="in">name = "blog_os"</span></span>
+<span id="cb11-191"><a href="#cb11-191"></a><span class="in">test = false</span></span>
+<span id="cb11-192"><a href="#cb11-192"></a><span class="in">bench = false</span></span>
+<span id="cb11-193"><a href="#cb11-193"></a><span class="in">```</span></span>
+<span id="cb11-194"><a href="#cb11-194"></a></span>
+<span id="cb11-195"><a href="#cb11-195"></a>The double-brackets around <span class="in">`bin`</span> are not a mistake, this is how the TOML format defines keys that can appear multiple times.</span>
+<span id="cb11-196"><a href="#cb11-196"></a>Since a crate can have multiple binaries, the <span class="in">`[[bin]]`</span> section can appear multiple times in the <span class="in">`Cargo.toml`</span> as well.</span>
+<span id="cb11-197"><a href="#cb11-197"></a>This is also the reason for the mandatory <span class="in">`name`</span> field, which needs to match the name of the binary (so that <span class="in">`cargo`</span> knows which settings should be applied to which binary).</span>
+<span id="cb11-198"><a href="#cb11-198"></a></span>
+<span id="cb11-199"><a href="#cb11-199"></a>By setting the <span class="co">[</span><span class="ot">`test`</span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-test-field)</span> and <span class="co">[</span><span class="ot">`bench` </span><span class="co">](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-bench-field)</span> fields to <span class="in">`false`</span>, we instruct <span class="in">`cargo`</span> to not build our binary in test or benchmark mode.</span>
+<span id="cb11-200"><a href="#cb11-200"></a>Now <span class="in">`cargo check --all-targets`</span> should not throw any errors anymore, and the <span class="in">`checkOnSave`</span> implementation of <span class="in">`rust-analyzer`</span> should be happy too.</span>
+<span id="cb11-201"><a href="#cb11-201"></a></span>
+<span id="cb11-202"><a href="#cb11-202"></a><span class="co">&lt;!--</span></span>
+<span id="cb11-203"><a href="#cb11-203"></a></span>
+<span id="cb11-204"><a href="#cb11-204"></a><span class="co">In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.</span></span>
+<span id="cb11-205"><a href="#cb11-205"></a></span>
+<span id="cb11-206"><a href="#cb11-206"></a><span class="co">#### Linux</span></span>
+<span id="cb11-207"><a href="#cb11-207"></a></span>
+<span id="cb11-208"><a href="#cb11-208"></a><span class="co">On Linux the following linker error occurs (shortened):</span></span>
+<span id="cb11-209"><a href="#cb11-209"></a></span>
+<span id="cb11-210"><a href="#cb11-210"></a><span class="co">```</span></span>
+<span id="cb11-211"><a href="#cb11-211"></a><span class="co">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb11-212"><a href="#cb11-212"></a><span class="co">  |</span></span>
+<span id="cb11-213"><a href="#cb11-213"></a><span class="co">  = note: "cc" […]</span></span>
+<span id="cb11-214"><a href="#cb11-214"></a><span class="co">  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
+<span id="cb11-215"><a href="#cb11-215"></a><span class="co">          (.text+0x12): undefined reference to `__libc_csu_fini'</span></span>
+<span id="cb11-216"><a href="#cb11-216"></a><span class="co">          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
+<span id="cb11-217"><a href="#cb11-217"></a><span class="co">          (.text+0x19): undefined reference to `__libc_csu_init'</span></span>
+<span id="cb11-218"><a href="#cb11-218"></a><span class="co">          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':</span></span>
+<span id="cb11-219"><a href="#cb11-219"></a><span class="co">          (.text+0x25): undefined reference to `__libc_start_main'</span></span>
+<span id="cb11-220"><a href="#cb11-220"></a><span class="co">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb11-221"><a href="#cb11-221"></a><span class="co">```</span></span>
+<span id="cb11-222"><a href="#cb11-222"></a></span>
+<span id="cb11-223"><a href="#cb11-223"></a><span class="co">The problem is that the linker includes the startup routine of the C runtime by default, which is also called `_start`. It requires some symbols of the C standard library `libc` that we don't include due to the `no_std` attribute, therefore the linker can't resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the `-nostartfiles` flag.</span></span>
+<span id="cb11-224"><a href="#cb11-224"></a></span>
+<span id="cb11-225"><a href="#cb11-225"></a><span class="co">One way to pass linker attributes via cargo is the `cargo rustc` command. The command behaves exactly like `cargo build`, but allows to pass options to `rustc`, the underlying Rust compiler. `rustc` has the `-C link-arg` flag, which passes an argument to the linker. Combined, our new build command looks like this:</span></span>
+<span id="cb11-226"><a href="#cb11-226"></a></span>
+<span id="cb11-227"><a href="#cb11-227"></a><span class="co">```</span></span>
+<span id="cb11-228"><a href="#cb11-228"></a><span class="co">cargo rustc -- -C link-arg=-nostartfiles</span></span>
+<span id="cb11-229"><a href="#cb11-229"></a><span class="co">```</span></span>
+<span id="cb11-230"><a href="#cb11-230"></a></span>
+<span id="cb11-231"><a href="#cb11-231"></a><span class="co">Now our crate builds as a freestanding executable on Linux!</span></span>
+<span id="cb11-232"><a href="#cb11-232"></a></span>
+<span id="cb11-233"><a href="#cb11-233"></a><span class="co">We didn't need to specify the name of our entry point function explicitly since the linker looks for a function with the name `_start` by default.</span></span>
+<span id="cb11-234"><a href="#cb11-234"></a></span>
+<span id="cb11-235"><a href="#cb11-235"></a><span class="co">#### Windows</span></span>
+<span id="cb11-236"><a href="#cb11-236"></a></span>
+<span id="cb11-237"><a href="#cb11-237"></a><span class="co">On Windows, a different linker error occurs (shortened):</span></span>
+<span id="cb11-238"><a href="#cb11-238"></a></span>
+<span id="cb11-239"><a href="#cb11-239"></a><span class="co">```</span></span>
+<span id="cb11-240"><a href="#cb11-240"></a><span class="co">error: linking with `link.exe` failed: exit code: 1561</span></span>
+<span id="cb11-241"><a href="#cb11-241"></a><span class="co">  |</span></span>
+<span id="cb11-242"><a href="#cb11-242"></a><span class="co">  = note: "C:\\Program Files (x86)\\…\\link.exe" […]</span></span>
+<span id="cb11-243"><a href="#cb11-243"></a><span class="co">  = note: LINK : fatal error LNK1561: entry point must be defined</span></span>
+<span id="cb11-244"><a href="#cb11-244"></a><span class="co">```</span></span>
+<span id="cb11-245"><a href="#cb11-245"></a></span>
+<span id="cb11-246"><a href="#cb11-246"></a><span class="co">The "entry point must be defined" error means that the linker can't find the entry point. On Windows, the default entry point name [depends on the used subsystem][windows-subsystems]. For the `CONSOLE` subsystem, the linker looks for a function named `mainCRTStartup` and for the `WINDOWS` subsystem, it looks for a function named `WinMainCRTStartup`. To override the default and tell the linker to look for our `_start` function instead, we can pass an `/ENTRY` argument to the linker:</span></span>
+<span id="cb11-247"><a href="#cb11-247"></a></span>
+<span id="cb11-248"><a href="#cb11-248"></a><span class="co">[windows-subsystems]: https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol</span></span>
+<span id="cb11-249"><a href="#cb11-249"></a></span>
+<span id="cb11-250"><a href="#cb11-250"></a><span class="co">```</span></span>
+<span id="cb11-251"><a href="#cb11-251"></a><span class="co">cargo rustc -- -C link-arg=/ENTRY:_start</span></span>
+<span id="cb11-252"><a href="#cb11-252"></a><span class="co">```</span></span>
+<span id="cb11-253"><a href="#cb11-253"></a></span>
+<span id="cb11-254"><a href="#cb11-254"></a><span class="co">From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.</span></span>
+<span id="cb11-255"><a href="#cb11-255"></a></span>
+<span id="cb11-256"><a href="#cb11-256"></a><span class="co">Now a different linker error occurs:</span></span>
+<span id="cb11-257"><a href="#cb11-257"></a></span>
+<span id="cb11-258"><a href="#cb11-258"></a><span class="co">```</span></span>
+<span id="cb11-259"><a href="#cb11-259"></a><span class="co">error: linking with `link.exe` failed: exit code: 1221</span></span>
+<span id="cb11-260"><a href="#cb11-260"></a><span class="co">  |</span></span>
+<span id="cb11-261"><a href="#cb11-261"></a><span class="co">  = note: "C:\\Program Files (x86)\\…\\link.exe" […]</span></span>
+<span id="cb11-262"><a href="#cb11-262"></a><span class="co">  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be</span></span>
+<span id="cb11-263"><a href="#cb11-263"></a><span class="co">          defined</span></span>
+<span id="cb11-264"><a href="#cb11-264"></a><span class="co">```</span></span>
+<span id="cb11-265"><a href="#cb11-265"></a></span>
+<span id="cb11-266"><a href="#cb11-266"></a><span class="co">This error occurs because Windows executables can use different [subsystems][windows-subsystems]. For normal programs, they are inferred depending on the entry point name: If the entry point is named `main`, the `CONSOLE` subsystem is used, and if the entry point is named `WinMain`, the `WINDOWS` subsystem is used. Since our `_start` function has a different name, we need to specify the subsystem explicitly:</span></span>
+<span id="cb11-267"><a href="#cb11-267"></a></span>
+<span id="cb11-268"><a href="#cb11-268"></a><span class="co">```</span></span>
+<span id="cb11-269"><a href="#cb11-269"></a><span class="co">cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"</span></span>
+<span id="cb11-270"><a href="#cb11-270"></a><span class="co">```</span></span>
+<span id="cb11-271"><a href="#cb11-271"></a></span>
+<span id="cb11-272"><a href="#cb11-272"></a><span class="co">We use the `CONSOLE` subsystem here, but the `WINDOWS` subsystem would work too. Instead of passing `-C link-arg` multiple times, we use `-C link-args` which takes a space separated list of arguments.</span></span>
+<span id="cb11-273"><a href="#cb11-273"></a></span>
+<span id="cb11-274"><a href="#cb11-274"></a><span class="co">With this command, our executable should build successfully on Windows.</span></span>
+<span id="cb11-275"><a href="#cb11-275"></a></span>
+<span id="cb11-276"><a href="#cb11-276"></a><span class="co">#### macOS</span></span>
+<span id="cb11-277"><a href="#cb11-277"></a></span>
+<span id="cb11-278"><a href="#cb11-278"></a><span class="co">On macOS, the following linker error occurs (shortened):</span></span>
+<span id="cb11-279"><a href="#cb11-279"></a></span>
+<span id="cb11-280"><a href="#cb11-280"></a><span class="co">```</span></span>
+<span id="cb11-281"><a href="#cb11-281"></a><span class="co">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb11-282"><a href="#cb11-282"></a><span class="co">  |</span></span>
+<span id="cb11-283"><a href="#cb11-283"></a><span class="co">  = note: "cc" […]</span></span>
+<span id="cb11-284"><a href="#cb11-284"></a><span class="co">  = note: ld: entry point (_main) undefined. for architecture x86_64</span></span>
+<span id="cb11-285"><a href="#cb11-285"></a><span class="co">          clang: error: linker command failed with exit code 1 […]</span></span>
+<span id="cb11-286"><a href="#cb11-286"></a><span class="co">```</span></span>
+<span id="cb11-287"><a href="#cb11-287"></a></span>
+<span id="cb11-288"><a href="#cb11-288"></a><span class="co">This error message tells us that the linker can't find an entry point function with the default name `main` (for some reason, all functions are prefixed with a `_` on macOS). To set the entry point to our `_start` function, we pass the `-e` linker argument:</span></span>
+<span id="cb11-289"><a href="#cb11-289"></a></span>
+<span id="cb11-290"><a href="#cb11-290"></a><span class="co">```</span></span>
+<span id="cb11-291"><a href="#cb11-291"></a><span class="co">cargo rustc -- -C link-args="-e __start"</span></span>
+<span id="cb11-292"><a href="#cb11-292"></a><span class="co">```</span></span>
+<span id="cb11-293"><a href="#cb11-293"></a></span>
+<span id="cb11-294"><a href="#cb11-294"></a><span class="co">The `-e` flag specifies the name of the entry point function. Since all functions have an additional `_` prefix on macOS, we need to set the entry point to `__start` instead of `_start`.</span></span>
+<span id="cb11-295"><a href="#cb11-295"></a></span>
+<span id="cb11-296"><a href="#cb11-296"></a><span class="co">Now the following linker error occurs:</span></span>
+<span id="cb11-297"><a href="#cb11-297"></a></span>
+<span id="cb11-298"><a href="#cb11-298"></a><span class="co">```</span></span>
+<span id="cb11-299"><a href="#cb11-299"></a><span class="co">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb11-300"><a href="#cb11-300"></a><span class="co">  |</span></span>
+<span id="cb11-301"><a href="#cb11-301"></a><span class="co">  = note: "cc" […]</span></span>
+<span id="cb11-302"><a href="#cb11-302"></a><span class="co">  = note: ld: dynamic main executables must link with libSystem.dylib</span></span>
+<span id="cb11-303"><a href="#cb11-303"></a><span class="co">          for architecture x86_64</span></span>
+<span id="cb11-304"><a href="#cb11-304"></a><span class="co">          clang: error: linker command failed with exit code 1 […]</span></span>
+<span id="cb11-305"><a href="#cb11-305"></a><span class="co">```</span></span>
+<span id="cb11-306"><a href="#cb11-306"></a></span>
+<span id="cb11-307"><a href="#cb11-307"></a><span class="co">macOS [does not officially support statically linked binaries] and requires programs to link the `libSystem` library by default. To override this and link a static binary, we pass the `-static` flag to the linker:</span></span>
+<span id="cb11-308"><a href="#cb11-308"></a></span>
+<span id="cb11-309"><a href="#cb11-309"></a><span class="co">[does not officially support statically linked binaries]: https://developer.apple.com/library/archive/qa/qa1118/_index.html</span></span>
+<span id="cb11-310"><a href="#cb11-310"></a></span>
+<span id="cb11-311"><a href="#cb11-311"></a><span class="co">```</span></span>
+<span id="cb11-312"><a href="#cb11-312"></a><span class="co">cargo rustc -- -C link-args="-e __start -static"</span></span>
+<span id="cb11-313"><a href="#cb11-313"></a><span class="co">```</span></span>
+<span id="cb11-314"><a href="#cb11-314"></a></span>
+<span id="cb11-315"><a href="#cb11-315"></a><span class="co">This still does not suffice, as a third linker error occurs:</span></span>
+<span id="cb11-316"><a href="#cb11-316"></a></span>
+<span id="cb11-317"><a href="#cb11-317"></a><span class="co">```</span></span>
+<span id="cb11-318"><a href="#cb11-318"></a><span class="co">error: linking with `cc` failed: exit code: 1</span></span>
+<span id="cb11-319"><a href="#cb11-319"></a><span class="co">  |</span></span>
+<span id="cb11-320"><a href="#cb11-320"></a><span class="co">  = note: "cc" […]</span></span>
+<span id="cb11-321"><a href="#cb11-321"></a><span class="co">  = note: ld: library not found for -lcrt0.o</span></span>
+<span id="cb11-322"><a href="#cb11-322"></a><span class="co">          clang: error: linker command failed with exit code 1 […]</span></span>
+<span id="cb11-323"><a href="#cb11-323"></a><span class="co">```</span></span>
+<span id="cb11-324"><a href="#cb11-324"></a></span>
+<span id="cb11-325"><a href="#cb11-325"></a><span class="co">This error occurs because programs on macOS link to `crt0` (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the `-nostartfiles` linker argument:</span></span>
+<span id="cb11-326"><a href="#cb11-326"></a></span>
+<span id="cb11-327"><a href="#cb11-327"></a><span class="co">```</span></span>
+<span id="cb11-328"><a href="#cb11-328"></a><span class="co">cargo rustc -- -C link-args="-e __start -static -nostartfiles"</span></span>
+<span id="cb11-329"><a href="#cb11-329"></a><span class="co">```</span></span>
+<span id="cb11-330"><a href="#cb11-330"></a></span>
+<span id="cb11-331"><a href="#cb11-331"></a><span class="co">Now our program should build successfully on macOS.</span></span>
+<span id="cb11-332"><a href="#cb11-332"></a></span>
+<span id="cb11-333"><a href="#cb11-333"></a><span class="co">#### Unifying the Build Commands</span></span>
+<span id="cb11-334"><a href="#cb11-334"></a></span>
+<span id="cb11-335"><a href="#cb11-335"></a><span class="co">Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named `.cargo/config.toml` that contains the platform-specific arguments:</span></span>
+<span id="cb11-336"><a href="#cb11-336"></a></span>
+<span id="cb11-337"><a href="#cb11-337"></a><span class="co">```toml</span></span>
+<span id="cb11-338"><a href="#cb11-338"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb11-339"><a href="#cb11-339"></a></span>
+<span id="cb11-340"><a href="#cb11-340"></a><span class="co">[target.'cfg(target_os = "linux")']</span></span>
+<span id="cb11-341"><a href="#cb11-341"></a><span class="co">rustflags = ["-C", "link-arg=-nostartfiles"]</span></span>
+<span id="cb11-342"><a href="#cb11-342"></a></span>
+<span id="cb11-343"><a href="#cb11-343"></a><span class="co">[target.'cfg(target_os = "windows")']</span></span>
+<span id="cb11-344"><a href="#cb11-344"></a><span class="co">rustflags = ["-C", "link-args=/ENTRY:_start /SUBSYSTEM:console"]</span></span>
+<span id="cb11-345"><a href="#cb11-345"></a></span>
+<span id="cb11-346"><a href="#cb11-346"></a><span class="co">[target.'cfg(target_os = "macos")']</span></span>
+<span id="cb11-347"><a href="#cb11-347"></a><span class="co">rustflags = ["-C", "link-args=-e __start -static -nostartfiles"]</span></span>
+<span id="cb11-348"><a href="#cb11-348"></a><span class="co">```</span></span>
+<span id="cb11-349"><a href="#cb11-349"></a></span>
+<span id="cb11-350"><a href="#cb11-350"></a><span class="co">The `rustflags` key contains arguments that are automatically added to every invocation of `rustc`. For more information on the `.cargo/config.toml` file, check out the [official documentation](https://doc.rust-lang.org/cargo/reference/config.html).</span></span>
+<span id="cb11-351"><a href="#cb11-351"></a></span>
+<span id="cb11-352"><a href="#cb11-352"></a><span class="co">Now our program should be buildable on all three platforms with a simple `cargo build`.</span></span>
+<span id="cb11-353"><a href="#cb11-353"></a></span>
+<span id="cb11-354"><a href="#cb11-354"></a><span class="co">#### Should You Do This?</span></span>
+<span id="cb11-355"><a href="#cb11-355"></a></span>
+<span id="cb11-356"><a href="#cb11-356"></a><span class="co">While it's possible to build a freestanding executable for Linux, Windows, and macOS, it's probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the `_start` function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.</span></span>
+<span id="cb11-357"><a href="#cb11-357"></a></span>
+<span id="cb11-358"><a href="#cb11-358"></a><span class="co">If you want to create a minimal binary that runs on top of an existing operating system, including `libc` and setting the `#[start]` attribute as described [here](https://doc.rust-lang.org/1.16.0/book/no-stdlib.html) is probably a better idea.</span></span>
+<span id="cb11-359"><a href="#cb11-359"></a></span>
+<span id="cb11-360"><a href="#cb11-360"></a><span class="co">--&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

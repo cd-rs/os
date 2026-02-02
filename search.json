@@ -11,7 +11,7 @@
     "href": "30_metal.html",
     "title": "Bare Metal",
     "section": "",
-    "text": "Welcome to OS in Rust\n\nBare metal\nLiterally the absolute coolest\n\nAction Items:\n\nmalloc stands eternal\n\nPossibly the coolest assignment ever\nI’m glad you all love it\n\nHomework this work is more complicated but also more supported.\n\nPrioritize malloc I think.",
+    "text": "Action Items:\n\nmalloc stands eternal\n\nPossibly the coolest assignment ever\nI’m glad you all love it\n\nHomework this week is more complicated but also more supported.\n\nPrioritize malloc I think.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -21,7 +21,7 @@
     "href": "30_metal.html#announcements",
     "title": "Bare Metal",
     "section": "",
-    "text": "Welcome to OS in Rust\n\nBare metal\nLiterally the absolute coolest\n\nAction Items:\n\nmalloc stands eternal\n\nPossibly the coolest assignment ever\nI’m glad you all love it\n\nHomework this work is more complicated but also more supported.\n\nPrioritize malloc I think.",
+    "text": "Action Items:\n\nmalloc stands eternal\n\nPossibly the coolest assignment ever\nI’m glad you all love it\n\nHomework this week is more complicated but also more supported.\n\nPrioritize malloc I think.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -67,11 +67,91 @@
     ]
   },
   {
+    "objectID": "30_metal.html#some-terms",
+    "href": "30_metal.html#some-terms",
+    "title": "Bare Metal",
+    "section": "Some Terms",
+    "text": "Some Terms\n\nShould introduce a few terms.\n\nNot required for OS but useful to know.\n\nTerms\n\nSimulation\nEmulation\nCross-compilation\nQEMU",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#simulation",
+    "href": "30_metal.html#simulation",
+    "title": "Bare Metal",
+    "section": "Simulation",
+    "text": "Simulation\n\nModels a system’s behavior\nFocuses on high-level results, not internal logic\n“Close enough” for performance or logic testing\nSimulating hardware components in software\nFaster but less precise",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#emulation",
+    "href": "30_metal.html#emulation",
+    "title": "Bare Metal",
+    "section": "Emulation",
+    "text": "Emulation\n\nReplicating exact internal behavior of hardware\nSoftware acting as hardware (CPU, registers, memory)\nAccuracy vs. Speed:\n\nMuch slower than simulation… unless?\nGoal: Guest software doesn’t know it’s not on actual silicon",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#example",
+    "href": "30_metal.html#example",
+    "title": "Bare Metal",
+    "section": "Example",
+    "text": "Example\n\nx86-64 - the Intel/AMD architecture common for Linux and Windows - supports a “long double” float with 80 bits of precision.\nARM64 - a competing formulation most popularized as “Apple silicon” with the M1 - lacks long doubles.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#context",
+    "href": "30_metal.html#context",
+    "title": "Bare Metal",
+    "section": "Context",
+    "text": "Context\n\nIt is trivial to implement a float in software…\n\nf16\n\nIt is relatively not-trivial to implement an architecture in software, though possible.\n\nHere’s the smallest example I know:\nPicoRV32",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#cross-compiling",
+    "href": "30_metal.html#cross-compiling",
+    "title": "Bare Metal",
+    "section": "Cross-Compiling",
+    "text": "Cross-Compiling\n\nExample:” compiling code on an x86 laptop for an ARM chip\n\nCommon in embedded applications (e.g. program a thermostat)\n\nCompiler runs on Host A, produces binary for Target B\n\nEssential for “bare metal” development\nTransmit the binary over wires (the bus!) to another device’s memory.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#considerations",
+    "href": "30_metal.html#considerations",
+    "title": "Bare Metal",
+    "section": "Considerations",
+    "text": "Considerations\n\nWe must:\n\nTarget a specific architecture\nLink against specific hardware memory maps\n\nSomehow you also need the actual hardware, unless…",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#qemu",
+    "href": "30_metal.html#qemu",
+    "title": "Bare Metal",
+    "section": "QEMU",
+    "text": "QEMU\n\nI used this a lot in grad school; less now.\n\nSupports both emulation and virtualization\n\nVirtualization emulates a device rather than a binary.\nUsed in cloud; can be fast; huge research area.\n\n\nLet’s us run bare metal binaries without physical chips (which would cost $)\nWrite locally \\(\\rightarrow\\) Cross-compile \\(\\rightarrow\\) Run in QEMU",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
     "objectID": "30_metal.html#first-steps",
     "href": "30_metal.html#first-steps",
     "title": "Bare Metal",
     "section": "First Steps",
-    "text": "First Steps\nThe first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library. This makes it possible to run Rust code on the bare metal without an underlying operating system.",
+    "text": "First Steps\n\nThe first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library.\nThis makes it possible to run Rust code on the “bare metal” without an underlying operating system.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -81,7 +161,7 @@
     "href": "30_metal.html#introduction",
     "title": "Bare Metal",
     "section": "Introduction",
-    "text": "Introduction\nTo write an operating system kernel, we need code that does not depend on any operating system features. This means that we can’t use threads, files, heap memory, the network, random numbers, standard output, or any other features requiring OS abstractions or specific hardware. Which makes sense, since we’re trying to write our own OS and our own drivers.",
+    "text": "Introduction\n\nTo write an operating system kernel, we need code that does not depend on any operating system features.\nThis means that we can’t use files, the heap, networks, random numbers, standard output, etc.\nWe’re trying to write our own OS!",
     "crumbs": [
       "Bare Metal"
     ]
@@ -91,7 +171,27 @@
     "href": "30_metal.html#on-std",
     "title": "Bare Metal",
     "section": "On std",
-    "text": "On std\nThis means that we can’t use most of the Rust standard library, but there are a lot of Rust features that we can use. For example, we can use iterators, closures, pattern matching, option and result, string formatting, and of course the ownership system. These features make it possible to write a kernel in a very expressive, high level way without worrying about undefined behavior or memory safety.",
+    "text": "On std\n\nWe can’t use most of the Rust standard library, but…\n…there are a lot of Rust features that we can use.\nFor example, we can use iterators, closures, pattern matching, option and result\n\nRecall the official Calvin Deutschbein position on option and result:\n“It’s why Rust is good.” - me",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#on-std-1",
+    "href": "30_metal.html#on-std-1",
+    "title": "Bare Metal",
+    "section": "On std",
+    "text": "On std\n\nWhile not initially helpful, we can use string formatting, and…\n… the ownership system.\n\nBeats malloc!",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#quoth-the-blog",
+    "href": "30_metal.html#quoth-the-blog",
+    "title": "Bare Metal",
+    "section": "Quoth The Blog",
+    "text": "Quoth The Blog\n\nThese features make it possible to write a kernel in a very expressive, high level way without worrying about undefined behavior or memory safety.\n\n\nWell, we’ll see.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -100,58 +200,348 @@
     "objectID": "30_metal.html#we-keep",
     "href": "30_metal.html#we-keep",
     "title": "Bare Metal",
-    "section": "We keep:",
-    "text": "We keep:",
+    "section": "We keep",
+    "text": "We keep\n\noption\nresult\nRust standard library\niterators\nclosures\npattern matching\nstring formatting\nownership system\nundefined behavior\nmemory safety",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#section",
-    "href": "30_metal.html#section",
+    "objectID": "30_metal.html#onward",
+    "href": "30_metal.html#onward",
     "title": "Bare Metal",
-    "section": "",
-    "text": "In order to create an OS kernel in Rust, we need to create an executable that can be run without an underlying operating system. Such an executable is often called a “freestanding” or “bare-metal” executable.",
+    "section": "Onward!",
+    "text": "Onward!\n\nWe now enumerate the necessary steps to create a freestanding Rust binary…\n…and explains why the steps are needed.",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#section-1",
-    "href": "30_metal.html#section-1",
+    "objectID": "30_metal.html#no_std",
+    "href": "30_metal.html#no_std",
     "title": "Bare Metal",
-    "section": "",
-    "text": "This post describes the necessary steps to create a freestanding Rust binary and explains why the steps are needed. If you’re just interested in a minimal example, you can jump to the summary.",
+    "section": "no_std",
+    "text": "no_std\n\nBy default, all Rust crates link the standard library.\n\nIt depends on the operating system for features such as threads, files, or networking.\nIt also depends on the C standard library libc, which closely interacts with OS services.\n\nThat is, part of GNU but not part of Linux.",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#disabling-the-standard-library",
-    "href": "30_metal.html#disabling-the-standard-library",
+    "objectID": "30_metal.html#no_std-1",
+    "href": "30_metal.html#no_std-1",
     "title": "Bare Metal",
-    "section": "Disabling the Standard Library",
-    "text": "Disabling the Standard Library\nBy default, all Rust crates link the standard library, which depends on the operating system for features such as threads, files, or networking. It also depends on the C standard library libc, which closely interacts with OS services. Since our plan is to write an operating system, we can’t use any OS-dependent libraries. So we have to disable the automatic inclusion of the standard library through the no_std attribute.\nWe start by creating a new cargo application project. The easiest way to do this is through the command line:\ncargo new blog_os --bin --edition 2024\nI named the project blog_os, but of course you can choose your own name. The --bin flag specifies that we want to create an executable binary (in contrast to a library) and the --edition 2024 flag specifies that we want to use the 2024 edition of Rust for our crate. When we run the command, cargo creates the following directory structure for us:\nblog_os\n├── Cargo.toml\n└── src\n    └── main.rs\nThe Cargo.toml contains the crate configuration, for example the crate name, the author, the semantic version number, and dependencies. The src/main.rs file contains the root module of our crate and our main function. You can compile your crate through cargo build and then run the compiled blog_os binary in the target/debug subfolder.\n\nThe no_std Attribute\nRight now our crate implicitly links the standard library. Let’s try to disable this by adding the no_std attribute:\n// main.rs\n\n#![no_std]\n\nfn main() {\n    println!(\"Hello, world!\");\n}\nWhen we try to build it now (by running cargo build), the following error occurs:\nerror: cannot find macro `println!` in this scope\n --&gt; src/main.rs:4:5\n  |\n4 |     println!(\"Hello, world!\");\n  |     ^^^^^^^\nThe reason for this error is that the println macro is part of the standard library, which we no longer include. So we can no longer print things. This makes sense, since println writes to standard output, which is a special file descriptor provided by the operating system.\nSo let’s remove the printing and try again with an empty main function:\n// main.rs\n\n#![no_std]\n\nfn main() {}\n&gt; cargo build\nerror: `#[panic_handler]` function required, but not found\nerror: language item required, but not found: `eh_personality`\nNow the compiler is missing a #[panic_handler] function and a language item.",
+    "section": "no_std",
+    "text": "no_std\n\nSince our plan is to write an operating system, we can’t use any OS-dependent libraries.\n\nThat would be recursive, which is only good sometimes!\n\nSo we have to disable the automatic inclusion of the standard library through the no_std attribute.\n\nstandard library\nno_std attribute",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#panic-implementation",
-    "href": "30_metal.html#panic-implementation",
+    "objectID": "30_metal.html#to-begin",
+    "href": "30_metal.html#to-begin",
     "title": "Bare Metal",
-    "section": "Panic Implementation",
-    "text": "Panic Implementation\nThe panic_handler attribute defines the function that the compiler should invoke when a panic occurs. The standard library provides its own panic handler function, but in a no_std environment we need to define it ourselves:\n// in main.rs\n\nuse core::panic::PanicInfo;\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &PanicInfo) -&gt; ! {\n    loop {}\n}\nThe PanicInfo parameter contains the file and line where the panic happened and the optional panic message. The function should never return, so it is marked as a diverging function by returning the “never” type !. There is not much we can do in this function for now, so we just loop indefinitely.",
+    "section": "To begin",
+    "text": "To begin\n\nWe can start creation the same way we make anything else in Rust…\nCargo (sighs heavily)\nWe will introduce only two wrinkles.\n\n--bin: we want to create an executable binary (in contrast to a library)\n--edition 2024: to maintain consistency across years and with the working example.",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#the-eh_personality-language-item",
-    "href": "30_metal.html#the-eh_personality-language-item",
+    "objectID": "30_metal.html#invoke-as",
+    "href": "30_metal.html#invoke-as",
     "title": "Bare Metal",
-    "section": "The eh_personality Language Item",
-    "text": "The eh_personality Language Item\nLanguage items are special functions and types that are required internally by the compiler. For example, the Copy trait is a language item that tells the compiler which types have copy semantics. When we look at the implementation, we see it has the special #[lang = \"copy\"] attribute that defines it as a language item.\nWhile providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn’t even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.\nThe eh_personality language item marks a function that is used for implementing stack unwinding. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a panic. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g. libunwind on Linux or structured exception handling on Windows), so we don’t want to use it for our operating system.\n\nDisabling Unwinding\nThere are other use cases as well for which unwinding is undesirable, so Rust provides an option to abort on panic instead. This disables the generation of unwinding symbol information and thus considerably reduces binary size. There are multiple places where we can disable unwinding. The easiest way is to add the following lines to our Cargo.toml:\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\"\nThis sets the panic strategy to abort for both the dev profile (used for cargo build) and the release profile (used for cargo build --release). Now the eh_personality language item should no longer be required.\nNow we fixed both of the above errors. However, if we try to compile it now, another error occurs:\n&gt; cargo build\nerror: requires `start` lang_item\nOur program is missing the start language item, which defines the entry point.",
+    "section": "Invoke as",
+    "text": "Invoke as\ncargo new ???? --bin --edition 2024",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#example-1",
+    "href": "30_metal.html#example-1",
+    "title": "Bare Metal",
+    "section": "Example",
+    "text": "Example\n\nPersonally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (32,42 etc.)\n\ncargo new 32 --name osirs --vcs none --bin --edition 2024",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#branches",
+    "href": "30_metal.html#branches",
+    "title": "Bare Metal",
+    "section": "Branches",
+    "text": "Branches\n\nA competing formulation would be to use git branch to create different developmental branches.\nThis is the industry standard and I wanted to introduce it but felt a time crunch.\nIf you are looking for something to do, figure it out.\n\nDon’t worry about me finding things; its worth it to me for you to learn.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#name",
+    "href": "30_metal.html#name",
+    "title": "Bare Metal",
+    "section": "Name",
+    "text": "Name\n\n\n\nYou don’t have to name your OS anything in particular, I just thought osirs (OS in Rust) sounded heckin’ rad.\nʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\nAlso a cringe AI real estate firm!",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#refresh",
+    "href": "30_metal.html#refresh",
+    "title": "Bare Metal",
+    "section": "Refresh",
+    "text": "Refresh\n\nWhen we run the command, cargo creates the following directory structure for us:\n\n$ tree\n.\n├── Cargo.toml\n└── src\n    └── main.rs\n\n1 directory, 2 files",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#recall",
+    "href": "30_metal.html#recall",
+    "title": "Bare Metal",
+    "section": "Recall",
+    "text": "Recall\n\nCargo.toml contains the crate configuration\n\nCrate name\nCrate author\nCrate version\n\nsrc/main.rs file contains our main function.\nAfter cargo build, find the compiled osirs binary in the target/debug subfolder.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#blah-blah-blah",
+    "href": "30_metal.html#blah-blah-blah",
+    "title": "Bare Metal",
+    "section": "Blah blah blah",
+    "text": "Blah blah blah\n\u0016$ cargo build ; tree\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.54s\n.\n├── Cargo.lock\n├── Cargo.toml\n├── src\n│   └── main.rs\n└── target\n    ├── CACHEDIR.TAG\n    └── debug\n        ├── build\n        ├── deps\n        │   ├── osirs-43412975b38d059d\n        │   └── osirs-43412975b38d059d.d\n        ├── examples\n        ├── incremental\n        │   └── osirs-3gae52yq1943v\n        │       ├── s-hfeunnoewq-0c8luu5-5dmhke08rl6h5l09ku3va3gkx\n        │       │   ├── 1tq3ts5gahvv7j1hzrmfdrzi6.o\n        │       │   ├── 6zk3flo890c0qhh6fykb6746g.o\n        │       │   ├── 8z45o15v3gxm5hydv3o63x07l.o\n        │       │   ├── 9itjtn00r7d8c6mknmav20oex.o\n        │       │   ├── bh9pj42wzikjd1ilqutnjbrx7.o\n        │       │   ├── dep-graph.bin\n        │       │   ├── eymyqxruzdb24suchgzd8ygxb.o\n        │       │   ├── query-cache.bin\n        │       │   └── work-products.bin\n        │       └── s-hfeunnoewq-0c8luu5.lock\n        ├── osirs\n        └── osirs.d\n\n9 directories, 18 files",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#running",
+    "href": "30_metal.html#running",
+    "title": "Bare Metal",
+    "section": "Running",
+    "text": "Running\n\nTechnically no one can stop you from using cargo run or even cargo run --release\nBut you can also just build and then directly run the executable.\n\n\u0016\u0016$ ./target/debug/osirs\nHello, world!",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#the-no_std-attribute",
+    "href": "30_metal.html#the-no_std-attribute",
+    "title": "Bare Metal",
+    "section": "The no_std Attribute",
+    "text": "The no_std Attribute\n\nInitially, the crate implicitly links the standard library.\nWe can prepend the no_std attribute to src/main.rs to get the version of Rust that builds character!\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n\nfn main() {\n    println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n}",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#we-can-rebuild",
+    "href": "30_metal.html#we-can-rebuild",
+    "title": "Bare Metal",
+    "section": "We Can Rebuild",
+    "text": "We Can Rebuild\n\nActually we can’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: cannot find macro `println` in this scope\n --&gt; src/main.rs:6:5\n  |\n6 |     println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n  |     ^^^^^^^\n\nerror: `#[panic_handler]` function required, but not found\n\nerror: unwinding panics are not supported without std\n  |\n  = help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n  = note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nerror: could not compile `osirs` (bin \"osirs\") due to 3 previous errors    ^^^^^^^",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#enhance",
+    "href": "30_metal.html#enhance",
+    "title": "Bare Metal",
+    "section": "Enhance!",
+    "text": "Enhance!\nerror: cannot find macro `println` in this scope\n --&gt; src/main.rs:6:5\n  |\n6 |     println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n  |     ^^^^^^^\n\nOh right, we can’t print without an OS.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#background",
+    "href": "30_metal.html#background",
+    "title": "Bare Metal",
+    "section": "Background",
+    "text": "Background\n\nThe println macro is part of the standard library std.\nWe said no_std.\nSo we can no longer print things.\nI hope it is clear how this is character-building!\nRead more:\n\nprintln macro\nstandard output",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#rip-it",
+    "href": "30_metal.html#rip-it",
+    "title": "Bare Metal",
+    "section": "Rip it",
+    "text": "Rip it\n\nRemove the printing and try again:\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n\nfn main() {\n    // println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n}",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#problems-remain",
+    "href": "30_metal.html#problems-remain",
+    "title": "Bare Metal",
+    "section": "Problems remain",
+    "text": "Problems remain\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: `#[panic_handler]` function required, but not found\n\nerror: unwinding panics are not supported without std\n  |\n  = help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n  = note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nerror: could not compile `osirs` (bin \"osirs\") due to 2 previous errors",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#enhance-1",
+    "href": "30_metal.html#enhance-1",
+    "title": "Bare Metal",
+    "section": "Enhance!",
+    "text": "Enhance!\nerror: cannot find macro `println` in this scope\n --&gt; src/main.rs:6:5\n  |\n6 |     println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n  |     ^^^^^^^\n\nSometimes, Rust explodes and calls the OS (written in C!) for help.\nIt can’t do that without std and is sad 😭",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#panic",
+    "href": "30_metal.html#panic",
+    "title": "Bare Metal",
+    "section": "Panic",
+    "text": "Panic\n\nThe panic_handler attribute defines the function that the compiler should invoke when a panic occurs.\nstd provides its own panic handler function, but in a no_std environment we need to define it ourselves:\npanic",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#our-approach",
+    "href": "30_metal.html#our-approach",
+    "title": "Bare Metal",
+    "section": "Our Approach",
+    "text": "Our Approach\n\n\nsrc/main.rs\n\n// main.rs\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#panics",
+    "href": "30_metal.html#panics",
+    "title": "Bare Metal",
+    "section": "Panics",
+    "text": "Panics\n\nThe PanicInfo parameter contains:\n\nfile and line where the panic happened\npanic message (e.g. panic!(\"YOLO\")\n\nThe function should never return.\n\nSo it is marked as a “diverging function”\nIt returns the “never” type !.\n\nNot much we can do in this function for now, so just loop() to prevent a return.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#read-more",
+    "href": "30_metal.html#read-more",
+    "title": "Bare Metal",
+    "section": "Read more…",
+    "text": "Read more…\n\nI had never heard of or used these but to me it was clear why they would have to exist in a type safe language.\n\nPanicInfo\ndiverging function\n“never” type",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#retry",
+    "href": "30_metal.html#retry",
+    "title": "Bare Metal",
+    "section": "Retry",
+    "text": "Retry\n\nI bet it works now!\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: unwinding panics are not supported without std\n  |\n  = help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n  = note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nThey should make a version of the OS class that is easy.\n\n(They did - this class)",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#panic-abort",
+    "href": "30_metal.html#panic-abort",
+    "title": "Bare Metal",
+    "section": "Panic abort",
+    "text": "Panic abort\n\n\n\nFun fact - back when I was an OS engineer slash rocket scientist my first launch was “PA-1” for “Pad Abort 1”\n\nBlew up a rocket on the launch pad to make sure it was safe for humans.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#panic-abort-1",
+    "href": "30_metal.html#panic-abort-1",
+    "title": "Bare Metal",
+    "section": "Panic abort",
+    "text": "Panic abort\n\nThe use of the term “abort” which in some nation-states is a hot-button political issue has come up from time-to-time in the discourse.\nRead more from 2018\n\n\n25.7.4 Aborting a Program\n\n...\n\nFuture Change Warning: Proposed Federal censorship regulations may prohibit us from giving you information about the possibility of calling this function. We would be required to say that this is not an acceptable way of terminating a program.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#quoth-stallman",
+    "href": "30_metal.html#quoth-stallman",
+    "title": "Bare Metal",
+    "section": "Quoth Stallman",
+    "text": "Quoth Stallman\n\n“The point of this joke is even more important now than it was when I first wrote it,” [Free Software Foundation president] Stallman wrote in a note posted to project mailing list, in reference to today’s political climate. “Please do not remove it. GNU is not a purely technical project, so the fact that this is not strictly and grimly technical is not a reason to remove this.”",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#now-in-rust",
+    "href": "30_metal.html#now-in-rust",
+    "title": "Bare Metal",
+    "section": "Now in Rust",
+    "text": "Now in Rust\n\nWe can oppose fascism and\n\n(looks into the history of NASA and Lockheed Martin)\n(clears throat)\nMoving on!\n\n\nWe can abort programs… in Rust",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#how",
+    "href": "30_metal.html#how",
+    "title": "Bare Metal",
+    "section": "How?",
+    "text": "How?\n\nRead carefully:\n\n= help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n= note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nGeniuses will recognize panic=\"abort\" syntax",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#toml",
+    "href": "30_metal.html#toml",
+    "title": "Bare Metal",
+    "section": "TOML",
+    "text": "TOML\n\nIt’s .toml\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#crate-options",
+    "href": "30_metal.html#crate-options",
+    "title": "Bare Metal",
+    "section": "Crate options",
+    "text": "Crate options\n\nNominally there are use cases for which unwinding is undesirable\n\nMy take: All cases.\n\nSo Rust provides an option to “abort on panic” instead.\nThis disables the generation of unwinding symbol information and thus considerably reduces binary size.\n\nThis seems obviously good to me.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#update-cargo.toml",
+    "href": "30_metal.html#update-cargo.toml",
+    "title": "Bare Metal",
+    "section": "Update Cargo.toml",
+    "text": "Update Cargo.toml\n\nAdd the following:\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\"",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#now",
+    "href": "30_metal.html#now",
+    "title": "Bare Metal",
+    "section": "Now…",
+    "text": "Now…\n\nThis sets the panic strategy to abort for both the dev profile (used for cargo build) and the release profile (used for cargo build --release).\nabort on panic\nI bet it will work now.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#whoops",
+    "href": "30_metal.html#whoops",
+    "title": "Bare Metal",
+    "section": "Whoops!",
+    "text": "Whoops!\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nOur program is missing the start language item, which defines the entry point.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -161,37 +551,127 @@
     "href": "30_metal.html#the-start-attribute",
     "title": "Bare Metal",
     "section": "The start attribute",
-    "text": "The start attribute\nOne might think that the main function is the first function called when you run a program. However, most languages have a runtime system, which is responsible for things such as garbage collection (e.g. in Java) or software threads (e.g. goroutines in Go). This runtime needs to be called before main, since it needs to initialize itself.\nIn a typical Rust binary that links the standard library, execution starts in a C runtime library called crt0 (“C runtime zero”), which sets up the environment for a C application. This includes creating a stack and placing the arguments in the right registers. The C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item. Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic. The runtime then finally calls the main function.\nOur freestanding executable does not have access to the Rust runtime and crt0, so we need to define our own entry point. Implementing the start language item wouldn’t help, since it would still require crt0. Instead, we need to overwrite the crt0 entry point directly.\n\nOverwriting the Entry Point\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n#![no_std]\n#![no_main]\n\nuse core::panic::PanicInfo;\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &PanicInfo) -&gt; ! {\n    loop {}\n}\nYou might notice that we removed the main function. The reason is that a main doesn’t make sense without an underlying runtime that calls it. Instead, we are now overwriting the operating system entry point with our own _start function:\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}\nBy using the #[unsafe(no_mangle)] attribute, we disable name mangling to ensure that the Rust compiler really outputs a function with the name _start. Without the attribute, the compiler would generate some cryptic _ZN3blog_os4_start7hb173fedf945531caE symbol to give every function a unique name. The attribute is required because we need to tell the name of the entry point function to the linker in the next step.\nWe also have to mark the function as extern \"C\" to tell the compiler that it should use the C calling convention for this function (instead of the unspecified Rust calling convention). The reason for naming the function _start is that this is the default entry point name for most systems.\nThe ! return type means that the function is diverging, i.e. not allowed to ever return. This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader. So instead of returning, the entry point should e.g. invoke the exit system call of the operating system. In our case, shutting down the machine could be a reasonable action, since there’s nothing left to do if a freestanding binary returns. For now, we fulfill the requirement by looping endlessly.\nWhen we run cargo build now, we get an ugly linker error.",
+    "text": "The start attribute\n\nOne might think that the main function is the first function called when you run a program.\nHowever, most languages have a “runtime system”\n\nFor e.g. Java garbage collection (e.g. in Java)\nFor e.g. Go software threads (goroutines)\n\nThis runtime needs to be called before main, since it needs to initialize itself.",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#linker-errors",
-    "href": "30_metal.html#linker-errors",
+    "objectID": "30_metal.html#c-again",
+    "href": "30_metal.html#c-again",
     "title": "Bare Metal",
-    "section": "Linker Errors",
-    "text": "Linker Errors\nThe linker is a program that combines the generated code into an executable. Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.\nTo solve the errors, we need to tell the linker that it should not include the C runtime. We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.\n\nBuilding for a Bare Metal Target\nBy default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on x86_64, Rust tries to build an .exe Windows executable that uses x86_64 instructions. This environment is called your “host” system.\nTo describe different environments, Rust uses a string called target triple. You can see the target triple for your host system by running rustc --version --verbose:\nrustc 1.35.0-nightly (474e7a648 2019-04-07)\nbinary: rustc\ncommit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab\ncommit-date: 2019-04-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.35.0-nightly\nLLVM version: 8.0\nThe above output is from a x86_64 Linux system. We see that the host triple is x86_64-unknown-linux-gnu, which includes the CPU architecture (x86_64), the vendor (unknown), the operating system (linux), and the ABI (gnu).\nBy compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.\nAn example of such a bare metal environment is the thumbv7em-none-eabihf target triple, which describes an embedded ARM system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the none in the target triple. To be able to compile for this target, we need to add it in rustup:\nrustup target add thumbv7em-none-eabihf\nThis downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:\ncargo build --target thumbv7em-none-eabihf\nBy passing a --target argument we cross compile our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.\nThis is the approach that we will use for building our OS kernel. Instead of thumbv7em-none-eabihf, we will use a custom target that describes a x86_64 bare metal environment. The details will be explained in the next post.\n\n\nLinker Arguments\nInstead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This isn’t the approach that we will use for our kernel, therefore this section is optional and only provided for completeness. Click on “Linker Arguments” below to show the optional content.\n\n\nLinker Arguments\n\nIn this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.\n\nLinux\nOn Linux the following linker error occurs (shortened):\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x12): undefined reference to `__libc_csu_fini'\n          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x19): undefined reference to `__libc_csu_init'\n          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x25): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\nThe problem is that the linker includes the startup routine of the C runtime by default, which is also called _start. It requires some symbols of the C standard library libc that we don’t include due to the no_std attribute, therefore the linker can’t resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the -nostartfiles flag.\nOne way to pass linker attributes via cargo is the cargo rustc command. The command behaves exactly like cargo build, but allows to pass options to rustc, the underlying Rust compiler. rustc has the -C link-arg flag, which passes an argument to the linker. Combined, our new build command looks like this:\ncargo rustc -- -C link-arg=-nostartfiles\nNow our crate builds as a freestanding executable on Linux!\nWe didn’t need to specify the name of our entry point function explicitly since the linker looks for a function with the name _start by default.\n\n\nWindows\nOn Windows, a different linker error occurs (shortened):\nerror: linking with `link.exe` failed: exit code: 1561\n  |\n  = note: \"C:\\\\Program Files (x86)\\\\…\\\\link.exe\" […]\n  = note: LINK : fatal error LNK1561: entry point must be defined\nThe “entry point must be defined” error means that the linker can’t find the entry point. On Windows, the default entry point name depends on the used subsystem. For the CONSOLE subsystem, the linker looks for a function named mainCRTStartup and for the WINDOWS subsystem, it looks for a function named WinMainCRTStartup. To override the default and tell the linker to look for our _start function instead, we can pass an /ENTRY argument to the linker:\ncargo rustc -- -C link-arg=/ENTRY:_start\nFrom the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.\nNow a different linker error occurs:\nerror: linking with `link.exe` failed: exit code: 1221\n  |\n  = note: \"C:\\\\Program Files (x86)\\\\…\\\\link.exe\" […]\n  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be\n          defined\nThis error occurs because Windows executables can use different subsystems. For normal programs, they are inferred depending on the entry point name: If the entry point is named main, the CONSOLE subsystem is used, and if the entry point is named WinMain, the WINDOWS subsystem is used. Since our _start function has a different name, we need to specify the subsystem explicitly:\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\nWe use the CONSOLE subsystem here, but the WINDOWS subsystem would work too. Instead of passing -C link-arg multiple times, we use -C link-args which takes a space separated list of arguments.\nWith this command, our executable should build successfully on Windows.\n\n\nmacOS\nOn macOS, the following linker error occurs (shortened):\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: entry point (_main) undefined. for architecture x86_64\n          clang: error: linker command failed with exit code 1 […]\nThis error message tells us that the linker can’t find an entry point function with the default name main (for some reason, all functions are prefixed with a _ on macOS). To set the entry point to our _start function, we pass the -e linker argument:\ncargo rustc -- -C link-args=\"-e __start\"\nThe -e flag specifies the name of the entry point function. Since all functions have an additional _ prefix on macOS, we need to set the entry point to __start instead of _start.\nNow the following linker error occurs:\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: dynamic main executables must link with libSystem.dylib\n          for architecture x86_64\n          clang: error: linker command failed with exit code 1 […]\nmacOS does not officially support statically linked binaries and requires programs to link the libSystem library by default. To override this and link a static binary, we pass the -static flag to the linker:\ncargo rustc -- -C link-args=\"-e __start -static\"\nThis still does not suffice, as a third linker error occurs:\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: library not found for -lcrt0.o\n          clang: error: linker command failed with exit code 1 […]\nThis error occurs because programs on macOS link to crt0 (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the -nostartfiles linker argument:\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNow our program should build successfully on macOS.\n\n\nUnifying the Build Commands\nRight now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named .cargo/config.toml that contains the platform-specific arguments:\n# in .cargo/config.toml\n\n[target.'cfg(target_os = \"linux\")']\nrustflags = [\"-C\", \"link-arg=-nostartfiles\"]\n\n[target.'cfg(target_os = \"windows\")']\nrustflags = [\"-C\", \"link-args=/ENTRY:_start /SUBSYSTEM:console\"]\n\n[target.'cfg(target_os = \"macos\")']\nrustflags = [\"-C\", \"link-args=-e __start -static -nostartfiles\"]\nThe rustflags key contains arguments that are automatically added to every invocation of rustc. For more information on the .cargo/config.toml file, check out the official documentation.\nNow our program should be buildable on all three platforms with a simple cargo build.\n\n\nShould You Do This?\nWhile it’s possible to build a freestanding executable for Linux, Windows, and macOS, it’s probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the _start function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.\nIf you want to create a minimal binary that runs on top of an existing operating system, including libc and setting the #[start] attribute as described here is probably a better idea.",
+    "section": "C, again",
+    "text": "C, again\n\nIn a typical Rust binary that links the standard library, execution starts in a C runtime library\n\ncrt0 for “C runtime zero”\n\nThis creates a stack and places the arguments in the right hardware registers.\nThe C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item.",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#summary",
-    "href": "30_metal.html#summary",
+    "objectID": "30_metal.html#back-to-rust",
+    "href": "30_metal.html#back-to-rust",
     "title": "Bare Metal",
-    "section": "Summary",
-    "text": "Summary\nA minimal freestanding Rust binary looks like this:\nsrc/main.rs:\n#![no_std] // don't link the Rust standard library\n#![no_main] // disable all Rust-level entry points\n\nuse core::panic::PanicInfo;\n\n#[unsafe(no_mangle)] // don't mangle the name of this function\npub extern \"C\" fn _start() -&gt; ! {\n    // this function is the entry point, since the linker looks for a function\n    // named `_start` by default\n    loop {}\n}\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &PanicInfo) -&gt; ! {\n    loop {}\n}\nCargo.toml:\n[package]\nname = \"crate_name\"\nversion = \"0.1.0\"\nauthors = [\"Author Name &lt;author@example.com&gt;\"]\n\n# the profile used for `cargo build`\n[profile.dev]\npanic = \"abort\" # disable stack unwinding on panic\n\n# the profile used for `cargo build --release`\n[profile.release]\npanic = \"abort\" # disable stack unwinding on panic\nTo build this binary, we need to compile for a bare metal target such as thumbv7em-none-eabihf:\ncargo build --target thumbv7em-none-eabihf\nAlternatively, we can compile it for the host system by passing additional linker arguments:\n# Linux\ncargo rustc -- -C link-arg=-nostartfiles\n# Windows\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\n# macOS\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNote that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the _start function is called. So for any real use of such a binary, more steps are required.",
+    "section": "Back to Rust",
+    "text": "Back to Rust\n\nRust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.\nThe runtime then finally calls the main function.",
     "crumbs": [
       "Bare Metal"
     ]
   },
   {
-    "objectID": "30_metal.html#making-rust-analyzer-happy",
-    "href": "30_metal.html#making-rust-analyzer-happy",
+    "objectID": "30_metal.html#crt0-is-cheating",
+    "href": "30_metal.html#crt0-is-cheating",
     "title": "Bare Metal",
-    "section": "Making rust-analyzer happy",
-    "text": "Making rust-analyzer happy\nThe rust-analyzer project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for #![no_std] projects too, so I recommend using it for kernel development!\nIf you’re using the checkOnSave feature of rust-analyzer (enabled by default), it might report an error for the panic function of our kernel:\nfound duplicate lang item `panic_impl`\nThe reason for this error is that rust-analyzer invokes cargo check --all-targets by default, which also tries to build the binary in test and benchmark mode.\n\nThe two meanings of “target”\nThe --all-targets flag is completely unrelated to the --target argument. There are two different meanings of the term “target” in cargo:\n\nThe --target flag specifies the compilation target that should be passed to the rustc compiler. This should be set to the target triple of the machine that should run our code.\nThe --all-targets flag references the package target of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for examples, tests, and benchmarks. These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.\n\n\nBy default, cargo check only builds the library and binary package targets. However, rust-analyzer chooses to check all package targets by default when checkOnSave is enabled. This is the reason that rust-analyzer reports the above lang item error that we don’t see in cargo check. If we run cargo check --all-targets, we see the error too:\nerror[E0152]: found duplicate lang item `panic_impl`\n  --&gt; src/main.rs:13:1\n   |\n13 | / fn panic(_info: &PanicInfo) -&gt; ! {\n14 | |     loop {}\n15 | | }\n   | |_^\n   |\n   = note: the lang item is first defined in crate `std` (which `test` depends on)\n   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib\n   = note: second definition in the local crate (`blog_os`)\nThe first note tells us that the panic language item is already defined in the std crate, which is a dependency of the test crate. The test crate is automatically included when building a crate in test mode. This does not make sense for our #![no_std] kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.\nThe proper way to avoid this error is to specify in our Cargo.toml that our binary does not support building in test and bench modes. We can do that by adding a [[bin]] section to our Cargo.toml to configure the build of our binary:\n# in Cargo.toml\n\n[[bin]]\nname = \"blog_os\"\ntest = false\nbench = false\nThe double-brackets around bin are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the [[bin]] section can appear multiple times in the Cargo.toml as well. This is also the reason for the mandatory name field, which needs to match the name of the binary (so that cargo knows which settings should be applied to which binary).\nBy setting the test and bench fields to false, we instruct cargo to not build our binary in test or benchmark mode. Now cargo check --all-targets should not throw any errors anymore, and the checkOnSave implementation of rust-analyzer should be happy too.",
+    "section": "crt0 is cheating",
+    "text": "crt0 is cheating\n\nOur freestanding executable does not have access to the Rust runtime and crt0\nWe need to define our own entry point. = Implementing the start language item wouldn’t help, since it would still require crt0.\nInstead, we need to overwrite the crt0 entry point directly.\n\n\nOverwriting\n\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n#![no_main]\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#no-main-in-main",
+    "href": "30_metal.html#no-main-in-main",
+    "title": "Bare Metal",
+    "section": "No main in main",
+    "text": "No main in main\n\nAt this point we can also remove the main function.\nAbsent a compatible runtime, main is meaningless!\nIf you cargo build at this point, by the way, you will get some fun errors.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#start-in-main",
+    "href": "30_metal.html#start-in-main",
+    "title": "Bare Metal",
+    "section": "Start in main",
+    "text": "Start in main\n\nInstead, overwrite the entry point with our own _start function:\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#manglin",
+    "href": "30_metal.html#manglin",
+    "title": "Bare Metal",
+    "section": "Manglin’",
+    "text": "Manglin’\n\nBy using the #[unsafe(no_mangle)] attribute, we disable “name mangling”\n\nThe function must be named _start.\n\nOtherwise, compiler generates unique symbols like _start_imarandomstr_1234 to avoid namespace collisons.\n\nFolks… it’s key-value storage.\n\nThe attribute is required for the linker in the next step.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#c-you-again",
+    "href": "30_metal.html#c-you-again",
+    "title": "Bare Metal",
+    "section": "C you again",
+    "text": "C you again\n\nMark the function as extern \"C\" to tell the compiler that it should use the “C calling convention”\nThe reason for naming the function _start is that this is the default entry point name for most systems.",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#read-more-1",
+    "href": "30_metal.html#read-more-1",
+    "title": "Bare Metal",
+    "section": "Read more",
+    "text": "Read more\n\nname mangling\nC calling convention",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#divergence",
+    "href": "30_metal.html#divergence",
+    "title": "Bare Metal",
+    "section": "Divergence",
+    "text": "Divergence\n\nThe ! return type returns!\nThis is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.\n\nIt can’t return anywhere!",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#exit",
+    "href": "30_metal.html#exit",
+    "title": "Bare Metal",
+    "section": "Exit",
+    "text": "Exit\n\nBefore I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.\nOperating systems are similar.\nSo instead of returning, the entry point should e.g. invoke the exit system call of the operating system.\nFor now, we fulfill the requirement by looping endlessly.\nexit system call",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#now-it-works",
+    "href": "30_metal.html#now-it-works",
+    "title": "Bare Metal",
+    "section": "Now it works!",
+    "text": "Now it works!\n\nIt doesn’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rustcheyGtM/symbols.o\" \"&lt;1 object files omitted&gt;\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-L\" \"/tmp/rustcheyGtM/raw-dylibs\" \"-Wl,-Bdynamic\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':\n          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here\n          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n          (.text+0x1b): undefined reference to `main'\n          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\n\n  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified\n  = note: use the `-l` flag to specify native libraries to link\n  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error",
+    "crumbs": [
+      "Bare Metal"
+    ]
+  },
+  {
+    "objectID": "30_metal.html#to-be-continued",
+    "href": "30_metal.html#to-be-continued",
+    "title": "Bare Metal",
+    "section": "To be continued",
+    "text": "To be continued\n\nI am 99% sure we run out of time here…\nAnd will continue with the lab on linker errors!\n\n\nsrc/main.rs:13:1 | 13 | / fn panic(info: &PanicInfo) -&gt; ! { 14 | | loop {} 15 | | } | |^ | = note: the lang item is first defined in crate std (which test depends on) = note: first definition in std loaded from /home/[…]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib = note: second definition in the local crate (blog_os)\n\nThe first `note` tells us that the panic language item is already defined in the `std` crate, which is a dependency of the `test` crate.\nThe `test` crate is automatically included when building a crate in [test mode](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests).\nThis does not make sense for our `#![no_std]` kernel as there is no way to support the standard library on bare metal.\nSo this error is not relevant to our project and we can safely ignore it.\n\nThe proper way to avoid this error is to specify in our `Cargo.toml` that our binary does not support building in `test` and `bench` modes.\nWe can do that by adding a `[[bin]]` section to our `Cargo.toml` to [configure the build](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target) of our binary:\n\n```toml\n# in Cargo.toml\n\n[[bin]]\nname = \"blog_os\"\ntest = false\nbench = false\nThe double-brackets around bin are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the [[bin]] section can appear multiple times in the Cargo.toml as well. This is also the reason for the mandatory name field, which needs to match the name of the binary (so that cargo knows which settings should be applied to which binary).\nBy setting the test and bench fields to false, we instruct cargo to not build our binary in test or benchmark mode. Now cargo check --all-targets should not throw any errors anymore, and the checkOnSave implementation of rust-analyzer should be happy too.\n–&gt;",
     "crumbs": [
       "Bare Metal"
     ]
@@ -201,7 +681,7 @@
     "href": "30_metal.rjs.html#announcements",
     "title": "Bare Metal",
     "section": "Announcements",
-    "text": "Announcements\n\nWelcome to OS in Rust\n\nBare metal\nLiterally the absolute coolest\n\nAction Items:\n\nmalloc stands eternal\n\nPossibly the coolest assignment ever\nI’m glad you all love it\n\nHomework this work is more complicated but also more supported.\n\nPrioritize malloc I think."
+    "text": "Announcements\n\nAction Items:\n\nmalloc stands eternal\n\nPossibly the coolest assignment ever\nI’m glad you all love it\n\nHomework this week is more complicated but also more supported.\n\nPrioritize malloc I think."
   },
   {
     "objectID": "30_metal.rjs.html#today",
@@ -232,95 +712,431 @@
     "text": "Bare Metal\n\nA computer which has no operating system. The software executed by a bare machine, commonly called a “bare metal program” or “bare metal application”, is designed to interact directly with hardware. Bare machines are widely used in embedded systems, particularly in cases where resources are limited or high performance is required."
   },
   {
+    "objectID": "30_metal.rjs.html#some-terms",
+    "href": "30_metal.rjs.html#some-terms",
+    "title": "Bare Metal",
+    "section": "Some Terms",
+    "text": "Some Terms\n\nShould introduce a few terms.\n\nNot required for OS but useful to know.\n\nTerms\n\nSimulation\nEmulation\nCross-compilation\nQEMU"
+  },
+  {
+    "objectID": "30_metal.rjs.html#simulation",
+    "href": "30_metal.rjs.html#simulation",
+    "title": "Bare Metal",
+    "section": "Simulation",
+    "text": "Simulation\n\nModels a system’s behavior\nFocuses on high-level results, not internal logic\n“Close enough” for performance or logic testing\nSimulating hardware components in software\nFaster but less precise"
+  },
+  {
+    "objectID": "30_metal.rjs.html#emulation",
+    "href": "30_metal.rjs.html#emulation",
+    "title": "Bare Metal",
+    "section": "Emulation",
+    "text": "Emulation\n\nReplicating exact internal behavior of hardware\nSoftware acting as hardware (CPU, registers, memory)\nAccuracy vs. Speed:\n\nMuch slower than simulation… unless?\nGoal: Guest software doesn’t know it’s not on actual silicon"
+  },
+  {
+    "objectID": "30_metal.rjs.html#example",
+    "href": "30_metal.rjs.html#example",
+    "title": "Bare Metal",
+    "section": "Example",
+    "text": "Example\n\nx86-64 - the Intel/AMD architecture common for Linux and Windows - supports a “long double” float with 80 bits of precision.\nARM64 - a competing formulation most popularized as “Apple silicon” with the M1 - lacks long doubles."
+  },
+  {
+    "objectID": "30_metal.rjs.html#context",
+    "href": "30_metal.rjs.html#context",
+    "title": "Bare Metal",
+    "section": "Context",
+    "text": "Context\n\nIt is trivial to implement a float in software…\n\nf16\n\nIt is relatively not-trivial to implement an architecture in software, though possible.\n\nHere’s the smallest example I know:\nPicoRV32"
+  },
+  {
+    "objectID": "30_metal.rjs.html#cross-compiling",
+    "href": "30_metal.rjs.html#cross-compiling",
+    "title": "Bare Metal",
+    "section": "Cross-Compiling",
+    "text": "Cross-Compiling\n\nExample:” compiling code on an x86 laptop for an ARM chip\n\nCommon in embedded applications (e.g. program a thermostat)\n\nCompiler runs on Host A, produces binary for Target B\n\nEssential for “bare metal” development\nTransmit the binary over wires (the bus!) to another device’s memory."
+  },
+  {
+    "objectID": "30_metal.rjs.html#considerations",
+    "href": "30_metal.rjs.html#considerations",
+    "title": "Bare Metal",
+    "section": "Considerations",
+    "text": "Considerations\n\nWe must:\n\nTarget a specific architecture\nLink against specific hardware memory maps\n\nSomehow you also need the actual hardware, unless…"
+  },
+  {
+    "objectID": "30_metal.rjs.html#qemu",
+    "href": "30_metal.rjs.html#qemu",
+    "title": "Bare Metal",
+    "section": "QEMU",
+    "text": "QEMU\n\nI used this a lot in grad school; less now.\n\nSupports both emulation and virtualization\n\nVirtualization emulates a device rather than a binary.\nUsed in cloud; can be fast; huge research area.\n\n\nLet’s us run bare metal binaries without physical chips (which would cost $)\nWrite locally \\(\\rightarrow\\) Cross-compile \\(\\rightarrow\\) Run in QEMU"
+  },
+  {
     "objectID": "30_metal.rjs.html#first-steps",
     "href": "30_metal.rjs.html#first-steps",
     "title": "Bare Metal",
     "section": "First Steps",
-    "text": "First Steps\nThe first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library. This makes it possible to run Rust code on the bare metal without an underlying operating system."
+    "text": "First Steps\n\nThe first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library.\nThis makes it possible to run Rust code on the “bare metal” without an underlying operating system."
   },
   {
     "objectID": "30_metal.rjs.html#introduction",
     "href": "30_metal.rjs.html#introduction",
     "title": "Bare Metal",
     "section": "Introduction",
-    "text": "Introduction\nTo write an operating system kernel, we need code that does not depend on any operating system features. This means that we can’t use threads, files, heap memory, the network, random numbers, standard output, or any other features requiring OS abstractions or specific hardware. Which makes sense, since we’re trying to write our own OS and our own drivers."
+    "text": "Introduction\n\nTo write an operating system kernel, we need code that does not depend on any operating system features.\nThis means that we can’t use files, the heap, networks, random numbers, standard output, etc.\nWe’re trying to write our own OS!"
   },
   {
     "objectID": "30_metal.rjs.html#on-std",
     "href": "30_metal.rjs.html#on-std",
     "title": "Bare Metal",
     "section": "On std",
-    "text": "On std\nThis means that we can’t use most of the Rust standard library, but there are a lot of Rust features that we can use. For example, we can use iterators, closures, pattern matching, option and result, string formatting, and of course the ownership system. These features make it possible to write a kernel in a very expressive, high level way without worrying about undefined behavior or memory safety."
+    "text": "On std\n\nWe can’t use most of the Rust standard library, but…\n…there are a lot of Rust features that we can use.\nFor example, we can use iterators, closures, pattern matching, option and result\n\nRecall the official Calvin Deutschbein position on option and result:\n“It’s why Rust is good.” - me"
+  },
+  {
+    "objectID": "30_metal.rjs.html#on-std-1",
+    "href": "30_metal.rjs.html#on-std-1",
+    "title": "Bare Metal",
+    "section": "On std",
+    "text": "On std\n\nWhile not initially helpful, we can use string formatting, and…\n… the ownership system.\n\nBeats malloc!"
+  },
+  {
+    "objectID": "30_metal.rjs.html#quoth-the-blog",
+    "href": "30_metal.rjs.html#quoth-the-blog",
+    "title": "Bare Metal",
+    "section": "Quoth The Blog",
+    "text": "Quoth The Blog\n\nThese features make it possible to write a kernel in a very expressive, high level way without worrying about undefined behavior or memory safety.\n\n\nWell, we’ll see."
   },
   {
     "objectID": "30_metal.rjs.html#we-keep",
     "href": "30_metal.rjs.html#we-keep",
     "title": "Bare Metal",
-    "section": "We keep:",
-    "text": "We keep:"
+    "section": "We keep",
+    "text": "We keep\n\noption\nresult\nRust standard library\niterators\nclosures\npattern matching\nstring formatting\nownership system\nundefined behavior\nmemory safety"
   },
   {
-    "objectID": "30_metal.rjs.html#section",
-    "href": "30_metal.rjs.html#section",
+    "objectID": "30_metal.rjs.html#onward",
+    "href": "30_metal.rjs.html#onward",
     "title": "Bare Metal",
-    "section": "",
-    "text": "In order to create an OS kernel in Rust, we need to create an executable that can be run without an underlying operating system. Such an executable is often called a “freestanding” or “bare-metal” executable."
+    "section": "Onward!",
+    "text": "Onward!\n\nWe now enumerate the necessary steps to create a freestanding Rust binary…\n…and explains why the steps are needed."
   },
   {
-    "objectID": "30_metal.rjs.html#section-1",
-    "href": "30_metal.rjs.html#section-1",
+    "objectID": "30_metal.rjs.html#no_std",
+    "href": "30_metal.rjs.html#no_std",
     "title": "Bare Metal",
-    "section": "",
-    "text": "This post describes the necessary steps to create a freestanding Rust binary and explains why the steps are needed. If you’re just interested in a minimal example, you can jump to the summary."
+    "section": "no_std",
+    "text": "no_std\n\nBy default, all Rust crates link the standard library.\n\nIt depends on the operating system for features such as threads, files, or networking.\nIt also depends on the C standard library libc, which closely interacts with OS services.\n\nThat is, part of GNU but not part of Linux."
   },
   {
-    "objectID": "30_metal.rjs.html#disabling-the-standard-library",
-    "href": "30_metal.rjs.html#disabling-the-standard-library",
+    "objectID": "30_metal.rjs.html#no_std-1",
+    "href": "30_metal.rjs.html#no_std-1",
     "title": "Bare Metal",
-    "section": "Disabling the Standard Library",
-    "text": "Disabling the Standard Library\nBy default, all Rust crates link the standard library, which depends on the operating system for features such as threads, files, or networking. It also depends on the C standard library libc, which closely interacts with OS services. Since our plan is to write an operating system, we can’t use any OS-dependent libraries. So we have to disable the automatic inclusion of the standard library through the no_std attribute.\nWe start by creating a new cargo application project. The easiest way to do this is through the command line:\ncargo new blog_os --bin --edition 2024\nI named the project blog_os, but of course you can choose your own name. The --bin flag specifies that we want to create an executable binary (in contrast to a library) and the --edition 2024 flag specifies that we want to use the 2024 edition of Rust for our crate. When we run the command, cargo creates the following directory structure for us:\nblog_os\n├── Cargo.toml\n└── src\n    └── main.rs\nThe Cargo.toml contains the crate configuration, for example the crate name, the author, the semantic version number, and dependencies. The src/main.rs file contains the root module of our crate and our main function. You can compile your crate through cargo build and then run the compiled blog_os binary in the target/debug subfolder.\nThe no_std Attribute\nRight now our crate implicitly links the standard library. Let’s try to disable this by adding the no_std attribute:\n// main.rs\n\n#![no_std]\n\nfn main() {\n    println!(\"Hello, world!\");\n}\nWhen we try to build it now (by running cargo build), the following error occurs:\nerror: cannot find macro `println!` in this scope\n --&gt; src/main.rs:4:5\n  |\n4 |     println!(\"Hello, world!\");\n  |     ^^^^^^^\nThe reason for this error is that the println macro is part of the standard library, which we no longer include. So we can no longer print things. This makes sense, since println writes to standard output, which is a special file descriptor provided by the operating system.\nSo let’s remove the printing and try again with an empty main function:\n// main.rs\n\n#![no_std]\n\nfn main() {}\n&gt; cargo build\nerror: `#[panic_handler]` function required, but not found\nerror: language item required, but not found: `eh_personality`\nNow the compiler is missing a #[panic_handler] function and a language item."
+    "section": "no_std",
+    "text": "no_std\n\nSince our plan is to write an operating system, we can’t use any OS-dependent libraries.\n\nThat would be recursive, which is only good sometimes!\n\nSo we have to disable the automatic inclusion of the standard library through the no_std attribute.\n\nstandard library\nno_std attribute"
   },
   {
-    "objectID": "30_metal.rjs.html#panic-implementation",
-    "href": "30_metal.rjs.html#panic-implementation",
+    "objectID": "30_metal.rjs.html#to-begin",
+    "href": "30_metal.rjs.html#to-begin",
     "title": "Bare Metal",
-    "section": "Panic Implementation",
-    "text": "Panic Implementation\nThe panic_handler attribute defines the function that the compiler should invoke when a panic occurs. The standard library provides its own panic handler function, but in a no_std environment we need to define it ourselves:\n// in main.rs\n\nuse core::panic::PanicInfo;\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &PanicInfo) -&gt; ! {\n    loop {}\n}\nThe PanicInfo parameter contains the file and line where the panic happened and the optional panic message. The function should never return, so it is marked as a diverging function by returning the “never” type !. There is not much we can do in this function for now, so we just loop indefinitely."
+    "section": "To begin",
+    "text": "To begin\n\nWe can start creation the same way we make anything else in Rust…\nCargo (sighs heavily)\nWe will introduce only two wrinkles.\n\n--bin: we want to create an executable binary (in contrast to a library)\n--edition 2024: to maintain consistency across years and with the working example."
   },
   {
-    "objectID": "30_metal.rjs.html#the-eh_personality-language-item",
-    "href": "30_metal.rjs.html#the-eh_personality-language-item",
+    "objectID": "30_metal.rjs.html#invoke-as",
+    "href": "30_metal.rjs.html#invoke-as",
     "title": "Bare Metal",
-    "section": "The eh_personality Language Item",
-    "text": "The eh_personality Language Item\nLanguage items are special functions and types that are required internally by the compiler. For example, the Copy trait is a language item that tells the compiler which types have copy semantics. When we look at the implementation, we see it has the special #[lang = \"copy\"] attribute that defines it as a language item.\nWhile providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn’t even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.\nThe eh_personality language item marks a function that is used for implementing stack unwinding. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a panic. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g. libunwind on Linux or structured exception handling on Windows), so we don’t want to use it for our operating system.\nDisabling Unwinding\nThere are other use cases as well for which unwinding is undesirable, so Rust provides an option to abort on panic instead. This disables the generation of unwinding symbol information and thus considerably reduces binary size. There are multiple places where we can disable unwinding. The easiest way is to add the following lines to our Cargo.toml:\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\"\nThis sets the panic strategy to abort for both the dev profile (used for cargo build) and the release profile (used for cargo build --release). Now the eh_personality language item should no longer be required.\nNow we fixed both of the above errors. However, if we try to compile it now, another error occurs:\n&gt; cargo build\nerror: requires `start` lang_item\nOur program is missing the start language item, which defines the entry point."
+    "section": "Invoke as",
+    "text": "Invoke as\ncargo new ???? --bin --edition 2024"
+  },
+  {
+    "objectID": "30_metal.rjs.html#example-1",
+    "href": "30_metal.rjs.html#example-1",
+    "title": "Bare Metal",
+    "section": "Example",
+    "text": "Example\n\nPersonally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (32,42 etc.)\n\ncargo new 32 --name osirs --vcs none --bin --edition 2024"
+  },
+  {
+    "objectID": "30_metal.rjs.html#branches",
+    "href": "30_metal.rjs.html#branches",
+    "title": "Bare Metal",
+    "section": "Branches",
+    "text": "Branches\n\nA competing formulation would be to use git branch to create different developmental branches.\nThis is the industry standard and I wanted to introduce it but felt a time crunch.\nIf you are looking for something to do, figure it out.\n\nDon’t worry about me finding things; its worth it to me for you to learn."
+  },
+  {
+    "objectID": "30_metal.rjs.html#name",
+    "href": "30_metal.rjs.html#name",
+    "title": "Bare Metal",
+    "section": "Name",
+    "text": "Name\n\n\n\nYou don’t have to name your OS anything in particular, I just thought osirs (OS in Rust) sounded heckin’ rad.\nʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\nAlso a cringe AI real estate firm!"
+  },
+  {
+    "objectID": "30_metal.rjs.html#refresh",
+    "href": "30_metal.rjs.html#refresh",
+    "title": "Bare Metal",
+    "section": "Refresh",
+    "text": "Refresh\n\nWhen we run the command, cargo creates the following directory structure for us:\n\n$ tree\n.\n├── Cargo.toml\n└── src\n    └── main.rs\n\n1 directory, 2 files"
+  },
+  {
+    "objectID": "30_metal.rjs.html#recall",
+    "href": "30_metal.rjs.html#recall",
+    "title": "Bare Metal",
+    "section": "Recall",
+    "text": "Recall\n\nCargo.toml contains the crate configuration\n\nCrate name\nCrate author\nCrate version\n\nsrc/main.rs file contains our main function.\nAfter cargo build, find the compiled osirs binary in the target/debug subfolder."
+  },
+  {
+    "objectID": "30_metal.rjs.html#blah-blah-blah",
+    "href": "30_metal.rjs.html#blah-blah-blah",
+    "title": "Bare Metal",
+    "section": "Blah blah blah",
+    "text": "Blah blah blah\n\u0016$ cargo build ; tree\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.54s\n.\n├── Cargo.lock\n├── Cargo.toml\n├── src\n│   └── main.rs\n└── target\n    ├── CACHEDIR.TAG\n    └── debug\n        ├── build\n        ├── deps\n        │   ├── osirs-43412975b38d059d\n        │   └── osirs-43412975b38d059d.d\n        ├── examples\n        ├── incremental\n        │   └── osirs-3gae52yq1943v\n        │       ├── s-hfeunnoewq-0c8luu5-5dmhke08rl6h5l09ku3va3gkx\n        │       │   ├── 1tq3ts5gahvv7j1hzrmfdrzi6.o\n        │       │   ├── 6zk3flo890c0qhh6fykb6746g.o\n        │       │   ├── 8z45o15v3gxm5hydv3o63x07l.o\n        │       │   ├── 9itjtn00r7d8c6mknmav20oex.o\n        │       │   ├── bh9pj42wzikjd1ilqutnjbrx7.o\n        │       │   ├── dep-graph.bin\n        │       │   ├── eymyqxruzdb24suchgzd8ygxb.o\n        │       │   ├── query-cache.bin\n        │       │   └── work-products.bin\n        │       └── s-hfeunnoewq-0c8luu5.lock\n        ├── osirs\n        └── osirs.d\n\n9 directories, 18 files"
+  },
+  {
+    "objectID": "30_metal.rjs.html#running",
+    "href": "30_metal.rjs.html#running",
+    "title": "Bare Metal",
+    "section": "Running",
+    "text": "Running\n\nTechnically no one can stop you from using cargo run or even cargo run --release\nBut you can also just build and then directly run the executable.\n\n\u0016\u0016$ ./target/debug/osirs\nHello, world!"
+  },
+  {
+    "objectID": "30_metal.rjs.html#the-no_std-attribute",
+    "href": "30_metal.rjs.html#the-no_std-attribute",
+    "title": "Bare Metal",
+    "section": "The no_std Attribute",
+    "text": "The no_std Attribute\n\nInitially, the crate implicitly links the standard library.\nWe can prepend the no_std attribute to src/main.rs to get the version of Rust that builds character!\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n\nfn main() {\n    println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n}"
+  },
+  {
+    "objectID": "30_metal.rjs.html#we-can-rebuild",
+    "href": "30_metal.rjs.html#we-can-rebuild",
+    "title": "Bare Metal",
+    "section": "We Can Rebuild",
+    "text": "We Can Rebuild\n\nActually we can’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: cannot find macro `println` in this scope\n --&gt; src/main.rs:6:5\n  |\n6 |     println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n  |     ^^^^^^^\n\nerror: `#[panic_handler]` function required, but not found\n\nerror: unwinding panics are not supported without std\n  |\n  = help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n  = note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nerror: could not compile `osirs` (bin \"osirs\") due to 3 previous errors    ^^^^^^^"
+  },
+  {
+    "objectID": "30_metal.rjs.html#enhance",
+    "href": "30_metal.rjs.html#enhance",
+    "title": "Bare Metal",
+    "section": "Enhance!",
+    "text": "Enhance!\nerror: cannot find macro `println` in this scope\n --&gt; src/main.rs:6:5\n  |\n6 |     println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n  |     ^^^^^^^\n\nOh right, we can’t print without an OS."
+  },
+  {
+    "objectID": "30_metal.rjs.html#background",
+    "href": "30_metal.rjs.html#background",
+    "title": "Bare Metal",
+    "section": "Background",
+    "text": "Background\n\nThe println macro is part of the standard library std.\nWe said no_std.\nSo we can no longer print things.\nI hope it is clear how this is character-building!\nRead more:\n\nprintln macro\nstandard output"
+  },
+  {
+    "objectID": "30_metal.rjs.html#rip-it",
+    "href": "30_metal.rjs.html#rip-it",
+    "title": "Bare Metal",
+    "section": "Rip it",
+    "text": "Rip it\n\nRemove the printing and try again:\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n\nfn main() {\n    // println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n}"
+  },
+  {
+    "objectID": "30_metal.rjs.html#problems-remain",
+    "href": "30_metal.rjs.html#problems-remain",
+    "title": "Bare Metal",
+    "section": "Problems remain",
+    "text": "Problems remain\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: `#[panic_handler]` function required, but not found\n\nerror: unwinding panics are not supported without std\n  |\n  = help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n  = note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nerror: could not compile `osirs` (bin \"osirs\") due to 2 previous errors"
+  },
+  {
+    "objectID": "30_metal.rjs.html#enhance-1",
+    "href": "30_metal.rjs.html#enhance-1",
+    "title": "Bare Metal",
+    "section": "Enhance!",
+    "text": "Enhance!\nerror: cannot find macro `println` in this scope\n --&gt; src/main.rs:6:5\n  |\n6 |     println!(\"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ\");\n  |     ^^^^^^^\n\nSometimes, Rust explodes and calls the OS (written in C!) for help.\nIt can’t do that without std and is sad 😭"
+  },
+  {
+    "objectID": "30_metal.rjs.html#panic",
+    "href": "30_metal.rjs.html#panic",
+    "title": "Bare Metal",
+    "section": "Panic",
+    "text": "Panic\n\nThe panic_handler attribute defines the function that the compiler should invoke when a panic occurs.\nstd provides its own panic handler function, but in a no_std environment we need to define it ourselves:\npanic"
+  },
+  {
+    "objectID": "30_metal.rjs.html#our-approach",
+    "href": "30_metal.rjs.html#our-approach",
+    "title": "Bare Metal",
+    "section": "Our Approach",
+    "text": "Our Approach\n\n\nsrc/main.rs\n\n// main.rs\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}"
+  },
+  {
+    "objectID": "30_metal.rjs.html#panics",
+    "href": "30_metal.rjs.html#panics",
+    "title": "Bare Metal",
+    "section": "Panics",
+    "text": "Panics\n\nThe PanicInfo parameter contains:\n\nfile and line where the panic happened\npanic message (e.g. panic!(\"YOLO\")\n\nThe function should never return.\n\nSo it is marked as a “diverging function”\nIt returns the “never” type !.\n\nNot much we can do in this function for now, so just loop() to prevent a return."
+  },
+  {
+    "objectID": "30_metal.rjs.html#read-more",
+    "href": "30_metal.rjs.html#read-more",
+    "title": "Bare Metal",
+    "section": "Read more…",
+    "text": "Read more…\n\nI had never heard of or used these but to me it was clear why they would have to exist in a type safe language.\n\nPanicInfo\ndiverging function\n“never” type"
+  },
+  {
+    "objectID": "30_metal.rjs.html#retry",
+    "href": "30_metal.rjs.html#retry",
+    "title": "Bare Metal",
+    "section": "Retry",
+    "text": "Retry\n\nI bet it works now!\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: unwinding panics are not supported without std\n  |\n  = help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n  = note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nThey should make a version of the OS class that is easy.\n\n(They did - this class)"
+  },
+  {
+    "objectID": "30_metal.rjs.html#panic-abort",
+    "href": "30_metal.rjs.html#panic-abort",
+    "title": "Bare Metal",
+    "section": "Panic abort",
+    "text": "Panic abort\n\n\n\nFun fact - back when I was an OS engineer slash rocket scientist my first launch was “PA-1” for “Pad Abort 1”\n\nBlew up a rocket on the launch pad to make sure it was safe for humans."
+  },
+  {
+    "objectID": "30_metal.rjs.html#panic-abort-1",
+    "href": "30_metal.rjs.html#panic-abort-1",
+    "title": "Bare Metal",
+    "section": "Panic abort",
+    "text": "Panic abort\n\nThe use of the term “abort” which in some nation-states is a hot-button political issue has come up from time-to-time in the discourse.\nRead more from 2018\n\n\n25.7.4 Aborting a Program\n\n...\n\nFuture Change Warning: Proposed Federal censorship regulations may prohibit us from giving you information about the possibility of calling this function. We would be required to say that this is not an acceptable way of terminating a program."
+  },
+  {
+    "objectID": "30_metal.rjs.html#quoth-stallman",
+    "href": "30_metal.rjs.html#quoth-stallman",
+    "title": "Bare Metal",
+    "section": "Quoth Stallman",
+    "text": "Quoth Stallman\n\n“The point of this joke is even more important now than it was when I first wrote it,” [Free Software Foundation president] Stallman wrote in a note posted to project mailing list, in reference to today’s political climate. “Please do not remove it. GNU is not a purely technical project, so the fact that this is not strictly and grimly technical is not a reason to remove this.”"
+  },
+  {
+    "objectID": "30_metal.rjs.html#now-in-rust",
+    "href": "30_metal.rjs.html#now-in-rust",
+    "title": "Bare Metal",
+    "section": "Now in Rust",
+    "text": "Now in Rust\n\nWe can oppose fascism and\n\n(looks into the history of NASA and Lockheed Martin)\n(clears throat)\nMoving on!\n\n\nWe can abort programs… in Rust"
+  },
+  {
+    "objectID": "30_metal.rjs.html#how",
+    "href": "30_metal.rjs.html#how",
+    "title": "Bare Metal",
+    "section": "How?",
+    "text": "How?\n\nRead carefully:\n\n= help: using nightly cargo, use -Zbuild-std with panic=\"abort\" to avoid unwinding\n= note: since the core library is usually precompiled with panic=\"unwind\", rebuilding your crate with panic=\"abort\" may not be enough to fix the problem\n\nGeniuses will recognize panic=\"abort\" syntax"
+  },
+  {
+    "objectID": "30_metal.rjs.html#toml",
+    "href": "30_metal.rjs.html#toml",
+    "title": "Bare Metal",
+    "section": "TOML",
+    "text": "TOML\n\nIt’s .toml\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]"
+  },
+  {
+    "objectID": "30_metal.rjs.html#crate-options",
+    "href": "30_metal.rjs.html#crate-options",
+    "title": "Bare Metal",
+    "section": "Crate options",
+    "text": "Crate options\n\nNominally there are use cases for which unwinding is undesirable\n\nMy take: All cases.\n\nSo Rust provides an option to “abort on panic” instead.\nThis disables the generation of unwinding symbol information and thus considerably reduces binary size.\n\nThis seems obviously good to me."
+  },
+  {
+    "objectID": "30_metal.rjs.html#update-cargo.toml",
+    "href": "30_metal.rjs.html#update-cargo.toml",
+    "title": "Bare Metal",
+    "section": "Update Cargo.toml",
+    "text": "Update Cargo.toml\n\nAdd the following:\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\""
+  },
+  {
+    "objectID": "30_metal.rjs.html#now",
+    "href": "30_metal.rjs.html#now",
+    "title": "Bare Metal",
+    "section": "Now…",
+    "text": "Now…\n\nThis sets the panic strategy to abort for both the dev profile (used for cargo build) and the release profile (used for cargo build --release).\nabort on panic\nI bet it will work now."
+  },
+  {
+    "objectID": "30_metal.rjs.html#whoops",
+    "href": "30_metal.rjs.html#whoops",
+    "title": "Bare Metal",
+    "section": "Whoops!",
+    "text": "Whoops!\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nOur program is missing the start language item, which defines the entry point."
   },
   {
     "objectID": "30_metal.rjs.html#the-start-attribute",
     "href": "30_metal.rjs.html#the-start-attribute",
     "title": "Bare Metal",
     "section": "The start attribute",
-    "text": "The start attribute\nOne might think that the main function is the first function called when you run a program. However, most languages have a runtime system, which is responsible for things such as garbage collection (e.g. in Java) or software threads (e.g. goroutines in Go). This runtime needs to be called before main, since it needs to initialize itself.\nIn a typical Rust binary that links the standard library, execution starts in a C runtime library called crt0 (“C runtime zero”), which sets up the environment for a C application. This includes creating a stack and placing the arguments in the right registers. The C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item. Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic. The runtime then finally calls the main function.\nOur freestanding executable does not have access to the Rust runtime and crt0, so we need to define our own entry point. Implementing the start language item wouldn’t help, since it would still require crt0. Instead, we need to overwrite the crt0 entry point directly.\nOverwriting the Entry Point\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n#![no_std]\n#![no_main]\n\nuse core::panic::PanicInfo;\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &PanicInfo) -&gt; ! {\n    loop {}\n}\nYou might notice that we removed the main function. The reason is that a main doesn’t make sense without an underlying runtime that calls it. Instead, we are now overwriting the operating system entry point with our own _start function:\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}\nBy using the #[unsafe(no_mangle)] attribute, we disable name mangling to ensure that the Rust compiler really outputs a function with the name _start. Without the attribute, the compiler would generate some cryptic _ZN3blog_os4_start7hb173fedf945531caE symbol to give every function a unique name. The attribute is required because we need to tell the name of the entry point function to the linker in the next step.\nWe also have to mark the function as extern \"C\" to tell the compiler that it should use the C calling convention for this function (instead of the unspecified Rust calling convention). The reason for naming the function _start is that this is the default entry point name for most systems.\nThe ! return type means that the function is diverging, i.e. not allowed to ever return. This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader. So instead of returning, the entry point should e.g. invoke the exit system call of the operating system. In our case, shutting down the machine could be a reasonable action, since there’s nothing left to do if a freestanding binary returns. For now, we fulfill the requirement by looping endlessly.\nWhen we run cargo build now, we get an ugly linker error."
+    "text": "The start attribute\n\nOne might think that the main function is the first function called when you run a program.\nHowever, most languages have a “runtime system”\n\nFor e.g. Java garbage collection (e.g. in Java)\nFor e.g. Go software threads (goroutines)\n\nThis runtime needs to be called before main, since it needs to initialize itself."
   },
   {
-    "objectID": "30_metal.rjs.html#linker-errors",
-    "href": "30_metal.rjs.html#linker-errors",
+    "objectID": "30_metal.rjs.html#c-again",
+    "href": "30_metal.rjs.html#c-again",
     "title": "Bare Metal",
-    "section": "Linker Errors",
-    "text": "Linker Errors\nThe linker is a program that combines the generated code into an executable. Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.\nTo solve the errors, we need to tell the linker that it should not include the C runtime. We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.\nBuilding for a Bare Metal Target\nBy default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on x86_64, Rust tries to build an .exe Windows executable that uses x86_64 instructions. This environment is called your “host” system.\nTo describe different environments, Rust uses a string called target triple. You can see the target triple for your host system by running rustc --version --verbose:\nrustc 1.35.0-nightly (474e7a648 2019-04-07)\nbinary: rustc\ncommit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab\ncommit-date: 2019-04-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.35.0-nightly\nLLVM version: 8.0\nThe above output is from a x86_64 Linux system. We see that the host triple is x86_64-unknown-linux-gnu, which includes the CPU architecture (x86_64), the vendor (unknown), the operating system (linux), and the ABI (gnu).\nBy compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.\nAn example of such a bare metal environment is the thumbv7em-none-eabihf target triple, which describes an embedded ARM system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the none in the target triple. To be able to compile for this target, we need to add it in rustup:\nrustup target add thumbv7em-none-eabihf\nThis downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:\ncargo build --target thumbv7em-none-eabihf\nBy passing a --target argument we cross compile our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.\nThis is the approach that we will use for building our OS kernel. Instead of thumbv7em-none-eabihf, we will use a custom target that describes a x86_64 bare metal environment. The details will be explained in the next post.\nLinker Arguments\nInstead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This isn’t the approach that we will use for our kernel, therefore this section is optional and only provided for completeness. Click on “Linker Arguments” below to show the optional content.\n\n\nLinker Arguments\n\nIn this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.\nLinux\nOn Linux the following linker error occurs (shortened):\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x12): undefined reference to `__libc_csu_fini'\n          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x19): undefined reference to `__libc_csu_init'\n          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x25): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\nThe problem is that the linker includes the startup routine of the C runtime by default, which is also called _start. It requires some symbols of the C standard library libc that we don’t include due to the no_std attribute, therefore the linker can’t resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the -nostartfiles flag.\nOne way to pass linker attributes via cargo is the cargo rustc command. The command behaves exactly like cargo build, but allows to pass options to rustc, the underlying Rust compiler. rustc has the -C link-arg flag, which passes an argument to the linker. Combined, our new build command looks like this:\ncargo rustc -- -C link-arg=-nostartfiles\nNow our crate builds as a freestanding executable on Linux!\nWe didn’t need to specify the name of our entry point function explicitly since the linker looks for a function with the name _start by default.\nWindows\nOn Windows, a different linker error occurs (shortened):\nerror: linking with `link.exe` failed: exit code: 1561\n  |\n  = note: \"C:\\\\Program Files (x86)\\\\…\\\\link.exe\" […]\n  = note: LINK : fatal error LNK1561: entry point must be defined\nThe “entry point must be defined” error means that the linker can’t find the entry point. On Windows, the default entry point name depends on the used subsystem. For the CONSOLE subsystem, the linker looks for a function named mainCRTStartup and for the WINDOWS subsystem, it looks for a function named WinMainCRTStartup. To override the default and tell the linker to look for our _start function instead, we can pass an /ENTRY argument to the linker:\ncargo rustc -- -C link-arg=/ENTRY:_start\nFrom the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.\nNow a different linker error occurs:\nerror: linking with `link.exe` failed: exit code: 1221\n  |\n  = note: \"C:\\\\Program Files (x86)\\\\…\\\\link.exe\" […]\n  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be\n          defined\nThis error occurs because Windows executables can use different subsystems. For normal programs, they are inferred depending on the entry point name: If the entry point is named main, the CONSOLE subsystem is used, and if the entry point is named WinMain, the WINDOWS subsystem is used. Since our _start function has a different name, we need to specify the subsystem explicitly:\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\nWe use the CONSOLE subsystem here, but the WINDOWS subsystem would work too. Instead of passing -C link-arg multiple times, we use -C link-args which takes a space separated list of arguments.\nWith this command, our executable should build successfully on Windows.\nmacOS\nOn macOS, the following linker error occurs (shortened):\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: entry point (_main) undefined. for architecture x86_64\n          clang: error: linker command failed with exit code 1 […]\nThis error message tells us that the linker can’t find an entry point function with the default name main (for some reason, all functions are prefixed with a _ on macOS). To set the entry point to our _start function, we pass the -e linker argument:\ncargo rustc -- -C link-args=\"-e __start\"\nThe -e flag specifies the name of the entry point function. Since all functions have an additional _ prefix on macOS, we need to set the entry point to __start instead of _start.\nNow the following linker error occurs:\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: dynamic main executables must link with libSystem.dylib\n          for architecture x86_64\n          clang: error: linker command failed with exit code 1 […]\nmacOS does not officially support statically linked binaries and requires programs to link the libSystem library by default. To override this and link a static binary, we pass the -static flag to the linker:\ncargo rustc -- -C link-args=\"-e __start -static\"\nThis still does not suffice, as a third linker error occurs:\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: library not found for -lcrt0.o\n          clang: error: linker command failed with exit code 1 […]\nThis error occurs because programs on macOS link to crt0 (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the -nostartfiles linker argument:\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNow our program should build successfully on macOS.\nUnifying the Build Commands\nRight now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named .cargo/config.toml that contains the platform-specific arguments:\n# in .cargo/config.toml\n\n[target.'cfg(target_os = \"linux\")']\nrustflags = [\"-C\", \"link-arg=-nostartfiles\"]\n\n[target.'cfg(target_os = \"windows\")']\nrustflags = [\"-C\", \"link-args=/ENTRY:_start /SUBSYSTEM:console\"]\n\n[target.'cfg(target_os = \"macos\")']\nrustflags = [\"-C\", \"link-args=-e __start -static -nostartfiles\"]\nThe rustflags key contains arguments that are automatically added to every invocation of rustc. For more information on the .cargo/config.toml file, check out the official documentation.\nNow our program should be buildable on all three platforms with a simple cargo build.\nShould You Do This?\nWhile it’s possible to build a freestanding executable for Linux, Windows, and macOS, it’s probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the _start function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.\nIf you want to create a minimal binary that runs on top of an existing operating system, including libc and setting the #[start] attribute as described here is probably a better idea."
+    "section": "C, again",
+    "text": "C, again\n\nIn a typical Rust binary that links the standard library, execution starts in a C runtime library\n\ncrt0 for “C runtime zero”\n\nThis creates a stack and places the arguments in the right hardware registers.\nThe C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item."
   },
   {
-    "objectID": "30_metal.rjs.html#summary",
-    "href": "30_metal.rjs.html#summary",
+    "objectID": "30_metal.rjs.html#back-to-rust",
+    "href": "30_metal.rjs.html#back-to-rust",
     "title": "Bare Metal",
-    "section": "Summary",
-    "text": "Summary\nA minimal freestanding Rust binary looks like this:\nsrc/main.rs:\n#![no_std] // don't link the Rust standard library\n#![no_main] // disable all Rust-level entry points\n\nuse core::panic::PanicInfo;\n\n#[unsafe(no_mangle)] // don't mangle the name of this function\npub extern \"C\" fn _start() -&gt; ! {\n    // this function is the entry point, since the linker looks for a function\n    // named `_start` by default\n    loop {}\n}\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &PanicInfo) -&gt; ! {\n    loop {}\n}\nCargo.toml:\n[package]\nname = \"crate_name\"\nversion = \"0.1.0\"\nauthors = [\"Author Name &lt;author@example.com&gt;\"]\n\n# the profile used for `cargo build`\n[profile.dev]\npanic = \"abort\" # disable stack unwinding on panic\n\n# the profile used for `cargo build --release`\n[profile.release]\npanic = \"abort\" # disable stack unwinding on panic\nTo build this binary, we need to compile for a bare metal target such as thumbv7em-none-eabihf:\ncargo build --target thumbv7em-none-eabihf\nAlternatively, we can compile it for the host system by passing additional linker arguments:\n# Linux\ncargo rustc -- -C link-arg=-nostartfiles\n# Windows\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\n# macOS\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNote that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the _start function is called. So for any real use of such a binary, more steps are required."
+    "section": "Back to Rust",
+    "text": "Back to Rust\n\nRust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.\nThe runtime then finally calls the main function."
   },
   {
-    "objectID": "30_metal.rjs.html#making-rust-analyzer-happy",
-    "href": "30_metal.rjs.html#making-rust-analyzer-happy",
+    "objectID": "30_metal.rjs.html#crt0-is-cheating",
+    "href": "30_metal.rjs.html#crt0-is-cheating",
     "title": "Bare Metal",
-    "section": "Making rust-analyzer happy",
-    "text": "Making rust-analyzer happy\nThe rust-analyzer project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for #![no_std] projects too, so I recommend using it for kernel development!\nIf you’re using the checkOnSave feature of rust-analyzer (enabled by default), it might report an error for the panic function of our kernel:\nfound duplicate lang item `panic_impl`\nThe reason for this error is that rust-analyzer invokes cargo check --all-targets by default, which also tries to build the binary in test and benchmark mode.\n\nThe two meanings of “target”\nThe --all-targets flag is completely unrelated to the --target argument. There are two different meanings of the term “target” in cargo:\n\nThe --target flag specifies the compilation target that should be passed to the rustc compiler. This should be set to the target triple of the machine that should run our code.\nThe --all-targets flag references the package target of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for examples, tests, and benchmarks. These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.\n\n\nBy default, cargo check only builds the library and binary package targets. However, rust-analyzer chooses to check all package targets by default when checkOnSave is enabled. This is the reason that rust-analyzer reports the above lang item error that we don’t see in cargo check. If we run cargo check --all-targets, we see the error too:\nerror[E0152]: found duplicate lang item `panic_impl`\n  --&gt; src/main.rs:13:1\n   |\n13 | / fn panic(_info: &PanicInfo) -&gt; ! {\n14 | |     loop {}\n15 | | }\n   | |_^\n   |\n   = note: the lang item is first defined in crate `std` (which `test` depends on)\n   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib\n   = note: second definition in the local crate (`blog_os`)\nThe first note tells us that the panic language item is already defined in the std crate, which is a dependency of the test crate. The test crate is automatically included when building a crate in test mode. This does not make sense for our #![no_std] kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.\nThe proper way to avoid this error is to specify in our Cargo.toml that our binary does not support building in test and bench modes. We can do that by adding a [[bin]] section to our Cargo.toml to configure the build of our binary:\n# in Cargo.toml\n\n[[bin]]\nname = \"blog_os\"\ntest = false\nbench = false\nThe double-brackets around bin are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the [[bin]] section can appear multiple times in the Cargo.toml as well. This is also the reason for the mandatory name field, which needs to match the name of the binary (so that cargo knows which settings should be applied to which binary).\nBy setting the test and bench fields to false, we instruct cargo to not build our binary in test or benchmark mode. Now cargo check --all-targets should not throw any errors anymore, and the checkOnSave implementation of rust-analyzer should be happy too."
+    "section": "crt0 is cheating",
+    "text": "crt0 is cheating\n\nOur freestanding executable does not have access to the Rust runtime and crt0\nWe need to define our own entry point. = Implementing the start language item wouldn’t help, since it would still require crt0.\nInstead, we need to overwrite the crt0 entry point directly.\n\nOverwriting\n\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n#![no_main]\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}"
+  },
+  {
+    "objectID": "30_metal.rjs.html#no-main-in-main",
+    "href": "30_metal.rjs.html#no-main-in-main",
+    "title": "Bare Metal",
+    "section": "No main in main",
+    "text": "No main in main\n\nAt this point we can also remove the main function.\nAbsent a compatible runtime, main is meaningless!\nIf you cargo build at this point, by the way, you will get some fun errors."
+  },
+  {
+    "objectID": "30_metal.rjs.html#start-in-main",
+    "href": "30_metal.rjs.html#start-in-main",
+    "title": "Bare Metal",
+    "section": "Start in main",
+    "text": "Start in main\n\nInstead, overwrite the entry point with our own _start function:\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}"
+  },
+  {
+    "objectID": "30_metal.rjs.html#manglin",
+    "href": "30_metal.rjs.html#manglin",
+    "title": "Bare Metal",
+    "section": "Manglin’",
+    "text": "Manglin’\n\nBy using the #[unsafe(no_mangle)] attribute, we disable “name mangling”\n\nThe function must be named _start.\n\nOtherwise, compiler generates unique symbols like _start_imarandomstr_1234 to avoid namespace collisons.\n\nFolks… it’s key-value storage.\n\nThe attribute is required for the linker in the next step."
+  },
+  {
+    "objectID": "30_metal.rjs.html#c-you-again",
+    "href": "30_metal.rjs.html#c-you-again",
+    "title": "Bare Metal",
+    "section": "C you again",
+    "text": "C you again\n\nMark the function as extern \"C\" to tell the compiler that it should use the “C calling convention”\nThe reason for naming the function _start is that this is the default entry point name for most systems."
+  },
+  {
+    "objectID": "30_metal.rjs.html#read-more-1",
+    "href": "30_metal.rjs.html#read-more-1",
+    "title": "Bare Metal",
+    "section": "Read more",
+    "text": "Read more\n\nname mangling\nC calling convention"
+  },
+  {
+    "objectID": "30_metal.rjs.html#divergence",
+    "href": "30_metal.rjs.html#divergence",
+    "title": "Bare Metal",
+    "section": "Divergence",
+    "text": "Divergence\n\nThe ! return type returns!\nThis is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.\n\nIt can’t return anywhere!"
+  },
+  {
+    "objectID": "30_metal.rjs.html#exit",
+    "href": "30_metal.rjs.html#exit",
+    "title": "Bare Metal",
+    "section": "Exit",
+    "text": "Exit\n\nBefore I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.\nOperating systems are similar.\nSo instead of returning, the entry point should e.g. invoke the exit system call of the operating system.\nFor now, we fulfill the requirement by looping endlessly.\nexit system call"
+  },
+  {
+    "objectID": "30_metal.rjs.html#now-it-works",
+    "href": "30_metal.rjs.html#now-it-works",
+    "title": "Bare Metal",
+    "section": "Now it works!",
+    "text": "Now it works!\n\nIt doesn’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rustcheyGtM/symbols.o\" \"&lt;1 object files omitted&gt;\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-L\" \"/tmp/rustcheyGtM/raw-dylibs\" \"-Wl,-Bdynamic\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':\n          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here\n          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n          (.text+0x1b): undefined reference to `main'\n          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\n\n  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified\n  = note: use the `-l` flag to specify native libraries to link\n  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error"
+  },
+  {
+    "objectID": "30_metal.rjs.html#to-be-continued",
+    "href": "30_metal.rjs.html#to-be-continued",
+    "title": "Bare Metal",
+    "section": "To be continued",
+    "text": "To be continued\n\nI am 99% sure we run out of time here…\nAnd will continue with the lab on linker errors!\n\n\nsrc/main.rs:13:1 | 13 | / fn panic(info: &PanicInfo) -&gt; ! { 14 | | loop {} 15 | | } | |^ | = note: the lang item is first defined in crate std (which test depends on) = note: first definition in std loaded from /home/[…]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib = note: second definition in the local crate (blog_os)\n\nThe first `note` tells us that the panic language item is already defined in the `std` crate, which is a dependency of the `test` crate.\nThe `test` crate is automatically included when building a crate in [test mode](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests).\nThis does not make sense for our `#![no_std]` kernel as there is no way to support the standard library on bare metal.\nSo this error is not relevant to our project and we can safely ignore it.\n\nThe proper way to avoid this error is to specify in our `Cargo.toml` that our binary does not support building in `test` and `bench` modes.\nWe can do that by adding a `[[bin]]` section to our `Cargo.toml` to [configure the build](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target) of our binary:\n\n```toml\n# in Cargo.toml\n\n[[bin]]\nname = \"blog_os\"\ntest = false\nbench = false\nThe double-brackets around bin are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the [[bin]] section can appear multiple times in the Cargo.toml as well. This is also the reason for the mandatory name field, which needs to match the name of the binary (so that cargo knows which settings should be applied to which binary).\nBy setting the test and bench fields to false, we instruct cargo to not build our binary in test or benchmark mode. Now cargo check --all-targets should not throw any errors anymore, and the checkOnSave implementation of rust-analyzer should be happy too.\n–&gt;"
   },
   {
     "objectID": "21_xmute.html",
@@ -2999,7 +3815,47 @@
     "href": "31_linker.html",
     "title": "Linker",
     "section": "",
-    "text": "In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.\n\nLinux\nOn Linux the following linker error occurs (shortened):\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x12): undefined reference to `__libc_csu_fini'\n          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x19): undefined reference to `__libc_csu_init'\n          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':\n          (.text+0x25): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\nThe problem is that the linker includes the startup routine of the C runtime by default, which is also called _start. It requires some symbols of the C standard library libc that we don’t include due to the no_std attribute, therefore the linker can’t resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the -nostartfiles flag.\nOne way to pass linker attributes via cargo is the cargo rustc command. The command behaves exactly like cargo build, but allows to pass options to rustc, the underlying Rust compiler. rustc has the -C link-arg flag, which passes an argument to the linker. Combined, our new build command looks like this:\ncargo rustc -- -C link-arg=-nostartfiles\nNow our crate builds as a freestanding executable on Linux!\nWe didn’t need to specify the name of our entry point function explicitly since the linker looks for a function with the name _start by default.\n\n\nWindows\nOn Windows, a different linker error occurs (shortened):\nerror: linking with `link.exe` failed: exit code: 1561\n  |\n  = note: \"C:\\\\Program Files (x86)\\\\…\\\\link.exe\" […]\n  = note: LINK : fatal error LNK1561: entry point must be defined\nThe “entry point must be defined” error means that the linker can’t find the entry point. On Windows, the default entry point name depends on the used subsystem. For the CONSOLE subsystem, the linker looks for a function named mainCRTStartup and for the WINDOWS subsystem, it looks for a function named WinMainCRTStartup. To override the default and tell the linker to look for our _start function instead, we can pass an /ENTRY argument to the linker:\ncargo rustc -- -C link-arg=/ENTRY:_start\nFrom the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.\nNow a different linker error occurs:\nerror: linking with `link.exe` failed: exit code: 1221\n  |\n  = note: \"C:\\\\Program Files (x86)\\\\…\\\\link.exe\" […]\n  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be\n          defined\nThis error occurs because Windows executables can use different subsystems. For normal programs, they are inferred depending on the entry point name: If the entry point is named main, the CONSOLE subsystem is used, and if the entry point is named WinMain, the WINDOWS subsystem is used. Since our _start function has a different name, we need to specify the subsystem explicitly:\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\nWe use the CONSOLE subsystem here, but the WINDOWS subsystem would work too. Instead of passing -C link-arg multiple times, we use -C link-args which takes a space separated list of arguments.\nWith this command, our executable should build successfully on Windows.\n\n\nmacOS\nOn macOS, the following linker error occurs (shortened):\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: entry point (_main) undefined. for architecture x86_64\n          clang: error: linker command failed with exit code 1 […]\nThis error message tells us that the linker can’t find an entry point function with the default name main (for some reason, all functions are prefixed with a _ on macOS). To set the entry point to our _start function, we pass the -e linker argument:\ncargo rustc -- -C link-args=\"-e __start\"\nThe -e flag specifies the name of the entry point function. Since all functions have an additional _ prefix on macOS, we need to set the entry point to __start instead of _start.\nNow the following linker error occurs:\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: dynamic main executables must link with libSystem.dylib\n          for architecture x86_64\n          clang: error: linker command failed with exit code 1 […]\nmacOS does not officially support statically linked binaries and requires programs to link the libSystem library by default. To override this and link a static binary, we pass the -static flag to the linker:\ncargo rustc -- -C link-args=\"-e __start -static\"\nThis still does not suffice, as a third linker error occurs:\nerror: linking with `cc` failed: exit code: 1\n  |\n  = note: \"cc\" […]\n  = note: ld: library not found for -lcrt0.o\n          clang: error: linker command failed with exit code 1 […]\nThis error occurs because programs on macOS link to crt0 (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the -nostartfiles linker argument:\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNow our program should build successfully on macOS.\n\n\nUnifying the Build Commands\nRight now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named .cargo/config.toml that contains the platform-specific arguments:\n# in .cargo/config.toml\n\n[target.'cfg(target_os = \"linux\")']\nrustflags = [\"-C\", \"link-arg=-nostartfiles\"]\n\n[target.'cfg(target_os = \"windows\")']\nrustflags = [\"-C\", \"link-args=/ENTRY:_start /SUBSYSTEM:console\"]\n\n[target.'cfg(target_os = \"macos\")']\nrustflags = [\"-C\", \"link-args=-e __start -static -nostartfiles\"]\nThe rustflags key contains arguments that are automatically added to every invocation of rustc. For more information on the .cargo/config.toml file, check out the official documentation.\nNow our program should be buildable on all three platforms with a simple cargo build.\n\n\nShould You Do This?\nWhile it’s possible to build a freestanding executable for Linux, Windows, and macOS, it’s probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the _start function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g. through a segmentation fault.\nIf you want to create a minimal binary that runs on top of an existing operating system, including libc and setting the #[start] attribute as described here is probably a better idea.",
+    "text": "The linker is a program that combines the generated code into an executable.\nSince the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error.\nThe fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#linker-errors",
+    "href": "31_linker.html#linker-errors",
+    "title": "Linker",
+    "section": "",
+    "text": "The linker is a program that combines the generated code into an executable.\nSince the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error.\nThe fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#solution",
+    "href": "31_linker.html#solution",
+    "title": "Linker",
+    "section": "Solution",
+    "text": "Solution\n\nTo solve the errors, we need to tell the linker that it should not include the C runtime.\nWe can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.\n\n\nBuilding for a Bare Metal Target\nBy default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on x86_64, Rust tries to build an .exe Windows executable that uses x86_64 instructions. This environment is called your “host” system.\nTo describe different environments, Rust uses a string called target triple. You can see the target triple for your host system by running rustc --version --verbose:\nrustc 1.35.0-nightly (474e7a648 2019-04-07)\nbinary: rustc\ncommit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab\ncommit-date: 2019-04-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.35.0-nightly\nLLVM version: 8.0\nThe above output is from a x86_64 Linux system. We see that the host triple is x86_64-unknown-linux-gnu, which includes the CPU architecture (x86_64), the vendor (unknown), the operating system (linux), and the ABI (gnu).\nBy compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.\nAn example of such a bare metal environment is the thumbv7em-none-eabihf target triple, which describes an embedded ARM system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the none in the target triple. To be able to compile for this target, we need to add it in rustup:\nrustup target add thumbv7em-none-eabihf\nThis downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:\ncargo build --target thumbv7em-none-eabihf\nBy passing a --target argument we cross compile our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.\nThis is the approach that we will use for building our OS kernel. Instead of thumbv7em-none-eabihf, we will use a custom target that describes a x86_64 bare metal environment. The details will be explained in the next post.\n\n\nLinker Arguments\nInstead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This will be the subject of the lab this week.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#summary",
+    "href": "31_linker.html#summary",
+    "title": "Linker",
+    "section": "Summary",
+    "text": "Summary\nA minimal freestanding Rust binary looks like this:\nsrc/main.rs:\n#![no_std] // don't link the Rust standard library\n#![no_main] // disable all Rust-level entry points\n\n#[unsafe(no_mangle)] // don't mangle the name of this function\npub extern \"C\" fn _start() -&gt; ! {\n    // this function is the entry point, since the linker looks for a function\n    // named `_start` by default\n    loop {}\n}\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}\nCargo.toml:\n[package]\nname = \"crate_name\"\nversion = \"0.1.0\"\nauthors = [\"Author Name &lt;author@example.com&gt;\"]\n\n# the profile used for `cargo build`\n[profile.dev]\npanic = \"abort\" # disable stack unwinding on panic\n\n# the profile used for `cargo build --release`\n[profile.release]\npanic = \"abort\" # disable stack unwinding on panic\nTo build this binary, we need to compile for a bare metal target such as thumbv7em-none-eabihf:\ncargo build --target thumbv7em-none-eabihf\nAlternatively, we can compile it for the host system by passing additional linker arguments:\n# Linux\ncargo rustc -- -C link-arg=-nostartfiles\n# Windows\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\n# macOS\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNote that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the _start function is called. So for any real use of such a binary, more steps are required.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#making-rust-analyzer-happy",
+    "href": "31_linker.html#making-rust-analyzer-happy",
+    "title": "Linker",
+    "section": "Making rust-analyzer happy",
+    "text": "Making rust-analyzer happy\nThe rust-analyzer project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for #![no_std] projects too, so I recommend using it for kernel development!\nIf you’re using the checkOnSave feature of rust-analyzer (enabled by default), it might report an error for the panic function of our kernel:\nfound duplicate lang item `panic_impl`\nThe reason for this error is that rust-analyzer invokes cargo check --all-targets by default, which also tries to build the binary in test and benchmark mode.\n\nThe two meanings of “target”\nThe --all-targets flag is completely unrelated to the --target argument. There are two different meanings of the term “target” in cargo:\n\nThe --target flag specifies the compilation target that should be passed to the rustc compiler. This should be set to the target triple of the machine that should run our code.\nThe --all-targets flag references the package target of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for examples, tests, and benchmarks. These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.\n\n\nBy default, cargo check only builds the library and binary package targets. However, rust-analyzer chooses to check all package targets by default when checkOnSave is enabled. This is the reason that rust-analyzer reports the above lang item error that we don’t see in cargo check. If we run cargo check --all-targets, we see the error too:\nerror[E0152]: found duplicate lang item `panic_impl`\n  --&gt; src/main.rs:13:1\n   |\n13 | / fn panic(_info: &PanicInfo) -&gt; ! {\n14 | |     loop {}\n15 | | }\n   | |_^\n   |\n   = note: the lang item is first defined in crate `std` (which `test` depends on)\n   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib\n   = note: second definition in the local crate (`blog_os`)\nThe first note tells us that the panic language item is already defined in the std crate, which is a dependency of the test crate. The test crate is automatically included when building a crate in test mode. This does not make sense for our #![no_std] kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.\nThe proper way to avoid this error is to specify in our Cargo.toml that our binary does not support building in test and bench modes. We can do that by adding a [[bin]] section to our Cargo.toml to configure the build of our binary:\n# in Cargo.toml\n\n[[bin]]\nname = \"blog_os\"\ntest = false\nbench = false\nThe double-brackets around bin are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the [[bin]] section can appear multiple times in the Cargo.toml as well. This is also the reason for the mandatory name field, which needs to match the name of the binary (so that cargo knows which settings should be applied to which binary).\nBy setting the test and bench fields to false, we instruct cargo to not build our binary in test or benchmark mode. Now cargo check --all-targets should not throw any errors anymore, and the checkOnSave implementation of rust-analyzer should be happy too.",
     "crumbs": [
       "Linker"
     ]

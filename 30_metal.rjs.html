@@ -399,11 +399,6 @@
 <section id="announcements" class="slide level2">
 <h2>Announcements</h2>
 <ul>
-<li><strong>Welcome</strong> to OS in Rust
-<ul>
-<li>Bare metal</li>
-<li>Literally the absolute coolest</li>
-</ul></li>
 <li><strong>Action Items</strong>:
 <ul>
 <li><code>malloc</code> stands eternal
@@ -411,7 +406,7 @@
 <li>Possibly the coolest assignment ever</li>
 <li>I’m glad you all love it</li>
 </ul></li>
-<li>Homework this work is more complicated but also more supported.
+<li>Homework this week is more complicated but also more supported.
 <ul>
 <li>Prioritize <code>malloc</code> I think.</li>
 </ul></li>
@@ -472,6 +467,105 @@
 <blockquote>
 <p><a href="https://en.wikipedia.org/wiki/Bare_machine">A computer which has no operating system. The software executed by a bare machine, commonly called a “bare metal program” or “bare metal application”, is designed to interact directly with hardware. Bare machines are widely used in embedded systems, particularly in cases where resources are limited or high performance is required.</a></p>
 </blockquote>
+</section>
+<section id="some-terms" class="slide level2">
+<h2>Some Terms</h2>
+<ul>
+<li>Should introduce a few terms.
+<ul>
+<li>Not required for OS but useful to know.</li>
+</ul></li>
+<li>Terms
+<ul>
+<li>Simulation</li>
+<li>Emulation</li>
+<li>Cross-compilation</li>
+<li>QEMU</li>
+</ul></li>
+</ul>
+</section>
+<section id="simulation" class="slide level2">
+<h2>Simulation</h2>
+<ul>
+<li>Models a system’s behavior</li>
+<li>Focuses on high-level results, not internal logic</li>
+<li>“Close enough” for performance or logic testing</li>
+<li>Simulating hardware components in software</li>
+<li>Faster but less precise</li>
+</ul>
+</section>
+<section id="emulation" class="slide level2">
+<h2>Emulation</h2>
+<ul>
+<li>Replicating exact internal behavior of hardware</li>
+<li>Software acting as hardware (CPU, registers, memory)</li>
+<li><strong>Accuracy vs.&nbsp;Speed</strong>:
+<ul>
+<li>Much slower than simulation… unless?</li>
+<li>Goal: Guest software doesn’t know it’s not on actual silicon</li>
+</ul></li>
+</ul>
+</section>
+<section id="example" class="slide level2">
+<h2>Example</h2>
+<ul>
+<li><code>x86-64</code> - the Intel/AMD architecture common for Linux and Windows - supports a “long double” float with 80 bits of precision.</li>
+<li><code>ARM64</code> - a competing formulation most popularized as “Apple silicon” with the M1 - lacks long doubles.</li>
+</ul>
+</section>
+<section id="context" class="slide level2">
+<h2>Context</h2>
+<ul>
+<li>It is trivial to implement a float in software…
+<ul>
+<li><a href="https://cd-c89.github.io/rs/51_f16.html"><code>f16</code></a></li>
+</ul></li>
+<li>It is relatively not-trivial to implement <em>an architecture</em> in software, though possible.
+<ul>
+<li>Here’s the smallest example I know:</li>
+<li><a href="https://github.com/YosysHQ/picorv32">PicoRV32</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="cross-compiling" class="slide level2">
+<h2>Cross-Compiling</h2>
+<ul>
+<li>Example:” compiling code <em>on</em> an x86 laptop <em>for</em> an ARM chip
+<ul>
+<li>Common in embedded applications (e.g.&nbsp;program a thermostat)</li>
+</ul></li>
+<li>Compiler runs on Host A, produces binary for Target B
+<ul>
+<li>Essential for “bare metal” development</li>
+<li>Transmit the binary over wires (the bus!) to another device’s memory.</li>
+</ul></li>
+</ul>
+</section>
+<section id="considerations" class="slide level2">
+<h2>Considerations</h2>
+<ul>
+<li>We must:
+<ul>
+<li><strong>Target</strong> a specific architecture</li>
+<li><strong>Link</strong> against specific hardware memory maps</li>
+</ul></li>
+<li>Somehow you also need the actual hardware, unless…</li>
+</ul>
+</section>
+<section id="qemu" class="slide level2">
+<h2>QEMU</h2>
+<ul>
+<li>I used this a lot in grad school; less now.
+<ul>
+<li>Supports both emulation and virtualization
+<ul>
+<li>Virtualization emulates a device rather than a binary.</li>
+<li>Used in cloud; can be fast; huge research area.</li>
+</ul></li>
+</ul></li>
+<li>Let’s us run bare metal binaries without physical chips (which would cost $)</li>
+<li>Write locally <span class="math inline">\(\rightarrow\)</span> Cross-compile <span class="math inline">\(\rightarrow\)</span> Run in QEMU</li>
+</ul>
 </section></section>
 <section>
 <section id="binary" class="title-slide slide level1 center">
@@ -480,329 +574,887 @@
 </section>
 <section id="first-steps" class="slide level2">
 <h2>First Steps</h2>
-<p>The first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library. This makes it possible to run Rust code on the <a href="#/bare-metal">bare metal</a> without an underlying operating system.</p>
+<ul>
+<li>The first step in creating our own operating system kernel is to create a Rust executable that does not link the standard library.</li>
+<li>This makes it possible to run Rust code on the “bare metal” without an underlying operating system.</li>
+</ul>
 </section>
 <section id="introduction" class="slide level2">
 <h2>Introduction</h2>
-<p>To write an operating system kernel, we need code that does not depend on any operating system features. This means that we can’t use threads, files, heap memory, the network, random numbers, standard output, or any other features requiring OS abstractions or specific hardware. Which makes sense, since we’re trying to write our own OS and our own drivers.</p>
+<ul>
+<li>To write an operating system kernel, we need code that does not depend on any operating system features.</li>
+<li>This means that we can’t use files, the heap, networks, random numbers, standard output, etc.</li>
+<li>We’re trying to write our own OS!</li>
+</ul>
 </section>
 <section id="on-std" class="slide level2">
 <h2>On <code>std</code></h2>
-<p>This means that we can’t use most of the <a href="https://doc.rust-lang.org/std/">Rust standard library</a>, but there are a lot of Rust features that we <em>can</em> use. For example, we can use <a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a>, <a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a>, <a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a>, <a href="https://doc.rust-lang.org/core/option/">option</a> and <a href="https://doc.rust-lang.org/core/result/">result</a>, <a href="https://doc.rust-lang.org/core/macro.write.html">string formatting</a>, and of course the <a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership system</a>. These features make it possible to write a kernel in a very expressive, high level way without worrying about <a href="https://www.nayuki.io/page/undefined-behavior-in-c-and-cplusplus-programs">undefined behavior</a> or <a href="https://tonyarcieri.com/it-s-time-for-a-memory-safety-intervention">memory safety</a>.</p>
-</section>
-<section id="we-keep" class="slide level2">
-<h2>We keep:</h2>
 <ul>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
-<li></li>
+<li>We can’t use most of the Rust standard library, but…</li>
+<li>…there are a lot of Rust features that we <em>can</em> use.</li>
+<li>For example, we can use iterators, closures, pattern matching, <code>option</code> and <code>result</code>
+<ul>
+<li>Recall the official Calvin Deutschbein position on <code>option</code> and <code>result</code>:</li>
+<li>“It’s why Rust is good.” - me</li>
+</ul></li>
 </ul>
 </section>
-<section id="section" class="slide level2">
-<h2></h2>
-<p>In order to create an OS kernel in Rust, we need to create an executable that can be run without an underlying operating system. Such an executable is often called a “freestanding” or “bare-metal” executable.</p>
+<section id="on-std-1" class="slide level2">
+<h2>On <code>std</code></h2>
+<ul>
+<li>While not initially helpful, we can use string formatting, and…</li>
+<li>… the ownership system.
+<ul>
+<li>Beats <code>malloc</code>!</li>
+</ul></li>
+</ul>
 </section>
-<section id="section-1" class="slide level2">
-<h2></h2>
-<p>This post describes the necessary steps to create a freestanding Rust binary and explains why the steps are needed. If you’re just interested in a minimal example, you can <strong><a href="#/summary">jump to the summary</a></strong>.</p>
+<section id="quoth-the-blog" class="slide level2">
+<h2>Quoth The Blog</h2>
+<blockquote>
+<p>These features make it possible to write a kernel in a very expressive, high level way without worrying about undefined behavior or memory safety.</p>
+</blockquote>
+<ul>
+<li>Well, we’ll see.</li>
+</ul>
 </section>
-<section id="disabling-the-standard-library" class="slide level2">
-<h2>Disabling the Standard Library</h2>
-<p>By default, all Rust crates link the <a href="https://doc.rust-lang.org/std/">standard library</a>, which depends on the operating system for features such as threads, files, or networking. It also depends on the C standard library <code>libc</code>, which closely interacts with OS services. Since our plan is to write an operating system, we can’t use any OS-dependent libraries. So we have to disable the automatic inclusion of the standard library through the <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/using-rust-without-the-standard-library.html"><code>no_std</code> attribute</a>.</p>
-<p>We start by creating a new cargo application project. The easiest way to do this is through the command line:</p>
-<pre><code>cargo new blog_os --bin --edition 2024</code></pre>
-<p>I named the project <code>blog_os</code>, but of course you can choose your own name. The <code>--bin</code> flag specifies that we want to create an executable binary (in contrast to a library) and the <code>--edition 2024</code> flag specifies that we want to use the <a href="https://doc.rust-lang.org/nightly/edition-guide/rust-2024/index.html">2024 edition</a> of Rust for our crate. When we run the command, cargo creates the following directory structure for us:</p>
-<pre><code>blog_os
-├── Cargo.toml
-└── src
-    └── main.rs</code></pre>
-<p>The <code>Cargo.toml</code> contains the crate configuration, for example the crate name, the author, the <a href="https://semver.org/">semantic version</a> number, and dependencies. The <code>src/main.rs</code> file contains the root module of our crate and our <code>main</code> function. You can compile your crate through <code>cargo build</code> and then run the compiled <code>blog_os</code> binary in the <code>target/debug</code> subfolder.</p>
-<h3 id="the-no_std-attribute">The <code>no_std</code> Attribute</h3>
-<p>Right now our crate implicitly links the standard library. Let’s try to disable this by adding the <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/using-rust-without-the-standard-library.html"><code>no_std</code> attribute</a>:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a></a><span class="co">// main.rs</span></span>
-<span id="cb3-2"><a></a></span>
-<span id="cb3-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb3-4"><a></a></span>
-<span id="cb3-5"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
-<span id="cb3-6"><a></a>    <span class="pp">println!</span>(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
-<span id="cb3-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When we try to build it now (by running <code>cargo build</code>), the following error occurs:</p>
-<pre><code>error: cannot find macro `println!` in this scope
- --&gt; src/main.rs:4:5
-  |
-4 |     println!("Hello, world!");
-  |     ^^^^^^^</code></pre>
-<p>The reason for this error is that the <a href="https://doc.rust-lang.org/std/macro.println.html"><code>println</code> macro</a> is part of the standard library, which we no longer include. So we can no longer print things. This makes sense, since <code>println</code> writes to <a href="https://en.wikipedia.org/wiki/Standard_streams#Standard_output_.28stdout.29">standard output</a>, which is a special file descriptor provided by the operating system.</p>
-<p>So let’s remove the printing and try again with an empty main function:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="co">// main.rs</span></span>
-<span id="cb5-2"><a></a></span>
-<span id="cb5-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb5-4"><a></a></span>
-<span id="cb5-5"><a></a><span class="kw">fn</span> main() <span class="op">{}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<pre><code>&gt; cargo build
-error: `#[panic_handler]` function required, but not found
-error: language item required, but not found: `eh_personality`</code></pre>
-<p>Now the compiler is missing a <code>#[panic_handler]</code> function and a <em>language item</em>.</p>
+<section id="we-keep" class="slide level2 smaller">
+<h2>We keep</h2>
+<ul>
+<li><a href="https://doc.rust-lang.org/core/option/">option</a></li>
+<li><a href="https://doc.rust-lang.org/core/result/">result</a></li>
+<li><a href="https://doc.rust-lang.org/std/">Rust standard library</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch13-02-iterators.html">iterators</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closures</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch06-00-enums.html">pattern matching</a></li>
+<li><a href="https://doc.rust-lang.org/core/macro.write.html">string formatting</a></li>
+<li><a href="https://doc.rust-lang.org/book/ch04-00-understanding-ownership.html">ownership system</a></li>
+<li><a href="https://www.nayuki.io/page/undefined-behavior-in-c-and-cplusplus-programs">undefined behavior</a></li>
+<li><a href="https://tonyarcieri.com/it-s-time-for-a-memory-safety-intervention">memory safety</a></li>
+</ul>
 </section>
-<section id="panic-implementation" class="slide level2">
-<h2>Panic Implementation</h2>
-<p>The <code>panic_handler</code> attribute defines the function that the compiler should invoke when a <a href="https://doc.rust-lang.org/stable/book/ch09-01-unrecoverable-errors-with-panic.html">panic</a> occurs. The standard library provides its own panic handler function, but in a <code>no_std</code> environment we need to define it ourselves:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="co">// in main.rs</span></span>
-<span id="cb7-2"><a></a></span>
-<span id="cb7-3"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb7-4"><a></a></span>
-<span id="cb7-5"><a></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb7-6"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb7-7"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb7-8"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb7-9"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <a href="https://doc.rust-lang.org/nightly/core/panic/struct.PanicInfo.html"><code>PanicInfo</code> parameter</a> contains the file and line where the panic happened and the optional panic message. The function should never return, so it is marked as a <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/functions.html#diverging-functions">diverging function</a> by returning the <a href="https://doc.rust-lang.org/nightly/std/primitive.never.html">“never” type</a> <code>!</code>. There is not much we can do in this function for now, so we just loop indefinitely.</p>
+<section id="onward" class="slide level2">
+<h2>Onward!</h2>
+<ul>
+<li>We now enumerate the necessary steps to create a freestanding Rust binary…</li>
+<li>…and explains why the steps are needed.</li>
+</ul>
 </section>
-<section id="the-eh_personality-language-item" class="slide level2">
-<h2>The <code>eh_personality</code> Language Item</h2>
-<p>Language items are special functions and types that are required internally by the compiler. For example, the <a href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html"><code>Copy</code></a> trait is a language item that tells the compiler which types have <a href="https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html"><em>copy semantics</em></a>. When we look at the <a href="https://github.com/rust-lang/rust/blob/485397e49a02a3b7ff77c17e4a3f16c653925cb3/src/libcore/marker.rs#L296-L299">implementation</a>, we see it has the special <code>#[lang = "copy"]</code> attribute that defines it as a language item.</p>
-<p>While providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn’t even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.</p>
-<p>The <a href="https://github.com/rust-lang/rust/blob/edb368491551a77d77a48446d4ee88b35490c565/src/libpanic_unwind/gcc.rs#L11-L45"><code>eh_personality</code> language item</a> marks a function that is used for implementing <a href="https://www.bogotobogo.com/cplusplus/stackunwinding.php">stack unwinding</a>. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a <a href="https://doc.rust-lang.org/stable/book/ch09-01-unrecoverable-errors-with-panic.html">panic</a>. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g.&nbsp;<a href="https://www.nongnu.org/libunwind/">libunwind</a> on Linux or <a href="https://docs.microsoft.com/en-us/windows/win32/debug/structured-exception-handling">structured exception handling</a> on Windows), so we don’t want to use it for our operating system.</p>
-<h3 id="disabling-unwinding">Disabling Unwinding</h3>
-<p>There are other use cases as well for which unwinding is undesirable, so Rust provides an option to <a href="https://github.com/rust-lang/rust/pull/32900">abort on panic</a> instead. This disables the generation of unwinding symbol information and thus considerably reduces binary size. There are multiple places where we can disable unwinding. The easiest way is to add the following lines to our <code>Cargo.toml</code>:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb8-1"><a></a><span class="kw">[profile.dev]</span></span>
-<span id="cb8-2"><a></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span></span>
-<span id="cb8-3"><a></a></span>
-<span id="cb8-4"><a></a><span class="kw">[profile.release]</span></span>
-<span id="cb8-5"><a></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This sets the panic strategy to <code>abort</code> for both the <code>dev</code> profile (used for <code>cargo build</code>) and the <code>release</code> profile (used for <code>cargo build --release</code>). Now the <code>eh_personality</code> language item should no longer be required.</p>
-<p>Now we fixed both of the above errors. However, if we try to compile it now, another error occurs:</p>
-<pre><code>&gt; cargo build
-error: requires `start` lang_item</code></pre>
-<p>Our program is missing the <code>start</code> language item, which defines the entry point.</p>
+<section id="no_std" class="slide level2">
+<h2><code>no_std</code></h2>
+<ul>
+<li>By default, all Rust crates link the standard library.
+<ul>
+<li>It depends on the operating system for features such as threads, files, or networking.</li>
+<li>It also depends on the C standard library <code>libc</code>, which closely interacts with OS services.
+<ul>
+<li>That is, part of GNU but not part of Linux.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="no_std-1" class="slide level2">
+<h2><code>no_std</code></h2>
+<ul>
+<li>Since our plan is to write an operating system, we can’t use any OS-dependent libraries.
+<ul>
+<li>That would be recursive, which is only good sometimes!</li>
+</ul></li>
+<li>So we have to disable the automatic inclusion of the standard library through the <code>no_std</code> attribute.
+<ul>
+<li><a href="https://doc.rust-lang.org/std/">standard library</a></li>
+<li><a href="https://doc.rust-lang.org/1.30.0/book/first-edition/using-rust-without-the-standard-library.html"><code>no_std</code> attribute</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="to-begin" class="slide level2">
+<h2>To begin</h2>
+<ul>
+<li>We can start creation the same way we make anything else in Rust…</li>
+<li><em>Cargo</em> (sighs heavily)</li>
+<li>We will introduce only two wrinkles.
+<ul>
+<li><code>--bin</code>: we want to create an executable binary (in contrast to a library)</li>
+<li><code>--edition 2024</code>: to maintain consistency across years and with the working example.</li>
+</ul></li>
+</ul>
+</section>
+<section id="invoke-as" class="slide level2">
+<h2>Invoke as</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">cargo</span> new <span class="pp">????</span> <span class="at">--bin</span> <span class="at">--edition</span> 2024</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="example-1" class="slide level2">
+<h2>Example</h2>
+<ul>
+<li>Personally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (<code>32</code>,<code>42</code> etc.)</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">cargo</span> new 32 <span class="at">--name</span> osirs <span class="at">--vcs</span> none <span class="at">--bin</span> <span class="at">--edition</span> 2024</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="branches" class="slide level2">
+<h2>Branches</h2>
+<ul>
+<li>A competing formulation would be to use <code>git branch</code> to create different developmental branches.</li>
+<li>This is the industry standard and I wanted to introduce it but felt a time crunch.</li>
+<li>If you are looking for something to do, figure it out.
+<ul>
+<li>Don’t worry about me finding things; its worth it to me for you to learn.</li>
+</ul></li>
+</ul>
+</section>
+<section id="name" class="slide level2">
+<h2>Name</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>You don’t have to name your OS anything in particular, I just thought <code>osirs</code> (OS in Rust) sounded heckin’ rad.</li>
+<li><a href="https://en.wikipedia.org/wiki/Osiris">ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ</a></li>
+<li>Also a cringe AI real estate firm!</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Standing_Osiris.svg/330px-Standing_Osiris.svg.png"></p>
+</div></div>
+</section>
+<section id="refresh" class="slide level2">
+<h2>Refresh</h2>
+<ul>
+<li>When we run the command, cargo creates the following directory structure for us:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="ex">$</span> tree</span>
+<span id="cb3-2"><a></a><span class="bu">.</span></span>
+<span id="cb3-3"><a></a><span class="ex">├──</span> Cargo.toml</span>
+<span id="cb3-4"><a></a><span class="ex">└──</span> src</span>
+<span id="cb3-5"><a></a>    <span class="ex">└──</span> main.rs</span>
+<span id="cb3-6"><a></a></span>
+<span id="cb3-7"><a></a><span class="ex">1</span> directory, 2 files</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="recall" class="slide level2">
+<h2>Recall</h2>
+<ul>
+<li><code>Cargo.toml</code> contains the crate configuration
+<ul>
+<li>Crate name</li>
+<li>Crate author</li>
+<li>Crate version</li>
+</ul></li>
+<li><code>src/main.rs</code> file contains our <code>main</code> function.</li>
+<li>After <code>cargo build</code>, find the compiled <code>osirs</code> binary in the <code>target/debug</code> subfolder.</li>
+</ul>
+</section>
+<section id="blah-blah-blah" class="slide level2">
+<h2>Blah blah blah</h2>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="ex">$</span> cargo build <span class="kw">;</span> <span class="ex">tree</span></span>
+<span id="cb4-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb4-3"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">dev</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.54s</span></span>
+<span id="cb4-4"><a></a><span class="bu">.</span></span>
+<span id="cb4-5"><a></a><span class="ex">├──</span> Cargo.lock</span>
+<span id="cb4-6"><a></a><span class="ex">├──</span> Cargo.toml</span>
+<span id="cb4-7"><a></a><span class="ex">├──</span> src</span>
+<span id="cb4-8"><a></a><span class="ex">│&nbsp;&nbsp;</span> └── main.rs</span>
+<span id="cb4-9"><a></a><span class="ex">└──</span> target</span>
+<span id="cb4-10"><a></a>    <span class="ex">├──</span> CACHEDIR.TAG</span>
+<span id="cb4-11"><a></a>    <span class="ex">└──</span> debug</span>
+<span id="cb4-12"><a></a>        <span class="ex">├──</span> build</span>
+<span id="cb4-13"><a></a>        <span class="ex">├──</span> deps</span>
+<span id="cb4-14"><a></a>        <span class="ex">│&nbsp;&nbsp;</span> ├── osirs-43412975b38d059d</span>
+<span id="cb4-15"><a></a>        <span class="ex">│&nbsp;&nbsp;</span> └── osirs-43412975b38d059d.d</span>
+<span id="cb4-16"><a></a>        <span class="ex">├──</span> examples</span>
+<span id="cb4-17"><a></a>        <span class="ex">├──</span> incremental</span>
+<span id="cb4-18"><a></a>        <span class="ex">│&nbsp;&nbsp;</span> └── osirs-3gae52yq1943v</span>
+<span id="cb4-19"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     ├── s-hfeunnoewq-0c8luu5-5dmhke08rl6h5l09ku3va3gkx</span>
+<span id="cb4-20"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── 1tq3ts5gahvv7j1hzrmfdrzi6.o</span>
+<span id="cb4-21"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── 6zk3flo890c0qhh6fykb6746g.o</span>
+<span id="cb4-22"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── 8z45o15v3gxm5hydv3o63x07l.o</span>
+<span id="cb4-23"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── 9itjtn00r7d8c6mknmav20oex.o</span>
+<span id="cb4-24"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── bh9pj42wzikjd1ilqutnjbrx7.o</span>
+<span id="cb4-25"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── dep-graph.bin</span>
+<span id="cb4-26"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── eymyqxruzdb24suchgzd8ygxb.o</span>
+<span id="cb4-27"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; ├── query-cache.bin</span>
+<span id="cb4-28"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     │&nbsp;&nbsp; └── work-products.bin</span>
+<span id="cb4-29"><a></a>        <span class="ex">│&nbsp;&nbsp;</span>     └── s-hfeunnoewq-0c8luu5.lock</span>
+<span id="cb4-30"><a></a>        <span class="ex">├──</span> osirs</span>
+<span id="cb4-31"><a></a>        <span class="ex">└──</span> osirs.d</span>
+<span id="cb4-32"><a></a></span>
+<span id="cb4-33"><a></a><span class="ex">9</span> directories, 18 files</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="running" class="slide level2">
+<h2>Running</h2>
+<ul>
+<li>Technically no one can stop you from using <code>cargo run</code> or even <code>cargo run --release</code></li>
+<li>But you can also just <code>build</code> and then <em>directly</em> run the executable.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a></a><span class="ex">$</span> ./target/debug/osirs</span>
+<span id="cb5-2"><a></a><span class="ex">Hello,</span> world!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="the-no_std-attribute" class="slide level2">
+<h2>The <code>no_std</code> Attribute</h2>
+<ul>
+<li>Initially, the crate implicitly links the standard library.</li>
+<li>We can prepend the <code>no_std</code> attribute to <code>src/main.rs</code> to get the version of Rust that builds character!</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="co">// main.rs</span></span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb6-4"><a></a></span>
+<span id="cb6-5"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb6-6"><a></a>    <span class="pp">println!</span>(<span class="st">"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ"</span>)<span class="op">;</span></span>
+<span id="cb6-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="we-can-rebuild" class="slide level2">
+<h2>We Can Rebuild</h2>
+<ul>
+<li>Actually we can’t.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a></a><span class="ex">$</span> cargo build</span>
+<span id="cb7-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb7-3"><a></a><span class="ex">error:</span> cannot find macro <span class="kw">`</span><span class="ex">println</span><span class="kw">`</span> in this scope</span>
+<span id="cb7-4"><a></a> <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:6:5</span>
+<span id="cb7-5"><a></a>  <span class="kw">|</span></span>
+<span id="cb7-6"><a></a><span class="ex">6</span> <span class="kw">|</span>     <span class="ex">println!</span><span class="er">(</span><span class="st">"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ"</span><span class="kw">);</span></span>
+<span id="cb7-7"><a></a>  <span class="kw">|</span>     <span class="ex">^^^^^^^</span></span>
+<span id="cb7-8"><a></a></span>
+<span id="cb7-9"><a></a><span class="ex">error:</span> <span class="kw">`</span><span class="co">#[panic_handler]</span><span class="kw">`</span> function required, but not found</span>
+<span id="cb7-10"><a></a></span>
+<span id="cb7-11"><a></a><span class="ex">error:</span> unwinding panics are not supported without std</span>
+<span id="cb7-12"><a></a>  <span class="kw">|</span></span>
+<span id="cb7-13"><a></a>  <span class="ex">=</span> help: using nightly cargo, use <span class="at">-Zbuild-std</span> with panic=<span class="st">"abort"</span> to avoid unwinding</span>
+<span id="cb7-14"><a></a>  <span class="ex">=</span> note: since the core library is usually precompiled with panic=<span class="st">"unwind"</span>, rebuilding your crate with panic=<span class="st">"abort"</span> may not be enough to fix the problem</span>
+<span id="cb7-15"><a></a></span>
+<span id="cb7-16"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">osirs</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 3 previous errors    ^^^^^^^</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="enhance" class="slide level2">
+<h2>Enhance!</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a></a><span class="ex">error:</span> cannot find macro <span class="kw">`</span><span class="ex">println</span><span class="kw">`</span> in this scope</span>
+<span id="cb8-2"><a></a> <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:6:5</span>
+<span id="cb8-3"><a></a>  <span class="kw">|</span></span>
+<span id="cb8-4"><a></a><span class="ex">6</span> <span class="kw">|</span>     <span class="ex">println!</span><span class="er">(</span><span class="st">"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ"</span><span class="kw">);</span></span>
+<span id="cb8-5"><a></a>  <span class="kw">|</span>     <span class="ex">^^^^^^^</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Oh right, we can’t print without an OS.</li>
+</ul>
+</section>
+<section id="background" class="slide level2">
+<h2>Background</h2>
+<ul>
+<li>The <code>println</code> macro is part of the standard library <code>std</code>.</li>
+<li>We said <code>no_std</code>.</li>
+<li>So we can no longer print things.</li>
+<li>I hope it is clear how this is character-building!</li>
+<li>Read more:
+<ul>
+<li><a href="https://doc.rust-lang.org/std/macro.println.html"><code>println</code> macro</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Standard_streams#Standard_output_.28stdout.29">standard output</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="rip-it" class="slide level2">
+<h2>Rip it</h2>
+<ul>
+<li>Remove the printing and try again:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// main.rs</span></span>
+<span id="cb9-2"><a></a></span>
+<span id="cb9-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb9-4"><a></a></span>
+<span id="cb9-5"><a></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb9-6"><a></a>    <span class="co">// println!("ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ");</span></span>
+<span id="cb9-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="problems-remain" class="slide level2">
+<h2>Problems remain</h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">$</span> cargo build</span>
+<span id="cb10-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb10-3"><a></a><span class="ex">error:</span> <span class="kw">`</span><span class="co">#[panic_handler]</span><span class="kw">`</span> function required, but not found</span>
+<span id="cb10-4"><a></a></span>
+<span id="cb10-5"><a></a><span class="ex">error:</span> unwinding panics are not supported without std</span>
+<span id="cb10-6"><a></a>  <span class="kw">|</span></span>
+<span id="cb10-7"><a></a>  <span class="ex">=</span> help: using nightly cargo, use <span class="at">-Zbuild-std</span> with panic=<span class="st">"abort"</span> to avoid unwinding</span>
+<span id="cb10-8"><a></a>  <span class="ex">=</span> note: since the core library is usually precompiled with panic=<span class="st">"unwind"</span>, rebuilding your crate with panic=<span class="st">"abort"</span> may not be enough to fix the problem</span>
+<span id="cb10-9"><a></a></span>
+<span id="cb10-10"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">osirs</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 2 previous errors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="enhance-1" class="slide level2">
+<h2>Enhance!</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="ex">error:</span> cannot find macro <span class="kw">`</span><span class="ex">println</span><span class="kw">`</span> in this scope</span>
+<span id="cb11-2"><a></a> <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:6:5</span>
+<span id="cb11-3"><a></a>  <span class="kw">|</span></span>
+<span id="cb11-4"><a></a><span class="ex">6</span> <span class="kw">|</span>     <span class="ex">println!</span><span class="er">(</span><span class="st">"ʙᴏᴡ ᴅᴏᴡɴ ʙᴇғᴏʀᴇ ᴛʜᴇ ɢᴏᴅ ᴏғ ᴅᴇᴀᴛʜ"</span><span class="kw">);</span></span>
+<span id="cb11-5"><a></a>  <span class="kw">|</span>     <span class="ex">^^^^^^^</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Sometimes, Rust explodes and calls the OS (written in C!) for help.</li>
+<li>It can’t do that without <code>std</code> and is sad 😭</li>
+</ul>
+</section>
+<section id="panic" class="slide level2">
+<h2>Panic</h2>
+<ul>
+<li>The <code>panic_handler</code> attribute defines the function that the compiler should invoke when a panic occurs.</li>
+<li><code>std</code> provides its own panic handler function, but in a <code>no_std</code> environment we need to define it ourselves:</li>
+<li><a href="https://doc.rust-lang.org/stable/book/ch09-01-unrecoverable-errors-with-panic.html">panic</a></li>
+</ul>
+</section>
+<section id="our-approach" class="slide level2">
+<h2>Our Approach</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb12" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="co">// main.rs</span></span>
+<span id="cb12-2"><a></a></span>
+<span id="cb12-3"><a></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb12-4"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb12-5"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb12-6"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb12-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="panics" class="slide level2">
+<h2>Panics</h2>
+<ul>
+<li>The <code>PanicInfo</code> parameter contains:
+<ul>
+<li><em>file</em> and <em>line</em> where the panic happened</li>
+<li>panic message (e.g.&nbsp;<code>panic!("YOLO")</code></li>
+</ul></li>
+<li>The function should never return.
+<ul>
+<li>So it is marked as a “diverging function”</li>
+<li>It returns the “never” type <code>!</code>.</li>
+</ul></li>
+<li>Not much we can do in this function for now, so just <code>loop()</code> to prevent a return.</li>
+</ul>
+</section>
+<section id="read-more" class="slide level2">
+<h2>Read more…</h2>
+<ul>
+<li>I had never heard of or used these but to me it was clear why they would have to exist in a type safe language.
+<ul>
+<li><a href="https://doc.rust-lang.org/nightly/core/panic/struct.PanicInfo.html">PanicInfo</a></li>
+<li><a href="https://doc.rust-lang.org/1.30.0/book/first-edition/functions.html#diverging-functions">diverging function</a></li>
+<li><a href="https://doc.rust-lang.org/nightly/std/primitive.never.html">“never” type</a></li>
+</ul></li>
+</ul>
+<!--
+
+## The `eh_personality` Language Item
+
+Language items are special functions and types that are required internally by the compiler. For example, the [`Copy`] trait is a language item that tells the compiler which types have [_copy semantics_][`Copy`]. When we look at the [implementation][copy code], we see it has the special `#[lang = "copy"]` attribute that defines it as a language item.
+
+[`Copy`]: https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html
+[copy code]: https://github.com/rust-lang/rust/blob/485397e49a02a3b7ff77c17e4a3f16c653925cb3/src/libcore/marker.rs#L296-L299
+
+While providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn't even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.
+
+The [`eh_personality` language item] marks a function that is used for implementing [stack unwinding]. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a [panic]. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g. [libunwind] on Linux or [structured exception handling] on Windows), so we don't want to use it for our operating system.
+
+[`eh_personality` language item]: https://github.com/rust-lang/rust/blob/edb368491551a77d77a48446d4ee88b35490c565/src/libpanic_unwind/gcc.rs#L11-L45
+[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php
+[libunwind]: https://www.nongnu.org/libunwind/
+[structured exception handling]: https://docs.microsoft.com/en-us/windows/win32/debug/structured-exception-handling
+
+-->
+</section>
+<section id="retry" class="slide level2">
+<h2>Retry</h2>
+<ul>
+<li>I bet it works now!</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="ex">$</span> cargo build</span>
+<span id="cb13-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb13-3"><a></a><span class="ex">error:</span> unwinding panics are not supported without std</span>
+<span id="cb13-4"><a></a>  <span class="kw">|</span></span>
+<span id="cb13-5"><a></a>  <span class="ex">=</span> help: using nightly cargo, use <span class="at">-Zbuild-std</span> with panic=<span class="st">"abort"</span> to avoid unwinding</span>
+<span id="cb13-6"><a></a>  <span class="ex">=</span> note: since the core library is usually precompiled with panic=<span class="st">"unwind"</span>, rebuilding your crate with panic=<span class="st">"abort"</span> may not be enough to fix the problem</span>
+<span id="cb13-7"><a></a></span>
+<span id="cb13-8"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">osirs</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>They should make a version of the OS class that is easy.
+<ul>
+<li>(They did - this class)</li>
+</ul></li>
+</ul>
+</section>
+<section id="panic-abort" class="slide level2">
+<h2>Panic abort</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
+<ul>
+<li>Fun fact - back when I was an OS engineer slash rocket scientist my first launch was <a href="https://en.wikipedia.org/wiki/Pad_Abort-1">“PA-1” for “Pad Abort 1”</a>
+<ul>
+<li>Blew up a rocket on the launch pad to make sure it was safe for humans.</li>
+</ul></li>
+</ul>
+</div><div class="column" style="width:50%;">
+<p><img data-src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/450775main_wstf0510e04493_hires.jpg/330px-450775main_wstf0510e04493_hires.jpg"></p>
+</div></div>
+</section>
+<section id="panic-abort-1" class="slide level2">
+<h2>Panic abort</h2>
+<ul>
+<li>The use of the term “abort” which in some nation-states is a hot-button political issue has come up from time-to-time in the discourse.</li>
+<li><a href="https://www.theregister.com/2018/05/09/gnu_glic_abort_stallman/">Read more from 2018</a></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb14-1"><a></a></span>
+<span id="cb14-2"><a></a>25.7.4 Aborting a Program</span>
+<span id="cb14-3"><a></a></span>
+<span id="cb14-4"><a></a>...</span>
+<span id="cb14-5"><a></a></span>
+<span id="cb14-6"><a></a>Future Change Warning: Proposed Federal censorship regulations may prohibit us from giving you information about the possibility of calling this function. We would be required to say that this is not an acceptable way of terminating a program.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="quoth-stallman" class="slide level2">
+<h2>Quoth Stallman</h2>
+<blockquote>
+<p>“The point of this joke is even more important now than it was when I first wrote it,” [Free Software Foundation president] Stallman wrote in a note posted to project mailing list, in reference to today’s political climate. “Please do not remove it. GNU is not a purely technical project, so the fact that this is not strictly and grimly technical is not a reason to remove this.”</p>
+</blockquote>
+</section>
+<section id="now-in-rust" class="slide level2">
+<h2>Now in Rust</h2>
+<ul>
+<li>We can oppose fascism <em>and</em>
+<ul>
+<li>(looks into the history of NASA and Lockheed Martin)</li>
+<li>(clears throat)</li>
+<li>Moving on!<br>
+</li>
+</ul></li>
+<li>We can abort programs… <em>in Rust</em></li>
+</ul>
+</section>
+<section id="how" class="slide level2">
+<h2>How?</h2>
+<ul>
+<li>Read carefully:</li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="ex">=</span> help: using nightly cargo, use <span class="at">-Zbuild-std</span> with panic=<span class="st">"abort"</span> to avoid unwinding</span>
+<span id="cb15-2"><a></a><span class="ex">=</span> note: since the core library is usually precompiled with panic=<span class="st">"unwind"</span>, rebuilding your crate with panic=<span class="st">"abort"</span> may not be enough to fix the problem</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Geniuses will recognize <code>panic="abort"</code> syntax</li>
+</ul>
+</section>
+<section id="toml" class="slide level2">
+<h2>TOML</h2>
+<ul>
+<li>It’s <code>.toml</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Cargo.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb16" data-filename="Cargo.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb16-1"><a></a><span class="kw">[package]</span></span>
+<span id="cb16-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
+<span id="cb16-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb16-4"><a></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2024"</span></span>
+<span id="cb16-5"><a></a></span>
+<span id="cb16-6"><a></a><span class="kw">[dependencies]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="crate-options" class="slide level2">
+<h2>Crate options</h2>
+<ul>
+<li>Nominally there are use cases for which unwinding is undesirable
+<ul>
+<li>My take: All cases.</li>
+</ul></li>
+<li>So Rust provides an option to “abort on panic” instead.</li>
+<li>This disables the generation of unwinding symbol information and thus considerably reduces binary size.
+<ul>
+<li>This seems obviously good to me.</li>
+</ul></li>
+</ul>
+</section>
+<section id="update-cargo.toml" class="slide level2">
+<h2>Update <code>Cargo.toml</code></h2>
+<ul>
+<li>Add the following:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Cargo.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb17" data-filename="Cargo.toml" data-code-line-numbers="8-12"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb17-1"><a></a><span class="kw">[package]</span></span>
+<span id="cb17-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
+<span id="cb17-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb17-4"><a></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2024"</span></span>
+<span id="cb17-5"><a></a></span>
+<span id="cb17-6"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb17-7"><a></a></span>
+<span id="cb17-8"><a></a><span class="kw">[profile.dev]</span></span>
+<span id="cb17-9"><a></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span></span>
+<span id="cb17-10"><a></a></span>
+<span id="cb17-11"><a></a><span class="kw">[profile.release]</span></span>
+<span id="cb17-12"><a></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="now" class="slide level2">
+<h2>Now…</h2>
+<ul>
+<li><p>This sets the panic strategy to <code>abort</code> for both the <code>dev</code> profile (used for <code>cargo build</code>) and the <code>release</code> profile (used for <code>cargo build --release</code>).</p></li>
+<li><p><a href="https://github.com/rust-lang/rust/pull/32900">abort on panic</a></p></li>
+<li><p>I bet it will work now.</p></li>
+</ul>
+</section>
+<section id="whoops" class="slide level2">
+<h2>Whoops!</h2>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="ex">$</span> cargo build</span>
+<span id="cb18-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb18-3"><a></a><span class="ex">error:</span> using <span class="kw">`</span><span class="ex">fn</span> main<span class="kw">`</span> requires the standard library</span>
+<span id="cb18-4"><a></a>  <span class="kw">|</span></span>
+<span id="cb18-5"><a></a>  <span class="ex">=</span> help: use <span class="kw">`</span><span class="co">#![no_main]</span><span class="kw">`</span> to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with <span class="kw">`</span><span class="co">#[no_mangle]</span><span class="kw">`</span></span>
+<span id="cb18-6"><a></a></span>
+<span id="cb18-7"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">osirs</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Our program is missing the <code>start</code> language item, which defines the entry point.</li>
+</ul>
 </section>
 <section id="the-start-attribute" class="slide level2">
 <h2>The <code>start</code> attribute</h2>
-<p>One might think that the <code>main</code> function is the first function called when you run a program. However, most languages have a <a href="https://en.wikipedia.org/wiki/Runtime_system">runtime system</a>, which is responsible for things such as garbage collection (e.g.&nbsp;in Java) or software threads (e.g.&nbsp;goroutines in Go). This runtime needs to be called before <code>main</code>, since it needs to initialize itself.</p>
-<p>In a typical Rust binary that links the standard library, execution starts in a C runtime library called <code>crt0</code> (“C runtime zero”), which sets up the environment for a C application. This includes creating a stack and placing the arguments in the right registers. The C runtime then invokes the <a href="https://github.com/rust-lang/rust/blob/bb4d1491466d8239a7a5fd68bd605e3276e97afb/src/libstd/rt.rs#L32-L73">entry point of the Rust runtime</a>, which is marked by the <code>start</code> language item. Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic. The runtime then finally calls the <code>main</code> function.</p>
-<p>Our freestanding executable does not have access to the Rust runtime and <code>crt0</code>, so we need to define our own entry point. Implementing the <code>start</code> language item wouldn’t help, since it would still require <code>crt0</code>. Instead, we need to overwrite the <code>crt0</code> entry point directly.</p>
-<h3 id="overwriting-the-entry-point">Overwriting the Entry Point</h3>
-<p>To tell the Rust compiler that we don’t want to use the normal entry point chain, we add the <code>#![no_main]</code> attribute.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb10-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
-<span id="cb10-3"><a></a></span>
-<span id="cb10-4"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb10-5"><a></a></span>
-<span id="cb10-6"><a></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb10-7"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb10-8"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb10-9"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb10-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You might notice that we removed the <code>main</code> function. The reason is that a <code>main</code> doesn’t make sense without an underlying runtime that calls it. Instead, we are now overwriting the operating system entry point with our own <code>_start</code> function:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb11-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb11-3"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb11-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>By using the <code>#[unsafe(no_mangle)]</code> attribute, we disable <a href="https://en.wikipedia.org/wiki/Name_mangling">name mangling</a> to ensure that the Rust compiler really outputs a function with the name <code>_start</code>. Without the attribute, the compiler would generate some cryptic <code>_ZN3blog_os4_start7hb173fedf945531caE</code> symbol to give every function a unique name. The attribute is required because we need to tell the name of the entry point function to the linker in the next step.</p>
-<p>We also have to mark the function as <code>extern "C"</code> to tell the compiler that it should use the <a href="https://en.wikipedia.org/wiki/Calling_convention">C calling convention</a> for this function (instead of the unspecified Rust calling convention). The reason for naming the function <code>_start</code> is that this is the default entry point name for most systems.</p>
-<p>The <code>!</code> return type means that the function is diverging, i.e.&nbsp;not allowed to ever return. This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader. So instead of returning, the entry point should e.g.&nbsp;invoke the <a href="https://en.wikipedia.org/wiki/Exit_(system_call)"><code>exit</code> system call</a> of the operating system. In our case, shutting down the machine could be a reasonable action, since there’s nothing left to do if a freestanding binary returns. For now, we fulfill the requirement by looping endlessly.</p>
-<p>When we run <code>cargo build</code> now, we get an ugly <em>linker</em> error.</p>
+<ul>
+<li>One might think that the <code>main</code> function is the first function called when you run a program.</li>
+<li>However, most languages have a “<a href="https://en.wikipedia.org/wiki/Runtime_system">runtime system</a>”
+<ul>
+<li>For e.g.&nbsp;Java garbage collection (e.g.&nbsp;in Java)</li>
+<li>For e.g.&nbsp;Go software threads (goroutines)</li>
+</ul></li>
+<li>This runtime needs to be called before <code>main</code>, since it needs to initialize itself.</li>
+</ul>
 </section>
-<section id="linker-errors" class="slide level2">
-<h2>Linker Errors</h2>
-<p>The linker is a program that combines the generated code into an executable. Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.</p>
-<p>To solve the errors, we need to tell the linker that it should not include the C runtime. We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.</p>
-<h3 id="building-for-a-bare-metal-target">Building for a Bare Metal Target</h3>
-<p>By default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on <code>x86_64</code>, Rust tries to build an <code>.exe</code> Windows executable that uses <code>x86_64</code> instructions. This environment is called your “host” system.</p>
-<p>To describe different environments, Rust uses a string called <a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple"><em>target triple</em></a>. You can see the target triple for your host system by running <code>rustc --version --verbose</code>:</p>
-<pre><code>rustc 1.35.0-nightly (474e7a648 2019-04-07)
+<section id="c-again" class="slide level2">
+<h2>C, again</h2>
+<ul>
+<li>In a typical Rust binary that links the standard library, execution starts in a C runtime library
+<ul>
+<li><code>crt0</code> for “C runtime zero”</li>
+</ul></li>
+<li>This creates a stack and places the arguments in the right hardware registers.</li>
+<li>The C runtime then invokes the entry point of the Rust runtime, which is marked by the <code>start</code> language item.</li>
+</ul>
+</section>
+<section id="back-to-rust" class="slide level2">
+<h2>Back to Rust</h2>
+<ul>
+<li>Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.</li>
+<li>The runtime then finally calls the <code>main</code> function.</li>
+</ul>
+</section>
+<section id="crt0-is-cheating" class="slide level2">
+<h2><code>crt0</code> is cheating</h2>
+<ul>
+<li>Our freestanding executable does not have access to the Rust runtime and <code>crt0</code></li>
+<li>We need to define our own entry point. = Implementing the <code>start</code> language item wouldn’t help, since it would still require <code>crt0</code>.</li>
+<li>Instead, we need to overwrite the <code>crt0</code> entry point directly.</li>
+</ul>
+<h3 id="overwriting">Overwriting</h3>
+<ul>
+<li>To tell the Rust compiler that we don’t want to use the normal entry point chain, we add the <code>#![no_main]</code> attribute.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb19" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// main.rs</span></span>
+<span id="cb19-2"><a></a></span>
+<span id="cb19-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb19-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb19-5"><a></a></span>
+<span id="cb19-6"><a></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb19-7"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb19-8"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb19-9"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb19-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="no-main-in-main" class="slide level2">
+<h2>No main in main</h2>
+<ul>
+<li>At this point we can also remove the <code>main</code> function.</li>
+<li>Absent a compatible runtime, <code>main</code> is meaningless!</li>
+<li>If you <code>cargo build</code> at this point, by the way, you will get some fun errors.</li>
+</ul>
+</section>
+<section id="start-in-main" class="slide level2">
+<h2>Start in main</h2>
+<ul>
+<li>Instead, overwrite the entry point with our own <code>_start</code> function:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb20" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb20-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb20-3"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb20-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="manglin" class="slide level2">
+<h2>Manglin’</h2>
+<ul>
+<li>By using the <code>#[unsafe(no_mangle)]</code> attribute, we disable “name mangling”
+<ul>
+<li>The function <strong>must</strong> be named <code>_start</code>.</li>
+</ul></li>
+<li>Otherwise, compiler generates unique symbols like <code>_start_imarandomstr_1234</code> to avoid namespace collisons.
+<ul>
+<li>Folks… it’s key-value storage.</li>
+</ul></li>
+<li>The attribute is required for the <em>linker</em> in the next step.</li>
+</ul>
+</section>
+<section id="c-you-again" class="slide level2">
+<h2>C you again</h2>
+<ul>
+<li>Mark the function as <code>extern "C"</code> to tell the compiler that it should use the “C calling convention”</li>
+<li>The reason for naming the function <code>_start</code> is that this is the default entry point name for most systems.</li>
+</ul>
+</section>
+<section id="read-more-1" class="slide level2">
+<h2>Read more</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Name_mangling">name mangling</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Calling_convention">C calling convention</a></li>
+</ul>
+</section>
+<section id="divergence" class="slide level2">
+<h2>Divergence</h2>
+<ul>
+<li>The <code>!</code> return type returns!</li>
+<li>This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.
+<ul>
+<li>It can’t return anywhere!</li>
+</ul></li>
+</ul>
+</section>
+<section id="exit" class="slide level2">
+<h2>Exit</h2>
+<ul>
+<li>Before I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.</li>
+<li>Operating systems are similar.</li>
+<li>So instead of returning, the entry point should e.g.&nbsp;invoke the <code>exit</code> system call of the operating system.</li>
+<li>For now, we fulfill the requirement by looping endlessly.</li>
+<li><a href="https://en.wikipedia.org/wiki/Exit_(system_call)"><code>exit</code> system call</a></li>
+</ul>
+</section>
+<section id="now-it-works" class="slide level2">
+<h2>Now it works!</h2>
+<ul>
+<li>It doesn’t.</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="ex">$</span> cargo build</span>
+<span id="cb21-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb21-3"><a></a><span class="ex">error:</span> linking with <span class="kw">`</span><span class="fu">cc</span><span class="kw">`</span> failed: exit status: 1</span>
+<span id="cb21-4"><a></a>  <span class="kw">|</span></span>
+<span id="cb21-5"><a></a>  <span class="ex">=</span> note:  <span class="st">"cc"</span> <span class="st">"-m64"</span> <span class="st">"/tmp/rustcheyGtM/symbols.o"</span> <span class="st">"&lt;1 object files omitted&gt;"</span> <span class="st">"-Wl,--as-needed"</span> <span class="st">"-Wl,-Bstatic"</span> <span class="st">"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib"</span> <span class="st">"-L"</span> <span class="st">"/tmp/rustcheyGtM/raw-dylibs"</span> <span class="st">"-Wl,-Bdynamic"</span> <span class="st">"-Wl,--eh-frame-hdr"</span> <span class="st">"-Wl,-z,noexecstack"</span> <span class="st">"-L"</span> <span class="st">"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib"</span> <span class="st">"-o"</span> <span class="st">"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e"</span> <span class="st">"-Wl,--gc-sections"</span> <span class="st">"-pie"</span> <span class="st">"-Wl,-z,relro,-z,now"</span> <span class="st">"-nodefaultlibs"</span></span>
+<span id="cb21-6"><a></a>  <span class="ex">=</span> note: some arguments are omitted. use <span class="kw">`</span><span class="ex">--verbose</span><span class="kw">`</span> to show all linker arguments</span>
+<span id="cb21-7"><a></a>  <span class="ex">=</span> note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function <span class="kw">`</span><span class="ex">_start</span><span class="st">':</span></span>
+<span id="cb21-8"><a></a><span class="st">          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'</span><span class="kw">;</span> <span class="ex">/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:</span><span class="er">(</span><span class="ex">.text+0x0</span><span class="kw">)</span><span class="bu">:</span> first defined here</span>
+<span id="cb21-9"><a></a>          <span class="ex">/usr/bin/ld:</span> /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function <span class="kw">`</span>_start<span class="st">':</span></span>
+<span id="cb21-10"><a></a><span class="st">          (.text+0x1b): undefined reference to `main'</span></span>
+<span id="cb21-11"><a></a>          <span class="ex">/usr/bin/ld:</span> <span class="er">(</span><span class="ex">.text+0x21</span><span class="kw">)</span><span class="bu">:</span> undefined reference to <span class="kw">`</span><span class="ex">__libc_start_main</span><span class="st">'</span></span>
+<span id="cb21-12"><a></a><span class="st">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb21-13"><a></a></span>
+<span id="cb21-14"><a></a><span class="st">  = note: some `extern` functions couldn'</span><span class="ex">t</span> be found<span class="kw">;</span> <span class="ex">some</span> native libraries may need to be installed or have their path specified</span>
+<span id="cb21-15"><a></a>  <span class="ex">=</span> note: use the <span class="kw">`</span><span class="at">-l</span><span class="kw">`</span> <span class="ex">flag</span> to specify native libraries to link</span>
+<span id="cb21-16"><a></a>  <span class="ex">=</span> note: use the <span class="kw">`</span>cargo:rustc-link-lib<span class="kw">`</span> <span class="ex">directive</span> to specify the native libraries to link with Cargo <span class="er">(</span><span class="ex">see</span> https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib<span class="kw">)</span></span>
+<span id="cb21-17"><a></a></span>
+<span id="cb21-18"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span>osirs<span class="kw">`</span> <span class="kw">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="to-be-continued" class="slide level2">
+<h2>To be continued</h2>
+<ul>
+<li>I am 99% sure we run out of time here…</li>
+<li>And will continue with the lab on linker errors!</li>
+</ul>
+<!--
+
+## Linker Errors
+
+- The linker is a program that combines the generated code into an executable. 
+- Since the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error. 
+- The fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.
+
+## Solution
+
+- To solve the errors, we need to tell the linker that it should not include the C runtime. 
+- We can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.
+
+### Building for a Bare Metal Target
+
+By default Rust tries to build an executable that is able to run in your current system environment. For example, if you're using Windows on `x86_64`, Rust tries to build an `.exe` Windows executable that uses `x86_64` instructions. This environment is called your "host" system.
+
+To describe different environments, Rust uses a string called [_target triple_]. You can see the target triple for your host system by running `rustc --version --verbose`:
+
+[_target triple_]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple
+
+```
+rustc 1.35.0-nightly (474e7a648 2019-04-07)
 binary: rustc
 commit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab
 commit-date: 2019-04-07
 host: x86_64-unknown-linux-gnu
 release: 1.35.0-nightly
-LLVM version: 8.0</code></pre>
-<p>The above output is from a <code>x86_64</code> Linux system. We see that the <code>host</code> triple is <code>x86_64-unknown-linux-gnu</code>, which includes the CPU architecture (<code>x86_64</code>), the vendor (<code>unknown</code>), the operating system (<code>linux</code>), and the <a href="https://en.wikipedia.org/wiki/Application_binary_interface">ABI</a> (<code>gnu</code>).</p>
-<p>By compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.</p>
-<p>An example of such a bare metal environment is the <code>thumbv7em-none-eabihf</code> target triple, which describes an <a href="https://en.wikipedia.org/wiki/Embedded_system">embedded</a> <a href="https://en.wikipedia.org/wiki/ARM_architecture">ARM</a> system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the <code>none</code> in the target triple. To be able to compile for this target, we need to add it in rustup:</p>
-<pre><code>rustup target add thumbv7em-none-eabihf</code></pre>
-<p>This downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:</p>
-<pre><code>cargo build --target thumbv7em-none-eabihf</code></pre>
-<p>By passing a <code>--target</code> argument we <a href="https://en.wikipedia.org/wiki/Cross_compiler">cross compile</a> our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.</p>
-<p>This is the approach that we will use for building our OS kernel. Instead of <code>thumbv7em-none-eabihf</code>, we will use a <a href="https://doc.rust-lang.org/rustc/targets/custom.html">custom target</a> that describes a <code>x86_64</code> bare metal environment. The details will be explained in the next post.</p>
-<h3 id="linker-arguments">Linker Arguments</h3>
-<p>Instead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This isn’t the approach that we will use for our kernel, therefore this section is optional and only provided for completeness. Click on <em>“Linker Arguments”</em> below to show the optional content.</p>
-<details>
-<summary>
-Linker Arguments
-</summary>
-<p>In this section we discuss the linker errors that occur on Linux, Windows, and macOS, and explain how to solve them by passing additional arguments to the linker. Note that the executable format and the linker differ between operating systems, so that a different set of arguments is required for each system.</p>
-<h4 id="linux">Linux</h4>
-<p>On Linux the following linker error occurs (shortened):</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
-  |
-  = note: "cc" […]
-  = note: /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
-          (.text+0x12): undefined reference to `__libc_csu_fini'
-          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
-          (.text+0x19): undefined reference to `__libc_csu_init'
-          /usr/lib/gcc/../x86_64-linux-gnu/Scrt1.o: In function `_start':
-          (.text+0x25): undefined reference to `__libc_start_main'
-          collect2: error: ld returned 1 exit status</code></pre>
-<p>The problem is that the linker includes the startup routine of the C runtime by default, which is also called <code>_start</code>. It requires some symbols of the C standard library <code>libc</code> that we don’t include due to the <code>no_std</code> attribute, therefore the linker can’t resolve these references. To solve this, we can tell the linker that it should not link the C startup routine by passing the <code>-nostartfiles</code> flag.</p>
-<p>One way to pass linker attributes via cargo is the <code>cargo rustc</code> command. The command behaves exactly like <code>cargo build</code>, but allows to pass options to <code>rustc</code>, the underlying Rust compiler. <code>rustc</code> has the <code>-C link-arg</code> flag, which passes an argument to the linker. Combined, our new build command looks like this:</p>
-<pre><code>cargo rustc -- -C link-arg=-nostartfiles</code></pre>
-<p>Now our crate builds as a freestanding executable on Linux!</p>
-<p>We didn’t need to specify the name of our entry point function explicitly since the linker looks for a function with the name <code>_start</code> by default.</p>
-<h4 id="windows">Windows</h4>
-<p>On Windows, a different linker error occurs (shortened):</p>
-<pre><code>error: linking with `link.exe` failed: exit code: 1561
-  |
-  = note: "C:\\Program Files (x86)\\…\\link.exe" […]
-  = note: LINK : fatal error LNK1561: entry point must be defined</code></pre>
-<p>The “entry point must be defined” error means that the linker can’t find the entry point. On Windows, the default entry point name <a href="https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol">depends on the used subsystem</a>. For the <code>CONSOLE</code> subsystem, the linker looks for a function named <code>mainCRTStartup</code> and for the <code>WINDOWS</code> subsystem, it looks for a function named <code>WinMainCRTStartup</code>. To override the default and tell the linker to look for our <code>_start</code> function instead, we can pass an <code>/ENTRY</code> argument to the linker:</p>
-<pre><code>cargo rustc -- -C link-arg=/ENTRY:_start</code></pre>
-<p>From the different argument format we clearly see that the Windows linker is a completely different program than the Linux linker.</p>
-<p>Now a different linker error occurs:</p>
-<pre><code>error: linking with `link.exe` failed: exit code: 1221
-  |
-  = note: "C:\\Program Files (x86)\\…\\link.exe" […]
-  = note: LINK : fatal error LNK1221: a subsystem can't be inferred and must be
-          defined</code></pre>
-<p>This error occurs because Windows executables can use different <a href="https://docs.microsoft.com/en-us/cpp/build/reference/entry-entry-point-symbol">subsystems</a>. For normal programs, they are inferred depending on the entry point name: If the entry point is named <code>main</code>, the <code>CONSOLE</code> subsystem is used, and if the entry point is named <code>WinMain</code>, the <code>WINDOWS</code> subsystem is used. Since our <code>_start</code> function has a different name, we need to specify the subsystem explicitly:</p>
-<pre><code>cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"</code></pre>
-<p>We use the <code>CONSOLE</code> subsystem here, but the <code>WINDOWS</code> subsystem would work too. Instead of passing <code>-C link-arg</code> multiple times, we use <code>-C link-args</code> which takes a space separated list of arguments.</p>
-<p>With this command, our executable should build successfully on Windows.</p>
-<h4 id="macos">macOS</h4>
-<p>On macOS, the following linker error occurs (shortened):</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
-  |
-  = note: "cc" […]
-  = note: ld: entry point (_main) undefined. for architecture x86_64
-          clang: error: linker command failed with exit code 1 […]</code></pre>
-<p>This error message tells us that the linker can’t find an entry point function with the default name <code>main</code> (for some reason, all functions are prefixed with a <code>_</code> on macOS). To set the entry point to our <code>_start</code> function, we pass the <code>-e</code> linker argument:</p>
-<pre><code>cargo rustc -- -C link-args="-e __start"</code></pre>
-<p>The <code>-e</code> flag specifies the name of the entry point function. Since all functions have an additional <code>_</code> prefix on macOS, we need to set the entry point to <code>__start</code> instead of <code>_start</code>.</p>
-<p>Now the following linker error occurs:</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
-  |
-  = note: "cc" […]
-  = note: ld: dynamic main executables must link with libSystem.dylib
-          for architecture x86_64
-          clang: error: linker command failed with exit code 1 […]</code></pre>
-<p>macOS <a href="https://developer.apple.com/library/archive/qa/qa1118/_index.html">does not officially support statically linked binaries</a> and requires programs to link the <code>libSystem</code> library by default. To override this and link a static binary, we pass the <code>-static</code> flag to the linker:</p>
-<pre><code>cargo rustc -- -C link-args="-e __start -static"</code></pre>
-<p>This still does not suffice, as a third linker error occurs:</p>
-<pre><code>error: linking with `cc` failed: exit code: 1
-  |
-  = note: "cc" […]
-  = note: ld: library not found for -lcrt0.o
-          clang: error: linker command failed with exit code 1 […]</code></pre>
-<p>This error occurs because programs on macOS link to <code>crt0</code> (“C runtime zero”) by default. This is similar to the error we had on Linux and can also be solved by adding the <code>-nostartfiles</code> linker argument:</p>
-<pre><code>cargo rustc -- -C link-args="-e __start -static -nostartfiles"</code></pre>
-<p>Now our program should build successfully on macOS.</p>
-<h4 id="unifying-the-build-commands">Unifying the Build Commands</h4>
-<p>Right now we have different build commands depending on the host platform, which is not ideal. To avoid this, we can create a file named <code>.cargo/config.toml</code> that contains the platform-specific arguments:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb27-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb27-2"><a></a></span>
-<span id="cb27-3"><a></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "linux")'</span><span class="kw">]</span></span>
-<span id="cb27-4"><a></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-arg=-nostartfiles"</span><span class="op">]</span></span>
-<span id="cb27-5"><a></a></span>
-<span id="cb27-6"><a></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "windows")'</span><span class="kw">]</span></span>
-<span id="cb27-7"><a></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-args=/ENTRY:_start /SUBSYSTEM:console"</span><span class="op">]</span></span>
-<span id="cb27-8"><a></a></span>
-<span id="cb27-9"><a></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "macos")'</span><span class="kw">]</span></span>
-<span id="cb27-10"><a></a><span class="dt">rustflags</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-C"</span><span class="op">,</span> <span class="st">"link-args=-e __start -static -nostartfiles"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>rustflags</code> key contains arguments that are automatically added to every invocation of <code>rustc</code>. For more information on the <code>.cargo/config.toml</code> file, check out the <a href="https://doc.rust-lang.org/cargo/reference/config.html">official documentation</a>.</p>
-<p>Now our program should be buildable on all three platforms with a simple <code>cargo build</code>.</p>
-<h4 id="should-you-do-this">Should You Do This?</h4>
-<p>While it’s possible to build a freestanding executable for Linux, Windows, and macOS, it’s probably not a good idea. The reason is that our executable still expects various things, for example that a stack is initialized when the <code>_start</code> function is called. Without the C runtime, some of these requirements might not be fulfilled, which might cause our program to fail, e.g.&nbsp;through a segmentation fault.</p>
-<p>If you want to create a minimal binary that runs on top of an existing operating system, including <code>libc</code> and setting the <code>#[start]</code> attribute as described <a href="https://doc.rust-lang.org/1.16.0/book/no-stdlib.html">here</a> is probably a better idea.</p>
-</details>
-</section>
-<section id="summary" class="slide level2">
-<h2>Summary</h2>
-<p>A minimal freestanding Rust binary looks like this:</p>
-<p><code>src/main.rs</code>:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
-<span id="cb28-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
-<span id="cb28-3"><a></a></span>
-<span id="cb28-4"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb28-5"><a></a></span>
-<span id="cb28-6"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
-<span id="cb28-7"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb28-8"><a></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
-<span id="cb28-9"><a></a>    <span class="co">// named `_start` by default</span></span>
-<span id="cb28-10"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb28-11"><a></a><span class="op">}</span></span>
-<span id="cb28-12"><a></a></span>
-<span id="cb28-13"><a></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb28-14"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb28-15"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb28-16"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb28-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p><code>Cargo.toml</code>:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb29-1"><a></a><span class="kw">[package]</span></span>
-<span id="cb29-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"crate_name"</span></span>
-<span id="cb29-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
-<span id="cb29-4"><a></a><span class="dt">authors</span> <span class="op">=</span> <span class="op">[</span><span class="st">"Author Name &lt;author@example.com&gt;"</span><span class="op">]</span></span>
-<span id="cb29-5"><a></a></span>
-<span id="cb29-6"><a></a><span class="co"># the profile used for `cargo build`</span></span>
-<span id="cb29-7"><a></a><span class="kw">[profile.dev]</span></span>
-<span id="cb29-8"><a></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span> <span class="co"># disable stack unwinding on panic</span></span>
-<span id="cb29-9"><a></a></span>
-<span id="cb29-10"><a></a><span class="co"># the profile used for `cargo build --release`</span></span>
-<span id="cb29-11"><a></a><span class="kw">[profile.release]</span></span>
-<span id="cb29-12"><a></a><span class="dt">panic</span> <span class="op">=</span> <span class="st">"abort"</span> <span class="co"># disable stack unwinding on panic</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>To build this binary, we need to compile for a bare metal target such as <code>thumbv7em-none-eabihf</code>:</p>
-<pre><code>cargo build --target thumbv7em-none-eabihf</code></pre>
-<p>Alternatively, we can compile it for the host system by passing additional linker arguments:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a></a><span class="co"># Linux</span></span>
-<span id="cb31-2"><a></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-arg=-nostartfiles</span>
-<span id="cb31-3"><a></a><span class="co"># Windows</span></span>
-<span id="cb31-4"><a></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"/ENTRY:_start /SUBSYSTEM:console"</span></span>
-<span id="cb31-5"><a></a><span class="co"># macOS</span></span>
-<span id="cb31-6"><a></a><span class="ex">cargo</span> rustc <span class="at">--</span> <span class="at">-C</span> link-args=<span class="st">"-e __start -static -nostartfiles"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the <code>_start</code> function is called. <strong>So for any real use of such a binary, more steps are required</strong>.</p>
-</section>
-<section id="making-rust-analyzer-happy" class="slide level2">
-<h2>Making <code>rust-analyzer</code> happy</h2>
-<p>The <a href="https://rust-analyzer.github.io/"><code>rust-analyzer</code></a> project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for <code>#![no_std]</code> projects too, so I recommend using it for kernel development!</p>
-<p>If you’re using the <a href="https://rust-analyzer.github.io/book/configuration.html#checkOnSave"><code>checkOnSave</code></a> feature of <code>rust-analyzer</code> (enabled by default), it might report an error for the panic function of our kernel:</p>
-<pre><code>found duplicate lang item `panic_impl`</code></pre>
-<p>The reason for this error is that <code>rust-analyzer</code> invokes <code>cargo check --all-targets</code> by default, which also tries to build the binary in <a href="https://doc.rust-lang.org/book/ch11-01-writing-tests.html">test</a> and <a href="https://doc.rust-lang.org/rustc/tests/index.html#benchmarks">benchmark</a> mode.</p>
-<section id="the-two-meanings-of-target" class="note">
-<h3>The two meanings of “target”</h3>
-<p>The <code>--all-targets</code> flag is completely unrelated to the <code>--target</code> argument. There are two different meanings of the term “target” in <code>cargo</code>:</p>
-<ul>
-<li>The <code>--target</code> flag specifies the <strong><a href="https://doc.rust-lang.org/rustc/targets/index.html"><em>compilation target</em></a></strong> that should be passed to the <code>rustc</code> compiler. This should be set to the <a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple">target triple</a> of the machine that should run our code.</li>
-<li>The <code>--all-targets</code> flag references the <strong><a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html"><em>package target</em></a></strong> of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples">examples</a>, <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests">tests</a>, and <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks">benchmarks</a>. These package targets can co-exist, so you can build/check the same crate in e.g.&nbsp;library or test mode.</li>
-</ul>
-</section>
-<p>By default, <code>cargo check</code> only builds the <em>library</em> and <em>binary</em> package targets. However, <code>rust-analyzer</code> chooses to check all package targets by default when <a href="https://rust-analyzer.github.io/book/configuration.html#checkOnSave"><code>checkOnSave</code></a> is enabled. This is the reason that <code>rust-analyzer</code> reports the above <code>lang item</code> error that we don’t see in <code>cargo check</code>. If we run <code>cargo check --all-targets</code>, we see the error too:</p>
-<pre><code>error[E0152]: found duplicate lang item `panic_impl`
-  --&gt; src/main.rs:13:1
-   |
-13 | / fn panic(_info: &amp;PanicInfo) -&gt; ! {
-14 | |     loop {}
-15 | | }
-   | |_^
-   |
-   = note: the lang item is first defined in crate `std` (which `test` depends on)
-   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib
-   = note: second definition in the local crate (`blog_os`)</code></pre>
-<p>The first <code>note</code> tells us that the panic language item is already defined in the <code>std</code> crate, which is a dependency of the <code>test</code> crate. The <code>test</code> crate is automatically included when building a crate in <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests">test mode</a>. This does not make sense for our <code>#![no_std]</code> kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.</p>
-<p>The proper way to avoid this error is to specify in our <code>Cargo.toml</code> that our binary does not support building in <code>test</code> and <code>bench</code> modes. We can do that by adding a <code>[[bin]]</code> section to our <code>Cargo.toml</code> to <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target">configure the build</a> of our binary:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb34-1"><a></a><span class="co"># in Cargo.toml</span></span>
-<span id="cb34-2"><a></a></span>
-<span id="cb34-3"><a></a><span class="kw">[[bin]]</span></span>
-<span id="cb34-4"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"blog_os"</span></span>
-<span id="cb34-5"><a></a><span class="dt">test</span> <span class="op">=</span> <span class="cn">false</span></span>
-<span id="cb34-6"><a></a><span class="dt">bench</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+LLVM version: 8.0
+```
+
+The above output is from a `x86_64` Linux system. We see that the `host` triple is `x86_64-unknown-linux-gnu`, which includes the CPU architecture (`x86_64`), the vendor (`unknown`), the operating system (`linux`), and the [ABI] (`gnu`).
+
+[ABI]: https://en.wikipedia.org/wiki/Application_binary_interface
+
+By compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.
+
+An example of such a bare metal environment is the `thumbv7em-none-eabihf` target triple, which describes an [embedded] [ARM] system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the `none` in the target triple. To be able to compile for this target, we need to add it in rustup:
+
+[embedded]: https://en.wikipedia.org/wiki/Embedded_system
+[ARM]: https://en.wikipedia.org/wiki/ARM_architecture
+
+```
+rustup target add thumbv7em-none-eabihf
+```
+
+This downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:
+
+```
+cargo build --target thumbv7em-none-eabihf
+```
+
+By passing a `--target` argument we [cross compile] our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.
+
+[cross compile]: https://en.wikipedia.org/wiki/Cross_compiler
+
+This is the approach that we will use for building our OS kernel. Instead of `thumbv7em-none-eabihf`, we will use a [custom target] that describes a `x86_64` bare metal environment. The details will be explained in the next post.
+
+[custom target]: https://doc.rust-lang.org/rustc/targets/custom.html
+
+### Linker Arguments
+
+Instead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This will be the subject of the lab this week.
+
+
+## Summary
+
+A minimal freestanding Rust binary looks like this:
+
+`src/main.rs`:
+
+```rust
+#![no_std] // don't link the Rust standard library
+#![no_main] // disable all Rust-level entry points
+
+#[unsafe(no_mangle)] // don't mangle the name of this function
+pub extern "C" fn _start() -> ! {
+    // this function is the entry point, since the linker looks for a function
+    // named `_start` by default
+    loop {}
+}
+
+/// This function is called on panic.
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
+    loop {}
+}
+```
+
+`Cargo.toml`:
+
+```toml
+[package]
+name = "crate_name"
+version = "0.1.0"
+authors = ["Author Name <author@example.com>"]
+
+# the profile used for `cargo build`
+[profile.dev]
+panic = "abort" # disable stack unwinding on panic
+
+# the profile used for `cargo build --release`
+[profile.release]
+panic = "abort" # disable stack unwinding on panic
+```
+
+To build this binary, we need to compile for a bare metal target such as `thumbv7em-none-eabihf`:
+
+```
+cargo build --target thumbv7em-none-eabihf
+```
+
+Alternatively, we can compile it for the host system by passing additional linker arguments:
+
+```bash
+# Linux
+cargo rustc -- -C link-arg=-nostartfiles
+# Windows
+cargo rustc -- -C link-args="/ENTRY:_start /SUBSYSTEM:console"
+# macOS
+cargo rustc -- -C link-args="-e __start -static -nostartfiles"
+```
+
+Note that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the `_start` function is called. **So for any real use of such a binary, more steps are required**.
+
+## Making `rust-analyzer` happy
+
+The [`rust-analyzer`](https://rust-analyzer.github.io/) project is a great way to get code completion and "go to definition" support (and many other features) for Rust code in your editor.
+It works really well for `#![no_std]` projects too, so I recommend using it for kernel development!
+
+If you're using the [`checkOnSave`](https://rust-analyzer.github.io/book/configuration.html#checkOnSave) feature of `rust-analyzer` (enabled by default), it might report an error for the panic function of our kernel:
+
+```
+found duplicate lang item `panic_impl`
+```
+
+The reason for this error is that `rust-analyzer` invokes `cargo check --all-targets` by default, which also tries to build the binary in [test](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) and [benchmark](https://doc.rust-lang.org/rustc/tests/index.html#benchmarks) mode.
+
+<div class="note">
+
+### The two meanings of "target"
+
+The `--all-targets` flag is completely unrelated to the `--target` argument.
+There are two different meanings of the term "target" in `cargo`:
+
+- The `--target` flag specifies the **[_compilation target_]** that should be passed to the `rustc` compiler. This should be set to the [target triple] of the machine that should run our code.
+- The `--all-targets` flag references the **[_package target_]** of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for [examples](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#examples), [tests](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests), and [benchmarks](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#benchmarks). These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.
+
+[_compilation target_]: https://doc.rust-lang.org/rustc/targets/index.html
+[target triple]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple
+[_package target_]: https://doc.rust-lang.org/cargo/reference/cargo-targets.html
+
+</div>
+
+By default, `cargo check` only builds the _library_ and _binary_ package targets.
+However, `rust-analyzer` chooses to check all package targets by default when [`checkOnSave`](https://rust-analyzer.github.io/book/configuration.html#checkOnSave) is enabled.
+This is the reason that `rust-analyzer` reports the above `lang item` error that we don't see in `cargo check`.
+If we run `cargo check --all-targets`, we see the error too:
+
+```
+error[E0152]: found duplicate lang item `panic_impl`
+  -->
+<p>src/main.rs:13:1 | 13 | / fn panic(<em>info: &amp;PanicInfo) -&gt; ! { 14 | | loop {} 15 | | } | |</em>^ | = note: the lang item is first defined in crate <code>std</code> (which <code>test</code> depends on) = note: first definition in <code>std</code> loaded from /home/[…]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib = note: second definition in the local crate (<code>blog_os</code>)</p>
+<pre><code>
+The first `note` tells us that the panic language item is already defined in the `std` crate, which is a dependency of the `test` crate.
+The `test` crate is automatically included when building a crate in [test mode](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#tests).
+This does not make sense for our `#![no_std]` kernel as there is no way to support the standard library on bare metal.
+So this error is not relevant to our project and we can safely ignore it.
+
+The proper way to avoid this error is to specify in our `Cargo.toml` that our binary does not support building in `test` and `bench` modes.
+We can do that by adding a `[[bin]]` section to our `Cargo.toml` to [configure the build](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target) of our binary:
+
+```toml
+# in Cargo.toml
+
+[[bin]]
+name = "blog_os"
+test = false
+bench = false</code></pre>
 <p>The double-brackets around <code>bin</code> are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the <code>[[bin]]</code> section can appear multiple times in the <code>Cargo.toml</code> as well. This is also the reason for the mandatory <code>name</code> field, which needs to match the name of the binary (so that <code>cargo</code> knows which settings should be applied to which binary).</p>
 <p>By setting the <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-test-field"><code>test</code></a> and <a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#the-bench-field"><code>bench</code></a> fields to <code>false</code>, we instruct <code>cargo</code> to not build our binary in test or benchmark mode. Now <code>cargo check --all-targets</code> should not throw any errors anymore, and the <code>checkOnSave</code> implementation of <code>rust-analyzer</code> should be happy too.</p>
+<p>–&gt;</p>
 
 
 </section></section>
