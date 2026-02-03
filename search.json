@@ -241,17 +241,7 @@
     "href": "30_metal.html#to-begin",
     "title": "Bare Metal",
     "section": "To begin",
-    "text": "To begin\n\nWe can start creation the same way we make anything else in Rust…\nCargo (sighs heavily)\nWe will introduce only two wrinkles.\n\n--bin: we want to create an executable binary (in contrast to a library)\n--edition 2024: to maintain consistency across years and with the working example.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#invoke-as",
-    "href": "30_metal.html#invoke-as",
-    "title": "Bare Metal",
-    "section": "Invoke as",
-    "text": "Invoke as\ncargo new ???? --bin --edition 2024",
+    "text": "To begin\n\nWe can start creation the same way we make anything else in Rust…\nCargo (sighs heavily)\n\ncargo new ????",
     "crumbs": [
       "Bare Metal"
     ]
@@ -261,7 +251,7 @@
     "href": "30_metal.html#example-1",
     "title": "Bare Metal",
     "section": "Example",
-    "text": "Example\n\nPersonally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (32,42 etc.)\n\ncargo new 32 --name osirs --vcs none --bin --edition 2024",
+    "text": "Example\n\nPersonally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (32,42 etc.)\n\ncargo new 32 --name osirs --vcs none",
     "crumbs": [
       "Bare Metal"
     ]
@@ -411,7 +401,7 @@
     "href": "30_metal.html#our-approach",
     "title": "Bare Metal",
     "section": "Our Approach",
-    "text": "Our Approach\n\n\nsrc/main.rs\n\n// main.rs\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}",
+    "text": "Our Approach\n\n\nsrc/main.rs\n\n// main.rs\n\n/// This function is called on panic.\n#[panic_handler]\n#[allow(unconditional_recursion)]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}",
     "crumbs": [
       "Bare Metal"
     ]
@@ -421,7 +411,7 @@
     "href": "30_metal.html#panics",
     "title": "Bare Metal",
     "section": "Panics",
-    "text": "Panics\n\nThe PanicInfo parameter contains:\n\nfile and line where the panic happened\npanic message (e.g. panic!(\"YOLO\")\n\nThe function should never return.\n\nSo it is marked as a “diverging function”\nIt returns the “never” type !.\n\nNot much we can do in this function for now, so just loop() to prevent a return.",
+    "text": "Panics\n\nThe PanicInfo parameter contains:\n\nfile and line where the panic happened\npanic message (e.g. panic!(\"YOLO\")\n\nThe function should never return.\n\nSo it is marked as a “diverging function”\nIt returns the “never” type !.\n\nNot much we can do in this function for now, so just recurse to prevent a return.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -511,7 +501,7 @@
     "href": "30_metal.html#crate-options",
     "title": "Bare Metal",
     "section": "Crate options",
-    "text": "Crate options\n\nNominally there are use cases for which unwinding is undesirable\n\nMy take: All cases.\n\nSo Rust provides an option to “abort on panic” instead.\nThis disables the generation of unwinding symbol information and thus considerably reduces binary size.\n\nThis seems obviously good to me.",
+    "text": "Crate options\n\nNominally there are use cases for which unwinding is undesirable\n\nMy take: All cases.\n\nSo Rust provides an option to “abort on panic” instead.\nOur reference materials claims this disables the generation of unwinding symbol information and thus considerably reduces binary size.\n\nI could not verify this independently.",
     "crumbs": [
       "Bare Metal"
     ]
@@ -541,127 +531,7 @@
     "href": "30_metal.html#whoops",
     "title": "Bare Metal",
     "section": "Whoops!",
-    "text": "Whoops!\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nOur program is missing the start language item, which defines the entry point.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#the-start-attribute",
-    "href": "30_metal.html#the-start-attribute",
-    "title": "Bare Metal",
-    "section": "The start attribute",
-    "text": "The start attribute\n\nOne might think that the main function is the first function called when you run a program.\nHowever, most languages have a “runtime system”\n\nFor e.g. Java garbage collection (e.g. in Java)\nFor e.g. Go software threads (goroutines)\n\nThis runtime needs to be called before main, since it needs to initialize itself.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#c-again",
-    "href": "30_metal.html#c-again",
-    "title": "Bare Metal",
-    "section": "C, again",
-    "text": "C, again\n\nIn a typical Rust binary that links the standard library, execution starts in a C runtime library\n\ncrt0 for “C runtime zero”\n\nThis creates a stack and places the arguments in the right hardware registers.\nThe C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#back-to-rust",
-    "href": "30_metal.html#back-to-rust",
-    "title": "Bare Metal",
-    "section": "Back to Rust",
-    "text": "Back to Rust\n\nRust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.\nThe runtime then finally calls the main function.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#crt0-is-cheating",
-    "href": "30_metal.html#crt0-is-cheating",
-    "title": "Bare Metal",
-    "section": "crt0 is cheating",
-    "text": "crt0 is cheating\n\nOur freestanding executable does not have access to the Rust runtime and crt0\nWe need to define our own entry point. = Implementing the start language item wouldn’t help, since it would still require crt0.\nInstead, we need to overwrite the crt0 entry point directly.\n\n\nOverwriting\n\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n#![no_main]\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#no-main-in-main",
-    "href": "30_metal.html#no-main-in-main",
-    "title": "Bare Metal",
-    "section": "No main in main",
-    "text": "No main in main\n\nAt this point we can also remove the main function.\nAbsent a compatible runtime, main is meaningless!\nIf you cargo build at this point, by the way, you will get some fun errors.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#start-in-main",
-    "href": "30_metal.html#start-in-main",
-    "title": "Bare Metal",
-    "section": "Start in main",
-    "text": "Start in main\n\nInstead, overwrite the entry point with our own _start function:\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#manglin",
-    "href": "30_metal.html#manglin",
-    "title": "Bare Metal",
-    "section": "Manglin’",
-    "text": "Manglin’\n\nBy using the #[unsafe(no_mangle)] attribute, we disable “name mangling”\n\nThe function must be named _start.\n\nOtherwise, compiler generates unique symbols like _start_imarandomstr_1234 to avoid namespace collisons.\n\nFolks… it’s key-value storage.\n\nThe attribute is required for the linker in the next step.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#c-you-again",
-    "href": "30_metal.html#c-you-again",
-    "title": "Bare Metal",
-    "section": "C you again",
-    "text": "C you again\n\nMark the function as extern \"C\" to tell the compiler that it should use the “C calling convention”\nThe reason for naming the function _start is that this is the default entry point name for most systems.",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#read-more-1",
-    "href": "30_metal.html#read-more-1",
-    "title": "Bare Metal",
-    "section": "Read more",
-    "text": "Read more\n\nname mangling\nC calling convention",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#divergence",
-    "href": "30_metal.html#divergence",
-    "title": "Bare Metal",
-    "section": "Divergence",
-    "text": "Divergence\n\nThe ! return type returns!\nThis is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.\n\nIt can’t return anywhere!",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#exit",
-    "href": "30_metal.html#exit",
-    "title": "Bare Metal",
-    "section": "Exit",
-    "text": "Exit\n\nBefore I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.\nOperating systems are similar.\nSo instead of returning, the entry point should e.g. invoke the exit system call of the operating system.\nFor now, we fulfill the requirement by looping endlessly.\nexit system call",
-    "crumbs": [
-      "Bare Metal"
-    ]
-  },
-  {
-    "objectID": "30_metal.html#now-it-works",
-    "href": "30_metal.html#now-it-works",
-    "title": "Bare Metal",
-    "section": "Now it works!",
-    "text": "Now it works!\n\nIt doesn’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rustcheyGtM/symbols.o\" \"&lt;1 object files omitted&gt;\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-L\" \"/tmp/rustcheyGtM/raw-dylibs\" \"-Wl,-Bdynamic\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':\n          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here\n          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n          (.text+0x1b): undefined reference to `main'\n          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\n\n  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified\n  = note: use the `-l` flag to specify native libraries to link\n  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error",
+    "text": "Whoops!\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nWe don’t have and can’t use a main!",
     "crumbs": [
       "Bare Metal"
     ]
@@ -835,21 +705,14 @@
     "href": "30_metal.rjs.html#to-begin",
     "title": "Bare Metal",
     "section": "To begin",
-    "text": "To begin\n\nWe can start creation the same way we make anything else in Rust…\nCargo (sighs heavily)\nWe will introduce only two wrinkles.\n\n--bin: we want to create an executable binary (in contrast to a library)\n--edition 2024: to maintain consistency across years and with the working example."
-  },
-  {
-    "objectID": "30_metal.rjs.html#invoke-as",
-    "href": "30_metal.rjs.html#invoke-as",
-    "title": "Bare Metal",
-    "section": "Invoke as",
-    "text": "Invoke as\ncargo new ???? --bin --edition 2024"
+    "text": "To begin\n\nWe can start creation the same way we make anything else in Rust…\nCargo (sighs heavily)\n\ncargo new ????"
   },
   {
     "objectID": "30_metal.rjs.html#example-1",
     "href": "30_metal.rjs.html#example-1",
     "title": "Bare Metal",
     "section": "Example",
-    "text": "Example\n\nPersonally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (32,42 etc.)\n\ncargo new 32 --name osirs --vcs none --bin --edition 2024"
+    "text": "Example\n\nPersonally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (32,42 etc.)\n\ncargo new 32 --name osirs --vcs none"
   },
   {
     "objectID": "30_metal.rjs.html#branches",
@@ -954,14 +817,14 @@
     "href": "30_metal.rjs.html#our-approach",
     "title": "Bare Metal",
     "section": "Our Approach",
-    "text": "Our Approach\n\n\nsrc/main.rs\n\n// main.rs\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}"
+    "text": "Our Approach\n\n\nsrc/main.rs\n\n// main.rs\n\n/// This function is called on panic.\n#[panic_handler]\n#[allow(unconditional_recursion)]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}"
   },
   {
     "objectID": "30_metal.rjs.html#panics",
     "href": "30_metal.rjs.html#panics",
     "title": "Bare Metal",
     "section": "Panics",
-    "text": "Panics\n\nThe PanicInfo parameter contains:\n\nfile and line where the panic happened\npanic message (e.g. panic!(\"YOLO\")\n\nThe function should never return.\n\nSo it is marked as a “diverging function”\nIt returns the “never” type !.\n\nNot much we can do in this function for now, so just loop() to prevent a return."
+    "text": "Panics\n\nThe PanicInfo parameter contains:\n\nfile and line where the panic happened\npanic message (e.g. panic!(\"YOLO\")\n\nThe function should never return.\n\nSo it is marked as a “diverging function”\nIt returns the “never” type !.\n\nNot much we can do in this function for now, so just recurse to prevent a return."
   },
   {
     "objectID": "30_metal.rjs.html#read-more",
@@ -1024,7 +887,7 @@
     "href": "30_metal.rjs.html#crate-options",
     "title": "Bare Metal",
     "section": "Crate options",
-    "text": "Crate options\n\nNominally there are use cases for which unwinding is undesirable\n\nMy take: All cases.\n\nSo Rust provides an option to “abort on panic” instead.\nThis disables the generation of unwinding symbol information and thus considerably reduces binary size.\n\nThis seems obviously good to me."
+    "text": "Crate options\n\nNominally there are use cases for which unwinding is undesirable\n\nMy take: All cases.\n\nSo Rust provides an option to “abort on panic” instead.\nOur reference materials claims this disables the generation of unwinding symbol information and thus considerably reduces binary size.\n\nI could not verify this independently."
   },
   {
     "objectID": "30_metal.rjs.html#update-cargo.toml",
@@ -1045,91 +908,7 @@
     "href": "30_metal.rjs.html#whoops",
     "title": "Bare Metal",
     "section": "Whoops!",
-    "text": "Whoops!\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nOur program is missing the start language item, which defines the entry point."
-  },
-  {
-    "objectID": "30_metal.rjs.html#the-start-attribute",
-    "href": "30_metal.rjs.html#the-start-attribute",
-    "title": "Bare Metal",
-    "section": "The start attribute",
-    "text": "The start attribute\n\nOne might think that the main function is the first function called when you run a program.\nHowever, most languages have a “runtime system”\n\nFor e.g. Java garbage collection (e.g. in Java)\nFor e.g. Go software threads (goroutines)\n\nThis runtime needs to be called before main, since it needs to initialize itself."
-  },
-  {
-    "objectID": "30_metal.rjs.html#c-again",
-    "href": "30_metal.rjs.html#c-again",
-    "title": "Bare Metal",
-    "section": "C, again",
-    "text": "C, again\n\nIn a typical Rust binary that links the standard library, execution starts in a C runtime library\n\ncrt0 for “C runtime zero”\n\nThis creates a stack and places the arguments in the right hardware registers.\nThe C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item."
-  },
-  {
-    "objectID": "30_metal.rjs.html#back-to-rust",
-    "href": "30_metal.rjs.html#back-to-rust",
-    "title": "Bare Metal",
-    "section": "Back to Rust",
-    "text": "Back to Rust\n\nRust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.\nThe runtime then finally calls the main function."
-  },
-  {
-    "objectID": "30_metal.rjs.html#crt0-is-cheating",
-    "href": "30_metal.rjs.html#crt0-is-cheating",
-    "title": "Bare Metal",
-    "section": "crt0 is cheating",
-    "text": "crt0 is cheating\n\nOur freestanding executable does not have access to the Rust runtime and crt0\nWe need to define our own entry point. = Implementing the start language item wouldn’t help, since it would still require crt0.\nInstead, we need to overwrite the crt0 entry point directly.\n\nOverwriting\n\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n#![no_main]\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}"
-  },
-  {
-    "objectID": "30_metal.rjs.html#no-main-in-main",
-    "href": "30_metal.rjs.html#no-main-in-main",
-    "title": "Bare Metal",
-    "section": "No main in main",
-    "text": "No main in main\n\nAt this point we can also remove the main function.\nAbsent a compatible runtime, main is meaningless!\nIf you cargo build at this point, by the way, you will get some fun errors."
-  },
-  {
-    "objectID": "30_metal.rjs.html#start-in-main",
-    "href": "30_metal.rjs.html#start-in-main",
-    "title": "Bare Metal",
-    "section": "Start in main",
-    "text": "Start in main\n\nInstead, overwrite the entry point with our own _start function:\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}"
-  },
-  {
-    "objectID": "30_metal.rjs.html#manglin",
-    "href": "30_metal.rjs.html#manglin",
-    "title": "Bare Metal",
-    "section": "Manglin’",
-    "text": "Manglin’\n\nBy using the #[unsafe(no_mangle)] attribute, we disable “name mangling”\n\nThe function must be named _start.\n\nOtherwise, compiler generates unique symbols like _start_imarandomstr_1234 to avoid namespace collisons.\n\nFolks… it’s key-value storage.\n\nThe attribute is required for the linker in the next step."
-  },
-  {
-    "objectID": "30_metal.rjs.html#c-you-again",
-    "href": "30_metal.rjs.html#c-you-again",
-    "title": "Bare Metal",
-    "section": "C you again",
-    "text": "C you again\n\nMark the function as extern \"C\" to tell the compiler that it should use the “C calling convention”\nThe reason for naming the function _start is that this is the default entry point name for most systems."
-  },
-  {
-    "objectID": "30_metal.rjs.html#read-more-1",
-    "href": "30_metal.rjs.html#read-more-1",
-    "title": "Bare Metal",
-    "section": "Read more",
-    "text": "Read more\n\nname mangling\nC calling convention"
-  },
-  {
-    "objectID": "30_metal.rjs.html#divergence",
-    "href": "30_metal.rjs.html#divergence",
-    "title": "Bare Metal",
-    "section": "Divergence",
-    "text": "Divergence\n\nThe ! return type returns!\nThis is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.\n\nIt can’t return anywhere!"
-  },
-  {
-    "objectID": "30_metal.rjs.html#exit",
-    "href": "30_metal.rjs.html#exit",
-    "title": "Bare Metal",
-    "section": "Exit",
-    "text": "Exit\n\nBefore I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.\nOperating systems are similar.\nSo instead of returning, the entry point should e.g. invoke the exit system call of the operating system.\nFor now, we fulfill the requirement by looping endlessly.\nexit system call"
-  },
-  {
-    "objectID": "30_metal.rjs.html#now-it-works",
-    "href": "30_metal.rjs.html#now-it-works",
-    "title": "Bare Metal",
-    "section": "Now it works!",
-    "text": "Now it works!\n\nIt doesn’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rustcheyGtM/symbols.o\" \"&lt;1 object files omitted&gt;\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-L\" \"/tmp/rustcheyGtM/raw-dylibs\" \"-Wl,-Bdynamic\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':\n          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here\n          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n          (.text+0x1b): undefined reference to `main'\n          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\n\n  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified\n  = note: use the `-l` flag to specify native libraries to link\n  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error"
+    "text": "Whoops!\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error\n\nWe don’t have and can’t use a main!"
   },
   {
     "objectID": "30_metal.rjs.html#to-be-continued",
@@ -3815,7 +3594,277 @@
     "href": "31_linker.html",
     "title": "Linker",
     "section": "",
-    "text": "The linker is a program that combines the generated code into an executable.\nSince the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error.\nThe fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.",
+    "text": "This is continued directly from the Bare Metal lecture.\n\n\n\n\nWe left off with the following code:\n\n\n\nsrc/main.rs\n\n#![no_std]\n\n#[panic_handler]\n#[allow(unconditional_recursion)]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}\n\n\n\n\n\nWe modified the configuration with a few new lines about panics.\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\"\n\n\n\n\n\nWe encountered the following error:\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#the-code",
+    "href": "31_linker.html#the-code",
+    "title": "Linker",
+    "section": "",
+    "text": "We left off with the following code:\n\n\n\nsrc/main.rs\n\n#![no_std]\n\n#[panic_handler]\n#[allow(unconditional_recursion)]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#the-configuration",
+    "href": "31_linker.html#the-configuration",
+    "title": "Linker",
+    "section": "",
+    "text": "We modified the configuration with a few new lines about panics.\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\"",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#the-state-of-play",
+    "href": "31_linker.html#the-state-of-play",
+    "title": "Linker",
+    "section": "",
+    "text": "We encountered the following error:\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: using `fn main` requires the standard library\n  |\n  = help: use `#![no_main]` to bypass the Rust generated entrypoint and declare a platform specific entrypoint yourself, usually with `#[no_mangle]`\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#the-start-attribute",
+    "href": "31_linker.html#the-start-attribute",
+    "title": "Linker",
+    "section": "The start attribute",
+    "text": "The start attribute\n\nOne might think that the main function is the first function called when you run a program.\n\nUsually because that is how main is taught.\nIt isn’t entirely wrong - main is the first thing that you write that is called when you run a program.\nBut there’s often some setup first!\n\nMost languages have a “runtime system”\n\nFor e.g. Java garbage collection (e.g. in Java)\nFor e.g. Go software threads (goroutines)\nFor e.g. Python, Pyodide runs in WebAssembly/Emscripten within your browser engine which itself runs on top of an OS.\n\nThis runtime needs to be called before main, since it needs to initialize itself.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#c-again",
+    "href": "31_linker.html#c-again",
+    "title": "Linker",
+    "section": "C, again",
+    "text": "C, again\n\nIn a typical Rust executable that links the standard library, execution starts in a C runtime library\n\ncrt0 for “C runtime zero”\nC stands for “cool”\n\nThis creates a stack and places the arguments in the right hardware registers.\n\nWe recall even in our earliest mentions of C and Rust we always assume there just happens to be a stack we can push/pop fixed-size variables onto.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#getting-_started",
+    "href": "31_linker.html#getting-_started",
+    "title": "Linker",
+    "section": "Getting _started",
+    "text": "Getting _started\n\nThe C runtime then invokes the entry point of the Rust runtime, which is marked by the start language item.\nI detect a great deal of hand-waving around the term “language item”.\nI think “language item” is how Rust people describe (some subset of) things that don’t make sense with the language implementation.\nMostly, they are not expressions.\nRead more",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#example",
+    "href": "31_linker.html#example",
+    "title": "Linker",
+    "section": "Example",
+    "text": "Example\nSome features provided by lang items:\n\noverloadable operators via traits: the traits corresponding to the ==, &lt;, dereferencing (*) and + (etc.) operators are all marked with lang items; those specific four are eq, partial_ord, deref/deref_mut, and add respectively.\n\nWe recall Calvin Deutschbein Thought on both overloading and traits (they’re bad).",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#example-1",
+    "href": "31_linker.html#example-1",
+    "title": "Linker",
+    "section": "Example",
+    "text": "Example\nSome features provided by lang items:\n\npanicking: the panic and panic_impl lang items, among others.\n\nWe have already been bamboozled into using #[panic_handler]",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#example-2",
+    "href": "31_linker.html#example-2",
+    "title": "Linker",
+    "section": "Example",
+    "text": "Example\nSome features provided by lang items:\n\nstack unwinding: the lang item eh_personality is a function used by the failure mechanisms of the compiler.\n\nThe eh_personality item is cut content present in the reference material. We recall Calvin Deutschbein Thought on unwinding (it’s bad).",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#back-to-rust",
+    "href": "31_linker.html#back-to-rust",
+    "title": "Linker",
+    "section": "Back to Rust",
+    "text": "Back to Rust\n\nRust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.\n\nWe should approach the claim of minimal with some skeptism, but it isn’t relevant to us for now.\n\nThe runtime then finally calls the main function.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#crt0-is-cheating",
+    "href": "31_linker.html#crt0-is-cheating",
+    "title": "Linker",
+    "section": "crt0 is cheating",
+    "text": "crt0 is cheating\n\nOur freestanding executable does not have access to the Rust runtime and crt0\nWe need to define our own entry point. = Implementing the start language item wouldn’t help, since it would still require crt0.\nInstead, we need to overwrite the crt0 entry point directly.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#overwriting",
+    "href": "31_linker.html#overwriting",
+    "title": "Linker",
+    "section": "Overwriting",
+    "text": "Overwriting\n\nTo tell the Rust compiler that we don’t want to use the normal entry point chain, we add the #![no_main] attribute.\n\n\n\nsrc/main.rs\n\n// main.rs\n\n#![no_std]\n#![no_main]\n\n/// This function is called on panic.\n#[panic_handler]\n#[allow(unconditional_recursion)]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#no-main-in-main",
+    "href": "31_linker.html#no-main-in-main",
+    "title": "Linker",
+    "section": "No main in main",
+    "text": "No main in main\n\nAt this point we can also remove the main function.\n\nBut notably still term our file main.rs\nWe also pretend this is not confusing.\n\nAbsent a compatible runtime, main is meaningless!\nIf you cargo build at this point, by the way, you will get some fun errors.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#start-in-main",
+    "href": "31_linker.html#start-in-main",
+    "title": "Linker",
+    "section": "Start in main",
+    "text": "Start in main\n\nInstead, overwrite the entry point with our own _start function:\n\n\n\nsrc/main.rs\n\nfn _start() -&gt; ! {\n    // Code\n}\n\n\nThis also won’t work.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#manglin",
+    "href": "31_linker.html#manglin",
+    "title": "Linker",
+    "section": "Manglin’",
+    "text": "Manglin’\n\nBy using the #[unsafe(no_mangle)] attribute, we disable “name mangling”\n\nThe function must be named _start.\n\nOtherwise, compiler generates unique symbols like _start_imarandomstr_1234 to avoid namespace collisons.\n\nFolks… it’s key-value storage.\n\nThe attribute is required for the linker in the next step.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#start-in-main-1",
+    "href": "31_linker.html#start-in-main-1",
+    "title": "Linker",
+    "section": "Start in main",
+    "text": "Start in main\n\nWrite your own mangle-free _start.:\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\nfn _start() -&gt; ! {\n    // Code\n}",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#c-you-again",
+    "href": "31_linker.html#c-you-again",
+    "title": "Linker",
+    "section": "C you again",
+    "text": "C you again\n\nMark the function as extern \"C\" to tell the compiler that it should use the “C calling convention”\nThe reason for naming the function _start is that this is the default entry point name for most systems.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#a-hardware-reality",
+    "href": "31_linker.html#a-hardware-reality",
+    "title": "Linker",
+    "section": "A Hardware Reality",
+    "text": "A Hardware Reality\n\nThe C calling convention is a hardware reality\nIt is the implementation of a physical device that assumes C code is running on it,\nIt assumes the C runs in an expected, consistent, historical way.\nThis consistency leads to a usable heap and viable return.\nIt could be possible to e.g. implement stack-less C\n\nBut that would not have hardware support.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#start-in-main-2",
+    "href": "31_linker.html#start-in-main-2",
+    "title": "Linker",
+    "section": "Start in main",
+    "text": "Start in main\n\nInstead, overwrite the entry point with our own _start function:\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    // Code\n}",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#c-you-later",
+    "href": "31_linker.html#c-you-later",
+    "title": "Linker",
+    "section": "C you later",
+    "text": "C you later\n\nWe don’t have a great way to test this at this stage.\n\nIn fact, most formulations will lead to similar errors…\nWe just put it in now for forwards compatability.\n\nThat said, I got this working without pub extern \"C\"\n\nYou can try it out soon.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#read-more",
+    "href": "31_linker.html#read-more",
+    "title": "Linker",
+    "section": "Read more",
+    "text": "Read more\n\nname mangling\nC calling convention",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#divergence",
+    "href": "31_linker.html#divergence",
+    "title": "Linker",
+    "section": "Divergence",
+    "text": "Divergence\n\nThe ! return type returns!\nThis is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.\n\nIt can’t return anywhere!\n\nCowards use loop(), heroes use recursion.\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    _start()\n}",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#allowance",
+    "href": "31_linker.html#allowance",
+    "title": "Linker",
+    "section": "Allowance",
+    "text": "Allowance\n\nAs you are aware, cargo is counted among the cowards that expect loop.\n\nWe still haven’t shown the trick to compile this yet, but if you knew the trick you would see the following.\n\n\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nwarning: function cannot return without recursing\n --&gt; src/main.rs:5:1\n  |\n5 | pub extern \"C\" fn _start() -&gt; ! {\n  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ cannot return without recursing\n6 |     _start()\n  |     -------- recursive call site\n  |\n  = help: a `loop` may express intention better if this is on purpose\n  = note: `#[warn(unconditional_recursion)]` on by default\n\nwarning: `osirs` (bin \"osirs\") generated 1 warning\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.16s",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#hash-and-hash-bang",
+    "href": "31_linker.html#hash-and-hash-bang",
+    "title": "Linker",
+    "section": "Hash and Hash Bang",
+    "text": "Hash and Hash Bang\n\nWe applied function-level allowances to our panic to allow infinite recursion as follows:\n\nImmediately prepending, octothorpe/hash prefixed “language items”\n\n\n\n\nsrc/main.rs\n\n#[panic_handler]\n#[allow(unconditional_recursion)]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}\n\n\nWe applied file-level allowances to our src/main.rs as follows:\n\nFree-floating, octothorpe+exclamation point (hash+bang)\n\n\n\n\nsrc/main.rs\n\n#![no_std]\n#![no_main]",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#the-code-1",
+    "href": "31_linker.html#the-code-1",
+    "title": "Linker",
+    "section": "The Code",
+    "text": "The Code\n\nI promoted the recursion allowance to file-level, with the following resultant code:\n\n\n\nsrc/main.rs\n\n#![no_std]\n#![no_main]\n#![allow(unconditional_recursion)]\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! { _start() }\n\n#[panic_handler]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! { panic(info) }\n\n\nPut a pin in this.\n\nWe’ll be back latter.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#exit",
+    "href": "31_linker.html#exit",
+    "title": "Linker",
+    "section": "Exit",
+    "text": "Exit\n\nBefore I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.\nOperating systems are similar.\nSo instead of returning, the entry point should e.g. invoke the exit system call of the operating system.\nexit system call\nFor now, we fulfill the requirement by recursing endlessly.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#now-it-works",
+    "href": "31_linker.html#now-it-works",
+    "title": "Linker",
+    "section": "Now it works!",
+    "text": "Now it works!\n\nIt doesn’t.\n\n$ cargo build\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\nerror: linking with `cc` failed: exit status: 1\n  |\n  = note:  \"cc\" \"-m64\" \"/tmp/rustcheyGtM/symbols.o\" \"&lt;1 object files omitted&gt;\" \"-Wl,--as-needed\" \"-Wl,-Bstatic\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib\" \"-L\" \"/tmp/rustcheyGtM/raw-dylibs\" \"-Wl,-Bdynamic\" \"-Wl,--eh-frame-hdr\" \"-Wl,-z,noexecstack\" \"-L\" \"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib\" \"-o\" \"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e\" \"-Wl,--gc-sections\" \"-pie\" \"-Wl,-z,relro,-z,now\" \"-nodefaultlibs\"\n  = note: some arguments are omitted. use `--verbose` to show all linker arguments\n  = note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':\n          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here\n          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':\n          (.text+0x1b): undefined reference to `main'\n          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'\n          collect2: error: ld returned 1 exit status\n\n  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified\n  = note: use the `-l` flag to specify native libraries to link\n  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)\n\nerror: could not compile `osirs` (bin \"osirs\") due to 1 previous error",
     "crumbs": [
       "Linker"
     ]
@@ -3824,8 +3873,8 @@
     "objectID": "31_linker.html#linker-errors",
     "href": "31_linker.html#linker-errors",
     "title": "Linker",
-    "section": "",
-    "text": "The linker is a program that combines the generated code into an executable.\nSince the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error.\nThe fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.",
+    "section": "Linker Errors",
+    "text": "Linker Errors\n\nThe linker is a program that combines the generated code into an executable.\n\nCould be the subject of an entire course.\nExtremely compiler-relevant.\n\nSince the executable format differs between Linux, Windows, and macOS, each system has its own linker that throws a different error.\nThe fundamental cause of the errors is the same: the default configuration of the linker assumes that our program depends on the C runtime, which it does not.",
     "crumbs": [
       "Linker"
     ]
@@ -3835,7 +3884,87 @@
     "href": "31_linker.html#solution",
     "title": "Linker",
     "section": "Solution",
-    "text": "Solution\n\nTo solve the errors, we need to tell the linker that it should not include the C runtime.\nWe can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.\n\n\nBuilding for a Bare Metal Target\nBy default Rust tries to build an executable that is able to run in your current system environment. For example, if you’re using Windows on x86_64, Rust tries to build an .exe Windows executable that uses x86_64 instructions. This environment is called your “host” system.\nTo describe different environments, Rust uses a string called target triple. You can see the target triple for your host system by running rustc --version --verbose:\nrustc 1.35.0-nightly (474e7a648 2019-04-07)\nbinary: rustc\ncommit-hash: 474e7a6486758ea6fc761893b1a49cd9076fb0ab\ncommit-date: 2019-04-07\nhost: x86_64-unknown-linux-gnu\nrelease: 1.35.0-nightly\nLLVM version: 8.0\nThe above output is from a x86_64 Linux system. We see that the host triple is x86_64-unknown-linux-gnu, which includes the CPU architecture (x86_64), the vendor (unknown), the operating system (linux), and the ABI (gnu).\nBy compiling for our host triple, the Rust compiler and the linker assume that there is an underlying operating system such as Linux or Windows that uses the C runtime by default, which causes the linker errors. So, to avoid the linker errors, we can compile for a different environment with no underlying operating system.\nAn example of such a bare metal environment is the thumbv7em-none-eabihf target triple, which describes an embedded ARM system. The details are not important, all that matters is that the target triple has no underlying operating system, which is indicated by the none in the target triple. To be able to compile for this target, we need to add it in rustup:\nrustup target add thumbv7em-none-eabihf\nThis downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:\ncargo build --target thumbv7em-none-eabihf\nBy passing a --target argument we cross compile our executable for a bare metal target system. Since the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.\nThis is the approach that we will use for building our OS kernel. Instead of thumbv7em-none-eabihf, we will use a custom target that describes a x86_64 bare metal environment. The details will be explained in the next post.\n\n\nLinker Arguments\nInstead of compiling for a bare metal system, it is also possible to resolve the linker errors by passing a certain set of arguments to the linker. This will be the subject of the lab this week.",
+    "text": "Solution\n\nTo solve the errors, we need to tell the linker that it should not include the C runtime.\nWe can do this either by passing a certain set of arguments to the linker or by building for a bare metal target.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#building-for-a-bare-metal-target",
+    "href": "31_linker.html#building-for-a-bare-metal-target",
+    "title": "Linker",
+    "section": "Building for a Bare Metal Target",
+    "text": "Building for a Bare Metal Target\n\nBy default Rust tries to build an executable that is able to run in your current system environment.\nFor example, if you’re using Linux on x86_64, Rust tries to build an ELF that uses x86_64 instructions.\nThis environment is called your “host” system.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#target-triple",
+    "href": "31_linker.html#target-triple",
+    "title": "Linker",
+    "section": "Target Triple",
+    "text": "Target Triple\n\nTo describe different environments, Rust uses a string called target triple.\nYou can see the target triple for your host system by running rustc --version --verbose:\n\n$ rustc --version --verbose\nrustc 1.87.0 (17067e9ac 2025-05-09)\nbinary: rustc\ncommit-hash: 17067e9ac6d7ecb70e50f92c1944e545188d2359\ncommit-date: 2025-05-09\nhost: x86_64-unknown-linux-gnu\nrelease: 1.87.0\nLLVM version: 20.1.1",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#comments",
+    "href": "31_linker.html#comments",
+    "title": "Linker",
+    "section": "Comments",
+    "text": "Comments\n\nThe above output is from a x86_64 Linux system.\nWe see that the host triple is x86_64-unknown-linux-gnu\n\nCPU architecture (x86_64),\nVendor (unknown) - It’s Intel #Portland\nOperating system (linux)\nThe ABI (gnu).",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#on-triples",
+    "href": "31_linker.html#on-triples",
+    "title": "Linker",
+    "section": "On Triples",
+    "text": "On Triples\n\nFor triple, rustc and the linker (for me gcc, often clang is recommended). assume an OS and C runtime.\nWe turned both of those things off.\nSo, to avoid the linker errors, we can compile for a different environment with no underlying operating system.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#bare-metal",
+    "href": "31_linker.html#bare-metal",
+    "title": "Linker",
+    "section": "Bare Metal",
+    "text": "Bare Metal\n\nOne bare metal environment is the thumbv7em-none-eabi target triple\nA embedded ARM system. Used for teaching.\nThe details are not important; it has no underlying operating system.\n\nThat is the none in the target triple.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#rustup",
+    "href": "31_linker.html#rustup",
+    "title": "Linker",
+    "section": "Rustup",
+    "text": "Rustup\n\nTo be able to compile for this target, we need to add it in rustup:\n\nrustup target add thumbv7em-none-eabihf\nThis downloads a copy of the standard (and core) library for the system. Now we can build our freestanding executable for this target:\ncargo build --target thumbv7em-none-eabihf",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#explanation",
+    "href": "31_linker.html#explanation",
+    "title": "Linker",
+    "section": "Explanation",
+    "text": "Explanation\n\nBy passing a --target argument we cross-compile\n\nBare metal compilation!\n\nSince the target system has no operating system, the linker does not try to link the C runtime and our build succeeds without any linker errors.",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#looking-ahead",
+    "href": "31_linker.html#looking-ahead",
+    "title": "Linker",
+    "section": "Looking Ahead",
+    "text": "Looking Ahead\n\nThis is the approach that we will use for building our OS kernel.\nInstead of thumbv7em-none-eabihf, we will use a custom target that describes a x86_64 bare metal environment.\n\nI don’t know how this will work for the Apple Silicon folks.\nBut I am excited to find out!\n\nThe details will be explained next week.",
     "crumbs": [
       "Linker"
     ]
@@ -3845,17 +3974,37 @@
     "href": "31_linker.html#summary",
     "title": "Linker",
     "section": "Summary",
-    "text": "Summary\nA minimal freestanding Rust binary looks like this:\nsrc/main.rs:\n#![no_std] // don't link the Rust standard library\n#![no_main] // disable all Rust-level entry points\n\n#[unsafe(no_mangle)] // don't mangle the name of this function\npub extern \"C\" fn _start() -&gt; ! {\n    // this function is the entry point, since the linker looks for a function\n    // named `_start` by default\n    loop {}\n}\n\n/// This function is called on panic.\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}\nCargo.toml:\n[package]\nname = \"crate_name\"\nversion = \"0.1.0\"\nauthors = [\"Author Name &lt;author@example.com&gt;\"]\n\n# the profile used for `cargo build`\n[profile.dev]\npanic = \"abort\" # disable stack unwinding on panic\n\n# the profile used for `cargo build --release`\n[profile.release]\npanic = \"abort\" # disable stack unwinding on panic\nTo build this binary, we need to compile for a bare metal target such as thumbv7em-none-eabihf:\ncargo build --target thumbv7em-none-eabihf\nAlternatively, we can compile it for the host system by passing additional linker arguments:\n# Linux\ncargo rustc -- -C link-arg=-nostartfiles\n# Windows\ncargo rustc -- -C link-args=\"/ENTRY:_start /SUBSYSTEM:console\"\n# macOS\ncargo rustc -- -C link-args=\"-e __start -static -nostartfiles\"\nNote that this is just a minimal example of a freestanding Rust binary. This binary expects various things, for example, that a stack is initialized when the _start function is called. So for any real use of such a binary, more steps are required.",
+    "text": "Summary\nA minimal freestanding Rust executable looks like this:\n\nCode\n\n\n\nsrc/main.rs\n\n#![no_std]\n#![no_main]\n#![allow(unconditional_recursion)]\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    _start()\n}\n\n#[panic_handler]\nfn panic(info: &core::panic::PanicInfo) -&gt; ! {\n    panic(info)\n}\n\n\nConfiguration\n\nWe made no changes to this during the lab.\n\n\n\n\nCargo.toml\n\n[package]\nname = \"osirs\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[dependencies]\n\n[profile.dev]\npanic = \"abort\"\n\n[profile.release]\npanic = \"abort\"",
     "crumbs": [
       "Linker"
     ]
   },
   {
-    "objectID": "31_linker.html#making-rust-analyzer-happy",
-    "href": "31_linker.html#making-rust-analyzer-happy",
+    "objectID": "31_linker.html#to-build",
+    "href": "31_linker.html#to-build",
     "title": "Linker",
-    "section": "Making rust-analyzer happy",
-    "text": "Making rust-analyzer happy\nThe rust-analyzer project is a great way to get code completion and “go to definition” support (and many other features) for Rust code in your editor. It works really well for #![no_std] projects too, so I recommend using it for kernel development!\nIf you’re using the checkOnSave feature of rust-analyzer (enabled by default), it might report an error for the panic function of our kernel:\nfound duplicate lang item `panic_impl`\nThe reason for this error is that rust-analyzer invokes cargo check --all-targets by default, which also tries to build the binary in test and benchmark mode.\n\nThe two meanings of “target”\nThe --all-targets flag is completely unrelated to the --target argument. There are two different meanings of the term “target” in cargo:\n\nThe --target flag specifies the compilation target that should be passed to the rustc compiler. This should be set to the target triple of the machine that should run our code.\nThe --all-targets flag references the package target of Cargo. Cargo packages can be a library and binary at the same time, so you can specify in which way you like to build your crate. In addition, Cargo also has package targets for examples, tests, and benchmarks. These package targets can co-exist, so you can build/check the same crate in e.g. library or test mode.\n\n\nBy default, cargo check only builds the library and binary package targets. However, rust-analyzer chooses to check all package targets by default when checkOnSave is enabled. This is the reason that rust-analyzer reports the above lang item error that we don’t see in cargo check. If we run cargo check --all-targets, we see the error too:\nerror[E0152]: found duplicate lang item `panic_impl`\n  --&gt; src/main.rs:13:1\n   |\n13 | / fn panic(_info: &PanicInfo) -&gt; ! {\n14 | |     loop {}\n15 | | }\n   | |_^\n   |\n   = note: the lang item is first defined in crate `std` (which `test` depends on)\n   = note: first definition in `std` loaded from /home/[...]/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib/libstd-8df6be531efb3fd0.rlib\n   = note: second definition in the local crate (`blog_os`)\nThe first note tells us that the panic language item is already defined in the std crate, which is a dependency of the test crate. The test crate is automatically included when building a crate in test mode. This does not make sense for our #![no_std] kernel as there is no way to support the standard library on bare metal. So this error is not relevant to our project and we can safely ignore it.\nThe proper way to avoid this error is to specify in our Cargo.toml that our binary does not support building in test and bench modes. We can do that by adding a [[bin]] section to our Cargo.toml to configure the build of our binary:\n# in Cargo.toml\n\n[[bin]]\nname = \"blog_os\"\ntest = false\nbench = false\nThe double-brackets around bin are not a mistake, this is how the TOML format defines keys that can appear multiple times. Since a crate can have multiple binaries, the [[bin]] section can appear multiple times in the Cargo.toml as well. This is also the reason for the mandatory name field, which needs to match the name of the binary (so that cargo knows which settings should be applied to which binary).\nBy setting the test and bench fields to false, we instruct cargo to not build our binary in test or benchmark mode. Now cargo check --all-targets should not throw any errors anymore, and the checkOnSave implementation of rust-analyzer should be happy too.",
+    "section": "To build",
+    "text": "To build\nTo build this binary, we need to compile for a bare metal target such as thumbv7em-none-eabi:\ncargo build --target thumbv7em-none-eabi\nAlternatively, we can compile it for Linux by passing additional linker arguments to rustc:\ncargo rustc -- -C link-arg=-nostartfiles",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#to-run",
+    "href": "31_linker.html#to-run",
+    "title": "Linker",
+    "section": "To run",
+    "text": "To run\n\nIf you build, you can run it!\n\n$ cargo rustc -- -C link-arg=-nostartfiles\n   Compiling osirs v0.1.0 (/home/user/tmp/32)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s\nuser@cd-desk:~/tmp/32$ ./target/debug/osirs\nSegmentation fault (core dumped)\n\nWait a minute!",
+    "crumbs": [
+      "Linker"
+    ]
+  },
+  {
+    "objectID": "31_linker.html#re-cursed",
+    "href": "31_linker.html#re-cursed",
+    "title": "Linker",
+    "section": "RE: cursed",
+    "text": "RE: cursed\n\nThe C calling convention segfaults on infinite recursion.\nSwitch to loop to get an infinite loop.\nThese two things are equally bad in my view.\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}\n\nPop the pin",
     "crumbs": [
       "Linker"
     ]

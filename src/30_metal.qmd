@@ -178,14 +178,9 @@ title: Bare Metal
 
 - We can start creation the same way we make anything else in Rust...
 - *Cargo* (sighs heavily)
-- We will introduce only two wrinkles.
-    - `--bin`: we want to create an executable binary (in contrast to a library) 
-    - `--edition 2024`: to maintain consistency across years and with the working example.
     
-## Invoke as
-
 ```{.sh}
-cargo new ???? --bin --edition 2024
+cargo new ???? 
 ```
 
 ## Example
@@ -193,7 +188,7 @@ cargo new ???? --bin --edition 2024
 - Personally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (`32`,`42` etc.)
 
 ```{.sh}
-cargo new 32 --name osirs --vcs none --bin --edition 2024
+cargo new 32 --name osirs --vcs none
 ```
 
 ## Branches
@@ -413,8 +408,9 @@ error: cannot find macro `println` in this scope
 
 /// This function is called on panic.
 #[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
+#[allow(unconditional_recursion)]
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    panic(info)
 }
 ```
 
@@ -426,7 +422,7 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 - The function should never return.
     - So it is marked as a "diverging function" 
     - It returns the “never” type `!`. 
-- Not much we can do in this function for now, so just `loop()` to prevent a return.
+- Not much we can do in this function for now, so just recurse to prevent a return.
 
 ## Read more...
 
@@ -434,26 +430,6 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
     - [PanicInfo](https://doc.rust-lang.org/nightly/core/panic/struct.PanicInfo.html)
     - [diverging function](https://doc.rust-lang.org/1.30.0/book/first-edition/functions.html#diverging-functions)
     - [“never” type](https://doc.rust-lang.org/nightly/std/primitive.never.html)
-
-<!--
-
-## The `eh_personality` Language Item
-
-Language items are special functions and types that are required internally by the compiler. For example, the [`Copy`] trait is a language item that tells the compiler which types have [_copy semantics_][`Copy`]. When we look at the [implementation][copy code], we see it has the special `#[lang = "copy"]` attribute that defines it as a language item.
-
-[`Copy`]: https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html
-[copy code]: https://github.com/rust-lang/rust/blob/485397e49a02a3b7ff77c17e4a3f16c653925cb3/src/libcore/marker.rs#L296-L299
-
-While providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn't even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.
-
-The [`eh_personality` language item] marks a function that is used for implementing [stack unwinding]. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a [panic]. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g. [libunwind] on Linux or [structured exception handling] on Windows), so we don't want to use it for our operating system.
-
-[`eh_personality` language item]: https://github.com/rust-lang/rust/blob/edb368491551a77d77a48446d4ee88b35490c565/src/libpanic_unwind/gcc.rs#L11-L45
-[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php
-[libunwind]: https://www.nongnu.org/libunwind/
-[structured exception handling]: https://docs.microsoft.com/en-us/windows/win32/debug/structured-exception-handling
-
--->
 
 ## Retry
 
@@ -549,8 +525,8 @@ edition = "2024"
 - Nominally there are use cases for which unwinding is undesirable
     - My take: All cases.
 - So Rust provides an option to "abort on panic" instead. 
-- This disables the generation of unwinding symbol information and thus considerably reduces binary size. 
-    - This seems obviously good to me.
+- Our reference materials claims this disables the generation of unwinding symbol information and thus considerably reduces binary size. 
+    - I could not verify this independently.
 
 ## Update `Cargo.toml`
 
@@ -589,125 +565,8 @@ error: using `fn main` requires the standard library
 
 error: could not compile `osirs` (bin "osirs") due to 1 previous error
 ```
+- We don't have and can't use a `main`!
 
-- Our program is missing the `start` language item, which defines the entry point.
-
-## The `start` attribute
-
-- One might think that the `main` function is the first function called when you run a program. 
-- However, most languages have a "[runtime system](https://en.wikipedia.org/wiki/Runtime_system)"
-    - For e.g. Java garbage collection (e.g. in Java)
-    - For e.g. Go software threads (goroutines)
-- This runtime needs to be called before `main`, since it needs to initialize itself.
-
-## C, again
-
-- In a typical Rust binary that links the standard library, execution starts in a C runtime library 
-    - `crt0` for “C runtime zero” 
-- This creates a stack and places the arguments in the right hardware registers. 
-- The C runtime then invokes the entry point of the Rust runtime, which is marked by the `start` language item. 
-
-## Back to Rust
-
-- Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic. 
-- The runtime then finally calls the `main` function.
-
-## `crt0` is cheating
-
-- Our freestanding executable does not have access to the Rust runtime and `crt0`
-- We need to define our own entry point. 
-= Implementing the `start` language item wouldn't help, since it would still require `crt0`. 
-- Instead, we need to overwrite the `crt0` entry point directly.
-
-### Overwriting
-
-- To tell the Rust compiler that we don't want to use the normal entry point chain, we add the `#![no_main]` attribute.
-
-```{.rs filename="src/main.rs"}
-// main.rs
-
-#![no_std]
-#![no_main]
-
-/// This function is called on panic.
-#[panic_handler]
-fn panic(_info: &core::panic::PanicInfo) -> ! {
-    loop {}
-}
-```
-
-## No main in main
-
-- At this point we can also remove the `main` function. 
-- Absent a compatible runtime, `main` is meaningless!
-- If you `cargo build` at this point, by the way, you will get some fun errors.
-
-## Start in main
-
-- Instead, overwrite the entry point with our own `_start` function:
-
-```{.rs filename="src/main.rs"}
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    loop {}
-}
-```
-
-## Manglin'
-
-- By using the `#[unsafe(no_mangle)]` attribute, we disable "name mangling"
-    - The function **must** be named `_start`. 
-- Otherwise, compiler generates unique symbols like `_start_imarandomstr_1234` to avoid namespace collisons.
-    - Folks... it's key-value storage.
-- The attribute is required for the *linker* in the next step.
-
-## C you again
-
-- Mark the function as `extern "C"` to tell the compiler that it should use the "C calling convention"
-- The reason for naming the function `_start` is that this is the default entry point name for most systems.
-
-## Read more
-
-- [name mangling](https://en.wikipedia.org/wiki/Name_mangling)
-- [C calling convention](https://en.wikipedia.org/wiki/Calling_convention)
-
-## Divergence
-
-- The `!` return type returns!
-- This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader. 
-    - It can't return anywhere!
-    
-## Exit
-
-- Before I go out to the clubs I always "X it up" (put X's on my hands) because I'm straight edge.
-- Operating systems are similar.
-- So instead of returning, the entry point should e.g. invoke the `exit` system call of the operating system.
-- For now, we fulfill the requirement by looping endlessly.
-- [`exit` system call](https://en.wikipedia.org/wiki/Exit_(system_call))
-
-## Now it works!
-
-- It doesn't.
-```{.sh}
-$ cargo build
-   Compiling osirs v0.1.0 (/home/user/tmp/32)
-error: linking with `cc` failed: exit status: 1
-  |
-  = note:  "cc" "-m64" "/tmp/rustcheyGtM/symbols.o" "<1 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustcheyGtM/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"
-  = note: some arguments are omitted. use `--verbose` to show all linker arguments
-  = note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':
-          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here
-          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
-          (.text+0x1b): undefined reference to `main'
-          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'
-          collect2: error: ld returned 1 exit status
-
-  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified
-  = note: use the `-l` flag to specify native libraries to link
-  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)
-
-error: could not compile `osirs` (bin "osirs") due to 1 previous error
-```
 
 ## To be continued
 

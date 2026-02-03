@@ -672,23 +672,15 @@
 <ul>
 <li>We can start creation the same way we make anything else in Rust…</li>
 <li><em>Cargo</em> (sighs heavily)</li>
-<li>We will introduce only two wrinkles.
-<ul>
-<li><code>--bin</code>: we want to create an executable binary (in contrast to a library)</li>
-<li><code>--edition 2024</code>: to maintain consistency across years and with the working example.</li>
-</ul></li>
 </ul>
-</section>
-<section id="invoke-as" class="slide level2">
-<h2>Invoke as</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">cargo</span> new <span class="pp">????</span> <span class="at">--bin</span> <span class="at">--edition</span> 2024</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a></a><span class="ex">cargo</span> new <span class="pp">????</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="example-1" class="slide level2">
 <h2>Example</h2>
 <ul>
 <li>Personally, I would expect you to maintain different OS versions with same crate name but within distinctly named directories (<code>32</code>,<code>42</code> etc.)</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">cargo</span> new 32 <span class="at">--name</span> osirs <span class="at">--vcs</span> none <span class="at">--bin</span> <span class="at">--edition</span> 2024</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a></a><span class="ex">cargo</span> new 32 <span class="at">--name</span> osirs <span class="at">--vcs</span> none</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="branches" class="slide level2">
 <h2>Branches</h2>
@@ -912,9 +904,10 @@
 <span id="cb12-2"><a></a></span>
 <span id="cb12-3"><a></a><span class="co">/// This function is called on panic.</span></span>
 <span id="cb12-4"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb12-5"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb12-6"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb12-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb12-5"><a></a><span class="at">#[</span>allow<span class="at">(</span>unconditional_recursion<span class="at">)]</span></span>
+<span id="cb12-6"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb12-7"><a></a>    panic(info)</span>
+<span id="cb12-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="panics" class="slide level2">
@@ -930,7 +923,7 @@
 <li>So it is marked as a “diverging function”</li>
 <li>It returns the “never” type <code>!</code>.</li>
 </ul></li>
-<li>Not much we can do in this function for now, so just <code>loop()</code> to prevent a return.</li>
+<li>Not much we can do in this function for now, so just recurse to prevent a return.</li>
 </ul>
 </section>
 <section id="read-more" class="slide level2">
@@ -943,25 +936,6 @@
 <li><a href="https://doc.rust-lang.org/nightly/std/primitive.never.html">“never” type</a></li>
 </ul></li>
 </ul>
-<!--
-
-## The `eh_personality` Language Item
-
-Language items are special functions and types that are required internally by the compiler. For example, the [`Copy`] trait is a language item that tells the compiler which types have [_copy semantics_][`Copy`]. When we look at the [implementation][copy code], we see it has the special `#[lang = "copy"]` attribute that defines it as a language item.
-
-[`Copy`]: https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html
-[copy code]: https://github.com/rust-lang/rust/blob/485397e49a02a3b7ff77c17e4a3f16c653925cb3/src/libcore/marker.rs#L296-L299
-
-While providing custom implementations of language items is possible, it should only be done as a last resort. The reason is that language items are highly unstable implementation details and not even type checked (so the compiler doesn't even check if a function has the right argument types). Fortunately, there is a more stable way to fix the above language item error.
-
-The [`eh_personality` language item] marks a function that is used for implementing [stack unwinding]. By default, Rust uses unwinding to run the destructors of all live stack variables in case of a [panic]. This ensures that all used memory is freed and allows the parent thread to catch the panic and continue execution. Unwinding, however, is a complicated process and requires some OS-specific libraries (e.g. [libunwind] on Linux or [structured exception handling] on Windows), so we don't want to use it for our operating system.
-
-[`eh_personality` language item]: https://github.com/rust-lang/rust/blob/edb368491551a77d77a48446d4ee88b35490c565/src/libpanic_unwind/gcc.rs#L11-L45
-[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php
-[libunwind]: https://www.nongnu.org/libunwind/
-[structured exception handling]: https://docs.microsoft.com/en-us/windows/win32/debug/structured-exception-handling
-
--->
 </section>
 <section id="retry" class="slide level2">
 <h2>Retry</h2>
@@ -1065,9 +1039,9 @@ The [`eh_personality` language item] marks a function that is used for implement
 <li>My take: All cases.</li>
 </ul></li>
 <li>So Rust provides an option to “abort on panic” instead.</li>
-<li>This disables the generation of unwinding symbol information and thus considerably reduces binary size.
+<li>Our reference materials claims this disables the generation of unwinding symbol information and thus considerably reduces binary size.
 <ul>
-<li>This seems obviously good to me.</li>
+<li>I could not verify this independently.</li>
 </ul></li>
 </ul>
 </section>
@@ -1112,160 +1086,8 @@ The [`eh_personality` language item] marks a function that is used for implement
 <span id="cb18-6"><a></a></span>
 <span id="cb18-7"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">osirs</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
-<li>Our program is missing the <code>start</code> language item, which defines the entry point.</li>
+<li>We don’t have and can’t use a <code>main</code>!</li>
 </ul>
-</section>
-<section id="the-start-attribute" class="slide level2">
-<h2>The <code>start</code> attribute</h2>
-<ul>
-<li>One might think that the <code>main</code> function is the first function called when you run a program.</li>
-<li>However, most languages have a “<a href="https://en.wikipedia.org/wiki/Runtime_system">runtime system</a>”
-<ul>
-<li>For e.g.&nbsp;Java garbage collection (e.g.&nbsp;in Java)</li>
-<li>For e.g.&nbsp;Go software threads (goroutines)</li>
-</ul></li>
-<li>This runtime needs to be called before <code>main</code>, since it needs to initialize itself.</li>
-</ul>
-</section>
-<section id="c-again" class="slide level2">
-<h2>C, again</h2>
-<ul>
-<li>In a typical Rust binary that links the standard library, execution starts in a C runtime library
-<ul>
-<li><code>crt0</code> for “C runtime zero”</li>
-</ul></li>
-<li>This creates a stack and places the arguments in the right hardware registers.</li>
-<li>The C runtime then invokes the entry point of the Rust runtime, which is marked by the <code>start</code> language item.</li>
-</ul>
-</section>
-<section id="back-to-rust" class="slide level2">
-<h2>Back to Rust</h2>
-<ul>
-<li>Rust only has a very minimal runtime, which takes care of some small things such as setting up stack overflow guards or printing a backtrace on panic.</li>
-<li>The runtime then finally calls the <code>main</code> function.</li>
-</ul>
-</section>
-<section id="crt0-is-cheating" class="slide level2">
-<h2><code>crt0</code> is cheating</h2>
-<ul>
-<li>Our freestanding executable does not have access to the Rust runtime and <code>crt0</code></li>
-<li>We need to define our own entry point. = Implementing the <code>start</code> language item wouldn’t help, since it would still require <code>crt0</code>.</li>
-<li>Instead, we need to overwrite the <code>crt0</code> entry point directly.</li>
-</ul>
-<h3 id="overwriting">Overwriting</h3>
-<ul>
-<li>To tell the Rust compiler that we don’t want to use the normal entry point chain, we add the <code>#![no_main]</code> attribute.</li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>src/main.rs</strong></pre>
-</div>
-<div class="sourceCode" id="cb19" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// main.rs</span></span>
-<span id="cb19-2"><a></a></span>
-<span id="cb19-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb19-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
-<span id="cb19-5"><a></a></span>
-<span id="cb19-6"><a></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb19-7"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb19-8"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb19-9"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb19-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="no-main-in-main" class="slide level2">
-<h2>No main in main</h2>
-<ul>
-<li>At this point we can also remove the <code>main</code> function.</li>
-<li>Absent a compatible runtime, <code>main</code> is meaningless!</li>
-<li>If you <code>cargo build</code> at this point, by the way, you will get some fun errors.</li>
-</ul>
-</section>
-<section id="start-in-main" class="slide level2">
-<h2>Start in main</h2>
-<ul>
-<li>Instead, overwrite the entry point with our own <code>_start</code> function:</li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>src/main.rs</strong></pre>
-</div>
-<div class="sourceCode" id="cb20" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb20-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb20-3"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb20-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="manglin" class="slide level2">
-<h2>Manglin’</h2>
-<ul>
-<li>By using the <code>#[unsafe(no_mangle)]</code> attribute, we disable “name mangling”
-<ul>
-<li>The function <strong>must</strong> be named <code>_start</code>.</li>
-</ul></li>
-<li>Otherwise, compiler generates unique symbols like <code>_start_imarandomstr_1234</code> to avoid namespace collisons.
-<ul>
-<li>Folks… it’s key-value storage.</li>
-</ul></li>
-<li>The attribute is required for the <em>linker</em> in the next step.</li>
-</ul>
-</section>
-<section id="c-you-again" class="slide level2">
-<h2>C you again</h2>
-<ul>
-<li>Mark the function as <code>extern "C"</code> to tell the compiler that it should use the “C calling convention”</li>
-<li>The reason for naming the function <code>_start</code> is that this is the default entry point name for most systems.</li>
-</ul>
-</section>
-<section id="read-more-1" class="slide level2">
-<h2>Read more</h2>
-<ul>
-<li><a href="https://en.wikipedia.org/wiki/Name_mangling">name mangling</a></li>
-<li><a href="https://en.wikipedia.org/wiki/Calling_convention">C calling convention</a></li>
-</ul>
-</section>
-<section id="divergence" class="slide level2">
-<h2>Divergence</h2>
-<ul>
-<li>The <code>!</code> return type returns!</li>
-<li>This is required because the entry point is not called by any function, but invoked directly by the operating system or bootloader.
-<ul>
-<li>It can’t return anywhere!</li>
-</ul></li>
-</ul>
-</section>
-<section id="exit" class="slide level2">
-<h2>Exit</h2>
-<ul>
-<li>Before I go out to the clubs I always “X it up” (put X’s on my hands) because I’m straight edge.</li>
-<li>Operating systems are similar.</li>
-<li>So instead of returning, the entry point should e.g.&nbsp;invoke the <code>exit</code> system call of the operating system.</li>
-<li>For now, we fulfill the requirement by looping endlessly.</li>
-<li><a href="https://en.wikipedia.org/wiki/Exit_(system_call)"><code>exit</code> system call</a></li>
-</ul>
-</section>
-<section id="now-it-works" class="slide level2">
-<h2>Now it works!</h2>
-<ul>
-<li>It doesn’t.</li>
-</ul>
-<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="ex">$</span> cargo build</span>
-<span id="cb21-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
-<span id="cb21-3"><a></a><span class="ex">error:</span> linking with <span class="kw">`</span><span class="fu">cc</span><span class="kw">`</span> failed: exit status: 1</span>
-<span id="cb21-4"><a></a>  <span class="kw">|</span></span>
-<span id="cb21-5"><a></a>  <span class="ex">=</span> note:  <span class="st">"cc"</span> <span class="st">"-m64"</span> <span class="st">"/tmp/rustcheyGtM/symbols.o"</span> <span class="st">"&lt;1 object files omitted&gt;"</span> <span class="st">"-Wl,--as-needed"</span> <span class="st">"-Wl,-Bstatic"</span> <span class="st">"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib"</span> <span class="st">"-L"</span> <span class="st">"/tmp/rustcheyGtM/raw-dylibs"</span> <span class="st">"-Wl,-Bdynamic"</span> <span class="st">"-Wl,--eh-frame-hdr"</span> <span class="st">"-Wl,-z,noexecstack"</span> <span class="st">"-L"</span> <span class="st">"&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib"</span> <span class="st">"-o"</span> <span class="st">"/home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e"</span> <span class="st">"-Wl,--gc-sections"</span> <span class="st">"-pie"</span> <span class="st">"-Wl,-z,relro,-z,now"</span> <span class="st">"-nodefaultlibs"</span></span>
-<span id="cb21-6"><a></a>  <span class="ex">=</span> note: some arguments are omitted. use <span class="kw">`</span><span class="ex">--verbose</span><span class="kw">`</span> to show all linker arguments</span>
-<span id="cb21-7"><a></a>  <span class="ex">=</span> note: /usr/bin/ld: /home/user/tmp/32/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function <span class="kw">`</span><span class="ex">_start</span><span class="st">':</span></span>
-<span id="cb21-8"><a></a><span class="st">          /home/user/tmp/32/src/main.rs:14: multiple definition of `_start'</span><span class="kw">;</span> <span class="ex">/usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:</span><span class="er">(</span><span class="ex">.text+0x0</span><span class="kw">)</span><span class="bu">:</span> first defined here</span>
-<span id="cb21-9"><a></a>          <span class="ex">/usr/bin/ld:</span> /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function <span class="kw">`</span>_start<span class="st">':</span></span>
-<span id="cb21-10"><a></a><span class="st">          (.text+0x1b): undefined reference to `main'</span></span>
-<span id="cb21-11"><a></a>          <span class="ex">/usr/bin/ld:</span> <span class="er">(</span><span class="ex">.text+0x21</span><span class="kw">)</span><span class="bu">:</span> undefined reference to <span class="kw">`</span><span class="ex">__libc_start_main</span><span class="st">'</span></span>
-<span id="cb21-12"><a></a><span class="st">          collect2: error: ld returned 1 exit status</span></span>
-<span id="cb21-13"><a></a></span>
-<span id="cb21-14"><a></a><span class="st">  = note: some `extern` functions couldn'</span><span class="ex">t</span> be found<span class="kw">;</span> <span class="ex">some</span> native libraries may need to be installed or have their path specified</span>
-<span id="cb21-15"><a></a>  <span class="ex">=</span> note: use the <span class="kw">`</span><span class="at">-l</span><span class="kw">`</span> <span class="ex">flag</span> to specify native libraries to link</span>
-<span id="cb21-16"><a></a>  <span class="ex">=</span> note: use the <span class="kw">`</span>cargo:rustc-link-lib<span class="kw">`</span> <span class="ex">directive</span> to specify the native libraries to link with Cargo <span class="er">(</span><span class="ex">see</span> https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib<span class="kw">)</span></span>
-<span id="cb21-17"><a></a></span>
-<span id="cb21-18"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span>osirs<span class="kw">`</span> <span class="kw">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="to-be-continued" class="slide level2">
 <h2>To be continued</h2>
