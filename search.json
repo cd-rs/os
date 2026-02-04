@@ -4044,7 +4044,7 @@
     "href": "32_r5.html#code",
     "title": "RISC-V",
     "section": "Code",
-    "text": "Code\n\n\n\n\n\n\nDon’t be like me\n\n\n\nLoops are more stable than recursion I guess.\n\n\n\n\nsrc/main.rs\n\n#![no_main]\n#![no_std]\n\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}\n\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}",
+    "text": "Code\n\n\n\n\n\n\nNoteDon’t be like me\n\n\n\nLoops are more stable than recursion I guess.\n\n\n\n\nsrc/main.rs\n\n#![no_main]\n#![no_std]\n\npub extern \"C\" fn _start() -&gt; ! {\n    loop {}\n}\n\n#[panic_handler]\nfn panic(_info: &core::panic::PanicInfo) -&gt; ! {\n    loop {}\n}",
     "crumbs": [
       "RISC-V"
     ]
@@ -4174,7 +4174,7 @@
     "href": "32_r5.html#run-main",
     "title": "RISC-V",
     "section": "Run main",
-    "text": "Run main\n\nYou can specify that you totally wrote a working OS, honest, by providing qemu with a specified kernel, like our main\n\n\u0016qemu-system-riscv64 -kernel main\n\n\n\n\n\n\nForward Pointer\n\n\n\nWe will properly introduce kernels in the next lecture.\n\n\n\nThis will probably work.\n\n$ qemu-system-riscv64 -kernel main\nqemu-system-riscv64: Some ROM regions are overlapping\nThese ROM regions might have been loaded by direct user request or by default.\nThey could be BIOS/firmware images, a guest kernel, initrd or some other file loaded into guest memory.\nCheck whether you intended to load all this guest code, and whether it has been built to load to the correct addresses.\n\nThe following two regions overlap (in the memory address space):\n  /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf ELF program header segment 1 (addresses 0x0000000080000000 - 0x0000000080016ce8)\n  main ELF program header segment 0 (addresses 0x0000000080000000 - 0x0000000080000004)\n\nAnd by probably I mean with a probability of zero.",
+    "text": "Run main\n\nYou can specify that you totally wrote a working OS, honest, by providing qemu with a specified kernel, like our main\n\n\u0016qemu-system-riscv64 -kernel main\n\n\n\n\n\n\nNoteForward Pointer\n\n\n\nWe will properly introduce kernels in the next lecture.\n\n\n\nThis will probably work.\n\n$ qemu-system-riscv64 -kernel main\nqemu-system-riscv64: Some ROM regions are overlapping\nThese ROM regions might have been loaded by direct user request or by default.\nThey could be BIOS/firmware images, a guest kernel, initrd or some other file loaded into guest memory.\nCheck whether you intended to load all this guest code, and whether it has been built to load to the correct addresses.\n\nThe following two regions overlap (in the memory address space):\n  /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf ELF program header segment 1 (addresses 0x0000000080000000 - 0x0000000080016ce8)\n  main ELF program header segment 0 (addresses 0x0000000080000000 - 0x0000000080000004)\n\nAnd by probably I mean with a probability of zero.",
     "crumbs": [
       "RISC-V"
     ]
@@ -4184,7 +4184,7 @@
     "href": "32_r5.html#bios",
     "title": "RISC-V",
     "section": "BIOS",
-    "text": "BIOS\n\n\n\n\n\n\nForward Pointer\n\n\n\nWe will properly introduce the BIOS in the next lecture.\n\n\n\nThe BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.\nWhen the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).\nThe BIOS will then instruct the device how to procede.\nWe don’t need any of that, we already wrote an infinite loop and can just start there!\n\n\u0016qemu-system-riscv64 -kernel main -bios none\n\nIn computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer’s motherboard.",
+    "text": "BIOS\n\n\n\n\n\n\nNoteForward Pointer\n\n\n\nWe will properly introduce the BIOS in the next lecture.\n\n\n\nThe BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.\nWhen the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).\nThe BIOS will then instruct the device how to procede.\nWe don’t need any of that, we already wrote an infinite loop and can just start there!\n\n\u0016qemu-system-riscv64 -kernel main -bios none\n\nIn computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer’s motherboard.",
     "crumbs": [
       "RISC-V"
     ]
@@ -4205,6 +4205,16 @@
     "title": "RISC-V",
     "section": "Main",
     "text": "Main\n\nGo ahead and run main, what could go wrong.\n\n$ ./main\n-bash: ./main: cannot execute binary file: Exec format error\n\nIf, like me, you foolish use an architecture other than RISC-V as your daily driver (that’s a metaphor, not a reference to device drivers), main won’t work on your system.",
+    "crumbs": [
+      "RISC-V"
+    ]
+  },
+  {
+    "objectID": "32_r5.html#machine",
+    "href": "32_r5.html#machine",
+    "title": "RISC-V",
+    "section": "Machine",
+    "text": "Machine\n\nYou may get an error not unlike this one:\n\n$ qemu-system-riscv64 -bios none -kernel main\nqemu-system-riscv64: Invalid HTIF fromhost or tohost address\n\nYou also may not get this error.\nIt is caused by not telling QEMU which specific, physical machine to pretend to be.\nI recommend sifive_u, which I believe is the most popular physical chip for developmental purposes.\n\nqemu-system-riscv64 -machine sifive_u -bios none -kernel main",
     "crumbs": [
       "RISC-V"
     ]
