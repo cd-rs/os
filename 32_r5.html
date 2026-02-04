@@ -643,6 +643,19 @@ Don’t be like me
 <li>You can specify that you totally wrote a working OS, honest, by providing <code>qemu</code> with a specified kernel, like our <code>main</code></li>
 </ul>
 <div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1"></a><span class="ex">qemu-system-riscv64</span> <span class="at">-kernel</span> main</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Forward Pointer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We will properly introduce kernels in the next lecture.</p>
+</div>
+</div>
 <ul>
 <li>This will probably work.</li>
 </ul>
@@ -1496,50 +1509,59 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb21-321"><a href="#cb21-321"></a><span class="in">qemu-system-riscv64 -kernel main</span></span>
 <span id="cb21-322"><a href="#cb21-322"></a><span class="in">```</span></span>
 <span id="cb21-323"><a href="#cb21-323"></a></span>
-<span id="cb21-324"><a href="#cb21-324"></a><span class="ss">- </span>This will probably work.</span>
+<span id="cb21-324"><a href="#cb21-324"></a>::: {.callout-note appearance="simple"}</span>
 <span id="cb21-325"><a href="#cb21-325"></a></span>
-<span id="cb21-326"><a href="#cb21-326"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-327"><a href="#cb21-327"></a><span class="in">$ qemu-system-riscv64 -kernel main</span></span>
-<span id="cb21-328"><a href="#cb21-328"></a><span class="in">qemu-system-riscv64: Some ROM regions are overlapping</span></span>
-<span id="cb21-329"><a href="#cb21-329"></a><span class="in">These ROM regions might have been loaded by direct user request or by default.</span></span>
-<span id="cb21-330"><a href="#cb21-330"></a><span class="in">They could be BIOS/firmware images, a guest kernel, initrd or some other file loaded into guest memory.</span></span>
-<span id="cb21-331"><a href="#cb21-331"></a><span class="in">Check whether you intended to load all this guest code, and whether it has been built to load to the correct addresses.</span></span>
+<span id="cb21-326"><a href="#cb21-326"></a><span class="fu">## Forward Pointer</span></span>
+<span id="cb21-327"><a href="#cb21-327"></a></span>
+<span id="cb21-328"><a href="#cb21-328"></a>We will properly introduce kernels in the next lecture.</span>
+<span id="cb21-329"><a href="#cb21-329"></a></span>
+<span id="cb21-330"><a href="#cb21-330"></a>:::</span>
+<span id="cb21-331"><a href="#cb21-331"></a></span>
 <span id="cb21-332"><a href="#cb21-332"></a></span>
-<span id="cb21-333"><a href="#cb21-333"></a><span class="in">The following two regions overlap (in the memory address space):</span></span>
-<span id="cb21-334"><a href="#cb21-334"></a><span class="in">  /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf ELF program header segment 1 (addresses 0x0000000080000000 - 0x0000000080016ce8)</span></span>
-<span id="cb21-335"><a href="#cb21-335"></a><span class="in">  main ELF program header segment 0 (addresses 0x0000000080000000 - 0x0000000080000004)</span></span>
-<span id="cb21-336"><a href="#cb21-336"></a><span class="in">```</span></span>
-<span id="cb21-337"><a href="#cb21-337"></a></span>
-<span id="cb21-338"><a href="#cb21-338"></a><span class="ss">- </span>And by probably I mean with a probability of zero.</span>
-<span id="cb21-339"><a href="#cb21-339"></a></span>
-<span id="cb21-340"><a href="#cb21-340"></a><span class="fu">## BIOS</span></span>
+<span id="cb21-333"><a href="#cb21-333"></a><span class="ss">- </span>This will probably work.</span>
+<span id="cb21-334"><a href="#cb21-334"></a></span>
+<span id="cb21-335"><a href="#cb21-335"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-336"><a href="#cb21-336"></a><span class="in">$ qemu-system-riscv64 -kernel main</span></span>
+<span id="cb21-337"><a href="#cb21-337"></a><span class="in">qemu-system-riscv64: Some ROM regions are overlapping</span></span>
+<span id="cb21-338"><a href="#cb21-338"></a><span class="in">These ROM regions might have been loaded by direct user request or by default.</span></span>
+<span id="cb21-339"><a href="#cb21-339"></a><span class="in">They could be BIOS/firmware images, a guest kernel, initrd or some other file loaded into guest memory.</span></span>
+<span id="cb21-340"><a href="#cb21-340"></a><span class="in">Check whether you intended to load all this guest code, and whether it has been built to load to the correct addresses.</span></span>
 <span id="cb21-341"><a href="#cb21-341"></a></span>
-<span id="cb21-342"><a href="#cb21-342"></a><span class="ss">- </span>The BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.</span>
-<span id="cb21-343"><a href="#cb21-343"></a><span class="ss">- </span>When the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).</span>
-<span id="cb21-344"><a href="#cb21-344"></a><span class="ss">- </span>The BIOS will then instruct the device how to procede.</span>
-<span id="cb21-345"><a href="#cb21-345"></a><span class="ss">- </span>We don't need any of that, we already wrote an infinite loop and can just start there!</span>
+<span id="cb21-342"><a href="#cb21-342"></a><span class="in">The following two regions overlap (in the memory address space):</span></span>
+<span id="cb21-343"><a href="#cb21-343"></a><span class="in">  /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf ELF program header segment 1 (addresses 0x0000000080000000 - 0x0000000080016ce8)</span></span>
+<span id="cb21-344"><a href="#cb21-344"></a><span class="in">  main ELF program header segment 0 (addresses 0x0000000080000000 - 0x0000000080000004)</span></span>
+<span id="cb21-345"><a href="#cb21-345"></a><span class="in">```</span></span>
 <span id="cb21-346"><a href="#cb21-346"></a></span>
-<span id="cb21-347"><a href="#cb21-347"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-348"><a href="#cb21-348"></a><span class="in">qemu-system-riscv64 -kernel main -bios none</span></span>
-<span id="cb21-349"><a href="#cb21-349"></a><span class="in">```</span></span>
+<span id="cb21-347"><a href="#cb21-347"></a><span class="ss">- </span>And by probably I mean with a probability of zero.</span>
+<span id="cb21-348"><a href="#cb21-348"></a></span>
+<span id="cb21-349"><a href="#cb21-349"></a><span class="fu">## BIOS</span></span>
 <span id="cb21-350"><a href="#cb21-350"></a></span>
-<span id="cb21-351"><a href="#cb21-351"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer's motherboard.</span><span class="co">](https://en.wikipedia.org/wiki/BIOS)</span></span>
-<span id="cb21-352"><a href="#cb21-352"></a></span>
-<span id="cb21-353"><a href="#cb21-353"></a><span class="fu"># Fin</span></span>
-<span id="cb21-354"><a href="#cb21-354"></a></span>
-<span id="cb21-355"><a href="#cb21-355"></a>For me that worked, hopefully for you too! If not, you have officially entered the fun zone.</span>
-<span id="cb21-356"><a href="#cb21-356"></a></span>
-<span id="cb21-357"><a href="#cb21-357"></a><span class="fu">## TODO</span></span>
-<span id="cb21-358"><a href="#cb21-358"></a></span>
-<span id="cb21-359"><a href="#cb21-359"></a>For this homework, add a README.md to the crate describing how to get it to work.</span>
-<span id="cb21-360"><a href="#cb21-360"></a></span>
-<span id="cb21-361"><a href="#cb21-361"></a><span class="ss">- </span>It should be like this document, but concise.</span>
-<span id="cb21-362"><a href="#cb21-362"></a><span class="ss">- </span>Use cool markdown checkboxes.</span>
+<span id="cb21-351"><a href="#cb21-351"></a><span class="ss">- </span>The BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.</span>
+<span id="cb21-352"><a href="#cb21-352"></a><span class="ss">- </span>When the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).</span>
+<span id="cb21-353"><a href="#cb21-353"></a><span class="ss">- </span>The BIOS will then instruct the device how to procede.</span>
+<span id="cb21-354"><a href="#cb21-354"></a><span class="ss">- </span>We don't need any of that, we already wrote an infinite loop and can just start there!</span>
+<span id="cb21-355"><a href="#cb21-355"></a></span>
+<span id="cb21-356"><a href="#cb21-356"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-357"><a href="#cb21-357"></a><span class="in">qemu-system-riscv64 -kernel main -bios none</span></span>
+<span id="cb21-358"><a href="#cb21-358"></a><span class="in">```</span></span>
+<span id="cb21-359"><a href="#cb21-359"></a></span>
+<span id="cb21-360"><a href="#cb21-360"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer's motherboard.</span><span class="co">](https://en.wikipedia.org/wiki/BIOS)</span></span>
+<span id="cb21-361"><a href="#cb21-361"></a></span>
+<span id="cb21-362"><a href="#cb21-362"></a><span class="fu"># Fin</span></span>
 <span id="cb21-363"><a href="#cb21-363"></a></span>
-<span id="cb21-364"><a href="#cb21-364"></a><span class="in">```md</span></span>
-<span id="cb21-365"><a href="#cb21-365"></a><span class="ss">- </span><span class="va">[ ]</span> Do a thing.</span>
-<span id="cb21-366"><a href="#cb21-366"></a><span class="ss">- </span><span class="va">[ ]</span> Do another thing.</span>
-<span id="cb21-367"><a href="#cb21-367"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb21-364"><a href="#cb21-364"></a>For me that worked, hopefully for you too! If not, you have officially entered the fun zone.</span>
+<span id="cb21-365"><a href="#cb21-365"></a></span>
+<span id="cb21-366"><a href="#cb21-366"></a><span class="fu">## TODO</span></span>
+<span id="cb21-367"><a href="#cb21-367"></a></span>
+<span id="cb21-368"><a href="#cb21-368"></a>For this homework, add a README.md to the crate describing how to get it to work.</span>
+<span id="cb21-369"><a href="#cb21-369"></a></span>
+<span id="cb21-370"><a href="#cb21-370"></a><span class="ss">- </span>It should be like this document, but concise.</span>
+<span id="cb21-371"><a href="#cb21-371"></a><span class="ss">- </span>Use cool markdown checkboxes.</span>
+<span id="cb21-372"><a href="#cb21-372"></a></span>
+<span id="cb21-373"><a href="#cb21-373"></a><span class="in">```md</span></span>
+<span id="cb21-374"><a href="#cb21-374"></a><span class="ss">- </span><span class="va">[ ]</span> Do a thing.</span>
+<span id="cb21-375"><a href="#cb21-375"></a><span class="ss">- </span><span class="va">[ ]</span> Do another thing.</span>
+<span id="cb21-376"><a href="#cb21-376"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
