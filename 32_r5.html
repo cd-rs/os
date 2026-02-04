@@ -217,8 +217,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#homework" id="toc-homework" class="nav-link active" data-scroll-target="#homework">Homework</a></li>
   <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
-  <li><a href="#main" id="toc-main" class="nav-link" data-scroll-target="#main">main</a>
-  <ul class="collapse">
   <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code</a></li>
   <li><a href="#other-stuff" id="toc-other-stuff" class="nav-link" data-scroll-target="#other-stuff">Other stuff</a></li>
   <li><a href="#the-working-parts" id="toc-the-working-parts" class="nav-link" data-scroll-target="#the-working-parts">The working parts</a></li>
@@ -229,12 +227,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#t" id="toc-t" class="nav-link" data-scroll-target="#t"><code>-T</code></a></li>
   <li><a href="#risc-v" id="toc-risc-v" class="nav-link" data-scroll-target="#risc-v">RISC-V</a></li>
   <li><a href="#target" id="toc-target" class="nav-link" data-scroll-target="#target">Target</a></li>
-  <li><a href="#main-1" id="toc-main-1" class="nav-link" data-scroll-target="#main-1">Main</a></li>
+  <li><a href="#main" id="toc-main" class="nav-link" data-scroll-target="#main">Main</a></li>
   <li><a href="#qemu" id="toc-qemu" class="nav-link" data-scroll-target="#qemu">QEMU</a></li>
   <li><a href="#run-qemu" id="toc-run-qemu" class="nav-link" data-scroll-target="#run-qemu">Run QEMU</a></li>
   <li><a href="#run-main" id="toc-run-main" class="nav-link" data-scroll-target="#run-main">Run main</a></li>
   <li><a href="#bios" id="toc-bios" class="nav-link" data-scroll-target="#bios">BIOS</a></li>
-  </ul></li>
   <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a>
   <ul class="collapse">
   <li><a href="#todo" id="toc-todo" class="nav-link" data-scroll-target="#todo">TODO</a></li>
@@ -280,8 +277,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><label><input type="checkbox">Run on emulated RISC-V in QEMU.</label></li>
 </ul>
 </section>
-<section id="main" class="level1">
-<h1>main</h1>
 <section id="code" class="level2">
 <h2 class="anchored" data-anchor-id="code">Code</h2>
 <div class="callout callout-style-simple callout-note callout-titled">
@@ -510,36 +505,44 @@ Don’t be like me
 <tr class="header">
 <th></th>
 <th>Good (Open Source)</th>
+<th>Bad (Not)</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>Windows</td>
 <td></td>
+<td>x</td>
 </tr>
 <tr class="even">
 <td>Linux</td>
 <td>x</td>
+<td></td>
 </tr>
 <tr class="odd">
 <td>ICC (Intel C Compiler)</td>
 <td></td>
+<td>x</td>
 </tr>
 <tr class="even">
 <td>GCC</td>
 <td>x</td>
+<td></td>
 </tr>
 <tr class="odd">
 <td>x86-64</td>
 <td></td>
+<td>x</td>
 </tr>
 <tr class="even">
 <td>ARM64</td>
 <td></td>
+<td>x</td>
 </tr>
 <tr class="odd">
 <td>RISC-V</td>
 <td>x</td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -599,8 +602,8 @@ Don’t be like me
 </ul></li>
 </ul>
 </section>
-<section id="main-1" class="level2">
-<h2 class="anchored" data-anchor-id="main-1">Main</h2>
+<section id="main" class="level2">
+<h2 class="anchored" data-anchor-id="main">Main</h2>
 <ul>
 <li>Go ahead and run <code>main</code>, what could go wrong.</li>
 </ul>
@@ -674,6 +677,19 @@ Forward Pointer
 </section>
 <section id="bios" class="level2">
 <h2 class="anchored" data-anchor-id="bios">BIOS</h2>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Forward Pointer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>We will properly introduce the BIOS in the next lecture.</p>
+</div>
+</div>
 <ul>
 <li>The BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.</li>
 <li>When the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).</li>
@@ -684,7 +700,6 @@ Forward Pointer
 <blockquote class="blockquote">
 <p><a href="https://en.wikipedia.org/wiki/BIOS">In computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer’s motherboard.</a></p>
 </blockquote>
-</section>
 </section>
 <section id="fin" class="level1">
 <h1>Fin</h1>
@@ -1202,366 +1217,371 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb21-14"><a href="#cb21-14"></a><span class="ss">- </span><span class="va">[ ]</span> Use the <span class="in">`src/main.rs`</span> from the <span class="co">[</span><span class="ot">linker</span><span class="co">](31_linker.md)</span> lab.</span>
 <span id="cb21-15"><a href="#cb21-15"></a><span class="ss">- </span><span class="va">[ ]</span> Run on emulated RISC-V in QEMU.</span>
 <span id="cb21-16"><a href="#cb21-16"></a></span>
-<span id="cb21-17"><a href="#cb21-17"></a><span class="fu"># main</span></span>
+<span id="cb21-17"><a href="#cb21-17"></a><span class="fu">## Code</span></span>
 <span id="cb21-18"><a href="#cb21-18"></a></span>
-<span id="cb21-19"><a href="#cb21-19"></a><span class="fu">## Code</span></span>
+<span id="cb21-19"><a href="#cb21-19"></a>::: {.callout-note appearance="simple"}</span>
 <span id="cb21-20"><a href="#cb21-20"></a></span>
-<span id="cb21-21"><a href="#cb21-21"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb21-21"><a href="#cb21-21"></a><span class="fu">## Don't be like me</span></span>
 <span id="cb21-22"><a href="#cb21-22"></a></span>
-<span id="cb21-23"><a href="#cb21-23"></a><span class="fu">## Don't be like me</span></span>
+<span id="cb21-23"><a href="#cb21-23"></a>Loops are more stable than recursion I guess.</span>
 <span id="cb21-24"><a href="#cb21-24"></a></span>
-<span id="cb21-25"><a href="#cb21-25"></a>Loops are more stable than recursion I guess.</span>
+<span id="cb21-25"><a href="#cb21-25"></a>:::</span>
 <span id="cb21-26"><a href="#cb21-26"></a></span>
-<span id="cb21-27"><a href="#cb21-27"></a>:::</span>
-<span id="cb21-28"><a href="#cb21-28"></a></span>
-<span id="cb21-29"><a href="#cb21-29"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb21-30"><a href="#cb21-30"></a><span class="in">#![no_main]</span></span>
-<span id="cb21-31"><a href="#cb21-31"></a><span class="in">#![no_std]</span></span>
-<span id="cb21-32"><a href="#cb21-32"></a></span>
-<span id="cb21-33"><a href="#cb21-33"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb21-34"><a href="#cb21-34"></a><span class="in">    loop {}</span></span>
-<span id="cb21-35"><a href="#cb21-35"></a><span class="in">}</span></span>
-<span id="cb21-36"><a href="#cb21-36"></a></span>
-<span id="cb21-37"><a href="#cb21-37"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb21-38"><a href="#cb21-38"></a><span class="in">fn panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb21-39"><a href="#cb21-39"></a><span class="in">    loop {}</span></span>
-<span id="cb21-40"><a href="#cb21-40"></a><span class="in">}</span></span>
-<span id="cb21-41"><a href="#cb21-41"></a><span class="in">```</span></span>
-<span id="cb21-42"><a href="#cb21-42"></a></span>
+<span id="cb21-27"><a href="#cb21-27"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb21-28"><a href="#cb21-28"></a><span class="in">#![no_main]</span></span>
+<span id="cb21-29"><a href="#cb21-29"></a><span class="in">#![no_std]</span></span>
+<span id="cb21-30"><a href="#cb21-30"></a></span>
+<span id="cb21-31"><a href="#cb21-31"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb21-32"><a href="#cb21-32"></a><span class="in">    loop {}</span></span>
+<span id="cb21-33"><a href="#cb21-33"></a><span class="in">}</span></span>
+<span id="cb21-34"><a href="#cb21-34"></a></span>
+<span id="cb21-35"><a href="#cb21-35"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb21-36"><a href="#cb21-36"></a><span class="in">fn panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb21-37"><a href="#cb21-37"></a><span class="in">    loop {}</span></span>
+<span id="cb21-38"><a href="#cb21-38"></a><span class="in">}</span></span>
+<span id="cb21-39"><a href="#cb21-39"></a><span class="in">```</span></span>
+<span id="cb21-40"><a href="#cb21-40"></a></span>
+<span id="cb21-41"><a href="#cb21-41"></a></span>
+<span id="cb21-42"><a href="#cb21-42"></a><span class="fu">## Other stuff</span></span>
 <span id="cb21-43"><a href="#cb21-43"></a></span>
-<span id="cb21-44"><a href="#cb21-44"></a><span class="fu">## Other stuff</span></span>
-<span id="cb21-45"><a href="#cb21-45"></a></span>
-<span id="cb21-46"><a href="#cb21-46"></a><span class="ss">- </span>I graciously borrrowed some code from this repository.</span>
-<span id="cb21-47"><a href="#cb21-47"></a><span class="ss">- </span>[</span>
-<span id="cb21-48"><a href="#cb21-48"></a>helloworld_in_riscv_and_rust_baremetal</span>
-<span id="cb21-49"><a href="#cb21-49"></a>](https://github.com/Alignof/helloworld_in_riscv_and_rust_baremetal/)</span>
-<span id="cb21-50"><a href="#cb21-50"></a></span>
-<span id="cb21-51"><a href="#cb21-51"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-52"><a href="#cb21-52"></a><span class="in">git clone https://github.com/Alignof/helloworld_in_riscv_and_rust_baremetal.git</span></span>
-<span id="cb21-53"><a href="#cb21-53"></a><span class="in">```</span></span>
+<span id="cb21-44"><a href="#cb21-44"></a><span class="ss">- </span>I graciously borrrowed some code from this repository.</span>
+<span id="cb21-45"><a href="#cb21-45"></a><span class="ss">- </span>[</span>
+<span id="cb21-46"><a href="#cb21-46"></a>helloworld_in_riscv_and_rust_baremetal</span>
+<span id="cb21-47"><a href="#cb21-47"></a>](https://github.com/Alignof/helloworld_in_riscv_and_rust_baremetal/)</span>
+<span id="cb21-48"><a href="#cb21-48"></a></span>
+<span id="cb21-49"><a href="#cb21-49"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-50"><a href="#cb21-50"></a><span class="in">git clone https://github.com/Alignof/helloworld_in_riscv_and_rust_baremetal.git</span></span>
+<span id="cb21-51"><a href="#cb21-51"></a><span class="in">```</span></span>
+<span id="cb21-52"><a href="#cb21-52"></a></span>
+<span id="cb21-53"><a href="#cb21-53"></a><span class="ss">- </span>Just kidding don't use that, use this instead.</span>
 <span id="cb21-54"><a href="#cb21-54"></a></span>
-<span id="cb21-55"><a href="#cb21-55"></a><span class="ss">- </span>Just kidding don't use that, use this instead.</span>
-<span id="cb21-56"><a href="#cb21-56"></a></span>
-<span id="cb21-57"><a href="#cb21-57"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-58"><a href="#cb21-58"></a><span class="in">git clone https://github.com/cd-rs/hwr5.git</span></span>
-<span id="cb21-59"><a href="#cb21-59"></a><span class="in">```</span></span>
+<span id="cb21-55"><a href="#cb21-55"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-56"><a href="#cb21-56"></a><span class="in">git clone https://github.com/cd-rs/hwr5.git</span></span>
+<span id="cb21-57"><a href="#cb21-57"></a><span class="in">```</span></span>
+<span id="cb21-58"><a href="#cb21-58"></a></span>
+<span id="cb21-59"><a href="#cb21-59"></a><span class="ss">- </span>I made a cool version.</span>
 <span id="cb21-60"><a href="#cb21-60"></a></span>
-<span id="cb21-61"><a href="#cb21-61"></a><span class="ss">- </span>I made a cool version.</span>
+<span id="cb21-61"><a href="#cb21-61"></a><span class="fu">## The working parts</span></span>
 <span id="cb21-62"><a href="#cb21-62"></a></span>
-<span id="cb21-63"><a href="#cb21-63"></a><span class="fu">## The working parts</span></span>
-<span id="cb21-64"><a href="#cb21-64"></a></span>
-<span id="cb21-65"><a href="#cb21-65"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-66"><a href="#cb21-66"></a><span class="in">$ tree</span></span>
-<span id="cb21-67"><a href="#cb21-67"></a><span class="in">.</span></span>
-<span id="cb21-68"><a href="#cb21-68"></a><span class="in">├── Cargo.lock</span></span>
-<span id="cb21-69"><a href="#cb21-69"></a><span class="in">├── Cargo.toml</span></span>
-<span id="cb21-70"><a href="#cb21-70"></a><span class="in">├── link.x</span></span>
-<span id="cb21-71"><a href="#cb21-71"></a><span class="in">├── memory.x</span></span>
-<span id="cb21-72"><a href="#cb21-72"></a><span class="in">└── src</span></span>
-<span id="cb21-73"><a href="#cb21-73"></a><span class="in">    └── main.rs</span></span>
-<span id="cb21-74"><a href="#cb21-74"></a></span>
-<span id="cb21-75"><a href="#cb21-75"></a><span class="in">1 directory, 5 files</span></span>
-<span id="cb21-76"><a href="#cb21-76"></a><span class="in">```</span></span>
-<span id="cb21-77"><a href="#cb21-77"></a></span>
-<span id="cb21-78"><a href="#cb21-78"></a><span class="ss">- </span>Some of this shouldn't be new to you.</span>
-<span id="cb21-79"><a href="#cb21-79"></a><span class="ss">    - </span><span class="va">[x]</span> <span class="in">`Cargo.lock`</span></span>
-<span id="cb21-80"><a href="#cb21-80"></a><span class="ss">    - </span><span class="va">[x]</span> <span class="in">`Cargo.toml`</span></span>
-<span id="cb21-81"><a href="#cb21-81"></a><span class="ss">    - </span><span class="va">[x]</span> <span class="in">`src/main.rs`</span></span>
-<span id="cb21-82"><a href="#cb21-82"></a><span class="ss">- </span>Some should:</span>
-<span id="cb21-83"><a href="#cb21-83"></a><span class="ss">    - </span><span class="va">[ ]</span> <span class="in">`link.x`</span></span>
-<span id="cb21-84"><a href="#cb21-84"></a><span class="ss">    - </span><span class="va">[ ]</span> <span class="in">`memory.x`</span></span>
+<span id="cb21-63"><a href="#cb21-63"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-64"><a href="#cb21-64"></a><span class="in">$ tree</span></span>
+<span id="cb21-65"><a href="#cb21-65"></a><span class="in">.</span></span>
+<span id="cb21-66"><a href="#cb21-66"></a><span class="in">├── Cargo.lock</span></span>
+<span id="cb21-67"><a href="#cb21-67"></a><span class="in">├── Cargo.toml</span></span>
+<span id="cb21-68"><a href="#cb21-68"></a><span class="in">├── link.x</span></span>
+<span id="cb21-69"><a href="#cb21-69"></a><span class="in">├── memory.x</span></span>
+<span id="cb21-70"><a href="#cb21-70"></a><span class="in">└── src</span></span>
+<span id="cb21-71"><a href="#cb21-71"></a><span class="in">    └── main.rs</span></span>
+<span id="cb21-72"><a href="#cb21-72"></a></span>
+<span id="cb21-73"><a href="#cb21-73"></a><span class="in">1 directory, 5 files</span></span>
+<span id="cb21-74"><a href="#cb21-74"></a><span class="in">```</span></span>
+<span id="cb21-75"><a href="#cb21-75"></a></span>
+<span id="cb21-76"><a href="#cb21-76"></a><span class="ss">- </span>Some of this shouldn't be new to you.</span>
+<span id="cb21-77"><a href="#cb21-77"></a><span class="ss">    - </span><span class="va">[x]</span> <span class="in">`Cargo.lock`</span></span>
+<span id="cb21-78"><a href="#cb21-78"></a><span class="ss">    - </span><span class="va">[x]</span> <span class="in">`Cargo.toml`</span></span>
+<span id="cb21-79"><a href="#cb21-79"></a><span class="ss">    - </span><span class="va">[x]</span> <span class="in">`src/main.rs`</span></span>
+<span id="cb21-80"><a href="#cb21-80"></a><span class="ss">- </span>Some should:</span>
+<span id="cb21-81"><a href="#cb21-81"></a><span class="ss">    - </span><span class="va">[ ]</span> <span class="in">`link.x`</span></span>
+<span id="cb21-82"><a href="#cb21-82"></a><span class="ss">    - </span><span class="va">[ ]</span> <span class="in">`memory.x`</span></span>
+<span id="cb21-83"><a href="#cb21-83"></a></span>
+<span id="cb21-84"><a href="#cb21-84"></a><span class="fu">## The internals</span></span>
 <span id="cb21-85"><a href="#cb21-85"></a></span>
-<span id="cb21-86"><a href="#cb21-86"></a><span class="fu">## The internals</span></span>
-<span id="cb21-87"><a href="#cb21-87"></a></span>
-<span id="cb21-88"><a href="#cb21-88"></a><span class="ss">- </span>Without dwelling on the details, these <span class="in">`.x`</span> files are for the *linker*</span>
-<span id="cb21-89"><a href="#cb21-89"></a><span class="ss">    - </span>Remember our good friend the linker.</span>
-<span id="cb21-90"><a href="#cb21-90"></a><span class="ss">    - </span><span class="in">`link.x`</span> was written by someone that understands linkers.</span>
-<span id="cb21-91"><a href="#cb21-91"></a><span class="ss">    - </span><span class="in">`memory.x`</span> was written by a script from a crate written by someone that understands linkers.</span>
-<span id="cb21-92"><a href="#cb21-92"></a><span class="ss">- </span>From our perspective, they "just work"</span>
-<span id="cb21-93"><a href="#cb21-93"></a><span class="ss">    - </span>But how?</span>
-<span id="cb21-94"><a href="#cb21-94"></a>    </span>
-<span id="cb21-95"><a href="#cb21-95"></a><span class="fu">## Starting Point</span></span>
-<span id="cb21-96"><a href="#cb21-96"></a></span>
-<span id="cb21-97"><a href="#cb21-97"></a><span class="ss">- </span>At first, probably nothing works.</span>
-<span id="cb21-98"><a href="#cb21-98"></a><span class="ss">    - </span>Or at least, <span class="in">`cargo b`</span> doesn't work.</span>
-<span id="cb21-99"><a href="#cb21-99"></a></span>
-<span id="cb21-100"><a href="#cb21-100"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-101"><a href="#cb21-101"></a><span class="in">$ cargo b</span></span>
-<span id="cb21-102"><a href="#cb21-102"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/hwr5)</span></span>
-<span id="cb21-103"><a href="#cb21-103"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
-<span id="cb21-104"><a href="#cb21-104"></a><span class="in">  |</span></span>
-<span id="cb21-105"><a href="#cb21-105"></a><span class="in">  = note:  "cc" "-m64" "/tmp/rustcwuxfha/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustcwuxfha/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/user/tmp/hwr5/target/debug/deps/osirs-80f8eb3240ba748e" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"</span></span>
-<span id="cb21-106"><a href="#cb21-106"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
-<span id="cb21-107"><a href="#cb21-107"></a><span class="in">  = note: /usr/bin/ld: /home/user/tmp/hwr5/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':</span></span>
-<span id="cb21-108"><a href="#cb21-108"></a><span class="in">          /home/user/tmp/hwr5/src/main.rs:7: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here</span></span>
-<span id="cb21-109"><a href="#cb21-109"></a><span class="in">          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':</span></span>
-<span id="cb21-110"><a href="#cb21-110"></a><span class="in">          (.text+0x1b): undefined reference to `main'</span></span>
-<span id="cb21-111"><a href="#cb21-111"></a><span class="in">          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'</span></span>
-<span id="cb21-112"><a href="#cb21-112"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
-<span id="cb21-113"><a href="#cb21-113"></a></span>
-<span id="cb21-114"><a href="#cb21-114"></a><span class="in">  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified</span></span>
-<span id="cb21-115"><a href="#cb21-115"></a><span class="in">  = note: use the `-l` flag to specify native libraries to link</span></span>
-<span id="cb21-116"><a href="#cb21-116"></a><span class="in">  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)</span></span>
-<span id="cb21-117"><a href="#cb21-117"></a></span>
-<span id="cb21-118"><a href="#cb21-118"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
-<span id="cb21-119"><a href="#cb21-119"></a><span class="in">```</span></span>
+<span id="cb21-86"><a href="#cb21-86"></a><span class="ss">- </span>Without dwelling on the details, these <span class="in">`.x`</span> files are for the *linker*</span>
+<span id="cb21-87"><a href="#cb21-87"></a><span class="ss">    - </span>Remember our good friend the linker.</span>
+<span id="cb21-88"><a href="#cb21-88"></a><span class="ss">    - </span><span class="in">`link.x`</span> was written by someone that understands linkers.</span>
+<span id="cb21-89"><a href="#cb21-89"></a><span class="ss">    - </span><span class="in">`memory.x`</span> was written by a script from a crate written by someone that understands linkers.</span>
+<span id="cb21-90"><a href="#cb21-90"></a><span class="ss">- </span>From our perspective, they "just work"</span>
+<span id="cb21-91"><a href="#cb21-91"></a><span class="ss">    - </span>But how?</span>
+<span id="cb21-92"><a href="#cb21-92"></a>    </span>
+<span id="cb21-93"><a href="#cb21-93"></a><span class="fu">## Starting Point</span></span>
+<span id="cb21-94"><a href="#cb21-94"></a></span>
+<span id="cb21-95"><a href="#cb21-95"></a><span class="ss">- </span>At first, probably nothing works.</span>
+<span id="cb21-96"><a href="#cb21-96"></a><span class="ss">    - </span>Or at least, <span class="in">`cargo b`</span> doesn't work.</span>
+<span id="cb21-97"><a href="#cb21-97"></a></span>
+<span id="cb21-98"><a href="#cb21-98"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-99"><a href="#cb21-99"></a><span class="in">$ cargo b</span></span>
+<span id="cb21-100"><a href="#cb21-100"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/hwr5)</span></span>
+<span id="cb21-101"><a href="#cb21-101"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
+<span id="cb21-102"><a href="#cb21-102"></a><span class="in">  |</span></span>
+<span id="cb21-103"><a href="#cb21-103"></a><span class="in">  = note:  "cc" "-m64" "/tmp/rustcwuxfha/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustcwuxfha/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/user/tmp/hwr5/target/debug/deps/osirs-80f8eb3240ba748e" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"</span></span>
+<span id="cb21-104"><a href="#cb21-104"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
+<span id="cb21-105"><a href="#cb21-105"></a><span class="in">  = note: /usr/bin/ld: /home/user/tmp/hwr5/target/debug/deps/osirs-80f8eb3240ba748e.9chdw59nqscmfe0ef1hrxy2nb.rcgu.o: in function `_start':</span></span>
+<span id="cb21-106"><a href="#cb21-106"></a><span class="in">          /home/user/tmp/hwr5/src/main.rs:7: multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here</span></span>
+<span id="cb21-107"><a href="#cb21-107"></a><span class="in">          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':</span></span>
+<span id="cb21-108"><a href="#cb21-108"></a><span class="in">          (.text+0x1b): undefined reference to `main'</span></span>
+<span id="cb21-109"><a href="#cb21-109"></a><span class="in">          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'</span></span>
+<span id="cb21-110"><a href="#cb21-110"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb21-111"><a href="#cb21-111"></a></span>
+<span id="cb21-112"><a href="#cb21-112"></a><span class="in">  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified</span></span>
+<span id="cb21-113"><a href="#cb21-113"></a><span class="in">  = note: use the `-l` flag to specify native libraries to link</span></span>
+<span id="cb21-114"><a href="#cb21-114"></a><span class="in">  = note: use the `cargo:rustc-link-lib` directive to specify the native libraries to link with Cargo (see https://doc.rust-lang.org/cargo/reference/build-scripts.html#rustc-link-lib)</span></span>
+<span id="cb21-115"><a href="#cb21-115"></a></span>
+<span id="cb21-116"><a href="#cb21-116"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb21-117"><a href="#cb21-117"></a><span class="in">```</span></span>
+<span id="cb21-118"><a href="#cb21-118"></a></span>
+<span id="cb21-119"><a href="#cb21-119"></a><span class="fu">## `rustc`</span></span>
 <span id="cb21-120"><a href="#cb21-120"></a></span>
-<span id="cb21-121"><a href="#cb21-121"></a><span class="fu">## `rustc`</span></span>
-<span id="cb21-122"><a href="#cb21-122"></a></span>
-<span id="cb21-123"><a href="#cb21-123"></a><span class="ss">- </span>I found it easier to get to work with <span class="in">`rustc`</span></span>
-<span id="cb21-124"><a href="#cb21-124"></a><span class="ss">    - </span>Cargo hater Calvin</span>
-<span id="cb21-125"><a href="#cb21-125"></a><span class="ss">- </span>Recall a way we ran the executable in the lab.</span>
-<span id="cb21-126"><a href="#cb21-126"></a></span>
-<span id="cb21-127"><a href="#cb21-127"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-128"><a href="#cb21-128"></a><span class="in">cargo rustc -- -C link-arg=-nostartfiles</span></span>
-<span id="cb21-129"><a href="#cb21-129"></a><span class="in">```</span></span>
+<span id="cb21-121"><a href="#cb21-121"></a><span class="ss">- </span>I found it easier to get to work with <span class="in">`rustc`</span></span>
+<span id="cb21-122"><a href="#cb21-122"></a><span class="ss">    - </span>Cargo hater Calvin</span>
+<span id="cb21-123"><a href="#cb21-123"></a><span class="ss">- </span>Recall a way we ran the executable in the lab.</span>
+<span id="cb21-124"><a href="#cb21-124"></a></span>
+<span id="cb21-125"><a href="#cb21-125"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-126"><a href="#cb21-126"></a><span class="in">cargo rustc -- -C link-arg=-nostartfiles</span></span>
+<span id="cb21-127"><a href="#cb21-127"></a><span class="in">```</span></span>
+<span id="cb21-128"><a href="#cb21-128"></a></span>
+<span id="cb21-129"><a href="#cb21-129"></a><span class="ss">- </span>We can just go straight to <span class="in">`rustc`</span></span>
 <span id="cb21-130"><a href="#cb21-130"></a></span>
-<span id="cb21-131"><a href="#cb21-131"></a><span class="ss">- </span>We can just go straight to <span class="in">`rustc`</span></span>
-<span id="cb21-132"><a href="#cb21-132"></a></span>
-<span id="cb21-133"><a href="#cb21-133"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-134"><a href="#cb21-134"></a><span class="in">rust -C link-arg=-nostartfiles</span></span>
-<span id="cb21-135"><a href="#cb21-135"></a><span class="in">```</span></span>
-<span id="cb21-136"><a href="#cb21-136"></a></span>
-<span id="cb21-137"><a href="#cb21-137"></a><span class="ss">- </span>Only one catch.</span>
-<span id="cb21-138"><a href="#cb21-138"></a><span class="ss">    - </span>Well, two.</span>
-<span id="cb21-139"><a href="#cb21-139"></a><span class="ss">    - </span>We want to link files.</span>
-<span id="cb21-140"><a href="#cb21-140"></a><span class="ss">    - </span>Specifically, the <span class="in">`.x`</span> files.</span>
+<span id="cb21-131"><a href="#cb21-131"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-132"><a href="#cb21-132"></a><span class="in">rust -C link-arg=-nostartfiles</span></span>
+<span id="cb21-133"><a href="#cb21-133"></a><span class="in">```</span></span>
+<span id="cb21-134"><a href="#cb21-134"></a></span>
+<span id="cb21-135"><a href="#cb21-135"></a><span class="ss">- </span>Only one catch.</span>
+<span id="cb21-136"><a href="#cb21-136"></a><span class="ss">    - </span>Well, two.</span>
+<span id="cb21-137"><a href="#cb21-137"></a><span class="ss">    - </span>We want to link files.</span>
+<span id="cb21-138"><a href="#cb21-138"></a><span class="ss">    - </span>Specifically, the <span class="in">`.x`</span> files.</span>
+<span id="cb21-139"><a href="#cb21-139"></a></span>
+<span id="cb21-140"><a href="#cb21-140"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/The_X-Files_original_title_screen.webp/412px-The_X-Files_original_title_screen.webp.png)</span></span>
 <span id="cb21-141"><a href="#cb21-141"></a></span>
-<span id="cb21-142"><a href="#cb21-142"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/thumb/5/5e/The_X-Files_original_title_screen.webp/412px-The_X-Files_original_title_screen.webp.png)</span></span>
+<span id="cb21-142"><a href="#cb21-142"></a><span class="fu">## Naively</span></span>
 <span id="cb21-143"><a href="#cb21-143"></a></span>
-<span id="cb21-144"><a href="#cb21-144"></a><span class="fu">## Naively</span></span>
+<span id="cb21-144"><a href="#cb21-144"></a><span class="ss">- </span>You can give <span class="in">`rustc`</span> a shot straight-away.</span>
 <span id="cb21-145"><a href="#cb21-145"></a></span>
-<span id="cb21-146"><a href="#cb21-146"></a><span class="ss">- </span>You can give <span class="in">`rustc`</span> a shot straight-away.</span>
-<span id="cb21-147"><a href="#cb21-147"></a></span>
-<span id="cb21-148"><a href="#cb21-148"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-149"><a href="#cb21-149"></a><span class="in">$ rustc src/main.rs</span></span>
-<span id="cb21-150"><a href="#cb21-150"></a><span class="in">error: unwinding panics are not supported without std</span></span>
-<span id="cb21-151"><a href="#cb21-151"></a><span class="in">  |</span></span>
-<span id="cb21-152"><a href="#cb21-152"></a><span class="in">  = help: using nightly cargo, use -Zbuild-std with panic="abort" to avoid unwinding</span></span>
-<span id="cb21-153"><a href="#cb21-153"></a><span class="in">  = note: since the core library is usually precompiled with panic="unwind", rebuilding your crate with panic="abort" may not be enough to fix the problem</span></span>
-<span id="cb21-154"><a href="#cb21-154"></a></span>
-<span id="cb21-155"><a href="#cb21-155"></a><span class="in">error: aborting due to 1 previous error</span></span>
-<span id="cb21-156"><a href="#cb21-156"></a><span class="in">```</span></span>
-<span id="cb21-157"><a href="#cb21-157"></a></span>
-<span id="cb21-158"><a href="#cb21-158"></a><span class="ss">- </span>We recall we "fixed" the problem with panics by modifying <span class="in">`Cargo.toml`</span>.</span>
-<span id="cb21-159"><a href="#cb21-159"></a><span class="ss">- </span><span class="in">`rustc`</span> doesn't care about your <span class="in">`Cargo.toml`</span>!</span>
-<span id="cb21-160"><a href="#cb21-160"></a><span class="ss">- </span>We instead have to specify an argument to <span class="in">`rustc`</span>.</span>
-<span id="cb21-161"><a href="#cb21-161"></a><span class="ss">- </span>We do so similarly to the <span class="in">`link-arg`</span>, with the <span class="in">`-C`</span> flag.</span>
-<span id="cb21-162"><a href="#cb21-162"></a><span class="ss">    - </span>We furnish basically the same thing we placed in <span class="in">`Cargo.toml`</span>.</span>
-<span id="cb21-163"><a href="#cb21-163"></a>    </span>
-<span id="cb21-164"><a href="#cb21-164"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-165"><a href="#cb21-165"></a><span class="in">rustc src/main.rs -C panic=abort</span></span>
-<span id="cb21-166"><a href="#cb21-166"></a><span class="in">```</span></span>
+<span id="cb21-146"><a href="#cb21-146"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-147"><a href="#cb21-147"></a><span class="in">$ rustc src/main.rs</span></span>
+<span id="cb21-148"><a href="#cb21-148"></a><span class="in">error: unwinding panics are not supported without std</span></span>
+<span id="cb21-149"><a href="#cb21-149"></a><span class="in">  |</span></span>
+<span id="cb21-150"><a href="#cb21-150"></a><span class="in">  = help: using nightly cargo, use -Zbuild-std with panic="abort" to avoid unwinding</span></span>
+<span id="cb21-151"><a href="#cb21-151"></a><span class="in">  = note: since the core library is usually precompiled with panic="unwind", rebuilding your crate with panic="abort" may not be enough to fix the problem</span></span>
+<span id="cb21-152"><a href="#cb21-152"></a></span>
+<span id="cb21-153"><a href="#cb21-153"></a><span class="in">error: aborting due to 1 previous error</span></span>
+<span id="cb21-154"><a href="#cb21-154"></a><span class="in">```</span></span>
+<span id="cb21-155"><a href="#cb21-155"></a></span>
+<span id="cb21-156"><a href="#cb21-156"></a><span class="ss">- </span>We recall we "fixed" the problem with panics by modifying <span class="in">`Cargo.toml`</span>.</span>
+<span id="cb21-157"><a href="#cb21-157"></a><span class="ss">- </span><span class="in">`rustc`</span> doesn't care about your <span class="in">`Cargo.toml`</span>!</span>
+<span id="cb21-158"><a href="#cb21-158"></a><span class="ss">- </span>We instead have to specify an argument to <span class="in">`rustc`</span>.</span>
+<span id="cb21-159"><a href="#cb21-159"></a><span class="ss">- </span>We do so similarly to the <span class="in">`link-arg`</span>, with the <span class="in">`-C`</span> flag.</span>
+<span id="cb21-160"><a href="#cb21-160"></a><span class="ss">    - </span>We furnish basically the same thing we placed in <span class="in">`Cargo.toml`</span>.</span>
+<span id="cb21-161"><a href="#cb21-161"></a>    </span>
+<span id="cb21-162"><a href="#cb21-162"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-163"><a href="#cb21-163"></a><span class="in">rustc src/main.rs -C panic=abort</span></span>
+<span id="cb21-164"><a href="#cb21-164"></a><span class="in">```</span></span>
+<span id="cb21-165"><a href="#cb21-165"></a></span>
+<span id="cb21-166"><a href="#cb21-166"></a><span class="ss">- </span>Get this working and see if you can get the following error message:</span>
 <span id="cb21-167"><a href="#cb21-167"></a></span>
-<span id="cb21-168"><a href="#cb21-168"></a><span class="ss">- </span>Get this working and see if you can get the following error message:</span>
-<span id="cb21-169"><a href="#cb21-169"></a></span>
-<span id="cb21-170"><a href="#cb21-170"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-171"><a href="#cb21-171"></a><span class="in">$ rustc src/main.rs -C panic=abort</span></span>
-<span id="cb21-172"><a href="#cb21-172"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
-<span id="cb21-173"><a href="#cb21-173"></a><span class="in">  |</span></span>
-<span id="cb21-174"><a href="#cb21-174"></a><span class="in">  = note:  "cc" "-m64" "/tmp/rustceBlIYK/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustceBlIYK/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "main" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"</span></span>
-<span id="cb21-175"><a href="#cb21-175"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
-<span id="cb21-176"><a href="#cb21-176"></a><span class="in">  = note: /usr/bin/ld: main.main.5f6bf0c8e9d0afce-cgu.0.rcgu.o: in function `_start':</span></span>
-<span id="cb21-177"><a href="#cb21-177"></a><span class="in">          main.5f6bf0c8e9d0afce-cgu.0:(.text._start+0x0): multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here</span></span>
-<span id="cb21-178"><a href="#cb21-178"></a><span class="in">          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':</span></span>
-<span id="cb21-179"><a href="#cb21-179"></a><span class="in">          (.text+0x1b): undefined reference to `main'</span></span>
-<span id="cb21-180"><a href="#cb21-180"></a><span class="in">          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'</span></span>
-<span id="cb21-181"><a href="#cb21-181"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
-<span id="cb21-182"><a href="#cb21-182"></a></span>
-<span id="cb21-183"><a href="#cb21-183"></a><span class="in">  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified</span></span>
-<span id="cb21-184"><a href="#cb21-184"></a><span class="in">  = note: use the `-l` flag to specify native libraries to link</span></span>
-<span id="cb21-185"><a href="#cb21-185"></a></span>
-<span id="cb21-186"><a href="#cb21-186"></a><span class="in">error: aborting due to 1 previous error</span></span>
-<span id="cb21-187"><a href="#cb21-187"></a><span class="in">```</span></span>
+<span id="cb21-168"><a href="#cb21-168"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-169"><a href="#cb21-169"></a><span class="in">$ rustc src/main.rs -C panic=abort</span></span>
+<span id="cb21-170"><a href="#cb21-170"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
+<span id="cb21-171"><a href="#cb21-171"></a><span class="in">  |</span></span>
+<span id="cb21-172"><a href="#cb21-172"></a><span class="in">  = note:  "cc" "-m64" "/tmp/rustceBlIYK/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustceBlIYK/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "main" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"</span></span>
+<span id="cb21-173"><a href="#cb21-173"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
+<span id="cb21-174"><a href="#cb21-174"></a><span class="in">  = note: /usr/bin/ld: main.main.5f6bf0c8e9d0afce-cgu.0.rcgu.o: in function `_start':</span></span>
+<span id="cb21-175"><a href="#cb21-175"></a><span class="in">          main.5f6bf0c8e9d0afce-cgu.0:(.text._start+0x0): multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here</span></span>
+<span id="cb21-176"><a href="#cb21-176"></a><span class="in">          /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':</span></span>
+<span id="cb21-177"><a href="#cb21-177"></a><span class="in">          (.text+0x1b): undefined reference to `main'</span></span>
+<span id="cb21-178"><a href="#cb21-178"></a><span class="in">          /usr/bin/ld: (.text+0x21): undefined reference to `__libc_start_main'</span></span>
+<span id="cb21-179"><a href="#cb21-179"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb21-180"><a href="#cb21-180"></a></span>
+<span id="cb21-181"><a href="#cb21-181"></a><span class="in">  = note: some `extern` functions couldn't be found; some native libraries may need to be installed or have their path specified</span></span>
+<span id="cb21-182"><a href="#cb21-182"></a><span class="in">  = note: use the `-l` flag to specify native libraries to link</span></span>
+<span id="cb21-183"><a href="#cb21-183"></a></span>
+<span id="cb21-184"><a href="#cb21-184"></a><span class="in">error: aborting due to 1 previous error</span></span>
+<span id="cb21-185"><a href="#cb21-185"></a><span class="in">```</span></span>
+<span id="cb21-186"><a href="#cb21-186"></a></span>
+<span id="cb21-187"><a href="#cb21-187"></a><span class="ss">- </span>Ah hah! A linker error! Just as we hoped.</span>
 <span id="cb21-188"><a href="#cb21-188"></a></span>
-<span id="cb21-189"><a href="#cb21-189"></a><span class="ss">- </span>Ah hah! A linker error! Just as we hoped.</span>
+<span id="cb21-189"><a href="#cb21-189"></a><span class="fu">## `-T`</span></span>
 <span id="cb21-190"><a href="#cb21-190"></a></span>
-<span id="cb21-191"><a href="#cb21-191"></a><span class="fu">## `-T`</span></span>
-<span id="cb21-192"><a href="#cb21-192"></a></span>
-<span id="cb21-193"><a href="#cb21-193"></a><span class="ss">- </span>The linker complains it's missing something, and it's not sure what.</span>
-<span id="cb21-194"><a href="#cb21-194"></a><span class="ss">- </span>We are sure, it's the <span class="in">`.x`</span> files.</span>
-<span id="cb21-195"><a href="#cb21-195"></a><span class="ss">- </span>To furnish a file by name to the linker, we provide it as a <span class="in">`link-arg`</span> prefixed with <span class="in">`-T`</span></span>
-<span id="cb21-196"><a href="#cb21-196"></a></span>
-<span id="cb21-197"><a href="#cb21-197"></a><span class="in">```{.email}</span></span>
-<span id="cb21-198"><a href="#cb21-198"></a><span class="in">link-arg=-Tlink.x</span></span>
-<span id="cb21-199"><a href="#cb21-199"></a><span class="in">```</span></span>
+<span id="cb21-191"><a href="#cb21-191"></a><span class="ss">- </span>The linker complains it's missing something, and it's not sure what.</span>
+<span id="cb21-192"><a href="#cb21-192"></a><span class="ss">- </span>We are sure, it's the <span class="in">`.x`</span> files.</span>
+<span id="cb21-193"><a href="#cb21-193"></a><span class="ss">- </span>To furnish a file by name to the linker, we provide it as a <span class="in">`link-arg`</span> prefixed with <span class="in">`-T`</span></span>
+<span id="cb21-194"><a href="#cb21-194"></a></span>
+<span id="cb21-195"><a href="#cb21-195"></a><span class="in">```{.email}</span></span>
+<span id="cb21-196"><a href="#cb21-196"></a><span class="in">link-arg=-Tlink.x</span></span>
+<span id="cb21-197"><a href="#cb21-197"></a><span class="in">```</span></span>
+<span id="cb21-198"><a href="#cb21-198"></a></span>
+<span id="cb21-199"><a href="#cb21-199"></a><span class="ss">- </span>If you link both <span class="in">`.x`</span> files, you will get a different error message.</span>
 <span id="cb21-200"><a href="#cb21-200"></a></span>
-<span id="cb21-201"><a href="#cb21-201"></a><span class="ss">- </span>If you link both <span class="in">`.x`</span> files, you will get a different error message.</span>
-<span id="cb21-202"><a href="#cb21-202"></a></span>
-<span id="cb21-203"><a href="#cb21-203"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-204"><a href="#cb21-204"></a><span class="in">$ rustc -C link-args=-Tmemory.x -C link-args=-Tlink.x -C panic=abort src/main.rs</span></span>
-<span id="cb21-205"><a href="#cb21-205"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
-<span id="cb21-206"><a href="#cb21-206"></a><span class="in">  |</span></span>
-<span id="cb21-207"><a href="#cb21-207"></a><span class="in">  = note:  "cc" "-m64" "/tmp/rustczhisJl/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustczhisJl/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "main" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs" "-Tmemory.x" "-Tlink.x"</span></span>
-<span id="cb21-208"><a href="#cb21-208"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
-<span id="cb21-209"><a href="#cb21-209"></a><span class="in">  = note: /usr/bin/ld: main.main.5f6bf0c8e9d0afce-cgu.0.rcgu.o: in function `_start':</span></span>
-<span id="cb21-210"><a href="#cb21-210"></a><span class="in">          main.5f6bf0c8e9d0afce-cgu.0:(.text._start+0x0): multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here</span></span>
-<span id="cb21-211"><a href="#cb21-211"></a><span class="in">          /usr/bin/ld:</span></span>
-<span id="cb21-212"><a href="#cb21-212"></a><span class="in">          .got section detected in the input files. Dynamic relocations are not</span></span>
-<span id="cb21-213"><a href="#cb21-213"></a><span class="in">          supported. If you are linking to C code compiled using the `gcc` crate</span></span>
-<span id="cb21-214"><a href="#cb21-214"></a><span class="in">          then modify your build script to compile the C code _without_ the</span></span>
-<span id="cb21-215"><a href="#cb21-215"></a><span class="in">          -fPIC flag. See the documentation of the `gcc::Config.fpic` method for</span></span>
-<span id="cb21-216"><a href="#cb21-216"></a><span class="in">          details.</span></span>
-<span id="cb21-217"><a href="#cb21-217"></a><span class="in">          /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o: in function `_init':</span></span>
-<span id="cb21-218"><a href="#cb21-218"></a><span class="in">          (.init+0xb): relocation truncated to fit: R_X86_64_REX_GOTPCRELX against undefined symbol `__gmon_start__'</span></span>
-<span id="cb21-219"><a href="#cb21-219"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
-<span id="cb21-220"><a href="#cb21-220"></a></span>
-<span id="cb21-221"><a href="#cb21-221"></a></span>
-<span id="cb21-222"><a href="#cb21-222"></a><span class="in">error: aborting due to 1 previous error</span></span>
-<span id="cb21-223"><a href="#cb21-223"></a><span class="in">```</span></span>
+<span id="cb21-201"><a href="#cb21-201"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-202"><a href="#cb21-202"></a><span class="in">$ rustc -C link-args=-Tmemory.x -C link-args=-Tlink.x -C panic=abort src/main.rs</span></span>
+<span id="cb21-203"><a href="#cb21-203"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
+<span id="cb21-204"><a href="#cb21-204"></a><span class="in">  |</span></span>
+<span id="cb21-205"><a href="#cb21-205"></a><span class="in">  = note:  "cc" "-m64" "/tmp/rustczhisJl/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib/{librustc_std_workspace_core-*,libcore-*,libcompiler_builtins-*}.rlib" "-L" "/tmp/rustczhisJl/raw-dylibs" "-Wl,-Bdynamic" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "main" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs" "-Tmemory.x" "-Tlink.x"</span></span>
+<span id="cb21-206"><a href="#cb21-206"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
+<span id="cb21-207"><a href="#cb21-207"></a><span class="in">  = note: /usr/bin/ld: main.main.5f6bf0c8e9d0afce-cgu.0.rcgu.o: in function `_start':</span></span>
+<span id="cb21-208"><a href="#cb21-208"></a><span class="in">          main.5f6bf0c8e9d0afce-cgu.0:(.text._start+0x0): multiple definition of `_start'; /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(.text+0x0): first defined here</span></span>
+<span id="cb21-209"><a href="#cb21-209"></a><span class="in">          /usr/bin/ld:</span></span>
+<span id="cb21-210"><a href="#cb21-210"></a><span class="in">          .got section detected in the input files. Dynamic relocations are not</span></span>
+<span id="cb21-211"><a href="#cb21-211"></a><span class="in">          supported. If you are linking to C code compiled using the `gcc` crate</span></span>
+<span id="cb21-212"><a href="#cb21-212"></a><span class="in">          then modify your build script to compile the C code _without_ the</span></span>
+<span id="cb21-213"><a href="#cb21-213"></a><span class="in">          -fPIC flag. See the documentation of the `gcc::Config.fpic` method for</span></span>
+<span id="cb21-214"><a href="#cb21-214"></a><span class="in">          details.</span></span>
+<span id="cb21-215"><a href="#cb21-215"></a><span class="in">          /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/crti.o: in function `_init':</span></span>
+<span id="cb21-216"><a href="#cb21-216"></a><span class="in">          (.init+0xb): relocation truncated to fit: R_X86_64_REX_GOTPCRELX against undefined symbol `__gmon_start__'</span></span>
+<span id="cb21-217"><a href="#cb21-217"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb21-218"><a href="#cb21-218"></a></span>
+<span id="cb21-219"><a href="#cb21-219"></a></span>
+<span id="cb21-220"><a href="#cb21-220"></a><span class="in">error: aborting due to 1 previous error</span></span>
+<span id="cb21-221"><a href="#cb21-221"></a><span class="in">```</span></span>
+<span id="cb21-222"><a href="#cb21-222"></a></span>
+<span id="cb21-223"><a href="#cb21-223"></a><span class="fu">## RISC-V</span></span>
 <span id="cb21-224"><a href="#cb21-224"></a></span>
-<span id="cb21-225"><a href="#cb21-225"></a><span class="fu">## RISC-V</span></span>
-<span id="cb21-226"><a href="#cb21-226"></a></span>
-<span id="cb21-227"><a href="#cb21-227"></a><span class="ss">- </span>RISC-V is what it would be like if hardware were good.</span>
-<span id="cb21-228"><a href="#cb21-228"></a><span class="ss">    - </span>By which I mean open-source.</span>
-<span id="cb21-229"><a href="#cb21-229"></a></span>
-<span id="cb21-230"><a href="#cb21-230"></a>| |Good (Open Source)|Bad (Not)|</span>
-<span id="cb21-231"><a href="#cb21-231"></a>|-|-|</span>
-<span id="cb21-232"><a href="#cb21-232"></a>|Windows  ||x|  </span>
-<span id="cb21-233"><a href="#cb21-233"></a>|Linux|x||  </span>
-<span id="cb21-234"><a href="#cb21-234"></a>|ICC (Intel C Compiler)||x|</span>
-<span id="cb21-235"><a href="#cb21-235"></a>|GCC        |x||</span>
-<span id="cb21-236"><a href="#cb21-236"></a>|x86-64||x|</span>
-<span id="cb21-237"><a href="#cb21-237"></a>|ARM64||x|</span>
-<span id="cb21-238"><a href="#cb21-238"></a>|RISC-V |x||</span>
+<span id="cb21-225"><a href="#cb21-225"></a><span class="ss">- </span>RISC-V is what it would be like if hardware were good.</span>
+<span id="cb21-226"><a href="#cb21-226"></a><span class="ss">    - </span>By which I mean open-source.</span>
+<span id="cb21-227"><a href="#cb21-227"></a></span>
+<span id="cb21-228"><a href="#cb21-228"></a>| |Good (Open Source)|Bad (Not)|</span>
+<span id="cb21-229"><a href="#cb21-229"></a>|-|-|-|</span>
+<span id="cb21-230"><a href="#cb21-230"></a>|Windows  ||x|  </span>
+<span id="cb21-231"><a href="#cb21-231"></a>|Linux|x||  </span>
+<span id="cb21-232"><a href="#cb21-232"></a>|ICC (Intel C Compiler)||x|</span>
+<span id="cb21-233"><a href="#cb21-233"></a>|GCC        |x||</span>
+<span id="cb21-234"><a href="#cb21-234"></a>|x86-64||x|</span>
+<span id="cb21-235"><a href="#cb21-235"></a>|ARM64||x|</span>
+<span id="cb21-236"><a href="#cb21-236"></a>|RISC-V |x||</span>
+<span id="cb21-237"><a href="#cb21-237"></a></span>
+<span id="cb21-238"><a href="#cb21-238"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">RISC-V (pronounced "risk-five"): 1  is a free and open standard instruction set architecture (ISA) based on reduced instruction set computer (RISC) principles. Unlike proprietary ISAs such as x86 and ARM, RISC-V is described as "free and open" because its specifications are released under permissive open-source licenses and can be implemented without paying royalties.</span><span class="co">](https://en.wikipedia.org/wiki/RISC-V)</span></span>
 <span id="cb21-239"><a href="#cb21-239"></a></span>
-<span id="cb21-240"><a href="#cb21-240"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">RISC-V (pronounced "risk-five"): 1  is a free and open standard instruction set architecture (ISA) based on reduced instruction set computer (RISC) principles. Unlike proprietary ISAs such as x86 and ARM, RISC-V is described as "free and open" because its specifications are released under permissive open-source licenses and can be implemented without paying royalties.</span><span class="co">](https://en.wikipedia.org/wiki/RISC-V)</span></span>
+<span id="cb21-240"><a href="#cb21-240"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">The RISC-V instruction set architecture (ISA) offers a highly customizable open standard platform, enabling developers to build, port, and optimize software applications, extensions, and hardware. Its simplicity and modularity enables efficient design and optimization, fostering innovation and reducing development time and cost.</span><span class="co">](https://riscv.org/)</span></span>
 <span id="cb21-241"><a href="#cb21-241"></a></span>
-<span id="cb21-242"><a href="#cb21-242"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">The RISC-V instruction set architecture (ISA) offers a highly customizable open standard platform, enabling developers to build, port, and optimize software applications, extensions, and hardware. Its simplicity and modularity enables efficient design and optimization, fostering innovation and reducing development time and cost.</span><span class="co">](https://riscv.org/)</span></span>
+<span id="cb21-242"><a href="#cb21-242"></a><span class="ss">- </span>Also unlike x86 and ARM, it is easy to develop for RISC-V, and that is what we've done.</span>
 <span id="cb21-243"><a href="#cb21-243"></a></span>
-<span id="cb21-244"><a href="#cb21-244"></a><span class="ss">- </span>Also unlike x86 and ARM, it is easy to develop for RISC-V, and that is what we've done.</span>
-<span id="cb21-245"><a href="#cb21-245"></a></span>
-<span id="cb21-246"><a href="#cb21-246"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-247"><a href="#cb21-247"></a><span class="in">$ grep riscv link.x</span></span>
-<span id="cb21-248"><a href="#cb21-248"></a><span class="in">  By default uses the riscv crates default trap handler</span></span>
-<span id="cb21-249"><a href="#cb21-249"></a><span class="in">ERROR(riscv-rt): the start of the REGION_TEXT must be 4-byte aligned");</span></span>
-<span id="cb21-250"><a href="#cb21-250"></a><span class="in">ERROR(riscv-rt): the start of the REGION_RODATA must be 4-byte aligned");</span></span>
-<span id="cb21-251"><a href="#cb21-251"></a><span class="in">ERROR(riscv-rt): the start of the REGION_DATA must be 4-byte aligned");</span></span>
-<span id="cb21-252"><a href="#cb21-252"></a><span class="in">ERROR(riscv-rt): the start of the REGION_HEAP must be 4-byte aligned");</span></span>
-<span id="cb21-253"><a href="#cb21-253"></a><span class="in">ERROR(riscv-rt): the start of the REGION_TEXT must be 4-byte aligned");</span></span>
-<span id="cb21-254"><a href="#cb21-254"></a><span class="in">ERROR(riscv-rt): the start of the REGION_STACK must be 4-byte aligned");</span></span>
-<span id="cb21-255"><a href="#cb21-255"></a><span class="in">ERROR(riscv-rt): `_stext` must be 4-byte aligned");</span></span>
-<span id="cb21-256"><a href="#cb21-256"></a><span class="in">BUG(riscv-rt): .data is not 4-byte aligned");</span></span>
-<span id="cb21-257"><a href="#cb21-257"></a><span class="in">BUG(riscv-rt): the LMA of .data is not 4-byte aligned");</span></span>
-<span id="cb21-258"><a href="#cb21-258"></a><span class="in">BUG(riscv-rt): .bss is not 4-byte aligned");</span></span>
-<span id="cb21-259"><a href="#cb21-259"></a><span class="in">BUG(riscv-rt): start of .heap is not 4-byte aligned");</span></span>
-<span id="cb21-260"><a href="#cb21-260"></a><span class="in">ERROR(riscv-rt): The .text section must be placed inside the REGION_TEXT region.</span></span>
-<span id="cb21-261"><a href="#cb21-261"></a><span class="in">ERROR(riscv-rt): .stack section is too small for allocating stacks for all the harts.</span></span>
-<span id="cb21-262"><a href="#cb21-262"></a><span class="in">```</span></span>
-<span id="cb21-263"><a href="#cb21-263"></a></span>
-<span id="cb21-264"><a href="#cb21-264"></a><span class="ss">- </span>By golly, our <span class="in">`.x`</span> files are for RISC-V!</span>
-<span id="cb21-265"><a href="#cb21-265"></a><span class="ss">    - </span>And therefore *good*.</span>
-<span id="cb21-266"><a href="#cb21-266"></a>    </span>
-<span id="cb21-267"><a href="#cb21-267"></a><span class="fu">## Target</span></span>
-<span id="cb21-268"><a href="#cb21-268"></a></span>
-<span id="cb21-269"><a href="#cb21-269"></a><span class="ss">- </span>We recall the notion of a *target triple*</span>
-<span id="cb21-270"><a href="#cb21-270"></a><span class="ss">    - </span>From the <span class="co">[</span><span class="ot">linker lab</span><span class="co">](31_linker.md#target-triple)</span></span>
-<span id="cb21-271"><a href="#cb21-271"></a><span class="ss">- </span>We note:</span>
-<span id="cb21-272"><a href="#cb21-272"></a><span class="ss">    - </span>There are references to x86 (in my case) in the error logs.</span>
-<span id="cb21-273"><a href="#cb21-273"></a><span class="ss">    - </span>There are references to RISC-V in the linker files.</span>
-<span id="cb21-274"><a href="#cb21-274"></a><span class="ss">    - </span>We have to pick one, and...</span>
-<span id="cb21-275"><a href="#cb21-275"></a><span class="ss">    - </span>I didn't provide appropriate linker files for x86</span>
-<span id="cb21-276"><a href="#cb21-276"></a><span class="ss">        - </span>Because it's bad!</span>
-<span id="cb21-277"><a href="#cb21-277"></a><span class="ss">- </span>You will additionlly need to specify a target.</span>
-<span id="cb21-278"><a href="#cb21-278"></a><span class="ss">- </span><span class="in">`riscv64imac-unknown-none-elf`</span></span>
-<span id="cb21-279"><a href="#cb21-279"></a><span class="ss">- </span>You will figure it out.</span>
-<span id="cb21-280"><a href="#cb21-280"></a><span class="ss">    - </span>And you will know when you have, because you will see *no errors* and a <span class="in">`main`</span> will have appeared.</span>
-<span id="cb21-281"><a href="#cb21-281"></a>    </span>
-<span id="cb21-282"><a href="#cb21-282"></a><span class="fu">## Main</span></span>
+<span id="cb21-244"><a href="#cb21-244"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-245"><a href="#cb21-245"></a><span class="in">$ grep riscv link.x</span></span>
+<span id="cb21-246"><a href="#cb21-246"></a><span class="in">  By default uses the riscv crates default trap handler</span></span>
+<span id="cb21-247"><a href="#cb21-247"></a><span class="in">ERROR(riscv-rt): the start of the REGION_TEXT must be 4-byte aligned");</span></span>
+<span id="cb21-248"><a href="#cb21-248"></a><span class="in">ERROR(riscv-rt): the start of the REGION_RODATA must be 4-byte aligned");</span></span>
+<span id="cb21-249"><a href="#cb21-249"></a><span class="in">ERROR(riscv-rt): the start of the REGION_DATA must be 4-byte aligned");</span></span>
+<span id="cb21-250"><a href="#cb21-250"></a><span class="in">ERROR(riscv-rt): the start of the REGION_HEAP must be 4-byte aligned");</span></span>
+<span id="cb21-251"><a href="#cb21-251"></a><span class="in">ERROR(riscv-rt): the start of the REGION_TEXT must be 4-byte aligned");</span></span>
+<span id="cb21-252"><a href="#cb21-252"></a><span class="in">ERROR(riscv-rt): the start of the REGION_STACK must be 4-byte aligned");</span></span>
+<span id="cb21-253"><a href="#cb21-253"></a><span class="in">ERROR(riscv-rt): `_stext` must be 4-byte aligned");</span></span>
+<span id="cb21-254"><a href="#cb21-254"></a><span class="in">BUG(riscv-rt): .data is not 4-byte aligned");</span></span>
+<span id="cb21-255"><a href="#cb21-255"></a><span class="in">BUG(riscv-rt): the LMA of .data is not 4-byte aligned");</span></span>
+<span id="cb21-256"><a href="#cb21-256"></a><span class="in">BUG(riscv-rt): .bss is not 4-byte aligned");</span></span>
+<span id="cb21-257"><a href="#cb21-257"></a><span class="in">BUG(riscv-rt): start of .heap is not 4-byte aligned");</span></span>
+<span id="cb21-258"><a href="#cb21-258"></a><span class="in">ERROR(riscv-rt): The .text section must be placed inside the REGION_TEXT region.</span></span>
+<span id="cb21-259"><a href="#cb21-259"></a><span class="in">ERROR(riscv-rt): .stack section is too small for allocating stacks for all the harts.</span></span>
+<span id="cb21-260"><a href="#cb21-260"></a><span class="in">```</span></span>
+<span id="cb21-261"><a href="#cb21-261"></a></span>
+<span id="cb21-262"><a href="#cb21-262"></a><span class="ss">- </span>By golly, our <span class="in">`.x`</span> files are for RISC-V!</span>
+<span id="cb21-263"><a href="#cb21-263"></a><span class="ss">    - </span>And therefore *good*.</span>
+<span id="cb21-264"><a href="#cb21-264"></a>    </span>
+<span id="cb21-265"><a href="#cb21-265"></a><span class="fu">## Target</span></span>
+<span id="cb21-266"><a href="#cb21-266"></a></span>
+<span id="cb21-267"><a href="#cb21-267"></a><span class="ss">- </span>We recall the notion of a *target triple*</span>
+<span id="cb21-268"><a href="#cb21-268"></a><span class="ss">    - </span>From the <span class="co">[</span><span class="ot">linker lab</span><span class="co">](31_linker.md#target-triple)</span></span>
+<span id="cb21-269"><a href="#cb21-269"></a><span class="ss">- </span>We note:</span>
+<span id="cb21-270"><a href="#cb21-270"></a><span class="ss">    - </span>There are references to x86 (in my case) in the error logs.</span>
+<span id="cb21-271"><a href="#cb21-271"></a><span class="ss">    - </span>There are references to RISC-V in the linker files.</span>
+<span id="cb21-272"><a href="#cb21-272"></a><span class="ss">    - </span>We have to pick one, and...</span>
+<span id="cb21-273"><a href="#cb21-273"></a><span class="ss">    - </span>I didn't provide appropriate linker files for x86</span>
+<span id="cb21-274"><a href="#cb21-274"></a><span class="ss">        - </span>Because it's bad!</span>
+<span id="cb21-275"><a href="#cb21-275"></a><span class="ss">- </span>You will additionlly need to specify a target.</span>
+<span id="cb21-276"><a href="#cb21-276"></a><span class="ss">- </span><span class="in">`riscv64imac-unknown-none-elf`</span></span>
+<span id="cb21-277"><a href="#cb21-277"></a><span class="ss">- </span>You will figure it out.</span>
+<span id="cb21-278"><a href="#cb21-278"></a><span class="ss">    - </span>And you will know when you have, because you will see *no errors* and a <span class="in">`main`</span> will have appeared.</span>
+<span id="cb21-279"><a href="#cb21-279"></a>    </span>
+<span id="cb21-280"><a href="#cb21-280"></a><span class="fu">## Main</span></span>
+<span id="cb21-281"><a href="#cb21-281"></a></span>
+<span id="cb21-282"><a href="#cb21-282"></a><span class="ss">- </span>Go ahead and run <span class="in">`main`</span>, what could go wrong.</span>
 <span id="cb21-283"><a href="#cb21-283"></a></span>
-<span id="cb21-284"><a href="#cb21-284"></a><span class="ss">- </span>Go ahead and run <span class="in">`main`</span>, what could go wrong.</span>
-<span id="cb21-285"><a href="#cb21-285"></a></span>
-<span id="cb21-286"><a href="#cb21-286"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-287"><a href="#cb21-287"></a><span class="in">$ ./main</span></span>
-<span id="cb21-288"><a href="#cb21-288"></a><span class="in">-bash: ./main: cannot execute binary file: Exec format error</span></span>
-<span id="cb21-289"><a href="#cb21-289"></a><span class="in">```</span></span>
+<span id="cb21-284"><a href="#cb21-284"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-285"><a href="#cb21-285"></a><span class="in">$ ./main</span></span>
+<span id="cb21-286"><a href="#cb21-286"></a><span class="in">-bash: ./main: cannot execute binary file: Exec format error</span></span>
+<span id="cb21-287"><a href="#cb21-287"></a><span class="in">```</span></span>
+<span id="cb21-288"><a href="#cb21-288"></a></span>
+<span id="cb21-289"><a href="#cb21-289"></a><span class="ss">- </span>If, like me, you foolish use an architecture other than RISC-V as your daily driver (that's a metaphor, not a reference to device drivers), <span class="in">`main`</span> won't work on your system.</span>
 <span id="cb21-290"><a href="#cb21-290"></a></span>
-<span id="cb21-291"><a href="#cb21-291"></a><span class="ss">- </span>If, like me, you foolish use an architecture other than RISC-V as your daily driver (that's a metaphor, not a reference to device drivers), <span class="in">`main`</span> won't work on your system.</span>
+<span id="cb21-291"><a href="#cb21-291"></a><span class="fu">## QEMU</span></span>
 <span id="cb21-292"><a href="#cb21-292"></a></span>
-<span id="cb21-293"><a href="#cb21-293"></a><span class="fu">## QEMU</span></span>
+<span id="cb21-293"><a href="#cb21-293"></a><span class="ss">- </span>Well, it will, you just have to bamboozle your system into pretending to be a *good* system, like RISC-V</span>
 <span id="cb21-294"><a href="#cb21-294"></a></span>
-<span id="cb21-295"><a href="#cb21-295"></a><span class="ss">- </span>Well, it will, you just have to bamboozle your system into pretending to be a *good* system, like RISC-V</span>
-<span id="cb21-296"><a href="#cb21-296"></a></span>
-<span id="cb21-297"><a href="#cb21-297"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-298"><a href="#cb21-298"></a><span class="in">sudo apt install qemu-system-misc</span></span>
-<span id="cb21-299"><a href="#cb21-299"></a><span class="in">```</span></span>
-<span id="cb21-300"><a href="#cb21-300"></a></span>
-<span id="cb21-301"><a href="#cb21-301"></a><span class="ss">- </span>We don't allow our feelings to be hurt by RISC-V being described as "miscellaneous". </span>
-<span id="cb21-302"><a href="#cb21-302"></a><span class="ss">    - </span>I didn't properly sandbox my system before debugging so I think this is all you need but I may be wrong if I lost a dependency somewhere.</span>
+<span id="cb21-295"><a href="#cb21-295"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-296"><a href="#cb21-296"></a><span class="in">sudo apt install qemu-system-misc</span></span>
+<span id="cb21-297"><a href="#cb21-297"></a><span class="in">```</span></span>
+<span id="cb21-298"><a href="#cb21-298"></a></span>
+<span id="cb21-299"><a href="#cb21-299"></a><span class="ss">- </span>We don't allow our feelings to be hurt by RISC-V being described as "miscellaneous". </span>
+<span id="cb21-300"><a href="#cb21-300"></a><span class="ss">    - </span>I didn't properly sandbox my system before debugging so I think this is all you need but I may be wrong if I lost a dependency somewhere.</span>
+<span id="cb21-301"><a href="#cb21-301"></a></span>
+<span id="cb21-302"><a href="#cb21-302"></a><span class="fu">## Run QEMU</span></span>
 <span id="cb21-303"><a href="#cb21-303"></a></span>
-<span id="cb21-304"><a href="#cb21-304"></a><span class="fu">## Run QEMU</span></span>
+<span id="cb21-304"><a href="#cb21-304"></a><span class="ss">- </span>You can simply launch <span class="in">`qemu`</span> with no strings attached.</span>
 <span id="cb21-305"><a href="#cb21-305"></a></span>
-<span id="cb21-306"><a href="#cb21-306"></a><span class="ss">- </span>You can simply launch <span class="in">`qemu`</span> with no strings attached.</span>
-<span id="cb21-307"><a href="#cb21-307"></a></span>
-<span id="cb21-308"><a href="#cb21-308"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-309"><a href="#cb21-309"></a><span class="in">qemu-system-riscv64</span></span>
-<span id="cb21-310"><a href="#cb21-310"></a><span class="in">```</span></span>
-<span id="cb21-311"><a href="#cb21-311"></a></span>
-<span id="cb21-312"><a href="#cb21-312"></a><span class="ss">- </span>For me this popped open a new window.</span>
-<span id="cb21-313"><a href="#cb21-313"></a><span class="ss">    - </span>This is good, as otherwise you have to deal with processes and I don't have time to teach that.</span>
-<span id="cb21-314"><a href="#cb21-314"></a><span class="ss">    - </span>If you type "quit" after the prompt of <span class="in">`(qemu)`</span> it should close.</span>
+<span id="cb21-306"><a href="#cb21-306"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-307"><a href="#cb21-307"></a><span class="in">qemu-system-riscv64</span></span>
+<span id="cb21-308"><a href="#cb21-308"></a><span class="in">```</span></span>
+<span id="cb21-309"><a href="#cb21-309"></a></span>
+<span id="cb21-310"><a href="#cb21-310"></a><span class="ss">- </span>For me this popped open a new window.</span>
+<span id="cb21-311"><a href="#cb21-311"></a><span class="ss">    - </span>This is good, as otherwise you have to deal with processes and I don't have time to teach that.</span>
+<span id="cb21-312"><a href="#cb21-312"></a><span class="ss">    - </span>If you type "quit" after the prompt of <span class="in">`(qemu)`</span> it should close.</span>
+<span id="cb21-313"><a href="#cb21-313"></a></span>
+<span id="cb21-314"><a href="#cb21-314"></a><span class="fu">## Run main</span></span>
 <span id="cb21-315"><a href="#cb21-315"></a></span>
-<span id="cb21-316"><a href="#cb21-316"></a><span class="fu">## Run main</span></span>
+<span id="cb21-316"><a href="#cb21-316"></a><span class="ss">- </span>You can specify that you totally wrote a working OS, honest, by providing <span class="in">`qemu`</span> with a specified kernel, like our <span class="in">`main`</span></span>
 <span id="cb21-317"><a href="#cb21-317"></a></span>
-<span id="cb21-318"><a href="#cb21-318"></a><span class="ss">- </span>You can specify that you totally wrote a working OS, honest, by providing <span class="in">`qemu`</span> with a specified kernel, like our <span class="in">`main`</span></span>
-<span id="cb21-319"><a href="#cb21-319"></a></span>
-<span id="cb21-320"><a href="#cb21-320"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-321"><a href="#cb21-321"></a><span class="in">qemu-system-riscv64 -kernel main</span></span>
-<span id="cb21-322"><a href="#cb21-322"></a><span class="in">```</span></span>
+<span id="cb21-318"><a href="#cb21-318"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-319"><a href="#cb21-319"></a><span class="in">qemu-system-riscv64 -kernel main</span></span>
+<span id="cb21-320"><a href="#cb21-320"></a><span class="in">```</span></span>
+<span id="cb21-321"><a href="#cb21-321"></a></span>
+<span id="cb21-322"><a href="#cb21-322"></a>::: {.callout-note appearance="simple"}</span>
 <span id="cb21-323"><a href="#cb21-323"></a></span>
-<span id="cb21-324"><a href="#cb21-324"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb21-324"><a href="#cb21-324"></a><span class="fu">## Forward Pointer</span></span>
 <span id="cb21-325"><a href="#cb21-325"></a></span>
-<span id="cb21-326"><a href="#cb21-326"></a><span class="fu">## Forward Pointer</span></span>
+<span id="cb21-326"><a href="#cb21-326"></a>We will properly introduce kernels in the next lecture.</span>
 <span id="cb21-327"><a href="#cb21-327"></a></span>
-<span id="cb21-328"><a href="#cb21-328"></a>We will properly introduce kernels in the next lecture.</span>
+<span id="cb21-328"><a href="#cb21-328"></a>:::</span>
 <span id="cb21-329"><a href="#cb21-329"></a></span>
-<span id="cb21-330"><a href="#cb21-330"></a>:::</span>
+<span id="cb21-330"><a href="#cb21-330"></a><span class="ss">- </span>This will probably work.</span>
 <span id="cb21-331"><a href="#cb21-331"></a></span>
-<span id="cb21-332"><a href="#cb21-332"></a></span>
-<span id="cb21-333"><a href="#cb21-333"></a><span class="ss">- </span>This will probably work.</span>
-<span id="cb21-334"><a href="#cb21-334"></a></span>
-<span id="cb21-335"><a href="#cb21-335"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-336"><a href="#cb21-336"></a><span class="in">$ qemu-system-riscv64 -kernel main</span></span>
-<span id="cb21-337"><a href="#cb21-337"></a><span class="in">qemu-system-riscv64: Some ROM regions are overlapping</span></span>
-<span id="cb21-338"><a href="#cb21-338"></a><span class="in">These ROM regions might have been loaded by direct user request or by default.</span></span>
-<span id="cb21-339"><a href="#cb21-339"></a><span class="in">They could be BIOS/firmware images, a guest kernel, initrd or some other file loaded into guest memory.</span></span>
-<span id="cb21-340"><a href="#cb21-340"></a><span class="in">Check whether you intended to load all this guest code, and whether it has been built to load to the correct addresses.</span></span>
-<span id="cb21-341"><a href="#cb21-341"></a></span>
-<span id="cb21-342"><a href="#cb21-342"></a><span class="in">The following two regions overlap (in the memory address space):</span></span>
-<span id="cb21-343"><a href="#cb21-343"></a><span class="in">  /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf ELF program header segment 1 (addresses 0x0000000080000000 - 0x0000000080016ce8)</span></span>
-<span id="cb21-344"><a href="#cb21-344"></a><span class="in">  main ELF program header segment 0 (addresses 0x0000000080000000 - 0x0000000080000004)</span></span>
-<span id="cb21-345"><a href="#cb21-345"></a><span class="in">```</span></span>
-<span id="cb21-346"><a href="#cb21-346"></a></span>
-<span id="cb21-347"><a href="#cb21-347"></a><span class="ss">- </span>And by probably I mean with a probability of zero.</span>
-<span id="cb21-348"><a href="#cb21-348"></a></span>
-<span id="cb21-349"><a href="#cb21-349"></a><span class="fu">## BIOS</span></span>
-<span id="cb21-350"><a href="#cb21-350"></a></span>
-<span id="cb21-351"><a href="#cb21-351"></a><span class="ss">- </span>The BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.</span>
-<span id="cb21-352"><a href="#cb21-352"></a><span class="ss">- </span>When the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).</span>
-<span id="cb21-353"><a href="#cb21-353"></a><span class="ss">- </span>The BIOS will then instruct the device how to procede.</span>
-<span id="cb21-354"><a href="#cb21-354"></a><span class="ss">- </span>We don't need any of that, we already wrote an infinite loop and can just start there!</span>
+<span id="cb21-332"><a href="#cb21-332"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-333"><a href="#cb21-333"></a><span class="in">$ qemu-system-riscv64 -kernel main</span></span>
+<span id="cb21-334"><a href="#cb21-334"></a><span class="in">qemu-system-riscv64: Some ROM regions are overlapping</span></span>
+<span id="cb21-335"><a href="#cb21-335"></a><span class="in">These ROM regions might have been loaded by direct user request or by default.</span></span>
+<span id="cb21-336"><a href="#cb21-336"></a><span class="in">They could be BIOS/firmware images, a guest kernel, initrd or some other file loaded into guest memory.</span></span>
+<span id="cb21-337"><a href="#cb21-337"></a><span class="in">Check whether you intended to load all this guest code, and whether it has been built to load to the correct addresses.</span></span>
+<span id="cb21-338"><a href="#cb21-338"></a></span>
+<span id="cb21-339"><a href="#cb21-339"></a><span class="in">The following two regions overlap (in the memory address space):</span></span>
+<span id="cb21-340"><a href="#cb21-340"></a><span class="in">  /usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf ELF program header segment 1 (addresses 0x0000000080000000 - 0x0000000080016ce8)</span></span>
+<span id="cb21-341"><a href="#cb21-341"></a><span class="in">  main ELF program header segment 0 (addresses 0x0000000080000000 - 0x0000000080000004)</span></span>
+<span id="cb21-342"><a href="#cb21-342"></a><span class="in">```</span></span>
+<span id="cb21-343"><a href="#cb21-343"></a></span>
+<span id="cb21-344"><a href="#cb21-344"></a><span class="ss">- </span>And by probably I mean with a probability of zero.</span>
+<span id="cb21-345"><a href="#cb21-345"></a></span>
+<span id="cb21-346"><a href="#cb21-346"></a><span class="fu">## BIOS</span></span>
+<span id="cb21-347"><a href="#cb21-347"></a></span>
+<span id="cb21-348"><a href="#cb21-348"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb21-349"><a href="#cb21-349"></a></span>
+<span id="cb21-350"><a href="#cb21-350"></a><span class="fu">## Forward Pointer</span></span>
+<span id="cb21-351"><a href="#cb21-351"></a></span>
+<span id="cb21-352"><a href="#cb21-352"></a>We will properly introduce the BIOS in the next lecture.</span>
+<span id="cb21-353"><a href="#cb21-353"></a></span>
+<span id="cb21-354"><a href="#cb21-354"></a>:::</span>
 <span id="cb21-355"><a href="#cb21-355"></a></span>
-<span id="cb21-356"><a href="#cb21-356"></a><span class="in">```{.sh}</span></span>
-<span id="cb21-357"><a href="#cb21-357"></a><span class="in">qemu-system-riscv64 -kernel main -bios none</span></span>
-<span id="cb21-358"><a href="#cb21-358"></a><span class="in">```</span></span>
-<span id="cb21-359"><a href="#cb21-359"></a></span>
-<span id="cb21-360"><a href="#cb21-360"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer's motherboard.</span><span class="co">](https://en.wikipedia.org/wiki/BIOS)</span></span>
-<span id="cb21-361"><a href="#cb21-361"></a></span>
-<span id="cb21-362"><a href="#cb21-362"></a><span class="fu"># Fin</span></span>
-<span id="cb21-363"><a href="#cb21-363"></a></span>
-<span id="cb21-364"><a href="#cb21-364"></a>For me that worked, hopefully for you too! If not, you have officially entered the fun zone.</span>
-<span id="cb21-365"><a href="#cb21-365"></a></span>
-<span id="cb21-366"><a href="#cb21-366"></a><span class="fu">## TODO</span></span>
-<span id="cb21-367"><a href="#cb21-367"></a></span>
-<span id="cb21-368"><a href="#cb21-368"></a>For this homework, add a README.md to the crate describing how to get it to work.</span>
-<span id="cb21-369"><a href="#cb21-369"></a></span>
-<span id="cb21-370"><a href="#cb21-370"></a><span class="ss">- </span>It should be like this document, but concise.</span>
-<span id="cb21-371"><a href="#cb21-371"></a><span class="ss">- </span>Use cool markdown checkboxes.</span>
+<span id="cb21-356"><a href="#cb21-356"></a><span class="ss">- </span>The BIOS can be thought of as a tiny bit of read-only memory (ROM) that lives on a computer.</span>
+<span id="cb21-357"><a href="#cb21-357"></a><span class="ss">- </span>When the computer first turns on, it immediately begins reading instructions from the BIOS (presumably over the bus, or through some other means).</span>
+<span id="cb21-358"><a href="#cb21-358"></a><span class="ss">- </span>The BIOS will then instruct the device how to procede.</span>
+<span id="cb21-359"><a href="#cb21-359"></a><span class="ss">- </span>We don't need any of that, we already wrote an infinite loop and can just start there!</span>
+<span id="cb21-360"><a href="#cb21-360"></a></span>
+<span id="cb21-361"><a href="#cb21-361"></a><span class="in">```{.sh}</span></span>
+<span id="cb21-362"><a href="#cb21-362"></a><span class="in">qemu-system-riscv64 -kernel main -bios none</span></span>
+<span id="cb21-363"><a href="#cb21-363"></a><span class="in">```</span></span>
+<span id="cb21-364"><a href="#cb21-364"></a></span>
+<span id="cb21-365"><a href="#cb21-365"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In computing, BIOS (Basic Input/Output System, also known as the System BIOS, ROM BIOS, BIOS ROM or PC BIOS) is a type of firmware used to provide runtime services for operating systems and programs and to perform hardware initialization during the booting process (power-on startup). On a computer using BIOS firmware, the firmware comes pre-installed on the computer's motherboard.</span><span class="co">](https://en.wikipedia.org/wiki/BIOS)</span></span>
+<span id="cb21-366"><a href="#cb21-366"></a></span>
+<span id="cb21-367"><a href="#cb21-367"></a><span class="fu"># Fin</span></span>
+<span id="cb21-368"><a href="#cb21-368"></a></span>
+<span id="cb21-369"><a href="#cb21-369"></a>For me that worked, hopefully for you too! If not, you have officially entered the fun zone.</span>
+<span id="cb21-370"><a href="#cb21-370"></a></span>
+<span id="cb21-371"><a href="#cb21-371"></a><span class="fu">## TODO</span></span>
 <span id="cb21-372"><a href="#cb21-372"></a></span>
-<span id="cb21-373"><a href="#cb21-373"></a><span class="in">```md</span></span>
-<span id="cb21-374"><a href="#cb21-374"></a><span class="ss">- </span><span class="va">[ ]</span> Do a thing.</span>
-<span id="cb21-375"><a href="#cb21-375"></a><span class="ss">- </span><span class="va">[ ]</span> Do another thing.</span>
-<span id="cb21-376"><a href="#cb21-376"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb21-373"><a href="#cb21-373"></a>For this homework, add a README.md to the crate describing how to get it to work.</span>
+<span id="cb21-374"><a href="#cb21-374"></a></span>
+<span id="cb21-375"><a href="#cb21-375"></a><span class="ss">- </span>It should be like this document, but concise.</span>
+<span id="cb21-376"><a href="#cb21-376"></a><span class="ss">- </span>Use cool markdown checkboxes.</span>
+<span id="cb21-377"><a href="#cb21-377"></a></span>
+<span id="cb21-378"><a href="#cb21-378"></a><span class="in">```md</span></span>
+<span id="cb21-379"><a href="#cb21-379"></a><span class="ss">- </span><span class="va">[ ]</span> Do a thing.</span>
+<span id="cb21-380"><a href="#cb21-380"></a><span class="ss">- </span><span class="va">[ ]</span> Do another thing.</span>
+<span id="cb21-381"><a href="#cb21-381"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
