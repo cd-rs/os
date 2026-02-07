@@ -697,10 +697,22 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 
 -->
 </section>
-<section id="target-specification" class="slide level2">
-<h2>Target Specification</h2>
-<p>Cargo supports different target systems through the <code>--target</code> parameter. The target is described by a so-called <em><a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple">target triple</a></em>, which describes the CPU architecture, the vendor, the operating system, and the <a href="https://stackoverflow.com/a/2456882">ABI</a>. For example, the <code>x86_64-unknown-linux-gnu</code> target triple describes a system with an <code>x86_64</code> CPU, no clear vendor, and a Linux operating system with the GNU ABI. Rust supports <a href="https://forge.rust-lang.org/release/platform-support.html">many different target triples</a>, including <code>arm-linux-androideabi</code> for Android or <a href="https://www.hellorust.com/setup/wasm-target/"><code>wasm32-unknown-unknown</code> for WebAssembly</a>.</p>
-<p>For our target system, however, we require some special configuration parameters (e.g.&nbsp;no underlying OS), so none of the <a href="https://forge.rust-lang.org/release/platform-support.html">existing target triples</a> fits. Fortunately, Rust allows us to define <a href="https://doc.rust-lang.org/nightly/rustc/targets/custom.html">our own target</a> through a JSON file. For example, a JSON file that describes the <code>x86_64-unknown-linux-gnu</code> target looks like this:</p>
+<section id="target-triple" class="slide level2">
+<h2>Target Triple</h2>
+<ul>
+<li>We recall the “<a href="31_linker.md#target-triple">target triple</a>”</li>
+<li>Imagine <code>host</code> triple is <code>x86_64-unknown-linux-gnu</code>
+<ul>
+<li>CPU architecture (<code>x86_64</code>),</li>
+<li>Vendor (<code>unknown</code>) - It’s Intel #Portland</li>
+<li>Operating system (<code>linux</code>)</li>
+<li>The <a href="https://en.wikipedia.org/wiki/Application_binary_interface">ABI</a> (<code>gnu</code>).</li>
+</ul></li>
+</ul>
+</section>
+<section id="our-target" class="slide level2">
+<h2>Our Target</h2>
+<p>For our target system, however, we require some special configuration parameters (e.g.&nbsp;no underlying OS), so none of the [existing target triples][platform-support] fits. Fortunately, Rust allows us to define [our own target][custom-targets] through a JSON file. For example, a JSON file that describes the <code>x86_64-unknown-linux-gnu</code> target looks like this:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb1-1"><a></a><span class="fu">{</span></span>
 <span id="cb1-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
 <span id="cb1-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>

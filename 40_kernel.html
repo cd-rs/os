@@ -250,7 +250,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#kernel" id="toc-kernel" class="nav-link" data-scroll-target="#kernel">Kernel</a>
   <ul class="collapse">
   <li><a href="#a-minimal-kernel" id="toc-a-minimal-kernel" class="nav-link" data-scroll-target="#a-minimal-kernel">A Minimal Kernel</a></li>
-  <li><a href="#target-specification" id="toc-target-specification" class="nav-link" data-scroll-target="#target-specification">Target Specification</a></li>
+  <li><a href="#target-triple" id="toc-target-triple" class="nav-link" data-scroll-target="#target-triple">Target Triple</a></li>
+  <li><a href="#our-target" id="toc-our-target" class="nav-link" data-scroll-target="#our-target">Our Target</a></li>
   <li><a href="#putting-it-together" id="toc-putting-it-together" class="nav-link" data-scroll-target="#putting-it-together">Putting it Together</a></li>
   <li><a href="#building-our-kernel" id="toc-building-our-kernel" class="nav-link" data-scroll-target="#building-our-kernel">Building our Kernel</a></li>
   <li><a href="#the-json-target-spec-option" id="toc-the-json-target-spec-option" class="nav-link" data-scroll-target="#the-json-target-spec-option">The <code>json-target-spec</code> Option</a></li>
@@ -588,10 +589,22 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 
 -->
 </section>
-<section id="target-specification" class="level2">
-<h2 class="anchored" data-anchor-id="target-specification">Target Specification</h2>
-<p>Cargo supports different target systems through the <code>--target</code> parameter. The target is described by a so-called <em><a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple">target triple</a></em>, which describes the CPU architecture, the vendor, the operating system, and the <a href="https://stackoverflow.com/a/2456882">ABI</a>. For example, the <code>x86_64-unknown-linux-gnu</code> target triple describes a system with an <code>x86_64</code> CPU, no clear vendor, and a Linux operating system with the GNU ABI. Rust supports <a href="https://forge.rust-lang.org/release/platform-support.html">many different target triples</a>, including <code>arm-linux-androideabi</code> for Android or <a href="https://www.hellorust.com/setup/wasm-target/"><code>wasm32-unknown-unknown</code> for WebAssembly</a>.</p>
-<p>For our target system, however, we require some special configuration parameters (e.g.&nbsp;no underlying OS), so none of the <a href="https://forge.rust-lang.org/release/platform-support.html">existing target triples</a> fits. Fortunately, Rust allows us to define <a href="https://doc.rust-lang.org/nightly/rustc/targets/custom.html">our own target</a> through a JSON file. For example, a JSON file that describes the <code>x86_64-unknown-linux-gnu</code> target looks like this:</p>
+<section id="target-triple" class="level2">
+<h2 class="anchored" data-anchor-id="target-triple">Target Triple</h2>
+<ul>
+<li>We recall the “<a href="31_linker.md#target-triple">target triple</a>”</li>
+<li>Imagine <code>host</code> triple is <code>x86_64-unknown-linux-gnu</code>
+<ul>
+<li>CPU architecture (<code>x86_64</code>),</li>
+<li>Vendor (<code>unknown</code>) - It’s Intel #Portland</li>
+<li>Operating system (<code>linux</code>)</li>
+<li>The <a href="https://en.wikipedia.org/wiki/Application_binary_interface">ABI</a> (<code>gnu</code>).</li>
+</ul></li>
+</ul>
+</section>
+<section id="our-target" class="level2">
+<h2 class="anchored" data-anchor-id="our-target">Our Target</h2>
+<p>For our target system, however, we require some special configuration parameters (e.g.&nbsp;no underlying OS), so none of the [existing target triples][platform-support] fits. Fortunately, Rust allows us to define [our own target][custom-targets] through a JSON file. For example, a JSON file that describes the <code>x86_64-unknown-linux-gnu</code> target looks like this:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">{</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
@@ -1545,436 +1558,440 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb24-213"><a href="#cb24-213"></a></span>
 <span id="cb24-214"><a href="#cb24-214"></a><span class="co">--&gt;</span></span>
 <span id="cb24-215"><a href="#cb24-215"></a></span>
-<span id="cb24-216"><a href="#cb24-216"></a><span class="fu">## Target Specification</span></span>
-<span id="cb24-217"><a href="#cb24-217"></a>Cargo supports different target systems through the <span class="in">`--target`</span> parameter. The target is described by a so-called _[target triple]_, which describes the CPU architecture, the vendor, the operating system, and the <span class="co">[</span><span class="ot">ABI</span><span class="co">]</span>. For example, the <span class="in">`x86_64-unknown-linux-gnu`</span> target triple describes a system with an <span class="in">`x86_64`</span> CPU, no clear vendor, and a Linux operating system with the GNU ABI. Rust supports <span class="co">[</span><span class="ot">many different target triples</span><span class="co">][platform-support]</span>, including <span class="in">`arm-linux-androideabi`</span> for Android or <span class="co">[</span><span class="ot">`wasm32-unknown-unknown` for WebAssembly</span><span class="co">](https://www.hellorust.com/setup/wasm-target/)</span>.</span>
-<span id="cb24-218"><a href="#cb24-218"></a></span>
-<span id="cb24-219"><a href="#cb24-219"></a><span class="ot">[target triple]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple</span></span>
-<span id="cb24-220"><a href="#cb24-220"></a><span class="ot">[ABI]: https://stackoverflow.com/a/2456882</span></span>
-<span id="cb24-221"><a href="#cb24-221"></a><span class="ot">[platform-support]: https://forge.rust-lang.org/release/platform-support.html</span></span>
-<span id="cb24-222"><a href="#cb24-222"></a><span class="ot">[custom-targets]: https://doc.rust-lang.org/nightly/rustc/targets/custom.html</span></span>
-<span id="cb24-223"><a href="#cb24-223"></a></span>
-<span id="cb24-224"><a href="#cb24-224"></a>For our target system, however, we require some special configuration parameters (e.g. no underlying OS), so none of the <span class="co">[</span><span class="ot">existing target triples</span><span class="co">][platform-support]</span> fits. Fortunately, Rust allows us to define <span class="co">[</span><span class="ot">our own target</span><span class="co">][custom-targets]</span> through a JSON file. For example, a JSON file that describes the <span class="in">`x86_64-unknown-linux-gnu`</span> target looks like this:</span>
+<span id="cb24-216"><a href="#cb24-216"></a><span class="fu">## Target Triple</span></span>
+<span id="cb24-217"><a href="#cb24-217"></a></span>
+<span id="cb24-218"><a href="#cb24-218"></a><span class="ss">- </span>We recall the "<span class="co">[</span><span class="ot">target triple</span><span class="co">](31_linker.md#target-triple)</span>"</span>
+<span id="cb24-219"><a href="#cb24-219"></a><span class="ss">- </span>Imagine <span class="in">`host`</span> triple is <span class="in">`x86_64-unknown-linux-gnu`</span></span>
+<span id="cb24-220"><a href="#cb24-220"></a><span class="ss">    - </span>CPU architecture (<span class="in">`x86_64`</span>), </span>
+<span id="cb24-221"><a href="#cb24-221"></a><span class="ss">    - </span>Vendor (<span class="in">`unknown`</span>) - It's Intel #Portland</span>
+<span id="cb24-222"><a href="#cb24-222"></a><span class="ss">    - </span>Operating system (<span class="in">`linux`</span>)</span>
+<span id="cb24-223"><a href="#cb24-223"></a><span class="ss">    - </span>The <span class="co">[</span><span class="ot">ABI</span><span class="co">](https://en.wikipedia.org/wiki/Application_binary_interface)</span> (<span class="in">`gnu`</span>).</span>
+<span id="cb24-224"><a href="#cb24-224"></a></span>
 <span id="cb24-225"><a href="#cb24-225"></a></span>
-<span id="cb24-226"><a href="#cb24-226"></a><span class="in">```json</span></span>
-<span id="cb24-227"><a href="#cb24-227"></a><span class="fu">{</span></span>
-<span id="cb24-228"><a href="#cb24-228"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
-<span id="cb24-229"><a href="#cb24-229"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
-<span id="cb24-230"><a href="#cb24-230"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
-<span id="cb24-231"><a href="#cb24-231"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
-<span id="cb24-232"><a href="#cb24-232"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
-<span id="cb24-233"><a href="#cb24-233"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
-<span id="cb24-234"><a href="#cb24-234"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"linux"</span><span class="fu">,</span></span>
-<span id="cb24-235"><a href="#cb24-235"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb24-236"><a href="#cb24-236"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"gcc"</span><span class="fu">,</span></span>
-<span id="cb24-237"><a href="#cb24-237"></a>    <span class="dt">"pre-link-args"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"-m64"</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb24-238"><a href="#cb24-238"></a>    <span class="dt">"morestack"</span><span class="fu">:</span> <span class="kw">false</span></span>
-<span id="cb24-239"><a href="#cb24-239"></a><span class="fu">}</span></span>
-<span id="cb24-240"><a href="#cb24-240"></a><span class="in">```</span></span>
-<span id="cb24-241"><a href="#cb24-241"></a></span>
-<span id="cb24-242"><a href="#cb24-242"></a>Most fields are required by LLVM to generate code for that platform. For example, the <span class="co">[</span><span class="ot">`data-layout`</span><span class="co">]</span> field defines the size of various integer, floating point, and pointer types. Then there are fields that Rust uses for conditional compilation, such as <span class="in">`target-pointer-width`</span>. The third kind of field defines how the crate should be built. For example, the <span class="in">`pre-link-args`</span> field specifies arguments passed to the <span class="co">[</span><span class="ot">linker</span><span class="co">]</span>.</span>
-<span id="cb24-243"><a href="#cb24-243"></a></span>
-<span id="cb24-244"><a href="#cb24-244"></a><span class="ot">[`data-layout`]: https://llvm.org/docs/LangRef.html#data-layout</span></span>
-<span id="cb24-245"><a href="#cb24-245"></a><span class="ot">[linker]: https://en.wikipedia.org/wiki/Linker_(computing)</span></span>
-<span id="cb24-246"><a href="#cb24-246"></a></span>
-<span id="cb24-247"><a href="#cb24-247"></a>We also target <span class="in">`x86_64`</span> systems with our kernel, so our target specification will look very similar to the one above. Let's start by creating an <span class="in">`x86_64-blog_os.json`</span> file (choose any name you like) with the common content:</span>
-<span id="cb24-248"><a href="#cb24-248"></a></span>
-<span id="cb24-249"><a href="#cb24-249"></a><span class="in">```json</span></span>
-<span id="cb24-250"><a href="#cb24-250"></a><span class="fu">{</span></span>
-<span id="cb24-251"><a href="#cb24-251"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
-<span id="cb24-252"><a href="#cb24-252"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
-<span id="cb24-253"><a href="#cb24-253"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
-<span id="cb24-254"><a href="#cb24-254"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
-<span id="cb24-255"><a href="#cb24-255"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
-<span id="cb24-256"><a href="#cb24-256"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
-<span id="cb24-257"><a href="#cb24-257"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
-<span id="cb24-258"><a href="#cb24-258"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span></span>
-<span id="cb24-259"><a href="#cb24-259"></a><span class="fu">}</span></span>
-<span id="cb24-260"><a href="#cb24-260"></a><span class="in">```</span></span>
-<span id="cb24-261"><a href="#cb24-261"></a></span>
-<span id="cb24-262"><a href="#cb24-262"></a>Note that we changed the OS in the <span class="in">`llvm-target`</span> and the <span class="in">`os`</span> field to <span class="in">`none`</span>, because we will run on bare metal.</span>
-<span id="cb24-263"><a href="#cb24-263"></a></span>
-<span id="cb24-264"><a href="#cb24-264"></a>We add the following build-related entries:</span>
+<span id="cb24-226"><a href="#cb24-226"></a><span class="fu">## Our Target</span></span>
+<span id="cb24-227"><a href="#cb24-227"></a></span>
+<span id="cb24-228"><a href="#cb24-228"></a>For our target system, however, we require some special configuration parameters (e.g. no underlying OS), so none of the <span class="co">[</span><span class="ot">existing target triples</span><span class="co">][platform-support]</span> fits. Fortunately, Rust allows us to define <span class="co">[</span><span class="ot">our own target</span><span class="co">][custom-targets]</span> through a JSON file. For example, a JSON file that describes the <span class="in">`x86_64-unknown-linux-gnu`</span> target looks like this:</span>
+<span id="cb24-229"><a href="#cb24-229"></a></span>
+<span id="cb24-230"><a href="#cb24-230"></a><span class="in">```json</span></span>
+<span id="cb24-231"><a href="#cb24-231"></a><span class="fu">{</span></span>
+<span id="cb24-232"><a href="#cb24-232"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
+<span id="cb24-233"><a href="#cb24-233"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb24-234"><a href="#cb24-234"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb24-235"><a href="#cb24-235"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb24-236"><a href="#cb24-236"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb24-237"><a href="#cb24-237"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb24-238"><a href="#cb24-238"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"linux"</span><span class="fu">,</span></span>
+<span id="cb24-239"><a href="#cb24-239"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb24-240"><a href="#cb24-240"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"gcc"</span><span class="fu">,</span></span>
+<span id="cb24-241"><a href="#cb24-241"></a>    <span class="dt">"pre-link-args"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"-m64"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb24-242"><a href="#cb24-242"></a>    <span class="dt">"morestack"</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb24-243"><a href="#cb24-243"></a><span class="fu">}</span></span>
+<span id="cb24-244"><a href="#cb24-244"></a><span class="in">```</span></span>
+<span id="cb24-245"><a href="#cb24-245"></a></span>
+<span id="cb24-246"><a href="#cb24-246"></a>Most fields are required by LLVM to generate code for that platform. For example, the <span class="co">[</span><span class="ot">`data-layout`</span><span class="co">]</span> field defines the size of various integer, floating point, and pointer types. Then there are fields that Rust uses for conditional compilation, such as <span class="in">`target-pointer-width`</span>. The third kind of field defines how the crate should be built. For example, the <span class="in">`pre-link-args`</span> field specifies arguments passed to the <span class="co">[</span><span class="ot">linker</span><span class="co">]</span>.</span>
+<span id="cb24-247"><a href="#cb24-247"></a></span>
+<span id="cb24-248"><a href="#cb24-248"></a><span class="ot">[`data-layout`]: https://llvm.org/docs/LangRef.html#data-layout</span></span>
+<span id="cb24-249"><a href="#cb24-249"></a><span class="ot">[linker]: https://en.wikipedia.org/wiki/Linker_(computing)</span></span>
+<span id="cb24-250"><a href="#cb24-250"></a></span>
+<span id="cb24-251"><a href="#cb24-251"></a>We also target <span class="in">`x86_64`</span> systems with our kernel, so our target specification will look very similar to the one above. Let's start by creating an <span class="in">`x86_64-blog_os.json`</span> file (choose any name you like) with the common content:</span>
+<span id="cb24-252"><a href="#cb24-252"></a></span>
+<span id="cb24-253"><a href="#cb24-253"></a><span class="in">```json</span></span>
+<span id="cb24-254"><a href="#cb24-254"></a><span class="fu">{</span></span>
+<span id="cb24-255"><a href="#cb24-255"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb24-256"><a href="#cb24-256"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb24-257"><a href="#cb24-257"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb24-258"><a href="#cb24-258"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb24-259"><a href="#cb24-259"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb24-260"><a href="#cb24-260"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb24-261"><a href="#cb24-261"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb24-262"><a href="#cb24-262"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb24-263"><a href="#cb24-263"></a><span class="fu">}</span></span>
+<span id="cb24-264"><a href="#cb24-264"></a><span class="in">```</span></span>
 <span id="cb24-265"><a href="#cb24-265"></a></span>
-<span id="cb24-266"><a href="#cb24-266"></a></span>
-<span id="cb24-267"><a href="#cb24-267"></a><span class="in">```json</span></span>
-<span id="cb24-268"><a href="#cb24-268"></a>"linker-flavor": "ld.lld",</span>
-<span id="cb24-269"><a href="#cb24-269"></a>"linker": "rust-lld",</span>
-<span id="cb24-270"><a href="#cb24-270"></a><span class="in">```</span></span>
-<span id="cb24-271"><a href="#cb24-271"></a></span>
-<span id="cb24-272"><a href="#cb24-272"></a>Instead of using the platform's default linker (which might not support Linux targets), we use the cross-platform <span class="co">[</span><span class="ot">LLD</span><span class="co">]</span> linker that is shipped with Rust for linking our kernel.</span>
-<span id="cb24-273"><a href="#cb24-273"></a></span>
-<span id="cb24-274"><a href="#cb24-274"></a><span class="ot">[LLD]: https://lld.llvm.org/</span></span>
+<span id="cb24-266"><a href="#cb24-266"></a>Note that we changed the OS in the <span class="in">`llvm-target`</span> and the <span class="in">`os`</span> field to <span class="in">`none`</span>, because we will run on bare metal.</span>
+<span id="cb24-267"><a href="#cb24-267"></a></span>
+<span id="cb24-268"><a href="#cb24-268"></a>We add the following build-related entries:</span>
+<span id="cb24-269"><a href="#cb24-269"></a></span>
+<span id="cb24-270"><a href="#cb24-270"></a></span>
+<span id="cb24-271"><a href="#cb24-271"></a><span class="in">```json</span></span>
+<span id="cb24-272"><a href="#cb24-272"></a>"linker-flavor": "ld.lld",</span>
+<span id="cb24-273"><a href="#cb24-273"></a>"linker": "rust-lld",</span>
+<span id="cb24-274"><a href="#cb24-274"></a><span class="in">```</span></span>
 <span id="cb24-275"><a href="#cb24-275"></a></span>
-<span id="cb24-276"><a href="#cb24-276"></a><span class="in">```json</span></span>
-<span id="cb24-277"><a href="#cb24-277"></a>"panic-strategy": "abort",</span>
-<span id="cb24-278"><a href="#cb24-278"></a><span class="in">```</span></span>
+<span id="cb24-276"><a href="#cb24-276"></a>Instead of using the platform's default linker (which might not support Linux targets), we use the cross-platform <span class="co">[</span><span class="ot">LLD</span><span class="co">]</span> linker that is shipped with Rust for linking our kernel.</span>
+<span id="cb24-277"><a href="#cb24-277"></a></span>
+<span id="cb24-278"><a href="#cb24-278"></a><span class="ot">[LLD]: https://lld.llvm.org/</span></span>
 <span id="cb24-279"><a href="#cb24-279"></a></span>
-<span id="cb24-280"><a href="#cb24-280"></a>This setting specifies that the target doesn't support <span class="co">[</span><span class="ot">stack unwinding</span><span class="co">]</span> on panic, so instead the program should abort directly. This has the same effect as the <span class="in">`panic = "abort"`</span> option in our Cargo.toml, so we can remove it from there. (Note that, in contrast to the Cargo.toml option, this target option also applies when we recompile the <span class="in">`core`</span> library later in this post. So, even if you prefer to keep the Cargo.toml option, make sure to include this option.)</span>
-<span id="cb24-281"><a href="#cb24-281"></a></span>
-<span id="cb24-282"><a href="#cb24-282"></a><span class="ot">[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php</span></span>
+<span id="cb24-280"><a href="#cb24-280"></a><span class="in">```json</span></span>
+<span id="cb24-281"><a href="#cb24-281"></a>"panic-strategy": "abort",</span>
+<span id="cb24-282"><a href="#cb24-282"></a><span class="in">```</span></span>
 <span id="cb24-283"><a href="#cb24-283"></a></span>
-<span id="cb24-284"><a href="#cb24-284"></a><span class="in">```json</span></span>
-<span id="cb24-285"><a href="#cb24-285"></a>"disable-redzone": true,</span>
-<span id="cb24-286"><a href="#cb24-286"></a><span class="in">```</span></span>
+<span id="cb24-284"><a href="#cb24-284"></a>This setting specifies that the target doesn't support <span class="co">[</span><span class="ot">stack unwinding</span><span class="co">]</span> on panic, so instead the program should abort directly. This has the same effect as the <span class="in">`panic = "abort"`</span> option in our Cargo.toml, so we can remove it from there. (Note that, in contrast to the Cargo.toml option, this target option also applies when we recompile the <span class="in">`core`</span> library later in this post. So, even if you prefer to keep the Cargo.toml option, make sure to include this option.)</span>
+<span id="cb24-285"><a href="#cb24-285"></a></span>
+<span id="cb24-286"><a href="#cb24-286"></a><span class="ot">[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php</span></span>
 <span id="cb24-287"><a href="#cb24-287"></a></span>
-<span id="cb24-288"><a href="#cb24-288"></a>We're writing a kernel, so we'll need to handle interrupts at some point. To do that safely, we have to disable a certain stack pointer optimization called the _“red zone”_, because it would cause stack corruption otherwise. For more information, see our separate post about <span class="co">[</span><span class="ot">disabling the red zone</span><span class="co">]</span>.</span>
-<span id="cb24-289"><a href="#cb24-289"></a></span>
-<span id="cb24-290"><a href="#cb24-290"></a><span class="ot">[disabling the red zone]: </span>@/edition-2/posts/02-minimal-rust-kernel/disable-red-zone/index.md</span>
+<span id="cb24-288"><a href="#cb24-288"></a><span class="in">```json</span></span>
+<span id="cb24-289"><a href="#cb24-289"></a>"disable-redzone": true,</span>
+<span id="cb24-290"><a href="#cb24-290"></a><span class="in">```</span></span>
 <span id="cb24-291"><a href="#cb24-291"></a></span>
-<span id="cb24-292"><a href="#cb24-292"></a><span class="in">```json</span></span>
-<span id="cb24-293"><a href="#cb24-293"></a>"features": "-mmx,-sse,+soft-float",</span>
-<span id="cb24-294"><a href="#cb24-294"></a><span class="in">```</span></span>
+<span id="cb24-292"><a href="#cb24-292"></a>We're writing a kernel, so we'll need to handle interrupts at some point. To do that safely, we have to disable a certain stack pointer optimization called the _“red zone”_, because it would cause stack corruption otherwise. For more information, see our separate post about <span class="co">[</span><span class="ot">disabling the red zone</span><span class="co">]</span>.</span>
+<span id="cb24-293"><a href="#cb24-293"></a></span>
+<span id="cb24-294"><a href="#cb24-294"></a><span class="ot">[disabling the red zone]: </span>@/edition-2/posts/02-minimal-rust-kernel/disable-red-zone/index.md</span>
 <span id="cb24-295"><a href="#cb24-295"></a></span>
-<span id="cb24-296"><a href="#cb24-296"></a>The <span class="in">`features`</span> field enables/disables target features. We disable the <span class="in">`mmx`</span> and <span class="in">`sse`</span> features by prefixing them with a minus and enable the <span class="in">`soft-float`</span> feature by prefixing it with a plus. Note that there must be no spaces between different flags, otherwise LLVM fails to interpret the features string.</span>
-<span id="cb24-297"><a href="#cb24-297"></a></span>
-<span id="cb24-298"><a href="#cb24-298"></a>The <span class="in">`mmx`</span> and <span class="in">`sse`</span> features determine support for <span class="co">[</span><span class="ot">Single Instruction Multiple Data (SIMD)</span><span class="co">]</span> instructions, which can often speed up programs significantly. However, using the large SIMD registers in OS kernels leads to performance problems. The reason is that the kernel needs to restore all registers to their original state before continuing an interrupted program. This means that the kernel has to save the complete SIMD state to main memory on each system call or hardware interrupt. Since the SIMD state is very large (512–1600 bytes) and interrupts can occur very often, these additional save/restore operations considerably harm performance. To avoid this, we disable SIMD for our kernel (not for applications running on top!).</span>
+<span id="cb24-296"><a href="#cb24-296"></a><span class="in">```json</span></span>
+<span id="cb24-297"><a href="#cb24-297"></a>"features": "-mmx,-sse,+soft-float",</span>
+<span id="cb24-298"><a href="#cb24-298"></a><span class="in">```</span></span>
 <span id="cb24-299"><a href="#cb24-299"></a></span>
-<span id="cb24-300"><a href="#cb24-300"></a><span class="ot">[Single Instruction Multiple Data (SIMD)]: https://en.wikipedia.org/wiki/SIMD</span></span>
+<span id="cb24-300"><a href="#cb24-300"></a>The <span class="in">`features`</span> field enables/disables target features. We disable the <span class="in">`mmx`</span> and <span class="in">`sse`</span> features by prefixing them with a minus and enable the <span class="in">`soft-float`</span> feature by prefixing it with a plus. Note that there must be no spaces between different flags, otherwise LLVM fails to interpret the features string.</span>
 <span id="cb24-301"><a href="#cb24-301"></a></span>
-<span id="cb24-302"><a href="#cb24-302"></a>A problem with disabling SIMD is that floating point operations on <span class="in">`x86_64`</span> require SIMD registers by default. To solve this problem, we add the <span class="in">`soft-float`</span> feature, which emulates all floating point operations through software functions based on normal integers.</span>
+<span id="cb24-302"><a href="#cb24-302"></a>The <span class="in">`mmx`</span> and <span class="in">`sse`</span> features determine support for <span class="co">[</span><span class="ot">Single Instruction Multiple Data (SIMD)</span><span class="co">]</span> instructions, which can often speed up programs significantly. However, using the large SIMD registers in OS kernels leads to performance problems. The reason is that the kernel needs to restore all registers to their original state before continuing an interrupted program. This means that the kernel has to save the complete SIMD state to main memory on each system call or hardware interrupt. Since the SIMD state is very large (512–1600 bytes) and interrupts can occur very often, these additional save/restore operations considerably harm performance. To avoid this, we disable SIMD for our kernel (not for applications running on top!).</span>
 <span id="cb24-303"><a href="#cb24-303"></a></span>
-<span id="cb24-304"><a href="#cb24-304"></a>For more information, see our post on <span class="co">[</span><span class="ot">disabling SIMD</span><span class="co">](@/edition-2/posts/02-minimal-rust-kernel/disable-simd/index.md)</span>.</span>
+<span id="cb24-304"><a href="#cb24-304"></a><span class="ot">[Single Instruction Multiple Data (SIMD)]: https://en.wikipedia.org/wiki/SIMD</span></span>
 <span id="cb24-305"><a href="#cb24-305"></a></span>
-<span id="cb24-306"><a href="#cb24-306"></a><span class="in">```json</span></span>
-<span id="cb24-307"><a href="#cb24-307"></a>"rustc-abi": "x86-softfloat"</span>
-<span id="cb24-308"><a href="#cb24-308"></a><span class="in">```</span></span>
+<span id="cb24-306"><a href="#cb24-306"></a>A problem with disabling SIMD is that floating point operations on <span class="in">`x86_64`</span> require SIMD registers by default. To solve this problem, we add the <span class="in">`soft-float`</span> feature, which emulates all floating point operations through software functions based on normal integers.</span>
+<span id="cb24-307"><a href="#cb24-307"></a></span>
+<span id="cb24-308"><a href="#cb24-308"></a>For more information, see our post on <span class="co">[</span><span class="ot">disabling SIMD</span><span class="co">](@/edition-2/posts/02-minimal-rust-kernel/disable-simd/index.md)</span>.</span>
 <span id="cb24-309"><a href="#cb24-309"></a></span>
-<span id="cb24-310"><a href="#cb24-310"></a>As we want to use the <span class="in">`soft-float`</span> feature, we also need to tell the Rust compiler <span class="in">`rustc`</span> that we want to use the corresponding ABI. We can do that by setting the <span class="in">`rustc-abi`</span> field to <span class="in">`x86-softfloat`</span>.</span>
-<span id="cb24-311"><a href="#cb24-311"></a></span>
-<span id="cb24-312"><a href="#cb24-312"></a><span class="fu">## Putting it Together</span></span>
-<span id="cb24-313"><a href="#cb24-313"></a>Our target specification file now looks like this:</span>
-<span id="cb24-314"><a href="#cb24-314"></a></span>
-<span id="cb24-315"><a href="#cb24-315"></a><span class="in">```json</span></span>
-<span id="cb24-316"><a href="#cb24-316"></a><span class="fu">{</span></span>
-<span id="cb24-317"><a href="#cb24-317"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
-<span id="cb24-318"><a href="#cb24-318"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
-<span id="cb24-319"><a href="#cb24-319"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
-<span id="cb24-320"><a href="#cb24-320"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
-<span id="cb24-321"><a href="#cb24-321"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
-<span id="cb24-322"><a href="#cb24-322"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
-<span id="cb24-323"><a href="#cb24-323"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
-<span id="cb24-324"><a href="#cb24-324"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb24-325"><a href="#cb24-325"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
-<span id="cb24-326"><a href="#cb24-326"></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
-<span id="cb24-327"><a href="#cb24-327"></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
-<span id="cb24-328"><a href="#cb24-328"></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb24-329"><a href="#cb24-329"></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
-<span id="cb24-330"><a href="#cb24-330"></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
-<span id="cb24-331"><a href="#cb24-331"></a><span class="fu">}</span></span>
-<span id="cb24-332"><a href="#cb24-332"></a><span class="in">```</span></span>
-<span id="cb24-333"><a href="#cb24-333"></a></span>
-<span id="cb24-334"><a href="#cb24-334"></a><span class="fu">## Building our Kernel</span></span>
-<span id="cb24-335"><a href="#cb24-335"></a></span>
-<span id="cb24-336"><a href="#cb24-336"></a>Compiling for our new target will use Linux conventions, since the ld.lld linker-flavor instructs llvm to compile with the <span class="in">`-flavor gnu`</span> flag (for more linker options, see <span class="co">[</span><span class="ot">the rustc documentation</span><span class="co">](https://doc.rust-lang.org/rustc/codegen-options/index.html#linker-flavor)</span>). This means that we need an entry point named <span class="in">`_start`</span> as described in the <span class="co">[</span><span class="ot">previous post</span><span class="co">]</span>:</span>
+<span id="cb24-310"><a href="#cb24-310"></a><span class="in">```json</span></span>
+<span id="cb24-311"><a href="#cb24-311"></a>"rustc-abi": "x86-softfloat"</span>
+<span id="cb24-312"><a href="#cb24-312"></a><span class="in">```</span></span>
+<span id="cb24-313"><a href="#cb24-313"></a></span>
+<span id="cb24-314"><a href="#cb24-314"></a>As we want to use the <span class="in">`soft-float`</span> feature, we also need to tell the Rust compiler <span class="in">`rustc`</span> that we want to use the corresponding ABI. We can do that by setting the <span class="in">`rustc-abi`</span> field to <span class="in">`x86-softfloat`</span>.</span>
+<span id="cb24-315"><a href="#cb24-315"></a></span>
+<span id="cb24-316"><a href="#cb24-316"></a><span class="fu">## Putting it Together</span></span>
+<span id="cb24-317"><a href="#cb24-317"></a>Our target specification file now looks like this:</span>
+<span id="cb24-318"><a href="#cb24-318"></a></span>
+<span id="cb24-319"><a href="#cb24-319"></a><span class="in">```json</span></span>
+<span id="cb24-320"><a href="#cb24-320"></a><span class="fu">{</span></span>
+<span id="cb24-321"><a href="#cb24-321"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb24-322"><a href="#cb24-322"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb24-323"><a href="#cb24-323"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb24-324"><a href="#cb24-324"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb24-325"><a href="#cb24-325"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb24-326"><a href="#cb24-326"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb24-327"><a href="#cb24-327"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb24-328"><a href="#cb24-328"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb24-329"><a href="#cb24-329"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
+<span id="cb24-330"><a href="#cb24-330"></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
+<span id="cb24-331"><a href="#cb24-331"></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
+<span id="cb24-332"><a href="#cb24-332"></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb24-333"><a href="#cb24-333"></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
+<span id="cb24-334"><a href="#cb24-334"></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
+<span id="cb24-335"><a href="#cb24-335"></a><span class="fu">}</span></span>
+<span id="cb24-336"><a href="#cb24-336"></a><span class="in">```</span></span>
 <span id="cb24-337"><a href="#cb24-337"></a></span>
-<span id="cb24-338"><a href="#cb24-338"></a><span class="ot">[previous post]: </span>@/edition-2/posts/01-freestanding-rust-binary/index.md</span>
+<span id="cb24-338"><a href="#cb24-338"></a><span class="fu">## Building our Kernel</span></span>
 <span id="cb24-339"><a href="#cb24-339"></a></span>
-<span id="cb24-340"><a href="#cb24-340"></a><span class="in">```rust</span></span>
-<span id="cb24-341"><a href="#cb24-341"></a><span class="co">// src/main.rs</span></span>
-<span id="cb24-342"><a href="#cb24-342"></a></span>
-<span id="cb24-343"><a href="#cb24-343"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
-<span id="cb24-344"><a href="#cb24-344"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
-<span id="cb24-345"><a href="#cb24-345"></a></span>
-<span id="cb24-346"><a href="#cb24-346"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb24-347"><a href="#cb24-347"></a></span>
-<span id="cb24-348"><a href="#cb24-348"></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb24-349"><a href="#cb24-349"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb24-350"><a href="#cb24-350"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb24-351"><a href="#cb24-351"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb24-352"><a href="#cb24-352"></a><span class="op">}</span></span>
-<span id="cb24-353"><a href="#cb24-353"></a></span>
-<span id="cb24-354"><a href="#cb24-354"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
-<span id="cb24-355"><a href="#cb24-355"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb24-356"><a href="#cb24-356"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
-<span id="cb24-357"><a href="#cb24-357"></a>    <span class="co">// named `_start` by default</span></span>
-<span id="cb24-358"><a href="#cb24-358"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb24-359"><a href="#cb24-359"></a><span class="op">}</span></span>
-<span id="cb24-360"><a href="#cb24-360"></a><span class="in">```</span></span>
-<span id="cb24-361"><a href="#cb24-361"></a></span>
-<span id="cb24-362"><a href="#cb24-362"></a>Note that the entry point needs to be called <span class="in">`_start`</span> regardless of your host OS.</span>
-<span id="cb24-363"><a href="#cb24-363"></a></span>
-<span id="cb24-364"><a href="#cb24-364"></a>We can now build the kernel for our new target by passing the name of the JSON file as <span class="in">`--target`</span>:</span>
+<span id="cb24-340"><a href="#cb24-340"></a>Compiling for our new target will use Linux conventions, since the ld.lld linker-flavor instructs llvm to compile with the <span class="in">`-flavor gnu`</span> flag (for more linker options, see <span class="co">[</span><span class="ot">the rustc documentation</span><span class="co">](https://doc.rust-lang.org/rustc/codegen-options/index.html#linker-flavor)</span>). This means that we need an entry point named <span class="in">`_start`</span> as described in the <span class="co">[</span><span class="ot">previous post</span><span class="co">]</span>:</span>
+<span id="cb24-341"><a href="#cb24-341"></a></span>
+<span id="cb24-342"><a href="#cb24-342"></a><span class="ot">[previous post]: </span>@/edition-2/posts/01-freestanding-rust-binary/index.md</span>
+<span id="cb24-343"><a href="#cb24-343"></a></span>
+<span id="cb24-344"><a href="#cb24-344"></a><span class="in">```rust</span></span>
+<span id="cb24-345"><a href="#cb24-345"></a><span class="co">// src/main.rs</span></span>
+<span id="cb24-346"><a href="#cb24-346"></a></span>
+<span id="cb24-347"><a href="#cb24-347"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb24-348"><a href="#cb24-348"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb24-349"><a href="#cb24-349"></a></span>
+<span id="cb24-350"><a href="#cb24-350"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb24-351"><a href="#cb24-351"></a></span>
+<span id="cb24-352"><a href="#cb24-352"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb24-353"><a href="#cb24-353"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb24-354"><a href="#cb24-354"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb24-355"><a href="#cb24-355"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb24-356"><a href="#cb24-356"></a><span class="op">}</span></span>
+<span id="cb24-357"><a href="#cb24-357"></a></span>
+<span id="cb24-358"><a href="#cb24-358"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb24-359"><a href="#cb24-359"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb24-360"><a href="#cb24-360"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb24-361"><a href="#cb24-361"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb24-362"><a href="#cb24-362"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb24-363"><a href="#cb24-363"></a><span class="op">}</span></span>
+<span id="cb24-364"><a href="#cb24-364"></a><span class="in">```</span></span>
 <span id="cb24-365"><a href="#cb24-365"></a></span>
-<span id="cb24-366"><a href="#cb24-366"></a><span class="in">```</span></span>
-<span id="cb24-367"><a href="#cb24-367"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
-<span id="cb24-368"><a href="#cb24-368"></a></span>
-<span id="cb24-369"><a href="#cb24-369"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
+<span id="cb24-366"><a href="#cb24-366"></a>Note that the entry point needs to be called <span class="in">`_start`</span> regardless of your host OS.</span>
+<span id="cb24-367"><a href="#cb24-367"></a></span>
+<span id="cb24-368"><a href="#cb24-368"></a>We can now build the kernel for our new target by passing the name of the JSON file as <span class="in">`--target`</span>:</span>
+<span id="cb24-369"><a href="#cb24-369"></a></span>
 <span id="cb24-370"><a href="#cb24-370"></a><span class="in">```</span></span>
-<span id="cb24-371"><a href="#cb24-371"></a></span>
-<span id="cb24-372"><a href="#cb24-372"></a>It fails! The error tells us that custom JSON target specifications are an unstable feature that requires explicit opt-in. This is because the format of the JSON target files is not considered stable yet, so changes to it might occur in future versions of Rust. See the <span class="co">[</span><span class="ot">tracking issue for custom JSON target specs</span><span class="co">][json-target-spec-issue]</span> for more information.</span>
-<span id="cb24-373"><a href="#cb24-373"></a></span>
-<span id="cb24-374"><a href="#cb24-374"></a><span class="ot">[json-target-spec-issue]: https://github.com/rust-lang/rust/issues/151528</span></span>
+<span id="cb24-371"><a href="#cb24-371"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
+<span id="cb24-372"><a href="#cb24-372"></a></span>
+<span id="cb24-373"><a href="#cb24-373"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
+<span id="cb24-374"><a href="#cb24-374"></a><span class="in">```</span></span>
 <span id="cb24-375"><a href="#cb24-375"></a></span>
-<span id="cb24-376"><a href="#cb24-376"></a><span class="fu">## The `json-target-spec` Option</span></span>
+<span id="cb24-376"><a href="#cb24-376"></a>It fails! The error tells us that custom JSON target specifications are an unstable feature that requires explicit opt-in. This is because the format of the JSON target files is not considered stable yet, so changes to it might occur in future versions of Rust. See the <span class="co">[</span><span class="ot">tracking issue for custom JSON target specs</span><span class="co">][json-target-spec-issue]</span> for more information.</span>
 <span id="cb24-377"><a href="#cb24-377"></a></span>
-<span id="cb24-378"><a href="#cb24-378"></a>To enable support for custom JSON target specifications, we need to create a local <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span> (the <span class="in">`.cargo`</span> folder should be next to your <span class="in">`src`</span> folder) with the following content:</span>
+<span id="cb24-378"><a href="#cb24-378"></a><span class="ot">[json-target-spec-issue]: https://github.com/rust-lang/rust/issues/151528</span></span>
 <span id="cb24-379"><a href="#cb24-379"></a></span>
-<span id="cb24-380"><a href="#cb24-380"></a><span class="ot">[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html</span></span>
+<span id="cb24-380"><a href="#cb24-380"></a><span class="fu">## The `json-target-spec` Option</span></span>
 <span id="cb24-381"><a href="#cb24-381"></a></span>
-<span id="cb24-382"><a href="#cb24-382"></a><span class="in">```toml</span></span>
-<span id="cb24-383"><a href="#cb24-383"></a><span class="in"># in .cargo/config.toml</span></span>
-<span id="cb24-384"><a href="#cb24-384"></a></span>
-<span id="cb24-385"><a href="#cb24-385"></a><span class="in">[unstable]</span></span>
-<span id="cb24-386"><a href="#cb24-386"></a><span class="in">json-target-spec = true</span></span>
-<span id="cb24-387"><a href="#cb24-387"></a><span class="in">```</span></span>
+<span id="cb24-382"><a href="#cb24-382"></a>To enable support for custom JSON target specifications, we need to create a local <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span> (the <span class="in">`.cargo`</span> folder should be next to your <span class="in">`src`</span> folder) with the following content:</span>
+<span id="cb24-383"><a href="#cb24-383"></a></span>
+<span id="cb24-384"><a href="#cb24-384"></a><span class="ot">[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html</span></span>
+<span id="cb24-385"><a href="#cb24-385"></a></span>
+<span id="cb24-386"><a href="#cb24-386"></a><span class="in">```toml</span></span>
+<span id="cb24-387"><a href="#cb24-387"></a><span class="in"># in .cargo/config.toml</span></span>
 <span id="cb24-388"><a href="#cb24-388"></a></span>
-<span id="cb24-389"><a href="#cb24-389"></a>This enables the unstable <span class="in">`json-target-spec`</span> feature, allowing us to use custom JSON target files.</span>
-<span id="cb24-390"><a href="#cb24-390"></a></span>
-<span id="cb24-391"><a href="#cb24-391"></a>With this configuration in place, let's try building again:</span>
+<span id="cb24-389"><a href="#cb24-389"></a><span class="in">[unstable]</span></span>
+<span id="cb24-390"><a href="#cb24-390"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb24-391"><a href="#cb24-391"></a><span class="in">```</span></span>
 <span id="cb24-392"><a href="#cb24-392"></a></span>
-<span id="cb24-393"><a href="#cb24-393"></a><span class="in">```</span></span>
-<span id="cb24-394"><a href="#cb24-394"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
-<span id="cb24-395"><a href="#cb24-395"></a></span>
-<span id="cb24-396"><a href="#cb24-396"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
+<span id="cb24-393"><a href="#cb24-393"></a>This enables the unstable <span class="in">`json-target-spec`</span> feature, allowing us to use custom JSON target files.</span>
+<span id="cb24-394"><a href="#cb24-394"></a></span>
+<span id="cb24-395"><a href="#cb24-395"></a>With this configuration in place, let's try building again:</span>
+<span id="cb24-396"><a href="#cb24-396"></a></span>
 <span id="cb24-397"><a href="#cb24-397"></a><span class="in">```</span></span>
-<span id="cb24-398"><a href="#cb24-398"></a></span>
-<span id="cb24-399"><a href="#cb24-399"></a>It still fails, but with a new error. The error tells us that the Rust compiler does not find the <span class="co">[</span><span class="ot">`core` library</span><span class="co">]</span>. This library contains basic Rust types such as <span class="in">`Result`</span>, <span class="in">`Option`</span>, and iterators, and is implicitly linked to all <span class="in">`no_std`</span> crates.</span>
-<span id="cb24-400"><a href="#cb24-400"></a></span>
-<span id="cb24-401"><a href="#cb24-401"></a><span class="ot">[`core` library]: https://doc.rust-lang.org/nightly/core/index.html</span></span>
+<span id="cb24-398"><a href="#cb24-398"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
+<span id="cb24-399"><a href="#cb24-399"></a></span>
+<span id="cb24-400"><a href="#cb24-400"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
+<span id="cb24-401"><a href="#cb24-401"></a><span class="in">```</span></span>
 <span id="cb24-402"><a href="#cb24-402"></a></span>
-<span id="cb24-403"><a href="#cb24-403"></a>The problem is that the core library is distributed together with the Rust compiler as a _precompiled_ library. So it is only valid for supported host triples (e.g., <span class="in">`x86_64-unknown-linux-gnu`</span>) but not for our custom target. If we want to compile code for other targets, we need to recompile <span class="in">`core`</span> for these targets first.</span>
+<span id="cb24-403"><a href="#cb24-403"></a>It still fails, but with a new error. The error tells us that the Rust compiler does not find the <span class="co">[</span><span class="ot">`core` library</span><span class="co">]</span>. This library contains basic Rust types such as <span class="in">`Result`</span>, <span class="in">`Option`</span>, and iterators, and is implicitly linked to all <span class="in">`no_std`</span> crates.</span>
 <span id="cb24-404"><a href="#cb24-404"></a></span>
-<span id="cb24-405"><a href="#cb24-405"></a><span class="fu">## The `build-std` Option</span></span>
+<span id="cb24-405"><a href="#cb24-405"></a><span class="ot">[`core` library]: https://doc.rust-lang.org/nightly/core/index.html</span></span>
 <span id="cb24-406"><a href="#cb24-406"></a></span>
-<span id="cb24-407"><a href="#cb24-407"></a>That's where the <span class="co">[</span><span class="ot">`build-std` feature</span><span class="co">]</span> of cargo comes in. It allows to recompile <span class="in">`core`</span> and other standard library crates on demand, instead of using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as "unstable" and only available on <span class="co">[</span><span class="ot">nightly Rust compilers</span><span class="co">]</span>.</span>
+<span id="cb24-407"><a href="#cb24-407"></a>The problem is that the core library is distributed together with the Rust compiler as a _precompiled_ library. So it is only valid for supported host triples (e.g., <span class="in">`x86_64-unknown-linux-gnu`</span>) but not for our custom target. If we want to compile code for other targets, we need to recompile <span class="in">`core`</span> for these targets first.</span>
 <span id="cb24-408"><a href="#cb24-408"></a></span>
-<span id="cb24-409"><a href="#cb24-409"></a><span class="ot">[`build-std` feature]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std</span></span>
-<span id="cb24-410"><a href="#cb24-410"></a><span class="ot">[nightly Rust compilers]: #installing-rust-nightly</span></span>
-<span id="cb24-411"><a href="#cb24-411"></a></span>
-<span id="cb24-412"><a href="#cb24-412"></a>To use the feature, we need to add the following to our <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span>:</span>
-<span id="cb24-413"><a href="#cb24-413"></a></span>
-<span id="cb24-414"><a href="#cb24-414"></a><span class="in">```toml</span></span>
-<span id="cb24-415"><a href="#cb24-415"></a><span class="in"># in .cargo/config.toml</span></span>
-<span id="cb24-416"><a href="#cb24-416"></a></span>
-<span id="cb24-417"><a href="#cb24-417"></a><span class="in">[unstable]</span></span>
-<span id="cb24-418"><a href="#cb24-418"></a><span class="in">json-target-spec = true</span></span>
-<span id="cb24-419"><a href="#cb24-419"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
-<span id="cb24-420"><a href="#cb24-420"></a><span class="in">```</span></span>
-<span id="cb24-421"><a href="#cb24-421"></a></span>
-<span id="cb24-422"><a href="#cb24-422"></a>This tells cargo that it should recompile the <span class="in">`core`</span> and <span class="in">`compiler_builtins`</span> libraries. The latter is required because it is a dependency of <span class="in">`core`</span>. In order to recompile these libraries, cargo needs access to the rust source code, which we can install with <span class="in">`rustup component add rust-src`</span>.</span>
-<span id="cb24-423"><a href="#cb24-423"></a></span>
-<span id="cb24-424"><a href="#cb24-424"></a>&lt;div class="note"&gt;</span>
+<span id="cb24-409"><a href="#cb24-409"></a><span class="fu">## The `build-std` Option</span></span>
+<span id="cb24-410"><a href="#cb24-410"></a></span>
+<span id="cb24-411"><a href="#cb24-411"></a>That's where the <span class="co">[</span><span class="ot">`build-std` feature</span><span class="co">]</span> of cargo comes in. It allows to recompile <span class="in">`core`</span> and other standard library crates on demand, instead of using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as "unstable" and only available on <span class="co">[</span><span class="ot">nightly Rust compilers</span><span class="co">]</span>.</span>
+<span id="cb24-412"><a href="#cb24-412"></a></span>
+<span id="cb24-413"><a href="#cb24-413"></a><span class="ot">[`build-std` feature]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std</span></span>
+<span id="cb24-414"><a href="#cb24-414"></a><span class="ot">[nightly Rust compilers]: #installing-rust-nightly</span></span>
+<span id="cb24-415"><a href="#cb24-415"></a></span>
+<span id="cb24-416"><a href="#cb24-416"></a>To use the feature, we need to add the following to our <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span>:</span>
+<span id="cb24-417"><a href="#cb24-417"></a></span>
+<span id="cb24-418"><a href="#cb24-418"></a><span class="in">```toml</span></span>
+<span id="cb24-419"><a href="#cb24-419"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-420"><a href="#cb24-420"></a></span>
+<span id="cb24-421"><a href="#cb24-421"></a><span class="in">[unstable]</span></span>
+<span id="cb24-422"><a href="#cb24-422"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb24-423"><a href="#cb24-423"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
+<span id="cb24-424"><a href="#cb24-424"></a><span class="in">```</span></span>
 <span id="cb24-425"><a href="#cb24-425"></a></span>
-<span id="cb24-426"><a href="#cb24-426"></a>**Note:** The <span class="in">`unstable.build-std`</span> configuration key requires at least the Rust nightly from 2020-07-15.</span>
+<span id="cb24-426"><a href="#cb24-426"></a>This tells cargo that it should recompile the <span class="in">`core`</span> and <span class="in">`compiler_builtins`</span> libraries. The latter is required because it is a dependency of <span class="in">`core`</span>. In order to recompile these libraries, cargo needs access to the rust source code, which we can install with <span class="in">`rustup component add rust-src`</span>.</span>
 <span id="cb24-427"><a href="#cb24-427"></a></span>
-<span id="cb24-428"><a href="#cb24-428"></a>&lt;/div&gt;</span>
+<span id="cb24-428"><a href="#cb24-428"></a>&lt;div class="note"&gt;</span>
 <span id="cb24-429"><a href="#cb24-429"></a></span>
-<span id="cb24-430"><a href="#cb24-430"></a>After setting the <span class="in">`unstable.build-std`</span> configuration key and installing the <span class="in">`rust-src`</span> component, we can rerun our build command:</span>
+<span id="cb24-430"><a href="#cb24-430"></a>**Note:** The <span class="in">`unstable.build-std`</span> configuration key requires at least the Rust nightly from 2020-07-15.</span>
 <span id="cb24-431"><a href="#cb24-431"></a></span>
-<span id="cb24-432"><a href="#cb24-432"></a><span class="in">```</span></span>
-<span id="cb24-433"><a href="#cb24-433"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
-<span id="cb24-434"><a href="#cb24-434"></a><span class="in">   Compiling core v0.0.0 (/…/rust/src/libcore)</span></span>
-<span id="cb24-435"><a href="#cb24-435"></a><span class="in">   Compiling rustc-std-workspace-core v1.99.0 (/…/rust/src/tools/rustc-std-workspace-core)</span></span>
-<span id="cb24-436"><a href="#cb24-436"></a><span class="in">   Compiling compiler_builtins v0.1.32</span></span>
-<span id="cb24-437"><a href="#cb24-437"></a><span class="in">   Compiling blog_os v0.1.0 (/…/blog_os)</span></span>
-<span id="cb24-438"><a href="#cb24-438"></a><span class="in">    Finished dev [unoptimized + debuginfo] target(s) in 0.29 secs</span></span>
-<span id="cb24-439"><a href="#cb24-439"></a><span class="in">```</span></span>
-<span id="cb24-440"><a href="#cb24-440"></a></span>
-<span id="cb24-441"><a href="#cb24-441"></a>We see that <span class="in">`cargo build`</span> now recompiles the <span class="in">`core`</span>, <span class="in">`rustc-std-workspace-core`</span> (a dependency of <span class="in">`compiler_builtins`</span>), and <span class="in">`compiler_builtins`</span> libraries for our custom target.</span>
-<span id="cb24-442"><a href="#cb24-442"></a></span>
-<span id="cb24-443"><a href="#cb24-443"></a><span class="fu">## Memory-Related Intrinsics</span></span>
+<span id="cb24-432"><a href="#cb24-432"></a>&lt;/div&gt;</span>
+<span id="cb24-433"><a href="#cb24-433"></a></span>
+<span id="cb24-434"><a href="#cb24-434"></a>After setting the <span class="in">`unstable.build-std`</span> configuration key and installing the <span class="in">`rust-src`</span> component, we can rerun our build command:</span>
+<span id="cb24-435"><a href="#cb24-435"></a></span>
+<span id="cb24-436"><a href="#cb24-436"></a><span class="in">```</span></span>
+<span id="cb24-437"><a href="#cb24-437"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
+<span id="cb24-438"><a href="#cb24-438"></a><span class="in">   Compiling core v0.0.0 (/…/rust/src/libcore)</span></span>
+<span id="cb24-439"><a href="#cb24-439"></a><span class="in">   Compiling rustc-std-workspace-core v1.99.0 (/…/rust/src/tools/rustc-std-workspace-core)</span></span>
+<span id="cb24-440"><a href="#cb24-440"></a><span class="in">   Compiling compiler_builtins v0.1.32</span></span>
+<span id="cb24-441"><a href="#cb24-441"></a><span class="in">   Compiling blog_os v0.1.0 (/…/blog_os)</span></span>
+<span id="cb24-442"><a href="#cb24-442"></a><span class="in">    Finished dev [unoptimized + debuginfo] target(s) in 0.29 secs</span></span>
+<span id="cb24-443"><a href="#cb24-443"></a><span class="in">```</span></span>
 <span id="cb24-444"><a href="#cb24-444"></a></span>
-<span id="cb24-445"><a href="#cb24-445"></a>The Rust compiler assumes that a certain set of built-in functions is available for all systems. Most of these functions are provided by the <span class="in">`compiler_builtins`</span> crate that we just recompiled. However, there are some memory-related functions in that crate that are not enabled by default because they are normally provided by the C library on the system. These functions include <span class="in">`memset`</span>, which sets all bytes in a memory block to a given value, <span class="in">`memcpy`</span>, which copies one memory block to another, and <span class="in">`memcmp`</span>, which compares two memory blocks. While we didn't need any of these functions to compile our kernel right now, they will be required as soon as we add some more code to it (e.g. when copying structs around).</span>
+<span id="cb24-445"><a href="#cb24-445"></a>We see that <span class="in">`cargo build`</span> now recompiles the <span class="in">`core`</span>, <span class="in">`rustc-std-workspace-core`</span> (a dependency of <span class="in">`compiler_builtins`</span>), and <span class="in">`compiler_builtins`</span> libraries for our custom target.</span>
 <span id="cb24-446"><a href="#cb24-446"></a></span>
-<span id="cb24-447"><a href="#cb24-447"></a>Since we can't link to the C library of the operating system, we need an alternative way to provide these functions to the compiler. One possible approach for this could be to implement our own <span class="in">`memset`</span> etc. functions and apply the <span class="in">`#[unsafe(no_mangle)]`</span> attribute to them (to avoid the automatic renaming during compilation). However, this is dangerous since the slightest mistake in the implementation of these functions could lead to undefined behavior. For example, implementing <span class="in">`memcpy`</span> with a <span class="in">`for`</span> loop may result in an infinite recursion because <span class="in">`for`</span> loops implicitly call the <span class="co">[</span><span class="ot">`IntoIterator::into_iter`</span><span class="co">]</span> trait method, which may call <span class="in">`memcpy`</span> again. So it's a good idea to reuse existing, well-tested implementations instead.</span>
+<span id="cb24-447"><a href="#cb24-447"></a><span class="fu">## Memory-Related Intrinsics</span></span>
 <span id="cb24-448"><a href="#cb24-448"></a></span>
-<span id="cb24-449"><a href="#cb24-449"></a><span class="ot">[`IntoIterator::into_iter`]: https://doc.rust-lang.org/stable/core/iter/trait.IntoIterator.html#tymethod.into_iter</span></span>
+<span id="cb24-449"><a href="#cb24-449"></a>The Rust compiler assumes that a certain set of built-in functions is available for all systems. Most of these functions are provided by the <span class="in">`compiler_builtins`</span> crate that we just recompiled. However, there are some memory-related functions in that crate that are not enabled by default because they are normally provided by the C library on the system. These functions include <span class="in">`memset`</span>, which sets all bytes in a memory block to a given value, <span class="in">`memcpy`</span>, which copies one memory block to another, and <span class="in">`memcmp`</span>, which compares two memory blocks. While we didn't need any of these functions to compile our kernel right now, they will be required as soon as we add some more code to it (e.g. when copying structs around).</span>
 <span id="cb24-450"><a href="#cb24-450"></a></span>
-<span id="cb24-451"><a href="#cb24-451"></a>Fortunately, the <span class="in">`compiler_builtins`</span> crate already contains implementations for all the needed functions, they are just disabled by default to not collide with the implementations from the C library. We can enable them by setting cargo's <span class="co">[</span><span class="ot">`build-std-features`</span><span class="co">]</span> flag to <span class="in">`["compiler-builtins-mem"]`</span>. Like the <span class="in">`build-std`</span> flag, this flag can be either passed on the command line as a <span class="in">`-Z`</span> flag or configured in the <span class="in">`unstable`</span> table in the <span class="in">`.cargo/config.toml`</span> file. Since we always want to build with this flag, the config file option makes more sense for us:</span>
+<span id="cb24-451"><a href="#cb24-451"></a>Since we can't link to the C library of the operating system, we need an alternative way to provide these functions to the compiler. One possible approach for this could be to implement our own <span class="in">`memset`</span> etc. functions and apply the <span class="in">`#[unsafe(no_mangle)]`</span> attribute to them (to avoid the automatic renaming during compilation). However, this is dangerous since the slightest mistake in the implementation of these functions could lead to undefined behavior. For example, implementing <span class="in">`memcpy`</span> with a <span class="in">`for`</span> loop may result in an infinite recursion because <span class="in">`for`</span> loops implicitly call the <span class="co">[</span><span class="ot">`IntoIterator::into_iter`</span><span class="co">]</span> trait method, which may call <span class="in">`memcpy`</span> again. So it's a good idea to reuse existing, well-tested implementations instead.</span>
 <span id="cb24-452"><a href="#cb24-452"></a></span>
-<span id="cb24-453"><a href="#cb24-453"></a><span class="ot">[`build-std-features`]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std-features</span></span>
+<span id="cb24-453"><a href="#cb24-453"></a><span class="ot">[`IntoIterator::into_iter`]: https://doc.rust-lang.org/stable/core/iter/trait.IntoIterator.html#tymethod.into_iter</span></span>
 <span id="cb24-454"><a href="#cb24-454"></a></span>
-<span id="cb24-455"><a href="#cb24-455"></a><span class="in">```toml</span></span>
-<span id="cb24-456"><a href="#cb24-456"></a><span class="in"># in .cargo/config.toml</span></span>
-<span id="cb24-457"><a href="#cb24-457"></a></span>
-<span id="cb24-458"><a href="#cb24-458"></a><span class="in">[unstable]</span></span>
-<span id="cb24-459"><a href="#cb24-459"></a><span class="in">json-target-spec = true</span></span>
-<span id="cb24-460"><a href="#cb24-460"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
-<span id="cb24-461"><a href="#cb24-461"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
-<span id="cb24-462"><a href="#cb24-462"></a><span class="in">```</span></span>
-<span id="cb24-463"><a href="#cb24-463"></a></span>
-<span id="cb24-464"><a href="#cb24-464"></a>(Support for the <span class="in">`compiler-builtins-mem`</span> feature was only <span class="co">[</span><span class="ot">added very recently</span><span class="co">](https://github.com/rust-lang/rust/pull/77284)</span>, so you need at least Rust nightly <span class="in">`2020-09-30`</span> for it.)</span>
-<span id="cb24-465"><a href="#cb24-465"></a></span>
-<span id="cb24-466"><a href="#cb24-466"></a>Behind the scenes, this flag enables the <span class="co">[</span><span class="ot">`mem` feature</span><span class="co">]</span> of the <span class="in">`compiler_builtins`</span> crate. The effect of this is that the <span class="in">`#[unsafe(no_mangle)]`</span> attribute is applied to the <span class="co">[</span><span class="ot">`memcpy` etc. implementations</span><span class="co">]</span> of the crate, which makes them available to the linker.</span>
+<span id="cb24-455"><a href="#cb24-455"></a>Fortunately, the <span class="in">`compiler_builtins`</span> crate already contains implementations for all the needed functions, they are just disabled by default to not collide with the implementations from the C library. We can enable them by setting cargo's <span class="co">[</span><span class="ot">`build-std-features`</span><span class="co">]</span> flag to <span class="in">`["compiler-builtins-mem"]`</span>. Like the <span class="in">`build-std`</span> flag, this flag can be either passed on the command line as a <span class="in">`-Z`</span> flag or configured in the <span class="in">`unstable`</span> table in the <span class="in">`.cargo/config.toml`</span> file. Since we always want to build with this flag, the config file option makes more sense for us:</span>
+<span id="cb24-456"><a href="#cb24-456"></a></span>
+<span id="cb24-457"><a href="#cb24-457"></a><span class="ot">[`build-std-features`]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std-features</span></span>
+<span id="cb24-458"><a href="#cb24-458"></a></span>
+<span id="cb24-459"><a href="#cb24-459"></a><span class="in">```toml</span></span>
+<span id="cb24-460"><a href="#cb24-460"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-461"><a href="#cb24-461"></a></span>
+<span id="cb24-462"><a href="#cb24-462"></a><span class="in">[unstable]</span></span>
+<span id="cb24-463"><a href="#cb24-463"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb24-464"><a href="#cb24-464"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
+<span id="cb24-465"><a href="#cb24-465"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
+<span id="cb24-466"><a href="#cb24-466"></a><span class="in">```</span></span>
 <span id="cb24-467"><a href="#cb24-467"></a></span>
-<span id="cb24-468"><a href="#cb24-468"></a><span class="ot">[`mem` feature]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/Cargo.toml#L54-L55</span></span>
-<span id="cb24-469"><a href="#cb24-469"></a><span class="ot">[`memcpy` etc. implementations]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/src/mem.rs#L12-L69</span></span>
-<span id="cb24-470"><a href="#cb24-470"></a></span>
-<span id="cb24-471"><a href="#cb24-471"></a>With this change, our kernel has valid implementations for all compiler-required functions, so it will continue to compile even if our code gets more complex.</span>
-<span id="cb24-472"><a href="#cb24-472"></a></span>
-<span id="cb24-473"><a href="#cb24-473"></a><span class="fu">## Set a Default Target</span></span>
+<span id="cb24-468"><a href="#cb24-468"></a>(Support for the <span class="in">`compiler-builtins-mem`</span> feature was only <span class="co">[</span><span class="ot">added very recently</span><span class="co">](https://github.com/rust-lang/rust/pull/77284)</span>, so you need at least Rust nightly <span class="in">`2020-09-30`</span> for it.)</span>
+<span id="cb24-469"><a href="#cb24-469"></a></span>
+<span id="cb24-470"><a href="#cb24-470"></a>Behind the scenes, this flag enables the <span class="co">[</span><span class="ot">`mem` feature</span><span class="co">]</span> of the <span class="in">`compiler_builtins`</span> crate. The effect of this is that the <span class="in">`#[unsafe(no_mangle)]`</span> attribute is applied to the <span class="co">[</span><span class="ot">`memcpy` etc. implementations</span><span class="co">]</span> of the crate, which makes them available to the linker.</span>
+<span id="cb24-471"><a href="#cb24-471"></a></span>
+<span id="cb24-472"><a href="#cb24-472"></a><span class="ot">[`mem` feature]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/Cargo.toml#L54-L55</span></span>
+<span id="cb24-473"><a href="#cb24-473"></a><span class="ot">[`memcpy` etc. implementations]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/src/mem.rs#L12-L69</span></span>
 <span id="cb24-474"><a href="#cb24-474"></a></span>
-<span id="cb24-475"><a href="#cb24-475"></a>To avoid passing the <span class="in">`--target`</span> parameter on every invocation of <span class="in">`cargo build`</span>, we can override the default target. To do this, we add the following to our <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span>:</span>
+<span id="cb24-475"><a href="#cb24-475"></a>With this change, our kernel has valid implementations for all compiler-required functions, so it will continue to compile even if our code gets more complex.</span>
 <span id="cb24-476"><a href="#cb24-476"></a></span>
-<span id="cb24-477"><a href="#cb24-477"></a><span class="ot">[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html</span></span>
+<span id="cb24-477"><a href="#cb24-477"></a><span class="fu">## Set a Default Target</span></span>
 <span id="cb24-478"><a href="#cb24-478"></a></span>
-<span id="cb24-479"><a href="#cb24-479"></a><span class="in">```toml</span></span>
-<span id="cb24-480"><a href="#cb24-480"></a><span class="in"># in .cargo/config.toml</span></span>
-<span id="cb24-481"><a href="#cb24-481"></a></span>
-<span id="cb24-482"><a href="#cb24-482"></a><span class="in">[build]</span></span>
-<span id="cb24-483"><a href="#cb24-483"></a><span class="in">target = "x86_64-blog_os.json"</span></span>
-<span id="cb24-484"><a href="#cb24-484"></a><span class="in">```</span></span>
+<span id="cb24-479"><a href="#cb24-479"></a>To avoid passing the <span class="in">`--target`</span> parameter on every invocation of <span class="in">`cargo build`</span>, we can override the default target. To do this, we add the following to our <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span>:</span>
+<span id="cb24-480"><a href="#cb24-480"></a></span>
+<span id="cb24-481"><a href="#cb24-481"></a><span class="ot">[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html</span></span>
+<span id="cb24-482"><a href="#cb24-482"></a></span>
+<span id="cb24-483"><a href="#cb24-483"></a><span class="in">```toml</span></span>
+<span id="cb24-484"><a href="#cb24-484"></a><span class="in"># in .cargo/config.toml</span></span>
 <span id="cb24-485"><a href="#cb24-485"></a></span>
-<span id="cb24-486"><a href="#cb24-486"></a>This tells <span class="in">`cargo`</span> to use our <span class="in">`x86_64-blog_os.json`</span> target when no explicit <span class="in">`--target`</span> argument is passed. This means that we can now build our kernel with a simple <span class="in">`cargo build`</span>. For more information on cargo configuration options, check out the <span class="co">[</span><span class="ot">official documentation</span><span class="co">][cargo configuration]</span>.</span>
-<span id="cb24-487"><a href="#cb24-487"></a></span>
-<span id="cb24-488"><a href="#cb24-488"></a>We are now able to build our kernel for a bare metal target with a simple <span class="in">`cargo build`</span>. However, our <span class="in">`_start`</span> entry point, which will be called by the boot loader, is still empty. It's time that we output something to screen from it.</span>
+<span id="cb24-486"><a href="#cb24-486"></a><span class="in">[build]</span></span>
+<span id="cb24-487"><a href="#cb24-487"></a><span class="in">target = "x86_64-blog_os.json"</span></span>
+<span id="cb24-488"><a href="#cb24-488"></a><span class="in">```</span></span>
 <span id="cb24-489"><a href="#cb24-489"></a></span>
-<span id="cb24-490"><a href="#cb24-490"></a><span class="fu">## Printing to Screen</span></span>
-<span id="cb24-491"><a href="#cb24-491"></a>The easiest way to print text to the screen at this stage is the <span class="co">[</span><span class="ot">VGA text buffer</span><span class="co">]</span>. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:</span>
-<span id="cb24-492"><a href="#cb24-492"></a></span>
-<span id="cb24-493"><a href="#cb24-493"></a><span class="ot">[VGA text buffer]: https://en.wikipedia.org/wiki/VGA-compatible_text_mode</span></span>
-<span id="cb24-494"><a href="#cb24-494"></a></span>
-<span id="cb24-495"><a href="#cb24-495"></a><span class="al">![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)</span></span>
+<span id="cb24-490"><a href="#cb24-490"></a>This tells <span class="in">`cargo`</span> to use our <span class="in">`x86_64-blog_os.json`</span> target when no explicit <span class="in">`--target`</span> argument is passed. This means that we can now build our kernel with a simple <span class="in">`cargo build`</span>. For more information on cargo configuration options, check out the <span class="co">[</span><span class="ot">official documentation</span><span class="co">][cargo configuration]</span>.</span>
+<span id="cb24-491"><a href="#cb24-491"></a></span>
+<span id="cb24-492"><a href="#cb24-492"></a>We are now able to build our kernel for a bare metal target with a simple <span class="in">`cargo build`</span>. However, our <span class="in">`_start`</span> entry point, which will be called by the boot loader, is still empty. It's time that we output something to screen from it.</span>
+<span id="cb24-493"><a href="#cb24-493"></a></span>
+<span id="cb24-494"><a href="#cb24-494"></a><span class="fu">## Printing to Screen</span></span>
+<span id="cb24-495"><a href="#cb24-495"></a>The easiest way to print text to the screen at this stage is the <span class="co">[</span><span class="ot">VGA text buffer</span><span class="co">]</span>. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:</span>
 <span id="cb24-496"><a href="#cb24-496"></a></span>
-<span id="cb24-497"><a href="#cb24-497"></a>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <span class="in">`0xb8000`</span> and that each character cell consists of an ASCII byte and a color byte.</span>
+<span id="cb24-497"><a href="#cb24-497"></a><span class="ot">[VGA text buffer]: https://en.wikipedia.org/wiki/VGA-compatible_text_mode</span></span>
 <span id="cb24-498"><a href="#cb24-498"></a></span>
-<span id="cb24-499"><a href="#cb24-499"></a>The implementation looks like this:</span>
+<span id="cb24-499"><a href="#cb24-499"></a><span class="al">![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)</span></span>
 <span id="cb24-500"><a href="#cb24-500"></a></span>
-<span id="cb24-501"><a href="#cb24-501"></a><span class="in">```rust</span></span>
-<span id="cb24-502"><a href="#cb24-502"></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
-<span id="cb24-503"><a href="#cb24-503"></a></span>
-<span id="cb24-504"><a href="#cb24-504"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb24-505"><a href="#cb24-505"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb24-506"><a href="#cb24-506"></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-501"><a href="#cb24-501"></a>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <span class="in">`0xb8000`</span> and that each character cell consists of an ASCII byte and a color byte.</span>
+<span id="cb24-502"><a href="#cb24-502"></a></span>
+<span id="cb24-503"><a href="#cb24-503"></a>The implementation looks like this:</span>
+<span id="cb24-504"><a href="#cb24-504"></a></span>
+<span id="cb24-505"><a href="#cb24-505"></a><span class="in">```rust</span></span>
+<span id="cb24-506"><a href="#cb24-506"></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
 <span id="cb24-507"><a href="#cb24-507"></a></span>
-<span id="cb24-508"><a href="#cb24-508"></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb24-509"><a href="#cb24-509"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb24-510"><a href="#cb24-510"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
-<span id="cb24-511"><a href="#cb24-511"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
-<span id="cb24-512"><a href="#cb24-512"></a>        <span class="op">}</span></span>
-<span id="cb24-513"><a href="#cb24-513"></a>    <span class="op">}</span></span>
-<span id="cb24-514"><a href="#cb24-514"></a></span>
-<span id="cb24-515"><a href="#cb24-515"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb24-516"><a href="#cb24-516"></a><span class="op">}</span></span>
-<span id="cb24-517"><a href="#cb24-517"></a><span class="in">```</span></span>
+<span id="cb24-508"><a href="#cb24-508"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb24-509"><a href="#cb24-509"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb24-510"><a href="#cb24-510"></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-511"><a href="#cb24-511"></a></span>
+<span id="cb24-512"><a href="#cb24-512"></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb24-513"><a href="#cb24-513"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb24-514"><a href="#cb24-514"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
+<span id="cb24-515"><a href="#cb24-515"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
+<span id="cb24-516"><a href="#cb24-516"></a>        <span class="op">}</span></span>
+<span id="cb24-517"><a href="#cb24-517"></a>    <span class="op">}</span></span>
 <span id="cb24-518"><a href="#cb24-518"></a></span>
-<span id="cb24-519"><a href="#cb24-519"></a>First, we cast the integer <span class="in">`0xb8000`</span> into a <span class="co">[</span><span class="ot">raw pointer</span><span class="co">]</span>. Then we <span class="co">[</span><span class="ot">iterate</span><span class="co">]</span> over the bytes of the <span class="co">[</span><span class="ot">static</span><span class="co">]</span> <span class="in">`HELLO`</span> <span class="co">[</span><span class="ot">byte string</span><span class="co">]</span>. We use the <span class="co">[</span><span class="ot">`enumerate`</span><span class="co">]</span> method to additionally get a running variable <span class="in">`i`</span>. In the body of the for loop, we use the <span class="co">[</span><span class="ot">`offset`</span><span class="co">]</span> method to write the string byte and the corresponding color byte (<span class="in">`0xb`</span> is a light cyan).</span>
-<span id="cb24-520"><a href="#cb24-520"></a></span>
-<span id="cb24-521"><a href="#cb24-521"></a><span class="ot">[iterate]: https://doc.rust-lang.org/stable/book/ch13-02-iterators.html</span></span>
-<span id="cb24-522"><a href="#cb24-522"></a><span class="ot">[static]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime</span></span>
-<span id="cb24-523"><a href="#cb24-523"></a><span class="ot">[`enumerate`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate</span></span>
-<span id="cb24-524"><a href="#cb24-524"></a><span class="ot">[byte string]: https://doc.rust-lang.org/reference/tokens.html#byte-string-literals</span></span>
-<span id="cb24-525"><a href="#cb24-525"></a><span class="ot">[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer</span></span>
-<span id="cb24-526"><a href="#cb24-526"></a><span class="ot">[`offset`]: https://doc.rust-lang.org/std/primitive.pointer.html#method.offset</span></span>
-<span id="cb24-527"><a href="#cb24-527"></a></span>
-<span id="cb24-528"><a href="#cb24-528"></a>Note that there's an <span class="co">[</span><span class="ot">`unsafe`</span><span class="co">]</span> block around all memory writes. The reason is that the Rust compiler can't prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <span class="in">`unsafe`</span> block, we're basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <span class="in">`unsafe`</span> block does not turn off Rust's safety checks. It only allows you to do <span class="co">[</span><span class="ot">five additional things</span><span class="co">]</span>.</span>
-<span id="cb24-529"><a href="#cb24-529"></a></span>
-<span id="cb24-530"><a href="#cb24-530"></a><span class="ot">[`unsafe`]: https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html</span></span>
-<span id="cb24-531"><a href="#cb24-531"></a><span class="ot">[five additional things]: https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers</span></span>
-<span id="cb24-532"><a href="#cb24-532"></a></span>
-<span id="cb24-533"><a href="#cb24-533"></a>I want to emphasize that **this is not the way we want to do things in Rust!** It's very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer's end if we're not careful.</span>
-<span id="cb24-534"><a href="#cb24-534"></a></span>
-<span id="cb24-535"><a href="#cb24-535"></a>So we want to minimize the use of <span class="in">`unsafe`</span> as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is _impossible_ to do anything wrong from the outside. This way, we would only need minimal amounts of <span class="in">`unsafe`</span> code and can be sure that we don't violate <span class="co">[</span><span class="ot">memory safety</span><span class="co">]</span>. We will create such a safe VGA buffer abstraction in the next post.</span>
+<span id="cb24-519"><a href="#cb24-519"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb24-520"><a href="#cb24-520"></a><span class="op">}</span></span>
+<span id="cb24-521"><a href="#cb24-521"></a><span class="in">```</span></span>
+<span id="cb24-522"><a href="#cb24-522"></a></span>
+<span id="cb24-523"><a href="#cb24-523"></a>First, we cast the integer <span class="in">`0xb8000`</span> into a <span class="co">[</span><span class="ot">raw pointer</span><span class="co">]</span>. Then we <span class="co">[</span><span class="ot">iterate</span><span class="co">]</span> over the bytes of the <span class="co">[</span><span class="ot">static</span><span class="co">]</span> <span class="in">`HELLO`</span> <span class="co">[</span><span class="ot">byte string</span><span class="co">]</span>. We use the <span class="co">[</span><span class="ot">`enumerate`</span><span class="co">]</span> method to additionally get a running variable <span class="in">`i`</span>. In the body of the for loop, we use the <span class="co">[</span><span class="ot">`offset`</span><span class="co">]</span> method to write the string byte and the corresponding color byte (<span class="in">`0xb`</span> is a light cyan).</span>
+<span id="cb24-524"><a href="#cb24-524"></a></span>
+<span id="cb24-525"><a href="#cb24-525"></a><span class="ot">[iterate]: https://doc.rust-lang.org/stable/book/ch13-02-iterators.html</span></span>
+<span id="cb24-526"><a href="#cb24-526"></a><span class="ot">[static]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime</span></span>
+<span id="cb24-527"><a href="#cb24-527"></a><span class="ot">[`enumerate`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate</span></span>
+<span id="cb24-528"><a href="#cb24-528"></a><span class="ot">[byte string]: https://doc.rust-lang.org/reference/tokens.html#byte-string-literals</span></span>
+<span id="cb24-529"><a href="#cb24-529"></a><span class="ot">[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer</span></span>
+<span id="cb24-530"><a href="#cb24-530"></a><span class="ot">[`offset`]: https://doc.rust-lang.org/std/primitive.pointer.html#method.offset</span></span>
+<span id="cb24-531"><a href="#cb24-531"></a></span>
+<span id="cb24-532"><a href="#cb24-532"></a>Note that there's an <span class="co">[</span><span class="ot">`unsafe`</span><span class="co">]</span> block around all memory writes. The reason is that the Rust compiler can't prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <span class="in">`unsafe`</span> block, we're basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <span class="in">`unsafe`</span> block does not turn off Rust's safety checks. It only allows you to do <span class="co">[</span><span class="ot">five additional things</span><span class="co">]</span>.</span>
+<span id="cb24-533"><a href="#cb24-533"></a></span>
+<span id="cb24-534"><a href="#cb24-534"></a><span class="ot">[`unsafe`]: https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html</span></span>
+<span id="cb24-535"><a href="#cb24-535"></a><span class="ot">[five additional things]: https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers</span></span>
 <span id="cb24-536"><a href="#cb24-536"></a></span>
-<span id="cb24-537"><a href="#cb24-537"></a><span class="ot">[memory safety]: https://en.wikipedia.org/wiki/Memory_safety</span></span>
+<span id="cb24-537"><a href="#cb24-537"></a>I want to emphasize that **this is not the way we want to do things in Rust!** It's very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer's end if we're not careful.</span>
 <span id="cb24-538"><a href="#cb24-538"></a></span>
-<span id="cb24-539"><a href="#cb24-539"></a><span class="fu">## Running our Kernel</span></span>
+<span id="cb24-539"><a href="#cb24-539"></a>So we want to minimize the use of <span class="in">`unsafe`</span> as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is _impossible_ to do anything wrong from the outside. This way, we would only need minimal amounts of <span class="in">`unsafe`</span> code and can be sure that we don't violate <span class="co">[</span><span class="ot">memory safety</span><span class="co">]</span>. We will create such a safe VGA buffer abstraction in the next post.</span>
 <span id="cb24-540"><a href="#cb24-540"></a></span>
-<span id="cb24-541"><a href="#cb24-541"></a>Now that we have an executable that does something perceptible, it is time to run it. First, we need to turn our compiled kernel into a bootable disk image by linking it with a bootloader. Then we can run the disk image in the <span class="co">[</span><span class="ot">QEMU</span><span class="co">]</span> virtual machine or boot it on real hardware using a USB stick.</span>
+<span id="cb24-541"><a href="#cb24-541"></a><span class="ot">[memory safety]: https://en.wikipedia.org/wiki/Memory_safety</span></span>
 <span id="cb24-542"><a href="#cb24-542"></a></span>
-<span id="cb24-543"><a href="#cb24-543"></a><span class="fu">## Creating a Bootimage</span></span>
+<span id="cb24-543"><a href="#cb24-543"></a><span class="fu">## Running our Kernel</span></span>
 <span id="cb24-544"><a href="#cb24-544"></a></span>
-<span id="cb24-545"><a href="#cb24-545"></a>To turn our compiled kernel into a bootable disk image, we need to link it with a bootloader. As we learned in the <span class="co">[</span><span class="ot">section about booting</span><span class="co">]</span>, the bootloader is responsible for initializing the CPU and loading our kernel.</span>
+<span id="cb24-545"><a href="#cb24-545"></a>Now that we have an executable that does something perceptible, it is time to run it. First, we need to turn our compiled kernel into a bootable disk image by linking it with a bootloader. Then we can run the disk image in the <span class="co">[</span><span class="ot">QEMU</span><span class="co">]</span> virtual machine or boot it on real hardware using a USB stick.</span>
 <span id="cb24-546"><a href="#cb24-546"></a></span>
-<span id="cb24-547"><a href="#cb24-547"></a><span class="ot">[section about booting]: #the-boot-process</span></span>
+<span id="cb24-547"><a href="#cb24-547"></a><span class="fu">## Creating a Bootimage</span></span>
 <span id="cb24-548"><a href="#cb24-548"></a></span>
-<span id="cb24-549"><a href="#cb24-549"></a>Instead of writing our own bootloader, which is a project on its own, we use the <span class="co">[</span><span class="ot">`bootloader`</span><span class="co">]</span> crate. This crate implements a basic BIOS bootloader without any C dependencies, just Rust and inline assembly. To use it for booting our kernel, we need to add a dependency on it:</span>
+<span id="cb24-549"><a href="#cb24-549"></a>To turn our compiled kernel into a bootable disk image, we need to link it with a bootloader. As we learned in the <span class="co">[</span><span class="ot">section about booting</span><span class="co">]</span>, the bootloader is responsible for initializing the CPU and loading our kernel.</span>
 <span id="cb24-550"><a href="#cb24-550"></a></span>
-<span id="cb24-551"><a href="#cb24-551"></a><span class="ot">[`bootloader`]: https://crates.io/crates/bootloader</span></span>
+<span id="cb24-551"><a href="#cb24-551"></a><span class="ot">[section about booting]: #the-boot-process</span></span>
 <span id="cb24-552"><a href="#cb24-552"></a></span>
-<span id="cb24-553"><a href="#cb24-553"></a><span class="in">```toml</span></span>
-<span id="cb24-554"><a href="#cb24-554"></a><span class="in"># in Cargo.toml</span></span>
-<span id="cb24-555"><a href="#cb24-555"></a></span>
-<span id="cb24-556"><a href="#cb24-556"></a><span class="in">[dependencies]</span></span>
-<span id="cb24-557"><a href="#cb24-557"></a><span class="in">bootloader = "0.9"</span></span>
-<span id="cb24-558"><a href="#cb24-558"></a><span class="in">```</span></span>
+<span id="cb24-553"><a href="#cb24-553"></a>Instead of writing our own bootloader, which is a project on its own, we use the <span class="co">[</span><span class="ot">`bootloader`</span><span class="co">]</span> crate. This crate implements a basic BIOS bootloader without any C dependencies, just Rust and inline assembly. To use it for booting our kernel, we need to add a dependency on it:</span>
+<span id="cb24-554"><a href="#cb24-554"></a></span>
+<span id="cb24-555"><a href="#cb24-555"></a><span class="ot">[`bootloader`]: https://crates.io/crates/bootloader</span></span>
+<span id="cb24-556"><a href="#cb24-556"></a></span>
+<span id="cb24-557"><a href="#cb24-557"></a><span class="in">```toml</span></span>
+<span id="cb24-558"><a href="#cb24-558"></a><span class="in"># in Cargo.toml</span></span>
 <span id="cb24-559"><a href="#cb24-559"></a></span>
-<span id="cb24-560"><a href="#cb24-560"></a>**Note:** This post is only compatible with <span class="in">`bootloader v0.9`</span>. Newer versions use a different build system and will result in build errors when following this post.</span>
-<span id="cb24-561"><a href="#cb24-561"></a></span>
-<span id="cb24-562"><a href="#cb24-562"></a>Adding the bootloader as a dependency is not enough to actually create a bootable disk image. The problem is that we need to link our kernel with the bootloader after compilation, but cargo has no support for <span class="co">[</span><span class="ot">post-build scripts</span><span class="co">]</span>.</span>
+<span id="cb24-560"><a href="#cb24-560"></a><span class="in">[dependencies]</span></span>
+<span id="cb24-561"><a href="#cb24-561"></a><span class="in">bootloader = "0.9"</span></span>
+<span id="cb24-562"><a href="#cb24-562"></a><span class="in">```</span></span>
 <span id="cb24-563"><a href="#cb24-563"></a></span>
-<span id="cb24-564"><a href="#cb24-564"></a><span class="ot">[post-build scripts]: https://github.com/rust-lang/cargo/issues/545</span></span>
+<span id="cb24-564"><a href="#cb24-564"></a>**Note:** This post is only compatible with <span class="in">`bootloader v0.9`</span>. Newer versions use a different build system and will result in build errors when following this post.</span>
 <span id="cb24-565"><a href="#cb24-565"></a></span>
-<span id="cb24-566"><a href="#cb24-566"></a>To solve this problem, we created a tool named <span class="in">`bootimage`</span> that first compiles the kernel and bootloader, and then links them together to create a bootable disk image. To install the tool, go into your home directory (or any directory outside of your cargo project) and execute the following command in your terminal:</span>
+<span id="cb24-566"><a href="#cb24-566"></a>Adding the bootloader as a dependency is not enough to actually create a bootable disk image. The problem is that we need to link our kernel with the bootloader after compilation, but cargo has no support for <span class="co">[</span><span class="ot">post-build scripts</span><span class="co">]</span>.</span>
 <span id="cb24-567"><a href="#cb24-567"></a></span>
-<span id="cb24-568"><a href="#cb24-568"></a><span class="in">```</span></span>
-<span id="cb24-569"><a href="#cb24-569"></a><span class="in">cargo install bootimage</span></span>
-<span id="cb24-570"><a href="#cb24-570"></a><span class="in">```</span></span>
+<span id="cb24-568"><a href="#cb24-568"></a><span class="ot">[post-build scripts]: https://github.com/rust-lang/cargo/issues/545</span></span>
+<span id="cb24-569"><a href="#cb24-569"></a></span>
+<span id="cb24-570"><a href="#cb24-570"></a>To solve this problem, we created a tool named <span class="in">`bootimage`</span> that first compiles the kernel and bootloader, and then links them together to create a bootable disk image. To install the tool, go into your home directory (or any directory outside of your cargo project) and execute the following command in your terminal:</span>
 <span id="cb24-571"><a href="#cb24-571"></a></span>
-<span id="cb24-572"><a href="#cb24-572"></a>For running <span class="in">`bootimage`</span> and building the bootloader, you need to have the <span class="in">`llvm-tools-preview`</span> rustup component installed. You can do so by executing <span class="in">`rustup component add llvm-tools-preview`</span>.</span>
-<span id="cb24-573"><a href="#cb24-573"></a></span>
-<span id="cb24-574"><a href="#cb24-574"></a>After installing <span class="in">`bootimage`</span> and adding the <span class="in">`llvm-tools-preview`</span> component, you can create a bootable disk image by going back into your cargo project directory and executing:</span>
+<span id="cb24-572"><a href="#cb24-572"></a><span class="in">```</span></span>
+<span id="cb24-573"><a href="#cb24-573"></a><span class="in">cargo install bootimage</span></span>
+<span id="cb24-574"><a href="#cb24-574"></a><span class="in">```</span></span>
 <span id="cb24-575"><a href="#cb24-575"></a></span>
-<span id="cb24-576"><a href="#cb24-576"></a><span class="in">```</span></span>
-<span id="cb24-577"><a href="#cb24-577"></a><span class="in">&gt; cargo bootimage</span></span>
-<span id="cb24-578"><a href="#cb24-578"></a><span class="in">```</span></span>
+<span id="cb24-576"><a href="#cb24-576"></a>For running <span class="in">`bootimage`</span> and building the bootloader, you need to have the <span class="in">`llvm-tools-preview`</span> rustup component installed. You can do so by executing <span class="in">`rustup component add llvm-tools-preview`</span>.</span>
+<span id="cb24-577"><a href="#cb24-577"></a></span>
+<span id="cb24-578"><a href="#cb24-578"></a>After installing <span class="in">`bootimage`</span> and adding the <span class="in">`llvm-tools-preview`</span> component, you can create a bootable disk image by going back into your cargo project directory and executing:</span>
 <span id="cb24-579"><a href="#cb24-579"></a></span>
-<span id="cb24-580"><a href="#cb24-580"></a>We see that the tool recompiles our kernel using <span class="in">`cargo build`</span>, so it will automatically pick up any changes you make. Afterwards, it compiles the bootloader, which might take a while. Like all crate dependencies, it is only built once and then cached, so subsequent builds will be much faster. Finally, <span class="in">`bootimage`</span> combines the bootloader and your kernel into a bootable disk image.</span>
-<span id="cb24-581"><a href="#cb24-581"></a></span>
-<span id="cb24-582"><a href="#cb24-582"></a>After executing the command, you should see a bootable disk image named <span class="in">`bootimage-blog_os.bin`</span> in your <span class="in">`target/x86_64-blog_os/debug`</span> directory. You can boot it in a virtual machine or copy it to a USB drive to boot it on real hardware. (Note that this is not a CD image, which has a different format, so burning it to a CD doesn't work).</span>
+<span id="cb24-580"><a href="#cb24-580"></a><span class="in">```</span></span>
+<span id="cb24-581"><a href="#cb24-581"></a><span class="in">&gt; cargo bootimage</span></span>
+<span id="cb24-582"><a href="#cb24-582"></a><span class="in">```</span></span>
 <span id="cb24-583"><a href="#cb24-583"></a></span>
-<span id="cb24-584"><a href="#cb24-584"></a><span class="fu">## How does it work?</span></span>
-<span id="cb24-585"><a href="#cb24-585"></a>The <span class="in">`bootimage`</span> tool performs the following steps behind the scenes:</span>
-<span id="cb24-586"><a href="#cb24-586"></a></span>
-<span id="cb24-587"><a href="#cb24-587"></a><span class="ss">- </span>It compiles our kernel to an <span class="co">[</span><span class="ot">ELF</span><span class="co">]</span> file.</span>
-<span id="cb24-588"><a href="#cb24-588"></a><span class="ss">- </span>It compiles the bootloader dependency as a standalone executable.</span>
-<span id="cb24-589"><a href="#cb24-589"></a><span class="ss">- </span>It links the bytes of the kernel ELF file to the bootloader.</span>
+<span id="cb24-584"><a href="#cb24-584"></a>We see that the tool recompiles our kernel using <span class="in">`cargo build`</span>, so it will automatically pick up any changes you make. Afterwards, it compiles the bootloader, which might take a while. Like all crate dependencies, it is only built once and then cached, so subsequent builds will be much faster. Finally, <span class="in">`bootimage`</span> combines the bootloader and your kernel into a bootable disk image.</span>
+<span id="cb24-585"><a href="#cb24-585"></a></span>
+<span id="cb24-586"><a href="#cb24-586"></a>After executing the command, you should see a bootable disk image named <span class="in">`bootimage-blog_os.bin`</span> in your <span class="in">`target/x86_64-blog_os/debug`</span> directory. You can boot it in a virtual machine or copy it to a USB drive to boot it on real hardware. (Note that this is not a CD image, which has a different format, so burning it to a CD doesn't work).</span>
+<span id="cb24-587"><a href="#cb24-587"></a></span>
+<span id="cb24-588"><a href="#cb24-588"></a><span class="fu">## How does it work?</span></span>
+<span id="cb24-589"><a href="#cb24-589"></a>The <span class="in">`bootimage`</span> tool performs the following steps behind the scenes:</span>
 <span id="cb24-590"><a href="#cb24-590"></a></span>
-<span id="cb24-591"><a href="#cb24-591"></a><span class="ot">[ELF]: https://en.wikipedia.org/wiki/Executable_and_Linkable_Format</span></span>
-<span id="cb24-592"><a href="#cb24-592"></a><span class="ot">[rust-osdev/bootloader]: https://github.com/rust-osdev/bootloader</span></span>
-<span id="cb24-593"><a href="#cb24-593"></a></span>
-<span id="cb24-594"><a href="#cb24-594"></a>When booted, the bootloader reads and parses the appended ELF file. It then maps the program segments to virtual addresses in the page tables, zeroes the <span class="in">`.bss`</span> section, and sets up a stack. Finally, it reads the entry point address (our <span class="in">`_start`</span> function) and jumps to it.</span>
-<span id="cb24-595"><a href="#cb24-595"></a></span>
-<span id="cb24-596"><a href="#cb24-596"></a><span class="fu">## Booting it in QEMU</span></span>
+<span id="cb24-591"><a href="#cb24-591"></a><span class="ss">- </span>It compiles our kernel to an <span class="co">[</span><span class="ot">ELF</span><span class="co">]</span> file.</span>
+<span id="cb24-592"><a href="#cb24-592"></a><span class="ss">- </span>It compiles the bootloader dependency as a standalone executable.</span>
+<span id="cb24-593"><a href="#cb24-593"></a><span class="ss">- </span>It links the bytes of the kernel ELF file to the bootloader.</span>
+<span id="cb24-594"><a href="#cb24-594"></a></span>
+<span id="cb24-595"><a href="#cb24-595"></a><span class="ot">[ELF]: https://en.wikipedia.org/wiki/Executable_and_Linkable_Format</span></span>
+<span id="cb24-596"><a href="#cb24-596"></a><span class="ot">[rust-osdev/bootloader]: https://github.com/rust-osdev/bootloader</span></span>
 <span id="cb24-597"><a href="#cb24-597"></a></span>
-<span id="cb24-598"><a href="#cb24-598"></a>We can now boot the disk image in a virtual machine. To boot it in <span class="co">[</span><span class="ot">QEMU</span><span class="co">]</span>, execute the following command:</span>
+<span id="cb24-598"><a href="#cb24-598"></a>When booted, the bootloader reads and parses the appended ELF file. It then maps the program segments to virtual addresses in the page tables, zeroes the <span class="in">`.bss`</span> section, and sets up a stack. Finally, it reads the entry point address (our <span class="in">`_start`</span> function) and jumps to it.</span>
 <span id="cb24-599"><a href="#cb24-599"></a></span>
-<span id="cb24-600"><a href="#cb24-600"></a><span class="ot">[QEMU]: https://www.qemu.org/</span></span>
+<span id="cb24-600"><a href="#cb24-600"></a><span class="fu">## Booting it in QEMU</span></span>
 <span id="cb24-601"><a href="#cb24-601"></a></span>
-<span id="cb24-602"><a href="#cb24-602"></a><span class="in">```</span></span>
-<span id="cb24-603"><a href="#cb24-603"></a><span class="in">&gt; qemu-system-x86_64 -drive format=raw,file=target/x86_64-blog_os/debug/bootimage-blog_os.bin</span></span>
-<span id="cb24-604"><a href="#cb24-604"></a><span class="in">```</span></span>
+<span id="cb24-602"><a href="#cb24-602"></a>We can now boot the disk image in a virtual machine. To boot it in <span class="co">[</span><span class="ot">QEMU</span><span class="co">]</span>, execute the following command:</span>
+<span id="cb24-603"><a href="#cb24-603"></a></span>
+<span id="cb24-604"><a href="#cb24-604"></a><span class="ot">[QEMU]: https://www.qemu.org/</span></span>
 <span id="cb24-605"><a href="#cb24-605"></a></span>
-<span id="cb24-606"><a href="#cb24-606"></a>This opens a separate window which should look similar to this:</span>
-<span id="cb24-607"><a href="#cb24-607"></a></span>
-<span id="cb24-608"><a href="#cb24-608"></a><span class="al">![QEMU showing "Hello World!"](qemu.png)</span></span>
+<span id="cb24-606"><a href="#cb24-606"></a><span class="in">```</span></span>
+<span id="cb24-607"><a href="#cb24-607"></a><span class="in">&gt; qemu-system-x86_64 -drive format=raw,file=target/x86_64-blog_os/debug/bootimage-blog_os.bin</span></span>
+<span id="cb24-608"><a href="#cb24-608"></a><span class="in">```</span></span>
 <span id="cb24-609"><a href="#cb24-609"></a></span>
-<span id="cb24-610"><a href="#cb24-610"></a>We see that our "Hello World!" is visible on the screen.</span>
+<span id="cb24-610"><a href="#cb24-610"></a>This opens a separate window which should look similar to this:</span>
 <span id="cb24-611"><a href="#cb24-611"></a></span>
-<span id="cb24-612"><a href="#cb24-612"></a><span class="fu">## Real Machine</span></span>
+<span id="cb24-612"><a href="#cb24-612"></a><span class="al">![QEMU showing "Hello World!"](qemu.png)</span></span>
 <span id="cb24-613"><a href="#cb24-613"></a></span>
-<span id="cb24-614"><a href="#cb24-614"></a>It is also possible to write it to a USB stick and boot it on a real machine, **but be careful** to choose the correct device name, because **everything on that device is overwritten**:</span>
+<span id="cb24-614"><a href="#cb24-614"></a>We see that our "Hello World!" is visible on the screen.</span>
 <span id="cb24-615"><a href="#cb24-615"></a></span>
-<span id="cb24-616"><a href="#cb24-616"></a><span class="in">```</span></span>
-<span id="cb24-617"><a href="#cb24-617"></a><span class="in">&gt; dd if=target/x86_64-blog_os/debug/bootimage-blog_os.bin of=/dev/sdX &amp;&amp; sync</span></span>
-<span id="cb24-618"><a href="#cb24-618"></a><span class="in">```</span></span>
+<span id="cb24-616"><a href="#cb24-616"></a><span class="fu">## Real Machine</span></span>
+<span id="cb24-617"><a href="#cb24-617"></a></span>
+<span id="cb24-618"><a href="#cb24-618"></a>It is also possible to write it to a USB stick and boot it on a real machine, **but be careful** to choose the correct device name, because **everything on that device is overwritten**:</span>
 <span id="cb24-619"><a href="#cb24-619"></a></span>
-<span id="cb24-620"><a href="#cb24-620"></a>Where <span class="in">`sdX`</span> is the device name of your USB stick. </span>
-<span id="cb24-621"><a href="#cb24-621"></a></span>
-<span id="cb24-622"><a href="#cb24-622"></a>After writing the image to the USB stick, you can run it on real hardware by booting from it. You probably need to use a special boot menu or change the boot order in your BIOS configuration to boot from the USB stick. Note that it currently doesn't work for UEFI machines, since the <span class="in">`bootloader`</span> crate has no UEFI support yet.</span>
+<span id="cb24-620"><a href="#cb24-620"></a><span class="in">```</span></span>
+<span id="cb24-621"><a href="#cb24-621"></a><span class="in">&gt; dd if=target/x86_64-blog_os/debug/bootimage-blog_os.bin of=/dev/sdX &amp;&amp; sync</span></span>
+<span id="cb24-622"><a href="#cb24-622"></a><span class="in">```</span></span>
 <span id="cb24-623"><a href="#cb24-623"></a></span>
-<span id="cb24-624"><a href="#cb24-624"></a><span class="fu">## Using `cargo run`</span></span>
+<span id="cb24-624"><a href="#cb24-624"></a>Where <span class="in">`sdX`</span> is the device name of your USB stick. </span>
 <span id="cb24-625"><a href="#cb24-625"></a></span>
-<span id="cb24-626"><a href="#cb24-626"></a>To make it easier to run our kernel in QEMU, we can set the <span class="in">`runner`</span> configuration key for cargo:</span>
+<span id="cb24-626"><a href="#cb24-626"></a>After writing the image to the USB stick, you can run it on real hardware by booting from it. You probably need to use a special boot menu or change the boot order in your BIOS configuration to boot from the USB stick. Note that it currently doesn't work for UEFI machines, since the <span class="in">`bootloader`</span> crate has no UEFI support yet.</span>
 <span id="cb24-627"><a href="#cb24-627"></a></span>
-<span id="cb24-628"><a href="#cb24-628"></a><span class="in">```toml</span></span>
-<span id="cb24-629"><a href="#cb24-629"></a><span class="in"># in .cargo/config.toml</span></span>
-<span id="cb24-630"><a href="#cb24-630"></a></span>
-<span id="cb24-631"><a href="#cb24-631"></a><span class="in">[target.'cfg(target_os = "none")']</span></span>
-<span id="cb24-632"><a href="#cb24-632"></a><span class="in">runner = "bootimage runner"</span></span>
-<span id="cb24-633"><a href="#cb24-633"></a><span class="in">```</span></span>
+<span id="cb24-628"><a href="#cb24-628"></a><span class="fu">## Using `cargo run`</span></span>
+<span id="cb24-629"><a href="#cb24-629"></a></span>
+<span id="cb24-630"><a href="#cb24-630"></a>To make it easier to run our kernel in QEMU, we can set the <span class="in">`runner`</span> configuration key for cargo:</span>
+<span id="cb24-631"><a href="#cb24-631"></a></span>
+<span id="cb24-632"><a href="#cb24-632"></a><span class="in">```toml</span></span>
+<span id="cb24-633"><a href="#cb24-633"></a><span class="in"># in .cargo/config.toml</span></span>
 <span id="cb24-634"><a href="#cb24-634"></a></span>
-<span id="cb24-635"><a href="#cb24-635"></a>The <span class="in">`target.'cfg(target_os = "none")'`</span> table applies to all targets whose target configuration file's <span class="in">`"os"`</span> field is set to <span class="in">`"none"`</span>. This includes our <span class="in">`x86_64-blog_os.json`</span> target. The <span class="in">`runner`</span> key specifies the command that should be invoked for <span class="in">`cargo run`</span>. The command is run after a successful build with the executable path passed as the first argument. See the <span class="co">[</span><span class="ot">cargo documentation</span><span class="co">][cargo configuration]</span> for more details.</span>
-<span id="cb24-636"><a href="#cb24-636"></a></span>
-<span id="cb24-637"><a href="#cb24-637"></a>The <span class="in">`bootimage runner`</span> command is specifically designed to be usable as a <span class="in">`runner`</span> executable. It links the given executable with the project's bootloader dependency and then launches QEMU. See the <span class="co">[</span><span class="ot">Readme of `bootimage`</span><span class="co">]</span> for more details and possible configuration options.</span>
+<span id="cb24-635"><a href="#cb24-635"></a><span class="in">[target.'cfg(target_os = "none")']</span></span>
+<span id="cb24-636"><a href="#cb24-636"></a><span class="in">runner = "bootimage runner"</span></span>
+<span id="cb24-637"><a href="#cb24-637"></a><span class="in">```</span></span>
 <span id="cb24-638"><a href="#cb24-638"></a></span>
-<span id="cb24-639"><a href="#cb24-639"></a><span class="ot">[Readme of `bootimage`]: https://github.com/rust-osdev/bootimage</span></span>
+<span id="cb24-639"><a href="#cb24-639"></a>The <span class="in">`target.'cfg(target_os = "none")'`</span> table applies to all targets whose target configuration file's <span class="in">`"os"`</span> field is set to <span class="in">`"none"`</span>. This includes our <span class="in">`x86_64-blog_os.json`</span> target. The <span class="in">`runner`</span> key specifies the command that should be invoked for <span class="in">`cargo run`</span>. The command is run after a successful build with the executable path passed as the first argument. See the <span class="co">[</span><span class="ot">cargo documentation</span><span class="co">][cargo configuration]</span> for more details.</span>
 <span id="cb24-640"><a href="#cb24-640"></a></span>
-<span id="cb24-641"><a href="#cb24-641"></a>Now we can use <span class="in">`cargo run`</span> to compile our kernel and boot it in QEMU.</span>
+<span id="cb24-641"><a href="#cb24-641"></a>The <span class="in">`bootimage runner`</span> command is specifically designed to be usable as a <span class="in">`runner`</span> executable. It links the given executable with the project's bootloader dependency and then launches QEMU. See the <span class="co">[</span><span class="ot">Readme of `bootimage`</span><span class="co">]</span> for more details and possible configuration options.</span>
 <span id="cb24-642"><a href="#cb24-642"></a></span>
-<span id="cb24-643"><a href="#cb24-643"></a><span class="fu">## What's next?</span></span>
+<span id="cb24-643"><a href="#cb24-643"></a><span class="ot">[Readme of `bootimage`]: https://github.com/rust-osdev/bootimage</span></span>
 <span id="cb24-644"><a href="#cb24-644"></a></span>
-<span id="cb24-645"><a href="#cb24-645"></a>In the next post, we will explore the VGA text buffer in more detail and write a safe interface for it. We will also add support for the <span class="in">`println`</span> macro.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb24-645"><a href="#cb24-645"></a>Now we can use <span class="in">`cargo run`</span> to compile our kernel and boot it in QEMU.</span>
+<span id="cb24-646"><a href="#cb24-646"></a></span>
+<span id="cb24-647"><a href="#cb24-647"></a><span class="fu">## What's next?</span></span>
+<span id="cb24-648"><a href="#cb24-648"></a></span>
+<span id="cb24-649"><a href="#cb24-649"></a>In the next post, we will explore the VGA text buffer in more detail and write a safe interface for it. We will also add support for the <span class="in">`println`</span> macro.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
