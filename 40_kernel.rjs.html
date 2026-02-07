@@ -659,18 +659,33 @@
 <ul>
 <li>This is called “cheating” and is a good way to get ahead in life.</li>
 </ul>
-</section>
-<section id="the-multiboot-standard" class="slide level2">
-<h2>The Multiboot Standard</h2>
-<p>To avoid that every operating system implements its own bootloader, which is only compatible with a single OS, the <a href="https://en.wikipedia.org/wiki/Free_Software_Foundation">Free Software Foundation</a> created an open bootloader standard called <a href="https://wiki.osdev.org/Multiboot">Multiboot</a> in 1995. The standard defines an interface between the bootloader and the operating system, so that any Multiboot-compliant bootloader can load any Multiboot-compliant operating system. The reference implementation is <a href="https://en.wikipedia.org/wiki/GNU_GRUB">GNU GRUB</a>, which is the most popular bootloader for Linux systems.</p>
-<p>To make a kernel Multiboot compliant, one just needs to insert a so-called <a href="https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format">Multiboot header</a> at the beginning of the kernel file. This makes it very easy to boot an OS from GRUB. However, GRUB and the Multiboot standard have some problems too:</p>
-<ul>
-<li>They support only the 32-bit protected mode. This means that you still have to do the CPU configuration to switch to the 64-bit long mode.</li>
-<li>They are designed to make the bootloader simple instead of the kernel. For example, the kernel needs to be linked with an <a href="https://wiki.osdev.org/Multiboot#Multiboot_2">adjusted default page size</a>, because GRUB can’t find the Multiboot header otherwise. Another example is that the <a href="https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Boot-information-format">boot information</a>, which is passed to the kernel, contains lots of architecture-dependent structures instead of providing clean abstractions.</li>
-<li>Both GRUB and the Multiboot standard are only sparsely documented.</li>
-<li>GRUB needs to be installed on the host system to create a bootable disk image from the kernel file. This makes development on Windows or Mac more difficult.</li>
-</ul>
-<p>Because of these drawbacks, we decided to not use GRUB or the Multiboot standard. However, we plan to add Multiboot support to our [bootimage] tool, so that it’s possible to load your kernel on a GRUB system too. If you’re interested in writing a Multiboot compliant kernel, check out the <a href="@/edition-1/_index.md">first edition</a> of this blog series.</p>
+<!--
+
+## The Multiboot Standard
+
+To avoid that every operating system implements its own bootloader, which is only compatible with a single OS, the [Free Software Foundation] created an open bootloader standard called [Multiboot] in 1995. The standard defines an interface between the bootloader and the operating system, so that any Multiboot-compliant bootloader can load any Multiboot-compliant operating system. The reference implementation is [GNU GRUB], which is the most popular bootloader for Linux systems.
+
+[Free Software Foundation]: https://en.wikipedia.org/wiki/Free_Software_Foundation
+[Multiboot]: https://wiki.osdev.org/Multiboot
+[GNU GRUB]: https://en.wikipedia.org/wiki/GNU_GRUB
+
+To make a kernel Multiboot compliant, one just needs to insert a so-called [Multiboot header] at the beginning of the kernel file. This makes it very easy to boot an OS from GRUB. However, GRUB and the Multiboot standard have some problems too:
+
+[Multiboot header]: https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format
+
+- They support only the 32-bit protected mode. This means that you still have to do the CPU configuration to switch to the 64-bit long mode.
+- They are designed to make the bootloader simple instead of the kernel. For example, the kernel needs to be linked with an [adjusted default page size], because GRUB can't find the Multiboot header otherwise. Another example is that the [boot information], which is passed to the kernel, contains lots of architecture-dependent structures instead of providing clean abstractions.
+- Both GRUB and the Multiboot standard are only sparsely documented.
+- GRUB needs to be installed on the host system to create a bootable disk image from the kernel file. This makes development on Windows or Mac more difficult.
+
+[adjusted default page size]: https://wiki.osdev.org/Multiboot#Multiboot_2
+[boot information]: https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Boot-information-format
+
+Because of these drawbacks, we decided to not use GRUB or the Multiboot standard. However, we plan to add Multiboot support to our [bootimage] tool, so that it's possible to load your kernel on a GRUB system too. If you're interested in writing a Multiboot compliant kernel, check out the [first edition] of this blog series.
+
+[first edition]: @/edition-1/_index.md
+
+-->
 </section></section>
 <section>
 <section id="kernel" class="title-slide slide level1 center">
@@ -679,8 +694,11 @@
 </section>
 <section id="a-minimal-kernel" class="slide level2">
 <h2>A Minimal Kernel</h2>
-<p>Now that we roughly know how a computer boots, it’s time to create our own minimal kernel. Our goal is to create a disk image that prints a “Hello World!” to the screen when booted. We do this by extending the previous post’s [freestanding Rust binary].</p>
-<p>As you may remember, we built the freestanding binary through <code>cargo</code>, but depending on the operating system, we needed different entry point names and compile flags. That’s because <code>cargo</code> builds for the <em>host system</em> by default, i.e., the system you’re running on. This isn’t something we want for our kernel, because a kernel that runs on top of, e.g., Windows, does not make much sense. Instead, we want to compile for a clearly defined <em>target system</em>.</p>
+<ul>
+<li>Let’s make a kernel.</li>
+<li>Specifically, a disk image that prints a “Hello World!” to the screen when booted.</li>
+<li>We extending our bare metal executable.</li>
+</ul>
 <!--
 
 ## Installing Rust Nightly
@@ -712,7 +730,22 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 </section>
 <section id="our-target" class="slide level2">
 <h2>Our Target</h2>
-<p>For our target system, however, we require some special configuration parameters (e.g.&nbsp;no underlying OS), so none of the [existing target triples][platform-support] fits. Fortunately, Rust allows us to define [our own target][custom-targets] through a JSON file. For example, a JSON file that describes the <code>x86_64-unknown-linux-gnu</code> target looks like this:</p>
+<ul>
+<li>I am aware of no existing target triple suitable for this course.</li>
+<li>So, make our own.</li>
+<li>It’s not too bad, just JSON.
+<ul>
+<li>We’ll specify some easy stuff, like archtiecture.</li>
+<li>Some weird stuff, like manual memory layouts.</li>
+<li>And get on with things.</li>
+</ul></li>
+</ul>
+</section>
+<section id="json" class="slide level2">
+<h2>JSON</h2>
+<ul>
+<li>JSON rules by the way.</li>
+</ul>
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb1-1"><a></a><span class="fu">{</span></span>
 <span id="cb1-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
 <span id="cb1-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
@@ -726,9 +759,27 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb1-11"><a></a>    <span class="dt">"pre-link-args"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"-m64"</span><span class="ot">]</span><span class="fu">,</span></span>
 <span id="cb1-12"><a></a>    <span class="dt">"morestack"</span><span class="fu">:</span> <span class="kw">false</span></span>
 <span id="cb1-13"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Most fields are required by LLVM to generate code for that platform. For example, the <a href="https://llvm.org/docs/LangRef.html#data-layout"><code>data-layout</code></a> field defines the size of various integer, floating point, and pointer types. Then there are fields that Rust uses for conditional compilation, such as <code>target-pointer-width</code>. The third kind of field defines how the crate should be built. For example, the <code>pre-link-args</code> field specifies arguments passed to the <a href="https://en.wikipedia.org/wiki/Linker_(computing)">linker</a>.</p>
-<p>We also target <code>x86_64</code> systems with our kernel, so our target specification will look very similar to the one above. Let’s start by creating an <code>x86_64-blog_os.json</code> file (choose any name you like) with the common content:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a></a><span class="fu">{</span></span>
+</section>
+<section id="some-context" class="slide level2">
+<h2>Some context</h2>
+<ul>
+<li>Most fields are required by LLVM.</li>
+<li>Data layout field defines the size of integer, float (ew), and pointer types.</li>
+<li>Rust uses conditional compilation, such as via <code>target-pointer-width</code>.</li>
+<li>The <code>pre-link-args</code> field specifies arguments passed to the linker.</li>
+</ul>
+</section>
+<section id="arm64-take-notes" class="slide level2">
+<h2>ARM64 Take Notes</h2>
+<ul>
+<li>We also target <code>x86_64</code>.</li>
+<li>Start here:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a></a><span class="fu">{</span></span>
 <span id="cb2-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
 <span id="cb2-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
 <span id="cb2-4"><a></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
@@ -738,96 +789,496 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb2-8"><a></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
 <span id="cb2-9"><a></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span></span>
 <span id="cb2-10"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that we changed the OS in the <code>llvm-target</code> and the <code>os</code> field to <code>none</code>, because we will run on bare metal.</p>
-<p>We add the following build-related entries:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a></a><span class="er">"linker-flavor":</span> <span class="er">"ld.lld",</span></span>
-<span id="cb3-2"><a></a><span class="er">"linker":</span> <span class="er">"rust-lld",</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Instead of using the platform’s default linker (which might not support Linux targets), we use the cross-platform <a href="https://lld.llvm.org/">LLD</a> linker that is shipped with Rust for linking our kernel.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a></a><span class="er">"panic-strategy":</span> <span class="er">"abort",</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This setting specifies that the target doesn’t support <a href="https://www.bogotobogo.com/cplusplus/stackunwinding.php">stack unwinding</a> on panic, so instead the program should abort directly. This has the same effect as the <code>panic = "abort"</code> option in our Cargo.toml, so we can remove it from there. (Note that, in contrast to the Cargo.toml option, this target option also applies when we recompile the <code>core</code> library later in this post. So, even if you prefer to keep the Cargo.toml option, make sure to include this option.)</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb5-1"><a></a><span class="er">"disable-redzone":</span> <span class="er">true,</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We’re writing a kernel, so we’ll need to handle interrupts at some point. To do that safely, we have to disable a certain stack pointer optimization called the <em>“red zone”</em>, because it would cause stack corruption otherwise. For more information, see our separate post about <a href="@/edition-2/posts/02-minimal-rust-kernel/disable-red-zone/index.md">disabling the red zone</a>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb6-1"><a></a><span class="er">"features":</span> <span class="er">"-mmx,-sse,+soft-float",</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>features</code> field enables/disables target features. We disable the <code>mmx</code> and <code>sse</code> features by prefixing them with a minus and enable the <code>soft-float</code> feature by prefixing it with a plus. Note that there must be no spaces between different flags, otherwise LLVM fails to interpret the features string.</p>
-<p>The <code>mmx</code> and <code>sse</code> features determine support for <a href="https://en.wikipedia.org/wiki/SIMD">Single Instruction Multiple Data (SIMD)</a> instructions, which can often speed up programs significantly. However, using the large SIMD registers in OS kernels leads to performance problems. The reason is that the kernel needs to restore all registers to their original state before continuing an interrupted program. This means that the kernel has to save the complete SIMD state to main memory on each system call or hardware interrupt. Since the SIMD state is very large (512–1600 bytes) and interrupts can occur very often, these additional save/restore operations considerably harm performance. To avoid this, we disable SIMD for our kernel (not for applications running on top!).</p>
-<p>A problem with disabling SIMD is that floating point operations on <code>x86_64</code> require SIMD registers by default. To solve this problem, we add the <code>soft-float</code> feature, which emulates all floating point operations through software functions based on normal integers.</p>
-<p>For more information, see our post on <a href="@/edition-2/posts/02-minimal-rust-kernel/disable-simd/index.md">disabling SIMD</a>.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb7-1"><a></a><span class="er">"rustc-abi":</span> <span class="er">"x86-softfloat"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>As we want to use the <code>soft-float</code> feature, we also need to tell the Rust compiler <code>rustc</code> that we want to use the corresponding ABI. We can do that by setting the <code>rustc-abi</code> field to <code>x86-softfloat</code>.</p>
+</div>
 </section>
-<section id="putting-it-together" class="slide level2">
-<h2>Putting it Together</h2>
-<p>Our target specification file now looks like this:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb8-1"><a></a><span class="fu">{</span></span>
-<span id="cb8-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
-<span id="cb8-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
-<span id="cb8-4"><a></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
-<span id="cb8-5"><a></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
-<span id="cb8-6"><a></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
-<span id="cb8-7"><a></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
-<span id="cb8-8"><a></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
-<span id="cb8-9"><a></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb8-10"><a></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
-<span id="cb8-11"><a></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
-<span id="cb8-12"><a></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
-<span id="cb8-13"><a></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb8-14"><a></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
-<span id="cb8-15"><a></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
-<span id="cb8-16"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="changes" class="slide level2">
+<h2>Changes</h2>
+<ul>
+<li>Note that we changed the OS in the <code>llvm-target</code> and the <code>os</code> field to <code>none</code>, because we will run on bare metal.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="x86_64-osirs.json" data-code-line-numbers="2, 8"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a></a><span class="fu">{</span></span>
+<span id="cb3-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb3-3"><a></a>    <span class="er">...</span></span>
+<span id="cb3-4"><a></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb3-5"><a></a>    <span class="er">...</span></span>
+<span id="cb3-6"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="building-our-kernel" class="slide level2">
-<h2>Building our Kernel</h2>
-<p>Compiling for our new target will use Linux conventions, since the ld.lld linker-flavor instructs llvm to compile with the <code>-flavor gnu</code> flag (for more linker options, see <a href="https://doc.rust-lang.org/rustc/codegen-options/index.html#linker-flavor">the rustc documentation</a>). This means that we need an entry point named <code>_start</code> as described in the <a href="@/edition-2/posts/01-freestanding-rust-binary/index.md">previous post</a>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// src/main.rs</span></span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
-<span id="cb9-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
-<span id="cb9-5"><a></a></span>
-<span id="cb9-6"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb9-7"><a></a></span>
-<span id="cb9-8"><a></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb9-9"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb9-10"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb9-11"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb9-12"><a></a><span class="op">}</span></span>
-<span id="cb9-13"><a></a></span>
-<span id="cb9-14"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
-<span id="cb9-15"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb9-16"><a></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
-<span id="cb9-17"><a></a>    <span class="co">// named `_start` by default</span></span>
-<span id="cb9-18"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb9-19"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that the entry point needs to be called <code>_start</code> regardless of your host OS.</p>
-<p>We can now build the kernel for our new target by passing the name of the JSON file as <code>--target</code>:</p>
-<pre><code>&gt; cargo build --target x86_64-blog_os.json
-
-error: `.json` target specs require -Zjson-target-spec</code></pre>
-<p>It fails! The error tells us that custom JSON target specifications are an unstable feature that requires explicit opt-in. This is because the format of the JSON target files is not considered stable yet, so changes to it might occur in future versions of Rust. See the <a href="https://github.com/rust-lang/rust/issues/151528">tracking issue for custom JSON target specs</a> for more information.</p>
+<section id="linking" class="slide level2">
+<h2>Linking</h2>
+<ul>
+<li>We’ll add the following build-related entries:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a></a><span class="fu">{</span></span>
+<span id="cb4-2"><a></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
+<span id="cb4-3"><a></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
+<span id="cb4-4"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>For OS-agnosticism, we use the cross-platform “LLD” linker that is shipped with Rust for linking our kernel.
+<ul>
+<li><a href="https://lld.llvm.org/">More.</a></li>
+</ul></li>
+</ul>
 </section>
-<section id="the-json-target-spec-option" class="slide level2">
-<h2>The <code>json-target-spec</code> Option</h2>
-<p>To enable support for custom JSON target specifications, we need to create a local <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo configuration</a> file at <code>.cargo/config.toml</code> (the <code>.cargo</code> folder should be next to your <code>src</code> folder) with the following content:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb11-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb11-2"><a></a></span>
-<span id="cb11-3"><a></a><span class="kw">[unstable]</span></span>
-<span id="cb11-4"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This enables the unstable <code>json-target-spec</code> feature, allowing us to use custom JSON target files.</p>
-<p>With this configuration in place, let’s try building again:</p>
-<pre><code>&gt; cargo build --target x86_64-blog_os.json
-
-error[E0463]: can't find crate for `core`</code></pre>
-<p>It still fails, but with a new error. The error tells us that the Rust compiler does not find the <a href="https://doc.rust-lang.org/nightly/core/index.html"><code>core</code> library</a>. This library contains basic Rust types such as <code>Result</code>, <code>Option</code>, and iterators, and is implicitly linked to all <code>no_std</code> crates.</p>
-<p>The problem is that the core library is distributed together with the Rust compiler as a <em>precompiled</em> library. So it is only valid for supported host triples (e.g., <code>x86_64-unknown-linux-gnu</code>) but not for our custom target. If we want to compile code for other targets, we need to recompile <code>core</code> for these targets first.</p>
+<section id="panic-abort" class="slide level2">
+<h2>Panic Abort</h2>
+<ul>
+<li>You know how I feel about unwinding.
+<ul>
+<li>I have never relaxed in my life.</li>
+<li>I’ve only panicked and given up.</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb5-1"><a></a><span class="fu">{</span></span>
+<span id="cb5-2"><a></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
+<span id="cb5-3"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="target-vs.-toml" class="slide level2">
+<h2>Target vs.&nbsp;TOML</h2>
+<ul>
+<li>This has the same effect as the <code>panic = "abort"</code> option in our Cargo.toml</li>
+<li>So we can remove it from there!</li>
+<li>This is better though:
+<ul>
+<li>We will use <code>core</code>, an architecture specific library, and we need <code>core</code> to <em>also</em> panic abort.</li>
+<li><a href="https://doc.rust-lang.org/core/">“It is the portable glue between the language and its libraries, defining the intrinsic and primitive building blocks of all Rust code.”</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="red-zone" class="slide level2">
+<h2>Red Zone</h2>
+<ul>
+<li>Okay red zone is not particularly relevant to this class.</li>
+<li>But it is <em>extremely</em> cool.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb6-1"><a></a><span class="fu">{</span></span>
+<span id="cb6-2"><a></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb6-3"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>So I’m going to tell you about it.</li>
+</ul>
+</section>
+<section id="the-red-zone" class="slide level2">
+<h2>The Red Zone</h2>
+<ul>
+<li>The <strong>Red Zone</strong> is a 128-byte optimization area below the current stack pointer (<span class="math inline">\(RSP\)</span>).
+<ul>
+<li>“R” for 64 bit.</li>
+<li>“SP” for “stack pointer”</li>
+</ul></li>
+<li>It is a specific feature of the x86-64 System V ABI (Application Binary Interface).</li>
+<li>It allows functions to use a small amount of stack space without actually moving the pointer.</li>
+</ul>
+</section>
+<section id="performance-gains" class="slide level2">
+<h2>Performance Gains</h2>
+<ul>
+<li>Normally, any data written to the stack requires an <span class="math inline">\(RSP\)</span> adjustment to prevent data corruption.
+<ul>
+<li><code>sub rsp, 8</code></li>
+<li><code>mov [rsp], rax</code></li>
+</ul></li>
+<li>With the Red Zone, compilers can skip the subtraction for some functions.</li>
+<li>This reduces the number of instructions and speeds up function execution.
+<ul>
+<li>At the cost of <em>no longer tracking the stack</em>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="negative-indexing" class="slide level2">
+<h2>Negative Indexing</h2>
+<ul>
+<li>Since <span class="math inline">\(RSP\)</span> remains at the “top” of the stack, we access this memory using negative offsets.</li>
+<li>In assembly, this looks like <code>mov [rsp - 16], rax</code>.</li>
+<li>This treats the stack as a fixed-base array rather than a stack ADT.</li>
+<li>It is essentially “free” scratch space for short-lived data.</li>
+</ul>
+</section>
+<section id="the-danger-of-interrupts" class="slide level2">
+<h2>The Danger of Interrupts</h2>
+<ul>
+<li>The Red Zone is dangerous in kernel development because of <strong>hardware interrupts</strong>.
+<ul>
+<li>The OS has to deal with, say, someone hitting the power off button.</li>
+<li>Someone plugging in a USB drive.</li>
+<li>Lightning strikes.</li>
+<li>Cosmic rays flipping bits</li>
+</ul></li>
+</ul>
+</section>
+<section id="red-zone-to-dead-zone" class="slide level2">
+<h2>Red Zone to Dead Zone</h2>
+<ul>
+<li>When an interrupt occurs, the CPU pushes state (like <span class="math inline">\(RIP\)</span> and <span class="math inline">\(RFLAGS\)</span>) onto the stack.
+<ul>
+<li>“Instruction pointer” and “flags”.</li>
+</ul></li>
+<li>This will overwrite those 128 bytes of data.</li>
+<li>This leads to silent, non-deterministic memory corruption.
+<ul>
+<li>Generally regarded as bad.</li>
+</ul></li>
+</ul>
+</section>
+<section id="read-more" class="slide level2">
+<h2>Read more</h2>
+<ul>
+<li>There are good visuals here.</li>
+<li><a href="https://os.phil-opp.com/red-zone/">Read more</a></li>
+<li>Handwaving now - Better for the compilers class I think!</li>
+</ul>
+</section>
+<section id="ancient-nemesis" class="slide level2">
+<h2>Ancient Nemesis</h2>
+<ul>
+<li>You all know I love floating point numbers.
+<ul>
+<li>And with good reason!</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb7-1"><a></a><span class="fu">{</span></span>
+<span id="cb7-2"><a></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
+<span id="cb7-3"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="turn-off-floats" class="slide level2">
+<h2>Turn off floats</h2>
+<ul>
+<li><code>features</code> enables/disables target features.</li>
+<li>We disable the <code>mmx</code> and <code>sse</code> features by prefixing them with a minus</li>
+<li>We enable the <code>soft-float</code> feature by prefixing it with a plus.</li>
+<li>Note that there must be no spaces between different flags!</li>
+</ul>
+</section>
+<section id="mmxsse" class="slide level2">
+<h2>MMX/SSE</h2>
+<ul>
+<li>The <code>mmx</code> and <code>sse</code> features are performance optimizing vector operations from when Intel though they’d be able to hold off NVIDIA in the 90s.</li>
+<li>These are braodly called <a href="https://en.wikipedia.org/wiki/SIMD">Single Instruction Multiple Data (SIMD)</a> instructions and are historically important.
+<ul>
+<li>Foundation of <code>numpy</code></li>
+</ul></li>
+<li>We aren’t using data frames in our kernel.</li>
+</ul>
+</section>
+<section id="soft-float" class="slide level2">
+<h2>Soft Float</h2>
+<ul>
+<li>Floating point operations on <code>x86_64</code> require SIMD registers by default.
+<ul>
+<li>That’s right - floats are worse than you thought!</li>
+</ul></li>
+<li>To solve this problem, we add the <code>soft-float</code> feature, which emulates all floating point operations through software functions based on normal integers.
+<ul>
+<li>Just like <a href="https://cd-c89.github.io/rs/51_f16.html"><code>f16</code></a></li>
+</ul></li>
+</ul>
+</section>
+<section id="aside-1" class="slide level2">
+<h2>Aside</h2>
+<ul>
+<li>We also need to tell the Rust compiler <code>rustc</code> that we want to use the corresponding ABI.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb8-1"><a></a><span class="fu">{</span></span>
+<span id="cb8-2"><a></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
+<span id="cb8-3"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>I am 100% sure I can write an OS without hard or soft floats but I haven’t worked far enough ahead to be absolutely certain.</li>
+</ul>
+</section>
+<section id="altogether" class="slide level2">
+<h2>Altogether</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>x86_64-osirs.json</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb9-1"><a></a><span class="fu">{</span></span>
+<span id="cb9-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb9-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb9-4"><a></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb9-5"><a></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb9-6"><a></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb9-7"><a></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb9-8"><a></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb9-9"><a></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb9-10"><a></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
+<span id="cb9-11"><a></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
+<span id="cb9-12"><a></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
+<span id="cb9-13"><a></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb9-14"><a></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
+<span id="cb9-15"><a></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
+<span id="cb9-16"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="i-just-curl" class="slide level2">
+<h2>I just <code>curl</code></h2>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a></a><span class="ex">curl</span> https://raw.githubusercontent.com/phil-opp/blog_os/refs/heads/post-02/x86_64-blog_os.json <span class="at">-o</span> x86_64-osirs.json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="tree" class="slide level2">
+<h2>Tree</h2>
+<ul>
+<li>For me looks like this.</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="ex">$</span> tree</span>
+<span id="cb11-2"><a></a><span class="bu">.</span></span>
+<span id="cb11-3"><a></a><span class="ex">├──</span> Cargo.lock</span>
+<span id="cb11-4"><a></a><span class="ex">├──</span> Cargo.toml</span>
+<span id="cb11-5"><a></a><span class="ex">├──</span> src</span>
+<span id="cb11-6"><a></a><span class="ex">│&nbsp;&nbsp;</span> ├── main.rs</span>
+<span id="cb11-7"><a></a><span class="ex">│&nbsp;&nbsp;</span> └── old.rs</span>
+<span id="cb11-8"><a></a><span class="ex">└──</span> x86_64-osirs.json</span>
+<span id="cb11-9"><a></a></span>
+<span id="cb11-10"><a></a><span class="ex">1</span> directory, 5 files</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="back-to-loops" class="slide level2">
+<h2>Back to loops</h2>
+<ul>
+<li>By the way, I’ve switched from cool, good recursion back to unexciting, drab loops</li>
+<li>Infinite recursion blows up the call stack and instantly segmentation faults.
+<ul>
+<li>This is because someone other than me wrote <code>rustc</code>.</li>
+<li>I am not about to write <code>rustc</code>!</li>
+</ul></li>
+</ul>
+</section>
+<section id="current-main" class="slide level2">
+<h2>Current main</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb12" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb12-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb12-3"><a></a></span>
+<span id="cb12-4"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb12-5"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb12-6"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb12-7"><a></a><span class="op">}</span></span>
+<span id="cb12-8"><a></a></span>
+<span id="cb12-9"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb12-10"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb12-11"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb12-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="a-note" class="slide level2">
+<h2>A note</h2>
+<ul>
+<li>Remember the earlier mention of <code>core</code>
+<ul>
+<li>How we need <code>core</code> to also panic abort?</li>
+<li>We note when looking at <code>src/main.rs</code> we do have a <code>core</code> reference.</li>
+</ul></li>
+</ul>
+</section>
+<section id="linux-everywhere" class="slide level2">
+<h2>Linux Everywhere</h2>
+<ul>
+<li>Okay so we aren’t going to use Linux on our device.</li>
+<li>But we are going to use Linux <em>conventions</em>
+<ul>
+<li>Not Linux software, but Linux as a social technology.</li>
+</ul></li>
+<li>The <code>ld.lld</code> “linker-flavor” instructs LLVM to compile with the <code>-flavor gnu</code> flag.</li>
+<li>This means that we need an entry point named <code>_start</code> - same as before!</li>
+</ul>
+</section>
+<section id="build-it" class="slide level2">
+<h2>Build it</h2>
+<ul>
+<li>I bet it will work now.
+<ul>
+<li>Use our new target by passing the name of the JSON file as <code>--target</code>:</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a></a><span class="ex">$</span> cargo b <span class="at">--target</span> x86_64-osirs.json</span>
+<span id="cb13-2"><a></a><span class="ex">error:</span> failed to run <span class="kw">`</span><span class="ex">rustc</span><span class="kw">`</span> to learn about target-specific information</span>
+<span id="cb13-3"><a></a></span>
+<span id="cb13-4"><a></a><span class="ex">Caused</span> by:</span>
+<span id="cb13-5"><a></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `/home/user/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
+<span id="cb13-6"><a></a><span class="st">  --- stderr</span></span>
+<span id="cb13-7"><a></a><span class="st">  error: Error loading target specification: Field target-pointer-width in target specification is required. Run `rustc --print target-list` for a list of built-in targets</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="okay-so" class="slide level2">
+<h2>Okay so</h2>
+<ul>
+<li>Huh?</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a></a><span class="ex">Field</span> target-pointer-width in target specification is required.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>We very explicitly included that.</li>
+<li>In the most annoying thing in the universe, <code>rustc</code> expect pointer width as a JSON string and not a JSON integer.
+<ul>
+<li><a href="https://github.com/rust-lang/rust/pull/144218">Read more</a></li>
+<li>It’s fixed in Nightly, but I sleep at night, so I’m busy.</li>
+</ul></li>
+</ul>
+</section>
+<section id="fix-it" class="slide level2">
+<h2>Fix it?</h2>
+<ul>
+<li>I kid you not this is the solution.
+<ul>
+<li>“Rust has a type system!”</li>
+<li>Sure it does.</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb15-1"><a></a><span class="ex">$</span> diff bad.wrong x86_64-osirs.json</span>
+<span id="cb15-2"><a></a><span class="ex">6,7c6,7</span></span>
+<span id="cb15-3"><a></a><span class="op">&lt;</span>     <span class="st">"target-pointer-width"</span>: <span class="ex">64,</span></span>
+<span id="cb15-4"><a></a><span class="op">&lt;</span>     <span class="st">"target-c-int-width"</span>: <span class="ex">32,</span></span>
+<span id="cb15-5"><a></a><span class="ex">---</span></span>
+<span id="cb15-6"><a></a><span class="op">&gt;</span>     <span class="st">"target-pointer-width"</span>: <span class="st">"64"</span><span class="ex">,</span></span>
+<span id="cb15-7"><a></a><span class="op">&gt;</span>     <span class="st">"target-c-int-width"</span>: <span class="st">"32"</span><span class="ex">,</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="now-it-works" class="slide level2">
+<h2>Now it works</h2>
+<ul>
+<li>This time it will work.</li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb16-1"><a></a><span class="ex">$</span> cargo b <span class="at">--target</span> x86_64-osirs.json</span>
+<span id="cb16-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb16-3"><a></a><span class="va">error</span><span class="op">[</span>E0463<span class="op">]</span><span class="ex">:</span> can<span class="st">'t find crate for `core`</span></span>
+<span id="cb16-4"><a></a><span class="st">  |</span></span>
+<span id="cb16-5"><a></a><span class="st">  = note: the `x86_64-osirs` target may not be installed</span></span>
+<span id="cb16-6"><a></a><span class="st">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb16-7"><a></a></span>
+<span id="cb16-8"><a></a><span class="st">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb16-9"><a></a><span class="st">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Okay I was bamboozled.</li>
+</ul>
+</section>
+<section id="the-core" class="slide level2">
+<h2>The Core</h2>
+<div class="columns">
+<div class="column" style="width:70%;">
+<blockquote>
+<p><a href="https://en.wikipedia.org/wiki/The_Core">The Core is a 2003 American science fiction disaster film directed by Jon Amiel with screenplay written by Cooper Layne and John Rogers.</a></p>
+</blockquote>
+<ul>
+<li>I haven’t seen it but it apparently passes the <a href="https://en.wikipedia.org/wiki/Bechdel_test">Bechdel Test</a></li>
+</ul>
+</div><div class="column" style="width:30%;">
+<p><img data-src="https://upload.wikimedia.org/wikipedia/en/f/f4/The_Core_poster.jpg"></p>
+</div></div>
+</section>
+<section id="wrong-core" class="slide level2">
+<h2>Wrong Core</h2>
+<ul>
+<li>We actually meant the Rust compiler <code>core</code> library.
+<ul>
+<li><a href="https://doc.rust-lang.org/nightly/core/index.html">Read more</a></li>
+</ul></li>
+<li>This library contains basic Rust types such as <code>Result</code>, <code>Option</code>, and iterators, and is implicitly linked to all <code>no_std</code> crates.</li>
+</ul>
+</section>
+<section id="the-problem" class="slide level2">
+<h2>The Problem</h2>
+<ul>
+<li><code>core</code> is usually <em>pre-compiled</em> (and then, of course, linked).</li>
+<li>But we made a new target which needs a new core.</li>
+<li>No problem, we’ll just tell <code>rustc</code> to do some compilation.</li>
+</ul>
+</section></section>
+<section>
+<section id="todo" class="title-slide slide level1 center">
+<h1>TODO</h1>
+<ul>
+<li>Have to compile core, so we alter .cargo/config.toml.</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="ex">$</span> cargo b <span class="at">--target</span> x86_64-osirs.json</span>
+<span id="cb17-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb17-3"><a></a><span class="va">error</span><span class="op">[</span>E0463<span class="op">]</span><span class="ex">:</span> can<span class="st">'t find crate for `core`</span></span>
+<span id="cb17-4"><a></a><span class="st">  |</span></span>
+<span id="cb17-5"><a></a><span class="st">  = note: the `x86_64-osirs` target may not be installed</span></span>
+<span id="cb17-6"><a></a><span class="st">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb17-7"><a></a></span>
+<span id="cb17-8"><a></a><span class="st">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb17-9"><a></a><span class="st">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Then have to use nightly.</li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb18-1"><a></a><span class="ex">$</span> cargo +nightly b <span class="at">--target</span> x86_64-osirs.json</span>
+<span id="cb18-2"><a></a><span class="ex">error:</span> failed to run <span class="kw">`</span><span class="ex">rustc</span><span class="kw">`</span> to learn about target-specific information</span>
+<span id="cb18-3"><a></a></span>
+<span id="cb18-4"><a></a><span class="ex">Caused</span> by:</span>
+<span id="cb18-5"><a></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
+<span id="cb18-6"><a></a><span class="st">  --- stderr</span></span>
+<span id="cb18-7"><a></a><span class="st">  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32</span></span>
+<span id="cb18-8"><a></a><span class="st">    |</span></span>
+<span id="cb18-9"><a></a><span class="st">    = help: run `rustc --print target-list` for a list of built-in targets</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>This re-bricks the .json, so we revert it.</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="ex">$</span> cargo +nightly b <span class="at">--target</span> x86_64-osirs.json</span>
+<span id="cb19-2"><a></a><span class="ex">error:</span> <span class="st">"/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/Cargo.lock"</span> does not exist, unable to build with the standard library, try:</span>
+<span id="cb19-3"><a></a>        <span class="ex">rustup</span> component add rust-src <span class="at">--toolchain</span> nightly-x86_64-unknown-linux-gnu</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>This requires a <code>rustup</code>.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="ex">rustup</span> component add rust-src <span class="at">--toolchain</span> nightly-x86_64-unknown-linux-gnu</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Building is then quite slow. 10+ seconds.</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a></a><span class="ex">$</span> cargo +nightly b <span class="at">--target</span> x86_64-osirs.json</span>
+<span id="cb21-2"><a></a>    <span class="ex">Updating</span> crates.io index</span>
+<span id="cb21-3"><a></a>  <span class="ex">Downloaded</span> rustc-literal-escaper v0.0.5</span>
+<span id="cb21-4"><a></a>  <span class="ex">Downloaded</span> rustc-demangle v0.1.26</span>
+<span id="cb21-5"><a></a>  <span class="ex">Downloaded</span> addr2line v0.25.0</span>
+<span id="cb21-6"><a></a>  <span class="ex">Downloaded</span> getopts v0.2.23</span>
+<span id="cb21-7"><a></a>  <span class="ex">Downloaded</span> object v0.37.3</span>
+<span id="cb21-8"><a></a>  <span class="ex">Downloaded</span> gimli v0.32.0</span>
+<span id="cb21-9"><a></a>  <span class="ex">Downloaded</span> 6 crates <span class="er">(</span><span class="ex">721.4KiB</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.14s</span></span>
+<span id="cb21-10"><a></a>   <span class="ex">Compiling</span> compiler_builtins v0.1.160 <span class="er">(</span><span class="ex">/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins</span><span class="kw">)</span></span>
+<span id="cb21-11"><a></a>   <span class="ex">Compiling</span> core v0.0.0 <span class="er">(</span><span class="ex">/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core</span><span class="kw">)</span></span>
+<span id="cb21-12"><a></a>   <span class="ex">Compiling</span> compiler_builtins v0.1.160 <span class="er">(</span><span class="ex">/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins</span><span class="kw">)</span></span>
+<span id="cb21-13"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
+<span id="cb21-14"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">dev</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">10.40s</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="the-build-std-option" class="slide level2">
 <h2>The <code>build-std</code> Option</h2>
-<p>That’s where the <a href="https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std"><code>build-std</code> feature</a> of cargo comes in. It allows to recompile <code>core</code> and other standard library crates on demand, instead of using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as “unstable” and only available on <a href="#/installing-rust-nightly">nightly Rust compilers</a>.</p>
+<ul>
+<li><code>build-std</code> is a feature of Cargo.</li>
+<li>We can recompile <code>core</code> and other standard library crates on demand.
+<ul>
+<li>Vs. using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as “unstable” and only available on <a href="#/installing-rust-nightly">nightly Rust compilers</a>.</li>
+</ul></li>
+</ul>
 <p>To use the feature, we need to add the following to our <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo configuration</a> file at <code>.cargo/config.toml</code>:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb13-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb13-2"><a></a></span>
-<span id="cb13-3"><a></a><span class="kw">[unstable]</span></span>
-<span id="cb13-4"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
-<span id="cb13-5"><a></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb22-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb22-2"><a></a></span>
+<span id="cb22-3"><a></a><span class="kw">[unstable]</span></span>
+<span id="cb22-4"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb22-5"><a></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This tells cargo that it should recompile the <code>core</code> and <code>compiler_builtins</code> libraries. The latter is required because it is a dependency of <code>core</code>. In order to recompile these libraries, cargo needs access to the rust source code, which we can install with <code>rustup component add rust-src</code>.</p>
 <div class="note">
 <p><strong>Note:</strong> The <code>unstable.build-std</code> configuration key requires at least the Rust nightly from 2020-07-15.</p>
@@ -846,12 +1297,12 @@ error[E0463]: can't find crate for `core`</code></pre>
 <p>The Rust compiler assumes that a certain set of built-in functions is available for all systems. Most of these functions are provided by the <code>compiler_builtins</code> crate that we just recompiled. However, there are some memory-related functions in that crate that are not enabled by default because they are normally provided by the C library on the system. These functions include <code>memset</code>, which sets all bytes in a memory block to a given value, <code>memcpy</code>, which copies one memory block to another, and <code>memcmp</code>, which compares two memory blocks. While we didn’t need any of these functions to compile our kernel right now, they will be required as soon as we add some more code to it (e.g.&nbsp;when copying structs around).</p>
 <p>Since we can’t link to the C library of the operating system, we need an alternative way to provide these functions to the compiler. One possible approach for this could be to implement our own <code>memset</code> etc. functions and apply the <code>#[unsafe(no_mangle)]</code> attribute to them (to avoid the automatic renaming during compilation). However, this is dangerous since the slightest mistake in the implementation of these functions could lead to undefined behavior. For example, implementing <code>memcpy</code> with a <code>for</code> loop may result in an infinite recursion because <code>for</code> loops implicitly call the <a href="https://doc.rust-lang.org/stable/core/iter/trait.IntoIterator.html#tymethod.into_iter"><code>IntoIterator::into_iter</code></a> trait method, which may call <code>memcpy</code> again. So it’s a good idea to reuse existing, well-tested implementations instead.</p>
 <p>Fortunately, the <code>compiler_builtins</code> crate already contains implementations for all the needed functions, they are just disabled by default to not collide with the implementations from the C library. We can enable them by setting cargo’s <a href="https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std-features"><code>build-std-features</code></a> flag to <code>["compiler-builtins-mem"]</code>. Like the <code>build-std</code> flag, this flag can be either passed on the command line as a <code>-Z</code> flag or configured in the <code>unstable</code> table in the <code>.cargo/config.toml</code> file. Since we always want to build with this flag, the config file option makes more sense for us:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb15-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb15-2"><a></a></span>
-<span id="cb15-3"><a></a><span class="kw">[unstable]</span></span>
-<span id="cb15-4"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
-<span id="cb15-5"><a></a><span class="dt">build-std-features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"compiler-builtins-mem"</span><span class="op">]</span></span>
-<span id="cb15-6"><a></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb24-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb24-2"><a></a></span>
+<span id="cb24-3"><a></a><span class="kw">[unstable]</span></span>
+<span id="cb24-4"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb24-5"><a></a><span class="dt">build-std-features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"compiler-builtins-mem"</span><span class="op">]</span></span>
+<span id="cb24-6"><a></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>(Support for the <code>compiler-builtins-mem</code> feature was only <a href="https://github.com/rust-lang/rust/pull/77284">added very recently</a>, so you need at least Rust nightly <code>2020-09-30</code> for it.)</p>
 <p>Behind the scenes, this flag enables the <a href="https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/Cargo.toml#L54-L55"><code>mem</code> feature</a> of the <code>compiler_builtins</code> crate. The effect of this is that the <code>#[unsafe(no_mangle)]</code> attribute is applied to the <a href="https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/src/mem.rs#L12-L69"><code>memcpy</code> etc. implementations</a> of the crate, which makes them available to the linker.</p>
 <p>With this change, our kernel has valid implementations for all compiler-required functions, so it will continue to compile even if our code gets more complex.</p>
@@ -859,10 +1310,10 @@ error[E0463]: can't find crate for `core`</code></pre>
 <section id="set-a-default-target" class="slide level2">
 <h2>Set a Default Target</h2>
 <p>To avoid passing the <code>--target</code> parameter on every invocation of <code>cargo build</code>, we can override the default target. To do this, we add the following to our <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo configuration</a> file at <code>.cargo/config.toml</code>:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb16-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a><span class="kw">[build]</span></span>
-<span id="cb16-4"><a></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-blog_os.json"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb25-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb25-2"><a></a></span>
+<span id="cb25-3"><a></a><span class="kw">[build]</span></span>
+<span id="cb25-4"><a></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-blog_os.json"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>This tells <code>cargo</code> to use our <code>x86_64-blog_os.json</code> target when no explicit <code>--target</code> argument is passed. This means that we can now build our kernel with a simple <code>cargo build</code>. For more information on cargo configuration options, check out the <a href="https://doc.rust-lang.org/cargo/reference/config.html">official documentation</a>.</p>
 <p>We are now able to build our kernel for a bare metal target with a simple <code>cargo build</code>. However, our <code>_start</code> entry point, which will be called by the boot loader, is still empty. It’s time that we output something to screen from it.</p>
 </section>
@@ -872,21 +1323,21 @@ error[E0463]: can't find crate for `core`</code></pre>
 
 <img data-src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png" class="r-stretch quarto-figure-center"><p class="caption">screen output for common ASCII characters</p><p>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <code>0xb8000</code> and that each character cell consists of an ASCII byte and a color byte.</p>
 <p>The implementation looks like this:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
-<span id="cb17-2"><a></a></span>
-<span id="cb17-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb17-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb17-5"><a></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
-<span id="cb17-6"><a></a></span>
-<span id="cb17-7"><a></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb17-8"><a></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb17-9"><a></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
-<span id="cb17-10"><a></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
-<span id="cb17-11"><a></a>        <span class="op">}</span></span>
-<span id="cb17-12"><a></a>    <span class="op">}</span></span>
-<span id="cb17-13"><a></a></span>
-<span id="cb17-14"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb17-15"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
+<span id="cb26-2"><a></a></span>
+<span id="cb26-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb26-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb26-5"><a></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb26-6"><a></a></span>
+<span id="cb26-7"><a></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb26-8"><a></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb26-9"><a></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
+<span id="cb26-10"><a></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
+<span id="cb26-11"><a></a>        <span class="op">}</span></span>
+<span id="cb26-12"><a></a>    <span class="op">}</span></span>
+<span id="cb26-13"><a></a></span>
+<span id="cb26-14"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb26-15"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>First, we cast the integer <code>0xb8000</code> into a <a href="https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer">raw pointer</a>. Then we <a href="https://doc.rust-lang.org/stable/book/ch13-02-iterators.html">iterate</a> over the bytes of the <a href="https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime">static</a> <code>HELLO</code> <a href="https://doc.rust-lang.org/reference/tokens.html#byte-string-literals">byte string</a>. We use the <a href="https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate"><code>enumerate</code></a> method to additionally get a running variable <code>i</code>. In the body of the for loop, we use the <a href="https://doc.rust-lang.org/std/primitive.pointer.html#method.offset"><code>offset</code></a> method to write the string byte and the corresponding color byte (<code>0xb</code> is a light cyan).</p>
 <p>Note that there’s an <a href="https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html"><code>unsafe</code></a> block around all memory writes. The reason is that the Rust compiler can’t prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <code>unsafe</code> block, we’re basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <code>unsafe</code> block does not turn off Rust’s safety checks. It only allows you to do <a href="https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers">five additional things</a>.</p>
 <p>I want to emphasize that <strong>this is not the way we want to do things in Rust!</strong> It’s very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer’s end if we’re not careful.</p>
@@ -900,10 +1351,10 @@ error[E0463]: can't find crate for `core`</code></pre>
 <h2>Creating a Bootimage</h2>
 <p>To turn our compiled kernel into a bootable disk image, we need to link it with a bootloader. As we learned in the <a href="#/the-boot-process">section about booting</a>, the bootloader is responsible for initializing the CPU and loading our kernel.</p>
 <p>Instead of writing our own bootloader, which is a project on its own, we use the <a href="https://crates.io/crates/bootloader"><code>bootloader</code></a> crate. This crate implements a basic BIOS bootloader without any C dependencies, just Rust and inline assembly. To use it for booting our kernel, we need to add a dependency on it:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb18-1"><a></a><span class="co"># in Cargo.toml</span></span>
-<span id="cb18-2"><a></a></span>
-<span id="cb18-3"><a></a><span class="kw">[dependencies]</span></span>
-<span id="cb18-4"><a></a><span class="dt">bootloader</span> <span class="op">=</span> <span class="st">"0.9"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb27-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb27-2"><a></a></span>
+<span id="cb27-3"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb27-4"><a></a><span class="dt">bootloader</span> <span class="op">=</span> <span class="st">"0.9"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p><strong>Note:</strong> This post is only compatible with <code>bootloader v0.9</code>. Newer versions use a different build system and will result in build errors when following this post.</p>
 <p>Adding the bootloader as a dependency is not enough to actually create a bootable disk image. The problem is that we need to link our kernel with the bootloader after compilation, but cargo has no support for <a href="https://github.com/rust-lang/cargo/issues/545">post-build scripts</a>.</p>
 <p>To solve this problem, we created a tool named <code>bootimage</code> that first compiles the kernel and bootloader, and then links them together to create a bootable disk image. To install the tool, go into your home directory (or any directory outside of your cargo project) and execute the following command in your terminal:</p>
@@ -942,10 +1393,10 @@ error[E0463]: can't find crate for `core`</code></pre>
 <section id="using-cargo-run" class="slide level2">
 <h2>Using <code>cargo run</code></h2>
 <p>To make it easier to run our kernel in QEMU, we can set the <code>runner</code> configuration key for cargo:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb23-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
-<span id="cb23-2"><a></a></span>
-<span id="cb23-3"><a></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "none")'</span><span class="kw">]</span></span>
-<span id="cb23-4"><a></a><span class="dt">runner</span> <span class="op">=</span> <span class="st">"bootimage runner"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb32-1"><a></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb32-2"><a></a></span>
+<span id="cb32-3"><a></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "none")'</span><span class="kw">]</span></span>
+<span id="cb32-4"><a></a><span class="dt">runner</span> <span class="op">=</span> <span class="st">"bootimage runner"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>target.'cfg(target_os = "none")'</code> table applies to all targets whose target configuration file’s <code>"os"</code> field is set to <code>"none"</code>. This includes our <code>x86_64-blog_os.json</code> target. The <code>runner</code> key specifies the command that should be invoked for <code>cargo run</code>. The command is run after a successful build with the executable path passed as the first argument. See the <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo documentation</a> for more details.</p>
 <p>The <code>bootimage runner</code> command is specifically designed to be usable as a <code>runner</code> executable. It links the given executable with the project’s bootloader dependency and then launches QEMU. See the <a href="https://github.com/rust-osdev/bootimage">Readme of <code>bootimage</code></a> for more details and possible configuration options.</p>
 <p>Now we can use <code>cargo run</code> to compile our kernel and boot it in QEMU.</p>

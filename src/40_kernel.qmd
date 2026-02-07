@@ -164,6 +164,8 @@ title: Kernel
 
 - This is called "cheating" and is a good way to get ahead in life.
 
+<!--
+
 ## The Multiboot Standard
 
 To avoid that every operating system implements its own bootloader, which is only compatible with a single OS, the [Free Software Foundation] created an open bootloader standard called [Multiboot] in 1995. The standard defines an interface between the bootloader and the operating system, so that any Multiboot-compliant bootloader can load any Multiboot-compliant operating system. The reference implementation is [GNU GRUB], which is the most popular bootloader for Linux systems.
@@ -188,14 +190,15 @@ Because of these drawbacks, we decided to not use GRUB or the Multiboot standard
 
 [first edition]: @/edition-1/_index.md
 
+-->
 
 # Kernel
 
 ## A Minimal Kernel
 
-Now that we roughly know how a computer boots, it's time to create our own minimal kernel. Our goal is to create a disk image that prints a “Hello World!” to the screen when booted. We do this by extending the previous post's [freestanding Rust binary].
-
-As you may remember, we built the freestanding binary through `cargo`, but depending on the operating system, we needed different entry point names and compile flags. That's because `cargo` builds for the _host system_ by default, i.e., the system you're running on. This isn't something we want for our kernel, because a kernel that runs on top of, e.g., Windows, does not make much sense. Instead, we want to compile for a clearly defined _target system_.
+- Let's make a kernel.
+- Specifically, a disk image that prints a “Hello World!” to the screen when booted.
+- We extending our bare metal executable.
 
 <!--
 
@@ -225,9 +228,18 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 
 ## Our Target
 
-For our target system, however, we require some special configuration parameters (e.g. no underlying OS), so none of the [existing target triples][platform-support] fits. Fortunately, Rust allows us to define [our own target][custom-targets] through a JSON file. For example, a JSON file that describes the `x86_64-unknown-linux-gnu` target looks like this:
+- I am aware of no existing target triple suitable for this course.
+- So, make our own.
+- It's not too bad, just JSON.
+    - We'll specify some easy stuff, like archtiecture.
+    - Some weird stuff, like manual memory layouts.
+    - And get on with things.
+    
+## JSON
 
-```json
+- JSON rules by the way.
+
+```{.json}
 {
     "llvm-target": "x86_64-unknown-linux-gnu",
     "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
@@ -243,14 +255,19 @@ For our target system, however, we require some special configuration parameters
 }
 ```
 
-Most fields are required by LLVM to generate code for that platform. For example, the [`data-layout`] field defines the size of various integer, floating point, and pointer types. Then there are fields that Rust uses for conditional compilation, such as `target-pointer-width`. The third kind of field defines how the crate should be built. For example, the `pre-link-args` field specifies arguments passed to the [linker].
+## Some context
 
-[`data-layout`]: https://llvm.org/docs/LangRef.html#data-layout
-[linker]: https://en.wikipedia.org/wiki/Linker_(computing)
+- Most fields are required by LLVM. 
+- Data layout field defines the size of integer, float (ew), and pointer types. 
+- Rust uses conditional compilation, such as via `target-pointer-width`. 
+- The `pre-link-args` field specifies arguments passed to the linker.
 
-We also target `x86_64` systems with our kernel, so our target specification will look very similar to the one above. Let's start by creating an `x86_64-blog_os.json` file (choose any name you like) with the common content:
+## ARM64 Take Notes
 
-```json
+- We also target `x86_64`.
+- Start here:
+
+```{.json filename="x86_64-osirs.json"}
 {
     "llvm-target": "x86_64-unknown-none",
     "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
@@ -263,60 +280,161 @@ We also target `x86_64` systems with our kernel, so our target specification wil
 }
 ```
 
-Note that we changed the OS in the `llvm-target` and the `os` field to `none`, because we will run on bare metal.
+## Changes
 
-We add the following build-related entries:
+- Note that we changed the OS in the `llvm-target` and the `os` field to `none`, because we will run on bare metal.
 
-
-```json
-"linker-flavor": "ld.lld",
-"linker": "rust-lld",
+```{.json filename="x86_64-osirs.json" code-line-numbers="2, 8"}
+{
+    "llvm-target": "x86_64-unknown-none",
+    ...
+    "os": "none",
+    ...
+}
 ```
 
-Instead of using the platform's default linker (which might not support Linux targets), we use the cross-platform [LLD] linker that is shipped with Rust for linking our kernel.
+## Linking
 
-[LLD]: https://lld.llvm.org/
+- We'll add the following build-related entries:
 
-```json
-"panic-strategy": "abort",
+
+```{.json filename="x86_64-osirs.json"}
+{
+    "linker-flavor": "ld.lld",
+    "linker": "rust-lld",
+}
 ```
 
-This setting specifies that the target doesn't support [stack unwinding] on panic, so instead the program should abort directly. This has the same effect as the `panic = "abort"` option in our Cargo.toml, so we can remove it from there. (Note that, in contrast to the Cargo.toml option, this target option also applies when we recompile the `core` library later in this post. So, even if you prefer to keep the Cargo.toml option, make sure to include this option.)
+- For OS-agnosticism, we use the cross-platform "LLD" linker that is shipped with Rust for linking our kernel.
+    - [More.](https://lld.llvm.org/)
 
-[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php
+## Panic Abort
 
-```json
-"disable-redzone": true,
+- You know how I feel about unwinding.
+    - I have never relaxed in my life.
+    - I've only panicked and given up.
+
+```{.json filename="x86_64-osirs.json"}
+{
+    "panic-strategy": "abort",
+}
 ```
 
-We're writing a kernel, so we'll need to handle interrupts at some point. To do that safely, we have to disable a certain stack pointer optimization called the _“red zone”_, because it would cause stack corruption otherwise. For more information, see our separate post about [disabling the red zone].
+## Target vs. TOML
 
-[disabling the red zone]: @/edition-2/posts/02-minimal-rust-kernel/disable-red-zone/index.md
+- This has the same effect as the `panic = "abort"` option in our Cargo.toml 
+- So we can remove it from there! 
+- This is better though:
+    - We will use `core`, an architecture specific library, and we need `core` to *also* panic abort.
+    - ["It is the portable glue between the language and its libraries, defining the intrinsic and primitive building blocks of all Rust code."](https://doc.rust-lang.org/core/)
 
-```json
-"features": "-mmx,-sse,+soft-float",
+
+## Red Zone
+
+- Okay red zone is not particularly relevant to this class.
+- But it is *extremely* cool.
+
+```{.json filename="x86_64-osirs.json"}
+{
+    "disable-redzone": true,
+}
 ```
 
-The `features` field enables/disables target features. We disable the `mmx` and `sse` features by prefixing them with a minus and enable the `soft-float` feature by prefixing it with a plus. Note that there must be no spaces between different flags, otherwise LLVM fails to interpret the features string.
+- So I'm going to tell you about it.
 
-The `mmx` and `sse` features determine support for [Single Instruction Multiple Data (SIMD)] instructions, which can often speed up programs significantly. However, using the large SIMD registers in OS kernels leads to performance problems. The reason is that the kernel needs to restore all registers to their original state before continuing an interrupted program. This means that the kernel has to save the complete SIMD state to main memory on each system call or hardware interrupt. Since the SIMD state is very large (512–1600 bytes) and interrupts can occur very often, these additional save/restore operations considerably harm performance. To avoid this, we disable SIMD for our kernel (not for applications running on top!).
+## The Red Zone
 
-[Single Instruction Multiple Data (SIMD)]: https://en.wikipedia.org/wiki/SIMD
+- The **Red Zone** is a 128-byte optimization area below the current stack pointer ($RSP$).
+    - "R" for 64 bit.
+    - "SP" for "stack pointer"
+- It is a specific feature of the x86-64 System V ABI (Application Binary Interface).
+- It allows functions to use a small amount of stack space without actually moving the pointer.
 
-A problem with disabling SIMD is that floating point operations on `x86_64` require SIMD registers by default. To solve this problem, we add the `soft-float` feature, which emulates all floating point operations through software functions based on normal integers.
+## Performance Gains
 
-For more information, see our post on [disabling SIMD](@/edition-2/posts/02-minimal-rust-kernel/disable-simd/index.md).
+- Normally, any data written to the stack requires an $RSP$ adjustment to prevent data corruption.
+    - `sub rsp, 8`
+    - `mov [rsp], rax`
+- With the Red Zone, compilers can skip the subtraction for some functions.
+- This reduces the number of instructions and speeds up function execution.
+    - At the cost of *no longer tracking the stack*.
 
-```json
-"rustc-abi": "x86-softfloat"
+## Negative Indexing
+
+- Since $RSP$ remains at the "top" of the stack, we access this memory using negative offsets.
+- In assembly, this looks like `mov [rsp - 16], rax`.
+- This treats the stack as a fixed-base array rather than a stack ADT.
+- It is essentially "free" scratch space for short-lived data.
+
+## The Danger of Interrupts
+
+- The Red Zone is dangerous in kernel development because of **hardware interrupts**.
+    - The OS has to deal with, say, someone hitting the power off button.
+    - Someone plugging in a USB drive.
+    - Lightning strikes.
+    - Cosmic rays flipping bits
+    
+## Red Zone to Dead Zone
+    
+- When an interrupt occurs, the CPU pushes state (like $RIP$ and $RFLAGS$) onto the stack.
+    - "Instruction pointer" and "flags".
+- This will overwrite those 128 bytes of data.
+- This leads to silent, non-deterministic memory corruption.
+    - Generally regarded as bad.
+    
+## Read more
+
+- There are good visuals here.
+- [Read more](https://os.phil-opp.com/red-zone/)
+- Handwaving now - Better for the compilers class I think!
+
+## Ancient Nemesis
+
+- You all know I love floating point numbers.
+    - And with good reason!
+
+```{.json filename="x86_64-osirs.json"}
+{
+    "features": "-mmx,-sse,+soft-float",
+}
 ```
 
-As we want to use the `soft-float` feature, we also need to tell the Rust compiler `rustc` that we want to use the corresponding ABI. We can do that by setting the `rustc-abi` field to `x86-softfloat`.
+## Turn off floats
 
-## Putting it Together
-Our target specification file now looks like this:
+- `features` enables/disables target features. 
+- We disable the `mmx` and `sse` features by prefixing them with a minus
+- We enable the `soft-float` feature by prefixing it with a plus. 
+- Note that there must be no spaces between different flags!
 
-```json
+## MMX/SSE
+
+- The `mmx` and `sse` features are performance optimizing vector operations from when Intel though they'd be able to hold off NVIDIA in the 90s.
+- These are braodly called [Single Instruction Multiple Data (SIMD)](https://en.wikipedia.org/wiki/SIMD) instructions and are historically important.
+    - Foundation of `numpy`
+- We aren't using data frames in our kernel.
+
+## Soft Float
+
+- Floating point operations on `x86_64` require SIMD registers by default. 
+    - That's right - floats are worse than you thought!
+- To solve this problem, we add the `soft-float` feature, which emulates all floating point operations through software functions based on normal integers.
+    - Just like [`f16`](https://cd-c89.github.io/rs/51_f16.html)
+
+## Aside
+
+
+- We also need to tell the Rust compiler `rustc` that we want to use the corresponding ABI.
+
+```{.json filename="x86_64-osirs.json"}
+{
+    "rustc-abi": "x86-softfloat"
+}
+```
+- I am 100% sure I can write an OS without hard or soft floats but I haven't worked far enough ahead to be absolutely certain.
+
+## Altogether
+
+```{.json filename="x86_64-osirs.json"}
 {
     "llvm-target": "x86_64-unknown-none",
     "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
@@ -335,80 +453,232 @@ Our target specification file now looks like this:
 }
 ```
 
-## Building our Kernel
+## I just `curl`
 
-Compiling for our new target will use Linux conventions, since the ld.lld linker-flavor instructs llvm to compile with the `-flavor gnu` flag (for more linker options, see [the rustc documentation](https://doc.rust-lang.org/rustc/codegen-options/index.html#linker-flavor)). This means that we need an entry point named `_start` as described in the [previous post]:
+```{.sh}
+curl https://raw.githubusercontent.com/phil-opp/blog_os/refs/heads/post-02/x86_64-blog_os.json -o x86_64-osirs.json
+```
 
-[previous post]: @/edition-2/posts/01-freestanding-rust-binary/index.md
+## Tree
 
-```rust
-// src/main.rs
+- For me looks like this.
 
-#![no_std] // don't link the Rust standard library
-#![no_main] // disable all Rust-level entry points
+```{.sh}
+$ tree
+.
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   ├── main.rs
+│   └── old.rs
+└── x86_64-osirs.json
 
-use core::panic::PanicInfo;
+1 directory, 5 files
+```
 
-/// This function is called on panic.
-#[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    loop {}
-}
+## Back to loops
 
-#[unsafe(no_mangle)] // don't mangle the name of this function
+- By the way, I've switched from cool, good recursion back to unexciting, drab loops
+- Infinite recursion blows up the call stack and instantly segmentation faults.
+    - This is because someone other than me wrote `rustc`.
+    - I am not about to write `rustc`!
+    
+## Current main
+
+```{.rs filename="src/main.rs"}
+#![no_std]
+#![no_main]
+
+#[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    // this function is the entry point, since the linker looks for a function
-    // named `_start` by default
+    loop {}
+}
+
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 ```
 
-Note that the entry point needs to be called `_start` regardless of your host OS.
+## A note
 
-We can now build the kernel for our new target by passing the name of the JSON file as `--target`:
+- Remember the earlier mention of `core`
+    - How we need `core` to also panic abort?
+    - We note when looking at `src/main.rs` we do have a `core` reference.
 
+## Linux Everywhere
+
+- Okay so we aren't going to use Linux on our device.
+- But we are going to use Linux *conventions*
+    - Not Linux software, but Linux as a social technology.
+- The `ld.lld` "linker-flavor" instructs LLVM to compile with the `-flavor gnu` flag.
+- This means that we need an entry point named `_start` - same as before!
+
+## Build it
+
+- I bet it will work now.
+    - Use our new target by passing the name of the JSON file as `--target`:
+
+```{.sh}
+$ cargo b --target x86_64-osirs.json
+error: failed to run `rustc` to learn about target-specific information
+
+Caused by:
+  process didn't exit successfully: `/home/user/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)
+  --- stderr
+  error: Error loading target specification: Field target-pointer-width in target specification is required. Run `rustc --print target-list` for a list of built-in targets
 ```
-> cargo build --target x86_64-blog_os.json
 
-error: `.json` target specs require -Zjson-target-spec
+## Okay so
+
+- Huh?
+
+```{.sh}
+Field target-pointer-width in target specification is required.
 ```
 
-It fails! The error tells us that custom JSON target specifications are an unstable feature that requires explicit opt-in. This is because the format of the JSON target files is not considered stable yet, so changes to it might occur in future versions of Rust. See the [tracking issue for custom JSON target specs][json-target-spec-issue] for more information.
+- We very explicitly included that.
+- In the most annoying thing in the universe, `rustc` expect pointer width as a JSON string and not a JSON integer.
+    - [Read more](https://github.com/rust-lang/rust/pull/144218)
+    - It's fixed in Nightly, but I sleep at night, so I'm busy.
+        
+## Fix it?
 
-[json-target-spec-issue]: https://github.com/rust-lang/rust/issues/151528
-
-## The `json-target-spec` Option
-
-To enable support for custom JSON target specifications, we need to create a local [cargo configuration] file at `.cargo/config.toml` (the `.cargo` folder should be next to your `src` folder) with the following content:
-
-[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html
-
-```toml
-# in .cargo/config.toml
-
-[unstable]
-json-target-spec = true
+- I kid you not this is the solution.   
+    - "Rust has a type system!"
+    - Sure it does.
+    
+```{.sh}
+$ diff bad.wrong x86_64-osirs.json
+6,7c6,7
+<     "target-pointer-width": 64,
+<     "target-c-int-width": 32,
+---
+>     "target-pointer-width": "64",
+>     "target-c-int-width": "32",
 ```
 
-This enables the unstable `json-target-spec` feature, allowing us to use custom JSON target files.
+## Now it works
 
-With this configuration in place, let's try building again:
+- This time it will work.
 
-```
-> cargo build --target x86_64-blog_os.json
-
+```{.sh}
+$ cargo b --target x86_64-osirs.json
+   Compiling osirs v0.1.0 (/home/user/tmp/32)
 error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-osirs` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-osirs`
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `osirs` (bin "osirs") due to 1 previous error
 ```
 
-It still fails, but with a new error. The error tells us that the Rust compiler does not find the [`core` library]. This library contains basic Rust types such as `Result`, `Option`, and iterators, and is implicitly linked to all `no_std` crates.
+- Okay I was bamboozled.
 
-[`core` library]: https://doc.rust-lang.org/nightly/core/index.html
+## The Core
 
-The problem is that the core library is distributed together with the Rust compiler as a _precompiled_ library. So it is only valid for supported host triples (e.g., `x86_64-unknown-linux-gnu`) but not for our custom target. If we want to compile code for other targets, we need to recompile `core` for these targets first.
+:::: {.columns}
+
+::: {.column width="70%"}
+
+> [The Core is a 2003 American science fiction disaster film directed by Jon Amiel with screenplay written by Cooper Layne and John Rogers.](https://en.wikipedia.org/wiki/The_Core)
+
+- I haven't seen it but it apparently passes the [Bechdel Test](https://en.wikipedia.org/wiki/Bechdel_test)
+
+:::
+
+::: {.column width="30%"}
+
+![](https://upload.wikimedia.org/wikipedia/en/f/f4/The_Core_poster.jpg)
+
+:::
+
+::::
+
+## Wrong Core
+
+- We actually meant the Rust compiler `core` library.
+    - [Read more](https://doc.rust-lang.org/nightly/core/index.html)
+- This library contains basic Rust types such as `Result`, `Option`, and iterators, and is implicitly linked to all `no_std` crates.
+
+## The Problem
+
+- `core` is usually *pre-compiled* (and then, of course, linked).
+- But we made a new target which needs a new core.
+- No problem, we'll just tell `rustc` to do some compilation.
+
+# TODO
+
+- Have to compile core, so we alter .cargo/config.toml.
+
+```{.sh}
+$ cargo b --target x86_64-osirs.json
+   Compiling osirs v0.1.0 (/home/user/tmp/32)
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-osirs` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-osirs`
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `osirs` (bin "osirs") due to 1 previous error
+```
+
+- Then have to use nightly.
+
+```{.sh}
+$ cargo +nightly b --target x86_64-osirs.json
+error: failed to run `rustc` to learn about target-specific information
+
+Caused by:
+  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)
+  --- stderr
+  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32
+    |
+    = help: run `rustc --print target-list` for a list of built-in targets
+```
+
+- This re-bricks the .json, so we revert it.
+
+```{.sh}
+$ cargo +nightly b --target x86_64-osirs.json
+error: "/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/Cargo.lock" does not exist, unable to build with the standard library, try:
+        rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+```
+
+- This requires a `rustup`.
+
+```{.sh}
+rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+```
+
+- Building is then quite slow.  10+ seconds.
+
+```{.sh}
+$ cargo +nightly b --target x86_64-osirs.json
+    Updating crates.io index
+  Downloaded rustc-literal-escaper v0.0.5
+  Downloaded rustc-demangle v0.1.26
+  Downloaded addr2line v0.25.0
+  Downloaded getopts v0.2.23
+  Downloaded object v0.37.3
+  Downloaded gimli v0.32.0
+  Downloaded 6 crates (721.4KiB) in 0.14s
+   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling osirs v0.1.0 (/home/user/tmp/32)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.40s
+```
+
+
 
 ## The `build-std` Option
 
-That's where the [`build-std` feature] of cargo comes in. It allows to recompile `core` and other standard library crates on demand, instead of using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as "unstable" and only available on [nightly Rust compilers].
+- `build-std` is a feature of Cargo.
+- We can recompile `core` and other standard library crates on demand.
+    - Vs. using the precompiled versions shipped with the Rust installation. 
+This feature is very new and still not finished, so it is marked as "unstable" and only available on [nightly Rust compilers].
 
 [`build-std` feature]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std
 [nightly Rust compilers]: #installing-rust-nightly
