@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Kernel – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./32_r5.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./40_kernel.html">Kernel</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#today" id="toc-today" class="nav-link" data-scroll-target="#today">Today</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#background" id="toc-background" class="nav-link" data-scroll-target="#background">Background</a>
+  <ul class="collapse">
+  <li><a href="#the-boot-process" id="toc-the-boot-process" class="nav-link" data-scroll-target="#the-boot-process">The Boot Process</a></li>
+  <li><a href="#first-steps" id="toc-first-steps" class="nav-link" data-scroll-target="#first-steps">First Steps</a></li>
+  <li><a href="#firmware" id="toc-firmware" class="nav-link" data-scroll-target="#firmware">Firmware</a></li>
+  <li><a href="#enter-the-cpu" id="toc-enter-the-cpu" class="nav-link" data-scroll-target="#enter-the-cpu">Enter the CPU</a></li>
+  <li><a href="#not-code-but-ware" id="toc-not-code-but-ware" class="nav-link" data-scroll-target="#not-code-but-ware">Not “code” but “ware”</a></li>
+  <li><a href="#enter-the-os" id="toc-enter-the-os" class="nav-link" data-scroll-target="#enter-the-os">Enter the OS</a></li>
+  <li><a href="#what-it-sounds-like" id="toc-what-it-sounds-like" class="nav-link" data-scroll-target="#what-it-sounds-like">What it sounds like</a></li>
+  <li><a href="#aside" id="toc-aside" class="nav-link" data-scroll-target="#aside">Aside</a></li>
+  <li><a href="#competing-standards" id="toc-competing-standards" class="nav-link" data-scroll-target="#competing-standards">Competing Standards</a></li>
+  <li><a href="#competing-standards-1" id="toc-competing-standards-1" class="nav-link" data-scroll-target="#competing-standards-1">Competing Standards</a></li>
+  <li><a href="#bios-boot" id="toc-bios-boot" class="nav-link" data-scroll-target="#bios-boot">BIOS Boot</a></li>
+  <li><a href="#upsides" id="toc-upsides" class="nav-link" data-scroll-target="#upsides">Upsides</a></li>
+  <li><a href="#bootable-disks" id="toc-bootable-disks" class="nav-link" data-scroll-target="#bootable-disks">Bootable Disks</a></li>
+  <li><a href="#bootlaoder" id="toc-bootlaoder" class="nav-link" data-scroll-target="#bootlaoder">Bootlaoder</a></li>
+  <li><a href="#data-structures" id="toc-data-structures" class="nav-link" data-scroll-target="#data-structures">Data Structures</a></li>
+  <li><a href="#location-location" id="toc-location-location" class="nav-link" data-scroll-target="#location-location">Location, Location</a></li>
+  <li><a href="#booting-the-os" id="toc-booting-the-os" class="nav-link" data-scroll-target="#booting-the-os">Booting the OS</a></li>
+  <li><a href="#switcheroo" id="toc-switcheroo" class="nav-link" data-scroll-target="#switcheroo">Switcheroo</a></li>
+  <li><a href="#hand-wave" id="toc-hand-wave" class="nav-link" data-scroll-target="#hand-wave">Hand-wave</a></li>
+  <li><a href="#the-multiboot-standard" id="toc-the-multiboot-standard" class="nav-link" data-scroll-target="#the-multiboot-standard">The Multiboot Standard</a></li>
+  </ul></li>
+  <li><a href="#kernel" id="toc-kernel" class="nav-link" data-scroll-target="#kernel">Kernel</a>
+  <ul class="collapse">
+  <li><a href="#a-minimal-kernel" id="toc-a-minimal-kernel" class="nav-link" data-scroll-target="#a-minimal-kernel">A Minimal Kernel</a></li>
+  <li><a href="#target-specification" id="toc-target-specification" class="nav-link" data-scroll-target="#target-specification">Target Specification</a></li>
+  <li><a href="#putting-it-together" id="toc-putting-it-together" class="nav-link" data-scroll-target="#putting-it-together">Putting it Together</a></li>
+  <li><a href="#building-our-kernel" id="toc-building-our-kernel" class="nav-link" data-scroll-target="#building-our-kernel">Building our Kernel</a></li>
+  <li><a href="#the-json-target-spec-option" id="toc-the-json-target-spec-option" class="nav-link" data-scroll-target="#the-json-target-spec-option">The <code>json-target-spec</code> Option</a></li>
+  <li><a href="#the-build-std-option" id="toc-the-build-std-option" class="nav-link" data-scroll-target="#the-build-std-option">The <code>build-std</code> Option</a></li>
+  <li><a href="#memory-related-intrinsics" id="toc-memory-related-intrinsics" class="nav-link" data-scroll-target="#memory-related-intrinsics">Memory-Related Intrinsics</a></li>
+  <li><a href="#set-a-default-target" id="toc-set-a-default-target" class="nav-link" data-scroll-target="#set-a-default-target">Set a Default Target</a></li>
+  <li><a href="#printing-to-screen" id="toc-printing-to-screen" class="nav-link" data-scroll-target="#printing-to-screen">Printing to Screen</a></li>
+  <li><a href="#running-our-kernel" id="toc-running-our-kernel" class="nav-link" data-scroll-target="#running-our-kernel">Running our Kernel</a></li>
+  <li><a href="#creating-a-bootimage" id="toc-creating-a-bootimage" class="nav-link" data-scroll-target="#creating-a-bootimage">Creating a Bootimage</a></li>
+  <li><a href="#how-does-it-work" id="toc-how-does-it-work" class="nav-link" data-scroll-target="#how-does-it-work">How does it work?</a></li>
+  <li><a href="#booting-it-in-qemu" id="toc-booting-it-in-qemu" class="nav-link" data-scroll-target="#booting-it-in-qemu">Booting it in QEMU</a></li>
+  <li><a href="#real-machine" id="toc-real-machine" class="nav-link" data-scroll-target="#real-machine">Real Machine</a></li>
+  <li><a href="#using-cargo-run" id="toc-using-cargo-run" class="nav-link" data-scroll-target="#using-cargo-run">Using <code>cargo run</code></a></li>
+  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next">What’s next?</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="40_kernel.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Kernel</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li><strong>Action Items</strong>:
+<ul>
+<li>Is <code>qemu</code> working at all.
+<ul>
+<li>The coolest assignment ever for a second week in a row.</li>
+<li>I’m glad you all love it</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="today" class="level2">
+<h2 class="anchored" data-anchor-id="today">Today</h2>
+<ul>
+<li>Background</li>
+<li>Kernel</li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>Outright theft:
+<ul>
+<li><a href="https://os.phil-opp.com/minimal-rust-kernel/">A Minimal Rust Kernel</a></li>
+</ul></li>
+</ul>
+</section>
+<section id="background" class="level1">
+<h1>Background</h1>
+<section id="the-boot-process" class="level2">
+<h2 class="anchored" data-anchor-id="the-boot-process">The Boot Process</h2>
+<ul>
+<li>POV: You are an inanimate piece of silicon.
+<ul>
+<li>You contain wires connected to logic gates.</li>
+<li>Somewhere, a switch is flipped.</li>
+<li>Electrons flow into some of your wires, through some gates.</li>
+</ul></li>
+</ul>
+</section>
+<section id="first-steps" class="level2">
+<h2 class="anchored" data-anchor-id="first-steps">First Steps</h2>
+<ul>
+<li>What determines the initial arrangement of gates?</li>
+<li>Where do electrons flow?</li>
+<li>This is determined by the <em>boot process</em>
+<ul>
+<li>Occurs on <em>ever</em> power-up</li>
+<li>Determined by <em>hardware</em> design</li>
+<li>More fundamental than the OS</li>
+</ul></li>
+</ul>
+</section>
+<section id="firmware" class="level2">
+<h2 class="anchored" data-anchor-id="firmware">Firmware</h2>
+<ul>
+<li>What is between hardware and software?
+<ul>
+<li>Firmware.</li>
+</ul></li>
+<li>On power-up, devices execute code embedded in physical read only memory (ROM).
+<ul>
+<li>Read more: <a href="https://en.wikipedia.org/wiki/Read-only_memory">ROM</a></li>
+</ul></li>
+<li>Is it software? Is it hardware? Who can say.</li>
+</ul>
+</section>
+<section id="enter-the-cpu" class="level2">
+<h2 class="anchored" data-anchor-id="enter-the-cpu">Enter the CPU</h2>
+<ul>
+<li>Usually, power-up occurs on a “motherboard” hosting, among other things, the bus.
+<ul>
+<li>Named “mother” after the “MU/TH/UR” on ship computer in <em>Alien</em> (1979)</li>
+<li>This is a lie.</li>
+</ul></li>
+</ul>
+</section>
+<section id="not-code-but-ware" class="level2">
+<h2 class="anchored" data-anchor-id="not-code-but-ware">Not “code” but “ware”</h2>
+<ul>
+<li>So firmware isn’t really like CPU code (like Rust or C), but it does:
+<ul>
+<li>Tell circuitry where to direct electrons within the CPU.</li>
+<li>Also wake up e.g.&nbsp;the MMU.</li>
+</ul></li>
+</ul>
+</section>
+<section id="enter-the-os" class="level2">
+<h2 class="anchored" data-anchor-id="enter-the-os">Enter the OS</h2>
+<ul>
+<li>With the CPU primed but not yet ticking through clock cycles, all that remains is to either
+<ul>
+<li>Execute a bare metal executable, or</li>
+<li>Boot an operating system to enable the next higher-level task.</li>
+</ul></li>
+</ul>
+</section>
+<section id="what-it-sounds-like" class="level2">
+<h2 class="anchored" data-anchor-id="what-it-sounds-like">What it sounds like</h2>
+<ul>
+<li>We regard, then, the operating system as a <em>system</em> which <em>operates</em> the <em>hardware</em> on behalf of higher level <em>software</em>.
+<ul>
+<li>Hence, “systems computing”.</li>
+<li>Hopefully the contrast to software is a bit more clear here.</li>
+</ul></li>
+</ul>
+</section>
+<section id="aside" class="level2">
+<h2 class="anchored" data-anchor-id="aside">Aside</h2>
+<ul>
+<li>I am supposed to teach you about the “power-on self-test”.</li>
+<li>A bit electrical engineering for me.</li>
+</ul>
+<blockquote class="blockquote">
+<p><a href="https://en.wikipedia.org/wiki/Power-on_self-test">A <strong>power-on self-test</strong> (POST) is a process performed by firmware or software routines immediately after a computer or other digital electronic device is powered on.</a></p>
+</blockquote>
+<ul>
+<li>Neat! Moving on.</li>
+</ul>
+</section>
+<section id="competing-standards" class="level2">
+<h2 class="anchored" data-anchor-id="competing-standards">Competing Standards</h2>
+<ul>
+<li>Lucky us, there is no widely agreed upon way to do firmware.</li>
+<li>There’s the cool, old way that doesn’t work well but is easy.
+<ul>
+<li>“Basic Input/Output System“ <a href="https://en.wikipedia.org/wiki/BIOS"><strong>BIOS</strong></a></li>
+<li>1981</li>
+</ul></li>
+</ul>
+</section>
+<section id="competing-standards-1" class="level2">
+<h2 class="anchored" data-anchor-id="competing-standards-1">Competing Standards</h2>
+<ul>
+<li>There’s the new way that is too hard to use for normal people like us.
+<ul>
+<li>As in people who do anything else ever.</li>
+<li>It’s good though we promise.</li>
+<li>“Unified Extensible Firmware Interface” <a href="https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface"><strong>UEFI</strong></a>.</li>
+<li>May make you use it for a lab. <a href="https://github.com/le-jzr/sisyphos-kernel-uefi-x86_64">More.</a></li>
+<li>2006</li>
+</ul></li>
+</ul>
+</section>
+<section id="bios-boot" class="level2">
+<h2 class="anchored" data-anchor-id="bios-boot">BIOS Boot</h2>
+<ul>
+<li>I actually started fooling around with the BIOS before UEFI even existed.
+<ul>
+<li>I was a normal kid though 100%.</li>
+</ul></li>
+<li>Fortunately it’s still basically around. Quoth Blog:</li>
+</ul>
+<blockquote class="blockquote">
+<p>This is great, because you can use the same boot logic across all machines from the last century.</p>
+</blockquote>
+</section>
+<section id="upsides" class="level2">
+<h2 class="anchored" data-anchor-id="upsides">Upsides</h2>
+<ul>
+<li>Blog says it’s a downside that this means you have to do 16-bit mode.
+<ul>
+<li>I say: that’s cool.</li>
+<li>I can’t count higher than about 0xFFFF anyways.</li>
+</ul></li>
+<li>The blog impolitely calls 1980s bootloaders “archaic” instead of “vintage”, “retro”, or “foundational”.</li>
+</ul>
+</section>
+<section id="bootable-disks" class="level2">
+<h2 class="anchored" data-anchor-id="bootable-disks">Bootable Disks</h2>
+<ul>
+<li>I should also tell you about <em>bootable disks</em></li>
+<li>Nowadays we all boot from SSD or rarely HDD.</li>
+<li>But you have probably at some point booted from USB.
+<ul>
+<li>Usually when removing a virus like Microsoft Windows from your system.</li>
+</ul></li>
+<li>Olden days computers could boot from floppy disks, etc.</li>
+</ul>
+</section>
+<section id="bootlaoder" class="level2">
+<h2 class="anchored" data-anchor-id="bootlaoder">Bootlaoder</h2>
+<ul>
+<li>I mentioned 1980s bootloaders.
+<ul>
+<li>No relation to bootleggers or boatloaders.</li>
+</ul></li>
+<li>512-byte portion of executable code stored at the bootable disk’s “beginning”.
+<ul>
+<li>On a HDD this is physically the outermost ring of addressable magnetic regions.</li>
+<li>I don’t know how SSDs work as Samsung, SK Hynix, or Micron (shout out Boise).</li>
+</ul></li>
+</ul>
+</section>
+<section id="data-structures" class="level2">
+<h2 class="anchored" data-anchor-id="data-structures">Data Structures</h2>
+<ul>
+<li>Most bootloaders are larger than 512 bytes.</li>
+<li>So bootloaders are commonly split into a 512 byte first stage that loads a latter stage.
+<ul>
+<li>This is why we should still be teaching linked lists, basically.</li>
+</ul></li>
+</ul>
+</section>
+<section id="location-location" class="level2">
+<h2 class="anchored" data-anchor-id="location-location">Location, Location</h2>
+<ul>
+<li>The bootloader lives in a reserved physical (HDD) or logical (SSD) location.</li>
+<li>Does the OS?
+<ul>
+<li>With respect to itself, yes, the OS probably says it lives at memory location zero.</li>
+<li>With respect to underlying hardware? Probably not.
+<ul>
+<li>Gotta find it.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="booting-the-os" class="level2">
+<h2 class="anchored" data-anchor-id="booting-the-os">Booting the OS</h2>
+<ul>
+<li>The bootloader has to determine the location of the <em>kernel image</em> on disk and load it into memory.
+<ul>
+<li>Basically this is the definition of the kernel, the minimal OS internal that runs first.</li>
+<li>Image here means we have physical bits capturing some information, so copies of the bits may live in different places.
+<ul>
+<li>SSD and RAM, for example.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="switcheroo" class="level2">
+<h2 class="anchored" data-anchor-id="switcheroo">Switcheroo</h2>
+<ul>
+<li>The OS probably is not a 16-bit OS.
+<ul>
+<li>Unless? Lab idea? Hold me back!</li>
+</ul></li>
+<li>Big OS wants me to tell you that:
+<ul>
+<li>16-bit mode is called “real mode”</li>
+<li>32-bit mode is called “protected mode”</li>
+<li>64-bit mode is called “long mode”.</li>
+</ul></li>
+<li>Recall we were writing 64-bit bare metal.</li>
+</ul>
+</section>
+<section id="hand-wave" class="level2">
+<h2 class="anchored" data-anchor-id="hand-wave">Hand-wave</h2>
+<blockquote class="blockquote">
+<p>Writing a bootloader is a bit cumbersome as it requires assembly language and “write this magic value to this processor register”.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Instead use a <a href="https://github.com/rust-osdev/bootimage">bootimage</a> that automatically prepends a bootloader to your kernel.</p>
+</blockquote>
+<ul>
+<li>This is called “cheating” and is a good way to get ahead in life.</li>
+</ul>
+</section>
+<section id="the-multiboot-standard" class="level2">
+<h2 class="anchored" data-anchor-id="the-multiboot-standard">The Multiboot Standard</h2>
+<p>To avoid that every operating system implements its own bootloader, which is only compatible with a single OS, the <a href="https://en.wikipedia.org/wiki/Free_Software_Foundation">Free Software Foundation</a> created an open bootloader standard called <a href="https://wiki.osdev.org/Multiboot">Multiboot</a> in 1995. The standard defines an interface between the bootloader and the operating system, so that any Multiboot-compliant bootloader can load any Multiboot-compliant operating system. The reference implementation is <a href="https://en.wikipedia.org/wiki/GNU_GRUB">GNU GRUB</a>, which is the most popular bootloader for Linux systems.</p>
+<p>To make a kernel Multiboot compliant, one just needs to insert a so-called <a href="https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format">Multiboot header</a> at the beginning of the kernel file. This makes it very easy to boot an OS from GRUB. However, GRUB and the Multiboot standard have some problems too:</p>
+<ul>
+<li>They support only the 32-bit protected mode. This means that you still have to do the CPU configuration to switch to the 64-bit long mode.</li>
+<li>They are designed to make the bootloader simple instead of the kernel. For example, the kernel needs to be linked with an <a href="https://wiki.osdev.org/Multiboot#Multiboot_2">adjusted default page size</a>, because GRUB can’t find the Multiboot header otherwise. Another example is that the <a href="https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Boot-information-format">boot information</a>, which is passed to the kernel, contains lots of architecture-dependent structures instead of providing clean abstractions.</li>
+<li>Both GRUB and the Multiboot standard are only sparsely documented.</li>
+<li>GRUB needs to be installed on the host system to create a bootable disk image from the kernel file. This makes development on Windows or Mac more difficult.</li>
+</ul>
+<p>Because of these drawbacks, we decided to not use GRUB or the Multiboot standard. However, we plan to add Multiboot support to our [bootimage] tool, so that it’s possible to load your kernel on a GRUB system too. If you’re interested in writing a Multiboot compliant kernel, check out the <a href="@/edition-1/_index.md">first edition</a> of this blog series.</p>
+</section>
+</section>
+<section id="kernel" class="level1">
+<h1>Kernel</h1>
+<section id="a-minimal-kernel" class="level2">
+<h2 class="anchored" data-anchor-id="a-minimal-kernel">A Minimal Kernel</h2>
+<p>Now that we roughly know how a computer boots, it’s time to create our own minimal kernel. Our goal is to create a disk image that prints a “Hello World!” to the screen when booted. We do this by extending the previous post’s [freestanding Rust binary].</p>
+<p>As you may remember, we built the freestanding binary through <code>cargo</code>, but depending on the operating system, we needed different entry point names and compile flags. That’s because <code>cargo</code> builds for the <em>host system</em> by default, i.e., the system you’re running on. This isn’t something we want for our kernel, because a kernel that runs on top of, e.g., Windows, does not make much sense. Instead, we want to compile for a clearly defined <em>target system</em>.</p>
+<!--
+
+## Installing Rust Nightly
+
+Rust has three release channels: _stable_, _beta_, and _nightly_. The Rust Book explains the difference between these channels really well, so take a minute and [check it out](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html#choo-choo-release-channels-and-riding-the-trains). For building an operating system, we will need some experimental features that are only available on the nightly channel, so we need to install a nightly version of Rust.
+
+To manage Rust installations, I highly recommend [rustup]. It allows you to install nightly, beta, and stable compilers side-by-side and makes it easy to update them. With rustup, you can use a nightly compiler for the current directory by running `rustup override set nightly`. Alternatively, you can add a file called `rust-toolchain` with the content `nightly` to the project's root directory. You can check that you have a nightly version installed by running `rustc --version`: The version number should contain `-nightly` at the end.
+
+[rustup]: https://www.rustup.rs/
+
+The nightly compiler allows us to opt-in to various experimental features by using so-called _feature flags_ at the top of our file. For example, we could enable the experimental [`asm!` macro] for inline assembly by adding `#![feature(asm)]` to the top of our `main.rs`. Note that such experimental features are completely unstable, which means that future Rust versions might change or remove them without prior warning. For this reason, we will only use them if absolutely necessary.
+
+[`asm!` macro]: https://doc.rust-lang.org/stable/reference/inline-assembly.html
+
+-->
+</section>
+<section id="target-specification" class="level2">
+<h2 class="anchored" data-anchor-id="target-specification">Target Specification</h2>
+<p>Cargo supports different target systems through the <code>--target</code> parameter. The target is described by a so-called <em><a href="https://clang.llvm.org/docs/CrossCompilation.html#target-triple">target triple</a></em>, which describes the CPU architecture, the vendor, the operating system, and the <a href="https://stackoverflow.com/a/2456882">ABI</a>. For example, the <code>x86_64-unknown-linux-gnu</code> target triple describes a system with an <code>x86_64</code> CPU, no clear vendor, and a Linux operating system with the GNU ABI. Rust supports <a href="https://forge.rust-lang.org/release/platform-support.html">many different target triples</a>, including <code>arm-linux-androideabi</code> for Android or <a href="https://www.hellorust.com/setup/wasm-target/"><code>wasm32-unknown-unknown</code> for WebAssembly</a>.</p>
+<p>For our target system, however, we require some special configuration parameters (e.g.&nbsp;no underlying OS), so none of the <a href="https://forge.rust-lang.org/release/platform-support.html">existing target triples</a> fits. Fortunately, Rust allows us to define <a href="https://doc.rust-lang.org/nightly/rustc/targets/custom.html">our own target</a> through a JSON file. For example, a JSON file that describes the <code>x86_64-unknown-linux-gnu</code> target looks like this:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb1-6"><a href="#cb1-6"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"linux"</span><span class="fu">,</span></span>
+<span id="cb1-9"><a href="#cb1-9"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb1-10"><a href="#cb1-10"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"gcc"</span><span class="fu">,</span></span>
+<span id="cb1-11"><a href="#cb1-11"></a>    <span class="dt">"pre-link-args"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"-m64"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb1-12"><a href="#cb1-12"></a>    <span class="dt">"morestack"</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Most fields are required by LLVM to generate code for that platform. For example, the <a href="https://llvm.org/docs/LangRef.html#data-layout"><code>data-layout</code></a> field defines the size of various integer, floating point, and pointer types. Then there are fields that Rust uses for conditional compilation, such as <code>target-pointer-width</code>. The third kind of field defines how the crate should be built. For example, the <code>pre-link-args</code> field specifies arguments passed to the <a href="https://en.wikipedia.org/wiki/Linker_(computing)">linker</a>.</p>
+<p>We also target <code>x86_64</code> systems with our kernel, so our target specification will look very similar to the one above. Let’s start by creating an <code>x86_64-blog_os.json</code> file (choose any name you like) with the common content:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that we changed the OS in the <code>llvm-target</code> and the <code>os</code> field to <code>none</code>, because we will run on bare metal.</p>
+<p>We add the following build-related entries:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1"></a><span class="er">"linker-flavor":</span> <span class="er">"ld.lld",</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="er">"linker":</span> <span class="er">"rust-lld",</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Instead of using the platform’s default linker (which might not support Linux targets), we use the cross-platform <a href="https://lld.llvm.org/">LLD</a> linker that is shipped with Rust for linking our kernel.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1"></a><span class="er">"panic-strategy":</span> <span class="er">"abort",</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This setting specifies that the target doesn’t support <a href="https://www.bogotobogo.com/cplusplus/stackunwinding.php">stack unwinding</a> on panic, so instead the program should abort directly. This has the same effect as the <code>panic = "abort"</code> option in our Cargo.toml, so we can remove it from there. (Note that, in contrast to the Cargo.toml option, this target option also applies when we recompile the <code>core</code> library later in this post. So, even if you prefer to keep the Cargo.toml option, make sure to include this option.)</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1"></a><span class="er">"disable-redzone":</span> <span class="er">true,</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We’re writing a kernel, so we’ll need to handle interrupts at some point. To do that safely, we have to disable a certain stack pointer optimization called the <em>“red zone”</em>, because it would cause stack corruption otherwise. For more information, see our separate post about <a href="@/edition-2/posts/02-minimal-rust-kernel/disable-red-zone/index.md">disabling the red zone</a>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1"></a><span class="er">"features":</span> <span class="er">"-mmx,-sse,+soft-float",</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>features</code> field enables/disables target features. We disable the <code>mmx</code> and <code>sse</code> features by prefixing them with a minus and enable the <code>soft-float</code> feature by prefixing it with a plus. Note that there must be no spaces between different flags, otherwise LLVM fails to interpret the features string.</p>
+<p>The <code>mmx</code> and <code>sse</code> features determine support for <a href="https://en.wikipedia.org/wiki/SIMD">Single Instruction Multiple Data (SIMD)</a> instructions, which can often speed up programs significantly. However, using the large SIMD registers in OS kernels leads to performance problems. The reason is that the kernel needs to restore all registers to their original state before continuing an interrupted program. This means that the kernel has to save the complete SIMD state to main memory on each system call or hardware interrupt. Since the SIMD state is very large (512–1600 bytes) and interrupts can occur very often, these additional save/restore operations considerably harm performance. To avoid this, we disable SIMD for our kernel (not for applications running on top!).</p>
+<p>A problem with disabling SIMD is that floating point operations on <code>x86_64</code> require SIMD registers by default. To solve this problem, we add the <code>soft-float</code> feature, which emulates all floating point operations through software functions based on normal integers.</p>
+<p>For more information, see our post on <a href="@/edition-2/posts/02-minimal-rust-kernel/disable-simd/index.md">disabling SIMD</a>.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1"></a><span class="er">"rustc-abi":</span> <span class="er">"x86-softfloat"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As we want to use the <code>soft-float</code> feature, we also need to tell the Rust compiler <code>rustc</code> that we want to use the corresponding ABI. We can do that by setting the <code>rustc-abi</code> field to <code>x86-softfloat</code>.</p>
+</section>
+<section id="putting-it-together" class="level2">
+<h2 class="anchored" data-anchor-id="putting-it-together">Putting it Together</h2>
+<p>Our target specification file now looks like this:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
+<span id="cb8-11"><a href="#cb8-11"></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
+<span id="cb8-13"><a href="#cb8-13"></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb8-14"><a href="#cb8-14"></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
+<span id="cb8-15"><a href="#cb8-15"></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
+<span id="cb8-16"><a href="#cb8-16"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="building-our-kernel" class="level2">
+<h2 class="anchored" data-anchor-id="building-our-kernel">Building our Kernel</h2>
+<p>Compiling for our new target will use Linux conventions, since the ld.lld linker-flavor instructs llvm to compile with the <code>-flavor gnu</code> flag (for more linker options, see <a href="https://doc.rust-lang.org/rustc/codegen-options/index.html#linker-flavor">the rustc documentation</a>). This means that we need an entry point named <code>_start</code> as described in the <a href="@/edition-2/posts/01-freestanding-rust-binary/index.md">previous post</a>:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">// src/main.rs</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a></span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="op">}</span></span>
+<span id="cb9-13"><a href="#cb9-13"></a></span>
+<span id="cb9-14"><a href="#cb9-14"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb9-16"><a href="#cb9-16"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb9-17"><a href="#cb9-17"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb9-18"><a href="#cb9-18"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb9-19"><a href="#cb9-19"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that the entry point needs to be called <code>_start</code> regardless of your host OS.</p>
+<p>We can now build the kernel for our new target by passing the name of the JSON file as <code>--target</code>:</p>
+<pre><code>&gt; cargo build --target x86_64-blog_os.json
+
+error: `.json` target specs require -Zjson-target-spec</code></pre>
+<p>It fails! The error tells us that custom JSON target specifications are an unstable feature that requires explicit opt-in. This is because the format of the JSON target files is not considered stable yet, so changes to it might occur in future versions of Rust. See the <a href="https://github.com/rust-lang/rust/issues/151528">tracking issue for custom JSON target specs</a> for more information.</p>
+</section>
+<section id="the-json-target-spec-option" class="level2">
+<h2 class="anchored" data-anchor-id="the-json-target-spec-option">The <code>json-target-spec</code> Option</h2>
+<p>To enable support for custom JSON target specifications, we need to create a local <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo configuration</a> file at <code>.cargo/config.toml</code> (the <code>.cargo</code> folder should be next to your <code>src</code> folder) with the following content:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb11-1"><a href="#cb11-1"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="kw">[unstable]</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This enables the unstable <code>json-target-spec</code> feature, allowing us to use custom JSON target files.</p>
+<p>With this configuration in place, let’s try building again:</p>
+<pre><code>&gt; cargo build --target x86_64-blog_os.json
+
+error[E0463]: can't find crate for `core`</code></pre>
+<p>It still fails, but with a new error. The error tells us that the Rust compiler does not find the <a href="https://doc.rust-lang.org/nightly/core/index.html"><code>core</code> library</a>. This library contains basic Rust types such as <code>Result</code>, <code>Option</code>, and iterators, and is implicitly linked to all <code>no_std</code> crates.</p>
+<p>The problem is that the core library is distributed together with the Rust compiler as a <em>precompiled</em> library. So it is only valid for supported host triples (e.g., <code>x86_64-unknown-linux-gnu</code>) but not for our custom target. If we want to compile code for other targets, we need to recompile <code>core</code> for these targets first.</p>
+</section>
+<section id="the-build-std-option" class="level2">
+<h2 class="anchored" data-anchor-id="the-build-std-option">The <code>build-std</code> Option</h2>
+<p>That’s where the <a href="https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std"><code>build-std</code> feature</a> of cargo comes in. It allows to recompile <code>core</code> and other standard library crates on demand, instead of using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as “unstable” and only available on <a href="#installing-rust-nightly">nightly Rust compilers</a>.</p>
+<p>To use the feature, we need to add the following to our <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo configuration</a> file at <code>.cargo/config.toml</code>:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb13-1"><a href="#cb13-1"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="kw">[unstable]</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This tells cargo that it should recompile the <code>core</code> and <code>compiler_builtins</code> libraries. The latter is required because it is a dependency of <code>core</code>. In order to recompile these libraries, cargo needs access to the rust source code, which we can install with <code>rustup component add rust-src</code>.</p>
+<div class="note">
+<p><strong>Note:</strong> The <code>unstable.build-std</code> configuration key requires at least the Rust nightly from 2020-07-15.</p>
+</div>
+<p>After setting the <code>unstable.build-std</code> configuration key and installing the <code>rust-src</code> component, we can rerun our build command:</p>
+<pre><code>&gt; cargo build --target x86_64-blog_os.json
+   Compiling core v0.0.0 (/…/rust/src/libcore)
+   Compiling rustc-std-workspace-core v1.99.0 (/…/rust/src/tools/rustc-std-workspace-core)
+   Compiling compiler_builtins v0.1.32
+   Compiling blog_os v0.1.0 (/…/blog_os)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.29 secs</code></pre>
+<p>We see that <code>cargo build</code> now recompiles the <code>core</code>, <code>rustc-std-workspace-core</code> (a dependency of <code>compiler_builtins</code>), and <code>compiler_builtins</code> libraries for our custom target.</p>
+</section>
+<section id="memory-related-intrinsics" class="level2">
+<h2 class="anchored" data-anchor-id="memory-related-intrinsics">Memory-Related Intrinsics</h2>
+<p>The Rust compiler assumes that a certain set of built-in functions is available for all systems. Most of these functions are provided by the <code>compiler_builtins</code> crate that we just recompiled. However, there are some memory-related functions in that crate that are not enabled by default because they are normally provided by the C library on the system. These functions include <code>memset</code>, which sets all bytes in a memory block to a given value, <code>memcpy</code>, which copies one memory block to another, and <code>memcmp</code>, which compares two memory blocks. While we didn’t need any of these functions to compile our kernel right now, they will be required as soon as we add some more code to it (e.g.&nbsp;when copying structs around).</p>
+<p>Since we can’t link to the C library of the operating system, we need an alternative way to provide these functions to the compiler. One possible approach for this could be to implement our own <code>memset</code> etc. functions and apply the <code>#[unsafe(no_mangle)]</code> attribute to them (to avoid the automatic renaming during compilation). However, this is dangerous since the slightest mistake in the implementation of these functions could lead to undefined behavior. For example, implementing <code>memcpy</code> with a <code>for</code> loop may result in an infinite recursion because <code>for</code> loops implicitly call the <a href="https://doc.rust-lang.org/stable/core/iter/trait.IntoIterator.html#tymethod.into_iter"><code>IntoIterator::into_iter</code></a> trait method, which may call <code>memcpy</code> again. So it’s a good idea to reuse existing, well-tested implementations instead.</p>
+<p>Fortunately, the <code>compiler_builtins</code> crate already contains implementations for all the needed functions, they are just disabled by default to not collide with the implementations from the C library. We can enable them by setting cargo’s <a href="https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std-features"><code>build-std-features</code></a> flag to <code>["compiler-builtins-mem"]</code>. Like the <code>build-std</code> flag, this flag can be either passed on the command line as a <code>-Z</code> flag or configured in the <code>unstable</code> table in the <code>.cargo/config.toml</code> file. Since we always want to build with this flag, the config file option makes more sense for us:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="kw">[unstable]</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="dt">build-std-features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"compiler-builtins-mem"</span><span class="op">]</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>(Support for the <code>compiler-builtins-mem</code> feature was only <a href="https://github.com/rust-lang/rust/pull/77284">added very recently</a>, so you need at least Rust nightly <code>2020-09-30</code> for it.)</p>
+<p>Behind the scenes, this flag enables the <a href="https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/Cargo.toml#L54-L55"><code>mem</code> feature</a> of the <code>compiler_builtins</code> crate. The effect of this is that the <code>#[unsafe(no_mangle)]</code> attribute is applied to the <a href="https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/src/mem.rs#L12-L69"><code>memcpy</code> etc. implementations</a> of the crate, which makes them available to the linker.</p>
+<p>With this change, our kernel has valid implementations for all compiler-required functions, so it will continue to compile even if our code gets more complex.</p>
+</section>
+<section id="set-a-default-target" class="level2">
+<h2 class="anchored" data-anchor-id="set-a-default-target">Set a Default Target</h2>
+<p>To avoid passing the <code>--target</code> parameter on every invocation of <code>cargo build</code>, we can override the default target. To do this, we add the following to our <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo configuration</a> file at <code>.cargo/config.toml</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb16-1"><a href="#cb16-1"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="kw">[build]</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-blog_os.json"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This tells <code>cargo</code> to use our <code>x86_64-blog_os.json</code> target when no explicit <code>--target</code> argument is passed. This means that we can now build our kernel with a simple <code>cargo build</code>. For more information on cargo configuration options, check out the <a href="https://doc.rust-lang.org/cargo/reference/config.html">official documentation</a>.</p>
+<p>We are now able to build our kernel for a bare metal target with a simple <code>cargo build</code>. However, our <code>_start</code> entry point, which will be called by the boot loader, is still empty. It’s time that we output something to screen from it.</p>
+</section>
+<section id="printing-to-screen" class="level2">
+<h2 class="anchored" data-anchor-id="printing-to-screen">Printing to Screen</h2>
+<p>The easiest way to print text to the screen at this stage is the <a href="https://en.wikipedia.org/wiki/VGA-compatible_text_mode">VGA text buffer</a>. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png" class="img-fluid figure-img"></p>
+<figcaption>screen output for common ASCII characters</figcaption>
+</figure>
+</div>
+<p>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <code>0xb8000</code> and that each character cell consists of an ASCII byte and a color byte.</p>
+<p>The implementation looks like this:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a></span>
+<span id="cb17-7"><a href="#cb17-7"></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb17-8"><a href="#cb17-8"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
+<span id="cb17-10"><a href="#cb17-10"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11"></a>        <span class="op">}</span></span>
+<span id="cb17-12"><a href="#cb17-12"></a>    <span class="op">}</span></span>
+<span id="cb17-13"><a href="#cb17-13"></a></span>
+<span id="cb17-14"><a href="#cb17-14"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb17-15"><a href="#cb17-15"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>First, we cast the integer <code>0xb8000</code> into a <a href="https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer">raw pointer</a>. Then we <a href="https://doc.rust-lang.org/stable/book/ch13-02-iterators.html">iterate</a> over the bytes of the <a href="https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime">static</a> <code>HELLO</code> <a href="https://doc.rust-lang.org/reference/tokens.html#byte-string-literals">byte string</a>. We use the <a href="https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate"><code>enumerate</code></a> method to additionally get a running variable <code>i</code>. In the body of the for loop, we use the <a href="https://doc.rust-lang.org/std/primitive.pointer.html#method.offset"><code>offset</code></a> method to write the string byte and the corresponding color byte (<code>0xb</code> is a light cyan).</p>
+<p>Note that there’s an <a href="https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html"><code>unsafe</code></a> block around all memory writes. The reason is that the Rust compiler can’t prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <code>unsafe</code> block, we’re basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <code>unsafe</code> block does not turn off Rust’s safety checks. It only allows you to do <a href="https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers">five additional things</a>.</p>
+<p>I want to emphasize that <strong>this is not the way we want to do things in Rust!</strong> It’s very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer’s end if we’re not careful.</p>
+<p>So we want to minimize the use of <code>unsafe</code> as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is <em>impossible</em> to do anything wrong from the outside. This way, we would only need minimal amounts of <code>unsafe</code> code and can be sure that we don’t violate <a href="https://en.wikipedia.org/wiki/Memory_safety">memory safety</a>. We will create such a safe VGA buffer abstraction in the next post.</p>
+</section>
+<section id="running-our-kernel" class="level2">
+<h2 class="anchored" data-anchor-id="running-our-kernel">Running our Kernel</h2>
+<p>Now that we have an executable that does something perceptible, it is time to run it. First, we need to turn our compiled kernel into a bootable disk image by linking it with a bootloader. Then we can run the disk image in the <a href="https://www.qemu.org/">QEMU</a> virtual machine or boot it on real hardware using a USB stick.</p>
+</section>
+<section id="creating-a-bootimage" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-bootimage">Creating a Bootimage</h2>
+<p>To turn our compiled kernel into a bootable disk image, we need to link it with a bootloader. As we learned in the <a href="#the-boot-process">section about booting</a>, the bootloader is responsible for initializing the CPU and loading our kernel.</p>
+<p>Instead of writing our own bootloader, which is a project on its own, we use the <a href="https://crates.io/crates/bootloader"><code>bootloader</code></a> crate. This crate implements a basic BIOS bootloader without any C dependencies, just Rust and inline assembly. To use it for booting our kernel, we need to add a dependency on it:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb18-1"><a href="#cb18-1"></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a></span>
+<span id="cb18-3"><a href="#cb18-3"></a><span class="kw">[dependencies]</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="dt">bootloader</span> <span class="op">=</span> <span class="st">"0.9"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><strong>Note:</strong> This post is only compatible with <code>bootloader v0.9</code>. Newer versions use a different build system and will result in build errors when following this post.</p>
+<p>Adding the bootloader as a dependency is not enough to actually create a bootable disk image. The problem is that we need to link our kernel with the bootloader after compilation, but cargo has no support for <a href="https://github.com/rust-lang/cargo/issues/545">post-build scripts</a>.</p>
+<p>To solve this problem, we created a tool named <code>bootimage</code> that first compiles the kernel and bootloader, and then links them together to create a bootable disk image. To install the tool, go into your home directory (or any directory outside of your cargo project) and execute the following command in your terminal:</p>
+<pre><code>cargo install bootimage</code></pre>
+<p>For running <code>bootimage</code> and building the bootloader, you need to have the <code>llvm-tools-preview</code> rustup component installed. You can do so by executing <code>rustup component add llvm-tools-preview</code>.</p>
+<p>After installing <code>bootimage</code> and adding the <code>llvm-tools-preview</code> component, you can create a bootable disk image by going back into your cargo project directory and executing:</p>
+<pre><code>&gt; cargo bootimage</code></pre>
+<p>We see that the tool recompiles our kernel using <code>cargo build</code>, so it will automatically pick up any changes you make. Afterwards, it compiles the bootloader, which might take a while. Like all crate dependencies, it is only built once and then cached, so subsequent builds will be much faster. Finally, <code>bootimage</code> combines the bootloader and your kernel into a bootable disk image.</p>
+<p>After executing the command, you should see a bootable disk image named <code>bootimage-blog_os.bin</code> in your <code>target/x86_64-blog_os/debug</code> directory. You can boot it in a virtual machine or copy it to a USB drive to boot it on real hardware. (Note that this is not a CD image, which has a different format, so burning it to a CD doesn’t work).</p>
+</section>
+<section id="how-does-it-work" class="level2">
+<h2 class="anchored" data-anchor-id="how-does-it-work">How does it work?</h2>
+<p>The <code>bootimage</code> tool performs the following steps behind the scenes:</p>
+<ul>
+<li>It compiles our kernel to an <a href="https://en.wikipedia.org/wiki/Executable_and_Linkable_Format">ELF</a> file.</li>
+<li>It compiles the bootloader dependency as a standalone executable.</li>
+<li>It links the bytes of the kernel ELF file to the bootloader.</li>
+</ul>
+<p>When booted, the bootloader reads and parses the appended ELF file. It then maps the program segments to virtual addresses in the page tables, zeroes the <code>.bss</code> section, and sets up a stack. Finally, it reads the entry point address (our <code>_start</code> function) and jumps to it.</p>
+</section>
+<section id="booting-it-in-qemu" class="level2">
+<h2 class="anchored" data-anchor-id="booting-it-in-qemu">Booting it in QEMU</h2>
+<p>We can now boot the disk image in a virtual machine. To boot it in <a href="https://www.qemu.org/">QEMU</a>, execute the following command:</p>
+<pre><code>&gt; qemu-system-x86_64 -drive format=raw,file=target/x86_64-blog_os/debug/bootimage-blog_os.bin</code></pre>
+<p>This opens a separate window which should look similar to this:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="qemu.png" class="img-fluid figure-img"></p>
+<figcaption>QEMU showing “Hello World!”</figcaption>
+</figure>
+</div>
+<p>We see that our “Hello World!” is visible on the screen.</p>
+</section>
+<section id="real-machine" class="level2">
+<h2 class="anchored" data-anchor-id="real-machine">Real Machine</h2>
+<p>It is also possible to write it to a USB stick and boot it on a real machine, <strong>but be careful</strong> to choose the correct device name, because <strong>everything on that device is overwritten</strong>:</p>
+<pre><code>&gt; dd if=target/x86_64-blog_os/debug/bootimage-blog_os.bin of=/dev/sdX &amp;&amp; sync</code></pre>
+<p>Where <code>sdX</code> is the device name of your USB stick.</p>
+<p>After writing the image to the USB stick, you can run it on real hardware by booting from it. You probably need to use a special boot menu or change the boot order in your BIOS configuration to boot from the USB stick. Note that it currently doesn’t work for UEFI machines, since the <code>bootloader</code> crate has no UEFI support yet.</p>
+</section>
+<section id="using-cargo-run" class="level2">
+<h2 class="anchored" data-anchor-id="using-cargo-run">Using <code>cargo run</code></h2>
+<p>To make it easier to run our kernel in QEMU, we can set the <code>runner</code> configuration key for cargo:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb23-1"><a href="#cb23-1"></a><span class="co"># in .cargo/config.toml</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a></span>
+<span id="cb23-3"><a href="#cb23-3"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "none")'</span><span class="kw">]</span></span>
+<span id="cb23-4"><a href="#cb23-4"></a><span class="dt">runner</span> <span class="op">=</span> <span class="st">"bootimage runner"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>target.'cfg(target_os = "none")'</code> table applies to all targets whose target configuration file’s <code>"os"</code> field is set to <code>"none"</code>. This includes our <code>x86_64-blog_os.json</code> target. The <code>runner</code> key specifies the command that should be invoked for <code>cargo run</code>. The command is run after a successful build with the executable path passed as the first argument. See the <a href="https://doc.rust-lang.org/cargo/reference/config.html">cargo documentation</a> for more details.</p>
+<p>The <code>bootimage runner</code> command is specifically designed to be usable as a <code>runner</code> executable. It links the given executable with the project’s bootloader dependency and then launches QEMU. See the <a href="https://github.com/rust-osdev/bootimage">Readme of <code>bootimage</code></a> for more details and possible configuration options.</p>
+<p>Now we can use <code>cargo run</code> to compile our kernel and boot it in QEMU.</p>
+</section>
+<section id="whats-next" class="level2">
+<h2 class="anchored" data-anchor-id="whats-next">What’s next?</h2>
+<p>In the next post, we will explore the VGA text buffer in more detail and write a safe interface for it. We will also add support for the <code>println</code> macro.</p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./32_r5.html" class="pagination-link" aria-label="RISC-V">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">RISC-V</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb24" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb24-1"><a href="#cb24-1"></a><span class="co">---</span></span>
+<span id="cb24-2"><a href="#cb24-2"></a><span class="an">title:</span><span class="co"> Kernel</span></span>
+<span id="cb24-3"><a href="#cb24-3"></a><span class="co">---</span></span>
+<span id="cb24-4"><a href="#cb24-4"></a></span>
+<span id="cb24-5"><a href="#cb24-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb24-6"><a href="#cb24-6"></a></span>
+<span id="cb24-7"><a href="#cb24-7"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb24-8"><a href="#cb24-8"></a><span class="ss">  - </span>Is <span class="in">`qemu`</span> working at all.</span>
+<span id="cb24-9"><a href="#cb24-9"></a><span class="ss">    - </span>The coolest assignment ever for a second week in a row.</span>
+<span id="cb24-10"><a href="#cb24-10"></a><span class="ss">    - </span>I'm glad you all love it</span>
+<span id="cb24-11"><a href="#cb24-11"></a></span>
+<span id="cb24-12"><a href="#cb24-12"></a><span class="fu">## Today</span></span>
+<span id="cb24-13"><a href="#cb24-13"></a></span>
+<span id="cb24-14"><a href="#cb24-14"></a><span class="ss">- </span>Background</span>
+<span id="cb24-15"><a href="#cb24-15"></a><span class="ss">- </span>Kernel</span>
+<span id="cb24-16"><a href="#cb24-16"></a>    </span>
+<span id="cb24-17"><a href="#cb24-17"></a><span class="fu">## Citations</span></span>
+<span id="cb24-18"><a href="#cb24-18"></a></span>
+<span id="cb24-19"><a href="#cb24-19"></a><span class="ss">- </span>Outright theft:</span>
+<span id="cb24-20"><a href="#cb24-20"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">A Minimal Rust Kernel</span><span class="co">](https://os.phil-opp.com/minimal-rust-kernel/)</span></span>
+<span id="cb24-21"><a href="#cb24-21"></a></span>
+<span id="cb24-22"><a href="#cb24-22"></a><span class="fu"># Background</span></span>
+<span id="cb24-23"><a href="#cb24-23"></a></span>
+<span id="cb24-24"><a href="#cb24-24"></a><span class="fu">## The Boot Process</span></span>
+<span id="cb24-25"><a href="#cb24-25"></a></span>
+<span id="cb24-26"><a href="#cb24-26"></a><span class="ss">- </span>POV: You are an inanimate piece of silicon.</span>
+<span id="cb24-27"><a href="#cb24-27"></a><span class="ss">    - </span>You contain wires connected to logic gates.</span>
+<span id="cb24-28"><a href="#cb24-28"></a><span class="ss">    - </span>Somewhere, a switch is flipped.</span>
+<span id="cb24-29"><a href="#cb24-29"></a><span class="ss">    - </span>Electrons flow into some of your wires, through some gates.</span>
+<span id="cb24-30"><a href="#cb24-30"></a></span>
+<span id="cb24-31"><a href="#cb24-31"></a><span class="fu">## First Steps</span></span>
+<span id="cb24-32"><a href="#cb24-32"></a></span>
+<span id="cb24-33"><a href="#cb24-33"></a><span class="ss">- </span>What determines the initial arrangement of gates?</span>
+<span id="cb24-34"><a href="#cb24-34"></a><span class="ss">- </span>Where do electrons flow?</span>
+<span id="cb24-35"><a href="#cb24-35"></a><span class="ss">- </span>This is determined by the *boot process*</span>
+<span id="cb24-36"><a href="#cb24-36"></a><span class="ss">    - </span>Occurs on *ever* power-up</span>
+<span id="cb24-37"><a href="#cb24-37"></a><span class="ss">    - </span>Determined by *hardware* design</span>
+<span id="cb24-38"><a href="#cb24-38"></a><span class="ss">    - </span>More fundamental than the OS</span>
+<span id="cb24-39"><a href="#cb24-39"></a>    </span>
+<span id="cb24-40"><a href="#cb24-40"></a><span class="fu">## Firmware</span></span>
+<span id="cb24-41"><a href="#cb24-41"></a></span>
+<span id="cb24-42"><a href="#cb24-42"></a><span class="ss">- </span>What is between hardware and software?</span>
+<span id="cb24-43"><a href="#cb24-43"></a><span class="ss">    - </span>Firmware.</span>
+<span id="cb24-44"><a href="#cb24-44"></a><span class="ss">- </span>On power-up, devices execute code embedded in physical read only memory (ROM). </span>
+<span id="cb24-45"><a href="#cb24-45"></a><span class="ss">    - </span>Read more: <span class="co">[</span><span class="ot">ROM</span><span class="co">](https://en.wikipedia.org/wiki/Read-only_memory)</span></span>
+<span id="cb24-46"><a href="#cb24-46"></a><span class="ss">- </span>Is it software? Is it hardware? Who can say.</span>
+<span id="cb24-47"><a href="#cb24-47"></a></span>
+<span id="cb24-48"><a href="#cb24-48"></a><span class="fu">## Enter the CPU</span></span>
+<span id="cb24-49"><a href="#cb24-49"></a></span>
+<span id="cb24-50"><a href="#cb24-50"></a><span class="ss">- </span>Usually, power-up occurs on a "motherboard" hosting, among other things, the bus.</span>
+<span id="cb24-51"><a href="#cb24-51"></a><span class="ss">    - </span>Named "mother" after the "MU/TH/UR" on ship computer in *Alien* (1979)</span>
+<span id="cb24-52"><a href="#cb24-52"></a><span class="ss">    - </span>This is a lie.</span>
+<span id="cb24-53"><a href="#cb24-53"></a>    </span>
+<span id="cb24-54"><a href="#cb24-54"></a><span class="fu">## Not "code" but "ware"</span></span>
+<span id="cb24-55"><a href="#cb24-55"></a>    </span>
+<span id="cb24-56"><a href="#cb24-56"></a><span class="ss">- </span>So firmware isn't really like CPU code (like Rust or C), but it does:</span>
+<span id="cb24-57"><a href="#cb24-57"></a><span class="ss">    - </span>Tell circuitry where to direct electrons within the CPU.</span>
+<span id="cb24-58"><a href="#cb24-58"></a><span class="ss">    - </span>Also wake up e.g. the MMU.</span>
+<span id="cb24-59"><a href="#cb24-59"></a></span>
+<span id="cb24-60"><a href="#cb24-60"></a><span class="fu">## Enter the OS</span></span>
+<span id="cb24-61"><a href="#cb24-61"></a></span>
+<span id="cb24-62"><a href="#cb24-62"></a><span class="ss">- </span>With the CPU primed but not yet ticking through clock cycles, all that remains is to either</span>
+<span id="cb24-63"><a href="#cb24-63"></a><span class="ss">    - </span>Execute a bare metal executable, or</span>
+<span id="cb24-64"><a href="#cb24-64"></a><span class="ss">    - </span>Boot an operating system to enable the next higher-level task.</span>
+<span id="cb24-65"><a href="#cb24-65"></a>    </span>
+<span id="cb24-66"><a href="#cb24-66"></a><span class="fu">## What it sounds like</span></span>
+<span id="cb24-67"><a href="#cb24-67"></a>    </span>
+<span id="cb24-68"><a href="#cb24-68"></a><span class="ss">- </span>We regard, then, the operating system as a *system* which *operates* the *hardware* on behalf of higher level *software*.</span>
+<span id="cb24-69"><a href="#cb24-69"></a><span class="ss">    - </span>Hence, "systems computing".</span>
+<span id="cb24-70"><a href="#cb24-70"></a><span class="ss">    - </span>Hopefully the contrast to software is a bit more clear here.</span>
+<span id="cb24-71"><a href="#cb24-71"></a>    </span>
+<span id="cb24-72"><a href="#cb24-72"></a><span class="fu">## Aside</span></span>
+<span id="cb24-73"><a href="#cb24-73"></a></span>
+<span id="cb24-74"><a href="#cb24-74"></a><span class="ss">- </span>I am supposed to teach you about the "power-on self-test".</span>
+<span id="cb24-75"><a href="#cb24-75"></a><span class="ss">- </span>A bit electrical engineering for me.</span>
+<span id="cb24-76"><a href="#cb24-76"></a></span>
+<span id="cb24-77"><a href="#cb24-77"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">A **power-on self-test** (POST) is a process performed by firmware or software routines immediately after a computer or other digital electronic device is powered on.</span><span class="co">](https://en.wikipedia.org/wiki/Power-on_self-test)</span></span>
+<span id="cb24-78"><a href="#cb24-78"></a></span>
+<span id="cb24-79"><a href="#cb24-79"></a><span class="ss">- </span>Neat! Moving on.</span>
+<span id="cb24-80"><a href="#cb24-80"></a></span>
+<span id="cb24-81"><a href="#cb24-81"></a><span class="fu">## Competing Standards</span></span>
+<span id="cb24-82"><a href="#cb24-82"></a></span>
+<span id="cb24-83"><a href="#cb24-83"></a><span class="ss">- </span>Lucky us, there is no widely agreed upon way to do firmware.</span>
+<span id="cb24-84"><a href="#cb24-84"></a><span class="ss">- </span>There's the cool, old way that doesn't work well but is easy.</span>
+<span id="cb24-85"><a href="#cb24-85"></a><span class="ss">    - </span>“Basic Input/Output System“ <span class="co">[</span><span class="ot">**BIOS**</span><span class="co">](https://en.wikipedia.org/wiki/BIOS)</span></span>
+<span id="cb24-86"><a href="#cb24-86"></a><span class="ss">    - </span>1981</span>
+<span id="cb24-87"><a href="#cb24-87"></a>    </span>
+<span id="cb24-88"><a href="#cb24-88"></a><span class="fu">## Competing Standards</span></span>
+<span id="cb24-89"><a href="#cb24-89"></a>    </span>
+<span id="cb24-90"><a href="#cb24-90"></a><span class="ss">- </span>There's the new way that is too hard to use for normal people like us.</span>
+<span id="cb24-91"><a href="#cb24-91"></a><span class="ss">    - </span>As in people who do anything else ever.</span>
+<span id="cb24-92"><a href="#cb24-92"></a><span class="ss">    - </span>It's good though we promise.</span>
+<span id="cb24-93"><a href="#cb24-93"></a><span class="ss">    - </span>“Unified Extensible Firmware Interface” <span class="co">[</span><span class="ot">**UEFI**</span><span class="co">](https://en.wikipedia.org/wiki/Unified_Extensible_Firmware_Interface)</span>.</span>
+<span id="cb24-94"><a href="#cb24-94"></a><span class="ss">    - </span>May make you use it for a lab. <span class="co">[</span><span class="ot">More.</span><span class="co">](https://github.com/le-jzr/sisyphos-kernel-uefi-x86_64)</span></span>
+<span id="cb24-95"><a href="#cb24-95"></a><span class="ss">    - </span>2006</span>
+<span id="cb24-96"><a href="#cb24-96"></a></span>
+<span id="cb24-97"><a href="#cb24-97"></a><span class="fu">## BIOS Boot</span></span>
+<span id="cb24-98"><a href="#cb24-98"></a></span>
+<span id="cb24-99"><a href="#cb24-99"></a><span class="ss">- </span>I actually started fooling around with the BIOS before UEFI even existed.</span>
+<span id="cb24-100"><a href="#cb24-100"></a><span class="ss">    - </span>I was a normal kid though 100%.</span>
+<span id="cb24-101"><a href="#cb24-101"></a><span class="ss">- </span>Fortunately it's still basically around. Quoth Blog:</span>
+<span id="cb24-102"><a href="#cb24-102"></a></span>
+<span id="cb24-103"><a href="#cb24-103"></a><span class="at">&gt; This is great, because you can use the same boot logic across all machines from the last century. </span></span>
+<span id="cb24-104"><a href="#cb24-104"></a></span>
+<span id="cb24-105"><a href="#cb24-105"></a><span class="fu">## Upsides</span></span>
+<span id="cb24-106"><a href="#cb24-106"></a></span>
+<span id="cb24-107"><a href="#cb24-107"></a><span class="ss">- </span>Blog says it's a downside that this means you have to do 16-bit mode.</span>
+<span id="cb24-108"><a href="#cb24-108"></a><span class="ss">    - </span>I say: that's cool.</span>
+<span id="cb24-109"><a href="#cb24-109"></a><span class="ss">    - </span>I can't count higher than about 0xFFFF anyways.</span>
+<span id="cb24-110"><a href="#cb24-110"></a><span class="ss">- </span>The blog impolitely calls 1980s bootloaders "archaic" instead of "vintage", "retro", or "foundational".</span>
+<span id="cb24-111"><a href="#cb24-111"></a></span>
+<span id="cb24-112"><a href="#cb24-112"></a><span class="fu">## Bootable Disks</span></span>
+<span id="cb24-113"><a href="#cb24-113"></a></span>
+<span id="cb24-114"><a href="#cb24-114"></a><span class="ss">- </span>I should also tell you about *bootable disks*</span>
+<span id="cb24-115"><a href="#cb24-115"></a><span class="ss">- </span>Nowadays we all boot from SSD or rarely HDD.</span>
+<span id="cb24-116"><a href="#cb24-116"></a><span class="ss">- </span>But you have probably at some point booted from USB.</span>
+<span id="cb24-117"><a href="#cb24-117"></a><span class="ss">    - </span>Usually when removing a virus like Microsoft Windows from your system.</span>
+<span id="cb24-118"><a href="#cb24-118"></a><span class="ss">- </span>Olden days computers could boot from floppy disks, etc.</span>
+<span id="cb24-119"><a href="#cb24-119"></a></span>
+<span id="cb24-120"><a href="#cb24-120"></a><span class="fu">## Bootlaoder</span></span>
+<span id="cb24-121"><a href="#cb24-121"></a></span>
+<span id="cb24-122"><a href="#cb24-122"></a><span class="ss">- </span>I mentioned 1980s bootloaders.</span>
+<span id="cb24-123"><a href="#cb24-123"></a><span class="ss">    - </span>No relation to bootleggers or boatloaders.</span>
+<span id="cb24-124"><a href="#cb24-124"></a><span class="ss">- </span>512-byte portion of executable code stored at the bootable disk's "beginning". </span>
+<span id="cb24-125"><a href="#cb24-125"></a><span class="ss">    - </span>On a HDD this is physically the outermost ring of addressable magnetic regions.</span>
+<span id="cb24-126"><a href="#cb24-126"></a><span class="ss">    - </span>I don't know how SSDs work as Samsung, SK Hynix, or Micron (shout out Boise).</span>
+<span id="cb24-127"><a href="#cb24-127"></a></span>
+<span id="cb24-128"><a href="#cb24-128"></a><span class="fu">## Data Structures</span></span>
+<span id="cb24-129"><a href="#cb24-129"></a></span>
+<span id="cb24-130"><a href="#cb24-130"></a><span class="ss">- </span>Most bootloaders are larger than 512 bytes.</span>
+<span id="cb24-131"><a href="#cb24-131"></a><span class="ss">- </span>So bootloaders are commonly split into a 512 byte first stage that loads a latter stage.</span>
+<span id="cb24-132"><a href="#cb24-132"></a><span class="ss">    - </span>This is why we should still be teaching linked lists, basically.</span>
+<span id="cb24-133"><a href="#cb24-133"></a>    </span>
+<span id="cb24-134"><a href="#cb24-134"></a><span class="fu">## Location, Location</span></span>
+<span id="cb24-135"><a href="#cb24-135"></a></span>
+<span id="cb24-136"><a href="#cb24-136"></a><span class="ss">- </span>The bootloader lives in a reserved physical (HDD) or logical (SSD) location.</span>
+<span id="cb24-137"><a href="#cb24-137"></a><span class="ss">- </span>Does the OS?</span>
+<span id="cb24-138"><a href="#cb24-138"></a><span class="ss">    - </span>With respect to itself, yes, the OS probably says it lives at memory location zero.</span>
+<span id="cb24-139"><a href="#cb24-139"></a><span class="ss">    - </span>With respect to underlying hardware? Probably not.</span>
+<span id="cb24-140"><a href="#cb24-140"></a><span class="ss">        - </span>Gotta find it.</span>
+<span id="cb24-141"><a href="#cb24-141"></a>        </span>
+<span id="cb24-142"><a href="#cb24-142"></a><span class="fu">## Booting the OS</span></span>
+<span id="cb24-143"><a href="#cb24-143"></a></span>
+<span id="cb24-144"><a href="#cb24-144"></a><span class="ss">- </span>The bootloader has to determine the location of the *kernel image* on disk and load it into memory.</span>
+<span id="cb24-145"><a href="#cb24-145"></a><span class="ss">    - </span>Basically this is the definition of the kernel, the minimal OS internal that runs first.</span>
+<span id="cb24-146"><a href="#cb24-146"></a><span class="ss">    - </span>Image here means we have physical bits capturing some information, so copies of the bits may live in different places.</span>
+<span id="cb24-147"><a href="#cb24-147"></a><span class="ss">        - </span>SSD and RAM, for example.</span>
+<span id="cb24-148"><a href="#cb24-148"></a>        </span>
+<span id="cb24-149"><a href="#cb24-149"></a><span class="fu">## Switcheroo</span></span>
+<span id="cb24-150"><a href="#cb24-150"></a></span>
+<span id="cb24-151"><a href="#cb24-151"></a><span class="ss">- </span>The OS probably is not a 16-bit OS.</span>
+<span id="cb24-152"><a href="#cb24-152"></a><span class="ss">    - </span>Unless? Lab idea? Hold me back!</span>
+<span id="cb24-153"><a href="#cb24-153"></a><span class="ss">- </span>Big OS wants me to tell you that:</span>
+<span id="cb24-154"><a href="#cb24-154"></a><span class="ss">    - </span>16-bit mode is called "real mode"</span>
+<span id="cb24-155"><a href="#cb24-155"></a><span class="ss">    - </span>32-bit mode is called "protected mode"</span>
+<span id="cb24-156"><a href="#cb24-156"></a><span class="ss">    - </span>64-bit mode is called "long mode".</span>
+<span id="cb24-157"><a href="#cb24-157"></a><span class="ss">- </span>Recall we were writing 64-bit bare metal.</span>
+<span id="cb24-158"><a href="#cb24-158"></a></span>
+<span id="cb24-159"><a href="#cb24-159"></a><span class="fu">## Hand-wave</span></span>
+<span id="cb24-160"><a href="#cb24-160"></a></span>
+<span id="cb24-161"><a href="#cb24-161"></a><span class="at">&gt; Writing a bootloader is a bit cumbersome as it requires assembly language and “write this magic value to this processor register”. </span></span>
+<span id="cb24-162"><a href="#cb24-162"></a></span>
+<span id="cb24-163"><a href="#cb24-163"></a><span class="at">&gt; Instead use a </span><span class="co">[</span><span class="ot">bootimage</span><span class="co">](https://github.com/rust-osdev/bootimage)</span><span class="at"> that automatically prepends a bootloader to your kernel.</span></span>
+<span id="cb24-164"><a href="#cb24-164"></a></span>
+<span id="cb24-165"><a href="#cb24-165"></a><span class="ss">- </span>This is called "cheating" and is a good way to get ahead in life.</span>
+<span id="cb24-166"><a href="#cb24-166"></a></span>
+<span id="cb24-167"><a href="#cb24-167"></a><span class="fu">## The Multiboot Standard</span></span>
+<span id="cb24-168"><a href="#cb24-168"></a></span>
+<span id="cb24-169"><a href="#cb24-169"></a>To avoid that every operating system implements its own bootloader, which is only compatible with a single OS, the <span class="co">[</span><span class="ot">Free Software Foundation</span><span class="co">]</span> created an open bootloader standard called <span class="co">[</span><span class="ot">Multiboot</span><span class="co">]</span> in 1995. The standard defines an interface between the bootloader and the operating system, so that any Multiboot-compliant bootloader can load any Multiboot-compliant operating system. The reference implementation is <span class="co">[</span><span class="ot">GNU GRUB</span><span class="co">]</span>, which is the most popular bootloader for Linux systems.</span>
+<span id="cb24-170"><a href="#cb24-170"></a></span>
+<span id="cb24-171"><a href="#cb24-171"></a><span class="ot">[Free Software Foundation]: https://en.wikipedia.org/wiki/Free_Software_Foundation</span></span>
+<span id="cb24-172"><a href="#cb24-172"></a><span class="ot">[Multiboot]: https://wiki.osdev.org/Multiboot</span></span>
+<span id="cb24-173"><a href="#cb24-173"></a><span class="ot">[GNU GRUB]: https://en.wikipedia.org/wiki/GNU_GRUB</span></span>
+<span id="cb24-174"><a href="#cb24-174"></a></span>
+<span id="cb24-175"><a href="#cb24-175"></a>To make a kernel Multiboot compliant, one just needs to insert a so-called <span class="co">[</span><span class="ot">Multiboot header</span><span class="co">]</span> at the beginning of the kernel file. This makes it very easy to boot an OS from GRUB. However, GRUB and the Multiboot standard have some problems too:</span>
+<span id="cb24-176"><a href="#cb24-176"></a></span>
+<span id="cb24-177"><a href="#cb24-177"></a><span class="ot">[Multiboot header]: https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#OS-image-format</span></span>
+<span id="cb24-178"><a href="#cb24-178"></a></span>
+<span id="cb24-179"><a href="#cb24-179"></a><span class="ss">- </span>They support only the 32-bit protected mode. This means that you still have to do the CPU configuration to switch to the 64-bit long mode.</span>
+<span id="cb24-180"><a href="#cb24-180"></a><span class="ss">- </span>They are designed to make the bootloader simple instead of the kernel. For example, the kernel needs to be linked with an <span class="co">[</span><span class="ot">adjusted default page size</span><span class="co">]</span>, because GRUB can't find the Multiboot header otherwise. Another example is that the <span class="co">[</span><span class="ot">boot information</span><span class="co">]</span>, which is passed to the kernel, contains lots of architecture-dependent structures instead of providing clean abstractions.</span>
+<span id="cb24-181"><a href="#cb24-181"></a><span class="ss">- </span>Both GRUB and the Multiboot standard are only sparsely documented.</span>
+<span id="cb24-182"><a href="#cb24-182"></a><span class="ss">- </span>GRUB needs to be installed on the host system to create a bootable disk image from the kernel file. This makes development on Windows or Mac more difficult.</span>
+<span id="cb24-183"><a href="#cb24-183"></a></span>
+<span id="cb24-184"><a href="#cb24-184"></a><span class="ot">[adjusted default page size]: https://wiki.osdev.org/Multiboot#Multiboot_2</span></span>
+<span id="cb24-185"><a href="#cb24-185"></a><span class="ot">[boot information]: https://www.gnu.org/software/grub/manual/multiboot/multiboot.html#Boot-information-format</span></span>
+<span id="cb24-186"><a href="#cb24-186"></a></span>
+<span id="cb24-187"><a href="#cb24-187"></a>Because of these drawbacks, we decided to not use GRUB or the Multiboot standard. However, we plan to add Multiboot support to our <span class="co">[</span><span class="ot">bootimage</span><span class="co">]</span> tool, so that it's possible to load your kernel on a GRUB system too. If you're interested in writing a Multiboot compliant kernel, check out the <span class="co">[</span><span class="ot">first edition</span><span class="co">]</span> of this blog series.</span>
+<span id="cb24-188"><a href="#cb24-188"></a></span>
+<span id="cb24-189"><a href="#cb24-189"></a><span class="ot">[first edition]: </span>@/edition-1/_index.md</span>
+<span id="cb24-190"><a href="#cb24-190"></a></span>
+<span id="cb24-191"><a href="#cb24-191"></a></span>
+<span id="cb24-192"><a href="#cb24-192"></a><span class="fu"># Kernel</span></span>
+<span id="cb24-193"><a href="#cb24-193"></a></span>
+<span id="cb24-194"><a href="#cb24-194"></a><span class="fu">## A Minimal Kernel</span></span>
+<span id="cb24-195"><a href="#cb24-195"></a></span>
+<span id="cb24-196"><a href="#cb24-196"></a>Now that we roughly know how a computer boots, it's time to create our own minimal kernel. Our goal is to create a disk image that prints a “Hello World!” to the screen when booted. We do this by extending the previous post's <span class="co">[</span><span class="ot">freestanding Rust binary</span><span class="co">]</span>.</span>
+<span id="cb24-197"><a href="#cb24-197"></a></span>
+<span id="cb24-198"><a href="#cb24-198"></a>As you may remember, we built the freestanding binary through <span class="in">`cargo`</span>, but depending on the operating system, we needed different entry point names and compile flags. That's because <span class="in">`cargo`</span> builds for the _host system_ by default, i.e., the system you're running on. This isn't something we want for our kernel, because a kernel that runs on top of, e.g., Windows, does not make much sense. Instead, we want to compile for a clearly defined _target system_.</span>
+<span id="cb24-199"><a href="#cb24-199"></a></span>
+<span id="cb24-200"><a href="#cb24-200"></a><span class="co">&lt;!--</span></span>
+<span id="cb24-201"><a href="#cb24-201"></a></span>
+<span id="cb24-202"><a href="#cb24-202"></a><span class="co">## Installing Rust Nightly</span></span>
+<span id="cb24-203"><a href="#cb24-203"></a></span>
+<span id="cb24-204"><a href="#cb24-204"></a><span class="co">Rust has three release channels: _stable_, _beta_, and _nightly_. The Rust Book explains the difference between these channels really well, so take a minute and [check it out](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html#choo-choo-release-channels-and-riding-the-trains). For building an operating system, we will need some experimental features that are only available on the nightly channel, so we need to install a nightly version of Rust.</span></span>
+<span id="cb24-205"><a href="#cb24-205"></a></span>
+<span id="cb24-206"><a href="#cb24-206"></a><span class="co">To manage Rust installations, I highly recommend [rustup]. It allows you to install nightly, beta, and stable compilers side-by-side and makes it easy to update them. With rustup, you can use a nightly compiler for the current directory by running `rustup override set nightly`. Alternatively, you can add a file called `rust-toolchain` with the content `nightly` to the project's root directory. You can check that you have a nightly version installed by running `rustc --version`: The version number should contain `-nightly` at the end.</span></span>
+<span id="cb24-207"><a href="#cb24-207"></a></span>
+<span id="cb24-208"><a href="#cb24-208"></a><span class="co">[rustup]: https://www.rustup.rs/</span></span>
+<span id="cb24-209"><a href="#cb24-209"></a></span>
+<span id="cb24-210"><a href="#cb24-210"></a><span class="co">The nightly compiler allows us to opt-in to various experimental features by using so-called _feature flags_ at the top of our file. For example, we could enable the experimental [`asm!` macro] for inline assembly by adding `#![feature(asm)]` to the top of our `main.rs`. Note that such experimental features are completely unstable, which means that future Rust versions might change or remove them without prior warning. For this reason, we will only use them if absolutely necessary.</span></span>
+<span id="cb24-211"><a href="#cb24-211"></a></span>
+<span id="cb24-212"><a href="#cb24-212"></a><span class="co">[`asm!` macro]: https://doc.rust-lang.org/stable/reference/inline-assembly.html</span></span>
+<span id="cb24-213"><a href="#cb24-213"></a></span>
+<span id="cb24-214"><a href="#cb24-214"></a><span class="co">--&gt;</span></span>
+<span id="cb24-215"><a href="#cb24-215"></a></span>
+<span id="cb24-216"><a href="#cb24-216"></a><span class="fu">## Target Specification</span></span>
+<span id="cb24-217"><a href="#cb24-217"></a>Cargo supports different target systems through the <span class="in">`--target`</span> parameter. The target is described by a so-called _[target triple]_, which describes the CPU architecture, the vendor, the operating system, and the <span class="co">[</span><span class="ot">ABI</span><span class="co">]</span>. For example, the <span class="in">`x86_64-unknown-linux-gnu`</span> target triple describes a system with an <span class="in">`x86_64`</span> CPU, no clear vendor, and a Linux operating system with the GNU ABI. Rust supports <span class="co">[</span><span class="ot">many different target triples</span><span class="co">][platform-support]</span>, including <span class="in">`arm-linux-androideabi`</span> for Android or <span class="co">[</span><span class="ot">`wasm32-unknown-unknown` for WebAssembly</span><span class="co">](https://www.hellorust.com/setup/wasm-target/)</span>.</span>
+<span id="cb24-218"><a href="#cb24-218"></a></span>
+<span id="cb24-219"><a href="#cb24-219"></a><span class="ot">[target triple]: https://clang.llvm.org/docs/CrossCompilation.html#target-triple</span></span>
+<span id="cb24-220"><a href="#cb24-220"></a><span class="ot">[ABI]: https://stackoverflow.com/a/2456882</span></span>
+<span id="cb24-221"><a href="#cb24-221"></a><span class="ot">[platform-support]: https://forge.rust-lang.org/release/platform-support.html</span></span>
+<span id="cb24-222"><a href="#cb24-222"></a><span class="ot">[custom-targets]: https://doc.rust-lang.org/nightly/rustc/targets/custom.html</span></span>
+<span id="cb24-223"><a href="#cb24-223"></a></span>
+<span id="cb24-224"><a href="#cb24-224"></a>For our target system, however, we require some special configuration parameters (e.g. no underlying OS), so none of the <span class="co">[</span><span class="ot">existing target triples</span><span class="co">][platform-support]</span> fits. Fortunately, Rust allows us to define <span class="co">[</span><span class="ot">our own target</span><span class="co">][custom-targets]</span> through a JSON file. For example, a JSON file that describes the <span class="in">`x86_64-unknown-linux-gnu`</span> target looks like this:</span>
+<span id="cb24-225"><a href="#cb24-225"></a></span>
+<span id="cb24-226"><a href="#cb24-226"></a><span class="in">```json</span></span>
+<span id="cb24-227"><a href="#cb24-227"></a><span class="fu">{</span></span>
+<span id="cb24-228"><a href="#cb24-228"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-linux-gnu"</span><span class="fu">,</span></span>
+<span id="cb24-229"><a href="#cb24-229"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb24-230"><a href="#cb24-230"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb24-231"><a href="#cb24-231"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb24-232"><a href="#cb24-232"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb24-233"><a href="#cb24-233"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb24-234"><a href="#cb24-234"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"linux"</span><span class="fu">,</span></span>
+<span id="cb24-235"><a href="#cb24-235"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb24-236"><a href="#cb24-236"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"gcc"</span><span class="fu">,</span></span>
+<span id="cb24-237"><a href="#cb24-237"></a>    <span class="dt">"pre-link-args"</span><span class="fu">:</span> <span class="ot">[</span><span class="st">"-m64"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb24-238"><a href="#cb24-238"></a>    <span class="dt">"morestack"</span><span class="fu">:</span> <span class="kw">false</span></span>
+<span id="cb24-239"><a href="#cb24-239"></a><span class="fu">}</span></span>
+<span id="cb24-240"><a href="#cb24-240"></a><span class="in">```</span></span>
+<span id="cb24-241"><a href="#cb24-241"></a></span>
+<span id="cb24-242"><a href="#cb24-242"></a>Most fields are required by LLVM to generate code for that platform. For example, the <span class="co">[</span><span class="ot">`data-layout`</span><span class="co">]</span> field defines the size of various integer, floating point, and pointer types. Then there are fields that Rust uses for conditional compilation, such as <span class="in">`target-pointer-width`</span>. The third kind of field defines how the crate should be built. For example, the <span class="in">`pre-link-args`</span> field specifies arguments passed to the <span class="co">[</span><span class="ot">linker</span><span class="co">]</span>.</span>
+<span id="cb24-243"><a href="#cb24-243"></a></span>
+<span id="cb24-244"><a href="#cb24-244"></a><span class="ot">[`data-layout`]: https://llvm.org/docs/LangRef.html#data-layout</span></span>
+<span id="cb24-245"><a href="#cb24-245"></a><span class="ot">[linker]: https://en.wikipedia.org/wiki/Linker_(computing)</span></span>
+<span id="cb24-246"><a href="#cb24-246"></a></span>
+<span id="cb24-247"><a href="#cb24-247"></a>We also target <span class="in">`x86_64`</span> systems with our kernel, so our target specification will look very similar to the one above. Let's start by creating an <span class="in">`x86_64-blog_os.json`</span> file (choose any name you like) with the common content:</span>
+<span id="cb24-248"><a href="#cb24-248"></a></span>
+<span id="cb24-249"><a href="#cb24-249"></a><span class="in">```json</span></span>
+<span id="cb24-250"><a href="#cb24-250"></a><span class="fu">{</span></span>
+<span id="cb24-251"><a href="#cb24-251"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb24-252"><a href="#cb24-252"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb24-253"><a href="#cb24-253"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb24-254"><a href="#cb24-254"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb24-255"><a href="#cb24-255"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb24-256"><a href="#cb24-256"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb24-257"><a href="#cb24-257"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb24-258"><a href="#cb24-258"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb24-259"><a href="#cb24-259"></a><span class="fu">}</span></span>
+<span id="cb24-260"><a href="#cb24-260"></a><span class="in">```</span></span>
+<span id="cb24-261"><a href="#cb24-261"></a></span>
+<span id="cb24-262"><a href="#cb24-262"></a>Note that we changed the OS in the <span class="in">`llvm-target`</span> and the <span class="in">`os`</span> field to <span class="in">`none`</span>, because we will run on bare metal.</span>
+<span id="cb24-263"><a href="#cb24-263"></a></span>
+<span id="cb24-264"><a href="#cb24-264"></a>We add the following build-related entries:</span>
+<span id="cb24-265"><a href="#cb24-265"></a></span>
+<span id="cb24-266"><a href="#cb24-266"></a></span>
+<span id="cb24-267"><a href="#cb24-267"></a><span class="in">```json</span></span>
+<span id="cb24-268"><a href="#cb24-268"></a>"linker-flavor": "ld.lld",</span>
+<span id="cb24-269"><a href="#cb24-269"></a>"linker": "rust-lld",</span>
+<span id="cb24-270"><a href="#cb24-270"></a><span class="in">```</span></span>
+<span id="cb24-271"><a href="#cb24-271"></a></span>
+<span id="cb24-272"><a href="#cb24-272"></a>Instead of using the platform's default linker (which might not support Linux targets), we use the cross-platform <span class="co">[</span><span class="ot">LLD</span><span class="co">]</span> linker that is shipped with Rust for linking our kernel.</span>
+<span id="cb24-273"><a href="#cb24-273"></a></span>
+<span id="cb24-274"><a href="#cb24-274"></a><span class="ot">[LLD]: https://lld.llvm.org/</span></span>
+<span id="cb24-275"><a href="#cb24-275"></a></span>
+<span id="cb24-276"><a href="#cb24-276"></a><span class="in">```json</span></span>
+<span id="cb24-277"><a href="#cb24-277"></a>"panic-strategy": "abort",</span>
+<span id="cb24-278"><a href="#cb24-278"></a><span class="in">```</span></span>
+<span id="cb24-279"><a href="#cb24-279"></a></span>
+<span id="cb24-280"><a href="#cb24-280"></a>This setting specifies that the target doesn't support <span class="co">[</span><span class="ot">stack unwinding</span><span class="co">]</span> on panic, so instead the program should abort directly. This has the same effect as the <span class="in">`panic = "abort"`</span> option in our Cargo.toml, so we can remove it from there. (Note that, in contrast to the Cargo.toml option, this target option also applies when we recompile the <span class="in">`core`</span> library later in this post. So, even if you prefer to keep the Cargo.toml option, make sure to include this option.)</span>
+<span id="cb24-281"><a href="#cb24-281"></a></span>
+<span id="cb24-282"><a href="#cb24-282"></a><span class="ot">[stack unwinding]: https://www.bogotobogo.com/cplusplus/stackunwinding.php</span></span>
+<span id="cb24-283"><a href="#cb24-283"></a></span>
+<span id="cb24-284"><a href="#cb24-284"></a><span class="in">```json</span></span>
+<span id="cb24-285"><a href="#cb24-285"></a>"disable-redzone": true,</span>
+<span id="cb24-286"><a href="#cb24-286"></a><span class="in">```</span></span>
+<span id="cb24-287"><a href="#cb24-287"></a></span>
+<span id="cb24-288"><a href="#cb24-288"></a>We're writing a kernel, so we'll need to handle interrupts at some point. To do that safely, we have to disable a certain stack pointer optimization called the _“red zone”_, because it would cause stack corruption otherwise. For more information, see our separate post about <span class="co">[</span><span class="ot">disabling the red zone</span><span class="co">]</span>.</span>
+<span id="cb24-289"><a href="#cb24-289"></a></span>
+<span id="cb24-290"><a href="#cb24-290"></a><span class="ot">[disabling the red zone]: </span>@/edition-2/posts/02-minimal-rust-kernel/disable-red-zone/index.md</span>
+<span id="cb24-291"><a href="#cb24-291"></a></span>
+<span id="cb24-292"><a href="#cb24-292"></a><span class="in">```json</span></span>
+<span id="cb24-293"><a href="#cb24-293"></a>"features": "-mmx,-sse,+soft-float",</span>
+<span id="cb24-294"><a href="#cb24-294"></a><span class="in">```</span></span>
+<span id="cb24-295"><a href="#cb24-295"></a></span>
+<span id="cb24-296"><a href="#cb24-296"></a>The <span class="in">`features`</span> field enables/disables target features. We disable the <span class="in">`mmx`</span> and <span class="in">`sse`</span> features by prefixing them with a minus and enable the <span class="in">`soft-float`</span> feature by prefixing it with a plus. Note that there must be no spaces between different flags, otherwise LLVM fails to interpret the features string.</span>
+<span id="cb24-297"><a href="#cb24-297"></a></span>
+<span id="cb24-298"><a href="#cb24-298"></a>The <span class="in">`mmx`</span> and <span class="in">`sse`</span> features determine support for <span class="co">[</span><span class="ot">Single Instruction Multiple Data (SIMD)</span><span class="co">]</span> instructions, which can often speed up programs significantly. However, using the large SIMD registers in OS kernels leads to performance problems. The reason is that the kernel needs to restore all registers to their original state before continuing an interrupted program. This means that the kernel has to save the complete SIMD state to main memory on each system call or hardware interrupt. Since the SIMD state is very large (512–1600 bytes) and interrupts can occur very often, these additional save/restore operations considerably harm performance. To avoid this, we disable SIMD for our kernel (not for applications running on top!).</span>
+<span id="cb24-299"><a href="#cb24-299"></a></span>
+<span id="cb24-300"><a href="#cb24-300"></a><span class="ot">[Single Instruction Multiple Data (SIMD)]: https://en.wikipedia.org/wiki/SIMD</span></span>
+<span id="cb24-301"><a href="#cb24-301"></a></span>
+<span id="cb24-302"><a href="#cb24-302"></a>A problem with disabling SIMD is that floating point operations on <span class="in">`x86_64`</span> require SIMD registers by default. To solve this problem, we add the <span class="in">`soft-float`</span> feature, which emulates all floating point operations through software functions based on normal integers.</span>
+<span id="cb24-303"><a href="#cb24-303"></a></span>
+<span id="cb24-304"><a href="#cb24-304"></a>For more information, see our post on <span class="co">[</span><span class="ot">disabling SIMD</span><span class="co">](@/edition-2/posts/02-minimal-rust-kernel/disable-simd/index.md)</span>.</span>
+<span id="cb24-305"><a href="#cb24-305"></a></span>
+<span id="cb24-306"><a href="#cb24-306"></a><span class="in">```json</span></span>
+<span id="cb24-307"><a href="#cb24-307"></a>"rustc-abi": "x86-softfloat"</span>
+<span id="cb24-308"><a href="#cb24-308"></a><span class="in">```</span></span>
+<span id="cb24-309"><a href="#cb24-309"></a></span>
+<span id="cb24-310"><a href="#cb24-310"></a>As we want to use the <span class="in">`soft-float`</span> feature, we also need to tell the Rust compiler <span class="in">`rustc`</span> that we want to use the corresponding ABI. We can do that by setting the <span class="in">`rustc-abi`</span> field to <span class="in">`x86-softfloat`</span>.</span>
+<span id="cb24-311"><a href="#cb24-311"></a></span>
+<span id="cb24-312"><a href="#cb24-312"></a><span class="fu">## Putting it Together</span></span>
+<span id="cb24-313"><a href="#cb24-313"></a>Our target specification file now looks like this:</span>
+<span id="cb24-314"><a href="#cb24-314"></a></span>
+<span id="cb24-315"><a href="#cb24-315"></a><span class="in">```json</span></span>
+<span id="cb24-316"><a href="#cb24-316"></a><span class="fu">{</span></span>
+<span id="cb24-317"><a href="#cb24-317"></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb24-318"><a href="#cb24-318"></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb24-319"><a href="#cb24-319"></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb24-320"><a href="#cb24-320"></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb24-321"><a href="#cb24-321"></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb24-322"><a href="#cb24-322"></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb24-323"><a href="#cb24-323"></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb24-324"><a href="#cb24-324"></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb24-325"><a href="#cb24-325"></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
+<span id="cb24-326"><a href="#cb24-326"></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
+<span id="cb24-327"><a href="#cb24-327"></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
+<span id="cb24-328"><a href="#cb24-328"></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb24-329"><a href="#cb24-329"></a>    <span class="dt">"features"</span><span class="fu">:</span> <span class="st">"-mmx,-sse,+soft-float"</span><span class="fu">,</span></span>
+<span id="cb24-330"><a href="#cb24-330"></a>    <span class="dt">"rustc-abi"</span><span class="fu">:</span> <span class="st">"x86-softfloat"</span></span>
+<span id="cb24-331"><a href="#cb24-331"></a><span class="fu">}</span></span>
+<span id="cb24-332"><a href="#cb24-332"></a><span class="in">```</span></span>
+<span id="cb24-333"><a href="#cb24-333"></a></span>
+<span id="cb24-334"><a href="#cb24-334"></a><span class="fu">## Building our Kernel</span></span>
+<span id="cb24-335"><a href="#cb24-335"></a></span>
+<span id="cb24-336"><a href="#cb24-336"></a>Compiling for our new target will use Linux conventions, since the ld.lld linker-flavor instructs llvm to compile with the <span class="in">`-flavor gnu`</span> flag (for more linker options, see <span class="co">[</span><span class="ot">the rustc documentation</span><span class="co">](https://doc.rust-lang.org/rustc/codegen-options/index.html#linker-flavor)</span>). This means that we need an entry point named <span class="in">`_start`</span> as described in the <span class="co">[</span><span class="ot">previous post</span><span class="co">]</span>:</span>
+<span id="cb24-337"><a href="#cb24-337"></a></span>
+<span id="cb24-338"><a href="#cb24-338"></a><span class="ot">[previous post]: </span>@/edition-2/posts/01-freestanding-rust-binary/index.md</span>
+<span id="cb24-339"><a href="#cb24-339"></a></span>
+<span id="cb24-340"><a href="#cb24-340"></a><span class="in">```rust</span></span>
+<span id="cb24-341"><a href="#cb24-341"></a><span class="co">// src/main.rs</span></span>
+<span id="cb24-342"><a href="#cb24-342"></a></span>
+<span id="cb24-343"><a href="#cb24-343"></a><span class="at">#![</span>no_std<span class="at">]</span> <span class="co">// don't link the Rust standard library</span></span>
+<span id="cb24-344"><a href="#cb24-344"></a><span class="at">#![</span>no_main<span class="at">]</span> <span class="co">// disable all Rust-level entry points</span></span>
+<span id="cb24-345"><a href="#cb24-345"></a></span>
+<span id="cb24-346"><a href="#cb24-346"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb24-347"><a href="#cb24-347"></a></span>
+<span id="cb24-348"><a href="#cb24-348"></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb24-349"><a href="#cb24-349"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb24-350"><a href="#cb24-350"></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb24-351"><a href="#cb24-351"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb24-352"><a href="#cb24-352"></a><span class="op">}</span></span>
+<span id="cb24-353"><a href="#cb24-353"></a></span>
+<span id="cb24-354"><a href="#cb24-354"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb24-355"><a href="#cb24-355"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb24-356"><a href="#cb24-356"></a>    <span class="co">// this function is the entry point, since the linker looks for a function</span></span>
+<span id="cb24-357"><a href="#cb24-357"></a>    <span class="co">// named `_start` by default</span></span>
+<span id="cb24-358"><a href="#cb24-358"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb24-359"><a href="#cb24-359"></a><span class="op">}</span></span>
+<span id="cb24-360"><a href="#cb24-360"></a><span class="in">```</span></span>
+<span id="cb24-361"><a href="#cb24-361"></a></span>
+<span id="cb24-362"><a href="#cb24-362"></a>Note that the entry point needs to be called <span class="in">`_start`</span> regardless of your host OS.</span>
+<span id="cb24-363"><a href="#cb24-363"></a></span>
+<span id="cb24-364"><a href="#cb24-364"></a>We can now build the kernel for our new target by passing the name of the JSON file as <span class="in">`--target`</span>:</span>
+<span id="cb24-365"><a href="#cb24-365"></a></span>
+<span id="cb24-366"><a href="#cb24-366"></a><span class="in">```</span></span>
+<span id="cb24-367"><a href="#cb24-367"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
+<span id="cb24-368"><a href="#cb24-368"></a></span>
+<span id="cb24-369"><a href="#cb24-369"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
+<span id="cb24-370"><a href="#cb24-370"></a><span class="in">```</span></span>
+<span id="cb24-371"><a href="#cb24-371"></a></span>
+<span id="cb24-372"><a href="#cb24-372"></a>It fails! The error tells us that custom JSON target specifications are an unstable feature that requires explicit opt-in. This is because the format of the JSON target files is not considered stable yet, so changes to it might occur in future versions of Rust. See the <span class="co">[</span><span class="ot">tracking issue for custom JSON target specs</span><span class="co">][json-target-spec-issue]</span> for more information.</span>
+<span id="cb24-373"><a href="#cb24-373"></a></span>
+<span id="cb24-374"><a href="#cb24-374"></a><span class="ot">[json-target-spec-issue]: https://github.com/rust-lang/rust/issues/151528</span></span>
+<span id="cb24-375"><a href="#cb24-375"></a></span>
+<span id="cb24-376"><a href="#cb24-376"></a><span class="fu">## The `json-target-spec` Option</span></span>
+<span id="cb24-377"><a href="#cb24-377"></a></span>
+<span id="cb24-378"><a href="#cb24-378"></a>To enable support for custom JSON target specifications, we need to create a local <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span> (the <span class="in">`.cargo`</span> folder should be next to your <span class="in">`src`</span> folder) with the following content:</span>
+<span id="cb24-379"><a href="#cb24-379"></a></span>
+<span id="cb24-380"><a href="#cb24-380"></a><span class="ot">[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html</span></span>
+<span id="cb24-381"><a href="#cb24-381"></a></span>
+<span id="cb24-382"><a href="#cb24-382"></a><span class="in">```toml</span></span>
+<span id="cb24-383"><a href="#cb24-383"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-384"><a href="#cb24-384"></a></span>
+<span id="cb24-385"><a href="#cb24-385"></a><span class="in">[unstable]</span></span>
+<span id="cb24-386"><a href="#cb24-386"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb24-387"><a href="#cb24-387"></a><span class="in">```</span></span>
+<span id="cb24-388"><a href="#cb24-388"></a></span>
+<span id="cb24-389"><a href="#cb24-389"></a>This enables the unstable <span class="in">`json-target-spec`</span> feature, allowing us to use custom JSON target files.</span>
+<span id="cb24-390"><a href="#cb24-390"></a></span>
+<span id="cb24-391"><a href="#cb24-391"></a>With this configuration in place, let's try building again:</span>
+<span id="cb24-392"><a href="#cb24-392"></a></span>
+<span id="cb24-393"><a href="#cb24-393"></a><span class="in">```</span></span>
+<span id="cb24-394"><a href="#cb24-394"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
+<span id="cb24-395"><a href="#cb24-395"></a></span>
+<span id="cb24-396"><a href="#cb24-396"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
+<span id="cb24-397"><a href="#cb24-397"></a><span class="in">```</span></span>
+<span id="cb24-398"><a href="#cb24-398"></a></span>
+<span id="cb24-399"><a href="#cb24-399"></a>It still fails, but with a new error. The error tells us that the Rust compiler does not find the <span class="co">[</span><span class="ot">`core` library</span><span class="co">]</span>. This library contains basic Rust types such as <span class="in">`Result`</span>, <span class="in">`Option`</span>, and iterators, and is implicitly linked to all <span class="in">`no_std`</span> crates.</span>
+<span id="cb24-400"><a href="#cb24-400"></a></span>
+<span id="cb24-401"><a href="#cb24-401"></a><span class="ot">[`core` library]: https://doc.rust-lang.org/nightly/core/index.html</span></span>
+<span id="cb24-402"><a href="#cb24-402"></a></span>
+<span id="cb24-403"><a href="#cb24-403"></a>The problem is that the core library is distributed together with the Rust compiler as a _precompiled_ library. So it is only valid for supported host triples (e.g., <span class="in">`x86_64-unknown-linux-gnu`</span>) but not for our custom target. If we want to compile code for other targets, we need to recompile <span class="in">`core`</span> for these targets first.</span>
+<span id="cb24-404"><a href="#cb24-404"></a></span>
+<span id="cb24-405"><a href="#cb24-405"></a><span class="fu">## The `build-std` Option</span></span>
+<span id="cb24-406"><a href="#cb24-406"></a></span>
+<span id="cb24-407"><a href="#cb24-407"></a>That's where the <span class="co">[</span><span class="ot">`build-std` feature</span><span class="co">]</span> of cargo comes in. It allows to recompile <span class="in">`core`</span> and other standard library crates on demand, instead of using the precompiled versions shipped with the Rust installation. This feature is very new and still not finished, so it is marked as "unstable" and only available on <span class="co">[</span><span class="ot">nightly Rust compilers</span><span class="co">]</span>.</span>
+<span id="cb24-408"><a href="#cb24-408"></a></span>
+<span id="cb24-409"><a href="#cb24-409"></a><span class="ot">[`build-std` feature]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std</span></span>
+<span id="cb24-410"><a href="#cb24-410"></a><span class="ot">[nightly Rust compilers]: #installing-rust-nightly</span></span>
+<span id="cb24-411"><a href="#cb24-411"></a></span>
+<span id="cb24-412"><a href="#cb24-412"></a>To use the feature, we need to add the following to our <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span>:</span>
+<span id="cb24-413"><a href="#cb24-413"></a></span>
+<span id="cb24-414"><a href="#cb24-414"></a><span class="in">```toml</span></span>
+<span id="cb24-415"><a href="#cb24-415"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-416"><a href="#cb24-416"></a></span>
+<span id="cb24-417"><a href="#cb24-417"></a><span class="in">[unstable]</span></span>
+<span id="cb24-418"><a href="#cb24-418"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb24-419"><a href="#cb24-419"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
+<span id="cb24-420"><a href="#cb24-420"></a><span class="in">```</span></span>
+<span id="cb24-421"><a href="#cb24-421"></a></span>
+<span id="cb24-422"><a href="#cb24-422"></a>This tells cargo that it should recompile the <span class="in">`core`</span> and <span class="in">`compiler_builtins`</span> libraries. The latter is required because it is a dependency of <span class="in">`core`</span>. In order to recompile these libraries, cargo needs access to the rust source code, which we can install with <span class="in">`rustup component add rust-src`</span>.</span>
+<span id="cb24-423"><a href="#cb24-423"></a></span>
+<span id="cb24-424"><a href="#cb24-424"></a>&lt;div class="note"&gt;</span>
+<span id="cb24-425"><a href="#cb24-425"></a></span>
+<span id="cb24-426"><a href="#cb24-426"></a>**Note:** The <span class="in">`unstable.build-std`</span> configuration key requires at least the Rust nightly from 2020-07-15.</span>
+<span id="cb24-427"><a href="#cb24-427"></a></span>
+<span id="cb24-428"><a href="#cb24-428"></a>&lt;/div&gt;</span>
+<span id="cb24-429"><a href="#cb24-429"></a></span>
+<span id="cb24-430"><a href="#cb24-430"></a>After setting the <span class="in">`unstable.build-std`</span> configuration key and installing the <span class="in">`rust-src`</span> component, we can rerun our build command:</span>
+<span id="cb24-431"><a href="#cb24-431"></a></span>
+<span id="cb24-432"><a href="#cb24-432"></a><span class="in">```</span></span>
+<span id="cb24-433"><a href="#cb24-433"></a><span class="in">&gt; cargo build --target x86_64-blog_os.json</span></span>
+<span id="cb24-434"><a href="#cb24-434"></a><span class="in">   Compiling core v0.0.0 (/…/rust/src/libcore)</span></span>
+<span id="cb24-435"><a href="#cb24-435"></a><span class="in">   Compiling rustc-std-workspace-core v1.99.0 (/…/rust/src/tools/rustc-std-workspace-core)</span></span>
+<span id="cb24-436"><a href="#cb24-436"></a><span class="in">   Compiling compiler_builtins v0.1.32</span></span>
+<span id="cb24-437"><a href="#cb24-437"></a><span class="in">   Compiling blog_os v0.1.0 (/…/blog_os)</span></span>
+<span id="cb24-438"><a href="#cb24-438"></a><span class="in">    Finished dev [unoptimized + debuginfo] target(s) in 0.29 secs</span></span>
+<span id="cb24-439"><a href="#cb24-439"></a><span class="in">```</span></span>
+<span id="cb24-440"><a href="#cb24-440"></a></span>
+<span id="cb24-441"><a href="#cb24-441"></a>We see that <span class="in">`cargo build`</span> now recompiles the <span class="in">`core`</span>, <span class="in">`rustc-std-workspace-core`</span> (a dependency of <span class="in">`compiler_builtins`</span>), and <span class="in">`compiler_builtins`</span> libraries for our custom target.</span>
+<span id="cb24-442"><a href="#cb24-442"></a></span>
+<span id="cb24-443"><a href="#cb24-443"></a><span class="fu">## Memory-Related Intrinsics</span></span>
+<span id="cb24-444"><a href="#cb24-444"></a></span>
+<span id="cb24-445"><a href="#cb24-445"></a>The Rust compiler assumes that a certain set of built-in functions is available for all systems. Most of these functions are provided by the <span class="in">`compiler_builtins`</span> crate that we just recompiled. However, there are some memory-related functions in that crate that are not enabled by default because they are normally provided by the C library on the system. These functions include <span class="in">`memset`</span>, which sets all bytes in a memory block to a given value, <span class="in">`memcpy`</span>, which copies one memory block to another, and <span class="in">`memcmp`</span>, which compares two memory blocks. While we didn't need any of these functions to compile our kernel right now, they will be required as soon as we add some more code to it (e.g. when copying structs around).</span>
+<span id="cb24-446"><a href="#cb24-446"></a></span>
+<span id="cb24-447"><a href="#cb24-447"></a>Since we can't link to the C library of the operating system, we need an alternative way to provide these functions to the compiler. One possible approach for this could be to implement our own <span class="in">`memset`</span> etc. functions and apply the <span class="in">`#[unsafe(no_mangle)]`</span> attribute to them (to avoid the automatic renaming during compilation). However, this is dangerous since the slightest mistake in the implementation of these functions could lead to undefined behavior. For example, implementing <span class="in">`memcpy`</span> with a <span class="in">`for`</span> loop may result in an infinite recursion because <span class="in">`for`</span> loops implicitly call the <span class="co">[</span><span class="ot">`IntoIterator::into_iter`</span><span class="co">]</span> trait method, which may call <span class="in">`memcpy`</span> again. So it's a good idea to reuse existing, well-tested implementations instead.</span>
+<span id="cb24-448"><a href="#cb24-448"></a></span>
+<span id="cb24-449"><a href="#cb24-449"></a><span class="ot">[`IntoIterator::into_iter`]: https://doc.rust-lang.org/stable/core/iter/trait.IntoIterator.html#tymethod.into_iter</span></span>
+<span id="cb24-450"><a href="#cb24-450"></a></span>
+<span id="cb24-451"><a href="#cb24-451"></a>Fortunately, the <span class="in">`compiler_builtins`</span> crate already contains implementations for all the needed functions, they are just disabled by default to not collide with the implementations from the C library. We can enable them by setting cargo's <span class="co">[</span><span class="ot">`build-std-features`</span><span class="co">]</span> flag to <span class="in">`["compiler-builtins-mem"]`</span>. Like the <span class="in">`build-std`</span> flag, this flag can be either passed on the command line as a <span class="in">`-Z`</span> flag or configured in the <span class="in">`unstable`</span> table in the <span class="in">`.cargo/config.toml`</span> file. Since we always want to build with this flag, the config file option makes more sense for us:</span>
+<span id="cb24-452"><a href="#cb24-452"></a></span>
+<span id="cb24-453"><a href="#cb24-453"></a><span class="ot">[`build-std-features`]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std-features</span></span>
+<span id="cb24-454"><a href="#cb24-454"></a></span>
+<span id="cb24-455"><a href="#cb24-455"></a><span class="in">```toml</span></span>
+<span id="cb24-456"><a href="#cb24-456"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-457"><a href="#cb24-457"></a></span>
+<span id="cb24-458"><a href="#cb24-458"></a><span class="in">[unstable]</span></span>
+<span id="cb24-459"><a href="#cb24-459"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb24-460"><a href="#cb24-460"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
+<span id="cb24-461"><a href="#cb24-461"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
+<span id="cb24-462"><a href="#cb24-462"></a><span class="in">```</span></span>
+<span id="cb24-463"><a href="#cb24-463"></a></span>
+<span id="cb24-464"><a href="#cb24-464"></a>(Support for the <span class="in">`compiler-builtins-mem`</span> feature was only <span class="co">[</span><span class="ot">added very recently</span><span class="co">](https://github.com/rust-lang/rust/pull/77284)</span>, so you need at least Rust nightly <span class="in">`2020-09-30`</span> for it.)</span>
+<span id="cb24-465"><a href="#cb24-465"></a></span>
+<span id="cb24-466"><a href="#cb24-466"></a>Behind the scenes, this flag enables the <span class="co">[</span><span class="ot">`mem` feature</span><span class="co">]</span> of the <span class="in">`compiler_builtins`</span> crate. The effect of this is that the <span class="in">`#[unsafe(no_mangle)]`</span> attribute is applied to the <span class="co">[</span><span class="ot">`memcpy` etc. implementations</span><span class="co">]</span> of the crate, which makes them available to the linker.</span>
+<span id="cb24-467"><a href="#cb24-467"></a></span>
+<span id="cb24-468"><a href="#cb24-468"></a><span class="ot">[`mem` feature]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/Cargo.toml#L54-L55</span></span>
+<span id="cb24-469"><a href="#cb24-469"></a><span class="ot">[`memcpy` etc. implementations]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/src/mem.rs#L12-L69</span></span>
+<span id="cb24-470"><a href="#cb24-470"></a></span>
+<span id="cb24-471"><a href="#cb24-471"></a>With this change, our kernel has valid implementations for all compiler-required functions, so it will continue to compile even if our code gets more complex.</span>
+<span id="cb24-472"><a href="#cb24-472"></a></span>
+<span id="cb24-473"><a href="#cb24-473"></a><span class="fu">## Set a Default Target</span></span>
+<span id="cb24-474"><a href="#cb24-474"></a></span>
+<span id="cb24-475"><a href="#cb24-475"></a>To avoid passing the <span class="in">`--target`</span> parameter on every invocation of <span class="in">`cargo build`</span>, we can override the default target. To do this, we add the following to our <span class="co">[</span><span class="ot">cargo configuration</span><span class="co">]</span> file at <span class="in">`.cargo/config.toml`</span>:</span>
+<span id="cb24-476"><a href="#cb24-476"></a></span>
+<span id="cb24-477"><a href="#cb24-477"></a><span class="ot">[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html</span></span>
+<span id="cb24-478"><a href="#cb24-478"></a></span>
+<span id="cb24-479"><a href="#cb24-479"></a><span class="in">```toml</span></span>
+<span id="cb24-480"><a href="#cb24-480"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-481"><a href="#cb24-481"></a></span>
+<span id="cb24-482"><a href="#cb24-482"></a><span class="in">[build]</span></span>
+<span id="cb24-483"><a href="#cb24-483"></a><span class="in">target = "x86_64-blog_os.json"</span></span>
+<span id="cb24-484"><a href="#cb24-484"></a><span class="in">```</span></span>
+<span id="cb24-485"><a href="#cb24-485"></a></span>
+<span id="cb24-486"><a href="#cb24-486"></a>This tells <span class="in">`cargo`</span> to use our <span class="in">`x86_64-blog_os.json`</span> target when no explicit <span class="in">`--target`</span> argument is passed. This means that we can now build our kernel with a simple <span class="in">`cargo build`</span>. For more information on cargo configuration options, check out the <span class="co">[</span><span class="ot">official documentation</span><span class="co">][cargo configuration]</span>.</span>
+<span id="cb24-487"><a href="#cb24-487"></a></span>
+<span id="cb24-488"><a href="#cb24-488"></a>We are now able to build our kernel for a bare metal target with a simple <span class="in">`cargo build`</span>. However, our <span class="in">`_start`</span> entry point, which will be called by the boot loader, is still empty. It's time that we output something to screen from it.</span>
+<span id="cb24-489"><a href="#cb24-489"></a></span>
+<span id="cb24-490"><a href="#cb24-490"></a><span class="fu">## Printing to Screen</span></span>
+<span id="cb24-491"><a href="#cb24-491"></a>The easiest way to print text to the screen at this stage is the <span class="co">[</span><span class="ot">VGA text buffer</span><span class="co">]</span>. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:</span>
+<span id="cb24-492"><a href="#cb24-492"></a></span>
+<span id="cb24-493"><a href="#cb24-493"></a><span class="ot">[VGA text buffer]: https://en.wikipedia.org/wiki/VGA-compatible_text_mode</span></span>
+<span id="cb24-494"><a href="#cb24-494"></a></span>
+<span id="cb24-495"><a href="#cb24-495"></a><span class="al">![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)</span></span>
+<span id="cb24-496"><a href="#cb24-496"></a></span>
+<span id="cb24-497"><a href="#cb24-497"></a>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <span class="in">`0xb8000`</span> and that each character cell consists of an ASCII byte and a color byte.</span>
+<span id="cb24-498"><a href="#cb24-498"></a></span>
+<span id="cb24-499"><a href="#cb24-499"></a>The implementation looks like this:</span>
+<span id="cb24-500"><a href="#cb24-500"></a></span>
+<span id="cb24-501"><a href="#cb24-501"></a><span class="in">```rust</span></span>
+<span id="cb24-502"><a href="#cb24-502"></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
+<span id="cb24-503"><a href="#cb24-503"></a></span>
+<span id="cb24-504"><a href="#cb24-504"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb24-505"><a href="#cb24-505"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb24-506"><a href="#cb24-506"></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-507"><a href="#cb24-507"></a></span>
+<span id="cb24-508"><a href="#cb24-508"></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb24-509"><a href="#cb24-509"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb24-510"><a href="#cb24-510"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
+<span id="cb24-511"><a href="#cb24-511"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
+<span id="cb24-512"><a href="#cb24-512"></a>        <span class="op">}</span></span>
+<span id="cb24-513"><a href="#cb24-513"></a>    <span class="op">}</span></span>
+<span id="cb24-514"><a href="#cb24-514"></a></span>
+<span id="cb24-515"><a href="#cb24-515"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb24-516"><a href="#cb24-516"></a><span class="op">}</span></span>
+<span id="cb24-517"><a href="#cb24-517"></a><span class="in">```</span></span>
+<span id="cb24-518"><a href="#cb24-518"></a></span>
+<span id="cb24-519"><a href="#cb24-519"></a>First, we cast the integer <span class="in">`0xb8000`</span> into a <span class="co">[</span><span class="ot">raw pointer</span><span class="co">]</span>. Then we <span class="co">[</span><span class="ot">iterate</span><span class="co">]</span> over the bytes of the <span class="co">[</span><span class="ot">static</span><span class="co">]</span> <span class="in">`HELLO`</span> <span class="co">[</span><span class="ot">byte string</span><span class="co">]</span>. We use the <span class="co">[</span><span class="ot">`enumerate`</span><span class="co">]</span> method to additionally get a running variable <span class="in">`i`</span>. In the body of the for loop, we use the <span class="co">[</span><span class="ot">`offset`</span><span class="co">]</span> method to write the string byte and the corresponding color byte (<span class="in">`0xb`</span> is a light cyan).</span>
+<span id="cb24-520"><a href="#cb24-520"></a></span>
+<span id="cb24-521"><a href="#cb24-521"></a><span class="ot">[iterate]: https://doc.rust-lang.org/stable/book/ch13-02-iterators.html</span></span>
+<span id="cb24-522"><a href="#cb24-522"></a><span class="ot">[static]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime</span></span>
+<span id="cb24-523"><a href="#cb24-523"></a><span class="ot">[`enumerate`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate</span></span>
+<span id="cb24-524"><a href="#cb24-524"></a><span class="ot">[byte string]: https://doc.rust-lang.org/reference/tokens.html#byte-string-literals</span></span>
+<span id="cb24-525"><a href="#cb24-525"></a><span class="ot">[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer</span></span>
+<span id="cb24-526"><a href="#cb24-526"></a><span class="ot">[`offset`]: https://doc.rust-lang.org/std/primitive.pointer.html#method.offset</span></span>
+<span id="cb24-527"><a href="#cb24-527"></a></span>
+<span id="cb24-528"><a href="#cb24-528"></a>Note that there's an <span class="co">[</span><span class="ot">`unsafe`</span><span class="co">]</span> block around all memory writes. The reason is that the Rust compiler can't prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <span class="in">`unsafe`</span> block, we're basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <span class="in">`unsafe`</span> block does not turn off Rust's safety checks. It only allows you to do <span class="co">[</span><span class="ot">five additional things</span><span class="co">]</span>.</span>
+<span id="cb24-529"><a href="#cb24-529"></a></span>
+<span id="cb24-530"><a href="#cb24-530"></a><span class="ot">[`unsafe`]: https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html</span></span>
+<span id="cb24-531"><a href="#cb24-531"></a><span class="ot">[five additional things]: https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers</span></span>
+<span id="cb24-532"><a href="#cb24-532"></a></span>
+<span id="cb24-533"><a href="#cb24-533"></a>I want to emphasize that **this is not the way we want to do things in Rust!** It's very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer's end if we're not careful.</span>
+<span id="cb24-534"><a href="#cb24-534"></a></span>
+<span id="cb24-535"><a href="#cb24-535"></a>So we want to minimize the use of <span class="in">`unsafe`</span> as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is _impossible_ to do anything wrong from the outside. This way, we would only need minimal amounts of <span class="in">`unsafe`</span> code and can be sure that we don't violate <span class="co">[</span><span class="ot">memory safety</span><span class="co">]</span>. We will create such a safe VGA buffer abstraction in the next post.</span>
+<span id="cb24-536"><a href="#cb24-536"></a></span>
+<span id="cb24-537"><a href="#cb24-537"></a><span class="ot">[memory safety]: https://en.wikipedia.org/wiki/Memory_safety</span></span>
+<span id="cb24-538"><a href="#cb24-538"></a></span>
+<span id="cb24-539"><a href="#cb24-539"></a><span class="fu">## Running our Kernel</span></span>
+<span id="cb24-540"><a href="#cb24-540"></a></span>
+<span id="cb24-541"><a href="#cb24-541"></a>Now that we have an executable that does something perceptible, it is time to run it. First, we need to turn our compiled kernel into a bootable disk image by linking it with a bootloader. Then we can run the disk image in the <span class="co">[</span><span class="ot">QEMU</span><span class="co">]</span> virtual machine or boot it on real hardware using a USB stick.</span>
+<span id="cb24-542"><a href="#cb24-542"></a></span>
+<span id="cb24-543"><a href="#cb24-543"></a><span class="fu">## Creating a Bootimage</span></span>
+<span id="cb24-544"><a href="#cb24-544"></a></span>
+<span id="cb24-545"><a href="#cb24-545"></a>To turn our compiled kernel into a bootable disk image, we need to link it with a bootloader. As we learned in the <span class="co">[</span><span class="ot">section about booting</span><span class="co">]</span>, the bootloader is responsible for initializing the CPU and loading our kernel.</span>
+<span id="cb24-546"><a href="#cb24-546"></a></span>
+<span id="cb24-547"><a href="#cb24-547"></a><span class="ot">[section about booting]: #the-boot-process</span></span>
+<span id="cb24-548"><a href="#cb24-548"></a></span>
+<span id="cb24-549"><a href="#cb24-549"></a>Instead of writing our own bootloader, which is a project on its own, we use the <span class="co">[</span><span class="ot">`bootloader`</span><span class="co">]</span> crate. This crate implements a basic BIOS bootloader without any C dependencies, just Rust and inline assembly. To use it for booting our kernel, we need to add a dependency on it:</span>
+<span id="cb24-550"><a href="#cb24-550"></a></span>
+<span id="cb24-551"><a href="#cb24-551"></a><span class="ot">[`bootloader`]: https://crates.io/crates/bootloader</span></span>
+<span id="cb24-552"><a href="#cb24-552"></a></span>
+<span id="cb24-553"><a href="#cb24-553"></a><span class="in">```toml</span></span>
+<span id="cb24-554"><a href="#cb24-554"></a><span class="in"># in Cargo.toml</span></span>
+<span id="cb24-555"><a href="#cb24-555"></a></span>
+<span id="cb24-556"><a href="#cb24-556"></a><span class="in">[dependencies]</span></span>
+<span id="cb24-557"><a href="#cb24-557"></a><span class="in">bootloader = "0.9"</span></span>
+<span id="cb24-558"><a href="#cb24-558"></a><span class="in">```</span></span>
+<span id="cb24-559"><a href="#cb24-559"></a></span>
+<span id="cb24-560"><a href="#cb24-560"></a>**Note:** This post is only compatible with <span class="in">`bootloader v0.9`</span>. Newer versions use a different build system and will result in build errors when following this post.</span>
+<span id="cb24-561"><a href="#cb24-561"></a></span>
+<span id="cb24-562"><a href="#cb24-562"></a>Adding the bootloader as a dependency is not enough to actually create a bootable disk image. The problem is that we need to link our kernel with the bootloader after compilation, but cargo has no support for <span class="co">[</span><span class="ot">post-build scripts</span><span class="co">]</span>.</span>
+<span id="cb24-563"><a href="#cb24-563"></a></span>
+<span id="cb24-564"><a href="#cb24-564"></a><span class="ot">[post-build scripts]: https://github.com/rust-lang/cargo/issues/545</span></span>
+<span id="cb24-565"><a href="#cb24-565"></a></span>
+<span id="cb24-566"><a href="#cb24-566"></a>To solve this problem, we created a tool named <span class="in">`bootimage`</span> that first compiles the kernel and bootloader, and then links them together to create a bootable disk image. To install the tool, go into your home directory (or any directory outside of your cargo project) and execute the following command in your terminal:</span>
+<span id="cb24-567"><a href="#cb24-567"></a></span>
+<span id="cb24-568"><a href="#cb24-568"></a><span class="in">```</span></span>
+<span id="cb24-569"><a href="#cb24-569"></a><span class="in">cargo install bootimage</span></span>
+<span id="cb24-570"><a href="#cb24-570"></a><span class="in">```</span></span>
+<span id="cb24-571"><a href="#cb24-571"></a></span>
+<span id="cb24-572"><a href="#cb24-572"></a>For running <span class="in">`bootimage`</span> and building the bootloader, you need to have the <span class="in">`llvm-tools-preview`</span> rustup component installed. You can do so by executing <span class="in">`rustup component add llvm-tools-preview`</span>.</span>
+<span id="cb24-573"><a href="#cb24-573"></a></span>
+<span id="cb24-574"><a href="#cb24-574"></a>After installing <span class="in">`bootimage`</span> and adding the <span class="in">`llvm-tools-preview`</span> component, you can create a bootable disk image by going back into your cargo project directory and executing:</span>
+<span id="cb24-575"><a href="#cb24-575"></a></span>
+<span id="cb24-576"><a href="#cb24-576"></a><span class="in">```</span></span>
+<span id="cb24-577"><a href="#cb24-577"></a><span class="in">&gt; cargo bootimage</span></span>
+<span id="cb24-578"><a href="#cb24-578"></a><span class="in">```</span></span>
+<span id="cb24-579"><a href="#cb24-579"></a></span>
+<span id="cb24-580"><a href="#cb24-580"></a>We see that the tool recompiles our kernel using <span class="in">`cargo build`</span>, so it will automatically pick up any changes you make. Afterwards, it compiles the bootloader, which might take a while. Like all crate dependencies, it is only built once and then cached, so subsequent builds will be much faster. Finally, <span class="in">`bootimage`</span> combines the bootloader and your kernel into a bootable disk image.</span>
+<span id="cb24-581"><a href="#cb24-581"></a></span>
+<span id="cb24-582"><a href="#cb24-582"></a>After executing the command, you should see a bootable disk image named <span class="in">`bootimage-blog_os.bin`</span> in your <span class="in">`target/x86_64-blog_os/debug`</span> directory. You can boot it in a virtual machine or copy it to a USB drive to boot it on real hardware. (Note that this is not a CD image, which has a different format, so burning it to a CD doesn't work).</span>
+<span id="cb24-583"><a href="#cb24-583"></a></span>
+<span id="cb24-584"><a href="#cb24-584"></a><span class="fu">## How does it work?</span></span>
+<span id="cb24-585"><a href="#cb24-585"></a>The <span class="in">`bootimage`</span> tool performs the following steps behind the scenes:</span>
+<span id="cb24-586"><a href="#cb24-586"></a></span>
+<span id="cb24-587"><a href="#cb24-587"></a><span class="ss">- </span>It compiles our kernel to an <span class="co">[</span><span class="ot">ELF</span><span class="co">]</span> file.</span>
+<span id="cb24-588"><a href="#cb24-588"></a><span class="ss">- </span>It compiles the bootloader dependency as a standalone executable.</span>
+<span id="cb24-589"><a href="#cb24-589"></a><span class="ss">- </span>It links the bytes of the kernel ELF file to the bootloader.</span>
+<span id="cb24-590"><a href="#cb24-590"></a></span>
+<span id="cb24-591"><a href="#cb24-591"></a><span class="ot">[ELF]: https://en.wikipedia.org/wiki/Executable_and_Linkable_Format</span></span>
+<span id="cb24-592"><a href="#cb24-592"></a><span class="ot">[rust-osdev/bootloader]: https://github.com/rust-osdev/bootloader</span></span>
+<span id="cb24-593"><a href="#cb24-593"></a></span>
+<span id="cb24-594"><a href="#cb24-594"></a>When booted, the bootloader reads and parses the appended ELF file. It then maps the program segments to virtual addresses in the page tables, zeroes the <span class="in">`.bss`</span> section, and sets up a stack. Finally, it reads the entry point address (our <span class="in">`_start`</span> function) and jumps to it.</span>
+<span id="cb24-595"><a href="#cb24-595"></a></span>
+<span id="cb24-596"><a href="#cb24-596"></a><span class="fu">## Booting it in QEMU</span></span>
+<span id="cb24-597"><a href="#cb24-597"></a></span>
+<span id="cb24-598"><a href="#cb24-598"></a>We can now boot the disk image in a virtual machine. To boot it in <span class="co">[</span><span class="ot">QEMU</span><span class="co">]</span>, execute the following command:</span>
+<span id="cb24-599"><a href="#cb24-599"></a></span>
+<span id="cb24-600"><a href="#cb24-600"></a><span class="ot">[QEMU]: https://www.qemu.org/</span></span>
+<span id="cb24-601"><a href="#cb24-601"></a></span>
+<span id="cb24-602"><a href="#cb24-602"></a><span class="in">```</span></span>
+<span id="cb24-603"><a href="#cb24-603"></a><span class="in">&gt; qemu-system-x86_64 -drive format=raw,file=target/x86_64-blog_os/debug/bootimage-blog_os.bin</span></span>
+<span id="cb24-604"><a href="#cb24-604"></a><span class="in">```</span></span>
+<span id="cb24-605"><a href="#cb24-605"></a></span>
+<span id="cb24-606"><a href="#cb24-606"></a>This opens a separate window which should look similar to this:</span>
+<span id="cb24-607"><a href="#cb24-607"></a></span>
+<span id="cb24-608"><a href="#cb24-608"></a><span class="al">![QEMU showing "Hello World!"](qemu.png)</span></span>
+<span id="cb24-609"><a href="#cb24-609"></a></span>
+<span id="cb24-610"><a href="#cb24-610"></a>We see that our "Hello World!" is visible on the screen.</span>
+<span id="cb24-611"><a href="#cb24-611"></a></span>
+<span id="cb24-612"><a href="#cb24-612"></a><span class="fu">## Real Machine</span></span>
+<span id="cb24-613"><a href="#cb24-613"></a></span>
+<span id="cb24-614"><a href="#cb24-614"></a>It is also possible to write it to a USB stick and boot it on a real machine, **but be careful** to choose the correct device name, because **everything on that device is overwritten**:</span>
+<span id="cb24-615"><a href="#cb24-615"></a></span>
+<span id="cb24-616"><a href="#cb24-616"></a><span class="in">```</span></span>
+<span id="cb24-617"><a href="#cb24-617"></a><span class="in">&gt; dd if=target/x86_64-blog_os/debug/bootimage-blog_os.bin of=/dev/sdX &amp;&amp; sync</span></span>
+<span id="cb24-618"><a href="#cb24-618"></a><span class="in">```</span></span>
+<span id="cb24-619"><a href="#cb24-619"></a></span>
+<span id="cb24-620"><a href="#cb24-620"></a>Where <span class="in">`sdX`</span> is the device name of your USB stick. </span>
+<span id="cb24-621"><a href="#cb24-621"></a></span>
+<span id="cb24-622"><a href="#cb24-622"></a>After writing the image to the USB stick, you can run it on real hardware by booting from it. You probably need to use a special boot menu or change the boot order in your BIOS configuration to boot from the USB stick. Note that it currently doesn't work for UEFI machines, since the <span class="in">`bootloader`</span> crate has no UEFI support yet.</span>
+<span id="cb24-623"><a href="#cb24-623"></a></span>
+<span id="cb24-624"><a href="#cb24-624"></a><span class="fu">## Using `cargo run`</span></span>
+<span id="cb24-625"><a href="#cb24-625"></a></span>
+<span id="cb24-626"><a href="#cb24-626"></a>To make it easier to run our kernel in QEMU, we can set the <span class="in">`runner`</span> configuration key for cargo:</span>
+<span id="cb24-627"><a href="#cb24-627"></a></span>
+<span id="cb24-628"><a href="#cb24-628"></a><span class="in">```toml</span></span>
+<span id="cb24-629"><a href="#cb24-629"></a><span class="in"># in .cargo/config.toml</span></span>
+<span id="cb24-630"><a href="#cb24-630"></a></span>
+<span id="cb24-631"><a href="#cb24-631"></a><span class="in">[target.'cfg(target_os = "none")']</span></span>
+<span id="cb24-632"><a href="#cb24-632"></a><span class="in">runner = "bootimage runner"</span></span>
+<span id="cb24-633"><a href="#cb24-633"></a><span class="in">```</span></span>
+<span id="cb24-634"><a href="#cb24-634"></a></span>
+<span id="cb24-635"><a href="#cb24-635"></a>The <span class="in">`target.'cfg(target_os = "none")'`</span> table applies to all targets whose target configuration file's <span class="in">`"os"`</span> field is set to <span class="in">`"none"`</span>. This includes our <span class="in">`x86_64-blog_os.json`</span> target. The <span class="in">`runner`</span> key specifies the command that should be invoked for <span class="in">`cargo run`</span>. The command is run after a successful build with the executable path passed as the first argument. See the <span class="co">[</span><span class="ot">cargo documentation</span><span class="co">][cargo configuration]</span> for more details.</span>
+<span id="cb24-636"><a href="#cb24-636"></a></span>
+<span id="cb24-637"><a href="#cb24-637"></a>The <span class="in">`bootimage runner`</span> command is specifically designed to be usable as a <span class="in">`runner`</span> executable. It links the given executable with the project's bootloader dependency and then launches QEMU. See the <span class="co">[</span><span class="ot">Readme of `bootimage`</span><span class="co">]</span> for more details and possible configuration options.</span>
+<span id="cb24-638"><a href="#cb24-638"></a></span>
+<span id="cb24-639"><a href="#cb24-639"></a><span class="ot">[Readme of `bootimage`]: https://github.com/rust-osdev/bootimage</span></span>
+<span id="cb24-640"><a href="#cb24-640"></a></span>
+<span id="cb24-641"><a href="#cb24-641"></a>Now we can use <span class="in">`cargo run`</span> to compile our kernel and boot it in QEMU.</span>
+<span id="cb24-642"><a href="#cb24-642"></a></span>
+<span id="cb24-643"><a href="#cb24-643"></a><span class="fu">## What's next?</span></span>
+<span id="cb24-644"><a href="#cb24-644"></a></span>
+<span id="cb24-645"><a href="#cb24-645"></a>In the next post, we will explore the VGA text buffer in more detail and write a safe interface for it. We will also add support for the <span class="in">`println`</span> macro.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
