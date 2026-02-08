@@ -608,9 +608,49 @@ error: could not compile `osirs` (bin "osirs") due to 1 previous error
 - But we made a new target which needs a new core.
 - No problem, we'll just tell `rustc` to do some compilation.
 
-# TODO
+## Config
 
-- Have to compile core, so we alter .cargo/config.toml.
+- The most graceful to do this that *I* am aware of is with a `.cargo/config.toml`
+- Basically, we can write down some things we *always* want `cargo` to do, and store them in TOML file in the hidden `.cargo` folder.
+- I just made the folder then opened it up in my most beloved neon vimothy.
+
+```{.sh}
+mdkir .cargo
+nvim .cargo/config.toml
+```
+
+## Check in
+
+```{.sh}
+mdkir .cargo
+nvim .cargo/config.toml
+```
+
+- Understanding check - what happens if you don't make `.cargo` first?
+
+## The `build-std` Option
+
+- `build-std` is a feature of Cargo.
+- We can recompile `core` and other standard library crates on demand.
+    - Vs. using the precompiled versions shipped with the Rust installation. 
+- [Read more.](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std)
+
+## My Config
+
+- We can use a pretty sparse config though we'll want to add more latter.
+- I specify the "build-std" option in TOML.
+- We want to `build-std`
+- We want to build the `core`
+
+```{.toml filename=".cargo/config.toml"}
+build-std = ["core"]
+```
+
+- I bet this will work.
+
+## Oh.
+
+- The exact same error as before?
 
 ```{.sh}
 $ cargo b --target x86_64-osirs.json
@@ -624,296 +664,325 @@ For more information about this error, try `rustc --explain E0463`.
 error: could not compile `osirs` (bin "osirs") due to 1 previous error
 ```
 
-- Then have to use nightly.
+## Unstable
+
+- So apparently `build-std` is not a stable feature of the Rust language.
+    - This means the Rust designers can change or remove it at any time.
+- To use unstable features, we have to tell `cargo` they are unstable.
+
+## Mental model
+
+- Think of it a bit like unsafe, but for the language instead of the executables.
+    - When an executable is unsafe, it may crash or leak your private key.
+    - When a language is unstable, it may not compile or may compile then leak your private key.
+
+## Update config
+
+- We prepend an `[unstable]` label to our `build-std` configuration.
+
+```{.toml filename=".cargo/config.toml"}
+[unstable]
+build-std = ["core"]
+```
+
+- I bet it will work now (it won't).
+
+## Oh.
+
+- The exact same error as before?
+
+```{.sh}
+$ cargo b --target x86_64-osirs.json
+   Compiling osirs v0.1.0 (/home/user/tmp/32)
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `x86_64-osirs` target may not be installed
+  = help: consider downloading the target with `rustup target add x86_64-osirs`
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `osirs` (bin "osirs") due to 1 previous error
+```
+
+## Nightly
+
+- Okay folks here's the deal.
+- I'm not happy about it either.
+- `build-std` - which we need - is unstable and 
+- `[unstable]` is only available in nightly Rust.
+    - The version of Rust for *nerds*.
+- Not to worry, we are nerds and can use it.
+    - Simply add a `+nightly` right after cargo.
+    
+## Try Two Things
+
+- Here's two things that also still won't work.
+```{.sh}
+cargo +nightly b --target x86_64-osirs.json
+```
+- Gives this:
+```{.sh}
+error: `.json` target specs require -Zjson-target-spec
+```
+    
+## Try Two Things
+
+- Here's two things that also still won't work.
+```{.sh}
+cargo +nightly b
+```
+- Gives this:
+```{.sh}
+error: `.json` target specs require -Zjson-target-spec
+   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
+   Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
+   Compiling osirs v0.1.0 (/home/user/tmp/32)
+error: linking with `cc` failed: exit status: 1
+  |
+  = note:  "cc" "-m64" "/home/user/tmp/32/target/debug/deps/rustcMmXrbF/symbols.o" "<1 object files omitted>" "-Wl,--as-needed" "-Wl,-Bstatic" "/home/user/tmp/32/target/debug/deps/{libcore-0c26ef2bd74962c1,libcompiler_builtins-40a77a01cbdbd500}.rlib" "-L" "/home/user/tmp/32/target/debug/deps/rustcMmXrbF/raw-dylibs" "-Wl,-Bdynamic" "-B<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "<sysroot>/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/user/tmp/32/target/debug/deps/osirs-62b17f4aa5d3b391" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: rust-lld: error: duplicate symbol: _start
+          >>> defined at /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(_start)
+          >>> defined at main.rs:6 (src/main.rs:6)
+          >>>            /home/user/tmp/32/target/debug/deps/osirs-62b17f4aa5d3b391.3hpwl9lytayxk9wu897na7tu0.0wpyfaj.rcgu.o:(.text._start+0x0)
+          collect2: error: ld returned 1 exit status
+
+
+error: could not compile `osirs` (bin "osirs") due to 1 previous error
+```
+
+## The Problem
+
+- Not everything works the same way with nightly and stable rust.
+    - That's why it's not stable.
+- We will encounter two examples immediately, both related to JSON.
+- Let's look at this:
 
 ```{.sh}
 $ cargo +nightly b --target x86_64-osirs.json
+error: `.json` target specs require -Zjson-target-spec
+```
+
+## One Solution
+
+- We can of course just put `-Zjson-target-spec` in there.
+- We get an error, but one we are clever enough to handle.
+
+```{.sh}
+$ cargo +nightly b --target x86_64-osirs.json -Zjson-target-spec
+```
+- Gives this:
+```{.sh}
 error: failed to run `rustc` to learn about target-specific information
 
 Caused by:
-  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)
+  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json -Zunstable-options --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)
   --- stderr
   error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32
     |
     = help: run `rustc --print target-list` for a list of built-in targets
 ```
 
-- This re-bricks the .json, so we revert it.
+## Another Solution
+
+- However, that `-Zjson-target-spec` looks an *awful* lot like a `.cargo/config.toml` option...
+    - I believe that is also unstable...
+    - ... after all, it works fine on stable!
+
+```{.toml filename=".cargo/config.toml"}
+[unstable]
+build-std = ["core"]
+```
+- We can then get the same error with less typing:
+
+```{.sh}
+cargo +nightly b --target x86_64-osirs.json
+```
+
+## The error
+
+```{.sh code-line-numbers="6"}
+error: failed to run `rustc` to learn about target-specific information
+
+Caused by:
+  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json -Zunstable-options --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)
+  --- stderr
+  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32
+    |
+    = help: run `rustc --print target-list` for a list of built-in targets
+```
+
+- Does that remind you of anything?
+
+```{.sh}
+$ diff bad.wrong x86_64-osirs.json
+6,7c6,7
+<     "target-pointer-width": 64,
+<     "target-c-int-width": 32,
+---
+>     "target-pointer-width": "64",
+>     "target-c-int-width": "32",
+```
+
+## Revert!
+
+- Change the string integers back to integer integers in your JSON file and you will be living a charmed and blessed life.
+    - A long one, compilation is 10+ seconds for me.
 
 ```{.sh}
 $ cargo +nightly b --target x86_64-osirs.json
-error: "/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/Cargo.lock" does not exist, unable to build with the standard library, try:
-        rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
-```
-
-- This requires a `rustup`.
-
-```{.sh}
-rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
-```
-
-- Building is then quite slow.  10+ seconds.
-
-```{.sh}
-$ cargo +nightly b --target x86_64-osirs.json
-    Updating crates.io index
-  Downloaded rustc-literal-escaper v0.0.5
-  Downloaded rustc-demangle v0.1.26
-  Downloaded addr2line v0.25.0
-  Downloaded getopts v0.2.23
-  Downloaded object v0.37.3
-  Downloaded gimli v0.32.0
-  Downloaded 6 crates (721.4KiB) in 0.14s
    Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
    Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)
-   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)
-   Compiling osirs v0.1.0 (/home/user/tmp/32)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.40s
+^[[A    Building [==========>                  ] 2/5: core, compiler_builtins                                                                Compiling osirs v0.1.0 (/home/user/tmp/32)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.18s
 ```
 
+## Aside
 
+- By the way, are you tired of specifying the target every time?
+    - Sounds like a problem for `.cargo/config.toml`!
 
-## The `build-std` Option
-
-- `build-std` is a feature of Cargo.
-- We can recompile `core` and other standard library crates on demand.
-    - Vs. using the precompiled versions shipped with the Rust installation. 
-This feature is very new and still not finished, so it is marked as "unstable" and only available on [nightly Rust compilers].
-
-[`build-std` feature]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std
-[nightly Rust compilers]: #installing-rust-nightly
-
-To use the feature, we need to add the following to our [cargo configuration] file at `.cargo/config.toml`:
-
-```toml
-# in .cargo/config.toml
-
+```{.toml filename=".cargo/config.toml" code-line-numbers="5-6"}
 [unstable]
+build-std = ["core"]
 json-target-spec = true
-build-std = ["core", "compiler_builtins"]
+
+[build]
+target = "x86_64-osirs.json"
 ```
 
-This tells cargo that it should recompile the `core` and `compiler_builtins` libraries. The latter is required because it is a dependency of `core`. In order to recompile these libraries, cargo needs access to the rust source code, which we can install with `rustup component add rust-src`.
+## Run again
 
-<div class="note">
+- By the way it will be fast now.
 
-**Note:** The `unstable.build-std` configuration key requires at least the Rust nightly from 2020-07-15.
-
-</div>
-
-After setting the `unstable.build-std` configuration key and installing the `rust-src` component, we can rerun our build command:
-
-```
-> cargo build --target x86_64-blog_os.json
-   Compiling core v0.0.0 (/…/rust/src/libcore)
-   Compiling rustc-std-workspace-core v1.99.0 (/…/rust/src/tools/rustc-std-workspace-core)
-   Compiling compiler_builtins v0.1.32
-   Compiling blog_os v0.1.0 (/…/blog_os)
-    Finished dev [unoptimized + debuginfo] target(s) in 0.29 secs
+```{.sh}
+$ cargo +nightly b
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s
 ```
 
-We see that `cargo build` now recompiles the `core`, `rustc-std-workspace-core` (a dependency of `compiler_builtins`), and `compiler_builtins` libraries for our custom target.
+## Aside: Nightly
 
-## Memory-Related Intrinsics
+- Surely you can also update `.cargo/config.toml` to use nightly!
+    - You can't. You can solve the problem other ways though.
+    - Left as an exercise to the interested student.
+    
+## Aside: $\not$Futureproofing
 
-The Rust compiler assumes that a certain set of built-in functions is available for all systems. Most of these functions are provided by the `compiler_builtins` crate that we just recompiled. However, there are some memory-related functions in that crate that are not enabled by default because they are normally provided by the C library on the system. These functions include `memset`, which sets all bytes in a memory block to a given value, `memcpy`, which copies one memory block to another, and `memcmp`, which compares two memory blocks. While we didn't need any of these functions to compile our kernel right now, they will be required as soon as we add some more code to it (e.g. when copying structs around).
+- I was pretty sure I can make a kernel without floats.
+- So I removed the two `soft-float` lines and it still worked for now.
 
-Since we can't link to the C library of the operating system, we need an alternative way to provide these functions to the compiler. One possible approach for this could be to implement our own `memset` etc. functions and apply the `#[unsafe(no_mangle)]` attribute to them (to avoid the automatic renaming during compilation). However, this is dangerous since the slightest mistake in the implementation of these functions could lead to undefined behavior. For example, implementing `memcpy` with a `for` loop may result in an infinite recursion because `for` loops implicitly call the [`IntoIterator::into_iter`] trait method, which may call `memcpy` again. So it's a good idea to reuse existing, well-tested implementations instead.
+```{.sh}
+$ diff old.boring x86_64-osirs.json
+13,15c13
+<     "disable-redzone": true,
+<     "features": "-mmx,-sse,+soft-float",
+<     "rustc-abi": "x86-softfloat"
+---
+>     "disable-redzone": true
+```
 
-[`IntoIterator::into_iter`]: https://doc.rust-lang.org/stable/core/iter/trait.IntoIterator.html#tymethod.into_iter
+## Aside: $\not$Futureproofing
 
-Fortunately, the `compiler_builtins` crate already contains implementations for all the needed functions, they are just disabled by default to not collide with the implementations from the C library. We can enable them by setting cargo's [`build-std-features`] flag to `["compiler-builtins-mem"]`. Like the `build-std` flag, this flag can be either passed on the command line as a `-Z` flag or configured in the `unstable` table in the `.cargo/config.toml` file. Since we always want to build with this flag, the config file option makes more sense for us:
+- I was pretty sure I could make a kernel without `compiler-builtins`
+- These are memory related functions where Rust often uses linked C implementations.
+- I'm leaving them out for now and will add them in when I need them.
 
-[`build-std-features`]: https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std-features
-
-```toml
-# in .cargo/config.toml
-
-[unstable]
-json-target-spec = true
+```{.sh}
 build-std-features = ["compiler-builtins-mem"]
 build-std = ["core", "compiler_builtins"]
 ```
 
-(Support for the `compiler-builtins-mem` feature was only [added very recently](https://github.com/rust-lang/rust/pull/77284), so you need at least Rust nightly `2020-09-30` for it.)
+## Boot it
 
-Behind the scenes, this flag enables the [`mem` feature] of the `compiler_builtins` crate. The effect of this is that the `#[unsafe(no_mangle)]` attribute is applied to the [`memcpy` etc. implementations] of the crate, which makes them available to the linker.
-
-[`mem` feature]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/Cargo.toml#L54-L55
-[`memcpy` etc. implementations]: https://github.com/rust-lang/compiler-builtins/blob/eff506cd49b637f1ab5931625a33cef7e91fbbf6/src/mem.rs#L12-L69
-
-With this change, our kernel has valid implementations for all compiler-required functions, so it will continue to compile even if our code gets more complex.
-
-## Set a Default Target
-
-To avoid passing the `--target` parameter on every invocation of `cargo build`, we can override the default target. To do this, we add the following to our [cargo configuration] file at `.cargo/config.toml`:
-
-[cargo configuration]: https://doc.rust-lang.org/cargo/reference/config.html
-
-```toml
-# in .cargo/config.toml
-
-[build]
-target = "x86_64-blog_os.json"
+- And with that, I bet this will totally work.
+- Let's break out `qemu`
+```{.sh}
+$ qemu-system-x86_64 -kernel target/x86_64-osirs/debug/osirs
+Command 'qemu-system-x86_64' not found, but can be installed with:
+sudo apt install qemu-system-x86      # version 1:6.2+dfsg-2ubuntu6.27, or
+sudo apt install qemu-system-x86-xen  # version 1:6.2+dfsg-2ubuntu6.27
+```
+- Oh right, we only installed "misc" `qemu`
+    - Real ones will use `apt`
+```{.sh}
+sudo apt install qemu-system-x86
 ```
 
-This tells `cargo` to use our `x86_64-blog_os.json` target when no explicit `--target` argument is passed. This means that we can now build our kernel with a simple `cargo build`. For more information on cargo configuration options, check out the [official documentation][cargo configuration].
+## Boot it
 
-We are now able to build our kernel for a bare metal target with a simple `cargo build`. However, our `_start` entry point, which will be called by the boot loader, is still empty. It's time that we output something to screen from it.
+```{.sh}
+$ qemu-system-x86_64 -kernel target/x86_64-osirs/debug/osirs
+qemu-system-x86_64: Error loading uncompressed kernel without PVH ELF Note
+```
 
-## Printing to Screen
-The easiest way to print text to the screen at this stage is the [VGA text buffer]. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:
+- Oh right, we did precisely *nothing* with the BIOS and the bootloader and all that and still need to do those things.
+    - I bet that would be a fun topic for a lab.
+    
+# Fin
 
-[VGA text buffer]: https://en.wikipedia.org/wiki/VGA-compatible_text_mode
+## Main File
 
-![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)
+- Unaltered except loops for stability.
 
-We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address `0xb8000` and that each character cell consists of an ASCII byte and a color byte.
-
-The implementation looks like this:
-
-```rust
-static HELLO: &[u8] = b"Hello World!";
+```{.rs filename="src/main.rs"}
+#![no_std]
+#![no_main]
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
+    loop {}
+}
 
-    for (i, &byte) in HELLO.iter().enumerate() {
-        unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-        }
-    }
-
+#[panic_handler]
+fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 ```
 
-First, we cast the integer `0xb8000` into a [raw pointer]. Then we [iterate] over the bytes of the [static] `HELLO` [byte string]. We use the [`enumerate`] method to additionally get a running variable `i`. In the body of the for loop, we use the [`offset`] method to write the string byte and the corresponding color byte (`0xb` is a light cyan).
+## Config File
 
-[iterate]: https://doc.rust-lang.org/stable/book/ch13-02-iterators.html
-[static]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime
-[`enumerate`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate
-[byte string]: https://doc.rust-lang.org/reference/tokens.html#byte-string-literals
-[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer
-[`offset`]: https://doc.rust-lang.org/std/primitive.pointer.html#method.offset
+- All new, only works with nightly.
 
-Note that there's an [`unsafe`] block around all memory writes. The reason is that the Rust compiler can't prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an `unsafe` block, we're basically telling the compiler that we are absolutely sure that the operations are valid. Note that an `unsafe` block does not turn off Rust's safety checks. It only allows you to do [five additional things].
+```{.toml filename=".cargo/config.toml"}
+[unstable]
+build-std = ["core"]
+json-target-spec = true
 
-[`unsafe`]: https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html
-[five additional things]: https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers
+[build]
+target = "x86_64-osirs.json"
+```
 
-I want to emphasize that **this is not the way we want to do things in Rust!** It's very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer's end if we're not careful.
+## Target File
 
-So we want to minimize the use of `unsafe` as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is _impossible_ to do anything wrong from the outside. This way, we would only need minimal amounts of `unsafe` code and can be sure that we don't violate [memory safety]. We will create such a safe VGA buffer abstraction in the next post.
+- All new, this is the nightly version.
 
-[memory safety]: https://en.wikipedia.org/wiki/Memory_safety
+```{.json filename="x86_64-osirs.json"}
+{
+    "llvm-target": "x86_64-unknown-none",
+    "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",
+    "arch": "x86_64",
+    "target-endian": "little",
+    "target-pointer-width": 64,
+    "target-c-int-width": 32,
+    "os": "none",
+    "executables": true,
+    "linker-flavor": "ld.lld",
+    "linker": "rust-lld",
+    "panic-strategy": "abort",
+    "disable-redzone": true
+}
+```
 
-## Running our Kernel
+## Cargo File
 
-Now that we have an executable that does something perceptible, it is time to run it. First, we need to turn our compiled kernel into a bootable disk image by linking it with a bootloader. Then we can run the disk image in the [QEMU] virtual machine or boot it on real hardware using a USB stick.
+- Move panic specification to target.
 
-## Creating a Bootimage
-
-To turn our compiled kernel into a bootable disk image, we need to link it with a bootloader. As we learned in the [section about booting], the bootloader is responsible for initializing the CPU and loading our kernel.
-
-[section about booting]: #the-boot-process
-
-Instead of writing our own bootloader, which is a project on its own, we use the [`bootloader`] crate. This crate implements a basic BIOS bootloader without any C dependencies, just Rust and inline assembly. To use it for booting our kernel, we need to add a dependency on it:
-
-[`bootloader`]: https://crates.io/crates/bootloader
-
-```toml
-# in Cargo.toml
+```{.toml filename="Cargo.toml"}
+[package]
+name = "osirs"
+version = "0.1.0"
+edition = "2024"
 
 [dependencies]
-bootloader = "0.9"
 ```
 
-**Note:** This post is only compatible with `bootloader v0.9`. Newer versions use a different build system and will result in build errors when following this post.
 
-Adding the bootloader as a dependency is not enough to actually create a bootable disk image. The problem is that we need to link our kernel with the bootloader after compilation, but cargo has no support for [post-build scripts].
-
-[post-build scripts]: https://github.com/rust-lang/cargo/issues/545
-
-To solve this problem, we created a tool named `bootimage` that first compiles the kernel and bootloader, and then links them together to create a bootable disk image. To install the tool, go into your home directory (or any directory outside of your cargo project) and execute the following command in your terminal:
-
-```
-cargo install bootimage
-```
-
-For running `bootimage` and building the bootloader, you need to have the `llvm-tools-preview` rustup component installed. You can do so by executing `rustup component add llvm-tools-preview`.
-
-After installing `bootimage` and adding the `llvm-tools-preview` component, you can create a bootable disk image by going back into your cargo project directory and executing:
-
-```
-> cargo bootimage
-```
-
-We see that the tool recompiles our kernel using `cargo build`, so it will automatically pick up any changes you make. Afterwards, it compiles the bootloader, which might take a while. Like all crate dependencies, it is only built once and then cached, so subsequent builds will be much faster. Finally, `bootimage` combines the bootloader and your kernel into a bootable disk image.
-
-After executing the command, you should see a bootable disk image named `bootimage-blog_os.bin` in your `target/x86_64-blog_os/debug` directory. You can boot it in a virtual machine or copy it to a USB drive to boot it on real hardware. (Note that this is not a CD image, which has a different format, so burning it to a CD doesn't work).
-
-## How does it work?
-The `bootimage` tool performs the following steps behind the scenes:
-
-- It compiles our kernel to an [ELF] file.
-- It compiles the bootloader dependency as a standalone executable.
-- It links the bytes of the kernel ELF file to the bootloader.
-
-[ELF]: https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
-[rust-osdev/bootloader]: https://github.com/rust-osdev/bootloader
-
-When booted, the bootloader reads and parses the appended ELF file. It then maps the program segments to virtual addresses in the page tables, zeroes the `.bss` section, and sets up a stack. Finally, it reads the entry point address (our `_start` function) and jumps to it.
-
-## Booting it in QEMU
-
-We can now boot the disk image in a virtual machine. To boot it in [QEMU], execute the following command:
-
-[QEMU]: https://www.qemu.org/
-
-```
-> qemu-system-x86_64 -drive format=raw,file=target/x86_64-blog_os/debug/bootimage-blog_os.bin
-```
-
-This opens a separate window which should look similar to this:
-
-![QEMU showing "Hello World!"](qemu.png)
-
-We see that our "Hello World!" is visible on the screen.
-
-## Real Machine
-
-It is also possible to write it to a USB stick and boot it on a real machine, **but be careful** to choose the correct device name, because **everything on that device is overwritten**:
-
-```
-> dd if=target/x86_64-blog_os/debug/bootimage-blog_os.bin of=/dev/sdX && sync
-```
-
-Where `sdX` is the device name of your USB stick. 
-
-After writing the image to the USB stick, you can run it on real hardware by booting from it. You probably need to use a special boot menu or change the boot order in your BIOS configuration to boot from the USB stick. Note that it currently doesn't work for UEFI machines, since the `bootloader` crate has no UEFI support yet.
-
-## Using `cargo run`
-
-To make it easier to run our kernel in QEMU, we can set the `runner` configuration key for cargo:
-
-```toml
-# in .cargo/config.toml
-
-[target.'cfg(target_os = "none")']
-runner = "bootimage runner"
-```
-
-The `target.'cfg(target_os = "none")'` table applies to all targets whose target configuration file's `"os"` field is set to `"none"`. This includes our `x86_64-blog_os.json` target. The `runner` key specifies the command that should be invoked for `cargo run`. The command is run after a successful build with the executable path passed as the first argument. See the [cargo documentation][cargo configuration] for more details.
-
-The `bootimage runner` command is specifically designed to be usable as a `runner` executable. It links the given executable with the project's bootloader dependency and then launches QEMU. See the [Readme of `bootimage`] for more details and possible configuration options.
-
-[Readme of `bootimage`]: https://github.com/rust-osdev/bootimage
-
-Now we can use `cargo run` to compile our kernel and boot it in QEMU.
-
-## What's next?
-
-In the next post, we will explore the VGA text buffer in more detail and write a safe interface for it. We will also add support for the `println` macro.
