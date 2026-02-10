@@ -448,7 +448,7 @@
 <li>Where do electrons flow?</li>
 <li>This is determined by the <em>boot process</em>
 <ul>
-<li>Occurs on <em>ever</em> power-up</li>
+<li>Occurs on <em>every</em> power-up</li>
 <li>Determined by <em>hardware</em> design</li>
 <li>More fundamental than the OS</li>
 </ul></li>
@@ -735,7 +735,7 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <li>So, make our own.</li>
 <li>It’s not too bad, just JSON.
 <ul>
-<li>We’ll specify some easy stuff, like archtiecture.</li>
+<li>We’ll specify some easy stuff, like architecture.</li>
 <li>Some weird stuff, like manual memory layouts.</li>
 <li>And get on with things.</li>
 </ul></li>
@@ -873,79 +873,57 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb6-2"><a></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
 <span id="cb6-3"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<ul>
-<li>So I’m going to tell you about it.</li>
-</ul>
-</section>
-<section id="the-red-zone" class="slide level2">
-<h2>The Red Zone</h2>
-<ul>
-<li>The <strong>Red Zone</strong> is a 128-byte optimization area below the current stack pointer (<span class="math inline">\(RSP\)</span>).
-<ul>
-<li>“R” for 64 bit.</li>
-<li>“SP” for “stack pointer”</li>
-</ul></li>
-<li>It is a specific feature of the x86-64 System V ABI (Application Binary Interface).</li>
-<li>It allows functions to use a small amount of stack space without actually moving the pointer.</li>
-</ul>
-</section>
-<section id="performance-gains" class="slide level2">
-<h2>Performance Gains</h2>
-<ul>
-<li>Normally, any data written to the stack requires an <span class="math inline">\(RSP\)</span> adjustment to prevent data corruption.
-<ul>
-<li><code>sub rsp, 8</code></li>
-<li><code>mov [rsp], rax</code></li>
-</ul></li>
-<li>With the Red Zone, compilers can skip the subtraction for some functions.</li>
-<li>This reduces the number of instructions and speeds up function execution.
-<ul>
-<li>At the cost of <em>no longer tracking the stack</em>.</li>
-</ul></li>
-</ul>
-</section>
-<section id="negative-indexing" class="slide level2">
-<h2>Negative Indexing</h2>
-<ul>
-<li>Since <span class="math inline">\(RSP\)</span> remains at the “top” of the stack, we access this memory using negative offsets.</li>
-<li>In assembly, this looks like <code>mov [rsp - 16], rax</code>.</li>
-<li>This treats the stack as a fixed-base array rather than a stack ADT.</li>
-<li>It is essentially “free” scratch space for short-lived data.</li>
-</ul>
-</section>
-<section id="the-danger-of-interrupts" class="slide level2">
-<h2>The Danger of Interrupts</h2>
-<ul>
-<li>The Red Zone is dangerous in kernel development because of <strong>hardware interrupts</strong>.
-<ul>
-<li>The OS has to deal with, say, someone hitting the power off button.</li>
-<li>Someone plugging in a USB drive.</li>
-<li>Lightning strikes.</li>
-<li>Cosmic rays flipping bits</li>
-</ul></li>
-</ul>
-</section>
-<section id="red-zone-to-dead-zone" class="slide level2">
-<h2>Red Zone to Dead Zone</h2>
-<ul>
-<li>When an interrupt occurs, the CPU pushes state (like <span class="math inline">\(RIP\)</span> and <span class="math inline">\(RFLAGS\)</span>) onto the stack.
-<ul>
-<li>“Instruction pointer” and “flags”.</li>
-</ul></li>
-<li>This will overwrite those 128 bytes of data.</li>
-<li>This leads to silent, non-deterministic memory corruption.
-<ul>
-<li>Generally regarded as bad.</li>
-</ul></li>
-</ul>
-</section>
-<section id="read-more" class="slide level2">
-<h2>Read more</h2>
-<ul>
-<li>There are good visuals here.</li>
-<li><a href="https://os.phil-opp.com/red-zone/">Read more</a></li>
-<li>Handwaving now - Better for the compilers class I think!</li>
-</ul>
+<!--
+
+- So I'm going to tell you about it.
+
+## The Red Zone
+
+- The **Red Zone** is a 128-byte optimization area below the current stack pointer ($RSP$).
+    - "R" for 64 bit.
+    - "SP" for "stack pointer"
+- It is a specific feature of the x86-64 System V ABI (Application Binary Interface).
+- It allows functions to use a small amount of stack space without actually moving the pointer.
+
+## Performance Gains
+
+- Normally, any data written to the stack requires an $RSP$ adjustment to prevent data corruption.
+    - `sub rsp, 8`
+    - `mov [rsp], rax`
+- With the Red Zone, compilers can skip the subtraction for some functions.
+- This reduces the number of instructions and speeds up function execution.
+    - At the cost of *no longer tracking the stack*.
+
+## Negative Indexing
+
+- Since $RSP$ remains at the "top" of the stack, we access this memory using negative offsets.
+- In assembly, this looks like `mov [rsp - 16], rax`.
+- This treats the stack as a fixed-base array rather than a stack ADT.
+- It is essentially "free" scratch space for short-lived data.
+
+## The Danger of Interrupts
+
+- The Red Zone is dangerous in kernel development because of **hardware interrupts**.
+    - The OS has to deal with, say, someone hitting the power off button.
+    - Someone plugging in a USB drive.
+    - Lightning strikes.
+    - Cosmic rays flipping bits
+    
+## Red Zone to Dead Zone
+    
+- When an interrupt occurs, the CPU pushes state (like $RIP$ and $RFLAGS$) onto the stack.
+    - "Instruction pointer" and "flags".
+- This will overwrite those 128 bytes of data.
+- This leads to silent, non-deterministic memory corruption.
+    - Generally regarded as bad.
+    
+## Read more
+
+- There are good visuals here.
+- [Read more](https://os.phil-opp.com/red-zone/)
+- Handwaving now - Better for the compilers class I think!
+
+-->
 </section>
 <section id="ancient-nemesis" class="slide level2">
 <h2>Ancient Nemesis</h2>
@@ -1126,6 +1104,14 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb13-5"><a></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `/home/user/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
 <span id="cb13-6"><a></a><span class="st">  --- stderr</span></span>
 <span id="cb13-7"><a></a><span class="st">  error: Error loading target specification: Field target-pointer-width in target specification is required. Run `rustc --print target-list` for a list of built-in targets</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="aside-2" class="slide level2">
+<h2>Aside</h2>
+<ul>
+<li>If you did not see that error, that is okay!</li>
+<li>It concerns an unstable language feature and may differ.</li>
+<li>Just skip two slides!</li>
+</ul>
 </section>
 <section id="okay-so" class="slide level2">
 <h2>Okay so</h2>
@@ -1449,6 +1435,14 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb33-6"><a></a><span class="op">&gt;</span>     <span class="st">"target-pointer-width"</span>: <span class="st">"64"</span><span class="ex">,</span></span>
 <span id="cb33-7"><a></a><span class="op">&gt;</span>     <span class="st">"target-c-int-width"</span>: <span class="st">"32"</span><span class="ex">,</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
+<section id="aside-3" class="slide level2">
+<h2>Aside</h2>
+<ul>
+<li>If you did not see that error, that is okay!</li>
+<li>It concerns an unstable language feature and may differ.</li>
+<li>Just skip one slide!</li>
+</ul>
+</section>
 <section id="revert" class="slide level2">
 <h2>Revert!</h2>
 <ul>
@@ -1463,7 +1457,7 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb34-4"><a></a><span class="ex">^[[A</span>    Building [==========<span class="op">&gt;</span>                  ] 2/5: core, compiler_builtins                                                                Compiling osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
 <span id="cb34-5"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">dev</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">10.18s</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="aside-2" class="slide level2">
+<section id="aside-4" class="slide level2">
 <h2>Aside</h2>
 <ul>
 <li>By the way, are you tired of specifying the target every time?

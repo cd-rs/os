@@ -247,6 +247,12 @@ window.Quarto = {
  <span class="menu-text">Boot</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -295,12 +301,6 @@ window.Quarto = {
   <li><a href="#panic-abort" id="toc-panic-abort" class="nav-link" data-scroll-target="#panic-abort">Panic Abort</a></li>
   <li><a href="#target-vs.-toml" id="toc-target-vs.-toml" class="nav-link" data-scroll-target="#target-vs.-toml">Target vs.&nbsp;TOML</a></li>
   <li><a href="#red-zone" id="toc-red-zone" class="nav-link" data-scroll-target="#red-zone">Red Zone</a></li>
-  <li><a href="#the-red-zone" id="toc-the-red-zone" class="nav-link" data-scroll-target="#the-red-zone">The Red Zone</a></li>
-  <li><a href="#performance-gains" id="toc-performance-gains" class="nav-link" data-scroll-target="#performance-gains">Performance Gains</a></li>
-  <li><a href="#negative-indexing" id="toc-negative-indexing" class="nav-link" data-scroll-target="#negative-indexing">Negative Indexing</a></li>
-  <li><a href="#the-danger-of-interrupts" id="toc-the-danger-of-interrupts" class="nav-link" data-scroll-target="#the-danger-of-interrupts">The Danger of Interrupts</a></li>
-  <li><a href="#red-zone-to-dead-zone" id="toc-red-zone-to-dead-zone" class="nav-link" data-scroll-target="#red-zone-to-dead-zone">Red Zone to Dead Zone</a></li>
-  <li><a href="#read-more" id="toc-read-more" class="nav-link" data-scroll-target="#read-more">Read more</a></li>
   <li><a href="#ancient-nemesis" id="toc-ancient-nemesis" class="nav-link" data-scroll-target="#ancient-nemesis">Ancient Nemesis</a></li>
   <li><a href="#turn-off-floats" id="toc-turn-off-floats" class="nav-link" data-scroll-target="#turn-off-floats">Turn off floats</a></li>
   <li><a href="#mmxsse" id="toc-mmxsse" class="nav-link" data-scroll-target="#mmxsse">MMX/SSE</a></li>
@@ -314,6 +314,7 @@ window.Quarto = {
   <li><a href="#a-note" id="toc-a-note" class="nav-link" data-scroll-target="#a-note">A note</a></li>
   <li><a href="#linux-everywhere" id="toc-linux-everywhere" class="nav-link" data-scroll-target="#linux-everywhere">Linux Everywhere</a></li>
   <li><a href="#build-it" id="toc-build-it" class="nav-link" data-scroll-target="#build-it">Build it</a></li>
+  <li><a href="#aside-2" id="toc-aside-2" class="nav-link" data-scroll-target="#aside-2">Aside</a></li>
   <li><a href="#okay-so" id="toc-okay-so" class="nav-link" data-scroll-target="#okay-so">Okay so</a></li>
   <li><a href="#fix-it" id="toc-fix-it" class="nav-link" data-scroll-target="#fix-it">Fix it?</a></li>
   <li><a href="#now-it-works" id="toc-now-it-works" class="nav-link" data-scroll-target="#now-it-works">Now it works</a></li>
@@ -336,8 +337,9 @@ window.Quarto = {
   <li><a href="#one-solution" id="toc-one-solution" class="nav-link" data-scroll-target="#one-solution">One Solution</a></li>
   <li><a href="#another-solution" id="toc-another-solution" class="nav-link" data-scroll-target="#another-solution">Another Solution</a></li>
   <li><a href="#the-error" id="toc-the-error" class="nav-link" data-scroll-target="#the-error">The error</a></li>
+  <li><a href="#aside-3" id="toc-aside-3" class="nav-link" data-scroll-target="#aside-3">Aside</a></li>
   <li><a href="#revert" id="toc-revert" class="nav-link" data-scroll-target="#revert">Revert!</a></li>
-  <li><a href="#aside-2" id="toc-aside-2" class="nav-link" data-scroll-target="#aside-2">Aside</a></li>
+  <li><a href="#aside-4" id="toc-aside-4" class="nav-link" data-scroll-target="#aside-4">Aside</a></li>
   <li><a href="#run-again" id="toc-run-again" class="nav-link" data-scroll-target="#run-again">Run again</a></li>
   <li><a href="#aside-nightly" id="toc-aside-nightly" class="nav-link" data-scroll-target="#aside-nightly">Aside: Nightly</a></li>
   <li><a href="#aside-notfutureproofing" id="toc-aside-notfutureproofing" class="nav-link" data-scroll-target="#aside-notfutureproofing">Aside: <span class="math inline">\(\not\)</span>Futureproofing</a></li>
@@ -427,7 +429,7 @@ window.Quarto = {
 <li>Where do electrons flow?</li>
 <li>This is determined by the <em>boot process</em>
 <ul>
-<li>Occurs on <em>ever</em> power-up</li>
+<li>Occurs on <em>every</em> power-up</li>
 <li>Determined by <em>hardware</em> design</li>
 <li>More fundamental than the OS</li>
 </ul></li>
@@ -712,7 +714,7 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <li>So, make our own.</li>
 <li>It’s not too bad, just JSON.
 <ul>
-<li>We’ll specify some easy stuff, like archtiecture.</li>
+<li>We’ll specify some easy stuff, like architecture.</li>
 <li>Some weird stuff, like manual memory layouts.</li>
 <li>And get on with things.</li>
 </ul></li>
@@ -850,79 +852,57 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb6-2"><a href="#cb6-2"></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<ul>
-<li>So I’m going to tell you about it.</li>
-</ul>
-</section>
-<section id="the-red-zone" class="level2">
-<h2 class="anchored" data-anchor-id="the-red-zone">The Red Zone</h2>
-<ul>
-<li>The <strong>Red Zone</strong> is a 128-byte optimization area below the current stack pointer (<span class="math inline">\(RSP\)</span>).
-<ul>
-<li>“R” for 64 bit.</li>
-<li>“SP” for “stack pointer”</li>
-</ul></li>
-<li>It is a specific feature of the x86-64 System V ABI (Application Binary Interface).</li>
-<li>It allows functions to use a small amount of stack space without actually moving the pointer.</li>
-</ul>
-</section>
-<section id="performance-gains" class="level2">
-<h2 class="anchored" data-anchor-id="performance-gains">Performance Gains</h2>
-<ul>
-<li>Normally, any data written to the stack requires an <span class="math inline">\(RSP\)</span> adjustment to prevent data corruption.
-<ul>
-<li><code>sub rsp, 8</code></li>
-<li><code>mov [rsp], rax</code></li>
-</ul></li>
-<li>With the Red Zone, compilers can skip the subtraction for some functions.</li>
-<li>This reduces the number of instructions and speeds up function execution.
-<ul>
-<li>At the cost of <em>no longer tracking the stack</em>.</li>
-</ul></li>
-</ul>
-</section>
-<section id="negative-indexing" class="level2">
-<h2 class="anchored" data-anchor-id="negative-indexing">Negative Indexing</h2>
-<ul>
-<li>Since <span class="math inline">\(RSP\)</span> remains at the “top” of the stack, we access this memory using negative offsets.</li>
-<li>In assembly, this looks like <code>mov [rsp - 16], rax</code>.</li>
-<li>This treats the stack as a fixed-base array rather than a stack ADT.</li>
-<li>It is essentially “free” scratch space for short-lived data.</li>
-</ul>
-</section>
-<section id="the-danger-of-interrupts" class="level2">
-<h2 class="anchored" data-anchor-id="the-danger-of-interrupts">The Danger of Interrupts</h2>
-<ul>
-<li>The Red Zone is dangerous in kernel development because of <strong>hardware interrupts</strong>.
-<ul>
-<li>The OS has to deal with, say, someone hitting the power off button.</li>
-<li>Someone plugging in a USB drive.</li>
-<li>Lightning strikes.</li>
-<li>Cosmic rays flipping bits</li>
-</ul></li>
-</ul>
-</section>
-<section id="red-zone-to-dead-zone" class="level2">
-<h2 class="anchored" data-anchor-id="red-zone-to-dead-zone">Red Zone to Dead Zone</h2>
-<ul>
-<li>When an interrupt occurs, the CPU pushes state (like <span class="math inline">\(RIP\)</span> and <span class="math inline">\(RFLAGS\)</span>) onto the stack.
-<ul>
-<li>“Instruction pointer” and “flags”.</li>
-</ul></li>
-<li>This will overwrite those 128 bytes of data.</li>
-<li>This leads to silent, non-deterministic memory corruption.
-<ul>
-<li>Generally regarded as bad.</li>
-</ul></li>
-</ul>
-</section>
-<section id="read-more" class="level2">
-<h2 class="anchored" data-anchor-id="read-more">Read more</h2>
-<ul>
-<li>There are good visuals here.</li>
-<li><a href="https://os.phil-opp.com/red-zone/">Read more</a></li>
-<li>Handwaving now - Better for the compilers class I think!</li>
-</ul>
+<!--
+
+- So I'm going to tell you about it.
+
+## The Red Zone
+
+- The **Red Zone** is a 128-byte optimization area below the current stack pointer ($RSP$).
+    - "R" for 64 bit.
+    - "SP" for "stack pointer"
+- It is a specific feature of the x86-64 System V ABI (Application Binary Interface).
+- It allows functions to use a small amount of stack space without actually moving the pointer.
+
+## Performance Gains
+
+- Normally, any data written to the stack requires an $RSP$ adjustment to prevent data corruption.
+    - `sub rsp, 8`
+    - `mov [rsp], rax`
+- With the Red Zone, compilers can skip the subtraction for some functions.
+- This reduces the number of instructions and speeds up function execution.
+    - At the cost of *no longer tracking the stack*.
+
+## Negative Indexing
+
+- Since $RSP$ remains at the "top" of the stack, we access this memory using negative offsets.
+- In assembly, this looks like `mov [rsp - 16], rax`.
+- This treats the stack as a fixed-base array rather than a stack ADT.
+- It is essentially "free" scratch space for short-lived data.
+
+## The Danger of Interrupts
+
+- The Red Zone is dangerous in kernel development because of **hardware interrupts**.
+    - The OS has to deal with, say, someone hitting the power off button.
+    - Someone plugging in a USB drive.
+    - Lightning strikes.
+    - Cosmic rays flipping bits
+    
+## Red Zone to Dead Zone
+    
+- When an interrupt occurs, the CPU pushes state (like $RIP$ and $RFLAGS$) onto the stack.
+    - "Instruction pointer" and "flags".
+- This will overwrite those 128 bytes of data.
+- This leads to silent, non-deterministic memory corruption.
+    - Generally regarded as bad.
+    
+## Read more
+
+- There are good visuals here.
+- [Read more](https://os.phil-opp.com/red-zone/)
+- Handwaving now - Better for the compilers class I think!
+
+-->
 </section>
 <section id="ancient-nemesis" class="level2">
 <h2 class="anchored" data-anchor-id="ancient-nemesis">Ancient Nemesis</h2>
@@ -1103,6 +1083,14 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb13-5"><a href="#cb13-5"></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `/home/user/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
 <span id="cb13-6"><a href="#cb13-6"></a><span class="st">  --- stderr</span></span>
 <span id="cb13-7"><a href="#cb13-7"></a><span class="st">  error: Error loading target specification: Field target-pointer-width in target specification is required. Run `rustc --print target-list` for a list of built-in targets</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="aside-2" class="level2">
+<h2 class="anchored" data-anchor-id="aside-2">Aside</h2>
+<ul>
+<li>If you did not see that error, that is okay!</li>
+<li>It concerns an unstable language feature and may differ.</li>
+<li>Just skip two slides!</li>
+</ul>
 </section>
 <section id="okay-so" class="level2">
 <h2 class="anchored" data-anchor-id="okay-so">Okay so</h2>
@@ -1427,6 +1415,14 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb33-6"><a href="#cb33-6"></a><span class="op">&gt;</span>     <span class="st">"target-pointer-width"</span>: <span class="st">"64"</span><span class="ex">,</span></span>
 <span id="cb33-7"><a href="#cb33-7"></a><span class="op">&gt;</span>     <span class="st">"target-c-int-width"</span>: <span class="st">"32"</span><span class="ex">,</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
+<section id="aside-3" class="level2">
+<h2 class="anchored" data-anchor-id="aside-3">Aside</h2>
+<ul>
+<li>If you did not see that error, that is okay!</li>
+<li>It concerns an unstable language feature and may differ.</li>
+<li>Just skip one slide!</li>
+</ul>
+</section>
 <section id="revert" class="level2">
 <h2 class="anchored" data-anchor-id="revert">Revert!</h2>
 <ul>
@@ -1441,8 +1437,8 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <span id="cb34-4"><a href="#cb34-4"></a><span class="ex">^[[A</span>    Building [==========<span class="op">&gt;</span>                  ] 2/5: core, compiler_builtins                                                                Compiling osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/32</span><span class="kw">)</span></span>
 <span id="cb34-5"><a href="#cb34-5"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">dev</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">10.18s</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="aside-2" class="level2">
-<h2 class="anchored" data-anchor-id="aside-2">Aside</h2>
+<section id="aside-4" class="level2">
+<h2 class="anchored" data-anchor-id="aside-4">Aside</h2>
 <ul>
 <li>By the way, are you tired of specifying the target every time?
 <ul>
@@ -2142,7 +2138,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb46-33"><a href="#cb46-33"></a><span class="ss">- </span>What determines the initial arrangement of gates?</span>
 <span id="cb46-34"><a href="#cb46-34"></a><span class="ss">- </span>Where do electrons flow?</span>
 <span id="cb46-35"><a href="#cb46-35"></a><span class="ss">- </span>This is determined by the *boot process*</span>
-<span id="cb46-36"><a href="#cb46-36"></a><span class="ss">    - </span>Occurs on *ever* power-up</span>
+<span id="cb46-36"><a href="#cb46-36"></a><span class="ss">    - </span>Occurs on *every* power-up</span>
 <span id="cb46-37"><a href="#cb46-37"></a><span class="ss">    - </span>Determined by *hardware* design</span>
 <span id="cb46-38"><a href="#cb46-38"></a><span class="ss">    - </span>More fundamental than the OS</span>
 <span id="cb46-39"><a href="#cb46-39"></a>    </span>
@@ -2340,7 +2336,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb46-231"><a href="#cb46-231"></a><span class="ss">- </span>I am aware of no existing target triple suitable for this course.</span>
 <span id="cb46-232"><a href="#cb46-232"></a><span class="ss">- </span>So, make our own.</span>
 <span id="cb46-233"><a href="#cb46-233"></a><span class="ss">- </span>It's not too bad, just JSON.</span>
-<span id="cb46-234"><a href="#cb46-234"></a><span class="ss">    - </span>We'll specify some easy stuff, like archtiecture.</span>
+<span id="cb46-234"><a href="#cb46-234"></a><span class="ss">    - </span>We'll specify some easy stuff, like architecture.</span>
 <span id="cb46-235"><a href="#cb46-235"></a><span class="ss">    - </span>Some weird stuff, like manual memory layouts.</span>
 <span id="cb46-236"><a href="#cb46-236"></a><span class="ss">    - </span>And get on with things.</span>
 <span id="cb46-237"><a href="#cb46-237"></a>    </span>
@@ -2449,651 +2445,668 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb46-340"><a href="#cb46-340"></a><span class="in">}</span></span>
 <span id="cb46-341"><a href="#cb46-341"></a><span class="in">```</span></span>
 <span id="cb46-342"><a href="#cb46-342"></a></span>
-<span id="cb46-343"><a href="#cb46-343"></a><span class="ss">- </span>So I'm going to tell you about it.</span>
+<span id="cb46-343"><a href="#cb46-343"></a><span class="co">&lt;!--</span></span>
 <span id="cb46-344"><a href="#cb46-344"></a></span>
-<span id="cb46-345"><a href="#cb46-345"></a><span class="fu">## The Red Zone</span></span>
+<span id="cb46-345"><a href="#cb46-345"></a><span class="co">- So I'm going to tell you about it.</span></span>
 <span id="cb46-346"><a href="#cb46-346"></a></span>
-<span id="cb46-347"><a href="#cb46-347"></a><span class="ss">- </span>The **Red Zone** is a 128-byte optimization area below the current stack pointer ($RSP$).</span>
-<span id="cb46-348"><a href="#cb46-348"></a><span class="ss">    - </span>"R" for 64 bit.</span>
-<span id="cb46-349"><a href="#cb46-349"></a><span class="ss">    - </span>"SP" for "stack pointer"</span>
-<span id="cb46-350"><a href="#cb46-350"></a><span class="ss">- </span>It is a specific feature of the x86-64 System V ABI (Application Binary Interface).</span>
-<span id="cb46-351"><a href="#cb46-351"></a><span class="ss">- </span>It allows functions to use a small amount of stack space without actually moving the pointer.</span>
-<span id="cb46-352"><a href="#cb46-352"></a></span>
-<span id="cb46-353"><a href="#cb46-353"></a><span class="fu">## Performance Gains</span></span>
+<span id="cb46-347"><a href="#cb46-347"></a><span class="co">## The Red Zone</span></span>
+<span id="cb46-348"><a href="#cb46-348"></a></span>
+<span id="cb46-349"><a href="#cb46-349"></a><span class="co">- The **Red Zone** is a 128-byte optimization area below the current stack pointer ($RSP$).</span></span>
+<span id="cb46-350"><a href="#cb46-350"></a><span class="co">    - "R" for 64 bit.</span></span>
+<span id="cb46-351"><a href="#cb46-351"></a><span class="co">    - "SP" for "stack pointer"</span></span>
+<span id="cb46-352"><a href="#cb46-352"></a><span class="co">- It is a specific feature of the x86-64 System V ABI (Application Binary Interface).</span></span>
+<span id="cb46-353"><a href="#cb46-353"></a><span class="co">- It allows functions to use a small amount of stack space without actually moving the pointer.</span></span>
 <span id="cb46-354"><a href="#cb46-354"></a></span>
-<span id="cb46-355"><a href="#cb46-355"></a><span class="ss">- </span>Normally, any data written to the stack requires an $RSP$ adjustment to prevent data corruption.</span>
-<span id="cb46-356"><a href="#cb46-356"></a><span class="ss">    - </span><span class="in">`sub rsp, 8`</span></span>
-<span id="cb46-357"><a href="#cb46-357"></a><span class="ss">    - </span><span class="in">`mov [rsp], rax`</span></span>
-<span id="cb46-358"><a href="#cb46-358"></a><span class="ss">- </span>With the Red Zone, compilers can skip the subtraction for some functions.</span>
-<span id="cb46-359"><a href="#cb46-359"></a><span class="ss">- </span>This reduces the number of instructions and speeds up function execution.</span>
-<span id="cb46-360"><a href="#cb46-360"></a><span class="ss">    - </span>At the cost of *no longer tracking the stack*.</span>
-<span id="cb46-361"><a href="#cb46-361"></a></span>
-<span id="cb46-362"><a href="#cb46-362"></a><span class="fu">## Negative Indexing</span></span>
+<span id="cb46-355"><a href="#cb46-355"></a><span class="co">## Performance Gains</span></span>
+<span id="cb46-356"><a href="#cb46-356"></a></span>
+<span id="cb46-357"><a href="#cb46-357"></a><span class="co">- Normally, any data written to the stack requires an $RSP$ adjustment to prevent data corruption.</span></span>
+<span id="cb46-358"><a href="#cb46-358"></a><span class="co">    - `sub rsp, 8`</span></span>
+<span id="cb46-359"><a href="#cb46-359"></a><span class="co">    - `mov [rsp], rax`</span></span>
+<span id="cb46-360"><a href="#cb46-360"></a><span class="co">- With the Red Zone, compilers can skip the subtraction for some functions.</span></span>
+<span id="cb46-361"><a href="#cb46-361"></a><span class="co">- This reduces the number of instructions and speeds up function execution.</span></span>
+<span id="cb46-362"><a href="#cb46-362"></a><span class="co">    - At the cost of *no longer tracking the stack*.</span></span>
 <span id="cb46-363"><a href="#cb46-363"></a></span>
-<span id="cb46-364"><a href="#cb46-364"></a><span class="ss">- </span>Since $RSP$ remains at the "top" of the stack, we access this memory using negative offsets.</span>
-<span id="cb46-365"><a href="#cb46-365"></a><span class="ss">- </span>In assembly, this looks like <span class="in">`mov [rsp - 16], rax`</span>.</span>
-<span id="cb46-366"><a href="#cb46-366"></a><span class="ss">- </span>This treats the stack as a fixed-base array rather than a stack ADT.</span>
-<span id="cb46-367"><a href="#cb46-367"></a><span class="ss">- </span>It is essentially "free" scratch space for short-lived data.</span>
-<span id="cb46-368"><a href="#cb46-368"></a></span>
-<span id="cb46-369"><a href="#cb46-369"></a><span class="fu">## The Danger of Interrupts</span></span>
+<span id="cb46-364"><a href="#cb46-364"></a><span class="co">## Negative Indexing</span></span>
+<span id="cb46-365"><a href="#cb46-365"></a></span>
+<span id="cb46-366"><a href="#cb46-366"></a><span class="co">- Since $RSP$ remains at the "top" of the stack, we access this memory using negative offsets.</span></span>
+<span id="cb46-367"><a href="#cb46-367"></a><span class="co">- In assembly, this looks like `mov [rsp - 16], rax`.</span></span>
+<span id="cb46-368"><a href="#cb46-368"></a><span class="co">- This treats the stack as a fixed-base array rather than a stack ADT.</span></span>
+<span id="cb46-369"><a href="#cb46-369"></a><span class="co">- It is essentially "free" scratch space for short-lived data.</span></span>
 <span id="cb46-370"><a href="#cb46-370"></a></span>
-<span id="cb46-371"><a href="#cb46-371"></a><span class="ss">- </span>The Red Zone is dangerous in kernel development because of **hardware interrupts**.</span>
-<span id="cb46-372"><a href="#cb46-372"></a><span class="ss">    - </span>The OS has to deal with, say, someone hitting the power off button.</span>
-<span id="cb46-373"><a href="#cb46-373"></a><span class="ss">    - </span>Someone plugging in a USB drive.</span>
-<span id="cb46-374"><a href="#cb46-374"></a><span class="ss">    - </span>Lightning strikes.</span>
-<span id="cb46-375"><a href="#cb46-375"></a><span class="ss">    - </span>Cosmic rays flipping bits</span>
-<span id="cb46-376"><a href="#cb46-376"></a>    </span>
-<span id="cb46-377"><a href="#cb46-377"></a><span class="fu">## Red Zone to Dead Zone</span></span>
-<span id="cb46-378"><a href="#cb46-378"></a>    </span>
-<span id="cb46-379"><a href="#cb46-379"></a><span class="ss">- </span>When an interrupt occurs, the CPU pushes state (like $RIP$ and $RFLAGS$) onto the stack.</span>
-<span id="cb46-380"><a href="#cb46-380"></a><span class="ss">    - </span>"Instruction pointer" and "flags".</span>
-<span id="cb46-381"><a href="#cb46-381"></a><span class="ss">- </span>This will overwrite those 128 bytes of data.</span>
-<span id="cb46-382"><a href="#cb46-382"></a><span class="ss">- </span>This leads to silent, non-deterministic memory corruption.</span>
-<span id="cb46-383"><a href="#cb46-383"></a><span class="ss">    - </span>Generally regarded as bad.</span>
-<span id="cb46-384"><a href="#cb46-384"></a>    </span>
-<span id="cb46-385"><a href="#cb46-385"></a><span class="fu">## Read more</span></span>
-<span id="cb46-386"><a href="#cb46-386"></a></span>
-<span id="cb46-387"><a href="#cb46-387"></a><span class="ss">- </span>There are good visuals here.</span>
-<span id="cb46-388"><a href="#cb46-388"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://os.phil-opp.com/red-zone/)</span></span>
-<span id="cb46-389"><a href="#cb46-389"></a><span class="ss">- </span>Handwaving now - Better for the compilers class I think!</span>
-<span id="cb46-390"><a href="#cb46-390"></a></span>
-<span id="cb46-391"><a href="#cb46-391"></a><span class="fu">## Ancient Nemesis</span></span>
+<span id="cb46-371"><a href="#cb46-371"></a><span class="co">## The Danger of Interrupts</span></span>
+<span id="cb46-372"><a href="#cb46-372"></a></span>
+<span id="cb46-373"><a href="#cb46-373"></a><span class="co">- The Red Zone is dangerous in kernel development because of **hardware interrupts**.</span></span>
+<span id="cb46-374"><a href="#cb46-374"></a><span class="co">    - The OS has to deal with, say, someone hitting the power off button.</span></span>
+<span id="cb46-375"><a href="#cb46-375"></a><span class="co">    - Someone plugging in a USB drive.</span></span>
+<span id="cb46-376"><a href="#cb46-376"></a><span class="co">    - Lightning strikes.</span></span>
+<span id="cb46-377"><a href="#cb46-377"></a><span class="co">    - Cosmic rays flipping bits</span></span>
+<span id="cb46-378"><a href="#cb46-378"></a><span class="co">    </span></span>
+<span id="cb46-379"><a href="#cb46-379"></a><span class="co">## Red Zone to Dead Zone</span></span>
+<span id="cb46-380"><a href="#cb46-380"></a><span class="co">    </span></span>
+<span id="cb46-381"><a href="#cb46-381"></a><span class="co">- When an interrupt occurs, the CPU pushes state (like $RIP$ and $RFLAGS$) onto the stack.</span></span>
+<span id="cb46-382"><a href="#cb46-382"></a><span class="co">    - "Instruction pointer" and "flags".</span></span>
+<span id="cb46-383"><a href="#cb46-383"></a><span class="co">- This will overwrite those 128 bytes of data.</span></span>
+<span id="cb46-384"><a href="#cb46-384"></a><span class="co">- This leads to silent, non-deterministic memory corruption.</span></span>
+<span id="cb46-385"><a href="#cb46-385"></a><span class="co">    - Generally regarded as bad.</span></span>
+<span id="cb46-386"><a href="#cb46-386"></a><span class="co">    </span></span>
+<span id="cb46-387"><a href="#cb46-387"></a><span class="co">## Read more</span></span>
+<span id="cb46-388"><a href="#cb46-388"></a></span>
+<span id="cb46-389"><a href="#cb46-389"></a><span class="co">- There are good visuals here.</span></span>
+<span id="cb46-390"><a href="#cb46-390"></a><span class="co">- [Read more](https://os.phil-opp.com/red-zone/)</span></span>
+<span id="cb46-391"><a href="#cb46-391"></a><span class="co">- Handwaving now - Better for the compilers class I think!</span></span>
 <span id="cb46-392"><a href="#cb46-392"></a></span>
-<span id="cb46-393"><a href="#cb46-393"></a><span class="ss">- </span>You all know I love floating point numbers.</span>
-<span id="cb46-394"><a href="#cb46-394"></a><span class="ss">    - </span>And with good reason!</span>
-<span id="cb46-395"><a href="#cb46-395"></a></span>
-<span id="cb46-396"><a href="#cb46-396"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
-<span id="cb46-397"><a href="#cb46-397"></a><span class="in">{</span></span>
-<span id="cb46-398"><a href="#cb46-398"></a><span class="in">    "features": "-mmx,-sse,+soft-float",</span></span>
-<span id="cb46-399"><a href="#cb46-399"></a><span class="in">}</span></span>
-<span id="cb46-400"><a href="#cb46-400"></a><span class="in">```</span></span>
-<span id="cb46-401"><a href="#cb46-401"></a></span>
-<span id="cb46-402"><a href="#cb46-402"></a><span class="fu">## Turn off floats</span></span>
-<span id="cb46-403"><a href="#cb46-403"></a></span>
-<span id="cb46-404"><a href="#cb46-404"></a><span class="ss">- </span><span class="in">`features`</span> enables/disables target features. </span>
-<span id="cb46-405"><a href="#cb46-405"></a><span class="ss">- </span>We disable the <span class="in">`mmx`</span> and <span class="in">`sse`</span> features by prefixing them with a minus</span>
-<span id="cb46-406"><a href="#cb46-406"></a><span class="ss">- </span>We enable the <span class="in">`soft-float`</span> feature by prefixing it with a plus. </span>
-<span id="cb46-407"><a href="#cb46-407"></a><span class="ss">- </span>Note that there must be no spaces between different flags!</span>
-<span id="cb46-408"><a href="#cb46-408"></a></span>
-<span id="cb46-409"><a href="#cb46-409"></a><span class="fu">## MMX/SSE</span></span>
-<span id="cb46-410"><a href="#cb46-410"></a></span>
-<span id="cb46-411"><a href="#cb46-411"></a><span class="ss">- </span>The <span class="in">`mmx`</span> and <span class="in">`sse`</span> features are performance optimizing vector operations from when Intel though they'd be able to hold off NVIDIA in the 90s.</span>
-<span id="cb46-412"><a href="#cb46-412"></a><span class="ss">- </span>These are braodly called <span class="co">[</span><span class="ot">Single Instruction Multiple Data (SIMD)</span><span class="co">](https://en.wikipedia.org/wiki/SIMD)</span> instructions and are historically important.</span>
-<span id="cb46-413"><a href="#cb46-413"></a><span class="ss">    - </span>Foundation of <span class="in">`numpy`</span></span>
-<span id="cb46-414"><a href="#cb46-414"></a><span class="ss">- </span>We aren't using data frames in our kernel.</span>
-<span id="cb46-415"><a href="#cb46-415"></a></span>
-<span id="cb46-416"><a href="#cb46-416"></a><span class="fu">## Soft Float</span></span>
-<span id="cb46-417"><a href="#cb46-417"></a></span>
-<span id="cb46-418"><a href="#cb46-418"></a><span class="ss">- </span>Floating point operations on <span class="in">`x86_64`</span> require SIMD registers by default. </span>
-<span id="cb46-419"><a href="#cb46-419"></a><span class="ss">    - </span>That's right - floats are worse than you thought!</span>
-<span id="cb46-420"><a href="#cb46-420"></a><span class="ss">- </span>To solve this problem, we add the <span class="in">`soft-float`</span> feature, which emulates all floating point operations through software functions based on normal integers.</span>
-<span id="cb46-421"><a href="#cb46-421"></a><span class="ss">    - </span>Just like <span class="co">[</span><span class="ot">`f16`</span><span class="co">](https://cd-c89.github.io/rs/51_f16.html)</span></span>
-<span id="cb46-422"><a href="#cb46-422"></a></span>
-<span id="cb46-423"><a href="#cb46-423"></a><span class="fu">## Aside</span></span>
-<span id="cb46-424"><a href="#cb46-424"></a></span>
-<span id="cb46-425"><a href="#cb46-425"></a></span>
-<span id="cb46-426"><a href="#cb46-426"></a><span class="ss">- </span>We also need to tell the Rust compiler <span class="in">`rustc`</span> that we want to use the corresponding ABI.</span>
-<span id="cb46-427"><a href="#cb46-427"></a></span>
-<span id="cb46-428"><a href="#cb46-428"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
-<span id="cb46-429"><a href="#cb46-429"></a><span class="in">{</span></span>
-<span id="cb46-430"><a href="#cb46-430"></a><span class="in">    "rustc-abi": "x86-softfloat"</span></span>
-<span id="cb46-431"><a href="#cb46-431"></a><span class="in">}</span></span>
-<span id="cb46-432"><a href="#cb46-432"></a><span class="in">```</span></span>
-<span id="cb46-433"><a href="#cb46-433"></a><span class="ss">- </span>I am 100% sure I can write an OS without hard or soft floats but I haven't worked far enough ahead to be absolutely certain.</span>
-<span id="cb46-434"><a href="#cb46-434"></a></span>
-<span id="cb46-435"><a href="#cb46-435"></a><span class="fu">## Altogether</span></span>
-<span id="cb46-436"><a href="#cb46-436"></a></span>
-<span id="cb46-437"><a href="#cb46-437"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
-<span id="cb46-438"><a href="#cb46-438"></a><span class="in">{</span></span>
-<span id="cb46-439"><a href="#cb46-439"></a><span class="in">    "llvm-target": "x86_64-unknown-none",</span></span>
-<span id="cb46-440"><a href="#cb46-440"></a><span class="in">    "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",</span></span>
-<span id="cb46-441"><a href="#cb46-441"></a><span class="in">    "arch": "x86_64",</span></span>
-<span id="cb46-442"><a href="#cb46-442"></a><span class="in">    "target-endian": "little",</span></span>
-<span id="cb46-443"><a href="#cb46-443"></a><span class="in">    "target-pointer-width": 64,</span></span>
-<span id="cb46-444"><a href="#cb46-444"></a><span class="in">    "target-c-int-width": 32,</span></span>
-<span id="cb46-445"><a href="#cb46-445"></a><span class="in">    "os": "none",</span></span>
-<span id="cb46-446"><a href="#cb46-446"></a><span class="in">    "executables": true,</span></span>
-<span id="cb46-447"><a href="#cb46-447"></a><span class="in">    "linker-flavor": "ld.lld",</span></span>
-<span id="cb46-448"><a href="#cb46-448"></a><span class="in">    "linker": "rust-lld",</span></span>
-<span id="cb46-449"><a href="#cb46-449"></a><span class="in">    "panic-strategy": "abort",</span></span>
-<span id="cb46-450"><a href="#cb46-450"></a><span class="in">    "disable-redzone": true,</span></span>
-<span id="cb46-451"><a href="#cb46-451"></a><span class="in">    "features": "-mmx,-sse,+soft-float",</span></span>
-<span id="cb46-452"><a href="#cb46-452"></a><span class="in">    "rustc-abi": "x86-softfloat"</span></span>
-<span id="cb46-453"><a href="#cb46-453"></a><span class="in">}</span></span>
-<span id="cb46-454"><a href="#cb46-454"></a><span class="in">```</span></span>
-<span id="cb46-455"><a href="#cb46-455"></a></span>
-<span id="cb46-456"><a href="#cb46-456"></a><span class="fu">## I just `curl`</span></span>
-<span id="cb46-457"><a href="#cb46-457"></a></span>
-<span id="cb46-458"><a href="#cb46-458"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-459"><a href="#cb46-459"></a><span class="in">curl https://raw.githubusercontent.com/phil-opp/blog_os/refs/heads/post-02/x86_64-blog_os.json -o x86_64-osirs.json</span></span>
-<span id="cb46-460"><a href="#cb46-460"></a><span class="in">```</span></span>
+<span id="cb46-393"><a href="#cb46-393"></a><span class="co">--&gt;</span></span>
+<span id="cb46-394"><a href="#cb46-394"></a></span>
+<span id="cb46-395"><a href="#cb46-395"></a><span class="fu">## Ancient Nemesis</span></span>
+<span id="cb46-396"><a href="#cb46-396"></a></span>
+<span id="cb46-397"><a href="#cb46-397"></a><span class="ss">- </span>You all know I love floating point numbers.</span>
+<span id="cb46-398"><a href="#cb46-398"></a><span class="ss">    - </span>And with good reason!</span>
+<span id="cb46-399"><a href="#cb46-399"></a></span>
+<span id="cb46-400"><a href="#cb46-400"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
+<span id="cb46-401"><a href="#cb46-401"></a><span class="in">{</span></span>
+<span id="cb46-402"><a href="#cb46-402"></a><span class="in">    "features": "-mmx,-sse,+soft-float",</span></span>
+<span id="cb46-403"><a href="#cb46-403"></a><span class="in">}</span></span>
+<span id="cb46-404"><a href="#cb46-404"></a><span class="in">```</span></span>
+<span id="cb46-405"><a href="#cb46-405"></a></span>
+<span id="cb46-406"><a href="#cb46-406"></a><span class="fu">## Turn off floats</span></span>
+<span id="cb46-407"><a href="#cb46-407"></a></span>
+<span id="cb46-408"><a href="#cb46-408"></a><span class="ss">- </span><span class="in">`features`</span> enables/disables target features. </span>
+<span id="cb46-409"><a href="#cb46-409"></a><span class="ss">- </span>We disable the <span class="in">`mmx`</span> and <span class="in">`sse`</span> features by prefixing them with a minus</span>
+<span id="cb46-410"><a href="#cb46-410"></a><span class="ss">- </span>We enable the <span class="in">`soft-float`</span> feature by prefixing it with a plus. </span>
+<span id="cb46-411"><a href="#cb46-411"></a><span class="ss">- </span>Note that there must be no spaces between different flags!</span>
+<span id="cb46-412"><a href="#cb46-412"></a></span>
+<span id="cb46-413"><a href="#cb46-413"></a><span class="fu">## MMX/SSE</span></span>
+<span id="cb46-414"><a href="#cb46-414"></a></span>
+<span id="cb46-415"><a href="#cb46-415"></a><span class="ss">- </span>The <span class="in">`mmx`</span> and <span class="in">`sse`</span> features are performance optimizing vector operations from when Intel though they'd be able to hold off NVIDIA in the 90s.</span>
+<span id="cb46-416"><a href="#cb46-416"></a><span class="ss">- </span>These are braodly called <span class="co">[</span><span class="ot">Single Instruction Multiple Data (SIMD)</span><span class="co">](https://en.wikipedia.org/wiki/SIMD)</span> instructions and are historically important.</span>
+<span id="cb46-417"><a href="#cb46-417"></a><span class="ss">    - </span>Foundation of <span class="in">`numpy`</span></span>
+<span id="cb46-418"><a href="#cb46-418"></a><span class="ss">- </span>We aren't using data frames in our kernel.</span>
+<span id="cb46-419"><a href="#cb46-419"></a></span>
+<span id="cb46-420"><a href="#cb46-420"></a><span class="fu">## Soft Float</span></span>
+<span id="cb46-421"><a href="#cb46-421"></a></span>
+<span id="cb46-422"><a href="#cb46-422"></a><span class="ss">- </span>Floating point operations on <span class="in">`x86_64`</span> require SIMD registers by default. </span>
+<span id="cb46-423"><a href="#cb46-423"></a><span class="ss">    - </span>That's right - floats are worse than you thought!</span>
+<span id="cb46-424"><a href="#cb46-424"></a><span class="ss">- </span>To solve this problem, we add the <span class="in">`soft-float`</span> feature, which emulates all floating point operations through software functions based on normal integers.</span>
+<span id="cb46-425"><a href="#cb46-425"></a><span class="ss">    - </span>Just like <span class="co">[</span><span class="ot">`f16`</span><span class="co">](https://cd-c89.github.io/rs/51_f16.html)</span></span>
+<span id="cb46-426"><a href="#cb46-426"></a></span>
+<span id="cb46-427"><a href="#cb46-427"></a><span class="fu">## Aside</span></span>
+<span id="cb46-428"><a href="#cb46-428"></a></span>
+<span id="cb46-429"><a href="#cb46-429"></a></span>
+<span id="cb46-430"><a href="#cb46-430"></a><span class="ss">- </span>We also need to tell the Rust compiler <span class="in">`rustc`</span> that we want to use the corresponding ABI.</span>
+<span id="cb46-431"><a href="#cb46-431"></a></span>
+<span id="cb46-432"><a href="#cb46-432"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
+<span id="cb46-433"><a href="#cb46-433"></a><span class="in">{</span></span>
+<span id="cb46-434"><a href="#cb46-434"></a><span class="in">    "rustc-abi": "x86-softfloat"</span></span>
+<span id="cb46-435"><a href="#cb46-435"></a><span class="in">}</span></span>
+<span id="cb46-436"><a href="#cb46-436"></a><span class="in">```</span></span>
+<span id="cb46-437"><a href="#cb46-437"></a><span class="ss">- </span>I am 100% sure I can write an OS without hard or soft floats but I haven't worked far enough ahead to be absolutely certain.</span>
+<span id="cb46-438"><a href="#cb46-438"></a></span>
+<span id="cb46-439"><a href="#cb46-439"></a><span class="fu">## Altogether</span></span>
+<span id="cb46-440"><a href="#cb46-440"></a></span>
+<span id="cb46-441"><a href="#cb46-441"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
+<span id="cb46-442"><a href="#cb46-442"></a><span class="in">{</span></span>
+<span id="cb46-443"><a href="#cb46-443"></a><span class="in">    "llvm-target": "x86_64-unknown-none",</span></span>
+<span id="cb46-444"><a href="#cb46-444"></a><span class="in">    "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",</span></span>
+<span id="cb46-445"><a href="#cb46-445"></a><span class="in">    "arch": "x86_64",</span></span>
+<span id="cb46-446"><a href="#cb46-446"></a><span class="in">    "target-endian": "little",</span></span>
+<span id="cb46-447"><a href="#cb46-447"></a><span class="in">    "target-pointer-width": 64,</span></span>
+<span id="cb46-448"><a href="#cb46-448"></a><span class="in">    "target-c-int-width": 32,</span></span>
+<span id="cb46-449"><a href="#cb46-449"></a><span class="in">    "os": "none",</span></span>
+<span id="cb46-450"><a href="#cb46-450"></a><span class="in">    "executables": true,</span></span>
+<span id="cb46-451"><a href="#cb46-451"></a><span class="in">    "linker-flavor": "ld.lld",</span></span>
+<span id="cb46-452"><a href="#cb46-452"></a><span class="in">    "linker": "rust-lld",</span></span>
+<span id="cb46-453"><a href="#cb46-453"></a><span class="in">    "panic-strategy": "abort",</span></span>
+<span id="cb46-454"><a href="#cb46-454"></a><span class="in">    "disable-redzone": true,</span></span>
+<span id="cb46-455"><a href="#cb46-455"></a><span class="in">    "features": "-mmx,-sse,+soft-float",</span></span>
+<span id="cb46-456"><a href="#cb46-456"></a><span class="in">    "rustc-abi": "x86-softfloat"</span></span>
+<span id="cb46-457"><a href="#cb46-457"></a><span class="in">}</span></span>
+<span id="cb46-458"><a href="#cb46-458"></a><span class="in">```</span></span>
+<span id="cb46-459"><a href="#cb46-459"></a></span>
+<span id="cb46-460"><a href="#cb46-460"></a><span class="fu">## I just `curl`</span></span>
 <span id="cb46-461"><a href="#cb46-461"></a></span>
-<span id="cb46-462"><a href="#cb46-462"></a><span class="fu">## Tree</span></span>
-<span id="cb46-463"><a href="#cb46-463"></a></span>
-<span id="cb46-464"><a href="#cb46-464"></a><span class="ss">- </span>For me looks like this.</span>
+<span id="cb46-462"><a href="#cb46-462"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-463"><a href="#cb46-463"></a><span class="in">curl https://raw.githubusercontent.com/phil-opp/blog_os/refs/heads/post-02/x86_64-blog_os.json -o x86_64-osirs.json</span></span>
+<span id="cb46-464"><a href="#cb46-464"></a><span class="in">```</span></span>
 <span id="cb46-465"><a href="#cb46-465"></a></span>
-<span id="cb46-466"><a href="#cb46-466"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-467"><a href="#cb46-467"></a><span class="in">$ tree</span></span>
-<span id="cb46-468"><a href="#cb46-468"></a><span class="in">.</span></span>
-<span id="cb46-469"><a href="#cb46-469"></a><span class="in">├── Cargo.lock</span></span>
-<span id="cb46-470"><a href="#cb46-470"></a><span class="in">├── Cargo.toml</span></span>
-<span id="cb46-471"><a href="#cb46-471"></a><span class="in">├── src</span></span>
-<span id="cb46-472"><a href="#cb46-472"></a><span class="in">│&nbsp;&nbsp; ├── main.rs</span></span>
-<span id="cb46-473"><a href="#cb46-473"></a><span class="in">│&nbsp;&nbsp; └── old.rs</span></span>
-<span id="cb46-474"><a href="#cb46-474"></a><span class="in">└── x86_64-osirs.json</span></span>
-<span id="cb46-475"><a href="#cb46-475"></a></span>
-<span id="cb46-476"><a href="#cb46-476"></a><span class="in">1 directory, 5 files</span></span>
-<span id="cb46-477"><a href="#cb46-477"></a><span class="in">```</span></span>
-<span id="cb46-478"><a href="#cb46-478"></a></span>
-<span id="cb46-479"><a href="#cb46-479"></a><span class="fu">## Back to loops</span></span>
-<span id="cb46-480"><a href="#cb46-480"></a></span>
-<span id="cb46-481"><a href="#cb46-481"></a><span class="ss">- </span>By the way, I've switched from cool, good recursion back to unexciting, drab loops</span>
-<span id="cb46-482"><a href="#cb46-482"></a><span class="ss">- </span>Infinite recursion blows up the call stack and instantly segmentation faults.</span>
-<span id="cb46-483"><a href="#cb46-483"></a><span class="ss">    - </span>This is because someone other than me wrote <span class="in">`rustc`</span>.</span>
-<span id="cb46-484"><a href="#cb46-484"></a><span class="ss">    - </span>I am not about to write <span class="in">`rustc`</span>!</span>
-<span id="cb46-485"><a href="#cb46-485"></a>    </span>
-<span id="cb46-486"><a href="#cb46-486"></a><span class="fu">## Current main</span></span>
-<span id="cb46-487"><a href="#cb46-487"></a></span>
-<span id="cb46-488"><a href="#cb46-488"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb46-489"><a href="#cb46-489"></a><span class="in">#![no_std]</span></span>
-<span id="cb46-490"><a href="#cb46-490"></a><span class="in">#![no_main]</span></span>
+<span id="cb46-466"><a href="#cb46-466"></a><span class="fu">## Tree</span></span>
+<span id="cb46-467"><a href="#cb46-467"></a></span>
+<span id="cb46-468"><a href="#cb46-468"></a><span class="ss">- </span>For me looks like this.</span>
+<span id="cb46-469"><a href="#cb46-469"></a></span>
+<span id="cb46-470"><a href="#cb46-470"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-471"><a href="#cb46-471"></a><span class="in">$ tree</span></span>
+<span id="cb46-472"><a href="#cb46-472"></a><span class="in">.</span></span>
+<span id="cb46-473"><a href="#cb46-473"></a><span class="in">├── Cargo.lock</span></span>
+<span id="cb46-474"><a href="#cb46-474"></a><span class="in">├── Cargo.toml</span></span>
+<span id="cb46-475"><a href="#cb46-475"></a><span class="in">├── src</span></span>
+<span id="cb46-476"><a href="#cb46-476"></a><span class="in">│&nbsp;&nbsp; ├── main.rs</span></span>
+<span id="cb46-477"><a href="#cb46-477"></a><span class="in">│&nbsp;&nbsp; └── old.rs</span></span>
+<span id="cb46-478"><a href="#cb46-478"></a><span class="in">└── x86_64-osirs.json</span></span>
+<span id="cb46-479"><a href="#cb46-479"></a></span>
+<span id="cb46-480"><a href="#cb46-480"></a><span class="in">1 directory, 5 files</span></span>
+<span id="cb46-481"><a href="#cb46-481"></a><span class="in">```</span></span>
+<span id="cb46-482"><a href="#cb46-482"></a></span>
+<span id="cb46-483"><a href="#cb46-483"></a><span class="fu">## Back to loops</span></span>
+<span id="cb46-484"><a href="#cb46-484"></a></span>
+<span id="cb46-485"><a href="#cb46-485"></a><span class="ss">- </span>By the way, I've switched from cool, good recursion back to unexciting, drab loops</span>
+<span id="cb46-486"><a href="#cb46-486"></a><span class="ss">- </span>Infinite recursion blows up the call stack and instantly segmentation faults.</span>
+<span id="cb46-487"><a href="#cb46-487"></a><span class="ss">    - </span>This is because someone other than me wrote <span class="in">`rustc`</span>.</span>
+<span id="cb46-488"><a href="#cb46-488"></a><span class="ss">    - </span>I am not about to write <span class="in">`rustc`</span>!</span>
+<span id="cb46-489"><a href="#cb46-489"></a>    </span>
+<span id="cb46-490"><a href="#cb46-490"></a><span class="fu">## Current main</span></span>
 <span id="cb46-491"><a href="#cb46-491"></a></span>
-<span id="cb46-492"><a href="#cb46-492"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb46-493"><a href="#cb46-493"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb46-494"><a href="#cb46-494"></a><span class="in">    loop {}</span></span>
-<span id="cb46-495"><a href="#cb46-495"></a><span class="in">}</span></span>
-<span id="cb46-496"><a href="#cb46-496"></a></span>
-<span id="cb46-497"><a href="#cb46-497"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb46-498"><a href="#cb46-498"></a><span class="in">fn panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb46-499"><a href="#cb46-499"></a><span class="in">    loop {}</span></span>
-<span id="cb46-500"><a href="#cb46-500"></a><span class="in">}</span></span>
-<span id="cb46-501"><a href="#cb46-501"></a><span class="in">```</span></span>
-<span id="cb46-502"><a href="#cb46-502"></a></span>
-<span id="cb46-503"><a href="#cb46-503"></a><span class="fu">## A note</span></span>
-<span id="cb46-504"><a href="#cb46-504"></a></span>
-<span id="cb46-505"><a href="#cb46-505"></a><span class="ss">- </span>Remember the earlier mention of <span class="in">`core`</span></span>
-<span id="cb46-506"><a href="#cb46-506"></a><span class="ss">    - </span>How we need <span class="in">`core`</span> to also panic abort?</span>
-<span id="cb46-507"><a href="#cb46-507"></a><span class="ss">    - </span>We note when looking at <span class="in">`src/main.rs`</span> we do have a <span class="in">`core`</span> reference.</span>
+<span id="cb46-492"><a href="#cb46-492"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb46-493"><a href="#cb46-493"></a><span class="in">#![no_std]</span></span>
+<span id="cb46-494"><a href="#cb46-494"></a><span class="in">#![no_main]</span></span>
+<span id="cb46-495"><a href="#cb46-495"></a></span>
+<span id="cb46-496"><a href="#cb46-496"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb46-497"><a href="#cb46-497"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb46-498"><a href="#cb46-498"></a><span class="in">    loop {}</span></span>
+<span id="cb46-499"><a href="#cb46-499"></a><span class="in">}</span></span>
+<span id="cb46-500"><a href="#cb46-500"></a></span>
+<span id="cb46-501"><a href="#cb46-501"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb46-502"><a href="#cb46-502"></a><span class="in">fn panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb46-503"><a href="#cb46-503"></a><span class="in">    loop {}</span></span>
+<span id="cb46-504"><a href="#cb46-504"></a><span class="in">}</span></span>
+<span id="cb46-505"><a href="#cb46-505"></a><span class="in">```</span></span>
+<span id="cb46-506"><a href="#cb46-506"></a></span>
+<span id="cb46-507"><a href="#cb46-507"></a><span class="fu">## A note</span></span>
 <span id="cb46-508"><a href="#cb46-508"></a></span>
-<span id="cb46-509"><a href="#cb46-509"></a><span class="fu">## Linux Everywhere</span></span>
-<span id="cb46-510"><a href="#cb46-510"></a></span>
-<span id="cb46-511"><a href="#cb46-511"></a><span class="ss">- </span>Okay so we aren't going to use Linux on our device.</span>
-<span id="cb46-512"><a href="#cb46-512"></a><span class="ss">- </span>But we are going to use Linux *conventions*</span>
-<span id="cb46-513"><a href="#cb46-513"></a><span class="ss">    - </span>Not Linux software, but Linux as a social technology.</span>
-<span id="cb46-514"><a href="#cb46-514"></a><span class="ss">- </span>The <span class="in">`ld.lld`</span> "linker-flavor" instructs LLVM to compile with the <span class="in">`-flavor gnu`</span> flag.</span>
-<span id="cb46-515"><a href="#cb46-515"></a><span class="ss">- </span>This means that we need an entry point named <span class="in">`_start`</span> - same as before!</span>
-<span id="cb46-516"><a href="#cb46-516"></a></span>
-<span id="cb46-517"><a href="#cb46-517"></a><span class="fu">## Build it</span></span>
-<span id="cb46-518"><a href="#cb46-518"></a></span>
-<span id="cb46-519"><a href="#cb46-519"></a><span class="ss">- </span>I bet it will work now.</span>
-<span id="cb46-520"><a href="#cb46-520"></a><span class="ss">    - </span>Use our new target by passing the name of the JSON file as <span class="in">`--target`</span>:</span>
-<span id="cb46-521"><a href="#cb46-521"></a></span>
-<span id="cb46-522"><a href="#cb46-522"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-523"><a href="#cb46-523"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
-<span id="cb46-524"><a href="#cb46-524"></a><span class="in">error: failed to run `rustc` to learn about target-specific information</span></span>
+<span id="cb46-509"><a href="#cb46-509"></a><span class="ss">- </span>Remember the earlier mention of <span class="in">`core`</span></span>
+<span id="cb46-510"><a href="#cb46-510"></a><span class="ss">    - </span>How we need <span class="in">`core`</span> to also panic abort?</span>
+<span id="cb46-511"><a href="#cb46-511"></a><span class="ss">    - </span>We note when looking at <span class="in">`src/main.rs`</span> we do have a <span class="in">`core`</span> reference.</span>
+<span id="cb46-512"><a href="#cb46-512"></a></span>
+<span id="cb46-513"><a href="#cb46-513"></a><span class="fu">## Linux Everywhere</span></span>
+<span id="cb46-514"><a href="#cb46-514"></a></span>
+<span id="cb46-515"><a href="#cb46-515"></a><span class="ss">- </span>Okay so we aren't going to use Linux on our device.</span>
+<span id="cb46-516"><a href="#cb46-516"></a><span class="ss">- </span>But we are going to use Linux *conventions*</span>
+<span id="cb46-517"><a href="#cb46-517"></a><span class="ss">    - </span>Not Linux software, but Linux as a social technology.</span>
+<span id="cb46-518"><a href="#cb46-518"></a><span class="ss">- </span>The <span class="in">`ld.lld`</span> "linker-flavor" instructs LLVM to compile with the <span class="in">`-flavor gnu`</span> flag.</span>
+<span id="cb46-519"><a href="#cb46-519"></a><span class="ss">- </span>This means that we need an entry point named <span class="in">`_start`</span> - same as before!</span>
+<span id="cb46-520"><a href="#cb46-520"></a></span>
+<span id="cb46-521"><a href="#cb46-521"></a><span class="fu">## Build it</span></span>
+<span id="cb46-522"><a href="#cb46-522"></a></span>
+<span id="cb46-523"><a href="#cb46-523"></a><span class="ss">- </span>I bet it will work now.</span>
+<span id="cb46-524"><a href="#cb46-524"></a><span class="ss">    - </span>Use our new target by passing the name of the JSON file as <span class="in">`--target`</span>:</span>
 <span id="cb46-525"><a href="#cb46-525"></a></span>
-<span id="cb46-526"><a href="#cb46-526"></a><span class="in">Caused by:</span></span>
-<span id="cb46-527"><a href="#cb46-527"></a><span class="in">  process didn't exit successfully: `/home/user/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
-<span id="cb46-528"><a href="#cb46-528"></a><span class="in">  --- stderr</span></span>
-<span id="cb46-529"><a href="#cb46-529"></a><span class="in">  error: Error loading target specification: Field target-pointer-width in target specification is required. Run `rustc --print target-list` for a list of built-in targets</span></span>
-<span id="cb46-530"><a href="#cb46-530"></a><span class="in">```</span></span>
-<span id="cb46-531"><a href="#cb46-531"></a></span>
-<span id="cb46-532"><a href="#cb46-532"></a><span class="fu">## Okay so</span></span>
-<span id="cb46-533"><a href="#cb46-533"></a></span>
-<span id="cb46-534"><a href="#cb46-534"></a><span class="ss">- </span>Huh?</span>
+<span id="cb46-526"><a href="#cb46-526"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-527"><a href="#cb46-527"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
+<span id="cb46-528"><a href="#cb46-528"></a><span class="in">error: failed to run `rustc` to learn about target-specific information</span></span>
+<span id="cb46-529"><a href="#cb46-529"></a></span>
+<span id="cb46-530"><a href="#cb46-530"></a><span class="in">Caused by:</span></span>
+<span id="cb46-531"><a href="#cb46-531"></a><span class="in">  process didn't exit successfully: `/home/user/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
+<span id="cb46-532"><a href="#cb46-532"></a><span class="in">  --- stderr</span></span>
+<span id="cb46-533"><a href="#cb46-533"></a><span class="in">  error: Error loading target specification: Field target-pointer-width in target specification is required. Run `rustc --print target-list` for a list of built-in targets</span></span>
+<span id="cb46-534"><a href="#cb46-534"></a><span class="in">```</span></span>
 <span id="cb46-535"><a href="#cb46-535"></a></span>
-<span id="cb46-536"><a href="#cb46-536"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-537"><a href="#cb46-537"></a><span class="in">Field target-pointer-width in target specification is required.</span></span>
-<span id="cb46-538"><a href="#cb46-538"></a><span class="in">```</span></span>
-<span id="cb46-539"><a href="#cb46-539"></a></span>
-<span id="cb46-540"><a href="#cb46-540"></a><span class="ss">- </span>We very explicitly included that.</span>
-<span id="cb46-541"><a href="#cb46-541"></a><span class="ss">- </span>In the most annoying thing in the universe, <span class="in">`rustc`</span> expect pointer width as a JSON string and not a JSON integer.</span>
-<span id="cb46-542"><a href="#cb46-542"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://github.com/rust-lang/rust/pull/144218)</span></span>
-<span id="cb46-543"><a href="#cb46-543"></a><span class="ss">    - </span>It's fixed in Nightly, but I sleep at night, so I'm busy.</span>
-<span id="cb46-544"><a href="#cb46-544"></a>        </span>
-<span id="cb46-545"><a href="#cb46-545"></a><span class="fu">## Fix it?</span></span>
-<span id="cb46-546"><a href="#cb46-546"></a></span>
-<span id="cb46-547"><a href="#cb46-547"></a><span class="ss">- </span>I kid you not this is the solution.   </span>
-<span id="cb46-548"><a href="#cb46-548"></a><span class="ss">    - </span>"Rust has a type system!"</span>
-<span id="cb46-549"><a href="#cb46-549"></a><span class="ss">    - </span>Sure it does.</span>
-<span id="cb46-550"><a href="#cb46-550"></a>    </span>
-<span id="cb46-551"><a href="#cb46-551"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-552"><a href="#cb46-552"></a><span class="in">$ diff bad.wrong x86_64-osirs.json</span></span>
-<span id="cb46-553"><a href="#cb46-553"></a><span class="in">6,7c6,7</span></span>
-<span id="cb46-554"><a href="#cb46-554"></a><span class="in">&lt;     "target-pointer-width": 64,</span></span>
-<span id="cb46-555"><a href="#cb46-555"></a><span class="in">&lt;     "target-c-int-width": 32,</span></span>
-<span id="cb46-556"><a href="#cb46-556"></a><span class="in">---</span></span>
-<span id="cb46-557"><a href="#cb46-557"></a><span class="in">&gt;     "target-pointer-width": "64",</span></span>
-<span id="cb46-558"><a href="#cb46-558"></a><span class="in">&gt;     "target-c-int-width": "32",</span></span>
-<span id="cb46-559"><a href="#cb46-559"></a><span class="in">```</span></span>
-<span id="cb46-560"><a href="#cb46-560"></a></span>
-<span id="cb46-561"><a href="#cb46-561"></a><span class="fu">## Now it works</span></span>
-<span id="cb46-562"><a href="#cb46-562"></a></span>
-<span id="cb46-563"><a href="#cb46-563"></a><span class="ss">- </span>This time it will work.</span>
-<span id="cb46-564"><a href="#cb46-564"></a></span>
-<span id="cb46-565"><a href="#cb46-565"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-566"><a href="#cb46-566"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
-<span id="cb46-567"><a href="#cb46-567"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
-<span id="cb46-568"><a href="#cb46-568"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
-<span id="cb46-569"><a href="#cb46-569"></a><span class="in">  |</span></span>
-<span id="cb46-570"><a href="#cb46-570"></a><span class="in">  = note: the `x86_64-osirs` target may not be installed</span></span>
-<span id="cb46-571"><a href="#cb46-571"></a><span class="in">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb46-536"><a href="#cb46-536"></a><span class="fu">## Aside</span></span>
+<span id="cb46-537"><a href="#cb46-537"></a></span>
+<span id="cb46-538"><a href="#cb46-538"></a><span class="ss">- </span>If you did not see that error, that is okay!</span>
+<span id="cb46-539"><a href="#cb46-539"></a><span class="ss">- </span>It concerns an unstable language feature and may differ.</span>
+<span id="cb46-540"><a href="#cb46-540"></a><span class="ss">- </span>Just skip two slides!</span>
+<span id="cb46-541"><a href="#cb46-541"></a></span>
+<span id="cb46-542"><a href="#cb46-542"></a><span class="fu">## Okay so</span></span>
+<span id="cb46-543"><a href="#cb46-543"></a></span>
+<span id="cb46-544"><a href="#cb46-544"></a><span class="ss">- </span>Huh?</span>
+<span id="cb46-545"><a href="#cb46-545"></a></span>
+<span id="cb46-546"><a href="#cb46-546"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-547"><a href="#cb46-547"></a><span class="in">Field target-pointer-width in target specification is required.</span></span>
+<span id="cb46-548"><a href="#cb46-548"></a><span class="in">```</span></span>
+<span id="cb46-549"><a href="#cb46-549"></a></span>
+<span id="cb46-550"><a href="#cb46-550"></a><span class="ss">- </span>We very explicitly included that.</span>
+<span id="cb46-551"><a href="#cb46-551"></a><span class="ss">- </span>In the most annoying thing in the universe, <span class="in">`rustc`</span> expect pointer width as a JSON string and not a JSON integer.</span>
+<span id="cb46-552"><a href="#cb46-552"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://github.com/rust-lang/rust/pull/144218)</span></span>
+<span id="cb46-553"><a href="#cb46-553"></a><span class="ss">    - </span>It's fixed in Nightly, but I sleep at night, so I'm busy.</span>
+<span id="cb46-554"><a href="#cb46-554"></a>        </span>
+<span id="cb46-555"><a href="#cb46-555"></a><span class="fu">## Fix it?</span></span>
+<span id="cb46-556"><a href="#cb46-556"></a></span>
+<span id="cb46-557"><a href="#cb46-557"></a><span class="ss">- </span>I kid you not this is the solution.   </span>
+<span id="cb46-558"><a href="#cb46-558"></a><span class="ss">    - </span>"Rust has a type system!"</span>
+<span id="cb46-559"><a href="#cb46-559"></a><span class="ss">    - </span>Sure it does.</span>
+<span id="cb46-560"><a href="#cb46-560"></a>    </span>
+<span id="cb46-561"><a href="#cb46-561"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-562"><a href="#cb46-562"></a><span class="in">$ diff bad.wrong x86_64-osirs.json</span></span>
+<span id="cb46-563"><a href="#cb46-563"></a><span class="in">6,7c6,7</span></span>
+<span id="cb46-564"><a href="#cb46-564"></a><span class="in">&lt;     "target-pointer-width": 64,</span></span>
+<span id="cb46-565"><a href="#cb46-565"></a><span class="in">&lt;     "target-c-int-width": 32,</span></span>
+<span id="cb46-566"><a href="#cb46-566"></a><span class="in">---</span></span>
+<span id="cb46-567"><a href="#cb46-567"></a><span class="in">&gt;     "target-pointer-width": "64",</span></span>
+<span id="cb46-568"><a href="#cb46-568"></a><span class="in">&gt;     "target-c-int-width": "32",</span></span>
+<span id="cb46-569"><a href="#cb46-569"></a><span class="in">```</span></span>
+<span id="cb46-570"><a href="#cb46-570"></a></span>
+<span id="cb46-571"><a href="#cb46-571"></a><span class="fu">## Now it works</span></span>
 <span id="cb46-572"><a href="#cb46-572"></a></span>
-<span id="cb46-573"><a href="#cb46-573"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
-<span id="cb46-574"><a href="#cb46-574"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
-<span id="cb46-575"><a href="#cb46-575"></a><span class="in">```</span></span>
-<span id="cb46-576"><a href="#cb46-576"></a></span>
-<span id="cb46-577"><a href="#cb46-577"></a><span class="ss">- </span>Okay I was bamboozled.</span>
-<span id="cb46-578"><a href="#cb46-578"></a></span>
-<span id="cb46-579"><a href="#cb46-579"></a><span class="fu">## The Core</span></span>
-<span id="cb46-580"><a href="#cb46-580"></a></span>
-<span id="cb46-581"><a href="#cb46-581"></a>:::: {.columns}</span>
+<span id="cb46-573"><a href="#cb46-573"></a><span class="ss">- </span>This time it will work.</span>
+<span id="cb46-574"><a href="#cb46-574"></a></span>
+<span id="cb46-575"><a href="#cb46-575"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-576"><a href="#cb46-576"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
+<span id="cb46-577"><a href="#cb46-577"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
+<span id="cb46-578"><a href="#cb46-578"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
+<span id="cb46-579"><a href="#cb46-579"></a><span class="in">  |</span></span>
+<span id="cb46-580"><a href="#cb46-580"></a><span class="in">  = note: the `x86_64-osirs` target may not be installed</span></span>
+<span id="cb46-581"><a href="#cb46-581"></a><span class="in">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
 <span id="cb46-582"><a href="#cb46-582"></a></span>
-<span id="cb46-583"><a href="#cb46-583"></a>::: {.column width="70%"}</span>
-<span id="cb46-584"><a href="#cb46-584"></a></span>
-<span id="cb46-585"><a href="#cb46-585"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">The Core is a 2003 American science fiction disaster film directed by Jon Amiel with screenplay written by Cooper Layne and John Rogers.</span><span class="co">](https://en.wikipedia.org/wiki/The_Core)</span></span>
+<span id="cb46-583"><a href="#cb46-583"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb46-584"><a href="#cb46-584"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb46-585"><a href="#cb46-585"></a><span class="in">```</span></span>
 <span id="cb46-586"><a href="#cb46-586"></a></span>
-<span id="cb46-587"><a href="#cb46-587"></a><span class="ss">- </span>I haven't seen it but it apparently passes the <span class="co">[</span><span class="ot">Bechdel Test</span><span class="co">](https://en.wikipedia.org/wiki/Bechdel_test)</span></span>
+<span id="cb46-587"><a href="#cb46-587"></a><span class="ss">- </span>Okay I was bamboozled.</span>
 <span id="cb46-588"><a href="#cb46-588"></a></span>
-<span id="cb46-589"><a href="#cb46-589"></a>:::</span>
+<span id="cb46-589"><a href="#cb46-589"></a><span class="fu">## The Core</span></span>
 <span id="cb46-590"><a href="#cb46-590"></a></span>
-<span id="cb46-591"><a href="#cb46-591"></a>::: {.column width="30%"}</span>
+<span id="cb46-591"><a href="#cb46-591"></a>:::: {.columns}</span>
 <span id="cb46-592"><a href="#cb46-592"></a></span>
-<span id="cb46-593"><a href="#cb46-593"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/f/f4/The_Core_poster.jpg)</span></span>
+<span id="cb46-593"><a href="#cb46-593"></a>::: {.column width="70%"}</span>
 <span id="cb46-594"><a href="#cb46-594"></a></span>
-<span id="cb46-595"><a href="#cb46-595"></a>:::</span>
+<span id="cb46-595"><a href="#cb46-595"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">The Core is a 2003 American science fiction disaster film directed by Jon Amiel with screenplay written by Cooper Layne and John Rogers.</span><span class="co">](https://en.wikipedia.org/wiki/The_Core)</span></span>
 <span id="cb46-596"><a href="#cb46-596"></a></span>
-<span id="cb46-597"><a href="#cb46-597"></a>::::</span>
+<span id="cb46-597"><a href="#cb46-597"></a><span class="ss">- </span>I haven't seen it but it apparently passes the <span class="co">[</span><span class="ot">Bechdel Test</span><span class="co">](https://en.wikipedia.org/wiki/Bechdel_test)</span></span>
 <span id="cb46-598"><a href="#cb46-598"></a></span>
-<span id="cb46-599"><a href="#cb46-599"></a><span class="fu">## Wrong Core</span></span>
+<span id="cb46-599"><a href="#cb46-599"></a>:::</span>
 <span id="cb46-600"><a href="#cb46-600"></a></span>
-<span id="cb46-601"><a href="#cb46-601"></a><span class="ss">- </span>We actually meant the Rust compiler <span class="in">`core`</span> library.</span>
-<span id="cb46-602"><a href="#cb46-602"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://doc.rust-lang.org/nightly/core/index.html)</span></span>
-<span id="cb46-603"><a href="#cb46-603"></a><span class="ss">- </span>This library contains basic Rust types such as <span class="in">`Result`</span>, <span class="in">`Option`</span>, and iterators, and is implicitly linked to all <span class="in">`no_std`</span> crates.</span>
+<span id="cb46-601"><a href="#cb46-601"></a>::: {.column width="30%"}</span>
+<span id="cb46-602"><a href="#cb46-602"></a></span>
+<span id="cb46-603"><a href="#cb46-603"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/f/f4/The_Core_poster.jpg)</span></span>
 <span id="cb46-604"><a href="#cb46-604"></a></span>
-<span id="cb46-605"><a href="#cb46-605"></a><span class="fu">## The Problem</span></span>
+<span id="cb46-605"><a href="#cb46-605"></a>:::</span>
 <span id="cb46-606"><a href="#cb46-606"></a></span>
-<span id="cb46-607"><a href="#cb46-607"></a><span class="ss">- </span><span class="in">`core`</span> is usually *pre-compiled* (and then, of course, linked).</span>
-<span id="cb46-608"><a href="#cb46-608"></a><span class="ss">- </span>But we made a new target which needs a new core.</span>
-<span id="cb46-609"><a href="#cb46-609"></a><span class="ss">- </span>No problem, we'll just tell <span class="in">`rustc`</span> to do some compilation.</span>
+<span id="cb46-607"><a href="#cb46-607"></a>::::</span>
+<span id="cb46-608"><a href="#cb46-608"></a></span>
+<span id="cb46-609"><a href="#cb46-609"></a><span class="fu">## Wrong Core</span></span>
 <span id="cb46-610"><a href="#cb46-610"></a></span>
-<span id="cb46-611"><a href="#cb46-611"></a><span class="fu">## Config</span></span>
-<span id="cb46-612"><a href="#cb46-612"></a></span>
-<span id="cb46-613"><a href="#cb46-613"></a><span class="ss">- </span>The most graceful to do this that *I* am aware of is with a <span class="in">`.cargo/config.toml`</span></span>
-<span id="cb46-614"><a href="#cb46-614"></a><span class="ss">- </span>Basically, we can write down some things we *always* want <span class="in">`cargo`</span> to do, and store them in TOML file in the hidden <span class="in">`.cargo`</span> folder.</span>
-<span id="cb46-615"><a href="#cb46-615"></a><span class="ss">- </span>I just made the folder then opened it up in my most beloved neon vimothy.</span>
+<span id="cb46-611"><a href="#cb46-611"></a><span class="ss">- </span>We actually meant the Rust compiler <span class="in">`core`</span> library.</span>
+<span id="cb46-612"><a href="#cb46-612"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://doc.rust-lang.org/nightly/core/index.html)</span></span>
+<span id="cb46-613"><a href="#cb46-613"></a><span class="ss">- </span>This library contains basic Rust types such as <span class="in">`Result`</span>, <span class="in">`Option`</span>, and iterators, and is implicitly linked to all <span class="in">`no_std`</span> crates.</span>
+<span id="cb46-614"><a href="#cb46-614"></a></span>
+<span id="cb46-615"><a href="#cb46-615"></a><span class="fu">## The Problem</span></span>
 <span id="cb46-616"><a href="#cb46-616"></a></span>
-<span id="cb46-617"><a href="#cb46-617"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-618"><a href="#cb46-618"></a><span class="in">mdkir .cargo</span></span>
-<span id="cb46-619"><a href="#cb46-619"></a><span class="in">nvim .cargo/config.toml</span></span>
-<span id="cb46-620"><a href="#cb46-620"></a><span class="in">```</span></span>
-<span id="cb46-621"><a href="#cb46-621"></a></span>
-<span id="cb46-622"><a href="#cb46-622"></a><span class="fu">## Check in</span></span>
-<span id="cb46-623"><a href="#cb46-623"></a></span>
-<span id="cb46-624"><a href="#cb46-624"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-625"><a href="#cb46-625"></a><span class="in">mdkir .cargo</span></span>
-<span id="cb46-626"><a href="#cb46-626"></a><span class="in">nvim .cargo/config.toml</span></span>
-<span id="cb46-627"><a href="#cb46-627"></a><span class="in">```</span></span>
-<span id="cb46-628"><a href="#cb46-628"></a></span>
-<span id="cb46-629"><a href="#cb46-629"></a><span class="ss">- </span>Understanding check - what happens if you don't make <span class="in">`.cargo`</span> first?</span>
-<span id="cb46-630"><a href="#cb46-630"></a></span>
-<span id="cb46-631"><a href="#cb46-631"></a><span class="fu">## The `build-std` Option</span></span>
-<span id="cb46-632"><a href="#cb46-632"></a></span>
-<span id="cb46-633"><a href="#cb46-633"></a><span class="ss">- </span><span class="in">`build-std`</span> is a feature of Cargo.</span>
-<span id="cb46-634"><a href="#cb46-634"></a><span class="ss">- </span>We can recompile <span class="in">`core`</span> and other standard library crates on demand.</span>
-<span id="cb46-635"><a href="#cb46-635"></a><span class="ss">    - </span>Vs. using the precompiled versions shipped with the Rust installation. </span>
-<span id="cb46-636"><a href="#cb46-636"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more.</span><span class="co">](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std)</span></span>
-<span id="cb46-637"><a href="#cb46-637"></a></span>
-<span id="cb46-638"><a href="#cb46-638"></a><span class="fu">## My Config</span></span>
-<span id="cb46-639"><a href="#cb46-639"></a></span>
-<span id="cb46-640"><a href="#cb46-640"></a><span class="ss">- </span>We can use a pretty sparse config though we'll want to add more latter.</span>
-<span id="cb46-641"><a href="#cb46-641"></a><span class="ss">- </span>I specify the "build-std" option in TOML.</span>
-<span id="cb46-642"><a href="#cb46-642"></a><span class="ss">- </span>We want to <span class="in">`build-std`</span></span>
-<span id="cb46-643"><a href="#cb46-643"></a><span class="ss">- </span>We want to build the <span class="in">`core`</span></span>
-<span id="cb46-644"><a href="#cb46-644"></a></span>
-<span id="cb46-645"><a href="#cb46-645"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
-<span id="cb46-646"><a href="#cb46-646"></a><span class="in">build-std = ["core"]</span></span>
-<span id="cb46-647"><a href="#cb46-647"></a><span class="in">```</span></span>
-<span id="cb46-648"><a href="#cb46-648"></a></span>
-<span id="cb46-649"><a href="#cb46-649"></a><span class="ss">- </span>I bet this will work.</span>
-<span id="cb46-650"><a href="#cb46-650"></a></span>
-<span id="cb46-651"><a href="#cb46-651"></a><span class="fu">## Oh.</span></span>
-<span id="cb46-652"><a href="#cb46-652"></a></span>
-<span id="cb46-653"><a href="#cb46-653"></a><span class="ss">- </span>The exact same error as before?</span>
+<span id="cb46-617"><a href="#cb46-617"></a><span class="ss">- </span><span class="in">`core`</span> is usually *pre-compiled* (and then, of course, linked).</span>
+<span id="cb46-618"><a href="#cb46-618"></a><span class="ss">- </span>But we made a new target which needs a new core.</span>
+<span id="cb46-619"><a href="#cb46-619"></a><span class="ss">- </span>No problem, we'll just tell <span class="in">`rustc`</span> to do some compilation.</span>
+<span id="cb46-620"><a href="#cb46-620"></a></span>
+<span id="cb46-621"><a href="#cb46-621"></a><span class="fu">## Config</span></span>
+<span id="cb46-622"><a href="#cb46-622"></a></span>
+<span id="cb46-623"><a href="#cb46-623"></a><span class="ss">- </span>The most graceful to do this that *I* am aware of is with a <span class="in">`.cargo/config.toml`</span></span>
+<span id="cb46-624"><a href="#cb46-624"></a><span class="ss">- </span>Basically, we can write down some things we *always* want <span class="in">`cargo`</span> to do, and store them in TOML file in the hidden <span class="in">`.cargo`</span> folder.</span>
+<span id="cb46-625"><a href="#cb46-625"></a><span class="ss">- </span>I just made the folder then opened it up in my most beloved neon vimothy.</span>
+<span id="cb46-626"><a href="#cb46-626"></a></span>
+<span id="cb46-627"><a href="#cb46-627"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-628"><a href="#cb46-628"></a><span class="in">mdkir .cargo</span></span>
+<span id="cb46-629"><a href="#cb46-629"></a><span class="in">nvim .cargo/config.toml</span></span>
+<span id="cb46-630"><a href="#cb46-630"></a><span class="in">```</span></span>
+<span id="cb46-631"><a href="#cb46-631"></a></span>
+<span id="cb46-632"><a href="#cb46-632"></a><span class="fu">## Check in</span></span>
+<span id="cb46-633"><a href="#cb46-633"></a></span>
+<span id="cb46-634"><a href="#cb46-634"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-635"><a href="#cb46-635"></a><span class="in">mdkir .cargo</span></span>
+<span id="cb46-636"><a href="#cb46-636"></a><span class="in">nvim .cargo/config.toml</span></span>
+<span id="cb46-637"><a href="#cb46-637"></a><span class="in">```</span></span>
+<span id="cb46-638"><a href="#cb46-638"></a></span>
+<span id="cb46-639"><a href="#cb46-639"></a><span class="ss">- </span>Understanding check - what happens if you don't make <span class="in">`.cargo`</span> first?</span>
+<span id="cb46-640"><a href="#cb46-640"></a></span>
+<span id="cb46-641"><a href="#cb46-641"></a><span class="fu">## The `build-std` Option</span></span>
+<span id="cb46-642"><a href="#cb46-642"></a></span>
+<span id="cb46-643"><a href="#cb46-643"></a><span class="ss">- </span><span class="in">`build-std`</span> is a feature of Cargo.</span>
+<span id="cb46-644"><a href="#cb46-644"></a><span class="ss">- </span>We can recompile <span class="in">`core`</span> and other standard library crates on demand.</span>
+<span id="cb46-645"><a href="#cb46-645"></a><span class="ss">    - </span>Vs. using the precompiled versions shipped with the Rust installation. </span>
+<span id="cb46-646"><a href="#cb46-646"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more.</span><span class="co">](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#build-std)</span></span>
+<span id="cb46-647"><a href="#cb46-647"></a></span>
+<span id="cb46-648"><a href="#cb46-648"></a><span class="fu">## My Config</span></span>
+<span id="cb46-649"><a href="#cb46-649"></a></span>
+<span id="cb46-650"><a href="#cb46-650"></a><span class="ss">- </span>We can use a pretty sparse config though we'll want to add more latter.</span>
+<span id="cb46-651"><a href="#cb46-651"></a><span class="ss">- </span>I specify the "build-std" option in TOML.</span>
+<span id="cb46-652"><a href="#cb46-652"></a><span class="ss">- </span>We want to <span class="in">`build-std`</span></span>
+<span id="cb46-653"><a href="#cb46-653"></a><span class="ss">- </span>We want to build the <span class="in">`core`</span></span>
 <span id="cb46-654"><a href="#cb46-654"></a></span>
-<span id="cb46-655"><a href="#cb46-655"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-656"><a href="#cb46-656"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
-<span id="cb46-657"><a href="#cb46-657"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
-<span id="cb46-658"><a href="#cb46-658"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
-<span id="cb46-659"><a href="#cb46-659"></a><span class="in">  |</span></span>
-<span id="cb46-660"><a href="#cb46-660"></a><span class="in">  = note: the `x86_64-osirs` target may not be installed</span></span>
-<span id="cb46-661"><a href="#cb46-661"></a><span class="in">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb46-655"><a href="#cb46-655"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
+<span id="cb46-656"><a href="#cb46-656"></a><span class="in">build-std = ["core"]</span></span>
+<span id="cb46-657"><a href="#cb46-657"></a><span class="in">```</span></span>
+<span id="cb46-658"><a href="#cb46-658"></a></span>
+<span id="cb46-659"><a href="#cb46-659"></a><span class="ss">- </span>I bet this will work.</span>
+<span id="cb46-660"><a href="#cb46-660"></a></span>
+<span id="cb46-661"><a href="#cb46-661"></a><span class="fu">## Oh.</span></span>
 <span id="cb46-662"><a href="#cb46-662"></a></span>
-<span id="cb46-663"><a href="#cb46-663"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
-<span id="cb46-664"><a href="#cb46-664"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
-<span id="cb46-665"><a href="#cb46-665"></a><span class="in">```</span></span>
-<span id="cb46-666"><a href="#cb46-666"></a></span>
-<span id="cb46-667"><a href="#cb46-667"></a><span class="fu">## Unstable</span></span>
-<span id="cb46-668"><a href="#cb46-668"></a></span>
-<span id="cb46-669"><a href="#cb46-669"></a><span class="ss">- </span>So apparently <span class="in">`build-std`</span> is not a stable feature of the Rust language.</span>
-<span id="cb46-670"><a href="#cb46-670"></a><span class="ss">    - </span>This means the Rust designers can change or remove it at any time.</span>
-<span id="cb46-671"><a href="#cb46-671"></a><span class="ss">- </span>To use unstable features, we have to tell <span class="in">`cargo`</span> they are unstable.</span>
+<span id="cb46-663"><a href="#cb46-663"></a><span class="ss">- </span>The exact same error as before?</span>
+<span id="cb46-664"><a href="#cb46-664"></a></span>
+<span id="cb46-665"><a href="#cb46-665"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-666"><a href="#cb46-666"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
+<span id="cb46-667"><a href="#cb46-667"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
+<span id="cb46-668"><a href="#cb46-668"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
+<span id="cb46-669"><a href="#cb46-669"></a><span class="in">  |</span></span>
+<span id="cb46-670"><a href="#cb46-670"></a><span class="in">  = note: the `x86_64-osirs` target may not be installed</span></span>
+<span id="cb46-671"><a href="#cb46-671"></a><span class="in">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
 <span id="cb46-672"><a href="#cb46-672"></a></span>
-<span id="cb46-673"><a href="#cb46-673"></a><span class="fu">## Mental model</span></span>
-<span id="cb46-674"><a href="#cb46-674"></a></span>
-<span id="cb46-675"><a href="#cb46-675"></a><span class="ss">- </span>Think of it a bit like unsafe, but for the language instead of the executables.</span>
-<span id="cb46-676"><a href="#cb46-676"></a><span class="ss">    - </span>When an executable is unsafe, it may crash or leak your private key.</span>
-<span id="cb46-677"><a href="#cb46-677"></a><span class="ss">    - </span>When a language is unstable, it may not compile or may compile then leak your private key.</span>
+<span id="cb46-673"><a href="#cb46-673"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb46-674"><a href="#cb46-674"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb46-675"><a href="#cb46-675"></a><span class="in">```</span></span>
+<span id="cb46-676"><a href="#cb46-676"></a></span>
+<span id="cb46-677"><a href="#cb46-677"></a><span class="fu">## Unstable</span></span>
 <span id="cb46-678"><a href="#cb46-678"></a></span>
-<span id="cb46-679"><a href="#cb46-679"></a><span class="fu">## Update config</span></span>
-<span id="cb46-680"><a href="#cb46-680"></a></span>
-<span id="cb46-681"><a href="#cb46-681"></a><span class="ss">- </span>We prepend an <span class="in">`[unstable]`</span> label to our <span class="in">`build-std`</span> configuration.</span>
+<span id="cb46-679"><a href="#cb46-679"></a><span class="ss">- </span>So apparently <span class="in">`build-std`</span> is not a stable feature of the Rust language.</span>
+<span id="cb46-680"><a href="#cb46-680"></a><span class="ss">    - </span>This means the Rust designers can change or remove it at any time.</span>
+<span id="cb46-681"><a href="#cb46-681"></a><span class="ss">- </span>To use unstable features, we have to tell <span class="in">`cargo`</span> they are unstable.</span>
 <span id="cb46-682"><a href="#cb46-682"></a></span>
-<span id="cb46-683"><a href="#cb46-683"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
-<span id="cb46-684"><a href="#cb46-684"></a><span class="in">[unstable]</span></span>
-<span id="cb46-685"><a href="#cb46-685"></a><span class="in">build-std = ["core"]</span></span>
-<span id="cb46-686"><a href="#cb46-686"></a><span class="in">```</span></span>
-<span id="cb46-687"><a href="#cb46-687"></a></span>
-<span id="cb46-688"><a href="#cb46-688"></a><span class="ss">- </span>I bet it will work now (it won't).</span>
-<span id="cb46-689"><a href="#cb46-689"></a></span>
-<span id="cb46-690"><a href="#cb46-690"></a><span class="fu">## Oh.</span></span>
-<span id="cb46-691"><a href="#cb46-691"></a></span>
-<span id="cb46-692"><a href="#cb46-692"></a><span class="ss">- </span>The exact same error as before?</span>
-<span id="cb46-693"><a href="#cb46-693"></a></span>
-<span id="cb46-694"><a href="#cb46-694"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-695"><a href="#cb46-695"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
-<span id="cb46-696"><a href="#cb46-696"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
-<span id="cb46-697"><a href="#cb46-697"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
-<span id="cb46-698"><a href="#cb46-698"></a><span class="in">  |</span></span>
-<span id="cb46-699"><a href="#cb46-699"></a><span class="in">  = note: the `x86_64-osirs` target may not be installed</span></span>
-<span id="cb46-700"><a href="#cb46-700"></a><span class="in">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb46-683"><a href="#cb46-683"></a><span class="fu">## Mental model</span></span>
+<span id="cb46-684"><a href="#cb46-684"></a></span>
+<span id="cb46-685"><a href="#cb46-685"></a><span class="ss">- </span>Think of it a bit like unsafe, but for the language instead of the executables.</span>
+<span id="cb46-686"><a href="#cb46-686"></a><span class="ss">    - </span>When an executable is unsafe, it may crash or leak your private key.</span>
+<span id="cb46-687"><a href="#cb46-687"></a><span class="ss">    - </span>When a language is unstable, it may not compile or may compile then leak your private key.</span>
+<span id="cb46-688"><a href="#cb46-688"></a></span>
+<span id="cb46-689"><a href="#cb46-689"></a><span class="fu">## Update config</span></span>
+<span id="cb46-690"><a href="#cb46-690"></a></span>
+<span id="cb46-691"><a href="#cb46-691"></a><span class="ss">- </span>We prepend an <span class="in">`[unstable]`</span> label to our <span class="in">`build-std`</span> configuration.</span>
+<span id="cb46-692"><a href="#cb46-692"></a></span>
+<span id="cb46-693"><a href="#cb46-693"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
+<span id="cb46-694"><a href="#cb46-694"></a><span class="in">[unstable]</span></span>
+<span id="cb46-695"><a href="#cb46-695"></a><span class="in">build-std = ["core"]</span></span>
+<span id="cb46-696"><a href="#cb46-696"></a><span class="in">```</span></span>
+<span id="cb46-697"><a href="#cb46-697"></a></span>
+<span id="cb46-698"><a href="#cb46-698"></a><span class="ss">- </span>I bet it will work now (it won't).</span>
+<span id="cb46-699"><a href="#cb46-699"></a></span>
+<span id="cb46-700"><a href="#cb46-700"></a><span class="fu">## Oh.</span></span>
 <span id="cb46-701"><a href="#cb46-701"></a></span>
-<span id="cb46-702"><a href="#cb46-702"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
-<span id="cb46-703"><a href="#cb46-703"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
-<span id="cb46-704"><a href="#cb46-704"></a><span class="in">```</span></span>
-<span id="cb46-705"><a href="#cb46-705"></a></span>
-<span id="cb46-706"><a href="#cb46-706"></a><span class="fu">## Nightly</span></span>
-<span id="cb46-707"><a href="#cb46-707"></a></span>
-<span id="cb46-708"><a href="#cb46-708"></a><span class="ss">- </span>Okay folks here's the deal.</span>
-<span id="cb46-709"><a href="#cb46-709"></a><span class="ss">- </span>I'm not happy about it either.</span>
-<span id="cb46-710"><a href="#cb46-710"></a><span class="ss">- </span><span class="in">`build-std`</span> - which we need - is unstable and </span>
-<span id="cb46-711"><a href="#cb46-711"></a><span class="ss">- </span><span class="in">`[unstable]`</span> is only available in nightly Rust.</span>
-<span id="cb46-712"><a href="#cb46-712"></a><span class="ss">    - </span>The version of Rust for *nerds*.</span>
-<span id="cb46-713"><a href="#cb46-713"></a><span class="ss">- </span>Not to worry, we are nerds and can use it.</span>
-<span id="cb46-714"><a href="#cb46-714"></a><span class="ss">    - </span>Simply add a <span class="in">`+nightly`</span> right after cargo.</span>
-<span id="cb46-715"><a href="#cb46-715"></a>    </span>
-<span id="cb46-716"><a href="#cb46-716"></a><span class="fu">## Try Two Things</span></span>
+<span id="cb46-702"><a href="#cb46-702"></a><span class="ss">- </span>The exact same error as before?</span>
+<span id="cb46-703"><a href="#cb46-703"></a></span>
+<span id="cb46-704"><a href="#cb46-704"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-705"><a href="#cb46-705"></a><span class="in">$ cargo b --target x86_64-osirs.json</span></span>
+<span id="cb46-706"><a href="#cb46-706"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
+<span id="cb46-707"><a href="#cb46-707"></a><span class="in">error[E0463]: can't find crate for `core`</span></span>
+<span id="cb46-708"><a href="#cb46-708"></a><span class="in">  |</span></span>
+<span id="cb46-709"><a href="#cb46-709"></a><span class="in">  = note: the `x86_64-osirs` target may not be installed</span></span>
+<span id="cb46-710"><a href="#cb46-710"></a><span class="in">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb46-711"><a href="#cb46-711"></a></span>
+<span id="cb46-712"><a href="#cb46-712"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb46-713"><a href="#cb46-713"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb46-714"><a href="#cb46-714"></a><span class="in">```</span></span>
+<span id="cb46-715"><a href="#cb46-715"></a></span>
+<span id="cb46-716"><a href="#cb46-716"></a><span class="fu">## Nightly</span></span>
 <span id="cb46-717"><a href="#cb46-717"></a></span>
-<span id="cb46-718"><a href="#cb46-718"></a><span class="ss">- </span>Here's two things that also still won't work.</span>
-<span id="cb46-719"><a href="#cb46-719"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-720"><a href="#cb46-720"></a><span class="in">cargo +nightly b --target x86_64-osirs.json</span></span>
-<span id="cb46-721"><a href="#cb46-721"></a><span class="in">```</span></span>
-<span id="cb46-722"><a href="#cb46-722"></a><span class="ss">- </span>Gives this:</span>
-<span id="cb46-723"><a href="#cb46-723"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-724"><a href="#cb46-724"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
-<span id="cb46-725"><a href="#cb46-725"></a><span class="in">```</span></span>
-<span id="cb46-726"><a href="#cb46-726"></a>    </span>
-<span id="cb46-727"><a href="#cb46-727"></a><span class="fu">## Try Two Things</span></span>
-<span id="cb46-728"><a href="#cb46-728"></a></span>
-<span id="cb46-729"><a href="#cb46-729"></a><span class="ss">- </span>Here's two things that also still won't work.</span>
-<span id="cb46-730"><a href="#cb46-730"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-731"><a href="#cb46-731"></a><span class="in">cargo +nightly b</span></span>
-<span id="cb46-732"><a href="#cb46-732"></a><span class="in">```</span></span>
-<span id="cb46-733"><a href="#cb46-733"></a><span class="ss">- </span>Gives this:</span>
-<span id="cb46-734"><a href="#cb46-734"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-735"><a href="#cb46-735"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
-<span id="cb46-736"><a href="#cb46-736"></a><span class="in">   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)</span></span>
-<span id="cb46-737"><a href="#cb46-737"></a><span class="in">   Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)</span></span>
-<span id="cb46-738"><a href="#cb46-738"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
-<span id="cb46-739"><a href="#cb46-739"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
-<span id="cb46-740"><a href="#cb46-740"></a><span class="in">  |</span></span>
-<span id="cb46-741"><a href="#cb46-741"></a><span class="in">  = note:  "cc" "-m64" "/home/user/tmp/32/target/debug/deps/rustcMmXrbF/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "/home/user/tmp/32/target/debug/deps/{libcore-0c26ef2bd74962c1,libcompiler_builtins-40a77a01cbdbd500}.rlib" "-L" "/home/user/tmp/32/target/debug/deps/rustcMmXrbF/raw-dylibs" "-Wl,-Bdynamic" "-B&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/user/tmp/32/target/debug/deps/osirs-62b17f4aa5d3b391" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"</span></span>
-<span id="cb46-742"><a href="#cb46-742"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
-<span id="cb46-743"><a href="#cb46-743"></a><span class="in">  = note: rust-lld: error: duplicate symbol: _start</span></span>
-<span id="cb46-744"><a href="#cb46-744"></a><span class="in">          &gt;&gt;&gt; defined at /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(_start)</span></span>
-<span id="cb46-745"><a href="#cb46-745"></a><span class="in">          &gt;&gt;&gt; defined at main.rs:6 (src/main.rs:6)</span></span>
-<span id="cb46-746"><a href="#cb46-746"></a><span class="in">          &gt;&gt;&gt;            /home/user/tmp/32/target/debug/deps/osirs-62b17f4aa5d3b391.3hpwl9lytayxk9wu897na7tu0.0wpyfaj.rcgu.o:(.text._start+0x0)</span></span>
-<span id="cb46-747"><a href="#cb46-747"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
-<span id="cb46-748"><a href="#cb46-748"></a></span>
-<span id="cb46-749"><a href="#cb46-749"></a></span>
-<span id="cb46-750"><a href="#cb46-750"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
-<span id="cb46-751"><a href="#cb46-751"></a><span class="in">```</span></span>
-<span id="cb46-752"><a href="#cb46-752"></a></span>
-<span id="cb46-753"><a href="#cb46-753"></a><span class="fu">## The Problem</span></span>
-<span id="cb46-754"><a href="#cb46-754"></a></span>
-<span id="cb46-755"><a href="#cb46-755"></a><span class="ss">- </span>Not everything works the same way with nightly and stable rust.</span>
-<span id="cb46-756"><a href="#cb46-756"></a><span class="ss">    - </span>That's why it's not stable.</span>
-<span id="cb46-757"><a href="#cb46-757"></a><span class="ss">- </span>We will encounter two examples immediately, both related to JSON.</span>
-<span id="cb46-758"><a href="#cb46-758"></a><span class="ss">- </span>Let's look at this:</span>
+<span id="cb46-718"><a href="#cb46-718"></a><span class="ss">- </span>Okay folks here's the deal.</span>
+<span id="cb46-719"><a href="#cb46-719"></a><span class="ss">- </span>I'm not happy about it either.</span>
+<span id="cb46-720"><a href="#cb46-720"></a><span class="ss">- </span><span class="in">`build-std`</span> - which we need - is unstable and </span>
+<span id="cb46-721"><a href="#cb46-721"></a><span class="ss">- </span><span class="in">`[unstable]`</span> is only available in nightly Rust.</span>
+<span id="cb46-722"><a href="#cb46-722"></a><span class="ss">    - </span>The version of Rust for *nerds*.</span>
+<span id="cb46-723"><a href="#cb46-723"></a><span class="ss">- </span>Not to worry, we are nerds and can use it.</span>
+<span id="cb46-724"><a href="#cb46-724"></a><span class="ss">    - </span>Simply add a <span class="in">`+nightly`</span> right after cargo.</span>
+<span id="cb46-725"><a href="#cb46-725"></a>    </span>
+<span id="cb46-726"><a href="#cb46-726"></a><span class="fu">## Try Two Things</span></span>
+<span id="cb46-727"><a href="#cb46-727"></a></span>
+<span id="cb46-728"><a href="#cb46-728"></a><span class="ss">- </span>Here's two things that also still won't work.</span>
+<span id="cb46-729"><a href="#cb46-729"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-730"><a href="#cb46-730"></a><span class="in">cargo +nightly b --target x86_64-osirs.json</span></span>
+<span id="cb46-731"><a href="#cb46-731"></a><span class="in">```</span></span>
+<span id="cb46-732"><a href="#cb46-732"></a><span class="ss">- </span>Gives this:</span>
+<span id="cb46-733"><a href="#cb46-733"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-734"><a href="#cb46-734"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
+<span id="cb46-735"><a href="#cb46-735"></a><span class="in">```</span></span>
+<span id="cb46-736"><a href="#cb46-736"></a>    </span>
+<span id="cb46-737"><a href="#cb46-737"></a><span class="fu">## Try Two Things</span></span>
+<span id="cb46-738"><a href="#cb46-738"></a></span>
+<span id="cb46-739"><a href="#cb46-739"></a><span class="ss">- </span>Here's two things that also still won't work.</span>
+<span id="cb46-740"><a href="#cb46-740"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-741"><a href="#cb46-741"></a><span class="in">cargo +nightly b</span></span>
+<span id="cb46-742"><a href="#cb46-742"></a><span class="in">```</span></span>
+<span id="cb46-743"><a href="#cb46-743"></a><span class="ss">- </span>Gives this:</span>
+<span id="cb46-744"><a href="#cb46-744"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-745"><a href="#cb46-745"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
+<span id="cb46-746"><a href="#cb46-746"></a><span class="in">   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)</span></span>
+<span id="cb46-747"><a href="#cb46-747"></a><span class="in">   Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)</span></span>
+<span id="cb46-748"><a href="#cb46-748"></a><span class="in">   Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
+<span id="cb46-749"><a href="#cb46-749"></a><span class="in">error: linking with `cc` failed: exit status: 1</span></span>
+<span id="cb46-750"><a href="#cb46-750"></a><span class="in">  |</span></span>
+<span id="cb46-751"><a href="#cb46-751"></a><span class="in">  = note:  "cc" "-m64" "/home/user/tmp/32/target/debug/deps/rustcMmXrbF/symbols.o" "&lt;1 object files omitted&gt;" "-Wl,--as-needed" "-Wl,-Bstatic" "/home/user/tmp/32/target/debug/deps/{libcore-0c26ef2bd74962c1,libcompiler_builtins-40a77a01cbdbd500}.rlib" "-L" "/home/user/tmp/32/target/debug/deps/rustcMmXrbF/raw-dylibs" "-Wl,-Bdynamic" "-B&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/bin/gcc-ld" "-fuse-ld=lld" "-Wl,--eh-frame-hdr" "-Wl,-z,noexecstack" "-L" "&lt;sysroot&gt;/lib/rustlib/x86_64-unknown-linux-gnu/lib" "-o" "/home/user/tmp/32/target/debug/deps/osirs-62b17f4aa5d3b391" "-Wl,--gc-sections" "-pie" "-Wl,-z,relro,-z,now" "-nodefaultlibs"</span></span>
+<span id="cb46-752"><a href="#cb46-752"></a><span class="in">  = note: some arguments are omitted. use `--verbose` to show all linker arguments</span></span>
+<span id="cb46-753"><a href="#cb46-753"></a><span class="in">  = note: rust-lld: error: duplicate symbol: _start</span></span>
+<span id="cb46-754"><a href="#cb46-754"></a><span class="in">          &gt;&gt;&gt; defined at /usr/lib/gcc/x86_64-linux-gnu/11/../../../x86_64-linux-gnu/Scrt1.o:(_start)</span></span>
+<span id="cb46-755"><a href="#cb46-755"></a><span class="in">          &gt;&gt;&gt; defined at main.rs:6 (src/main.rs:6)</span></span>
+<span id="cb46-756"><a href="#cb46-756"></a><span class="in">          &gt;&gt;&gt;            /home/user/tmp/32/target/debug/deps/osirs-62b17f4aa5d3b391.3hpwl9lytayxk9wu897na7tu0.0wpyfaj.rcgu.o:(.text._start+0x0)</span></span>
+<span id="cb46-757"><a href="#cb46-757"></a><span class="in">          collect2: error: ld returned 1 exit status</span></span>
+<span id="cb46-758"><a href="#cb46-758"></a></span>
 <span id="cb46-759"><a href="#cb46-759"></a></span>
-<span id="cb46-760"><a href="#cb46-760"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-761"><a href="#cb46-761"></a><span class="in">$ cargo +nightly b --target x86_64-osirs.json</span></span>
-<span id="cb46-762"><a href="#cb46-762"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
-<span id="cb46-763"><a href="#cb46-763"></a><span class="in">```</span></span>
+<span id="cb46-760"><a href="#cb46-760"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb46-761"><a href="#cb46-761"></a><span class="in">```</span></span>
+<span id="cb46-762"><a href="#cb46-762"></a></span>
+<span id="cb46-763"><a href="#cb46-763"></a><span class="fu">## The Problem</span></span>
 <span id="cb46-764"><a href="#cb46-764"></a></span>
-<span id="cb46-765"><a href="#cb46-765"></a><span class="fu">## One Solution</span></span>
-<span id="cb46-766"><a href="#cb46-766"></a></span>
-<span id="cb46-767"><a href="#cb46-767"></a><span class="ss">- </span>We can of course just put <span class="in">`-Zjson-target-spec`</span> in there.</span>
-<span id="cb46-768"><a href="#cb46-768"></a><span class="ss">- </span>We get an error, but one we are clever enough to handle.</span>
+<span id="cb46-765"><a href="#cb46-765"></a><span class="ss">- </span>Not everything works the same way with nightly and stable rust.</span>
+<span id="cb46-766"><a href="#cb46-766"></a><span class="ss">    - </span>That's why it's not stable.</span>
+<span id="cb46-767"><a href="#cb46-767"></a><span class="ss">- </span>We will encounter two examples immediately, both related to JSON.</span>
+<span id="cb46-768"><a href="#cb46-768"></a><span class="ss">- </span>Let's look at this:</span>
 <span id="cb46-769"><a href="#cb46-769"></a></span>
 <span id="cb46-770"><a href="#cb46-770"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-771"><a href="#cb46-771"></a><span class="in">$ cargo +nightly b --target x86_64-osirs.json -Zjson-target-spec</span></span>
-<span id="cb46-772"><a href="#cb46-772"></a><span class="in">```</span></span>
-<span id="cb46-773"><a href="#cb46-773"></a><span class="ss">- </span>Gives this:</span>
-<span id="cb46-774"><a href="#cb46-774"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-775"><a href="#cb46-775"></a><span class="in">error: failed to run `rustc` to learn about target-specific information</span></span>
+<span id="cb46-771"><a href="#cb46-771"></a><span class="in">$ cargo +nightly b --target x86_64-osirs.json</span></span>
+<span id="cb46-772"><a href="#cb46-772"></a><span class="in">error: `.json` target specs require -Zjson-target-spec</span></span>
+<span id="cb46-773"><a href="#cb46-773"></a><span class="in">```</span></span>
+<span id="cb46-774"><a href="#cb46-774"></a></span>
+<span id="cb46-775"><a href="#cb46-775"></a><span class="fu">## One Solution</span></span>
 <span id="cb46-776"><a href="#cb46-776"></a></span>
-<span id="cb46-777"><a href="#cb46-777"></a><span class="in">Caused by:</span></span>
-<span id="cb46-778"><a href="#cb46-778"></a><span class="in">  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json -Zunstable-options --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
-<span id="cb46-779"><a href="#cb46-779"></a><span class="in">  --- stderr</span></span>
-<span id="cb46-780"><a href="#cb46-780"></a><span class="in">  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32</span></span>
-<span id="cb46-781"><a href="#cb46-781"></a><span class="in">    |</span></span>
-<span id="cb46-782"><a href="#cb46-782"></a><span class="in">    = help: run `rustc --print target-list` for a list of built-in targets</span></span>
-<span id="cb46-783"><a href="#cb46-783"></a><span class="in">```</span></span>
-<span id="cb46-784"><a href="#cb46-784"></a></span>
-<span id="cb46-785"><a href="#cb46-785"></a><span class="fu">## Another Solution</span></span>
+<span id="cb46-777"><a href="#cb46-777"></a><span class="ss">- </span>We can of course just put <span class="in">`-Zjson-target-spec`</span> in there.</span>
+<span id="cb46-778"><a href="#cb46-778"></a><span class="ss">- </span>We get an error, but one we are clever enough to handle.</span>
+<span id="cb46-779"><a href="#cb46-779"></a></span>
+<span id="cb46-780"><a href="#cb46-780"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-781"><a href="#cb46-781"></a><span class="in">$ cargo +nightly b --target x86_64-osirs.json -Zjson-target-spec</span></span>
+<span id="cb46-782"><a href="#cb46-782"></a><span class="in">```</span></span>
+<span id="cb46-783"><a href="#cb46-783"></a><span class="ss">- </span>Gives this:</span>
+<span id="cb46-784"><a href="#cb46-784"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-785"><a href="#cb46-785"></a><span class="in">error: failed to run `rustc` to learn about target-specific information</span></span>
 <span id="cb46-786"><a href="#cb46-786"></a></span>
-<span id="cb46-787"><a href="#cb46-787"></a><span class="ss">- </span>However, that <span class="in">`-Zjson-target-spec`</span> looks an *awful* lot like a <span class="in">`.cargo/config.toml`</span> option...</span>
-<span id="cb46-788"><a href="#cb46-788"></a><span class="ss">    - </span>I believe that is also unstable...</span>
-<span id="cb46-789"><a href="#cb46-789"></a><span class="ss">    - </span>... after all, it works fine on stable!</span>
-<span id="cb46-790"><a href="#cb46-790"></a></span>
-<span id="cb46-791"><a href="#cb46-791"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
-<span id="cb46-792"><a href="#cb46-792"></a><span class="in">[unstable]</span></span>
-<span id="cb46-793"><a href="#cb46-793"></a><span class="in">build-std = ["core"]</span></span>
-<span id="cb46-794"><a href="#cb46-794"></a><span class="in">```</span></span>
-<span id="cb46-795"><a href="#cb46-795"></a><span class="ss">- </span>We can then get the same error with less typing:</span>
+<span id="cb46-787"><a href="#cb46-787"></a><span class="in">Caused by:</span></span>
+<span id="cb46-788"><a href="#cb46-788"></a><span class="in">  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json -Zunstable-options --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
+<span id="cb46-789"><a href="#cb46-789"></a><span class="in">  --- stderr</span></span>
+<span id="cb46-790"><a href="#cb46-790"></a><span class="in">  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32</span></span>
+<span id="cb46-791"><a href="#cb46-791"></a><span class="in">    |</span></span>
+<span id="cb46-792"><a href="#cb46-792"></a><span class="in">    = help: run `rustc --print target-list` for a list of built-in targets</span></span>
+<span id="cb46-793"><a href="#cb46-793"></a><span class="in">```</span></span>
+<span id="cb46-794"><a href="#cb46-794"></a></span>
+<span id="cb46-795"><a href="#cb46-795"></a><span class="fu">## Another Solution</span></span>
 <span id="cb46-796"><a href="#cb46-796"></a></span>
-<span id="cb46-797"><a href="#cb46-797"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-798"><a href="#cb46-798"></a><span class="in">cargo +nightly b --target x86_64-osirs.json</span></span>
-<span id="cb46-799"><a href="#cb46-799"></a><span class="in">```</span></span>
+<span id="cb46-797"><a href="#cb46-797"></a><span class="ss">- </span>However, that <span class="in">`-Zjson-target-spec`</span> looks an *awful* lot like a <span class="in">`.cargo/config.toml`</span> option...</span>
+<span id="cb46-798"><a href="#cb46-798"></a><span class="ss">    - </span>I believe that is also unstable...</span>
+<span id="cb46-799"><a href="#cb46-799"></a><span class="ss">    - </span>... after all, it works fine on stable!</span>
 <span id="cb46-800"><a href="#cb46-800"></a></span>
-<span id="cb46-801"><a href="#cb46-801"></a><span class="fu">## The error</span></span>
-<span id="cb46-802"><a href="#cb46-802"></a></span>
-<span id="cb46-803"><a href="#cb46-803"></a><span class="in">```{.sh code-line-numbers="6"}</span></span>
-<span id="cb46-804"><a href="#cb46-804"></a><span class="in">error: failed to run `rustc` to learn about target-specific information</span></span>
-<span id="cb46-805"><a href="#cb46-805"></a></span>
-<span id="cb46-806"><a href="#cb46-806"></a><span class="in">Caused by:</span></span>
-<span id="cb46-807"><a href="#cb46-807"></a><span class="in">  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json -Zunstable-options --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
-<span id="cb46-808"><a href="#cb46-808"></a><span class="in">  --- stderr</span></span>
-<span id="cb46-809"><a href="#cb46-809"></a><span class="in">  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32</span></span>
-<span id="cb46-810"><a href="#cb46-810"></a><span class="in">    |</span></span>
-<span id="cb46-811"><a href="#cb46-811"></a><span class="in">    = help: run `rustc --print target-list` for a list of built-in targets</span></span>
-<span id="cb46-812"><a href="#cb46-812"></a><span class="in">```</span></span>
-<span id="cb46-813"><a href="#cb46-813"></a></span>
-<span id="cb46-814"><a href="#cb46-814"></a><span class="ss">- </span>Does that remind you of anything?</span>
+<span id="cb46-801"><a href="#cb46-801"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
+<span id="cb46-802"><a href="#cb46-802"></a><span class="in">[unstable]</span></span>
+<span id="cb46-803"><a href="#cb46-803"></a><span class="in">build-std = ["core"]</span></span>
+<span id="cb46-804"><a href="#cb46-804"></a><span class="in">```</span></span>
+<span id="cb46-805"><a href="#cb46-805"></a><span class="ss">- </span>We can then get the same error with less typing:</span>
+<span id="cb46-806"><a href="#cb46-806"></a></span>
+<span id="cb46-807"><a href="#cb46-807"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-808"><a href="#cb46-808"></a><span class="in">cargo +nightly b --target x86_64-osirs.json</span></span>
+<span id="cb46-809"><a href="#cb46-809"></a><span class="in">```</span></span>
+<span id="cb46-810"><a href="#cb46-810"></a></span>
+<span id="cb46-811"><a href="#cb46-811"></a><span class="fu">## The error</span></span>
+<span id="cb46-812"><a href="#cb46-812"></a></span>
+<span id="cb46-813"><a href="#cb46-813"></a><span class="in">```{.sh code-line-numbers="6"}</span></span>
+<span id="cb46-814"><a href="#cb46-814"></a><span class="in">error: failed to run `rustc` to learn about target-specific information</span></span>
 <span id="cb46-815"><a href="#cb46-815"></a></span>
-<span id="cb46-816"><a href="#cb46-816"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-817"><a href="#cb46-817"></a><span class="in">$ diff bad.wrong x86_64-osirs.json</span></span>
-<span id="cb46-818"><a href="#cb46-818"></a><span class="in">6,7c6,7</span></span>
-<span id="cb46-819"><a href="#cb46-819"></a><span class="in">&lt;     "target-pointer-width": 64,</span></span>
-<span id="cb46-820"><a href="#cb46-820"></a><span class="in">&lt;     "target-c-int-width": 32,</span></span>
-<span id="cb46-821"><a href="#cb46-821"></a><span class="in">---</span></span>
-<span id="cb46-822"><a href="#cb46-822"></a><span class="in">&gt;     "target-pointer-width": "64",</span></span>
-<span id="cb46-823"><a href="#cb46-823"></a><span class="in">&gt;     "target-c-int-width": "32",</span></span>
-<span id="cb46-824"><a href="#cb46-824"></a><span class="in">```</span></span>
+<span id="cb46-816"><a href="#cb46-816"></a><span class="in">Caused by:</span></span>
+<span id="cb46-817"><a href="#cb46-817"></a><span class="in">  process didn't exit successfully: `/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rustc - --crate-name ___ --print=file-names --target /home/user/tmp/32/x86_64-osirs.json -Zunstable-options --crate-type bin --crate-type rlib --crate-type dylib --crate-type cdylib --crate-type staticlib --crate-type proc-macro --print=sysroot --print=split-debuginfo --print=crate-name --print=cfg -Wwarnings` (exit status: 1)</span></span>
+<span id="cb46-818"><a href="#cb46-818"></a><span class="in">  --- stderr</span></span>
+<span id="cb46-819"><a href="#cb46-819"></a><span class="in">  error: error loading target specification: target-pointer-width: invalid type: string "64", expected u16 at line 6 column 32</span></span>
+<span id="cb46-820"><a href="#cb46-820"></a><span class="in">    |</span></span>
+<span id="cb46-821"><a href="#cb46-821"></a><span class="in">    = help: run `rustc --print target-list` for a list of built-in targets</span></span>
+<span id="cb46-822"><a href="#cb46-822"></a><span class="in">```</span></span>
+<span id="cb46-823"><a href="#cb46-823"></a></span>
+<span id="cb46-824"><a href="#cb46-824"></a><span class="ss">- </span>Does that remind you of anything?</span>
 <span id="cb46-825"><a href="#cb46-825"></a></span>
-<span id="cb46-826"><a href="#cb46-826"></a><span class="fu">## Revert!</span></span>
-<span id="cb46-827"><a href="#cb46-827"></a></span>
-<span id="cb46-828"><a href="#cb46-828"></a><span class="ss">- </span>Change the string integers back to integer integers in your JSON file and you will be living a charmed and blessed life.</span>
-<span id="cb46-829"><a href="#cb46-829"></a><span class="ss">    - </span>A long one, compilation is 10+ seconds for me.</span>
-<span id="cb46-830"><a href="#cb46-830"></a></span>
-<span id="cb46-831"><a href="#cb46-831"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-832"><a href="#cb46-832"></a><span class="in">$ cargo +nightly b --target x86_64-osirs.json</span></span>
-<span id="cb46-833"><a href="#cb46-833"></a><span class="in">   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)</span></span>
-<span id="cb46-834"><a href="#cb46-834"></a><span class="in">   Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)</span></span>
-<span id="cb46-835"><a href="#cb46-835"></a><span class="in">^[[A    Building [==========&gt;                  ] 2/5: core, compiler_builtins                                                                Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
-<span id="cb46-836"><a href="#cb46-836"></a><span class="in">    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.18s</span></span>
-<span id="cb46-837"><a href="#cb46-837"></a><span class="in">```</span></span>
+<span id="cb46-826"><a href="#cb46-826"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-827"><a href="#cb46-827"></a><span class="in">$ diff bad.wrong x86_64-osirs.json</span></span>
+<span id="cb46-828"><a href="#cb46-828"></a><span class="in">6,7c6,7</span></span>
+<span id="cb46-829"><a href="#cb46-829"></a><span class="in">&lt;     "target-pointer-width": 64,</span></span>
+<span id="cb46-830"><a href="#cb46-830"></a><span class="in">&lt;     "target-c-int-width": 32,</span></span>
+<span id="cb46-831"><a href="#cb46-831"></a><span class="in">---</span></span>
+<span id="cb46-832"><a href="#cb46-832"></a><span class="in">&gt;     "target-pointer-width": "64",</span></span>
+<span id="cb46-833"><a href="#cb46-833"></a><span class="in">&gt;     "target-c-int-width": "32",</span></span>
+<span id="cb46-834"><a href="#cb46-834"></a><span class="in">```</span></span>
+<span id="cb46-835"><a href="#cb46-835"></a></span>
+<span id="cb46-836"><a href="#cb46-836"></a></span>
+<span id="cb46-837"><a href="#cb46-837"></a><span class="fu">## Aside</span></span>
 <span id="cb46-838"><a href="#cb46-838"></a></span>
-<span id="cb46-839"><a href="#cb46-839"></a><span class="fu">## Aside</span></span>
-<span id="cb46-840"><a href="#cb46-840"></a></span>
-<span id="cb46-841"><a href="#cb46-841"></a><span class="ss">- </span>By the way, are you tired of specifying the target every time?</span>
-<span id="cb46-842"><a href="#cb46-842"></a><span class="ss">    - </span>Sounds like a problem for <span class="in">`.cargo/config.toml`</span>!</span>
-<span id="cb46-843"><a href="#cb46-843"></a></span>
-<span id="cb46-844"><a href="#cb46-844"></a><span class="in">```{.toml filename=".cargo/config.toml" code-line-numbers="5-6"}</span></span>
-<span id="cb46-845"><a href="#cb46-845"></a><span class="in">[unstable]</span></span>
-<span id="cb46-846"><a href="#cb46-846"></a><span class="in">build-std = ["core"]</span></span>
-<span id="cb46-847"><a href="#cb46-847"></a><span class="in">json-target-spec = true</span></span>
-<span id="cb46-848"><a href="#cb46-848"></a></span>
-<span id="cb46-849"><a href="#cb46-849"></a><span class="in">[build]</span></span>
-<span id="cb46-850"><a href="#cb46-850"></a><span class="in">target = "x86_64-osirs.json"</span></span>
-<span id="cb46-851"><a href="#cb46-851"></a><span class="in">```</span></span>
-<span id="cb46-852"><a href="#cb46-852"></a></span>
-<span id="cb46-853"><a href="#cb46-853"></a><span class="fu">## Run again</span></span>
-<span id="cb46-854"><a href="#cb46-854"></a></span>
-<span id="cb46-855"><a href="#cb46-855"></a><span class="ss">- </span>By the way it will be fast now.</span>
-<span id="cb46-856"><a href="#cb46-856"></a></span>
-<span id="cb46-857"><a href="#cb46-857"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-858"><a href="#cb46-858"></a><span class="in">$ cargo +nightly b</span></span>
-<span id="cb46-859"><a href="#cb46-859"></a><span class="in">    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s</span></span>
-<span id="cb46-860"><a href="#cb46-860"></a><span class="in">```</span></span>
-<span id="cb46-861"><a href="#cb46-861"></a></span>
-<span id="cb46-862"><a href="#cb46-862"></a><span class="fu">## Aside: Nightly</span></span>
-<span id="cb46-863"><a href="#cb46-863"></a></span>
-<span id="cb46-864"><a href="#cb46-864"></a><span class="ss">- </span>Surely you can also update <span class="in">`.cargo/config.toml`</span> to use nightly!</span>
-<span id="cb46-865"><a href="#cb46-865"></a><span class="ss">    - </span>You can't. You can solve the problem other ways though.</span>
-<span id="cb46-866"><a href="#cb46-866"></a><span class="ss">    - </span>Left as an exercise to the interested student.</span>
-<span id="cb46-867"><a href="#cb46-867"></a>    </span>
-<span id="cb46-868"><a href="#cb46-868"></a><span class="fu">## Aside: $\not$Futureproofing</span></span>
+<span id="cb46-839"><a href="#cb46-839"></a><span class="ss">- </span>If you did not see that error, that is okay!</span>
+<span id="cb46-840"><a href="#cb46-840"></a><span class="ss">- </span>It concerns an unstable language feature and may differ.</span>
+<span id="cb46-841"><a href="#cb46-841"></a><span class="ss">- </span>Just skip one slide!</span>
+<span id="cb46-842"><a href="#cb46-842"></a></span>
+<span id="cb46-843"><a href="#cb46-843"></a><span class="fu">## Revert!</span></span>
+<span id="cb46-844"><a href="#cb46-844"></a></span>
+<span id="cb46-845"><a href="#cb46-845"></a><span class="ss">- </span>Change the string integers back to integer integers in your JSON file and you will be living a charmed and blessed life.</span>
+<span id="cb46-846"><a href="#cb46-846"></a><span class="ss">    - </span>A long one, compilation is 10+ seconds for me.</span>
+<span id="cb46-847"><a href="#cb46-847"></a></span>
+<span id="cb46-848"><a href="#cb46-848"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-849"><a href="#cb46-849"></a><span class="in">$ cargo +nightly b --target x86_64-osirs.json</span></span>
+<span id="cb46-850"><a href="#cb46-850"></a><span class="in">   Compiling compiler_builtins v0.1.160 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/compiler-builtins/compiler-builtins)</span></span>
+<span id="cb46-851"><a href="#cb46-851"></a><span class="in">   Compiling core v0.0.0 (/home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/core)</span></span>
+<span id="cb46-852"><a href="#cb46-852"></a><span class="in">^[[A    Building [==========&gt;                  ] 2/5: core, compiler_builtins                                                                Compiling osirs v0.1.0 (/home/user/tmp/32)</span></span>
+<span id="cb46-853"><a href="#cb46-853"></a><span class="in">    Finished `dev` profile [unoptimized + debuginfo] target(s) in 10.18s</span></span>
+<span id="cb46-854"><a href="#cb46-854"></a><span class="in">```</span></span>
+<span id="cb46-855"><a href="#cb46-855"></a></span>
+<span id="cb46-856"><a href="#cb46-856"></a><span class="fu">## Aside</span></span>
+<span id="cb46-857"><a href="#cb46-857"></a></span>
+<span id="cb46-858"><a href="#cb46-858"></a><span class="ss">- </span>By the way, are you tired of specifying the target every time?</span>
+<span id="cb46-859"><a href="#cb46-859"></a><span class="ss">    - </span>Sounds like a problem for <span class="in">`.cargo/config.toml`</span>!</span>
+<span id="cb46-860"><a href="#cb46-860"></a></span>
+<span id="cb46-861"><a href="#cb46-861"></a><span class="in">```{.toml filename=".cargo/config.toml" code-line-numbers="5-6"}</span></span>
+<span id="cb46-862"><a href="#cb46-862"></a><span class="in">[unstable]</span></span>
+<span id="cb46-863"><a href="#cb46-863"></a><span class="in">build-std = ["core"]</span></span>
+<span id="cb46-864"><a href="#cb46-864"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb46-865"><a href="#cb46-865"></a></span>
+<span id="cb46-866"><a href="#cb46-866"></a><span class="in">[build]</span></span>
+<span id="cb46-867"><a href="#cb46-867"></a><span class="in">target = "x86_64-osirs.json"</span></span>
+<span id="cb46-868"><a href="#cb46-868"></a><span class="in">```</span></span>
 <span id="cb46-869"><a href="#cb46-869"></a></span>
-<span id="cb46-870"><a href="#cb46-870"></a><span class="ss">- </span>I was pretty sure I can make a kernel without floats.</span>
-<span id="cb46-871"><a href="#cb46-871"></a><span class="ss">- </span>So I removed the two <span class="in">`soft-float`</span> lines and it still worked for now.</span>
-<span id="cb46-872"><a href="#cb46-872"></a></span>
-<span id="cb46-873"><a href="#cb46-873"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-874"><a href="#cb46-874"></a><span class="in">$ diff old.boring x86_64-osirs.json</span></span>
-<span id="cb46-875"><a href="#cb46-875"></a><span class="in">13,15c13</span></span>
-<span id="cb46-876"><a href="#cb46-876"></a><span class="in">&lt;     "disable-redzone": true,</span></span>
-<span id="cb46-877"><a href="#cb46-877"></a><span class="in">&lt;     "features": "-mmx,-sse,+soft-float",</span></span>
-<span id="cb46-878"><a href="#cb46-878"></a><span class="in">&lt;     "rustc-abi": "x86-softfloat"</span></span>
-<span id="cb46-879"><a href="#cb46-879"></a><span class="in">---</span></span>
-<span id="cb46-880"><a href="#cb46-880"></a><span class="in">&gt;     "disable-redzone": true</span></span>
-<span id="cb46-881"><a href="#cb46-881"></a><span class="in">```</span></span>
-<span id="cb46-882"><a href="#cb46-882"></a></span>
-<span id="cb46-883"><a href="#cb46-883"></a><span class="fu">## Aside: $\not$Futureproofing</span></span>
-<span id="cb46-884"><a href="#cb46-884"></a></span>
-<span id="cb46-885"><a href="#cb46-885"></a><span class="ss">- </span>I was pretty sure I could make a kernel without <span class="in">`compiler-builtins`</span></span>
-<span id="cb46-886"><a href="#cb46-886"></a><span class="ss">- </span>These are memory related functions where Rust often uses linked C implementations.</span>
-<span id="cb46-887"><a href="#cb46-887"></a><span class="ss">- </span>I'm leaving them out for now and will add them in when I need them.</span>
-<span id="cb46-888"><a href="#cb46-888"></a></span>
-<span id="cb46-889"><a href="#cb46-889"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-890"><a href="#cb46-890"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
-<span id="cb46-891"><a href="#cb46-891"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
-<span id="cb46-892"><a href="#cb46-892"></a><span class="in">```</span></span>
-<span id="cb46-893"><a href="#cb46-893"></a></span>
-<span id="cb46-894"><a href="#cb46-894"></a><span class="fu">## Boot it</span></span>
-<span id="cb46-895"><a href="#cb46-895"></a></span>
-<span id="cb46-896"><a href="#cb46-896"></a><span class="ss">- </span>And with that, I bet this will totally work.</span>
-<span id="cb46-897"><a href="#cb46-897"></a><span class="ss">- </span>Let's break out <span class="in">`qemu`</span></span>
-<span id="cb46-898"><a href="#cb46-898"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-899"><a href="#cb46-899"></a><span class="in">$ qemu-system-x86_64 -kernel target/x86_64-osirs/debug/osirs</span></span>
-<span id="cb46-900"><a href="#cb46-900"></a><span class="in">Command 'qemu-system-x86_64' not found, but can be installed with:</span></span>
-<span id="cb46-901"><a href="#cb46-901"></a><span class="in">sudo apt install qemu-system-x86      # version 1:6.2+dfsg-2ubuntu6.27, or</span></span>
-<span id="cb46-902"><a href="#cb46-902"></a><span class="in">sudo apt install qemu-system-x86-xen  # version 1:6.2+dfsg-2ubuntu6.27</span></span>
-<span id="cb46-903"><a href="#cb46-903"></a><span class="in">```</span></span>
-<span id="cb46-904"><a href="#cb46-904"></a><span class="ss">- </span>Oh right, we only installed "misc" <span class="in">`qemu`</span></span>
-<span id="cb46-905"><a href="#cb46-905"></a><span class="ss">    - </span>Real ones will use <span class="in">`apt`</span></span>
+<span id="cb46-870"><a href="#cb46-870"></a><span class="fu">## Run again</span></span>
+<span id="cb46-871"><a href="#cb46-871"></a></span>
+<span id="cb46-872"><a href="#cb46-872"></a><span class="ss">- </span>By the way it will be fast now.</span>
+<span id="cb46-873"><a href="#cb46-873"></a></span>
+<span id="cb46-874"><a href="#cb46-874"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-875"><a href="#cb46-875"></a><span class="in">$ cargo +nightly b</span></span>
+<span id="cb46-876"><a href="#cb46-876"></a><span class="in">    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.08s</span></span>
+<span id="cb46-877"><a href="#cb46-877"></a><span class="in">```</span></span>
+<span id="cb46-878"><a href="#cb46-878"></a></span>
+<span id="cb46-879"><a href="#cb46-879"></a><span class="fu">## Aside: Nightly</span></span>
+<span id="cb46-880"><a href="#cb46-880"></a></span>
+<span id="cb46-881"><a href="#cb46-881"></a><span class="ss">- </span>Surely you can also update <span class="in">`.cargo/config.toml`</span> to use nightly!</span>
+<span id="cb46-882"><a href="#cb46-882"></a><span class="ss">    - </span>You can't. You can solve the problem other ways though.</span>
+<span id="cb46-883"><a href="#cb46-883"></a><span class="ss">    - </span>Left as an exercise to the interested student.</span>
+<span id="cb46-884"><a href="#cb46-884"></a>    </span>
+<span id="cb46-885"><a href="#cb46-885"></a><span class="fu">## Aside: $\not$Futureproofing</span></span>
+<span id="cb46-886"><a href="#cb46-886"></a></span>
+<span id="cb46-887"><a href="#cb46-887"></a><span class="ss">- </span>I was pretty sure I can make a kernel without floats.</span>
+<span id="cb46-888"><a href="#cb46-888"></a><span class="ss">- </span>So I removed the two <span class="in">`soft-float`</span> lines and it still worked for now.</span>
+<span id="cb46-889"><a href="#cb46-889"></a></span>
+<span id="cb46-890"><a href="#cb46-890"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-891"><a href="#cb46-891"></a><span class="in">$ diff old.boring x86_64-osirs.json</span></span>
+<span id="cb46-892"><a href="#cb46-892"></a><span class="in">13,15c13</span></span>
+<span id="cb46-893"><a href="#cb46-893"></a><span class="in">&lt;     "disable-redzone": true,</span></span>
+<span id="cb46-894"><a href="#cb46-894"></a><span class="in">&lt;     "features": "-mmx,-sse,+soft-float",</span></span>
+<span id="cb46-895"><a href="#cb46-895"></a><span class="in">&lt;     "rustc-abi": "x86-softfloat"</span></span>
+<span id="cb46-896"><a href="#cb46-896"></a><span class="in">---</span></span>
+<span id="cb46-897"><a href="#cb46-897"></a><span class="in">&gt;     "disable-redzone": true</span></span>
+<span id="cb46-898"><a href="#cb46-898"></a><span class="in">```</span></span>
+<span id="cb46-899"><a href="#cb46-899"></a></span>
+<span id="cb46-900"><a href="#cb46-900"></a><span class="fu">## Aside: $\not$Futureproofing</span></span>
+<span id="cb46-901"><a href="#cb46-901"></a></span>
+<span id="cb46-902"><a href="#cb46-902"></a><span class="ss">- </span>I was pretty sure I could make a kernel without <span class="in">`compiler-builtins`</span></span>
+<span id="cb46-903"><a href="#cb46-903"></a><span class="ss">- </span>These are memory related functions where Rust often uses linked C implementations.</span>
+<span id="cb46-904"><a href="#cb46-904"></a><span class="ss">- </span>I'm leaving them out for now and will add them in when I need them.</span>
+<span id="cb46-905"><a href="#cb46-905"></a></span>
 <span id="cb46-906"><a href="#cb46-906"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-907"><a href="#cb46-907"></a><span class="in">sudo apt install qemu-system-x86</span></span>
-<span id="cb46-908"><a href="#cb46-908"></a><span class="in">```</span></span>
-<span id="cb46-909"><a href="#cb46-909"></a></span>
-<span id="cb46-910"><a href="#cb46-910"></a><span class="fu">## Boot it</span></span>
-<span id="cb46-911"><a href="#cb46-911"></a></span>
-<span id="cb46-912"><a href="#cb46-912"></a><span class="in">```{.sh}</span></span>
-<span id="cb46-913"><a href="#cb46-913"></a><span class="in">$ qemu-system-x86_64 -kernel target/x86_64-osirs/debug/osirs</span></span>
-<span id="cb46-914"><a href="#cb46-914"></a><span class="in">qemu-system-x86_64: Error loading uncompressed kernel without PVH ELF Note</span></span>
-<span id="cb46-915"><a href="#cb46-915"></a><span class="in">```</span></span>
-<span id="cb46-916"><a href="#cb46-916"></a></span>
-<span id="cb46-917"><a href="#cb46-917"></a><span class="ss">- </span>Oh right, we did precisely *nothing* with the BIOS and the bootloader and all that and still need to do those things.</span>
-<span id="cb46-918"><a href="#cb46-918"></a><span class="ss">    - </span>I bet that would be a fun topic for a lab.</span>
-<span id="cb46-919"><a href="#cb46-919"></a>    </span>
-<span id="cb46-920"><a href="#cb46-920"></a><span class="fu"># Fin</span></span>
-<span id="cb46-921"><a href="#cb46-921"></a></span>
-<span id="cb46-922"><a href="#cb46-922"></a><span class="fu">## Main File</span></span>
-<span id="cb46-923"><a href="#cb46-923"></a></span>
-<span id="cb46-924"><a href="#cb46-924"></a><span class="ss">- </span>Unaltered except loops for stability.</span>
-<span id="cb46-925"><a href="#cb46-925"></a></span>
-<span id="cb46-926"><a href="#cb46-926"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb46-927"><a href="#cb46-927"></a><span class="in">#![no_std]</span></span>
-<span id="cb46-928"><a href="#cb46-928"></a><span class="in">#![no_main]</span></span>
-<span id="cb46-929"><a href="#cb46-929"></a></span>
-<span id="cb46-930"><a href="#cb46-930"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb46-931"><a href="#cb46-931"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb46-932"><a href="#cb46-932"></a><span class="in">    loop {}</span></span>
-<span id="cb46-933"><a href="#cb46-933"></a><span class="in">}</span></span>
-<span id="cb46-934"><a href="#cb46-934"></a></span>
-<span id="cb46-935"><a href="#cb46-935"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb46-936"><a href="#cb46-936"></a><span class="in">fn panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb46-937"><a href="#cb46-937"></a><span class="in">    loop {}</span></span>
-<span id="cb46-938"><a href="#cb46-938"></a><span class="in">}</span></span>
-<span id="cb46-939"><a href="#cb46-939"></a><span class="in">```</span></span>
+<span id="cb46-907"><a href="#cb46-907"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
+<span id="cb46-908"><a href="#cb46-908"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
+<span id="cb46-909"><a href="#cb46-909"></a><span class="in">```</span></span>
+<span id="cb46-910"><a href="#cb46-910"></a></span>
+<span id="cb46-911"><a href="#cb46-911"></a><span class="fu">## Boot it</span></span>
+<span id="cb46-912"><a href="#cb46-912"></a></span>
+<span id="cb46-913"><a href="#cb46-913"></a><span class="ss">- </span>And with that, I bet this will totally work.</span>
+<span id="cb46-914"><a href="#cb46-914"></a><span class="ss">- </span>Let's break out <span class="in">`qemu`</span></span>
+<span id="cb46-915"><a href="#cb46-915"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-916"><a href="#cb46-916"></a><span class="in">$ qemu-system-x86_64 -kernel target/x86_64-osirs/debug/osirs</span></span>
+<span id="cb46-917"><a href="#cb46-917"></a><span class="in">Command 'qemu-system-x86_64' not found, but can be installed with:</span></span>
+<span id="cb46-918"><a href="#cb46-918"></a><span class="in">sudo apt install qemu-system-x86      # version 1:6.2+dfsg-2ubuntu6.27, or</span></span>
+<span id="cb46-919"><a href="#cb46-919"></a><span class="in">sudo apt install qemu-system-x86-xen  # version 1:6.2+dfsg-2ubuntu6.27</span></span>
+<span id="cb46-920"><a href="#cb46-920"></a><span class="in">```</span></span>
+<span id="cb46-921"><a href="#cb46-921"></a><span class="ss">- </span>Oh right, we only installed "misc" <span class="in">`qemu`</span></span>
+<span id="cb46-922"><a href="#cb46-922"></a><span class="ss">    - </span>Real ones will use <span class="in">`apt`</span></span>
+<span id="cb46-923"><a href="#cb46-923"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-924"><a href="#cb46-924"></a><span class="in">sudo apt install qemu-system-x86</span></span>
+<span id="cb46-925"><a href="#cb46-925"></a><span class="in">```</span></span>
+<span id="cb46-926"><a href="#cb46-926"></a></span>
+<span id="cb46-927"><a href="#cb46-927"></a><span class="fu">## Boot it</span></span>
+<span id="cb46-928"><a href="#cb46-928"></a></span>
+<span id="cb46-929"><a href="#cb46-929"></a><span class="in">```{.sh}</span></span>
+<span id="cb46-930"><a href="#cb46-930"></a><span class="in">$ qemu-system-x86_64 -kernel target/x86_64-osirs/debug/osirs</span></span>
+<span id="cb46-931"><a href="#cb46-931"></a><span class="in">qemu-system-x86_64: Error loading uncompressed kernel without PVH ELF Note</span></span>
+<span id="cb46-932"><a href="#cb46-932"></a><span class="in">```</span></span>
+<span id="cb46-933"><a href="#cb46-933"></a></span>
+<span id="cb46-934"><a href="#cb46-934"></a><span class="ss">- </span>Oh right, we did precisely *nothing* with the BIOS and the bootloader and all that and still need to do those things.</span>
+<span id="cb46-935"><a href="#cb46-935"></a><span class="ss">    - </span>I bet that would be a fun topic for a lab.</span>
+<span id="cb46-936"><a href="#cb46-936"></a>    </span>
+<span id="cb46-937"><a href="#cb46-937"></a><span class="fu"># Fin</span></span>
+<span id="cb46-938"><a href="#cb46-938"></a></span>
+<span id="cb46-939"><a href="#cb46-939"></a><span class="fu">## Main File</span></span>
 <span id="cb46-940"><a href="#cb46-940"></a></span>
-<span id="cb46-941"><a href="#cb46-941"></a><span class="fu">## Config File</span></span>
+<span id="cb46-941"><a href="#cb46-941"></a><span class="ss">- </span>Unaltered except loops for stability.</span>
 <span id="cb46-942"><a href="#cb46-942"></a></span>
-<span id="cb46-943"><a href="#cb46-943"></a><span class="ss">- </span>All new, only works with nightly.</span>
-<span id="cb46-944"><a href="#cb46-944"></a></span>
-<span id="cb46-945"><a href="#cb46-945"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
-<span id="cb46-946"><a href="#cb46-946"></a><span class="in">[unstable]</span></span>
-<span id="cb46-947"><a href="#cb46-947"></a><span class="in">build-std = ["core"]</span></span>
-<span id="cb46-948"><a href="#cb46-948"></a><span class="in">json-target-spec = true</span></span>
-<span id="cb46-949"><a href="#cb46-949"></a></span>
-<span id="cb46-950"><a href="#cb46-950"></a><span class="in">[build]</span></span>
-<span id="cb46-951"><a href="#cb46-951"></a><span class="in">target = "x86_64-osirs.json"</span></span>
-<span id="cb46-952"><a href="#cb46-952"></a><span class="in">```</span></span>
-<span id="cb46-953"><a href="#cb46-953"></a></span>
-<span id="cb46-954"><a href="#cb46-954"></a><span class="fu">## Target File</span></span>
-<span id="cb46-955"><a href="#cb46-955"></a></span>
-<span id="cb46-956"><a href="#cb46-956"></a><span class="ss">- </span>All new, this is the nightly version.</span>
+<span id="cb46-943"><a href="#cb46-943"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb46-944"><a href="#cb46-944"></a><span class="in">#![no_std]</span></span>
+<span id="cb46-945"><a href="#cb46-945"></a><span class="in">#![no_main]</span></span>
+<span id="cb46-946"><a href="#cb46-946"></a></span>
+<span id="cb46-947"><a href="#cb46-947"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb46-948"><a href="#cb46-948"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb46-949"><a href="#cb46-949"></a><span class="in">    loop {}</span></span>
+<span id="cb46-950"><a href="#cb46-950"></a><span class="in">}</span></span>
+<span id="cb46-951"><a href="#cb46-951"></a></span>
+<span id="cb46-952"><a href="#cb46-952"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb46-953"><a href="#cb46-953"></a><span class="in">fn panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb46-954"><a href="#cb46-954"></a><span class="in">    loop {}</span></span>
+<span id="cb46-955"><a href="#cb46-955"></a><span class="in">}</span></span>
+<span id="cb46-956"><a href="#cb46-956"></a><span class="in">```</span></span>
 <span id="cb46-957"><a href="#cb46-957"></a></span>
-<span id="cb46-958"><a href="#cb46-958"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
-<span id="cb46-959"><a href="#cb46-959"></a><span class="in">{</span></span>
-<span id="cb46-960"><a href="#cb46-960"></a><span class="in">    "llvm-target": "x86_64-unknown-none",</span></span>
-<span id="cb46-961"><a href="#cb46-961"></a><span class="in">    "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",</span></span>
-<span id="cb46-962"><a href="#cb46-962"></a><span class="in">    "arch": "x86_64",</span></span>
-<span id="cb46-963"><a href="#cb46-963"></a><span class="in">    "target-endian": "little",</span></span>
-<span id="cb46-964"><a href="#cb46-964"></a><span class="in">    "target-pointer-width": 64,</span></span>
-<span id="cb46-965"><a href="#cb46-965"></a><span class="in">    "target-c-int-width": 32,</span></span>
-<span id="cb46-966"><a href="#cb46-966"></a><span class="in">    "os": "none",</span></span>
-<span id="cb46-967"><a href="#cb46-967"></a><span class="in">    "executables": true,</span></span>
-<span id="cb46-968"><a href="#cb46-968"></a><span class="in">    "linker-flavor": "ld.lld",</span></span>
-<span id="cb46-969"><a href="#cb46-969"></a><span class="in">    "linker": "rust-lld",</span></span>
-<span id="cb46-970"><a href="#cb46-970"></a><span class="in">    "panic-strategy": "abort",</span></span>
-<span id="cb46-971"><a href="#cb46-971"></a><span class="in">    "disable-redzone": true</span></span>
-<span id="cb46-972"><a href="#cb46-972"></a><span class="in">}</span></span>
-<span id="cb46-973"><a href="#cb46-973"></a><span class="in">```</span></span>
+<span id="cb46-958"><a href="#cb46-958"></a><span class="fu">## Config File</span></span>
+<span id="cb46-959"><a href="#cb46-959"></a></span>
+<span id="cb46-960"><a href="#cb46-960"></a><span class="ss">- </span>All new, only works with nightly.</span>
+<span id="cb46-961"><a href="#cb46-961"></a></span>
+<span id="cb46-962"><a href="#cb46-962"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
+<span id="cb46-963"><a href="#cb46-963"></a><span class="in">[unstable]</span></span>
+<span id="cb46-964"><a href="#cb46-964"></a><span class="in">build-std = ["core"]</span></span>
+<span id="cb46-965"><a href="#cb46-965"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb46-966"><a href="#cb46-966"></a></span>
+<span id="cb46-967"><a href="#cb46-967"></a><span class="in">[build]</span></span>
+<span id="cb46-968"><a href="#cb46-968"></a><span class="in">target = "x86_64-osirs.json"</span></span>
+<span id="cb46-969"><a href="#cb46-969"></a><span class="in">```</span></span>
+<span id="cb46-970"><a href="#cb46-970"></a></span>
+<span id="cb46-971"><a href="#cb46-971"></a><span class="fu">## Target File</span></span>
+<span id="cb46-972"><a href="#cb46-972"></a></span>
+<span id="cb46-973"><a href="#cb46-973"></a><span class="ss">- </span>All new, this is the nightly version.</span>
 <span id="cb46-974"><a href="#cb46-974"></a></span>
-<span id="cb46-975"><a href="#cb46-975"></a><span class="fu">## Cargo File</span></span>
-<span id="cb46-976"><a href="#cb46-976"></a></span>
-<span id="cb46-977"><a href="#cb46-977"></a><span class="ss">- </span>Move panic specification to target.</span>
-<span id="cb46-978"><a href="#cb46-978"></a></span>
-<span id="cb46-979"><a href="#cb46-979"></a><span class="in">```{.toml filename="Cargo.toml"}</span></span>
-<span id="cb46-980"><a href="#cb46-980"></a><span class="in">[package]</span></span>
-<span id="cb46-981"><a href="#cb46-981"></a><span class="in">name = "osirs"</span></span>
-<span id="cb46-982"><a href="#cb46-982"></a><span class="in">version = "0.1.0"</span></span>
-<span id="cb46-983"><a href="#cb46-983"></a><span class="in">edition = "2024"</span></span>
-<span id="cb46-984"><a href="#cb46-984"></a></span>
-<span id="cb46-985"><a href="#cb46-985"></a><span class="in">[dependencies]</span></span>
-<span id="cb46-986"><a href="#cb46-986"></a><span class="in">```</span></span>
-<span id="cb46-987"><a href="#cb46-987"></a></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb46-975"><a href="#cb46-975"></a><span class="in">```{.json filename="x86_64-osirs.json"}</span></span>
+<span id="cb46-976"><a href="#cb46-976"></a><span class="in">{</span></span>
+<span id="cb46-977"><a href="#cb46-977"></a><span class="in">    "llvm-target": "x86_64-unknown-none",</span></span>
+<span id="cb46-978"><a href="#cb46-978"></a><span class="in">    "data-layout": "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128",</span></span>
+<span id="cb46-979"><a href="#cb46-979"></a><span class="in">    "arch": "x86_64",</span></span>
+<span id="cb46-980"><a href="#cb46-980"></a><span class="in">    "target-endian": "little",</span></span>
+<span id="cb46-981"><a href="#cb46-981"></a><span class="in">    "target-pointer-width": 64,</span></span>
+<span id="cb46-982"><a href="#cb46-982"></a><span class="in">    "target-c-int-width": 32,</span></span>
+<span id="cb46-983"><a href="#cb46-983"></a><span class="in">    "os": "none",</span></span>
+<span id="cb46-984"><a href="#cb46-984"></a><span class="in">    "executables": true,</span></span>
+<span id="cb46-985"><a href="#cb46-985"></a><span class="in">    "linker-flavor": "ld.lld",</span></span>
+<span id="cb46-986"><a href="#cb46-986"></a><span class="in">    "linker": "rust-lld",</span></span>
+<span id="cb46-987"><a href="#cb46-987"></a><span class="in">    "panic-strategy": "abort",</span></span>
+<span id="cb46-988"><a href="#cb46-988"></a><span class="in">    "disable-redzone": true</span></span>
+<span id="cb46-989"><a href="#cb46-989"></a><span class="in">}</span></span>
+<span id="cb46-990"><a href="#cb46-990"></a><span class="in">```</span></span>
+<span id="cb46-991"><a href="#cb46-991"></a></span>
+<span id="cb46-992"><a href="#cb46-992"></a><span class="fu">## Cargo File</span></span>
+<span id="cb46-993"><a href="#cb46-993"></a></span>
+<span id="cb46-994"><a href="#cb46-994"></a><span class="ss">- </span>Move panic specification to target.</span>
+<span id="cb46-995"><a href="#cb46-995"></a></span>
+<span id="cb46-996"><a href="#cb46-996"></a><span class="in">```{.toml filename="Cargo.toml"}</span></span>
+<span id="cb46-997"><a href="#cb46-997"></a><span class="in">[package]</span></span>
+<span id="cb46-998"><a href="#cb46-998"></a><span class="in">name = "osirs"</span></span>
+<span id="cb46-999"><a href="#cb46-999"></a><span class="in">version = "0.1.0"</span></span>
+<span id="cb46-1000"><a href="#cb46-1000"></a><span class="in">edition = "2024"</span></span>
+<span id="cb46-1001"><a href="#cb46-1001"></a></span>
+<span id="cb46-1002"><a href="#cb46-1002"></a><span class="in">[dependencies]</span></span>
+<span id="cb46-1003"><a href="#cb46-1003"></a><span class="in">```</span></span>
+<span id="cb46-1004"><a href="#cb46-1004"></a></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
