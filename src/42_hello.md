@@ -20,7 +20,7 @@ format: html
 - The easiest way to print text to the screen at this stage is the [VGA text buffer](https://en.wikipedia.org/wiki/VGA-compatible_text_mode). 
     - I regard VGA as an *aspect ratio* like SD (standard definition), 480p, 1080p, 4k, etc.
     - In practice, means "Video Graphics Array"
-    - IBM stnadard for 1987 that is widely adotped.
+    - IBM standard for 1987 that is widely adotped.
     - 640 $\times$ 480.
     - "lowest common denominator that virtually all post-1990 PC graphics hardware"
 - The *text buffer* is a special memory area.
@@ -49,7 +49,9 @@ You must write *two bytes per character*.
 $ python3 -c "print(ord('H'))"
 72
 ```
-2. A color value, for which you can review [Wordle](https://cd-c89.github.io/rs/22_wordle.html) or just us `0xF`
+2. A color value, for which you can review [Wordle](https://cd-c89.github.io/rs/22_wordle.html) or just use `0xF` or `0xF0`.
+
+Obviously I used `0x0` and then nothing showed up because that was the existing background color.
 
 :::
 

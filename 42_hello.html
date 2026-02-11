@@ -316,7 +316,7 @@ window.Quarto = {
 <ul>
 <li>I regard VGA as an <em>aspect ratio</em> like SD (standard definition), 480p, 1080p, 4k, etc.</li>
 <li>In practice, means “Video Graphics Array”</li>
-<li>IBM stnadard for 1987 that is widely adotped.</li>
+<li>IBM standard for 1987 that is widely adotped.</li>
 <li>640 <span class="math inline">\(\times\)</span> 480.</li>
 <li>“lowest common denominator that virtually all post-1990 PC graphics hardware”</li>
 </ul></li>
@@ -366,8 +366,9 @@ Emphasis “a byte and a byte”
 <div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="ex">$</span> python3 <span class="at">-c</span> <span class="st">"print(ord('H'))"</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="ex">72</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ol start="2" type="1">
-<li>A color value, for which you can review <a href="https://cd-c89.github.io/rs/22_wordle.html">Wordle</a> or just us <code>0xF</code></li>
+<li>A color value, for which you can review <a href="https://cd-c89.github.io/rs/22_wordle.html">Wordle</a> or just use <code>0xF</code> or <code>0xF0</code>.</li>
 </ol>
+<p>Obviously I used <code>0x0</code> and then nothing showed up because that was the existing background color.</p>
 </div>
 </div>
 </section>
@@ -943,7 +944,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-20"><a href="#cb4-20"></a><span class="ss">- </span>The easiest way to print text to the screen at this stage is the <span class="co">[</span><span class="ot">VGA text buffer</span><span class="co">](https://en.wikipedia.org/wiki/VGA-compatible_text_mode)</span>. </span>
 <span id="cb4-21"><a href="#cb4-21"></a><span class="ss">    - </span>I regard VGA as an *aspect ratio* like SD (standard definition), 480p, 1080p, 4k, etc.</span>
 <span id="cb4-22"><a href="#cb4-22"></a><span class="ss">    - </span>In practice, means "Video Graphics Array"</span>
-<span id="cb4-23"><a href="#cb4-23"></a><span class="ss">    - </span>IBM stnadard for 1987 that is widely adotped.</span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="ss">    - </span>IBM standard for 1987 that is widely adotped.</span>
 <span id="cb4-24"><a href="#cb4-24"></a><span class="ss">    - </span>640 $\times$ 480.</span>
 <span id="cb4-25"><a href="#cb4-25"></a><span class="ss">    - </span>"lowest common denominator that virtually all post-1990 PC graphics hardware"</span>
 <span id="cb4-26"><a href="#cb4-26"></a><span class="ss">- </span>The *text buffer* is a special memory area.</span>
@@ -972,54 +973,56 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb4-49"><a href="#cb4-49"></a><span class="in">$ python3 -c "print(ord('H'))"</span></span>
 <span id="cb4-50"><a href="#cb4-50"></a><span class="in">72</span></span>
 <span id="cb4-51"><a href="#cb4-51"></a><span class="in">```</span></span>
-<span id="cb4-52"><a href="#cb4-52"></a><span class="ss">2. </span>A color value, for which you can review <span class="co">[</span><span class="ot">Wordle</span><span class="co">](https://cd-c89.github.io/rs/22_wordle.html)</span> or just us <span class="in">`0xF`</span></span>
+<span id="cb4-52"><a href="#cb4-52"></a><span class="ss">2. </span>A color value, for which you can review <span class="co">[</span><span class="ot">Wordle</span><span class="co">](https://cd-c89.github.io/rs/22_wordle.html)</span> or just use <span class="in">`0xF`</span> or <span class="in">`0xF0`</span>.</span>
 <span id="cb4-53"><a href="#cb4-53"></a></span>
-<span id="cb4-54"><a href="#cb4-54"></a>:::</span>
+<span id="cb4-54"><a href="#cb4-54"></a>Obviously I used <span class="in">`0x0`</span> and then nothing showed up because that was the existing background color.</span>
 <span id="cb4-55"><a href="#cb4-55"></a></span>
-<span id="cb4-56"><a href="#cb4-56"></a><span class="fu">## Recall</span></span>
+<span id="cb4-56"><a href="#cb4-56"></a>:::</span>
 <span id="cb4-57"><a href="#cb4-57"></a></span>
-<span id="cb4-58"><a href="#cb4-58"></a><span class="ss">- </span>We recall the solution to the <span class="co">[</span><span class="ot">Transmute lab</span><span class="co">](21_xmute.md)</span>.</span>
+<span id="cb4-58"><a href="#cb4-58"></a><span class="fu">## Recall</span></span>
 <span id="cb4-59"><a href="#cb4-59"></a></span>
-<span id="cb4-60"><a href="#cb4-60"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb4-61"><a href="#cb4-61"></a><span class="in">fn main() {</span></span>
-<span id="cb4-62"><a href="#cb4-62"></a><span class="in">    unsafe {</span></span>
-<span id="cb4-63"><a href="#cb4-63"></a><span class="in">        println!("{}", std::mem::transmute::&lt;&amp;[u8], &amp;str&gt;(&amp;std::mem::transmute::&lt;[i32; 3], [u8; 12]&gt;([1819043144, 1870078063, 560229490])));</span></span>
-<span id="cb4-64"><a href="#cb4-64"></a><span class="in">    }</span></span>
-<span id="cb4-65"><a href="#cb4-65"></a><span class="in">}</span></span>
-<span id="cb4-66"><a href="#cb4-66"></a><span class="in">```</span></span>
-<span id="cb4-67"><a href="#cb4-67"></a></span>
-<span id="cb4-68"><a href="#cb4-68"></a><span class="ss">- </span>I will urge that you use this <span class="in">`[i32; 3]`</span> as your payload and regard other solutions as "unsporting".</span>
-<span id="cb4-69"><a href="#cb4-69"></a><span class="ss">    - </span>We regard the failure of that solution to fit in 80 horizontal characters as a personal moral failing of the course instructor.</span>
-<span id="cb4-70"><a href="#cb4-70"></a><span class="ss">    - </span>We will regard specification of those numerical values in hexadecimal as acceptable.</span>
-<span id="cb4-71"><a href="#cb4-71"></a><span class="ss">- </span>Here is a bit more information about my source code.</span>
-<span id="cb4-72"><a href="#cb4-72"></a></span>
-<span id="cb4-73"><a href="#cb4-73"></a><span class="in">```{.sh}</span></span>
-<span id="cb4-74"><a href="#cb4-74"></a><span class="in">$ python3 -c "print(ord('H'))"</span></span>
-<span id="cb4-75"><a href="#cb4-75"></a><span class="in">72</span></span>
-<span id="cb4-76"><a href="#cb4-76"></a><span class="in">$ wc src/main.rs</span></span>
-<span id="cb4-77"><a href="#cb4-77"></a><span class="in"> 23  88 565 src/main.rs</span></span>
-<span id="cb4-78"><a href="#cb4-78"></a><span class="in">$ grep ello src/main.rs</span></span>
-<span id="cb4-79"><a href="#cb4-79"></a><span class="in">$ grep tranmute src/main.rs</span></span>
-<span id="cb4-80"><a href="#cb4-80"></a><span class="in">$ grep 1819043144 src/main.rs</span></span>
-<span id="cb4-81"><a href="#cb4-81"></a><span class="in">        let ints: [i32; 3] = [1819043144, 1870078063, 560229490];</span></span>
-<span id="cb4-82"><a href="#cb4-82"></a><span class="in">```</span></span>
-<span id="cb4-83"><a href="#cb4-83"></a></span>
-<span id="cb4-84"><a href="#cb4-84"></a><span class="ss">- </span>There is a solution on the blog (which I will not link) that I find banal and uninteresting, but to be of idiomatic Rust.</span>
-<span id="cb4-85"><a href="#cb4-85"></a><span class="ss">    - </span>It is the "blog" solution, which an interested student can find and consult.</span>
-<span id="cb4-86"><a href="#cb4-86"></a><span class="ss">- </span>I found this a much better opportunity to practice working with memory.</span>
-<span id="cb4-87"><a href="#cb4-87"></a><span class="ss">    - </span>I used no Rust functions or methods.</span>
-<span id="cb4-88"><a href="#cb4-88"></a><span class="ss">    - </span>I exclusively used casts and arithmetic on raw pointers.</span>
-<span id="cb4-89"><a href="#cb4-89"></a><span class="ss">        - </span>I did not use <span class="in">`transmute`</span> but do not regard its usage as unsporting.</span>
-<span id="cb4-90"><a href="#cb4-90"></a><span class="ss">    - </span>I used the same number of unsafe lines (2) as the blog.</span>
-<span id="cb4-91"><a href="#cb4-91"></a><span class="ss">        - </span>But in typical fashion, I just enclosed the entire function body in <span class="in">`unsafe`</span> out of pure spite.</span>
-<span id="cb4-92"><a href="#cb4-92"></a><span class="ss">        - </span>Do *not* do that in a job interview.</span>
-<span id="cb4-93"><a href="#cb4-93"></a><span class="ss">    - </span>I also turned my panic back to recursion because that sounded fun.</span>
-<span id="cb4-94"><a href="#cb4-94"></a><span class="ss">        - </span>This required an addition line of code to quell the compiler.</span>
-<span id="cb4-95"><a href="#cb4-95"></a>        </span>
-<span id="cb4-96"><a href="#cb4-96"></a><span class="fu">## Bonus</span></span>
-<span id="cb4-97"><a href="#cb4-97"></a></span>
-<span id="cb4-98"><a href="#cb4-98"></a><span class="ss">- </span>Precompute a <span class="in">`[u32; 6]`</span> with color data and write it in a block.</span>
-<span id="cb4-99"><a href="#cb4-99"></a><span class="ss">    - </span>For extra fun, color letters uniquely, perhaps by lexicographical order or consonant/vowel classification.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb4-60"><a href="#cb4-60"></a><span class="ss">- </span>We recall the solution to the <span class="co">[</span><span class="ot">Transmute lab</span><span class="co">](21_xmute.md)</span>.</span>
+<span id="cb4-61"><a href="#cb4-61"></a></span>
+<span id="cb4-62"><a href="#cb4-62"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb4-63"><a href="#cb4-63"></a><span class="in">fn main() {</span></span>
+<span id="cb4-64"><a href="#cb4-64"></a><span class="in">    unsafe {</span></span>
+<span id="cb4-65"><a href="#cb4-65"></a><span class="in">        println!("{}", std::mem::transmute::&lt;&amp;[u8], &amp;str&gt;(&amp;std::mem::transmute::&lt;[i32; 3], [u8; 12]&gt;([1819043144, 1870078063, 560229490])));</span></span>
+<span id="cb4-66"><a href="#cb4-66"></a><span class="in">    }</span></span>
+<span id="cb4-67"><a href="#cb4-67"></a><span class="in">}</span></span>
+<span id="cb4-68"><a href="#cb4-68"></a><span class="in">```</span></span>
+<span id="cb4-69"><a href="#cb4-69"></a></span>
+<span id="cb4-70"><a href="#cb4-70"></a><span class="ss">- </span>I will urge that you use this <span class="in">`[i32; 3]`</span> as your payload and regard other solutions as "unsporting".</span>
+<span id="cb4-71"><a href="#cb4-71"></a><span class="ss">    - </span>We regard the failure of that solution to fit in 80 horizontal characters as a personal moral failing of the course instructor.</span>
+<span id="cb4-72"><a href="#cb4-72"></a><span class="ss">    - </span>We will regard specification of those numerical values in hexadecimal as acceptable.</span>
+<span id="cb4-73"><a href="#cb4-73"></a><span class="ss">- </span>Here is a bit more information about my source code.</span>
+<span id="cb4-74"><a href="#cb4-74"></a></span>
+<span id="cb4-75"><a href="#cb4-75"></a><span class="in">```{.sh}</span></span>
+<span id="cb4-76"><a href="#cb4-76"></a><span class="in">$ python3 -c "print(ord('H'))"</span></span>
+<span id="cb4-77"><a href="#cb4-77"></a><span class="in">72</span></span>
+<span id="cb4-78"><a href="#cb4-78"></a><span class="in">$ wc src/main.rs</span></span>
+<span id="cb4-79"><a href="#cb4-79"></a><span class="in"> 23  88 565 src/main.rs</span></span>
+<span id="cb4-80"><a href="#cb4-80"></a><span class="in">$ grep ello src/main.rs</span></span>
+<span id="cb4-81"><a href="#cb4-81"></a><span class="in">$ grep tranmute src/main.rs</span></span>
+<span id="cb4-82"><a href="#cb4-82"></a><span class="in">$ grep 1819043144 src/main.rs</span></span>
+<span id="cb4-83"><a href="#cb4-83"></a><span class="in">        let ints: [i32; 3] = [1819043144, 1870078063, 560229490];</span></span>
+<span id="cb4-84"><a href="#cb4-84"></a><span class="in">```</span></span>
+<span id="cb4-85"><a href="#cb4-85"></a></span>
+<span id="cb4-86"><a href="#cb4-86"></a><span class="ss">- </span>There is a solution on the blog (which I will not link) that I find banal and uninteresting, but to be of idiomatic Rust.</span>
+<span id="cb4-87"><a href="#cb4-87"></a><span class="ss">    - </span>It is the "blog" solution, which an interested student can find and consult.</span>
+<span id="cb4-88"><a href="#cb4-88"></a><span class="ss">- </span>I found this a much better opportunity to practice working with memory.</span>
+<span id="cb4-89"><a href="#cb4-89"></a><span class="ss">    - </span>I used no Rust functions or methods.</span>
+<span id="cb4-90"><a href="#cb4-90"></a><span class="ss">    - </span>I exclusively used casts and arithmetic on raw pointers.</span>
+<span id="cb4-91"><a href="#cb4-91"></a><span class="ss">        - </span>I did not use <span class="in">`transmute`</span> but do not regard its usage as unsporting.</span>
+<span id="cb4-92"><a href="#cb4-92"></a><span class="ss">    - </span>I used the same number of unsafe lines (2) as the blog.</span>
+<span id="cb4-93"><a href="#cb4-93"></a><span class="ss">        - </span>But in typical fashion, I just enclosed the entire function body in <span class="in">`unsafe`</span> out of pure spite.</span>
+<span id="cb4-94"><a href="#cb4-94"></a><span class="ss">        - </span>Do *not* do that in a job interview.</span>
+<span id="cb4-95"><a href="#cb4-95"></a><span class="ss">    - </span>I also turned my panic back to recursion because that sounded fun.</span>
+<span id="cb4-96"><a href="#cb4-96"></a><span class="ss">        - </span>This required an addition line of code to quell the compiler.</span>
+<span id="cb4-97"><a href="#cb4-97"></a>        </span>
+<span id="cb4-98"><a href="#cb4-98"></a><span class="fu">## Bonus</span></span>
+<span id="cb4-99"><a href="#cb4-99"></a></span>
+<span id="cb4-100"><a href="#cb4-100"></a><span class="ss">- </span>Precompute a <span class="in">`[u32; 6]`</span> with color data and write it in a block.</span>
+<span id="cb4-101"><a href="#cb4-101"></a><span class="ss">    - </span>For extra fun, color letters uniquely, perhaps by lexicographical order or consonant/vowel classification.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
