@@ -3,52 +3,92 @@ title: Hello
 format: html
 ---
 
+## Homework
+
+- Homeworks are due on the Friday *after* the week they correspond to lecture.
+- So 9 days after the corresponding lab.
+
+## Requirements
+
+- [ ] `371rs/42` crate; I named mine "osirs"
+- [ ] Modify `src/main.rs` from the [boot](41_boot.md) lab.
+- [ ] Do *not* modify other files.
+- [ ] Run on emulated x86-64 in QEMU.
+
 ## Printing to Screen
 
-The easiest way to print text to the screen at this stage is the [VGA text buffer]. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:
-
-[VGA text buffer]: https://en.wikipedia.org/wiki/VGA-compatible_text_mode
+- The easiest way to print text to the screen at this stage is the [VGA text buffer](https://en.wikipedia.org/wiki/VGA-compatible_text_mode). 
+    - I regard VGA as an *aspect ratio* like SD (standard definition), 480p, 1080p, 4k, etc.
+    - In practice, means "Video Graphics Array"
+    - IBM stnadard for 1987 that is widely adotped.
+    - 640 $\times$ 480.
+    - "lowest common denominator that virtually all post-1990 PC graphics hardware"
+- The *text buffer* is a special memory area.
+    - It maps memory locations to screen locations.
+    - It normally consists of 25 lines that each contain 80 character cells. 
+        - This is why I sometimes require line lengths less than 80 for backwards compatability.
+        - This is why legacy assignment ["snek.c"](https://cd-public.github.io/snek/snek.html) assumed a 24-by-80 screen (to allow I/O on the last line).
+    - Each character cell displays an ASCII character with some foreground and background colors. 
+- The screen output looks like this:
 
 ![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)
 
-We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address `0xb8000` and that each character cell consists of an ASCII byte and a color byte.
+- We will discuss the exact layout of the VGA buffer next week.
+  - We write a first small driver for it. 
+- For printing “Hello World!”, we just need to know:
+    - The buffer is located at address `0xb8000`, and 
+    - Each character cell consists of an ASCII byte and a color byte.
+    
+::: {.callout-tip}
+## Emphasis "a byte and a byte"
 
-The implementation looks like this:
+You must write *two bytes per character*.
 
-```rust
-static HELLO: &[u8] = b"Hello World!";
+1. An ASCII value, like 72.
+```{.sh}
+$ python3 -c "print(ord('H'))"
+72
+```
+2. A color value, for which you can review [Wordle](https://cd-c89.github.io/rs/22_wordle.html) or just us `0xF`
 
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
+:::
 
-    for (i, &byte) in HELLO.iter().enumerate() {
-        unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-        }
+## Recall
+
+- We recall the solution to the [Transmute lab](21_xmute.md).
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    unsafe {
+        println!("{}", std::mem::transmute::<&[u8], &str>(&std::mem::transmute::<[i32; 3], [u8; 12]>([1819043144, 1870078063, 560229490])));
     }
-
-    loop {}
 }
 ```
 
-First, we cast the integer `0xb8000` into a [raw pointer]. Then we [iterate] over the bytes of the [static] `HELLO` [byte string]. We use the [`enumerate`] method to additionally get a running variable `i`. In the body of the for loop, we use the [`offset`] method to write the string byte and the corresponding color byte (`0xb` is a light cyan).
+- I will urge that you use this `[i32; 3]` as your payload and regard other solutions as "unsporting".
+    - We regard the failure of that solution to fit in 80 horizontal characters as a personal moral failing of the course instructor.
+    - We will regard specification of those numerical values in hexadecimal as acceptable.
+- Here is a bit more information about my source code.
 
-[iterate]: https://doc.rust-lang.org/stable/book/ch13-02-iterators.html
-[static]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime
-[`enumerate`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate
-[byte string]: https://doc.rust-lang.org/reference/tokens.html#byte-string-literals
-[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer
-[`offset`]: https://doc.rust-lang.org/std/primitive.pointer.html#method.offset
+```{.sh}
+$ python3 -c "print(ord('H'))"
+72
+$ wc src/main.rs
+ 23  88 565 src/main.rs
+$ grep ello src/main.rs
+$ grep tranmute src/main.rs
+$ grep 1819043144 src/main.rs
+        let ints: [i32; 3] = [1819043144, 1870078063, 560229490];
+```
 
-Note that there's an [`unsafe`] block around all memory writes. The reason is that the Rust compiler can't prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an `unsafe` block, we're basically telling the compiler that we are absolutely sure that the operations are valid. Note that an `unsafe` block does not turn off Rust's safety checks. It only allows you to do [five additional things].
-
-[`unsafe`]: https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html
-[five additional things]: https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers
-
-I want to emphasize that **this is not the way we want to do things in Rust!** It's very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer's end if we're not careful.
-
-So we want to minimize the use of `unsafe` as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is _impossible_ to do anything wrong from the outside. This way, we would only need minimal amounts of `unsafe` code and can be sure that we don't violate [memory safety]. We will create such a safe VGA buffer abstraction in the next post.
-
-[memory safety]: https://en.wikipedia.org/wiki/Memory_safety
+- There is a solution on the blog (which I will not link) that I find banal and uninteresting, but to be of idiomatic Rust.
+    - It is the "blog" solution, which an interested student can find and consult.
+- I found this a much better opportunity to practice working with memory.
+    - I used no Rust functions or methods.
+    - I exclusively used casts and arithmetic on raw pointers.
+        - I did not use `transmute` but do not regard its usage as unsporting.
+    - I used the same number of unsafe lines (2) as the blog.
+        - But in typical fashion, I just enclosed the entire function body in `unsafe` out of pure spite.
+        - Do *not* do that in a job interview.
+    - I also turned my panic back to recursion because that sounded fun.
+        - This required an addition line of code to quell the compiler.

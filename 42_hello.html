@@ -102,6 +102,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -233,7 +262,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#printing-to-screen" id="toc-printing-to-screen" class="nav-link active" data-scroll-target="#printing-to-screen">Printing to Screen</a></li>
+  <li><a href="#homework" id="toc-homework" class="nav-link active" data-scroll-target="#homework">Homework</a></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#printing-to-screen" id="toc-printing-to-screen" class="nav-link" data-scroll-target="#printing-to-screen">Printing to Screen</a></li>
+  <li><a href="#recall" id="toc-recall" class="nav-link" data-scroll-target="#recall">Recall</a></li>
   </ul>
 </nav>
     </div>
@@ -260,36 +292,138 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<section id="homework" class="level2">
+<h2 class="anchored" data-anchor-id="homework">Homework</h2>
+<ul>
+<li>Homeworks are due on the Friday <em>after</em> the week they correspond to lecture.</li>
+<li>So 9 days after the corresponding lab.</li>
+</ul>
+</section>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"><code>371rs/42</code> crate; I named mine “osirs”</label></li>
+<li><label><input type="checkbox">Modify <code>src/main.rs</code> from the <a href="./41_boot.html">boot</a> lab.</label></li>
+<li><label><input type="checkbox">Do <em>not</em> modify other files.</label></li>
+<li><label><input type="checkbox">Run on emulated x86-64 in QEMU.</label></li>
+</ul>
+</section>
 <section id="printing-to-screen" class="level2">
 <h2 class="anchored" data-anchor-id="printing-to-screen">Printing to Screen</h2>
-<p>The easiest way to print text to the screen at this stage is the <a href="https://en.wikipedia.org/wiki/VGA-compatible_text_mode">VGA text buffer</a>. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:</p>
+<ul>
+<li>The easiest way to print text to the screen at this stage is the <a href="https://en.wikipedia.org/wiki/VGA-compatible_text_mode">VGA text buffer</a>.
+<ul>
+<li>I regard VGA as an <em>aspect ratio</em> like SD (standard definition), 480p, 1080p, 4k, etc.</li>
+<li>In practice, means “Video Graphics Array”</li>
+<li>IBM stnadard for 1987 that is widely adotped.</li>
+<li>640 <span class="math inline">\(\times\)</span> 480.</li>
+<li>“lowest common denominator that virtually all post-1990 PC graphics hardware”</li>
+</ul></li>
+<li>The <em>text buffer</em> is a special memory area.
+<ul>
+<li>It maps memory locations to screen locations.</li>
+<li>It normally consists of 25 lines that each contain 80 character cells.
+<ul>
+<li>This is why I sometimes require line lengths less than 80 for backwards compatability.</li>
+<li>This is why legacy assignment <a href="https://cd-public.github.io/snek/snek.html">“snek.c”</a> assumed a 24-by-80 screen (to allow I/O on the last line).</li>
+</ul></li>
+<li>Each character cell displays an ASCII character with some foreground and background colors.</li>
+</ul></li>
+<li>The screen output looks like this:</li>
+</ul>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png" class="img-fluid figure-img"></p>
 <figcaption>screen output for common ASCII characters</figcaption>
 </figure>
 </div>
-<p>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <code>0xb8000</code> and that each character cell consists of an ASCII byte and a color byte.</p>
-<p>The implementation looks like this:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
-<span id="cb1-6"><a href="#cb1-6"></a></span>
-<span id="cb1-7"><a href="#cb1-7"></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb1-8"><a href="#cb1-8"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb1-9"><a href="#cb1-9"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
-<span id="cb1-10"><a href="#cb1-10"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
-<span id="cb1-11"><a href="#cb1-11"></a>        <span class="op">}</span></span>
-<span id="cb1-12"><a href="#cb1-12"></a>    <span class="op">}</span></span>
-<span id="cb1-13"><a href="#cb1-13"></a></span>
-<span id="cb1-14"><a href="#cb1-14"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb1-15"><a href="#cb1-15"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>First, we cast the integer <code>0xb8000</code> into a <a href="https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer">raw pointer</a>. Then we <a href="https://doc.rust-lang.org/stable/book/ch13-02-iterators.html">iterate</a> over the bytes of the <a href="https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime">static</a> <code>HELLO</code> <a href="https://doc.rust-lang.org/reference/tokens.html#byte-string-literals">byte string</a>. We use the <a href="https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate"><code>enumerate</code></a> method to additionally get a running variable <code>i</code>. In the body of the for loop, we use the <a href="https://doc.rust-lang.org/std/primitive.pointer.html#method.offset"><code>offset</code></a> method to write the string byte and the corresponding color byte (<code>0xb</code> is a light cyan).</p>
-<p>Note that there’s an <a href="https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html"><code>unsafe</code></a> block around all memory writes. The reason is that the Rust compiler can’t prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <code>unsafe</code> block, we’re basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <code>unsafe</code> block does not turn off Rust’s safety checks. It only allows you to do <a href="https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers">five additional things</a>.</p>
-<p>I want to emphasize that <strong>this is not the way we want to do things in Rust!</strong> It’s very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer’s end if we’re not careful.</p>
-<p>So we want to minimize the use of <code>unsafe</code> as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is <em>impossible</em> to do anything wrong from the outside. This way, we would only need minimal amounts of <code>unsafe</code> code and can be sure that we don’t violate <a href="https://en.wikipedia.org/wiki/Memory_safety">memory safety</a>. We will create such a safe VGA buffer abstraction in the next post.</p>
+<ul>
+<li>We will discuss the exact layout of the VGA buffer next week.
+<ul>
+<li>We write a first small driver for it.</li>
+</ul></li>
+<li>For printing “Hello World!”, we just need to know:
+<ul>
+<li>The buffer is located at address <code>0xb8000</code>, and</li>
+<li>Each character cell consists of an ASCII byte and a color byte.</li>
+</ul></li>
+</ul>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Emphasis “a byte and a byte”
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You must write <em>two bytes per character</em>.</p>
+<ol type="1">
+<li>An ASCII value, like 72.</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="ex">$</span> python3 <span class="at">-c</span> <span class="st">"print(ord('H'))"</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="ex">72</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ol start="2" type="1">
+<li>A color value, for which you can review <a href="https://cd-c89.github.io/rs/22_wordle.html">Wordle</a> or just us <code>0xF</code></li>
+</ol>
+</div>
+</div>
+</section>
+<section id="recall" class="level2">
+<h2 class="anchored" data-anchor-id="recall">Recall</h2>
+<ul>
+<li>We recall the solution to the <a href="./21_xmute.html">Transmute lab</a>.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a>        <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> <span class="pp">std::mem::transmute::</span><span class="op">&lt;&amp;</span>[<span class="dt">u8</span>]<span class="op">,</span> <span class="op">&amp;</span><span class="dt">str</span><span class="op">&gt;</span>(<span class="op">&amp;</span><span class="pp">std::mem::transmute::</span><span class="op">&lt;</span>[<span class="dt">i32</span><span class="op">;</span> <span class="dv">3</span>]<span class="op">,</span> [<span class="dt">u8</span><span class="op">;</span> <span class="dv">12</span>]<span class="op">&gt;</span>([<span class="dv">1819043144</span><span class="op">,</span> <span class="dv">1870078063</span><span class="op">,</span> <span class="dv">560229490</span>])))<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="op">}</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>I will urge that you use this <code>[i32; 3]</code> as your payload and regard other solutions as “unsporting”.
+<ul>
+<li>We regard the failure of that solution to fit in 80 horizontal characters as a personal moral failing of the course instructor.</li>
+<li>We will regard specification of those numerical values in hexadecimal as acceptable.</li>
+</ul></li>
+<li>Here is a bit more information about my source code.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">$</span> python3 <span class="at">-c</span> <span class="st">"print(ord('H'))"</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="ex">72</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="ex">$</span> wc src/main.rs</span>
+<span id="cb3-4"><a href="#cb3-4"></a> <span class="ex">23</span>  88 565 src/main.rs</span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="ex">$</span> grep ello src/main.rs</span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="ex">$</span> grep tranmute src/main.rs</span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="ex">$</span> grep 1819043144 src/main.rs</span>
+<span id="cb3-8"><a href="#cb3-8"></a>        <span class="bu">let</span> <span class="va">ints</span><span class="op">:</span> <span class="op">[</span>i32; 3<span class="op">]</span> <span class="op">=</span> <span class="op">[</span><span class="dv">1819043144</span>, 1870078063, 560229490<span class="op">]</span><span class="kw">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>There is a solution on the blog (which I will not link) that I find banal and uninteresting, but to be of idiomatic Rust.
+<ul>
+<li>It is the “blog” solution, which an interested student can find and consult.</li>
+</ul></li>
+<li>I found this a much better opportunity to practice working with memory.
+<ul>
+<li>I used no Rust functions or methods.</li>
+<li>I exclusively used casts and arithmetic on raw pointers.
+<ul>
+<li>I did not use <code>transmute</code> but do not regard its usage as unsporting.</li>
+</ul></li>
+<li>I used the same number of unsafe lines (2) as the blog.
+<ul>
+<li>But in typical fashion, I just enclosed the entire function body in <code>unsafe</code> out of pure spite.</li>
+<li>Do <em>not</em> do that in a job interview.</li>
+</ul></li>
+<li>I also turned my panic back to recursion because that sounded fun.
+<ul>
+<li>This required an addition line of code to quell the compiler.</li>
+</ul></li>
+</ul></li>
+</ul>
 
 
 <!-- -->
@@ -777,60 +911,100 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-page nav-page-next">
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a><span class="an">title:</span><span class="co"> Hello</span></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a><span class="co">---</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a></span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="fu">## Printing to Screen</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a></span>
-<span id="cb2-8"><a href="#cb2-8"></a>The easiest way to print text to the screen at this stage is the <span class="co">[</span><span class="ot">VGA text buffer</span><span class="co">]</span>. It is a special memory area mapped to the VGA hardware that contains the contents displayed on screen. It normally consists of 25 lines that each contain 80 character cells. Each character cell displays an ASCII character with some foreground and background colors. The screen output looks like this:</span>
-<span id="cb2-9"><a href="#cb2-9"></a></span>
-<span id="cb2-10"><a href="#cb2-10"></a><span class="ot">[VGA text buffer]: https://en.wikipedia.org/wiki/VGA-compatible_text_mode</span></span>
-<span id="cb2-11"><a href="#cb2-11"></a></span>
-<span id="cb2-12"><a href="#cb2-12"></a><span class="al">![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)</span></span>
-<span id="cb2-13"><a href="#cb2-13"></a></span>
-<span id="cb2-14"><a href="#cb2-14"></a>We will discuss the exact layout of the VGA buffer in the next post, where we write a first small driver for it. For printing “Hello World!”, we just need to know that the buffer is located at address <span class="in">`0xb8000`</span> and that each character cell consists of an ASCII byte and a color byte.</span>
-<span id="cb2-15"><a href="#cb2-15"></a></span>
-<span id="cb2-16"><a href="#cb2-16"></a>The implementation looks like this:</span>
-<span id="cb2-17"><a href="#cb2-17"></a></span>
-<span id="cb2-18"><a href="#cb2-18"></a><span class="in">```rust</span></span>
-<span id="cb2-19"><a href="#cb2-19"></a><span class="kw">static</span> HELLO<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u8</span>] <span class="op">=</span> <span class="st">b"Hello World!"</span><span class="op">;</span></span>
-<span id="cb2-20"><a href="#cb2-20"></a></span>
-<span id="cb2-21"><a href="#cb2-21"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb2-22"><a href="#cb2-22"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb2-23"><a href="#cb2-23"></a>    <span class="kw">let</span> vga_buffer <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
-<span id="cb2-24"><a href="#cb2-24"></a></span>
-<span id="cb2-25"><a href="#cb2-25"></a>    <span class="cf">for</span> (i<span class="op">,</span> <span class="op">&amp;</span>byte) <span class="kw">in</span> HELLO<span class="op">.</span>iter()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb2-26"><a href="#cb2-26"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb2-27"><a href="#cb2-27"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span>) <span class="op">=</span> byte<span class="op">;</span></span>
-<span id="cb2-28"><a href="#cb2-28"></a>            <span class="op">*</span>vga_buffer<span class="op">.</span>offset(i <span class="kw">as</span> <span class="dt">isize</span> <span class="op">*</span> <span class="dv">2</span> <span class="op">+</span> <span class="dv">1</span>) <span class="op">=</span> <span class="dv">0xb</span><span class="op">;</span></span>
-<span id="cb2-29"><a href="#cb2-29"></a>        <span class="op">}</span></span>
-<span id="cb2-30"><a href="#cb2-30"></a>    <span class="op">}</span></span>
-<span id="cb2-31"><a href="#cb2-31"></a></span>
-<span id="cb2-32"><a href="#cb2-32"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb2-33"><a href="#cb2-33"></a><span class="op">}</span></span>
-<span id="cb2-34"><a href="#cb2-34"></a><span class="in">```</span></span>
-<span id="cb2-35"><a href="#cb2-35"></a></span>
-<span id="cb2-36"><a href="#cb2-36"></a>First, we cast the integer <span class="in">`0xb8000`</span> into a <span class="co">[</span><span class="ot">raw pointer</span><span class="co">]</span>. Then we <span class="co">[</span><span class="ot">iterate</span><span class="co">]</span> over the bytes of the <span class="co">[</span><span class="ot">static</span><span class="co">]</span> <span class="in">`HELLO`</span> <span class="co">[</span><span class="ot">byte string</span><span class="co">]</span>. We use the <span class="co">[</span><span class="ot">`enumerate`</span><span class="co">]</span> method to additionally get a running variable <span class="in">`i`</span>. In the body of the for loop, we use the <span class="co">[</span><span class="ot">`offset`</span><span class="co">]</span> method to write the string byte and the corresponding color byte (<span class="in">`0xb`</span> is a light cyan).</span>
-<span id="cb2-37"><a href="#cb2-37"></a></span>
-<span id="cb2-38"><a href="#cb2-38"></a><span class="ot">[iterate]: https://doc.rust-lang.org/stable/book/ch13-02-iterators.html</span></span>
-<span id="cb2-39"><a href="#cb2-39"></a><span class="ot">[static]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime</span></span>
-<span id="cb2-40"><a href="#cb2-40"></a><span class="ot">[`enumerate`]: https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate</span></span>
-<span id="cb2-41"><a href="#cb2-41"></a><span class="ot">[byte string]: https://doc.rust-lang.org/reference/tokens.html#byte-string-literals</span></span>
-<span id="cb2-42"><a href="#cb2-42"></a><span class="ot">[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer</span></span>
-<span id="cb2-43"><a href="#cb2-43"></a><span class="ot">[`offset`]: https://doc.rust-lang.org/std/primitive.pointer.html#method.offset</span></span>
-<span id="cb2-44"><a href="#cb2-44"></a></span>
-<span id="cb2-45"><a href="#cb2-45"></a>Note that there's an <span class="co">[</span><span class="ot">`unsafe`</span><span class="co">]</span> block around all memory writes. The reason is that the Rust compiler can't prove that the raw pointers we create are valid. They could point anywhere and lead to data corruption. By putting them into an <span class="in">`unsafe`</span> block, we're basically telling the compiler that we are absolutely sure that the operations are valid. Note that an <span class="in">`unsafe`</span> block does not turn off Rust's safety checks. It only allows you to do <span class="co">[</span><span class="ot">five additional things</span><span class="co">]</span>.</span>
-<span id="cb2-46"><a href="#cb2-46"></a></span>
-<span id="cb2-47"><a href="#cb2-47"></a><span class="ot">[`unsafe`]: https://doc.rust-lang.org/stable/book/ch19-01-unsafe-rust.html</span></span>
-<span id="cb2-48"><a href="#cb2-48"></a><span class="ot">[five additional things]: https://doc.rust-lang.org/stable/book/ch20-01-unsafe-rust.html#unsafe-superpowers</span></span>
-<span id="cb2-49"><a href="#cb2-49"></a></span>
-<span id="cb2-50"><a href="#cb2-50"></a>I want to emphasize that **this is not the way we want to do things in Rust!** It's very easy to mess up when working with raw pointers inside unsafe blocks. For example, we could easily write beyond the buffer's end if we're not careful.</span>
-<span id="cb2-51"><a href="#cb2-51"></a></span>
-<span id="cb2-52"><a href="#cb2-52"></a>So we want to minimize the use of <span class="in">`unsafe`</span> as much as possible. Rust gives us the ability to do this by creating safe abstractions. For example, we could create a VGA buffer type that encapsulates all unsafety and ensures that it is _impossible_ to do anything wrong from the outside. This way, we would only need minimal amounts of <span class="in">`unsafe`</span> code and can be sure that we don't violate <span class="co">[</span><span class="ot">memory safety</span><span class="co">]</span>. We will create such a safe VGA buffer abstraction in the next post.</span>
-<span id="cb2-53"><a href="#cb2-53"></a></span>
-<span id="cb2-54"><a href="#cb2-54"></a><span class="ot">[memory safety]: https://en.wikipedia.org/wiki/Memory_safety</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">---</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="an">title:</span><span class="co"> Hello</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="co">---</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="fu">## Homework</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a></span>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="ss">- </span>Homeworks are due on the Friday *after* the week they correspond to lecture.</span>
+<span id="cb4-9"><a href="#cb4-9"></a><span class="ss">- </span>So 9 days after the corresponding lab.</span>
+<span id="cb4-10"><a href="#cb4-10"></a></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="fu">## Requirements</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`371rs/42`</span> crate; I named mine "osirs"</span>
+<span id="cb4-14"><a href="#cb4-14"></a><span class="ss">- </span><span class="va">[ ]</span> Modify <span class="in">`src/main.rs`</span> from the <span class="co">[</span><span class="ot">boot</span><span class="co">](41_boot.md)</span> lab.</span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="ss">- </span><span class="va">[ ]</span> Do *not* modify other files.</span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="ss">- </span><span class="va">[ ]</span> Run on emulated x86-64 in QEMU.</span>
+<span id="cb4-17"><a href="#cb4-17"></a></span>
+<span id="cb4-18"><a href="#cb4-18"></a><span class="fu">## Printing to Screen</span></span>
+<span id="cb4-19"><a href="#cb4-19"></a></span>
+<span id="cb4-20"><a href="#cb4-20"></a><span class="ss">- </span>The easiest way to print text to the screen at this stage is the <span class="co">[</span><span class="ot">VGA text buffer</span><span class="co">](https://en.wikipedia.org/wiki/VGA-compatible_text_mode)</span>. </span>
+<span id="cb4-21"><a href="#cb4-21"></a><span class="ss">    - </span>I regard VGA as an *aspect ratio* like SD (standard definition), 480p, 1080p, 4k, etc.</span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="ss">    - </span>In practice, means "Video Graphics Array"</span>
+<span id="cb4-23"><a href="#cb4-23"></a><span class="ss">    - </span>IBM stnadard for 1987 that is widely adotped.</span>
+<span id="cb4-24"><a href="#cb4-24"></a><span class="ss">    - </span>640 $\times$ 480.</span>
+<span id="cb4-25"><a href="#cb4-25"></a><span class="ss">    - </span>"lowest common denominator that virtually all post-1990 PC graphics hardware"</span>
+<span id="cb4-26"><a href="#cb4-26"></a><span class="ss">- </span>The *text buffer* is a special memory area.</span>
+<span id="cb4-27"><a href="#cb4-27"></a><span class="ss">    - </span>It maps memory locations to screen locations.</span>
+<span id="cb4-28"><a href="#cb4-28"></a><span class="ss">    - </span>It normally consists of 25 lines that each contain 80 character cells. </span>
+<span id="cb4-29"><a href="#cb4-29"></a><span class="ss">        - </span>This is why I sometimes require line lengths less than 80 for backwards compatability.</span>
+<span id="cb4-30"><a href="#cb4-30"></a><span class="ss">        - </span>This is why legacy assignment <span class="co">[</span><span class="ot">"snek.c"</span><span class="co">](https://cd-public.github.io/snek/snek.html)</span> assumed a 24-by-80 screen (to allow I/O on the last line).</span>
+<span id="cb4-31"><a href="#cb4-31"></a><span class="ss">    - </span>Each character cell displays an ASCII character with some foreground and background colors. </span>
+<span id="cb4-32"><a href="#cb4-32"></a><span class="ss">- </span>The screen output looks like this:</span>
+<span id="cb4-33"><a href="#cb4-33"></a></span>
+<span id="cb4-34"><a href="#cb4-34"></a><span class="al">![screen output for common ASCII characters](https://upload.wikimedia.org/wikipedia/commons/f/f8/Codepage-437.png)</span></span>
+<span id="cb4-35"><a href="#cb4-35"></a></span>
+<span id="cb4-36"><a href="#cb4-36"></a><span class="ss">- </span>We will discuss the exact layout of the VGA buffer next week.</span>
+<span id="cb4-37"><a href="#cb4-37"></a><span class="ss">  - </span>We write a first small driver for it. </span>
+<span id="cb4-38"><a href="#cb4-38"></a><span class="ss">- </span>For printing “Hello World!”, we just need to know:</span>
+<span id="cb4-39"><a href="#cb4-39"></a><span class="ss">    - </span>The buffer is located at address <span class="in">`0xb8000`</span>, and </span>
+<span id="cb4-40"><a href="#cb4-40"></a><span class="ss">    - </span>Each character cell consists of an ASCII byte and a color byte.</span>
+<span id="cb4-41"><a href="#cb4-41"></a>    </span>
+<span id="cb4-42"><a href="#cb4-42"></a>::: {.callout-tip}</span>
+<span id="cb4-43"><a href="#cb4-43"></a><span class="fu">## Emphasis "a byte and a byte"</span></span>
+<span id="cb4-44"><a href="#cb4-44"></a></span>
+<span id="cb4-45"><a href="#cb4-45"></a>You must write *two bytes per character*.</span>
+<span id="cb4-46"><a href="#cb4-46"></a></span>
+<span id="cb4-47"><a href="#cb4-47"></a><span class="ss">1. </span>An ASCII value, like 72.</span>
+<span id="cb4-48"><a href="#cb4-48"></a><span class="in">```{.sh}</span></span>
+<span id="cb4-49"><a href="#cb4-49"></a><span class="in">$ python3 -c "print(ord('H'))"</span></span>
+<span id="cb4-50"><a href="#cb4-50"></a><span class="in">72</span></span>
+<span id="cb4-51"><a href="#cb4-51"></a><span class="in">```</span></span>
+<span id="cb4-52"><a href="#cb4-52"></a><span class="ss">2. </span>A color value, for which you can review <span class="co">[</span><span class="ot">Wordle</span><span class="co">](https://cd-c89.github.io/rs/22_wordle.html)</span> or just us <span class="in">`0xF`</span></span>
+<span id="cb4-53"><a href="#cb4-53"></a></span>
+<span id="cb4-54"><a href="#cb4-54"></a>:::</span>
+<span id="cb4-55"><a href="#cb4-55"></a></span>
+<span id="cb4-56"><a href="#cb4-56"></a><span class="fu">## Recall</span></span>
+<span id="cb4-57"><a href="#cb4-57"></a></span>
+<span id="cb4-58"><a href="#cb4-58"></a><span class="ss">- </span>We recall the solution to the <span class="co">[</span><span class="ot">Transmute lab</span><span class="co">](21_xmute.md)</span>.</span>
+<span id="cb4-59"><a href="#cb4-59"></a></span>
+<span id="cb4-60"><a href="#cb4-60"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb4-61"><a href="#cb4-61"></a><span class="in">fn main() {</span></span>
+<span id="cb4-62"><a href="#cb4-62"></a><span class="in">    unsafe {</span></span>
+<span id="cb4-63"><a href="#cb4-63"></a><span class="in">        println!("{}", std::mem::transmute::&lt;&amp;[u8], &amp;str&gt;(&amp;std::mem::transmute::&lt;[i32; 3], [u8; 12]&gt;([1819043144, 1870078063, 560229490])));</span></span>
+<span id="cb4-64"><a href="#cb4-64"></a><span class="in">    }</span></span>
+<span id="cb4-65"><a href="#cb4-65"></a><span class="in">}</span></span>
+<span id="cb4-66"><a href="#cb4-66"></a><span class="in">```</span></span>
+<span id="cb4-67"><a href="#cb4-67"></a></span>
+<span id="cb4-68"><a href="#cb4-68"></a><span class="ss">- </span>I will urge that you use this <span class="in">`[i32; 3]`</span> as your payload and regard other solutions as "unsporting".</span>
+<span id="cb4-69"><a href="#cb4-69"></a><span class="ss">    - </span>We regard the failure of that solution to fit in 80 horizontal characters as a personal moral failing of the course instructor.</span>
+<span id="cb4-70"><a href="#cb4-70"></a><span class="ss">    - </span>We will regard specification of those numerical values in hexadecimal as acceptable.</span>
+<span id="cb4-71"><a href="#cb4-71"></a><span class="ss">- </span>Here is a bit more information about my source code.</span>
+<span id="cb4-72"><a href="#cb4-72"></a></span>
+<span id="cb4-73"><a href="#cb4-73"></a><span class="in">```{.sh}</span></span>
+<span id="cb4-74"><a href="#cb4-74"></a><span class="in">$ python3 -c "print(ord('H'))"</span></span>
+<span id="cb4-75"><a href="#cb4-75"></a><span class="in">72</span></span>
+<span id="cb4-76"><a href="#cb4-76"></a><span class="in">$ wc src/main.rs</span></span>
+<span id="cb4-77"><a href="#cb4-77"></a><span class="in"> 23  88 565 src/main.rs</span></span>
+<span id="cb4-78"><a href="#cb4-78"></a><span class="in">$ grep ello src/main.rs</span></span>
+<span id="cb4-79"><a href="#cb4-79"></a><span class="in">$ grep tranmute src/main.rs</span></span>
+<span id="cb4-80"><a href="#cb4-80"></a><span class="in">$ grep 1819043144 src/main.rs</span></span>
+<span id="cb4-81"><a href="#cb4-81"></a><span class="in">        let ints: [i32; 3] = [1819043144, 1870078063, 560229490];</span></span>
+<span id="cb4-82"><a href="#cb4-82"></a><span class="in">```</span></span>
+<span id="cb4-83"><a href="#cb4-83"></a></span>
+<span id="cb4-84"><a href="#cb4-84"></a><span class="ss">- </span>There is a solution on the blog (which I will not link) that I find banal and uninteresting, but to be of idiomatic Rust.</span>
+<span id="cb4-85"><a href="#cb4-85"></a><span class="ss">    - </span>It is the "blog" solution, which an interested student can find and consult.</span>
+<span id="cb4-86"><a href="#cb4-86"></a><span class="ss">- </span>I found this a much better opportunity to practice working with memory.</span>
+<span id="cb4-87"><a href="#cb4-87"></a><span class="ss">    - </span>I used no Rust functions or methods.</span>
+<span id="cb4-88"><a href="#cb4-88"></a><span class="ss">    - </span>I exclusively used casts and arithmetic on raw pointers.</span>
+<span id="cb4-89"><a href="#cb4-89"></a><span class="ss">        - </span>I did not use <span class="in">`transmute`</span> but do not regard its usage as unsporting.</span>
+<span id="cb4-90"><a href="#cb4-90"></a><span class="ss">    - </span>I used the same number of unsafe lines (2) as the blog.</span>
+<span id="cb4-91"><a href="#cb4-91"></a><span class="ss">        - </span>But in typical fashion, I just enclosed the entire function body in <span class="in">`unsafe`</span> out of pure spite.</span>
+<span id="cb4-92"><a href="#cb4-92"></a><span class="ss">        - </span>Do *not* do that in a job interview.</span>
+<span id="cb4-93"><a href="#cb4-93"></a><span class="ss">    - </span>I also turned my panic back to recursion because that sounded fun.</span>
+<span id="cb4-94"><a href="#cb4-94"></a><span class="ss">        - </span>This required an addition line of code to quell the compiler.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
