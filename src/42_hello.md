@@ -92,3 +92,8 @@ $ grep 1819043144 src/main.rs
         - Do *not* do that in a job interview.
     - I also turned my panic back to recursion because that sounded fun.
         - This required an addition line of code to quell the compiler.
+        
+## Bonus
+
+- Precompute a `[u32; 6]` with color data and write it in a block.
+    - For extra fun, color letters uniquely, perhaps by lexicographical order or consonant/vowel classification.
