@@ -99,3 +99,33 @@ $ grep 1819043144 src/main.rs
 
 - Precompute a `[u32; 6]` with color data and write it in a block.
     - For extra fun, color letters uniquely, perhaps by lexicographical order or consonant/vowel classification.
+    
+<!--
+
+```{.rs filename="src/main.rs"}
+#![no_std]
+#![no_main]
+
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    unsafe {
+        let vga = 0xb8000 as *mut u8;
+        let ints: [i32; 3] = [1819043144, 1870078063, 560229490];
+        let ints = (&ints) as *const i32;
+
+        for i in 0..12 {
+            *((vga as usize + 2 * i) as *mut u8) = *(((ints as usize) + i) as *const u8);
+            *((vga as usize + 2 * i + 1) as *mut u8) = 0xF;
+        }
+        loop {}
+    }
+}
+
+#[panic_handler]
+#[allow(unconditional_recursion)]
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    panic(info)
+}
+```
+
+-->
