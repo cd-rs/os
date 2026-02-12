@@ -9,11 +9,6 @@ title: Text
     - The coolest assignment ever for a third week in a row.
     - How do I keep getting away with it.
 
-## Today
-
-- Background
-- Kernel
-    
 ## Citations
 
 - Outright theft:
@@ -35,6 +30,9 @@ title: Text
 
 - To print a character to the screen in VGA text mode, one has to write it to the text buffer of the VGA hardware. 
     - A byte passing over a bus to fixed location will render as ASCII on a screen.
+
+## 1d or 2d
+
 - The VGA text buffer renders as two-dimensional array.
     - Addressed as a one dimensional array.
     - Safe to assume 25 rows and 80 columns.
@@ -42,7 +40,7 @@ title: Text
     
 ## Format
 
-- Each array entry describes a single screen character through the following format:
+- Describes a single screen character through the following format:
 
 | Bit(s) | Value            |
 | ------ | ---------------- |
@@ -51,7 +49,7 @@ title: Text
 | 12-14  | Background color |
 | 15     | Blink            |
 
-- It did not seem like blinking worked to me but I'm not very good with I/O.
+- I did not see blinking. 
 
 ## First Byte
 
@@ -76,20 +74,20 @@ python3 -c "[print(chr(a), ':', a) for a in range(ord('A'), ord('z')+1)]"
         - I did not see blinking.
         - May be a `qemu` thing I'm not sure.
 
-## Some colors
+## Colors {.smaller} 
         
-The following colors are available:
+- Using octal.
 
-| Number | Color      | Number + Bright Bit | Bright Color |
+| Number | Color      | Bright   | Bright Color |
 | ------ | ---------- | ------------------- | ------------ |
-| 0x0    | Black      | 0x8                 | Dark Gray    |
-| 0x1    | Blue       | 0x9                 | Light Blue   |
-| 0x2    | Green      | 0xa                 | Light Green  |
-| 0x3    | Cyan       | 0xb                 | Light Cyan   |
-| 0x4    | Red        | 0xc                 | Light Red    |
-| 0x5    | Magenta    | 0xd                 | Pink         |
-| 0x6    | Brown      | 0xe                 | Yellow       |
-| 0x7    | Light Gray | 0xf                 | White        |
+| 0o00    | Black      | 0o10                 | Dark Gray    |
+| 0o01    | Blue       | 0o11                 | Light Blue   |
+| 0o02    | Green      | 0o12                 | Light Green  |
+| 0o03    | Cyan       | 0o13                 | Light Cyan   |
+| 0o04    | Red        | 0o14                 | Light Red    |
+| 0o05    | Magenta    | 0o15                 | Pink         |
+| 0o06    | Brown      | 0o16                 | Yellow       |
+| 0o07    | Light Gray | 0o17                 | White        |
 
 ## Bright/Blink
 
@@ -104,96 +102,167 @@ The following colors are available:
 - We are going to steal some diagrams.
     - Thanks [Geeks for Geeks](https://www.geeksforgeeks.org/computer-organization-architecture/memory-mapped-i-o-and-isolated-i-o/)
     
+## Isolated I/O
+
+- Imagine a form of I/O that isn't cool.
+- It may have separate address spaces.
+  	- So there may be a `0x64` memory location and also `0x64` device.
+
+![](https://media.geeksforgeeks.org/wp-content/uploads/20250506151408311194/isolate-io.webp)
+
+## This isn't cool
+
+- We already discussed Harvard vs. von Neumann architecture.
+- Having two memory spaces is not at all cool.
+- So we don't do it.
+- There's also port-mapped I/O (similarly not cool.
+
+## Memory-Mapped I/O
+
+- Imagine the following.
+  - The bootloader lives at `0x0`
+  - The OS lives at `0x1`
+  - The keyboard lives at `0x2`
+  - The internet (via a network card) at `0x3`
+  - The monitor at `0x4`
+- This obviously cool.
+
+## Altogether 
+
+- One Big Happy Memory Space 
+
+![](https://media.geeksforgeeks.org/wp-content/uploads/20250506151651561116/memory-io.webp)
+
+## Downsides
+
+- MMIO is a helpful *abstraction* - we already know how to think about memory, so we don't need to learn much to do I/O.
+  	- There's downsides.
+	- We shouldn't be able to write to keyboard, probably.
+	- Or read from a monitor.
+- But its fast and easy, like BIOS vs. UEFI.
+
+# x86_64
+
+## In x86_64
+
+- On our emulated device, VGA text buffer lives at address `0xb8000`. 
+	- Absolute geniuses will crack open C and get into trouble.
+- So any read to this location:
+  	- Doesn't go to MMU/RAM/SSD
+	- Does go to VGA hardware
 
 
-The VGA text buffer is accessible via [memory-mapped I/O] to the address `0xb8000`. This means that reads and writes to that address don't access the RAM but directly access the text buffer on the VGA hardware. This means we can read and write it through normal memory operations to that address.
+## Alert!
 
-
-Note that memory-mapped hardware might not support all normal RAM operations. For example, a device could only support byte-wise reads and return junk when a `u64` is read. Fortunately, the text buffer [supports normal reads and writes], so we don't have to treat it in a special way.
-
-[supports normal reads and writes]: https://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vgamem.htm#manip
+- MMIO, especially older devices, might not support all normal operations. 
+- For example, a device could only support byte-wise reads and return junk when a `u64` is read. 
+	- Block-write "Hello world!" is a homework extension. 
+- [Read more](https://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vgamem.htm#manip)
 
 ## A Rust Module
-Now that we know how the VGA buffer works, we can create a Rust module to handle printing:
 
-```rust
-// in src/main.rs
-mod vga_buffer;
+- Now we "know" how the VGA buffer works.
+- We can create a Rust module to handle print and standard out:
+
+```{.rs filename="src/main.rs"}
+mod vga;
 ```
 
-For the content of this module, we create a new `src/vga_buffer.rs` file. All of the code below goes into our new module (unless specified otherwise).
+- We also must create a new `src/vga.rs` file.
 
-### Colors
-First, we represent the different colors using an enum:
+<!--
 
-```rust
-// in src/vga_buffer.rs
+## Colors
 
+- Represent colors using an `enum`:
+
+```{.rs filename="src/vga.rs"}
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Color {
-    Black = 0,
-    Blue = 1,
-    Green = 2,
-    Cyan = 3,
-    Red = 4,
-    Magenta = 5,
-    Brown = 6,
-    LightGray = 7,
-    DarkGray = 8,
-    LightBlue = 9,
-    LightGreen = 10,
-    LightCyan = 11,
-    LightRed = 12,
-    Pink = 13,
-    Yellow = 14,
-    White = 15,
+    Blck = 0o00,
+    Blue = 0o01,
+    Gren = 0o02,
+    Cyan = 0o03,
+    Redd = 0o04,
+    Mgnt = 0o05,
+    Brwn = 0o06,
+    LGry = 0o07,
+    DGry = 0o10,
+    LBlu = 0o11,
+    LGrn = 0o12,
+    LCyn = 0o13,
+    LRed = 0o14,
+    Pink = 0o15,
+    Yelo = 0o16,
+    Whte = 0o17,
 }
 ```
-We use a [C-like enum] here to explicitly specify the number for each color. Because of the `repr(u8)` attribute, each enum variant is stored as a `u8`. Actually 4 bits would be sufficient, but Rust doesn't have a `u4` type.
 
-[C-like enum]: https://doc.rust-lang.org/rust-by-example/custom_types/enum/c_like.html
+## Notes
 
-Normally the compiler would issue a warning for each unused variant. By using the `#[allow(dead_code)]` attribute, we disable these warnings for the `Color` enum.
+- We use a [C-like enum] here to explicitly specify the number for each color. 
+- Because of the `repr(u8)` attribute, each enum variant is stored as a `u8`. 
+  	- I would use `u4` type (a nib) if I was allowed to.
+-  Rust on the [C-like enum](https://doc.rust-lang.org/rust-by-example/custom_types/enum/c_like.html)
+	- At some point we have to figure out why we aren't writing C.
 
-By [deriving] the [`Copy`], [`Clone`], [`Debug`], [`PartialEq`], and [`Eq`] traits, we enable [copy semantics] for the type and make it printable and comparable.
+## Suppress Warnings
 
-[deriving]: https://doc.rust-lang.org/rust-by-example/trait/derive.html
-[`Copy`]: https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html
-[`Clone`]: https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html
-[`Debug`]: https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html
-[`PartialEq`]: https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html
-[`Eq`]: https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html
-[copy semantics]: https://doc.rust-lang.org/1.30.0/book/first-edition/ownership.html#copy-types
+- Normally the compiler would issue a warning for each unused variant. 
+  	- This seems obviously annoying to me.
+- By using the `#[allow(dead_code)]` attribute, we disable these warnings for the `Color` enum.
 
-To represent a full color code that specifies foreground and background color, we create a [newtype] on top of `u8`:
+## Comparisons
 
-[newtype]: https://doc.rust-lang.org/rust-by-example/generics/new_types.html
+- By [deriving] the [`Copy`], [`Clone`], [`Debug`], [`PartialEq`], and [`Eq`] traits, we:
+  	- Get stack-like (vs. heap-like) behavior.
+	- Make it printable.
+	- Make it comparable (e.g. via double-equals-equality `==`)
+- I would obviously just use an u8 here but don't be like me, I am wrong in some way that may be important latter.
 
-```rust
-// in src/vga_buffer.rs
+## Links
 
+- [deriving](https://doc.rust-lang.org/rust-by-example/trait/derive.html)
+- [`Copy`](https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html)
+- [`Clone`](https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html)
+- [`Debug`](https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html)
+- [`PartialEq`](https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html)
+- [`Eq`](https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html)
+- [copy semantics](https://doc.rust-lang.org/1.30.0/book/first-edition/ownership.html#copy-types)
+
+
+## New Type
+
+- A full color code specifies foreground *and* background color
+- We create a [newtype](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) on top of `u8`
+
+
+```{.rs filename="src/vga.rs"}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(transparent)]
 struct ColorCode(u8);
 
 impl ColorCode {
-    fn new(foreground: Color, background: Color) -> ColorCode {
-        ColorCode((background as u8) << 4 | (foreground as u8))
+    fn new(fg: Color, b: Color) -> ColorCode {
+        ColorCode((bg as u8) << 4 | (fg as u8))
     }
 }
 ```
-The `ColorCode` struct contains the full color byte, containing foreground and background color. Like before, we derive the `Copy` and `Debug` traits for it. To ensure that the `ColorCode` has the exact same data layout as a `u8`, we use the [`repr(transparent)`] attribute.
 
-[`repr(transparent)`]: https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent
+## Transparency
 
-### Text Buffer
-Now we can add structures to represent a screen character and the text buffer:
+- Again, we derive the `Copy` and `Debug` traits for it. 
+- When working with low level devices, we need to ensure bits are where we expect them to be.
+- To ensure that the `ColorCode` has the exact same data layout as a `u8`, we use the [`repr(transparent)`] attribute.
+	- [Read more](https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent)
+<!--
+## Text Buffer
 
-```rust
-// in src/vga_buffer.rs
+- Now we can add structures to represent a screen character and the text buffer:
 
+```{.rs filename="src/vga.rs"}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(C)]
 struct ScreenChar {
@@ -209,58 +278,219 @@ struct Buffer {
     chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 ```
-Since the field ordering in default structs is undefined in Rust, we need the [`repr(C)`] attribute. It guarantees that the struct's fields are laid out exactly like in a C struct and thus guarantees the correct field ordering. For the `Buffer` struct, we use [`repr(transparent)`] again to ensure that it has the same memory layout as its single field.
 
-[`repr(C)`]: https://doc.rust-lang.org/nightly/nomicon/other-reprs.html#reprc
+## C Representation
 
-To actually write to screen, we now create a writer type:
+- Field ordering in default structs is undefined in Rust!
+- Not so in the good language, C.
+- We use the [`repr(C)`] attribute. 
+  - It guarantees that the struct's fields are laid out in order. `
+  - [`repr(C)`](https://doc.rust-lang.org/nightly/nomicon/other-reprs.html#reprc)
+- For the `Buffer` struct, we use [`repr(transparent)`] again to ensure that it has the same memory layout as its single field.
+-->
 
-```rust
-// in src/vga_buffer.rs
 
-pub struct Writer {
-    column_position: usize,
-    color_code: ColorCode,
-    buffer: &'static mut Buffer,
+## Standard Out
+
+- To provide "standard out" like functionality, I will:
+	- Maintain the most recent position to which a character has been written.
+
+
+```{.rs filename="src/vga.rs"}
+static mut latest: usize = 0;
+```
+
+## Location
+
+- To provide "standard out" like functionality, I will:
+	- Maintain the most recent position to which a character has been written.
+	- Have a constant referring to to the VGA buffer address.
+
+```{.rs filename="src/vga.rs"}
+static mut latest:usize = 0;
+const MMIO = 0xb8000 as *mut u8;
+```
+
+## Color
+
+- To provide "standard out" like functionality, I will:
+	- Provide a way to write a character.
+	  	- I will use a `const` for color and not worry about.
+
+```{.rs filename="src/vga.rs"}
+static mut latest:usize = 0;
+const MMIO = 0xb8000 as *mut u8;
+const COLOR: u = 0xF;
+```
+
+## Character-wise
+
+- To provide "standard out" like functionality, I will:
+	- Provide a way to write a character.
+	  	- I will write a function to push one character.
+
+```{.rs filename="src/vga.rs"}
+// Public for now
+pub fn char_to_vga(a: u8) {
+	todo!();
 }
 ```
-The writer will always write to the last line and shift lines up when a line is full (or on `\n`). The `column_position` field keeps track of the current position in the last row. The current foreground and background colors are specified by `color_code` and a reference to the VGA buffer is stored in `buffer`. Note that we need an [explicit lifetime] here to tell the compiler how long the reference is valid. The [`'static`] lifetime specifies that the reference is valid for the whole program run time (which is true for the VGA text buffer).
 
-[explicit lifetime]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#lifetime-annotation-syntax
-[`'static`]: https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime
+## Stepwise
 
-### Printing
-Now we can use the `Writer` to modify the buffer's characters. First we create a method to write a single ASCII byte:
+1. Compute absolute location from relative location.
 
-```rust
-// in src/vga_buffer.rs
+```{.rs filename="src/vga.rs"}
+// Public for now
+pub fn char_to_vga(a: u8) {
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
+}
+```
 
-impl Writer {
-    pub fn write_byte(&mut self, byte: u8) {
-        match byte {
-            b'\n' => self.new_line(),
-            byte => {
-                if self.column_position >= BUFFER_WIDTH {
-                    self.new_line();
-                }
+## Stepwise
 
-                let row = BUFFER_HEIGHT - 1;
-                let col = self.column_position;
+1. Compute absolute location from relative location.
+2. Store a value at that location.
 
-                let color_code = self.color_code;
-                self.buffer.chars[row][col] = ScreenChar {
-                    ascii_character: byte,
-                    color_code,
-                };
-                self.column_position += 1;
-            }
-        }
+```{.rs filename="src/vga.rs"}
+// Public for now
+pub fn char_to_vga(a: u8) {
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
+	*rel = a;
+}
+```
+
+## Stepwise
+
+1. Compute absolute location from relative location.
+2. Store a value at that location.
+3. Store a color at the next location.
+
+```{.rs filename="src/vga.rs"}
+// Public for now
+pub fn char_to_vga(a: u8) {
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
+	*rel = a;
+        *((rel as usize + 1) as *mut u8) = COLOR;
+}
+```
+
+## Stepwise
+
+1. Compute absolute location from relative location.
+2. Store a value at that location.
+3. Store a color at the next location.
+4. Increment the latest.
+
+```{.rs filename="src/vga.rs"}
+// Public for now
+pub fn char_to_vga(a: u8) {
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
+	*rel = a;
+        *((rel as usize + 1) as *mut u8) = COLOR;
+        LATEST = LATEST + 1;
+}
+```
+
+## Test it
+
+- It is trivial to test.
+
+```{.rs filename="src/main.rs"}
+    let hi: &[u8] = b"Hello World!";
+    for i in 0..12 {
+        vga::char_to_vga(hi[i]);
     }
+```
 
-    fn new_line(&mut self) {/* TODO */}
+- "Works on my machine!" - me
+	- Unless?
+	- We'll come back to this.
+
+## Annoying
+
+- Some of you may lack a strong work ethic and want to show entire a whole *string* rather than just a character at a time.
+  	- Especially since using characters of a string in Rust is ludicrously opaque.
+- Not to worry.
+
+## Target `&str`
+
+- We can abstract to loop into `src/vga.rs`
+
+```{.rs filename="src/vga.rs"}
+pub fn str_to_vga(s: &str) {
+    let v = s.as_bytes();
+    for i in 0..v.len() {
+        char_to_vga(v[i]);
+    }
 }
 ```
-If the byte is the [newline] byte `\n`, the writer does not print anything. Instead, it calls a `new_line` method, which we'll implement later. Other bytes get printed to the screen in the second `match` case.
+
+## Update main
+
+- Look how nice that is!
+
+```{.rs filename="src/main.rs"}
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    vga::str_to_vga("Hello, world!");
+    loop {}
+}
+```
+
+## I bet...
+
+- I bet we can print *any* string.
+
+## main
+
+```{.rs}
+#![no_std]
+#![no_main]
+
+mod vga;
+
+#[panic_handler]
+#[allow(unconditional_recursion)]
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    panic(info)
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    vga::str_to_vga("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
+    loop {}
+}
+```
+
+## vga
+
+```{.rs}
+static mut LATEST: usize = 0;
+const MMIO: *mut u8 = 0xb8000 as *mut u8;
+const COLOR: u8 = 0xF;
+
+fn char_to_vga(a: u8) {
+    unsafe {
+        let rel: *mut u8 = ((MMIO as usize) + (LATEST * 2)) as *mut u8;
+        *rel = a;
+        *((rel as usize + 1) as *mut u8) = COLOR;
+        LATEST = LATEST + 1;
+    }
+}
+
+pub fn str_to_vga(s: &str) {
+    let v = s.as_bytes();
+    for i in 0..v.len() {
+        char_to_vga(v[i]);
+    }
+}
+```
+
+
+## TODO
+
+If the byte is the [newline] byte `\n`, the writer does not print anything. Instead, it calls a `new_line` method, which we'll implement later.uuther bytes get printed to the screen in the second `match` case.
 
 [newline]: https://en.wikipedia.org/wiki/Newline
 
@@ -269,7 +499,7 @@ When printing a byte, the writer checks if the current line is full. In that cas
 To print whole strings, we can convert them to bytes and print them one-by-one:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 impl Writer {
     pub fn write_string(&mut self, s: &str) {
@@ -295,7 +525,7 @@ The VGA text buffer only supports ASCII and the additional bytes of [code page 4
 To write some characters to the screen, you can create a temporary function:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 pub fn print_something() {
     let mut writer = Writer {
@@ -321,7 +551,7 @@ Then it writes the byte `b'H'` to it. The `b` prefix creates a [byte literal], w
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    vga_buffer::print_something();
+    vga::print_something();
 
     loop {}
 }
@@ -366,7 +596,7 @@ Make sure to specify `volatile` version `0.2.6`. Newer versions of the crate are
 Let's use it to make writes to the VGA buffer volatile. We update our `Buffer` type as follows:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 use volatile::Volatile;
 
@@ -381,7 +611,7 @@ Instead of a `ScreenChar`, we're now using a `Volatile<ScreenChar>`. (The `Volat
 This means that we have to update our `Writer::write_byte` method:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 impl Writer {
     pub fn write_byte(&mut self, byte: u8) {
@@ -410,7 +640,7 @@ It would be nice to support Rust's formatting macros, too. That way, we can easi
 [`core::fmt::Write`]: https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 use core::fmt;
 
@@ -426,7 +656,7 @@ The `Ok(())` is just a `Ok` Result containing the `()` type.
 Now we can use Rust's built-in `write!`/`writeln!` formatting macros:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 pub fn print_something() {
     use core::fmt::Write;
@@ -450,7 +680,7 @@ Now you should see a `Hello! The numbers are 42 and 0.3333333333333333` at the b
 Right now, we just ignore newlines and characters that don't fit into the line anymore. Instead, we want to move every character one line up (the top line gets deleted) and start at the beginning of the last line again. To do this, we add an implementation for the `new_line` method of `Writer`:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 impl Writer {
     fn new_line(&mut self) {
@@ -472,7 +702,7 @@ We iterate over all the screen characters and move each character one row up. No
 To finish the newline code, we add the `clear_row` method:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 impl Writer {
     fn clear_row(&mut self, row: usize) {
@@ -492,7 +722,7 @@ This method clears a row by overwriting all of its characters with a space chara
 To provide a global writer that can be used as an interface from other modules without carrying a `Writer` instance around, we try to create a static `WRITER`:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 pub static WRITER: Writer = Writer {
     column_position: 0,
@@ -505,25 +735,25 @@ However, if we try to compile it now, the following errors occur:
 
 ```
 error[E0015]: calls in statics are limited to constant functions, tuple structs and tuple variants
- --> src/vga_buffer.rs:7:17
+ --> src/vga.rs:7:17
   |
 7 |     color_code: ColorCode::new(Color::Yellow, Color::Black),
   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error[E0396]: raw pointers cannot be dereferenced in statics
- --> src/vga_buffer.rs:8:22
+ --> src/vga.rs:8:22
   |
 8 |     buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ dereference of raw pointer in constant
 
 error[E0017]: references in statics may only refer to immutable values
- --> src/vga_buffer.rs:8:22
+ --> src/vga.rs:8:22
   |
 8 |     buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ statics require immutable values
 
 error[E0017]: references in statics may only refer to immutable values
- --> src/vga_buffer.rs:8:13
+ --> src/vga.rs:8:13
   |
 8 |     buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ statics require immutable values
@@ -558,7 +788,7 @@ We need the `spin_no_std` feature, since we don't link the standard library.
 With `lazy_static`, we can define our static `WRITER` without problems:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 use lazy_static::lazy_static;
 
@@ -599,7 +829,7 @@ spin = "0.5.2"
 Then we can use the spinning mutex to add safe [interior mutability] to our static `WRITER`:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 use spin::Mutex;
 ...
@@ -618,8 +848,8 @@ Now we can delete the `print_something` function and print directly from our `_s
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     use core::fmt::Write;
-    vga_buffer::WRITER.lock().write_str("Hello again").unwrap();
-    write!(vga_buffer::WRITER.lock(), ", some numbers: {} {}", 42, 1.337).unwrap();
+    vga::WRITER.lock().write_str("Hello again").unwrap();
+    write!(vga::WRITER.lock(), ", some numbers: {} {}", 42, 1.337).unwrap();
 
     loop {}
 }
@@ -670,11 +900,11 @@ The [`format_args` macro] builds a [fmt::Arguments] type from the passed argumen
 To print to the VGA buffer, we just copy the `println!` and `print!` macros, but modify them to use our own `_print` function:
 
 ```rust
-// in src/vga_buffer.rs
+// in src/vga.rs
 
 #[macro_export]
 macro_rules! print {
-    ($($arg:tt)*) => ($crate::vga_buffer::_print(format_args!($($arg)*)));
+    ($($arg:tt)*) => ($crate::vga::_print(format_args!($($arg)*)));
 }
 
 #[macro_export]
@@ -692,7 +922,7 @@ pub fn _print(args: fmt::Arguments) {
 
 One thing that we changed from the original `println` definition is that we prefixed the invocations of the `print!` macro with `$crate` too. This ensures that we don't need to import the `print!` macro too if we only want to use `println`.
 
-Like in the standard library, we add the `#[macro_export]` attribute to both macros to make them available everywhere in our crate. Note that this places the macros in the root namespace of the crate, so importing them via `use crate::vga_buffer::println` does not work. Instead, we have to do `use crate::println`.
+Like in the standard library, we add the `#[macro_export]` attribute to both macros to make them available everywhere in our crate. Note that this places the macros in the root namespace of the crate, so importing them via `use crate::vga::println` does not work. Instead, we have to do `use crate::println`.
 
 The `_print` function locks our static `WRITER` and calls the `write_fmt` method on it. This method is from the `Write` trait, which we need to import. The additional `unwrap()` at the end panics if printing isn't successful. But since we always return `Ok` in `write_str`, that should not happen.
 

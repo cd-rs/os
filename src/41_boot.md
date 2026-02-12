@@ -150,7 +150,7 @@ bootloader = "0.9"
 
 - Adding the bootloader as a dependency is not enough to actually create a bootable disk image. 
 - The problem is that we need to link our kernel with the bootloader after compilation.
-- But Cargo has no support for [post-build scripts].(https://github.com/rust-lang/cargo/issues/545)
+- But Cargo has no support for [post-build scripts](https://github.com/rust-lang/cargo/issues/545).
     - Typical Cargo L.
    
 ## Install Bootimage
