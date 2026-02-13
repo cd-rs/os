@@ -1516,8 +1516,7 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <li>These are memory related functions where Rust often uses linked C implementations.</li>
 <li>I’m leaving them out for now and will add them in when I need them.</li>
 </ul>
-<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a></a><span class="ex">build-std-features</span> = <span class="pp">[</span><span class="st">"compiler-builtins-mem"</span><span class="pp">]</span></span>
-<span id="cb38-2"><a></a><span class="ex">build-std</span> = [<span class="st">"core"</span>, <span class="st">"compiler_builtins"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>{.toml filename=".cargo/config.toml} [unstable] build-std-features = ["compiler-builtins-mem"] build-std = ["core", "compiler_builtins"]</code></p>
 </section>
 <section id="boot-it" class="slide level2">
 <h2>Boot it</h2>
@@ -1525,22 +1524,22 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <li>And with that, I bet this will totally work.</li>
 <li>Let’s break out <code>qemu</code></li>
 </ul>
-<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a></a><span class="ex">$</span> qemu-system-x86_64 <span class="at">-kernel</span> target/x86_64-osirs/debug/osirs</span>
-<span id="cb39-2"><a></a><span class="ex">Command</span> <span class="st">'qemu-system-x86_64'</span> not found, but can be installed with:</span>
-<span id="cb39-3"><a></a><span class="fu">sudo</span> apt install qemu-system-x86      <span class="co"># version 1:6.2+dfsg-2ubuntu6.27, or</span></span>
-<span id="cb39-4"><a></a><span class="fu">sudo</span> apt install qemu-system-x86-xen  <span class="co"># version 1:6.2+dfsg-2ubuntu6.27</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb38-1"><a></a><span class="ex">$</span> qemu-system-x86_64 <span class="at">-kernel</span> target/x86_64-osirs/debug/osirs</span>
+<span id="cb38-2"><a></a><span class="ex">Command</span> <span class="st">'qemu-system-x86_64'</span> not found, but can be installed with:</span>
+<span id="cb38-3"><a></a><span class="fu">sudo</span> apt install qemu-system-x86      <span class="co"># version 1:6.2+dfsg-2ubuntu6.27, or</span></span>
+<span id="cb38-4"><a></a><span class="fu">sudo</span> apt install qemu-system-x86-xen  <span class="co"># version 1:6.2+dfsg-2ubuntu6.27</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>Oh right, we only installed “misc” <code>qemu</code>
 <ul>
 <li>Real ones will use <code>apt</code></li>
 </ul>
-<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a></a><span class="fu">sudo</span> apt install qemu-system-x86</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb39"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a></a><span class="fu">sudo</span> apt install qemu-system-x86</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="boot-it-1" class="slide level2">
 <h2>Boot it</h2>
-<div class="sourceCode" id="cb41"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb41-1"><a></a><span class="ex">$</span> qemu-system-x86_64 <span class="at">-kernel</span> target/x86_64-osirs/debug/osirs</span>
-<span id="cb41-2"><a></a><span class="ex">qemu-system-x86_64:</span> Error loading uncompressed kernel without PVH ELF Note</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb40-1"><a></a><span class="ex">$</span> qemu-system-x86_64 <span class="at">-kernel</span> target/x86_64-osirs/debug/osirs</span>
+<span id="cb40-2"><a></a><span class="ex">qemu-system-x86_64:</span> Error loading uncompressed kernel without PVH ELF Note</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>Oh right, we did precisely <em>nothing</em> with the BIOS and the bootloader and all that and still need to do those things.
 <ul>
@@ -1562,18 +1561,18 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <div class="code-with-filename-file">
 <pre><strong>src/main.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb42" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb42-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb42-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
-<span id="cb42-3"><a></a></span>
-<span id="cb42-4"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb42-5"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb42-6"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb42-7"><a></a><span class="op">}</span></span>
-<span id="cb42-8"><a></a></span>
-<span id="cb42-9"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb42-10"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb42-11"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb42-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb41" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb41-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb41-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb41-3"><a></a></span>
+<span id="cb41-4"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb41-5"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb41-6"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb41-7"><a></a><span class="op">}</span></span>
+<span id="cb41-8"><a></a></span>
+<span id="cb41-9"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb41-10"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb41-11"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb41-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="config-file" class="slide level2">
@@ -1585,12 +1584,12 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <div class="code-with-filename-file">
 <pre><strong>.cargo/config.toml</strong></pre>
 </div>
-<div class="sourceCode" id="cb43" data-filename=".cargo/config.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb43-1"><a></a><span class="kw">[unstable]</span></span>
-<span id="cb43-2"><a></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">]</span></span>
-<span id="cb43-3"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
-<span id="cb43-4"><a></a></span>
-<span id="cb43-5"><a></a><span class="kw">[build]</span></span>
-<span id="cb43-6"><a></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-osirs.json"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb42" data-filename=".cargo/config.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb42-1"><a></a><span class="kw">[unstable]</span></span>
+<span id="cb42-2"><a></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">]</span></span>
+<span id="cb42-3"><a></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb42-4"><a></a></span>
+<span id="cb42-5"><a></a><span class="kw">[build]</span></span>
+<span id="cb42-6"><a></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-osirs.json"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="target-file" class="slide level2">
@@ -1602,20 +1601,20 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <div class="code-with-filename-file">
 <pre><strong>x86_64-osirs.json</strong></pre>
 </div>
-<div class="sourceCode" id="cb44" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb44-1"><a></a><span class="fu">{</span></span>
-<span id="cb44-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
-<span id="cb44-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
-<span id="cb44-4"><a></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
-<span id="cb44-5"><a></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
-<span id="cb44-6"><a></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
-<span id="cb44-7"><a></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
-<span id="cb44-8"><a></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
-<span id="cb44-9"><a></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
-<span id="cb44-10"><a></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
-<span id="cb44-11"><a></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
-<span id="cb44-12"><a></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
-<span id="cb44-13"><a></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span></span>
-<span id="cb44-14"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb43" data-filename="x86_64-osirs.json"><pre class="sourceCode numberSource json number-lines code-with-copy"><code class="sourceCode json"><span id="cb43-1"><a></a><span class="fu">{</span></span>
+<span id="cb43-2"><a></a>    <span class="dt">"llvm-target"</span><span class="fu">:</span> <span class="st">"x86_64-unknown-none"</span><span class="fu">,</span></span>
+<span id="cb43-3"><a></a>    <span class="dt">"data-layout"</span><span class="fu">:</span> <span class="st">"e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"</span><span class="fu">,</span></span>
+<span id="cb43-4"><a></a>    <span class="dt">"arch"</span><span class="fu">:</span> <span class="st">"x86_64"</span><span class="fu">,</span></span>
+<span id="cb43-5"><a></a>    <span class="dt">"target-endian"</span><span class="fu">:</span> <span class="st">"little"</span><span class="fu">,</span></span>
+<span id="cb43-6"><a></a>    <span class="dt">"target-pointer-width"</span><span class="fu">:</span> <span class="dv">64</span><span class="fu">,</span></span>
+<span id="cb43-7"><a></a>    <span class="dt">"target-c-int-width"</span><span class="fu">:</span> <span class="dv">32</span><span class="fu">,</span></span>
+<span id="cb43-8"><a></a>    <span class="dt">"os"</span><span class="fu">:</span> <span class="st">"none"</span><span class="fu">,</span></span>
+<span id="cb43-9"><a></a>    <span class="dt">"executables"</span><span class="fu">:</span> <span class="kw">true</span><span class="fu">,</span></span>
+<span id="cb43-10"><a></a>    <span class="dt">"linker-flavor"</span><span class="fu">:</span> <span class="st">"ld.lld"</span><span class="fu">,</span></span>
+<span id="cb43-11"><a></a>    <span class="dt">"linker"</span><span class="fu">:</span> <span class="st">"rust-lld"</span><span class="fu">,</span></span>
+<span id="cb43-12"><a></a>    <span class="dt">"panic-strategy"</span><span class="fu">:</span> <span class="st">"abort"</span><span class="fu">,</span></span>
+<span id="cb43-13"><a></a>    <span class="dt">"disable-redzone"</span><span class="fu">:</span> <span class="kw">true</span></span>
+<span id="cb43-14"><a></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="cargo-file" class="slide level2">
@@ -1627,12 +1626,12 @@ The nightly compiler allows us to opt-in to various experimental features by usi
 <div class="code-with-filename-file">
 <pre><strong>Cargo.toml</strong></pre>
 </div>
-<div class="sourceCode" id="cb45" data-filename="Cargo.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb45-1"><a></a><span class="kw">[package]</span></span>
-<span id="cb45-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
-<span id="cb45-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
-<span id="cb45-4"><a></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2024"</span></span>
-<span id="cb45-5"><a></a></span>
-<span id="cb45-6"><a></a><span class="kw">[dependencies]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb44" data-filename="Cargo.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb44-1"><a></a><span class="kw">[package]</span></span>
+<span id="cb44-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
+<span id="cb44-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb44-4"><a></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2024"</span></span>
+<span id="cb44-5"><a></a></span>
+<span id="cb44-6"><a></a><span class="kw">[dependencies]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 

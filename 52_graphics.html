@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Graphics – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./51_format.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./52_graphics.html">Graphics</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#homework" id="toc-homework" class="nav-link active" data-scroll-target="#homework">Homework</a></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#step-0" id="toc-step-0" class="nav-link" data-scroll-target="#step-0">Step 0</a></li>
+  <li><a href="#step-1" id="toc-step-1" class="nav-link" data-scroll-target="#step-1">Step 1</a>
+  <ul class="collapse">
+  <li><a href="#colors" id="toc-colors" class="nav-link" data-scroll-target="#colors">Colors</a></li>
+  <li><a href="#main" id="toc-main" class="nav-link" data-scroll-target="#main">Main</a></li>
+  <li><a href="#your-task" id="toc-your-task" class="nav-link" data-scroll-target="#your-task">Your task</a></li>
+  </ul></li>
+  <li><a href="#step-2" id="toc-step-2" class="nav-link" data-scroll-target="#step-2">Step 2</a>
+  <ul class="collapse">
+  <li><a href="#the-monitor" id="toc-the-monitor" class="nav-link" data-scroll-target="#the-monitor">The Monitor</a></li>
+  <li><a href="#screendump" id="toc-screendump" class="nav-link" data-scroll-target="#screendump">Screendump</a></li>
+  <li><a href="#ppm-files" id="toc-ppm-files" class="nav-link" data-scroll-target="#ppm-files">PPM files</a></li>
+  <li><a href="#head" id="toc-head" class="nav-link" data-scroll-target="#head"><code>head</code></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Graphics</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<!--
+
+array([[  0,   0,   0],
+       [  0,   0, 168],
+       [  0, 168,   0],
+       [  0, 168, 168],
+       [168,   0,   0],
+       [168,   0, 168],
+       [168,  87,   0],
+       [168, 168, 168],
+       [ 87,  87,  87],
+       [ 87,  87, 255],
+       [ 87, 255,  87],
+       [ 87, 255, 255],
+       [255,  87,  87],
+       [255,  87, 255],
+       [255, 255,  87],
+       [255, 255, 255]], dtype=uint8)
+       
+-->
+<section id="homework" class="level2">
+<h2 class="anchored" data-anchor-id="homework">Homework</h2>
+<ul>
+<li>Homeworks are due on the Friday <em>after</em> the week they correspond to lecture.</li>
+<li>So 9 days after the corresponding lab.</li>
+</ul>
+</section>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<p>Be advised this is a multistage lab that is intended to be interesting rather than easy.</p>
+<ol type="1">
+<li><label><input type="checkbox">Create a <code>src/colors.rs</code> to display all background colors.</label></li>
+<li><label><input type="checkbox">Display and screendump the background colors to <code>.ppm</code></label></li>
+<li><label><input type="checkbox">Extract hex values from the <code>.ppm</code></label></li>
+<li><label><input type="checkbox">Create a script to convert images from url to VGA buffer array</label>
+<ol type="1">
+<li><label><input type="checkbox">Download</label></li>
+<li><label><input type="checkbox">Scale</label></li>
+<li><label><input type="checkbox">Color map</label></li>
+<li><label><input type="checkbox">Output to <code>src/img.rs</code> as a datatype of some kind.</label></li>
+<li>I would use Python <code>numpy</code>.</li>
+</ol></li>
+<li><label><input type="checkbox">Add a function to <code>src/main.rs</code> to display the image in <code>src/img.rs</code></label></li>
+</ol>
+</section>
+<section id="step-0" class="level2">
+<h2 class="anchored" data-anchor-id="step-0">Step 0</h2>
+<ul>
+<li>Complete the “<a href="./51_format.html">Format</a>” lab.</li>
+</ul>
+</section>
+<section id="step-1" class="level2">
+<h2 class="anchored" data-anchor-id="step-1">Step 1</h2>
+<blockquote class="blockquote">
+<p>Add a function to <code>src/main.rs</code> to display all background colors in <code>qemu</code> via the VGA buffer.</p>
+</blockquote>
+<ul>
+<li>For this lab, we will display images using the VGA text buffer background color.</li>
+<li>To do that, we need to know what colors we have.</li>
+<li>To learn what colors we have, we will first display all of them.</li>
+</ul>
+<section id="colors" class="level3">
+<h3 class="anchored" data-anchor-id="colors">Colors</h3>
+<ul>
+<li>I created a new file.
+<ul>
+<li>I am planning to not use it after the lab so I factored it out.</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/colors.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="src/colors.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">pub</span> <span class="kw">fn</span> colors() <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="co">// I had 9 total lines here.</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>    <span class="co">// 1 line was in an unsafe block (which was 3 lines total)</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="main" class="level3">
+<h3 class="anchored" data-anchor-id="main">Main</h3>
+<ul>
+<li>There are two minor changes to main.
+<ul>
+<li>I call <code>colors</code> in <code>_start</code> and nothing else.</li>
+<li>I add <code>mod colors;</code> early in the file.</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="kw">mod</span> colors<span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="kw">mod</span> vga<span class="op">;</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="op">}</span></span>
+<span id="cb2-12"><a href="#cb2-12"></a></span>
+<span id="cb2-13"><a href="#cb2-13"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb2-15"><a href="#cb2-15"></a>    <span class="pp">colors::</span>colors()<span class="op">;</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="your-task" class="level3">
+<h3 class="anchored" data-anchor-id="your-task">Your task</h3>
+<ul>
+<li>Create 16 evenly sized columns, one for each background color, across the screen.</li>
+<li>Print no text.</li>
+<li>Recall that there are 80 horizontal by 25 vertical characters.</li>
+<li>Recall that there are 720 horizontal by 400 vertical pixels.</li>
+<li>I am creating the below example using hexcodes I extracted and raw HTML.
+<ul>
+<li>It is hardcoded to 720 <span class="math inline">\(\times\)</span> 400 and may look odd on some screens.</li>
+</ul></li>
+</ul>
+<table style="border-collapse: collapse; border: none; padding: 0; margin: 0; line-height: 0;">
+<tbody><tr style="height: 400px;">
+<td style="width: 45px; background-color: rgb(0, 0, 0); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(0, 0, 168); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(0, 168, 0); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(0, 168, 168); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(168, 0, 0); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(168, 0, 168); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(168, 87, 0); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(168, 168, 168); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(87, 87, 87); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(87, 87, 255); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(87, 255, 87); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(87, 255, 255); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(255, 87, 87); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(255, 87, 255); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(255, 255, 87); padding: 0;">
+</td>
+<td style="width: 45px; background-color: rgb(255, 255, 255); padding: 0;">
+</td>
+</tr>
+</tbody></table>
+<ul>
+<li>It is obviously trivial to extract color values from this.</li>
+<li>Fortunately, you are still required to include a <code>src/colors.rs</code> in your <code>52</code> folder.</li>
+</ul>
+</section>
+</section>
+<section id="step-2" class="level2">
+<h2 class="anchored" data-anchor-id="step-2">Step 2</h2>
+<blockquote class="blockquote">
+<p>Display and screendump the background colors to <code>.ppm</code></p>
+</blockquote>
+<ul>
+<li>Easy step.</li>
+<li>Once your <code>qemu</code> is displaying as above, you are ready to proceed.</li>
+</ul>
+<section id="the-monitor" class="level3">
+<h3 class="anchored" data-anchor-id="the-monitor">The Monitor</h3>
+<ul>
+<li><code>qemu</code> has more features than I can recall anymore; most of them very cool.</li>
+<li>One is the “Monitor”</li>
+<li>Within the QEMU window, you can use
+<p>
+<kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">2</kbd></kbd></p></li>
+<li>From here, you can input a variety of commands.
+<ul>
+<li><a href="https://qemu-project.gitlab.io/qemu/system/monitor.html">Read more</a></li>
+</ul></li>
+<li>At least try <code>help</code></li>
+</ul>
+</section>
+<section id="screendump" class="level3">
+<h3 class="anchored" data-anchor-id="screendump">Screendump</h3>
+<ul>
+<li>Try to following.
+<ul>
+<li>You can choose your own filename.</li>
+<li>I used <code>dump.ppm</code></li>
+<li>You will want to use <code>.ppm</code></li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">screendump</span> filename</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>QEMU documentation states:</li>
+</ul>
+<blockquote class="blockquote">
+<p>Save screen into PPM image <em>filename</em>.</p>
+</blockquote>
+</section>
+<section id="ppm-files" class="level3">
+<h3 class="anchored" data-anchor-id="ppm-files">PPM files</h3>
+<ul>
+<li>The PPM file format is ancient and I’m not sure of the authoritative documentation.</li>
+<li>This appears correct to me. <a href="https://netpbm.sourceforge.net/doc/ppm.html">https://netpbm.sourceforge.net/doc/ppm.html</a></li>
+<li>You don’t need to dwell on it overlong but:
+<ul>
+<li>There is a header that gives the filetype, the size, and highest brightness value.</li>
+<li>There’s a block write of pixels.</li>
+</ul></li>
+</ul>
+</section>
+<section id="head" class="level3">
+<h3 class="anchored" data-anchor-id="head"><code>head</code></h3>
+<ul>
+<li>It is trivial to verify you have a well formed PPM file.
+<ul>
+<li>We use <code>head</code> to read the first <span class="math inline">\(n\)</span> lines of a file.</li>
+<li>We use <code>-3</code> to specify that <span class="math inline">\(n=3\)</span></li>
+<li>Only the first 3 lines are human readable.</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="fu">head</span> <span class="at">-3</span> dump.ppm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>If you do not see the following, something went wrong.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1"></a><span class="ex">P6</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="ex">720</span> 400</span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="ex">255</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>This states that:
+<ul>
+<li>You have a PPM image of type P6, this is the most common format (there is a less used P3)</li>
+<li>Your image is 720 by 400 pixels</li>
+<li>Brightness is out of 255.</li>
+</ul></li>
+</ul>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./51_format.html" class="pagination-link" aria-label="Format">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Format</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">---</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="an">title:</span><span class="co"> Graphics</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="co">---</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="co">&lt;!--</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="co">array([[  0,   0,   0],</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="co">       [  0,   0, 168],</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="co">       [  0, 168,   0],</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a><span class="co">       [  0, 168, 168],</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a><span class="co">       [168,   0,   0],</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="co">       [168,   0, 168],</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a><span class="co">       [168,  87,   0],</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a><span class="co">       [168, 168, 168],</span></span>
+<span id="cb6-16"><a href="#cb6-16"></a><span class="co">       [ 87,  87,  87],</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a><span class="co">       [ 87,  87, 255],</span></span>
+<span id="cb6-18"><a href="#cb6-18"></a><span class="co">       [ 87, 255,  87],</span></span>
+<span id="cb6-19"><a href="#cb6-19"></a><span class="co">       [ 87, 255, 255],</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a><span class="co">       [255,  87,  87],</span></span>
+<span id="cb6-21"><a href="#cb6-21"></a><span class="co">       [255,  87, 255],</span></span>
+<span id="cb6-22"><a href="#cb6-22"></a><span class="co">       [255, 255,  87],</span></span>
+<span id="cb6-23"><a href="#cb6-23"></a><span class="co">       [255, 255, 255]], dtype=uint8)</span></span>
+<span id="cb6-24"><a href="#cb6-24"></a><span class="co">       </span></span>
+<span id="cb6-25"><a href="#cb6-25"></a><span class="co">--&gt;</span></span>
+<span id="cb6-26"><a href="#cb6-26"></a></span>
+<span id="cb6-27"><a href="#cb6-27"></a><span class="fu">## Homework</span></span>
+<span id="cb6-28"><a href="#cb6-28"></a></span>
+<span id="cb6-29"><a href="#cb6-29"></a><span class="ss">- </span>Homeworks are due on the Friday *after* the week they correspond to lecture.</span>
+<span id="cb6-30"><a href="#cb6-30"></a><span class="ss">- </span>So 9 days after the corresponding lab.</span>
+<span id="cb6-31"><a href="#cb6-31"></a></span>
+<span id="cb6-32"><a href="#cb6-32"></a><span class="fu">## Requirements</span></span>
+<span id="cb6-33"><a href="#cb6-33"></a></span>
+<span id="cb6-34"><a href="#cb6-34"></a>Be advised this is a multistage lab that is intended to be interesting rather than easy.</span>
+<span id="cb6-35"><a href="#cb6-35"></a></span>
+<span id="cb6-36"><a href="#cb6-36"></a><span class="ss">1. </span><span class="co">[ ]</span> Create a <span class="in">`src/colors.rs`</span> to display all background colors.</span>
+<span id="cb6-37"><a href="#cb6-37"></a><span class="ss">1. </span><span class="co">[ ]</span> Display and screendump the background colors to <span class="in">`.ppm`</span></span>
+<span id="cb6-38"><a href="#cb6-38"></a><span class="ss">1. </span><span class="co">[ ]</span> Extract hex values from the <span class="in">`.ppm`</span></span>
+<span id="cb6-39"><a href="#cb6-39"></a><span class="ss">1. </span><span class="co">[ ]</span> Create a script to convert images from url to VGA buffer array</span>
+<span id="cb6-40"><a href="#cb6-40"></a><span class="ss">   1. </span><span class="co">[ ]</span> Download</span>
+<span id="cb6-41"><a href="#cb6-41"></a><span class="ss">   1. </span><span class="co">[ ]</span> Scale</span>
+<span id="cb6-42"><a href="#cb6-42"></a><span class="ss">   1. </span><span class="co">[ ]</span> Color map</span>
+<span id="cb6-43"><a href="#cb6-43"></a><span class="ss">   1. </span><span class="co">[ ]</span> Output to <span class="in">`src/img.rs`</span> as a datatype of some kind.</span>
+<span id="cb6-44"><a href="#cb6-44"></a><span class="ss">1. </span><span class="co">[ ]</span> Add a function to <span class="in">`src/main.rs`</span> to display the image in <span class="in">`src/img.rs`</span></span>
+<span id="cb6-45"><a href="#cb6-45"></a></span>
+<span id="cb6-46"><a href="#cb6-46"></a><span class="fu">## Step 0</span></span>
+<span id="cb6-47"><a href="#cb6-47"></a></span>
+<span id="cb6-48"><a href="#cb6-48"></a><span class="ss">- </span>Complete the "<span class="co">[</span><span class="ot">Format</span><span class="co">](51_format.md)</span>" lab.</span>
+<span id="cb6-49"><a href="#cb6-49"></a></span>
+<span id="cb6-50"><a href="#cb6-50"></a><span class="fu">## Step 1</span></span>
+<span id="cb6-51"><a href="#cb6-51"></a></span>
+<span id="cb6-52"><a href="#cb6-52"></a><span class="at">&gt; Add a function to </span><span class="in">`src/main.rs`</span><span class="at"> to display all background colors in </span><span class="in">`qemu`</span><span class="at"> via the VGA buffer.</span></span>
+<span id="cb6-53"><a href="#cb6-53"></a></span>
+<span id="cb6-54"><a href="#cb6-54"></a><span class="ss">- </span>For this lab, we will display images using the VGA text buffer background color.</span>
+<span id="cb6-55"><a href="#cb6-55"></a><span class="ss">- </span>To do that, we need to know what colors we have.</span>
+<span id="cb6-56"><a href="#cb6-56"></a><span class="ss">- </span>To learn what colors we have, we will first display all of them.</span>
+<span id="cb6-57"><a href="#cb6-57"></a></span>
+<span id="cb6-58"><a href="#cb6-58"></a><span class="fu">### Colors</span></span>
+<span id="cb6-59"><a href="#cb6-59"></a></span>
+<span id="cb6-60"><a href="#cb6-60"></a><span class="ss">- </span>I created a new file.</span>
+<span id="cb6-61"><a href="#cb6-61"></a><span class="ss">    - </span>I am planning to not use it after the lab so I factored it out.</span>
+<span id="cb6-62"><a href="#cb6-62"></a></span>
+<span id="cb6-63"><a href="#cb6-63"></a><span class="in">```{.rs filename="src/colors.rs"}   </span></span>
+<span id="cb6-64"><a href="#cb6-64"></a><span class="in">pub fn colors() {</span></span>
+<span id="cb6-65"><a href="#cb6-65"></a><span class="in">    // I had 9 total lines here.</span></span>
+<span id="cb6-66"><a href="#cb6-66"></a><span class="in">    // 1 line was in an unsafe block (which was 3 lines total)</span></span>
+<span id="cb6-67"><a href="#cb6-67"></a><span class="in">}</span></span>
+<span id="cb6-68"><a href="#cb6-68"></a><span class="in">```</span></span>
+<span id="cb6-69"><a href="#cb6-69"></a></span>
+<span id="cb6-70"><a href="#cb6-70"></a><span class="fu">### Main</span></span>
+<span id="cb6-71"><a href="#cb6-71"></a></span>
+<span id="cb6-72"><a href="#cb6-72"></a><span class="ss">- </span>There are two minor changes to main.</span>
+<span id="cb6-73"><a href="#cb6-73"></a><span class="ss">    - </span>I call <span class="in">`colors`</span> in <span class="in">`_start`</span> and nothing else.</span>
+<span id="cb6-74"><a href="#cb6-74"></a><span class="ss">    - </span>I add <span class="in">`mod colors;`</span> early in the file.</span>
+<span id="cb6-75"><a href="#cb6-75"></a>    </span>
+<span id="cb6-76"><a href="#cb6-76"></a><span class="in">```{.rs filename="src/main.rs" code-line-numbers="4,15" }</span></span>
+<span id="cb6-77"><a href="#cb6-77"></a><span class="in">#![no_std]</span></span>
+<span id="cb6-78"><a href="#cb6-78"></a><span class="in">#![no_main]</span></span>
+<span id="cb6-79"><a href="#cb6-79"></a></span>
+<span id="cb6-80"><a href="#cb6-80"></a><span class="in">mod colors;</span></span>
+<span id="cb6-81"><a href="#cb6-81"></a><span class="in">mod vga;</span></span>
+<span id="cb6-82"><a href="#cb6-82"></a></span>
+<span id="cb6-83"><a href="#cb6-83"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb6-84"><a href="#cb6-84"></a><span class="in">fn panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb6-85"><a href="#cb6-85"></a><span class="in">    println!("{}", info);</span></span>
+<span id="cb6-86"><a href="#cb6-86"></a><span class="in">    loop {}</span></span>
+<span id="cb6-87"><a href="#cb6-87"></a><span class="in">}</span></span>
+<span id="cb6-88"><a href="#cb6-88"></a></span>
+<span id="cb6-89"><a href="#cb6-89"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb6-90"><a href="#cb6-90"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb6-91"><a href="#cb6-91"></a><span class="in">    colors::colors();</span></span>
+<span id="cb6-92"><a href="#cb6-92"></a><span class="in">    loop {}</span></span>
+<span id="cb6-93"><a href="#cb6-93"></a><span class="in">}</span></span>
+<span id="cb6-94"><a href="#cb6-94"></a><span class="in">```</span></span>
+<span id="cb6-95"><a href="#cb6-95"></a></span>
+<span id="cb6-96"><a href="#cb6-96"></a><span class="fu">### Your task</span></span>
+<span id="cb6-97"><a href="#cb6-97"></a></span>
+<span id="cb6-98"><a href="#cb6-98"></a><span class="ss">- </span>Create 16 evenly sized columns, one for each background color, across the screen.</span>
+<span id="cb6-99"><a href="#cb6-99"></a><span class="ss">- </span>Print no text.</span>
+<span id="cb6-100"><a href="#cb6-100"></a><span class="ss">- </span>Recall that there are 80 horizontal by 25 vertical characters.</span>
+<span id="cb6-101"><a href="#cb6-101"></a><span class="ss">- </span>Recall that there are 720 horizontal by 400 vertical pixels.</span>
+<span id="cb6-102"><a href="#cb6-102"></a><span class="ss">- </span>I am creating the below example using hexcodes I extracted and raw HTML.</span>
+<span id="cb6-103"><a href="#cb6-103"></a><span class="ss">    - </span>It is hardcoded to 720 $\times$ 400 and may look odd on some screens.</span>
+<span id="cb6-104"><a href="#cb6-104"></a>    </span>
+<span id="cb6-105"><a href="#cb6-105"></a>&lt;table style="border-collapse: collapse; border: none; padding: 0; margin: 0; line-height: 0;"&gt;</span>
+<span id="cb6-106"><a href="#cb6-106"></a>  &lt;tr style="height: 400px;"&gt;</span>
+<span id="cb6-107"><a href="#cb6-107"></a>    &lt;td style="width: 45px; background-color: rgb(0, 0, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-108"><a href="#cb6-108"></a>    &lt;td style="width: 45px; background-color: rgb(0, 0, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-109"><a href="#cb6-109"></a>    &lt;td style="width: 45px; background-color: rgb(0, 168, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-110"><a href="#cb6-110"></a>    &lt;td style="width: 45px; background-color: rgb(0, 168, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-111"><a href="#cb6-111"></a>    &lt;td style="width: 45px; background-color: rgb(168, 0, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-112"><a href="#cb6-112"></a>    &lt;td style="width: 45px; background-color: rgb(168, 0, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-113"><a href="#cb6-113"></a>    &lt;td style="width: 45px; background-color: rgb(168, 87, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-114"><a href="#cb6-114"></a>    &lt;td style="width: 45px; background-color: rgb(168, 168, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-115"><a href="#cb6-115"></a>    &lt;td style="width: 45px; background-color: rgb(87, 87, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-116"><a href="#cb6-116"></a>    &lt;td style="width: 45px; background-color: rgb(87, 87, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-117"><a href="#cb6-117"></a>    &lt;td style="width: 45px; background-color: rgb(87, 255, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-118"><a href="#cb6-118"></a>    &lt;td style="width: 45px; background-color: rgb(87, 255, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-119"><a href="#cb6-119"></a>    &lt;td style="width: 45px; background-color: rgb(255, 87, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-120"><a href="#cb6-120"></a>    &lt;td style="width: 45px; background-color: rgb(255, 87, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-121"><a href="#cb6-121"></a>    &lt;td style="width: 45px; background-color: rgb(255, 255, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-122"><a href="#cb6-122"></a>    &lt;td style="width: 45px; background-color: rgb(255, 255, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb6-123"><a href="#cb6-123"></a>  &lt;/tr&gt;</span>
+<span id="cb6-124"><a href="#cb6-124"></a>&lt;/table&gt;</span>
+<span id="cb6-125"><a href="#cb6-125"></a></span>
+<span id="cb6-126"><a href="#cb6-126"></a><span class="ss">- </span>It is obviously trivial to extract color values from this.</span>
+<span id="cb6-127"><a href="#cb6-127"></a><span class="ss">- </span>Fortunately, you are still required to include a <span class="in">`src/colors.rs`</span> in your <span class="in">`52`</span> folder.</span>
+<span id="cb6-128"><a href="#cb6-128"></a></span>
+<span id="cb6-129"><a href="#cb6-129"></a><span class="fu">## Step 2</span></span>
+<span id="cb6-130"><a href="#cb6-130"></a></span>
+<span id="cb6-131"><a href="#cb6-131"></a><span class="at">&gt; Display and screendump the background colors to </span><span class="in">`.ppm`</span></span>
+<span id="cb6-132"><a href="#cb6-132"></a></span>
+<span id="cb6-133"><a href="#cb6-133"></a><span class="ss">- </span>Easy step.</span>
+<span id="cb6-134"><a href="#cb6-134"></a><span class="ss">- </span>Once your <span class="in">`qemu`</span> is displaying as above, you are ready to proceed.</span>
+<span id="cb6-135"><a href="#cb6-135"></a></span>
+<span id="cb6-136"><a href="#cb6-136"></a><span class="fu">### The Monitor</span></span>
+<span id="cb6-137"><a href="#cb6-137"></a></span>
+<span id="cb6-138"><a href="#cb6-138"></a><span class="ss">- </span><span class="in">`qemu`</span> has more features than I can recall anymore; most of them very cool.</span>
+<span id="cb6-139"><a href="#cb6-139"></a><span class="ss">- </span>One is the "Monitor"</span>
+<span id="cb6-140"><a href="#cb6-140"></a><span class="ss">- </span>Within the QEMU window, you can use &lt;p&gt;&lt;kbd class="kbd compound docutils literal notranslate"&gt;&lt;kbd class="kbd docutils literal notranslate"&gt;Ctrl&lt;/kbd&gt;+&lt;kbd class="kbd docutils literal notranslate"&gt;Alt&lt;/kbd&gt;+&lt;kbd class="kbd docutils literal notranslate"&gt;2&lt;/kbd&gt;&lt;/kbd&gt;</span>
+<span id="cb6-141"><a href="#cb6-141"></a><span class="ss">- </span>From here, you can input a variety of commands.</span>
+<span id="cb6-142"><a href="#cb6-142"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://qemu-project.gitlab.io/qemu/system/monitor.html)</span></span>
+<span id="cb6-143"><a href="#cb6-143"></a><span class="ss">- </span>At least try <span class="in">`help`</span></span>
+<span id="cb6-144"><a href="#cb6-144"></a></span>
+<span id="cb6-145"><a href="#cb6-145"></a><span class="fu">### Screendump</span></span>
+<span id="cb6-146"><a href="#cb6-146"></a></span>
+<span id="cb6-147"><a href="#cb6-147"></a><span class="ss">- </span>Try to following.</span>
+<span id="cb6-148"><a href="#cb6-148"></a><span class="ss">    - </span>You can choose your own filename.</span>
+<span id="cb6-149"><a href="#cb6-149"></a><span class="ss">    - </span>I used <span class="in">`dump.ppm`</span></span>
+<span id="cb6-150"><a href="#cb6-150"></a><span class="ss">    - </span>You will want to use <span class="in">`.ppm`</span></span>
+<span id="cb6-151"><a href="#cb6-151"></a></span>
+<span id="cb6-152"><a href="#cb6-152"></a><span class="in">```{.sh}</span></span>
+<span id="cb6-153"><a href="#cb6-153"></a><span class="in">screendump filename</span></span>
+<span id="cb6-154"><a href="#cb6-154"></a><span class="in">```</span></span>
+<span id="cb6-155"><a href="#cb6-155"></a></span>
+<span id="cb6-156"><a href="#cb6-156"></a><span class="ss">- </span>QEMU documentation states:</span>
+<span id="cb6-157"><a href="#cb6-157"></a></span>
+<span id="cb6-158"><a href="#cb6-158"></a><span class="at">&gt; Save screen into PPM image *filename*.</span></span>
+<span id="cb6-159"><a href="#cb6-159"></a></span>
+<span id="cb6-160"><a href="#cb6-160"></a><span class="fu">### PPM files</span></span>
+<span id="cb6-161"><a href="#cb6-161"></a></span>
+<span id="cb6-162"><a href="#cb6-162"></a><span class="ss">- </span>The PPM file format is ancient and I'm not sure of the authoritative documentation.</span>
+<span id="cb6-163"><a href="#cb6-163"></a><span class="ss">- </span>This appears correct to me.  <span class="co">[</span><span class="ot">https://netpbm.sourceforge.net/doc/ppm.html</span><span class="co">](https://netpbm.sourceforge.net/doc/ppm.html)</span></span>
+<span id="cb6-164"><a href="#cb6-164"></a><span class="ss">- </span>You don't need to dwell on it overlong but:</span>
+<span id="cb6-165"><a href="#cb6-165"></a><span class="ss">    - </span>There is a header that gives the filetype, the size, and highest brightness value.</span>
+<span id="cb6-166"><a href="#cb6-166"></a><span class="ss">    - </span>There's a block write of pixels.</span>
+<span id="cb6-167"><a href="#cb6-167"></a></span>
+<span id="cb6-168"><a href="#cb6-168"></a><span class="fu">### `head`</span></span>
+<span id="cb6-169"><a href="#cb6-169"></a></span>
+<span id="cb6-170"><a href="#cb6-170"></a><span class="ss">- </span>It is trivial to verify you have a well formed PPM file.</span>
+<span id="cb6-171"><a href="#cb6-171"></a><span class="ss">    - </span>We use <span class="in">`head`</span> to read the first $n$ lines of a file.</span>
+<span id="cb6-172"><a href="#cb6-172"></a><span class="ss">    - </span>We use <span class="in">`-3`</span> to specify that $n=3$</span>
+<span id="cb6-173"><a href="#cb6-173"></a><span class="ss">    - </span>Only the first 3 lines are human readable.</span>
+<span id="cb6-174"><a href="#cb6-174"></a></span>
+<span id="cb6-175"><a href="#cb6-175"></a><span class="in">```{.sh}</span></span>
+<span id="cb6-176"><a href="#cb6-176"></a><span class="in">head -3 dump.ppm</span></span>
+<span id="cb6-177"><a href="#cb6-177"></a><span class="in">```</span></span>
+<span id="cb6-178"><a href="#cb6-178"></a></span>
+<span id="cb6-179"><a href="#cb6-179"></a><span class="ss">- </span>If you do not see the following, something went wrong.</span>
+<span id="cb6-180"><a href="#cb6-180"></a></span>
+<span id="cb6-181"><a href="#cb6-181"></a><span class="in">```{.sh}</span></span>
+<span id="cb6-182"><a href="#cb6-182"></a><span class="in">P6</span></span>
+<span id="cb6-183"><a href="#cb6-183"></a><span class="in">720 400</span></span>
+<span id="cb6-184"><a href="#cb6-184"></a><span class="in">255</span></span>
+<span id="cb6-185"><a href="#cb6-185"></a><span class="in">```</span></span>
+<span id="cb6-186"><a href="#cb6-186"></a></span>
+<span id="cb6-187"><a href="#cb6-187"></a><span class="ss">- </span>This states that:</span>
+<span id="cb6-188"><a href="#cb6-188"></a><span class="ss">    - </span>You have a PPM image of type P6, this is the most common format (there is a less used P3)</span>
+<span id="cb6-189"><a href="#cb6-189"></a><span class="ss">    - </span>Your image is 720 by 400 pixels</span>
+<span id="cb6-190"><a href="#cb6-190"></a><span class="ss">    - </span>Brightness is out of 255.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
