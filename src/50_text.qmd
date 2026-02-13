@@ -426,6 +426,31 @@ pub fn str_to_vga(s: &str) {
 }
 ```
 
+## Aside
+
+- I am opinionated on `as_bytes`.
+- Let's check some links.
+	- [`to_bytes`](https://doc.rust-lang.org/std/?search=to_bytes)
+        - [`as_bytes`](https://doc.rust-lang.org/std/?search=as_bytes)
+	- [`bytes`](https://doc.rust-lang.org/std/?search=bytes)
+- Can you guess what always works?
+
+## Aside
+
+- Big Rust doesn't want you to know you can use pointers.
+
+```{.rs filename="src/vga.rs"}
+    let ptr = s.as_ptr() as usize;
+    unsafe {
+        for i in 0..s.len() {
+            char_to_vga(*((ptr + i) as *const u8));
+        }
+    }
+```
+
+- I could make this even worse but I didn't.
+- Anyways don't do this.
+
 ## Update main
 
 - Look how nice that is!
@@ -441,44 +466,27 @@ pub extern "C" fn _start() -> ! {
 ## I bet...
 
 - I bet we can print *any* string.
+- Let's do like a comically easy string that will definitely print.
+- There's no way it will fail.
 
-## main
-
-```{.rs}
-#![no_std]
-#![no_main]
-
-mod vga;
-
-#[panic_handler]
-#[allow(unconditional_recursion)]
-fn panic(info: &core::panic::PanicInfo) -> ! {
-    panic(info)
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    vga::str_to_vga("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-    loop {}
-}
+```{.rs filename="src/main.rs"}
+    vga::str_to_vga("Hello\nworld!");
 ```
 
-## vga
+- It worked right?
 
-```{.rs}
-static mut LATEST: usize = 0;
-const MMIO: *mut u8 = 0xb8000 as *mut u8;
-const COLOR: u8 = 0xF;
+## Escape Codes
 
-fn char_to_vga(a: u8) {
-    unsafe {
-        let rel: *mut u8 = ((MMIO as usize) + (LATEST * 2)) as *mut u8;
-        *rel = a;
-        *((rel as usize + 1) as *mut u8) = COLOR;
-        LATEST = LATEST + 1;
-    }
-}
+- Okay so there's some things we need to treat differently.
+	- Minimally `\n`.
+	- And therefore also `\\` to show a single backslash.
+	- I don't even know if we need anything else, but I'll show the design pattern.
 
+## Revisit Implementation
+
+- Recall our naive implementation.
+
+```{.rs filename="src/vga.rs"}
 pub fn str_to_vga(s: &str) {
     let v = s.as_bytes();
     for i in 0..v.len() {
@@ -487,379 +495,329 @@ pub fn str_to_vga(s: &str) {
 }
 ```
 
+## Case analysis
 
-## TODO
+- As far as I know (I didn't check) we only have to look for is:
+  	- `\n`
+	- `10` (I think?)
+	- `0xa`
+- It will be a `u8` within the loop (since we `as_bytes` first)
 
-If the byte is the [newline] byte `\n`, the writer does not print anything. Instead, it calls a `new_line` method, which we'll implement later.uuther bytes get printed to the screen in the second `match` case.
 
-[newline]: https://en.wikipedia.org/wiki/Newline
+## Trust but verify
 
-When printing a byte, the writer checks if the current line is full. In that case, a `new_line` call is used to wrap the line. Then it writes a new `ScreenChar` to the buffer at the current position. Finally, the current column position is advanced.
+- I just checked in a different crate.
+```{.rs filename="../???/src/main.rs"}
+fn main() {
+    let s = "Hello\nworld!";
+    dbg!(s.as_bytes());
+}
+```
+- Looked like 10 to me.
 
-To print whole strings, we can convert them to bytes and print them one-by-one:
+## Now it works!
 
-```rust
-// in src/vga.rs
+- We can write vertically!
+  - I guess this could be a helper function or something.
 
-impl Writer {
-    pub fn write_string(&mut self, s: &str) {
-        for byte in s.bytes() {
-            match byte {
-                // printable ASCII byte or newline
-                0x20..=0x7e | b'\n' => self.write_byte(byte),
-                // not part of printable ASCII range
-                _ => self.write_byte(0xfe),
-            }
+```{.rs filename="src/main.rs"}
+    vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");
+```
 
+## Good thing...
+
+- I can print that more than once!
+
+```{.rs filename="src/main.rs"}
+    for _i in 0..3 {
+        vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");
+    }
+```
+- Wait a minute!
+
+## We're doomed
+
+- We didn't save what was written to the previous lines.
+- Real ones know.
+
+![](https://upload.wikimedia.org/wikipedia/en/1/16/BladeRunnerRoyBattySpeech.jpeg)
+
+## Unless?
+
+- No way can we *read* from the VGA text buffer right.
+- That would be... extraordinary.
+- You can do whatever you want, I just want to show you one possible design choice.
+  	- Mostly as a proof of concept.
+
+## Scroll
+
+- I'll add some `const`s and write a helper.
+
+```{.rs filename="src/vga.rs"}
+const ROWS: usize = 80;
+const COLS: usize = 25;
+const MAX: usize = ROWS * COLS;
+
+fn scroll() {
+    
+}
+```
+
+## Execution
+
+- Start at the first character that will remain visible.
+- Copy it to the earliest visible slot (start of buffer).
+- Iterate until the full buffer is moved.
+- We note this could be executed in a single `memmove`
+  	- [Read more](https://man7.org/linux/man-pages/man3/memmove.3.html)
+
+
+## My Code
+
+- Public just to test.
+
+```{.rs filename="src/vga.rs"}
+pub fn scroll() {
+    for i in 80..MAX {
+        unsafe {
+            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;
+            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;
+            *dst = *src;
         }
     }
 }
 ```
 
-The VGA text buffer only supports ASCII and the additional bytes of [code page 437]. Rust strings are [UTF-8] by default, so they might contain bytes that are not supported by the VGA text buffer. We use a `match` to differentiate printable ASCII bytes (a newline or anything in between a space character and a `~` character) and unprintable bytes. For unprintable bytes, we print a `■` character, which has the hex code `0xfe` on the VGA hardware.
+## My Test
 
-[code page 437]: https://en.wikipedia.org/wiki/Code_page_437
-[UTF-8]: https://www.fileformat.info/info/unicode/utf8.htm
+- I just sent line numbers then manually scrolled.
 
-#### Try it out!
-To write some characters to the screen, you can create a temporary function:
+```{.rs filename="src/main.rs"}
+    vga::str_to_vga("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\nA\nB");
+    vga::scroll();
+```
 
-```rust
-// in src/vga.rs
+## A better test
 
-pub fn print_something() {
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
+- Here is a copy of the Project Gutenburg ebook of *Pride and Prejudice*.
+- It contains some quotes which might be a problem.
+- [Link](https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt)
+```{.sh}
+https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt
+```
 
-    writer.write_byte(b'H');
-    writer.write_string("ello ");
-    writer.write_string("Wörld!");
+## Does it work?
+
+- What do we have to do?
+
+<details>
+1. Add `scroll` to `str_to_vga`
+2. Update `LATEST` in `scroll`
+3. Blank out the last line, I used space (`0x20` or `32`)
+4. Make sure all color bytes are set.
+</details>
+
+## Why do we blank out?
+
+- Recall we are writing to MMIO.
+- As soon as we exceed the MMIO range, we can *make no claims* about what memory we are vviewing.
+- So if we copy in data past the buffer, we could get *anything*.
+- So if we don't overwrite the buffer, we could get *anything*.
+
+## We set color bytes?
+
+- Like lines off the MMIO range, the color bytes have no known value.
+- So if we e.g. have a newline anywhere and end up not initially setting colors...
+- Then copy text up to that line...
+- We will be showing text in an *unset* color.
+  	- Just whatever bits happened to be there!
+
+## This is unsafe!
+
+- Astute learners will notice this is all very unsafe.
+
+## I'm loopy
+
+- I should not I do everything with `for` loops and "single-equals-assignment"
+	- I mostly am teaching you *how to code*
+	- This is NOT teaching you *how to Rust* (or C)
+- Who needs `memmove` (a C function) when we have the humble `for` loop.
+- Read more: [core::ptr::copy](https://doc.rust-lang.org/core/ptr/fn.copy.html)
+
+## Caution!
+
+- I am building my crate without access to `memmove`.
+- You may need to go back and add some configuration.
+- This was covered in the "Kernel" lecture.
+  	- [Here](40_kernel.qmd#aside-notfutureproofing-1)
+
+
+## My solution
+
+<details>
+
+```{.rs filename="src/vga.rs"}
+const ROWS: usize = 80;
+const COLS: usize = 25;
+const MAX: usize = ROWS * COLS;
+
+fn scroll() {
+    unsafe {
+        for i in 80..MAX {
+            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;
+            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;
+            *dst = *src;
+            *((dst as usize + 1) as *mut u8) = COLOR;
+        }
+        for i in (MAX-80)..MAX {
+            let dst: *mut u8 = ((MMIO as usize) + ((i) * 2)) as *mut u8;
+            *dst = 32;
+            *((dst as usize + 1) as *mut u8) = COLOR;
+        }
+        LATEST = LATEST - 80;
+    }
 }
-```
-It first creates a new Writer that points to the VGA buffer at `0xb8000`. The syntax for this might seem a bit strange: First, we cast the integer `0xb8000` as a mutable [raw pointer]. Then we convert it to a mutable reference by dereferencing it (through `*`) and immediately borrowing it again (through `&mut`). This conversion requires an [`unsafe` block], since the compiler can't guarantee that the raw pointer is valid.
 
-[raw pointer]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer
-[`unsafe` block]: https://doc.rust-lang.org/book/ch19-01-unsafe-rust.html
-
-Then it writes the byte `b'H'` to it. The `b` prefix creates a [byte literal], which represents an ASCII character. By writing the strings `"ello "` and `"Wörld!"`, we test our `write_string` method and the handling of unprintable characters. To see the output, we need to call the `print_something` function from our `_start` function:
-
-```rust
-// in src/main.rs
-
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    vga::print_something();
-
-    loop {}
-}
-```
-
-When we run our project now, a `Hello W■■rld!` should be printed in the _lower_ left corner of the screen in yellow:
-
-[byte literal]: https://doc.rust-lang.org/reference/tokens.html#byte-literals
-
-![QEMU output with a yellow `Hello W■■rld!` in the lower left corner](vga-hello.png)
-
-Notice that the `ö` is printed as two `■` characters. That's because `ö` is represented by two bytes in [UTF-8], which both don't fall into the printable ASCII range. In fact, this is a fundamental property of UTF-8: the individual bytes of multi-byte values are never valid ASCII.
-
-### Volatile
-We just saw that our message was printed correctly. However, it might not work with future Rust compilers that optimize more aggressively.
-
-The problem is that we only write to the `Buffer` and never read from it again. The compiler doesn't know that we really access VGA buffer memory (instead of normal RAM) and knows nothing about the side effect that some characters appear on the screen. So it might decide that these writes are unnecessary and can be omitted. To avoid this erroneous optimization, we need to specify these writes as _[volatile]_. This tells the compiler that the write has side effects and should not be optimized away.
-
-[volatile]: https://en.wikipedia.org/wiki/Volatile_(computer_programming)
-
-In order to use volatile writes for the VGA buffer, we use the [volatile][volatile crate] library. This _crate_ (this is how packages are called in the Rust world) provides a `Volatile` wrapper type with `read` and `write` methods. These methods internally use the [read_volatile] and [write_volatile] functions of the core library and thus guarantee that the reads/writes are not optimized away.
-
-[volatile crate]: https://docs.rs/volatile
-[read_volatile]: https://doc.rust-lang.org/nightly/core/ptr/fn.read_volatile.html
-[write_volatile]: https://doc.rust-lang.org/nightly/core/ptr/fn.write_volatile.html
-
-We can add a dependency on the `volatile` crate by adding it to the `dependencies` section of our `Cargo.toml`:
-
-```toml
-# in Cargo.toml
-
-[dependencies]
-volatile = "0.2.6"
-```
-
-Make sure to specify `volatile` version `0.2.6`. Newer versions of the crate are not compatible with this post.
-`0.2.6` is the [semantic] version number. For more information, see the [Specifying Dependencies] guide of the cargo documentation.
-
-[semantic]: https://semver.org/
-[Specifying Dependencies]: https://doc.crates.io/specifying-dependencies.html
-
-Let's use it to make writes to the VGA buffer volatile. We update our `Buffer` type as follows:
-
-```rust
-// in src/vga.rs
-
-use volatile::Volatile;
-
-struct Buffer {
-    chars: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
-}
-```
-Instead of a `ScreenChar`, we're now using a `Volatile<ScreenChar>`. (The `Volatile` type is [generic] and can wrap (almost) any type). This ensures that we can't accidentally write to it “normally”. Instead, we have to use the `write` method now.
-
-[generic]: https://doc.rust-lang.org/book/ch10-01-syntax.html
-
-This means that we have to update our `Writer::write_byte` method:
-
-```rust
-// in src/vga.rs
-
-impl Writer {
-    pub fn write_byte(&mut self, byte: u8) {
-        match byte {
-            b'\n' => self.new_line(),
-            byte => {
-                ...
-
-                self.buffer.chars[row][col].write(ScreenChar {
-                    ascii_character: byte,
-                    color_code,
-                });
-                ...
+pub fn str_to_vga(s: &str) {
+    let v = s.as_bytes();
+    unsafe {
+        for i in 0..v.len() {
+            if LATEST > MAX {
+                scroll();
+            }
+            match v[i] {
+                10 => LATEST = ((LATEST / 80) + 1) * 80,
+                _ => char_to_vga(v[i]),
             }
         }
     }
-    ...
 }
 ```
 
-Instead of a typical assignment using `=`, we're now using the `write` method. Now we can guarantee that the compiler will never optimize away this write.
+</details>
 
-### Formatting Macros
-It would be nice to support Rust's formatting macros, too. That way, we can easily print different types, like integers or floats. To support them, we need to implement the [`core::fmt::Write`] trait. The only required method of this trait is `write_str`, which looks quite similar to our `write_string` method, just with a `fmt::Result` return type:
+# Volatile
 
-[`core::fmt::Write`]: https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html
+## Best Practice
 
-```rust
-// in src/vga.rs
+- This works on my machine.
+- It may not always work.
+- Why? `rustc` is a bit too smart.
+  	- There is no obvious externally observable reason to write to fixed memory location.
+	- The compiler may optimize out such writes.
+	- I say "sure it will."
 
-use core::fmt;
+## Quote Blog
 
-impl fmt::Write for Writer {
+> The problem is that we only write to the buffer and never read from it again. 
+
+- Okay so but here me out.
+- Our implementation does read from the buffer again.
+	- Sometimes the best way to do things is also the simplest.
+	- For some reason blog kept a local copy and only used that?
+
+## Volatile
+
+- If we lacked the skill and bravery of the instructor of this course, we may have a problem.
+- To avoid an erroneous optimization omitting all writes, we need to specify writes as _[volatile]_. 
+- This tells the compiler that the write has side effects and should not be optimized away.
+- [Read more](https://en.wikipedia.org/wiki/Volatile_(computer_programming))
+
+## Interested Students
+
+- There's a `read_volatile` and `write_volatile` in `std::ptr` and another in `core::ptr`, we might be able to use those.
+
+# Fin
+
+## Timeout
+
+- This is 700 lines of markdown source which usually is enough.
+- Otherwise we proceed to "Format".
+
+
+# Format
+
+## Formatting Macros
+
+- It would be nice to support Rust's formatting macros, too. 
+- We will also discover that Rust is, in point of fact, an object-oriented language.
+  	- Read: bad.
+- I was extremely annoyed by how to get this working, but I did it.
+
+## Functionality
+
+- We need to implement the [`core::fmt::Write`] trait. 
+	- I had foolishly assumed we could just use `format!`
+	- That would tragically be too reasonable.
+	- (It also would raise some unanswered questions about memory but whatever).
+- The only required method of this trait is `write_str`:
+  - [`core::fmt::Write`](https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html)
+
+## Sketch
+
+- Basically we need to write this:
+
+```{.rs filename="src/vga.rs"}
+impl core::fmt::Write for ??? {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        self.write_string(s);
-        Ok(())
+        // Do the thing. 
+        return Ok(());
     }
 }
 ```
-The `Ok(())` is just a `Ok` Result containing the `()` type.
 
-Now we can use Rust's built-in `write!`/`writeln!` formatting macros:
+- The `Ok(())` is just a `Ok` Result containing the `()` "unit type".
 
-```rust
-// in src/vga.rs
+## Workaround
 
-pub fn print_something() {
-    use core::fmt::Write;
-    let mut writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
+- I already can write text!
 
-    writer.write_byte(b'H');
-    writer.write_string("ello! ");
-    write!(writer, "The numbers are {} and {}", 42, 1.0/3.0).unwrap();
-}
-```
-
-Now you should see a `Hello! The numbers are 42 and 0.3333333333333333` at the bottom of the screen. The `write!` call returns a `Result` which causes a warning if not used, so we call the [`unwrap`] function on it, which panics if an error occurs. This isn't a problem in our case, since writes to the VGA buffer never fail.
-
-[`unwrap`]: https://doc.rust-lang.org/core/result/enum.Result.html#method.unwrap
-
-### Newlines
-Right now, we just ignore newlines and characters that don't fit into the line anymore. Instead, we want to move every character one line up (the top line gets deleted) and start at the beginning of the last line again. To do this, we add an implementation for the `new_line` method of `Writer`:
-
-```rust
-// in src/vga.rs
-
-impl Writer {
-    fn new_line(&mut self) {
-        for row in 1..BUFFER_HEIGHT {
-            for col in 0..BUFFER_WIDTH {
-                let character = self.buffer.chars[row][col].read();
-                self.buffer.chars[row - 1][col].write(character);
-            }
-        }
-        self.clear_row(BUFFER_HEIGHT - 1);
-        self.column_position = 0;
-    }
-
-    fn clear_row(&mut self, row: usize) {/* TODO */}
-}
-```
-We iterate over all the screen characters and move each character one row up. Note that the upper bound of the range notation (`..`) is exclusive. We also omit the 0th row (the first range starts at `1`) because it's the row that is shifted off screen.
-
-To finish the newline code, we add the `clear_row` method:
-
-```rust
-// in src/vga.rs
-
-impl Writer {
-    fn clear_row(&mut self, row: usize) {
-        let blank = ScreenChar {
-            ascii_character: b' ',
-            color_code: self.color_code,
-        };
-        for col in 0..BUFFER_WIDTH {
-            self.buffer.chars[row][col].write(blank);
-        }
+```{.rs filename="src/vga.rs"}
+impl core::fmt::Write for ??? {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        str_to_vga(s); 
+        return Ok(());
     }
 }
 ```
-This method clears a row by overwriting all of its characters with a space character.
 
-## A Global Interface
-To provide a global writer that can be used as an interface from other modules without carrying a `Writer` instance around, we try to create a static `WRITER`:
+## Dummy struct
 
-```rust
-// in src/vga.rs
+- I just make an arbitrary structure.
 
-pub static WRITER: Writer = Writer {
-    column_position: 0,
-    color_code: ColorCode::new(Color::Yellow, Color::Black),
-    buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-};
-```
+```{.rs filename="src/vga.rs"}
+struct Dummy { } 
 
-However, if we try to compile it now, the following errors occur:
-
-```
-error[E0015]: calls in statics are limited to constant functions, tuple structs and tuple variants
- --> src/vga.rs:7:17
-  |
-7 |     color_code: ColorCode::new(Color::Yellow, Color::Black),
-  |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error[E0396]: raw pointers cannot be dereferenced in statics
- --> src/vga.rs:8:22
-  |
-8 |     buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ dereference of raw pointer in constant
-
-error[E0017]: references in statics may only refer to immutable values
- --> src/vga.rs:8:22
-  |
-8 |     buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-  |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ statics require immutable values
-
-error[E0017]: references in statics may only refer to immutable values
- --> src/vga.rs:8:13
-  |
-8 |     buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ statics require immutable values
-```
-
-To understand what's happening here, we need to know that statics are initialized at compile time, in contrast to normal variables that are initialized at run time. The component of the Rust compiler that evaluates such initialization expressions is called the “[const evaluator]”. Its functionality is still limited, but there is ongoing work to expand it, for example in the “[Allow panicking in constants]” RFC.
-
-[const evaluator]: https://rustc-dev-guide.rust-lang.org/const-eval.html
-[Allow panicking in constants]: https://github.com/rust-lang/rfcs/pull/2345
-
-The issue with `ColorCode::new` would be solvable by using [`const` functions], but the fundamental problem here is that Rust's const evaluator is not able to convert raw pointers to references at compile time. Maybe it will work someday, but until then, we have to find another solution.
-
-[`const` functions]: https://doc.rust-lang.org/reference/const_eval.html#const-functions
-
-### Lazy Statics
-The one-time initialization of statics with non-const functions is a common problem in Rust. Fortunately, there already exists a good solution in a crate named [lazy_static]. This crate provides a `lazy_static!` macro that defines a lazily initialized `static`. Instead of computing its value at compile time, the `static` lazily initializes itself when accessed for the first time. Thus, the initialization happens at runtime, so arbitrarily complex initialization code is possible.
-
-[lazy_static]: https://docs.rs/lazy_static/1.0.1/lazy_static/
-
-Let's add the `lazy_static` crate to our project:
-
-```toml
-# in Cargo.toml
-
-[dependencies.lazy_static]
-version = "1.0"
-features = ["spin_no_std"]
-```
-
-We need the `spin_no_std` feature, since we don't link the standard library.
-
-With `lazy_static`, we can define our static `WRITER` without problems:
-
-```rust
-// in src/vga.rs
-
-use lazy_static::lazy_static;
-
-lazy_static! {
-    pub static ref WRITER: Writer = Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    };
+impl core::fmt::Write for Dummy {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        str_to_vga(s); 
+        return Ok(());
+    }
 }
 ```
 
-However, this `WRITER` is pretty useless since it is immutable. This means that we can't write anything to it (since all the write methods take `&mut self`). One possible solution would be to use a [mutable static]. But then every read and write to it would be unsafe since it could easily introduce data races and other bad things. Using `static mut` is highly discouraged. There were even proposals to [remove it][remove static mut]. But what are the alternatives? We could try to use an immutable static with a cell type like [RefCell] or even [UnsafeCell] that provides [interior mutability]. But these types aren't [Sync] \(with good reason), so we can't use them in statics.
+- Presumably it is clear why someone would find this an annoying way to do things.
 
-[mutable static]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable
-[remove static mut]: https://internals.rust-lang.org/t/pre-rfc-remove-static-mut/1437
-[RefCell]: https://doc.rust-lang.org/book/ch15-05-interior-mutability.html#keeping-track-of-borrows-at-runtime-with-refcellt
-[UnsafeCell]: https://doc.rust-lang.org/nightly/core/cell/struct.UnsafeCell.html
-[interior mutability]: https://doc.rust-lang.org/book/ch15-05-interior-mutability.html
-[Sync]: https://doc.rust-lang.org/nightly/core/marker/trait.Sync.html
+## This works
 
-### Spinlocks
-To get synchronized interior mutability, users of the standard library can use [Mutex]. It provides mutual exclusion by blocking threads when the resource is already locked. But our basic kernel does not have any blocking support or even a concept of threads, so we can't use it either. However, there is a really basic kind of mutex in computer science that requires no operating system features: the [spinlock]. Instead of blocking, the threads simply try to lock it again and again in a tight loop, thus burning CPU time until the mutex is free again.
+- I'm not kidding it actually does.
+- I was surprised too.
+	- I did forget to capitalized the W in write but...
 
-[Mutex]: https://doc.rust-lang.org/nightly/std/sync/struct.Mutex.html
-[spinlock]: https://en.wikipedia.org/wiki/Spinlock
-
-To use a spinning mutex, we can add the [spin crate] as a dependency:
-
-[spin crate]: https://crates.io/crates/spin
-
-```toml
-# in Cargo.toml
-[dependencies]
-spin = "0.5.2"
-```
-
-Then we can use the spinning mutex to add safe [interior mutability] to our static `WRITER`:
-
-```rust
-// in src/vga.rs
-
-use spin::Mutex;
-...
-lazy_static! {
-    pub static ref WRITER: Mutex<Writer> = Mutex::new(Writer {
-        column_position: 0,
-        color_code: ColorCode::new(Color::Yellow, Color::Black),
-        buffer: unsafe { &mut *(0xb8000 as *mut Buffer) },
-    });
-}
-```
-Now we can delete the `print_something` function and print directly from our `_start` function:
-
-```rust
-// in src/main.rs
+```{.rs filename="src/main.rs"}
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     use core::fmt::Write;
-    vga::WRITER.lock().write_str("Hello again").unwrap();
-    write!(vga::WRITER.lock(), ", some numbers: {} {}", 42, 1.337).unwrap();
-
+    let mut d = vga::Dummy { };
+    write!(d, "Hello {}!", "world");
     loop {}
 }
 ```
-We need to import the `fmt::Write` trait in order to be able to use its functions.
 
-### Safety
-Note that we only have a single unsafe block in our code, which is needed to create a `Buffer` reference pointing to `0xb8000`. Afterwards, all operations are safe. Rust uses bounds checking for array accesses by default, so we can't accidentally write outside the buffer. Thus, we encoded the required conditions in the type system and are able to provide a safe interface to the outside.
+- It throws an uninteresting warning.
 
 ### A println Macro
+
 Now that we have a global writer, we can add a `println` macro that can be used from anywhere in the codebase. Rust's [macro syntax] is a bit strange, so we won't try to write a macro from scratch. Instead, we look at the source of the [`println!` macro] in the standard library:
 
 [macro syntax]: https://doc.rust-lang.org/nightly/book/ch20-05-macros.html#declarative-macros-for-general-metaprogramming
