@@ -240,4 +240,70 @@ Learning CUDA is straight-forward and an all-around good time. Learning C++ is q
 
 ### Use of Numpy
 
-- 
+#### Download
+
+Given this is an advanced class, I'm going to trust you to do the following without providing example code.
+- Regard is as "unsporting" to write a download a file and work with a local copy.
+
+- Use `requests` to get an image by url.
+    - You can [read this](https://cd-public.github.io/courses/cs1/slides/requests.html)
+    - You can use [this URL](https://cd-public.github.io/ai101/images/photo-cat.jpg)
+```{.email}
+https://cd-public.github.io/ai101/images/photo-cat.jpg
+```
+- Use `BytesIO` to interpret the HTTP response as a file.
+- Use PIL's `Image` API to open the image.
+- Coerce to a NumPy array using NumPy.
+
+<!--
+
+```{.py}
+from io import BytesIO
+import requests
+from PIL import Image
+import numpy as np
+
+IMG_URL = "https://cd-public.github.io/ai101/images/photo-cat.jpg"
+
+arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))
+```
+
+-->
+
+#### Scale
+
+- Do I look like I know how to scale images?
+    - Probably either sample or average.
+    - I don't think I care.
+- My code scales to fit the VGA buffer horizontally then crops to fit it vertically.
+    - Recall, the VGA buffer has more pixels than we are addressing.
+    - You can only address characters, which are many pixels in size.
+    - Your image will be *low* resolution.
+
+#### Color Map
+
+- You image will include colors that cannot be recognized by the VGA text buffer.
+- You will need to compute color distance between the 
+    - Color you are trying to show, and
+    - The 16 available colors you computed in a previous step.
+- A naive approached would be to regard colors in 3-space with dimensions of `R`, `G`, and `B` values.
+    - This is appropriate, but sub-optimal.
+
+::: {.callout-note collapse="true"}
+
+### Extension for Advanced Students
+
+Advanced students will already be familiar with distance in $n$-space and hexcodes and should use a perceptually uniform color space. In this case, `L*a*b`.
+
+[Read more](https://en.wikipedia.org/wiki/CIELAB_color_space)
+
+There is first class support in Python, I hear, and you can learn more from this poster, but one of Professor Brown's undergraduate researchers.
+
+[Poster](https://luebke.us/publications/pdf/vss2019.poster1.pdf)
+
+:::
+
+You are doing this in NumPy to take advantage of vectorized operations.
+- [Read more](https://cd-public.github.io/scicom/05_numpy.html#vectorization)
+- Regard it as "unsporting" to use loops.
+
