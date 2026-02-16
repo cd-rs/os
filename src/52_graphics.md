@@ -21,7 +21,6 @@ array([[  0,   0,   0],
        [255,  87, 255],
        [255, 255,  87],
        [255, 255, 255]], dtype=uint8)
-       
 -->
 
 ## Homework
@@ -41,7 +40,7 @@ Be advised this is a multistage lab that is intended to be interesting rather th
    1. [ ] Scale
    1. [ ] Color map
    1. [ ] Output to `src/img.rs` as a datatype of some kind.
-1. [ ] Add a function to `src/main.rs` to display the image in `src/img.rs`
+1. [ ] Add a function to `src/colors.rs` to display the image in `src/img.rs`
 
 ## Step 0
 
@@ -96,7 +95,7 @@ pub extern "C" fn _start() -> ! {
 ### Your task
 
 - Create 16 evenly sized columns, one for each background color, across the screen.
-- Print no text.
+- Display no text.
 - Recall that there are 80 horizontal by 25 vertical characters.
 - Recall that there are 720 horizontal by 400 vertical pixels.
 - I am creating the below example using hexcodes I extracted and raw HTML.
@@ -140,7 +139,8 @@ pub extern "C" fn _start() -> ! {
 - Within the QEMU window, you can use <p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">Ctrl</kbd>+<kbd class="kbd docutils literal notranslate">Alt</kbd>+<kbd class="kbd docutils literal notranslate">2</kbd></kbd>
 - From here, you can input a variety of commands.
     - [Read more](https://qemu-project.gitlab.io/qemu/system/monitor.html)
-- At least try `help`
+- At least try `help` and have at least on thought about it.
+    - `qemu` is listed on a job add for a Google position in Portland starting at 113k/yr as I type this.
 
 ### Screendump
 
@@ -150,12 +150,16 @@ pub extern "C" fn _start() -> ! {
     - You will want to use `.ppm`
 
 ```{.sh}
-screendump filename
+screendump dump.ppm
 ```
 
 - QEMU documentation states:
 
 > Save screen into PPM image *filename*.
+
+## Step 3
+
+> Extract hex values from the `.ppm`
 
 ### PPM files
 
@@ -188,3 +192,52 @@ P6
     - You have a PPM image of type P6, this is the most common format (there is a less used P3)
     - Your image is 720 by 400 pixels
     - Brightness is out of 255.
+- From here I perceive 2 "obvious" options.
+    - Use some combination of `head`, `tail`, `hexdump` and other command line utilities to extract all hex values.
+    - Use Python, NumPy, and PIL, all of which you likely have on your device, to extract all hex values.
+    - Be advised you can compute the precise location of the first instance of every color in either a `.ppm` file or a NumPy array as you have perfect knowledge about the number of pixels.
+- These two are free:
+
+```{.py}
+import numpy as np
+from PIL import Image
+
+IMG_NAME = "dump.ppm"
+
+img = np.array(Image.open(IMG_NAME))
+print(img[0][:10])
+```
+
+```{.sh}
+cat dump.ppm | tail -1 | head -c4 | hexdump
+```
+
+- I ended up using Python here because I was going to use Python for the next step.
+    - Unless?
+    
+## Step 4
+
+> Create a script to convert images from url to VGA buffer array
+
+1. [ ] Download
+1. [ ] Scale
+1. [ ] Color map
+1. [ ] Output to `src/img.rs` as a (Rust) datatype of some kind.
+
+The following instructions assume students will proceed using Python's NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly [here](40_kernel.md#mmxsse).
+
+::: {.callout-note collapse="true"}
+
+### Extension for Advanced Students
+
+Advanced students will already be familiar with these operations and with Python. They should complete Step 4 in CUDA C++, fulfilling the extension learning objective of familiarity with GPU programming and bus operations as mediated by the host/device metaphor. If you do not have access to a physical NVIDIA GPU, I provide instructions on usage in Colab [here](https://github.com/cd-public/coluda/blob/main/GPU_CUDA.ipynb).
+
+Learning CUDA is straight-forward and an all-around good time. Learning C++ is quite the opposite. By combining both, you can practice moderation.
+
+[CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
+
+:::
+
+### Use of Numpy
+
+- 

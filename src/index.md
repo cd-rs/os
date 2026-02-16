@@ -44,8 +44,8 @@ format: html
 |0bX|03/23|`None`|`None`|`None`|
 |0xA|03/30|Paging|
 |0xB|03/06|Page Tables|
-|0xC|04/13|The Heap|
-|0xD|04/20|Allocators|[`None`](https://my.willamette.edu/site/ssrd)||
+|0xC|04/13|The Heap|[`None`](https://my.willamette.edu/site/ssrd)||
+|0xD|04/20|Allocators|
 |0xE|04/29|`async`||`None`|
 
 <!--
