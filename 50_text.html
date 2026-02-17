@@ -324,22 +324,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#timeout" id="toc-timeout" class="nav-link" data-scroll-target="#timeout">Timeout</a></li>
   </ul></li>
-  <li><a href="#format-1" id="toc-format-1" class="nav-link" data-scroll-target="#format-1">Format</a>
-  <ul class="collapse">
-  <li><a href="#formatting-macros" id="toc-formatting-macros" class="nav-link" data-scroll-target="#formatting-macros">Formatting Macros</a></li>
-  <li><a href="#functionality" id="toc-functionality" class="nav-link" data-scroll-target="#functionality">Functionality</a></li>
-  <li><a href="#sketch" id="toc-sketch" class="nav-link" data-scroll-target="#sketch">Sketch</a></li>
-  <li><a href="#workaround" id="toc-workaround" class="nav-link" data-scroll-target="#workaround">Workaround</a></li>
-  <li><a href="#dummy-struct" id="toc-dummy-struct" class="nav-link" data-scroll-target="#dummy-struct">Dummy struct</a></li>
-  <li><a href="#this-works" id="toc-this-works" class="nav-link" data-scroll-target="#this-works">This works</a>
-  <ul class="collapse">
-  <li><a href="#a-println-macro" id="toc-a-println-macro" class="nav-link" data-scroll-target="#a-println-macro">A println Macro</a></li>
-  <li><a href="#hello-world-using-println" id="toc-hello-world-using-println" class="nav-link" data-scroll-target="#hello-world-using-println">Hello World using <code>println</code></a></li>
-  <li><a href="#printing-panic-messages" id="toc-printing-panic-messages" class="nav-link" data-scroll-target="#printing-panic-messages">Printing Panic Messages</a></li>
-  </ul></li>
-  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
-  <li><a href="#whats-next" id="toc-whats-next" class="nav-link" data-scroll-target="#whats-next">What’s next?</a></li>
-  </ul></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="50_text.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
     </div>
@@ -1402,209 +1386,6 @@ struct Buffer {
 <li>This is 700 lines of markdown source which usually is enough.</li>
 <li>Otherwise we proceed to “Format”.</li>
 </ul>
-</section>
-</section>
-<section id="format-1" class="level1">
-<h1>Format</h1>
-<section id="formatting-macros" class="level2">
-<h2 class="anchored" data-anchor-id="formatting-macros">Formatting Macros</h2>
-<ul>
-<li>It would be nice to support Rust’s formatting macros, too.</li>
-<li>We will also discover that Rust is, in point of fact, an object-oriented language.
-<ul>
-<li>Read: bad.</li>
-</ul></li>
-<li>I was extremely annoyed by how to get this working, but I did it.</li>
-</ul>
-</section>
-<section id="functionality" class="level2">
-<h2 class="anchored" data-anchor-id="functionality">Functionality</h2>
-<ul>
-<li>We need to implement the [<code>core::fmt::Write</code>] trait.
-<ul>
-<li>I had foolishly assumed we could just use <code>format!</code></li>
-<li>That would tragically be too reasonable.</li>
-<li>(It also would raise some unanswered questions about memory but whatever).</li>
-</ul></li>
-<li>The only required method of this trait is <code>write_str</code>:
-<ul>
-<li><a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html"><code>core::fmt::Write</code></a></li>
-</ul></li>
-</ul>
-</section>
-<section id="sketch" class="level2">
-<h2 class="anchored" data-anchor-id="sketch">Sketch</h2>
-<ul>
-<li>Basically we need to write this:</li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>src/vga.rs</strong></pre>
-</div>
-<div class="sourceCode" id="cb25" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb25-1"><a href="#cb25-1"></a><span class="kw">impl</span> <span class="pp">core::fmt::</span><span class="bu">Write</span> <span class="cf">for</span> <span class="op">???</span> <span class="op">{</span></span>
-<span id="cb25-2"><a href="#cb25-2"></a>    <span class="kw">fn</span> write_str(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> s<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="pp">fmt::</span><span class="dt">Result</span> <span class="op">{</span></span>
-<span id="cb25-3"><a href="#cb25-3"></a>        <span class="co">// Do the thing. </span></span>
-<span id="cb25-4"><a href="#cb25-4"></a>        <span class="cf">return</span> <span class="cn">Ok</span>(())<span class="op">;</span></span>
-<span id="cb25-5"><a href="#cb25-5"></a>    <span class="op">}</span></span>
-<span id="cb25-6"><a href="#cb25-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ul>
-<li>The <code>Ok(())</code> is just a <code>Ok</code> Result containing the <code>()</code> “unit type”.</li>
-</ul>
-</section>
-<section id="workaround" class="level2">
-<h2 class="anchored" data-anchor-id="workaround">Workaround</h2>
-<ul>
-<li>I already can write text!</li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>src/vga.rs</strong></pre>
-</div>
-<div class="sourceCode" id="cb26" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">impl</span> <span class="pp">core::fmt::</span><span class="bu">Write</span> <span class="cf">for</span> <span class="op">???</span> <span class="op">{</span></span>
-<span id="cb26-2"><a href="#cb26-2"></a>    <span class="kw">fn</span> write_str(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> s<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="pp">fmt::</span><span class="dt">Result</span> <span class="op">{</span></span>
-<span id="cb26-3"><a href="#cb26-3"></a>        str_to_vga(s)<span class="op">;</span> </span>
-<span id="cb26-4"><a href="#cb26-4"></a>        <span class="cf">return</span> <span class="cn">Ok</span>(())<span class="op">;</span></span>
-<span id="cb26-5"><a href="#cb26-5"></a>    <span class="op">}</span></span>
-<span id="cb26-6"><a href="#cb26-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="dummy-struct" class="level2">
-<h2 class="anchored" data-anchor-id="dummy-struct">Dummy struct</h2>
-<ul>
-<li>I just make an arbitrary structure.</li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>src/vga.rs</strong></pre>
-</div>
-<div class="sourceCode" id="cb27" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb27-1"><a href="#cb27-1"></a><span class="kw">struct</span> Dummy <span class="op">{</span> <span class="op">}</span> </span>
-<span id="cb27-2"><a href="#cb27-2"></a></span>
-<span id="cb27-3"><a href="#cb27-3"></a><span class="kw">impl</span> <span class="pp">core::fmt::</span><span class="bu">Write</span> <span class="cf">for</span> Dummy <span class="op">{</span></span>
-<span id="cb27-4"><a href="#cb27-4"></a>    <span class="kw">fn</span> write_str(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> s<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="pp">fmt::</span><span class="dt">Result</span> <span class="op">{</span></span>
-<span id="cb27-5"><a href="#cb27-5"></a>        str_to_vga(s)<span class="op">;</span> </span>
-<span id="cb27-6"><a href="#cb27-6"></a>        <span class="cf">return</span> <span class="cn">Ok</span>(())<span class="op">;</span></span>
-<span id="cb27-7"><a href="#cb27-7"></a>    <span class="op">}</span></span>
-<span id="cb27-8"><a href="#cb27-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ul>
-<li>Presumably it is clear why someone would find this an annoying way to do things.</li>
-</ul>
-</section>
-<section id="this-works" class="level2">
-<h2 class="anchored" data-anchor-id="this-works">This works</h2>
-<ul>
-<li>I’m not kidding it actually does.</li>
-<li>I was surprised too.
-<ul>
-<li>I did forget to capitalized the W in write but…</li>
-</ul></li>
-</ul>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>src/main.rs</strong></pre>
-</div>
-<div class="sourceCode" id="cb28" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a href="#cb28-1"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb28-3"><a href="#cb28-3"></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb28-4"><a href="#cb28-4"></a>    <span class="kw">let</span> <span class="kw">mut</span> d <span class="op">=</span> <span class="pp">vga::</span>Dummy <span class="op">{</span> <span class="op">};</span></span>
-<span id="cb28-5"><a href="#cb28-5"></a>    <span class="pp">write!</span>(d<span class="op">,</span> <span class="st">"Hello {}!"</span><span class="op">,</span> <span class="st">"world"</span>)<span class="op">;</span></span>
-<span id="cb28-6"><a href="#cb28-6"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb28-7"><a href="#cb28-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ul>
-<li>It throws an uninteresting warning.</li>
-</ul>
-<section id="a-println-macro" class="level3">
-<h3 class="anchored" data-anchor-id="a-println-macro">A println Macro</h3>
-<p>Now that we have a global writer, we can add a <code>println</code> macro that can be used from anywhere in the codebase. Rust’s <a href="https://doc.rust-lang.org/nightly/book/ch20-05-macros.html#declarative-macros-for-general-metaprogramming">macro syntax</a> is a bit strange, so we won’t try to write a macro from scratch. Instead, we look at the source of the <a href="https://doc.rust-lang.org/nightly/std/macro.println!.html"><code>println!</code> macro</a> in the standard library:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb29-1"><a href="#cb29-1"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb29-2"><a href="#cb29-2"></a><span class="pp">macro_rules!</span> println <span class="op">{</span></span>
-<span id="cb29-3"><a href="#cb29-3"></a>    () <span class="op">=&gt;</span> (<span class="pp">print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
-<span id="cb29-4"><a href="#cb29-4"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="pp">print!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> <span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb29-5"><a href="#cb29-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Macros are defined through one or more rules, similar to <code>match</code> arms. The <code>println</code> macro has two rules: The first rule is for invocations without arguments, e.g., <code>println!()</code>, which is expanded to <code>print!("\n")</code> and thus just prints a newline. The second rule is for invocations with parameters such as <code>println!("Hello")</code> or <code>println!("Number: {}", 4)</code>. It is also expanded to an invocation of the <code>print!</code> macro, passing all arguments and an additional newline <code>\n</code> at the end.</p>
-<p>The <code>#[macro_export]</code> attribute makes the macro available to the whole crate (not just the module it is defined in) and external crates. It also places the macro at the crate root, which means we have to import the macro through <code>use std::println</code> instead of <code>std::macros::println</code>.</p>
-<p>The <a href="https://doc.rust-lang.org/nightly/std/macro.print!.html"><code>print!</code> macro</a> is defined as:</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb30-1"><a href="#cb30-1"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb30-2"><a href="#cb30-2"></a><span class="pp">macro_rules!</span> print <span class="op">{</span></span>
-<span id="cb30-3"><a href="#cb30-3"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::io::</span>_print(<span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb30-4"><a href="#cb30-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The macro expands to a call of the <a href="https://github.com/rust-lang/rust/blob/29f5c699b11a6a148f097f82eaa05202f8799bbc/src/libstd/io/stdio.rs#L698"><code>_print</code> function</a> in the <code>io</code> module. The <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/macros.html#the-variable-crate"><code>$crate</code> variable</a> ensures that the macro also works from outside the <code>std</code> crate by expanding to <code>std</code> when it’s used in other crates.</p>
-<p>The <a href="https://doc.rust-lang.org/nightly/std/macro.format_args.html"><code>format_args</code> macro</a> builds a <a href="https://doc.rust-lang.org/nightly/core/fmt/struct.Arguments.html">fmt::Arguments</a> type from the passed arguments, which is passed to <code>_print</code>. The <a href="https://github.com/rust-lang/rust/blob/29f5c699b11a6a148f097f82eaa05202f8799bbc/src/libstd/io/stdio.rs#L698"><code>_print</code> function</a> of libstd calls <code>print_to</code>, which is rather complicated because it supports different <code>Stdout</code> devices. We don’t need that complexity since we just want to print to the VGA buffer.</p>
-<p>To print to the VGA buffer, we just copy the <code>println!</code> and <code>print!</code> macros, but modify them to use our own <code>_print</code> function:</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb31-1"><a href="#cb31-1"></a><span class="co">// in src/vga.rs</span></span>
-<span id="cb31-2"><a href="#cb31-2"></a></span>
-<span id="cb31-3"><a href="#cb31-3"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb31-4"><a href="#cb31-4"></a><span class="pp">macro_rules!</span> print <span class="op">{</span></span>
-<span id="cb31-5"><a href="#cb31-5"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::vga::</span>_print(<span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb31-6"><a href="#cb31-6"></a><span class="op">}</span></span>
-<span id="cb31-7"><a href="#cb31-7"></a></span>
-<span id="cb31-8"><a href="#cb31-8"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb31-9"><a href="#cb31-9"></a><span class="pp">macro_rules!</span> println <span class="op">{</span></span>
-<span id="cb31-10"><a href="#cb31-10"></a>    () <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
-<span id="cb31-11"><a href="#cb31-11"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> <span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb31-12"><a href="#cb31-12"></a><span class="op">}</span></span>
-<span id="cb31-13"><a href="#cb31-13"></a></span>
-<span id="cb31-14"><a href="#cb31-14"></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
-<span id="cb31-15"><a href="#cb31-15"></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
-<span id="cb31-16"><a href="#cb31-16"></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb31-17"><a href="#cb31-17"></a>    WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
-<span id="cb31-18"><a href="#cb31-18"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>One thing that we changed from the original <code>println</code> definition is that we prefixed the invocations of the <code>print!</code> macro with <code>$crate</code> too. This ensures that we don’t need to import the <code>print!</code> macro too if we only want to use <code>println</code>.</p>
-<p>Like in the standard library, we add the <code>#[macro_export]</code> attribute to both macros to make them available everywhere in our crate. Note that this places the macros in the root namespace of the crate, so importing them via <code>use crate::vga::println</code> does not work. Instead, we have to do <code>use crate::println</code>.</p>
-<p>The <code>_print</code> function locks our static <code>WRITER</code> and calls the <code>write_fmt</code> method on it. This method is from the <code>Write</code> trait, which we need to import. The additional <code>unwrap()</code> at the end panics if printing isn’t successful. But since we always return <code>Ok</code> in <code>write_str</code>, that should not happen.</p>
-<p>Since the macros need to be able to call <code>_print</code> from outside of the module, the function needs to be public. However, since we consider this a private implementation detail, we add the <a href="https://doc.rust-lang.org/nightly/rustdoc/write-documentation/the-doc-attribute.html#hidden"><code>doc(hidden)</code> attribute</a> to hide it from the generated documentation.</p>
-</section>
-<section id="hello-world-using-println" class="level3">
-<h3 class="anchored" data-anchor-id="hello-world-using-println">Hello World using <code>println</code></h3>
-<p>Now we can use <code>println</code> in our <code>_start</code> function:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb32-1"><a href="#cb32-1"></a><span class="co">// in src/main.rs</span></span>
-<span id="cb32-2"><a href="#cb32-2"></a></span>
-<span id="cb32-3"><a href="#cb32-3"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb32-4"><a href="#cb32-4"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb32-5"><a href="#cb32-5"></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
-<span id="cb32-6"><a href="#cb32-6"></a></span>
-<span id="cb32-7"><a href="#cb32-7"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb32-8"><a href="#cb32-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that we don’t have to import the macro in the main function, because it already lives in the root namespace.</p>
-<p>As expected, we now see a <em>“Hello World!”</em> on the screen:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="vga-hello-world.png" class="img-fluid figure-img"></p>
-<figcaption>QEMU printing “Hello World!”</figcaption>
-</figure>
-</div>
-</section>
-<section id="printing-panic-messages" class="level3">
-<h3 class="anchored" data-anchor-id="printing-panic-messages">Printing Panic Messages</h3>
-<p>Now that we have a <code>println</code> macro, we can use it in our panic function to print the panic message and the location of the panic:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb33-1"><a href="#cb33-1"></a><span class="co">// in main.rs</span></span>
-<span id="cb33-2"><a href="#cb33-2"></a></span>
-<span id="cb33-3"><a href="#cb33-3"></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb33-4"><a href="#cb33-4"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb33-5"><a href="#cb33-5"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb33-6"><a href="#cb33-6"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
-<span id="cb33-7"><a href="#cb33-7"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb33-8"><a href="#cb33-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When we now insert <code>panic!("Some panic message");</code> in our <code>_start</code> function, we get the following output:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="vga-panic.png" class="img-fluid figure-img"></p>
-<figcaption>QEMU printing “panicked at ‘Some panic message’, src/main.rs:28:5</figcaption>
-</figure>
-</div>
-<p>So we know not only that a panic has occurred, but also the panic message and where in the code it happened.</p>
-</section>
-</section>
-<section id="summary" class="level2">
-<h2 class="anchored" data-anchor-id="summary">Summary</h2>
-<p>In this post, we learned about the structure of the VGA text buffer and how it can be written through the memory mapping at address <code>0xb8000</code>. We created a Rust module that encapsulates the unsafety of writing to this memory-mapped buffer and presents a safe and convenient interface to the outside.</p>
-<p>Thanks to cargo, we also saw how easy it is to add dependencies on third-party libraries. The two dependencies that we added, <code>lazy_static</code> and <code>spin</code>, are very useful in OS development and we will use them in more places in future posts.</p>
-</section>
-<section id="whats-next" class="level2">
-<h2 class="anchored" data-anchor-id="whats-next">What’s next?</h2>
-<p>The next post explains how to set up Rust’s built-in unit test framework. We will then create some basic unit tests for the VGA buffer module from this post.</p>
 
 
 <!-- -->
@@ -2096,943 +1877,740 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb34" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb34-1"><a href="#cb34-1"></a><span class="co">---</span></span>
-<span id="cb34-2"><a href="#cb34-2"></a><span class="an">title:</span><span class="co"> Text</span></span>
-<span id="cb34-3"><a href="#cb34-3"></a><span class="co">---</span></span>
-<span id="cb34-4"><a href="#cb34-4"></a></span>
-<span id="cb34-5"><a href="#cb34-5"></a><span class="fu">## Announcements</span></span>
-<span id="cb34-6"><a href="#cb34-6"></a></span>
-<span id="cb34-7"><a href="#cb34-7"></a><span class="ss">- </span>**Action Items**:</span>
-<span id="cb34-8"><a href="#cb34-8"></a><span class="ss">  - </span>Do you text output yet?</span>
-<span id="cb34-9"><a href="#cb34-9"></a><span class="ss">    - </span>The coolest assignment ever for a third week in a row.</span>
-<span id="cb34-10"><a href="#cb34-10"></a><span class="ss">    - </span>How do I keep getting away with it.</span>
-<span id="cb34-11"><a href="#cb34-11"></a></span>
-<span id="cb34-12"><a href="#cb34-12"></a><span class="fu">## Citations</span></span>
-<span id="cb34-13"><a href="#cb34-13"></a></span>
-<span id="cb34-14"><a href="#cb34-14"></a><span class="ss">- </span>I tried to steal this but I thought it was too bad and changed everything. </span>
-<span id="cb34-15"><a href="#cb34-15"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">VGA Text Mode</span><span class="co">](https://os.phil-opp.com/vga-text-mode/)</span></span>
-<span id="cb34-16"><a href="#cb34-16"></a></span>
-<span id="cb34-17"><a href="#cb34-17"></a><span class="fu"># Background</span></span>
-<span id="cb34-18"><a href="#cb34-18"></a></span>
-<span id="cb34-19"><a href="#cb34-19"></a><span class="fu">## VGA Text Mode</span></span>
-<span id="cb34-20"><a href="#cb34-20"></a></span>
-<span id="cb34-21"><a href="#cb34-21"></a><span class="ss">- </span>We recall <span class="co">[</span><span class="ot">VGA text mode</span><span class="co">](https://en.wikipedia.org/wiki/VGA-compatible_text_mode)</span> from the homework. </span>
-<span id="cb34-22"><a href="#cb34-22"></a><span class="ss">    - </span>A simple way to print text to the screen. </span>
-<span id="cb34-23"><a href="#cb34-23"></a><span class="ss">- </span>We recall that Rust prints via a "macro"</span>
-<span id="cb34-24"><a href="#cb34-24"></a><span class="ss">- </span>Now we:</span>
-<span id="cb34-25"><a href="#cb34-25"></a><span class="ss">    - </span>Create an interface to encapsulating all unsafety in a separate module. </span>
-<span id="cb34-26"><a href="#cb34-26"></a><span class="ss">    - </span>We also implement support for Rust's <span class="co">[</span><span class="ot">formatting macros</span><span class="co">](https://en.wikipedia.org/wiki/VGA-compatible_text_mode)</span></span>
-<span id="cb34-27"><a href="#cb34-27"></a>    </span>
-<span id="cb34-28"><a href="#cb34-28"></a><span class="fu">## The Buffer</span></span>
-<span id="cb34-29"><a href="#cb34-29"></a></span>
-<span id="cb34-30"><a href="#cb34-30"></a><span class="ss">- </span>To print a character to the screen in VGA text mode, one has to write it to the text buffer of the VGA hardware. </span>
-<span id="cb34-31"><a href="#cb34-31"></a><span class="ss">    - </span>A byte passing over a bus to fixed location will render as ASCII on a screen.</span>
-<span id="cb34-32"><a href="#cb34-32"></a></span>
-<span id="cb34-33"><a href="#cb34-33"></a><span class="fu">## 1d or 2d</span></span>
-<span id="cb34-34"><a href="#cb34-34"></a></span>
-<span id="cb34-35"><a href="#cb34-35"></a><span class="ss">- </span>The VGA text buffer renders as two-dimensional array.</span>
-<span id="cb34-36"><a href="#cb34-36"></a><span class="ss">    - </span>Addressed as a one dimensional array.</span>
-<span id="cb34-37"><a href="#cb34-37"></a><span class="ss">    - </span>Safe to assume 25 rows and 80 columns.</span>
-<span id="cb34-38"><a href="#cb34-38"></a><span class="ss">    - </span>Each position is an ASCII (*not* unicode) character.</span>
-<span id="cb34-39"><a href="#cb34-39"></a>    </span>
-<span id="cb34-40"><a href="#cb34-40"></a><span class="fu">## Format</span></span>
-<span id="cb34-41"><a href="#cb34-41"></a></span>
-<span id="cb34-42"><a href="#cb34-42"></a><span class="ss">- </span>Describes a single screen character through the following format:</span>
-<span id="cb34-43"><a href="#cb34-43"></a></span>
-<span id="cb34-44"><a href="#cb34-44"></a>| Bit(s) | Value            |</span>
-<span id="cb34-45"><a href="#cb34-45"></a>| ------ | ---------------- |</span>
-<span id="cb34-46"><a href="#cb34-46"></a>| 0-7    | ASCII code point |</span>
-<span id="cb34-47"><a href="#cb34-47"></a>| 8-11   | Foreground color |</span>
-<span id="cb34-48"><a href="#cb34-48"></a>| 12-14  | Background color |</span>
-<span id="cb34-49"><a href="#cb34-49"></a>| 15     | Blink            |</span>
-<span id="cb34-50"><a href="#cb34-50"></a></span>
-<span id="cb34-51"><a href="#cb34-51"></a><span class="ss">- </span>I did not see blinking. </span>
-<span id="cb34-52"><a href="#cb34-52"></a></span>
-<span id="cb34-53"><a href="#cb34-53"></a><span class="fu">## First Byte</span></span>
-<span id="cb34-54"><a href="#cb34-54"></a></span>
-<span id="cb34-55"><a href="#cb34-55"></a><span class="ss">- </span>The first byte represents the character that should be printed in the <span class="co">[</span><span class="ot">ASCII encoding</span><span class="co">]</span>. </span>
-<span id="cb34-56"><a href="#cb34-56"></a><span class="ss">    - </span>We recall we say many mentions of Python in firmware jobs.</span>
-<span id="cb34-57"><a href="#cb34-57"></a><span class="in">```{.sh}</span></span>
-<span id="cb34-58"><a href="#cb34-58"></a><span class="in">python3 -c "[print(chr(a), ':', a) for a in range(ord('A'), ord('z')+1)]"</span></span>
-<span id="cb34-59"><a href="#cb34-59"></a><span class="in">```</span></span>
-<span id="cb34-60"><a href="#cb34-60"></a></span>
-<span id="cb34-61"><a href="#cb34-61"></a><span class="fu">## Except</span></span>
-<span id="cb34-62"><a href="#cb34-62"></a></span>
-<span id="cb34-63"><a href="#cb34-63"></a><span class="ss">- </span>Okay it isn't actually ASCII.</span>
-<span id="cb34-64"><a href="#cb34-64"></a><span class="ss">- </span>It's <span class="co">[</span><span class="ot">_code page 437_</span><span class="co">](https://en.wikipedia.org/wiki/Code_page_437)</span></span>
-<span id="cb34-65"><a href="#cb34-65"></a><span class="ss">- </span>We think of it as an IBM specific ASCII extension and just use the ASCII subset.</span>
-<span id="cb34-66"><a href="#cb34-66"></a></span>
-<span id="cb34-67"><a href="#cb34-67"></a><span class="fu">## Second Byte</span></span>
-<span id="cb34-68"><a href="#cb34-68"></a></span>
-<span id="cb34-69"><a href="#cb34-69"></a><span class="ss">- </span>The second **byte** defines how the character is displayed. </span>
-<span id="cb34-70"><a href="#cb34-70"></a><span class="ss">    - </span>The first **four** bits define the foreground color.</span>
-<span id="cb34-71"><a href="#cb34-71"></a><span class="ss">    - </span>The next three bits the background color</span>
-<span id="cb34-72"><a href="#cb34-72"></a><span class="ss">    - </span>*Nominally* the last bit whether the character should blink.</span>
-<span id="cb34-73"><a href="#cb34-73"></a><span class="ss">        - </span>I did not see blinking.</span>
-<span id="cb34-74"><a href="#cb34-74"></a><span class="ss">        - </span>May be a <span class="in">`qemu`</span> thing I'm not sure.</span>
-<span id="cb34-75"><a href="#cb34-75"></a></span>
-<span id="cb34-76"><a href="#cb34-76"></a><span class="fu">## Colors {.smaller} </span></span>
-<span id="cb34-77"><a href="#cb34-77"></a>        </span>
-<span id="cb34-78"><a href="#cb34-78"></a><span class="ss">- </span>Using octal.</span>
-<span id="cb34-79"><a href="#cb34-79"></a></span>
-<span id="cb34-80"><a href="#cb34-80"></a>| Number | Color      | Bright   | Bright Color |</span>
-<span id="cb34-81"><a href="#cb34-81"></a>| ------ | ---------- | ------------------- | ------------ |</span>
-<span id="cb34-82"><a href="#cb34-82"></a>| 0o00    | Black      | 0o10                 | Dark Gray    |</span>
-<span id="cb34-83"><a href="#cb34-83"></a>| 0o01    | Blue       | 0o11                 | Light Blue   |</span>
-<span id="cb34-84"><a href="#cb34-84"></a>| 0o02    | Green      | 0o12                 | Light Green  |</span>
-<span id="cb34-85"><a href="#cb34-85"></a>| 0o03    | Cyan       | 0o13                 | Light Cyan   |</span>
-<span id="cb34-86"><a href="#cb34-86"></a>| 0o04    | Red        | 0o14                 | Light Red    |</span>
-<span id="cb34-87"><a href="#cb34-87"></a>| 0o05    | Magenta    | 0o15                 | Pink         |</span>
-<span id="cb34-88"><a href="#cb34-88"></a>| 0o06    | Brown      | 0o16                 | Yellow       |</span>
-<span id="cb34-89"><a href="#cb34-89"></a>| 0o07    | Light Gray | 0o17                 | White        |</span>
-<span id="cb34-90"><a href="#cb34-90"></a></span>
-<span id="cb34-91"><a href="#cb34-91"></a><span class="fu">## Bright/Blink</span></span>
-<span id="cb34-92"><a href="#cb34-92"></a></span>
-<span id="cb34-93"><a href="#cb34-93"></a><span class="ss">- </span>Bit 4 is the _bright bit_.</span>
-<span id="cb34-94"><a href="#cb34-94"></a><span class="ss">    - </span>For example, blue into light blue. </span>
-<span id="cb34-95"><a href="#cb34-95"></a><span class="ss">- </span>For the background color, this bit is nominally repurposed as the blink bit.</span>
-<span id="cb34-96"><a href="#cb34-96"></a></span>
-<span id="cb34-97"><a href="#cb34-97"></a><span class="fu">## Memory-mapped I/O</span></span>
-<span id="cb34-98"><a href="#cb34-98"></a></span>
-<span id="cb34-99"><a href="#cb34-99"></a><span class="ss">- </span>Okay so this is cool.</span>
-<span id="cb34-100"><a href="#cb34-100"></a><span class="ss">- </span>Recall the bus!</span>
-<span id="cb34-101"><a href="#cb34-101"></a><span class="ss">- </span>We are going to steal some diagrams.</span>
-<span id="cb34-102"><a href="#cb34-102"></a><span class="ss">    - </span>Thanks <span class="co">[</span><span class="ot">Geeks for Geeks</span><span class="co">](https://www.geeksforgeeks.org/computer-organization-architecture/memory-mapped-i-o-and-isolated-i-o/)</span></span>
-<span id="cb34-103"><a href="#cb34-103"></a>    </span>
-<span id="cb34-104"><a href="#cb34-104"></a><span class="fu">## Isolated I/O</span></span>
-<span id="cb34-105"><a href="#cb34-105"></a></span>
-<span id="cb34-106"><a href="#cb34-106"></a><span class="ss">- </span>Imagine a form of I/O that isn't cool.</span>
-<span id="cb34-107"><a href="#cb34-107"></a><span class="ss">- </span>It may have separate address spaces.</span>
-<span id="cb34-108"><a href="#cb34-108"></a><span class="ss">    - </span>So there may be a <span class="in">`0x64`</span> memory location and also <span class="in">`0x64`</span> device.</span>
-<span id="cb34-109"><a href="#cb34-109"></a></span>
-<span id="cb34-110"><a href="#cb34-110"></a><span class="al">![](https://media.geeksforgeeks.org/wp-content/uploads/20250506151408311194/isolate-io.webp)</span></span>
-<span id="cb34-111"><a href="#cb34-111"></a></span>
-<span id="cb34-112"><a href="#cb34-112"></a><span class="fu">## This isn't cool</span></span>
-<span id="cb34-113"><a href="#cb34-113"></a></span>
-<span id="cb34-114"><a href="#cb34-114"></a><span class="ss">- </span>We already discussed Harvard vs. von Neumann architecture.</span>
-<span id="cb34-115"><a href="#cb34-115"></a><span class="ss">- </span>Having two memory spaces is not at all cool.</span>
-<span id="cb34-116"><a href="#cb34-116"></a><span class="ss">- </span>So we don't do it.</span>
-<span id="cb34-117"><a href="#cb34-117"></a><span class="ss">- </span>There's also port-mapped I/O (similarly not cool.</span>
-<span id="cb34-118"><a href="#cb34-118"></a></span>
-<span id="cb34-119"><a href="#cb34-119"></a><span class="fu">## Memory-Mapped I/O</span></span>
-<span id="cb34-120"><a href="#cb34-120"></a></span>
-<span id="cb34-121"><a href="#cb34-121"></a><span class="ss">- </span>Imagine the following.</span>
-<span id="cb34-122"><a href="#cb34-122"></a><span class="ss">  - </span>The bootloader lives at <span class="in">`0x0`</span></span>
-<span id="cb34-123"><a href="#cb34-123"></a><span class="ss">  - </span>The OS lives at <span class="in">`0x1`</span></span>
-<span id="cb34-124"><a href="#cb34-124"></a><span class="ss">  - </span>The keyboard lives at <span class="in">`0x2`</span></span>
-<span id="cb34-125"><a href="#cb34-125"></a><span class="ss">  - </span>The internet (via a network card) at <span class="in">`0x3`</span></span>
-<span id="cb34-126"><a href="#cb34-126"></a><span class="ss">  - </span>The monitor at <span class="in">`0x4`</span></span>
-<span id="cb34-127"><a href="#cb34-127"></a><span class="ss">- </span>This obviously cool.</span>
-<span id="cb34-128"><a href="#cb34-128"></a></span>
-<span id="cb34-129"><a href="#cb34-129"></a><span class="fu">## Altogether </span></span>
-<span id="cb34-130"><a href="#cb34-130"></a></span>
-<span id="cb34-131"><a href="#cb34-131"></a><span class="ss">- </span>One Big Happy Memory Space </span>
-<span id="cb34-132"><a href="#cb34-132"></a></span>
-<span id="cb34-133"><a href="#cb34-133"></a><span class="al">![](https://media.geeksforgeeks.org/wp-content/uploads/20250506151651561116/memory-io.webp)</span></span>
-<span id="cb34-134"><a href="#cb34-134"></a></span>
-<span id="cb34-135"><a href="#cb34-135"></a><span class="fu">## Downsides</span></span>
-<span id="cb34-136"><a href="#cb34-136"></a></span>
-<span id="cb34-137"><a href="#cb34-137"></a><span class="ss">- </span>MMIO is a helpful *abstraction* - we already know how to think about memory, so we don't need to learn much to do I/O.</span>
-<span id="cb34-138"><a href="#cb34-138"></a><span class="ss">    - </span>There's downsides.</span>
-<span id="cb34-139"><a href="#cb34-139"></a><span class="ss">    - </span>We shouldn't be able to write to keyboard, probably.</span>
-<span id="cb34-140"><a href="#cb34-140"></a><span class="ss">    - </span>Or read from a monitor.</span>
-<span id="cb34-141"><a href="#cb34-141"></a><span class="ss">- </span>But its fast and easy, like BIOS vs. UEFI.</span>
-<span id="cb34-142"><a href="#cb34-142"></a></span>
-<span id="cb34-143"><a href="#cb34-143"></a><span class="fu"># x86_64</span></span>
-<span id="cb34-144"><a href="#cb34-144"></a></span>
-<span id="cb34-145"><a href="#cb34-145"></a><span class="fu">## In x86_64</span></span>
-<span id="cb34-146"><a href="#cb34-146"></a></span>
-<span id="cb34-147"><a href="#cb34-147"></a><span class="ss">- </span>On our emulated device, VGA text buffer lives at address <span class="in">`0xb8000`</span>. </span>
-<span id="cb34-148"><a href="#cb34-148"></a><span class="ss">    - </span>Absolute geniuses will crack open C and get into trouble.</span>
-<span id="cb34-149"><a href="#cb34-149"></a><span class="ss">- </span>So any read to this location:</span>
-<span id="cb34-150"><a href="#cb34-150"></a><span class="ss">    - </span>Doesn't go to MMU/RAM/SSD</span>
-<span id="cb34-151"><a href="#cb34-151"></a><span class="ss">    - </span>Does go to VGA hardware</span>
-<span id="cb34-152"><a href="#cb34-152"></a></span>
-<span id="cb34-153"><a href="#cb34-153"></a></span>
-<span id="cb34-154"><a href="#cb34-154"></a><span class="fu">## Alert!</span></span>
-<span id="cb34-155"><a href="#cb34-155"></a></span>
-<span id="cb34-156"><a href="#cb34-156"></a><span class="ss">- </span>MMIO, especially older devices, might not support all normal operations. </span>
-<span id="cb34-157"><a href="#cb34-157"></a><span class="ss">- </span>For example, a device could only support byte-wise reads and return junk when a <span class="in">`u64`</span> is read. </span>
-<span id="cb34-158"><a href="#cb34-158"></a><span class="ss">    - </span>Block-write "Hello world!" is a homework extension. </span>
-<span id="cb34-159"><a href="#cb34-159"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vgamem.htm#manip)</span></span>
-<span id="cb34-160"><a href="#cb34-160"></a></span>
-<span id="cb34-161"><a href="#cb34-161"></a><span class="fu">## A Rust Module</span></span>
-<span id="cb34-162"><a href="#cb34-162"></a></span>
-<span id="cb34-163"><a href="#cb34-163"></a><span class="ss">- </span>Now we "know" how the VGA buffer works.</span>
-<span id="cb34-164"><a href="#cb34-164"></a><span class="ss">- </span>We can create a Rust module to handle print and standard out:</span>
-<span id="cb34-165"><a href="#cb34-165"></a></span>
-<span id="cb34-166"><a href="#cb34-166"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-167"><a href="#cb34-167"></a><span class="in">mod vga;</span></span>
-<span id="cb34-168"><a href="#cb34-168"></a><span class="in">```</span></span>
-<span id="cb34-169"><a href="#cb34-169"></a></span>
-<span id="cb34-170"><a href="#cb34-170"></a><span class="ss">- </span>We also must create a new <span class="in">`src/vga.rs`</span> file.</span>
-<span id="cb34-171"><a href="#cb34-171"></a></span>
-<span id="cb34-172"><a href="#cb34-172"></a><span class="co">&lt;!--</span></span>
-<span id="cb34-173"><a href="#cb34-173"></a></span>
-<span id="cb34-174"><a href="#cb34-174"></a><span class="co">## Colors</span></span>
-<span id="cb34-175"><a href="#cb34-175"></a></span>
-<span id="cb34-176"><a href="#cb34-176"></a><span class="co">- Represent colors using an `enum`:</span></span>
-<span id="cb34-177"><a href="#cb34-177"></a></span>
-<span id="cb34-178"><a href="#cb34-178"></a><span class="co">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-179"><a href="#cb34-179"></a><span class="co">#[allow(dead_code)]</span></span>
-<span id="cb34-180"><a href="#cb34-180"></a><span class="co">#[derive(Debug, Clone, Copy, PartialEq, Eq)]</span></span>
-<span id="cb34-181"><a href="#cb34-181"></a><span class="co">#[repr(u8)]</span></span>
-<span id="cb34-182"><a href="#cb34-182"></a><span class="co">pub enum Color {</span></span>
-<span id="cb34-183"><a href="#cb34-183"></a><span class="co">    Blck = 0o00,</span></span>
-<span id="cb34-184"><a href="#cb34-184"></a><span class="co">    Blue = 0o01,</span></span>
-<span id="cb34-185"><a href="#cb34-185"></a><span class="co">    Gren = 0o02,</span></span>
-<span id="cb34-186"><a href="#cb34-186"></a><span class="co">    Cyan = 0o03,</span></span>
-<span id="cb34-187"><a href="#cb34-187"></a><span class="co">    Redd = 0o04,</span></span>
-<span id="cb34-188"><a href="#cb34-188"></a><span class="co">    Mgnt = 0o05,</span></span>
-<span id="cb34-189"><a href="#cb34-189"></a><span class="co">    Brwn = 0o06,</span></span>
-<span id="cb34-190"><a href="#cb34-190"></a><span class="co">    LGry = 0o07,</span></span>
-<span id="cb34-191"><a href="#cb34-191"></a><span class="co">    DGry = 0o10,</span></span>
-<span id="cb34-192"><a href="#cb34-192"></a><span class="co">    LBlu = 0o11,</span></span>
-<span id="cb34-193"><a href="#cb34-193"></a><span class="co">    LGrn = 0o12,</span></span>
-<span id="cb34-194"><a href="#cb34-194"></a><span class="co">    LCyn = 0o13,</span></span>
-<span id="cb34-195"><a href="#cb34-195"></a><span class="co">    LRed = 0o14,</span></span>
-<span id="cb34-196"><a href="#cb34-196"></a><span class="co">    Pink = 0o15,</span></span>
-<span id="cb34-197"><a href="#cb34-197"></a><span class="co">    Yelo = 0o16,</span></span>
-<span id="cb34-198"><a href="#cb34-198"></a><span class="co">    Whte = 0o17,</span></span>
-<span id="cb34-199"><a href="#cb34-199"></a><span class="co">}</span></span>
-<span id="cb34-200"><a href="#cb34-200"></a><span class="co">```</span></span>
-<span id="cb34-201"><a href="#cb34-201"></a></span>
-<span id="cb34-202"><a href="#cb34-202"></a><span class="co">## Notes</span></span>
-<span id="cb34-203"><a href="#cb34-203"></a></span>
-<span id="cb34-204"><a href="#cb34-204"></a><span class="co">- We use a [C-like enum] here to explicitly specify the number for each color. </span></span>
-<span id="cb34-205"><a href="#cb34-205"></a><span class="co">- Because of the `repr(u8)` attribute, each enum variant is stored as a `u8`. </span></span>
-<span id="cb34-206"><a href="#cb34-206"></a><span class="co">    - I would use `u4` type (a nib) if I was allowed to.</span></span>
-<span id="cb34-207"><a href="#cb34-207"></a><span class="co">-  Rust on the [C-like enum](https://doc.rust-lang.org/rust-by-example/custom_types/enum/c_like.html)</span></span>
-<span id="cb34-208"><a href="#cb34-208"></a><span class="co">    - At some point we have to figure out why we aren't writing C.</span></span>
-<span id="cb34-209"><a href="#cb34-209"></a></span>
-<span id="cb34-210"><a href="#cb34-210"></a><span class="co">## Suppress Warnings</span></span>
-<span id="cb34-211"><a href="#cb34-211"></a></span>
-<span id="cb34-212"><a href="#cb34-212"></a><span class="co">- Normally the compiler would issue a warning for each unused variant. </span></span>
-<span id="cb34-213"><a href="#cb34-213"></a><span class="co">    - This seems obviously annoying to me.</span></span>
-<span id="cb34-214"><a href="#cb34-214"></a><span class="co">- By using the `#[allow(dead_code)]` attribute, we disable these warnings for the `Color` enum.</span></span>
-<span id="cb34-215"><a href="#cb34-215"></a></span>
-<span id="cb34-216"><a href="#cb34-216"></a><span class="co">## Comparisons</span></span>
-<span id="cb34-217"><a href="#cb34-217"></a></span>
-<span id="cb34-218"><a href="#cb34-218"></a><span class="co">- By [deriving] the [`Copy`], [`Clone`], [`Debug`], [`PartialEq`], and [`Eq`] traits, we:</span></span>
-<span id="cb34-219"><a href="#cb34-219"></a><span class="co">    - Get stack-like (vs. heap-like) behavior.</span></span>
-<span id="cb34-220"><a href="#cb34-220"></a><span class="co">    - Make it printable.</span></span>
-<span id="cb34-221"><a href="#cb34-221"></a><span class="co">    - Make it comparable (e.g. via double-equals-equality `==`)</span></span>
-<span id="cb34-222"><a href="#cb34-222"></a><span class="co">- I would obviously just use an u8 here but don't be like me, I am wrong in some way that may be important latter.</span></span>
-<span id="cb34-223"><a href="#cb34-223"></a></span>
-<span id="cb34-224"><a href="#cb34-224"></a><span class="co">## Links</span></span>
-<span id="cb34-225"><a href="#cb34-225"></a></span>
-<span id="cb34-226"><a href="#cb34-226"></a><span class="co">- [deriving](https://doc.rust-lang.org/rust-by-example/trait/derive.html)</span></span>
-<span id="cb34-227"><a href="#cb34-227"></a><span class="co">- [`Copy`](https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html)</span></span>
-<span id="cb34-228"><a href="#cb34-228"></a><span class="co">- [`Clone`](https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html)</span></span>
-<span id="cb34-229"><a href="#cb34-229"></a><span class="co">- [`Debug`](https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html)</span></span>
-<span id="cb34-230"><a href="#cb34-230"></a><span class="co">- [`PartialEq`](https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html)</span></span>
-<span id="cb34-231"><a href="#cb34-231"></a><span class="co">- [`Eq`](https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html)</span></span>
-<span id="cb34-232"><a href="#cb34-232"></a><span class="co">- [copy semantics](https://doc.rust-lang.org/1.30.0/book/first-edition/ownership.html#copy-types)</span></span>
-<span id="cb34-233"><a href="#cb34-233"></a></span>
-<span id="cb34-234"><a href="#cb34-234"></a></span>
-<span id="cb34-235"><a href="#cb34-235"></a><span class="co">## New Type</span></span>
-<span id="cb34-236"><a href="#cb34-236"></a></span>
-<span id="cb34-237"><a href="#cb34-237"></a><span class="co">- A full color code specifies foreground *and* background color</span></span>
-<span id="cb34-238"><a href="#cb34-238"></a><span class="co">- We create a [newtype](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) on top of `u8`</span></span>
-<span id="cb34-239"><a href="#cb34-239"></a></span>
-<span id="cb34-240"><a href="#cb34-240"></a></span>
-<span id="cb34-241"><a href="#cb34-241"></a><span class="co">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-242"><a href="#cb34-242"></a><span class="co">#[derive(Debug, Clone, Copy, PartialEq, Eq)]</span></span>
-<span id="cb34-243"><a href="#cb34-243"></a><span class="co">#[repr(transparent)]</span></span>
-<span id="cb34-244"><a href="#cb34-244"></a><span class="co">struct ColorCode(u8);</span></span>
-<span id="cb34-245"><a href="#cb34-245"></a></span>
-<span id="cb34-246"><a href="#cb34-246"></a><span class="co">impl ColorCode {</span></span>
-<span id="cb34-247"><a href="#cb34-247"></a><span class="co">    fn new(fg: Color, b: Color) -&gt; ColorCode {</span></span>
-<span id="cb34-248"><a href="#cb34-248"></a><span class="co">        ColorCode((bg as u8) &lt;&lt; 4 | (fg as u8))</span></span>
-<span id="cb34-249"><a href="#cb34-249"></a><span class="co">    }</span></span>
-<span id="cb34-250"><a href="#cb34-250"></a><span class="co">}</span></span>
-<span id="cb34-251"><a href="#cb34-251"></a><span class="co">```</span></span>
-<span id="cb34-252"><a href="#cb34-252"></a></span>
-<span id="cb34-253"><a href="#cb34-253"></a><span class="co">## Transparency</span></span>
-<span id="cb34-254"><a href="#cb34-254"></a></span>
-<span id="cb34-255"><a href="#cb34-255"></a><span class="co">- Again, we derive the `Copy` and `Debug` traits for it. </span></span>
-<span id="cb34-256"><a href="#cb34-256"></a><span class="co">- When working with low level devices, we need to ensure bits are where we expect them to be.</span></span>
-<span id="cb34-257"><a href="#cb34-257"></a><span class="co">- To ensure that the `ColorCode` has the exact same data layout as a `u8`, we use the [`repr(transparent)`] attribute.</span></span>
-<span id="cb34-258"><a href="#cb34-258"></a><span class="co">    - [Read more](https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent)</span></span>
-<span id="cb34-259"><a href="#cb34-259"></a><span class="co">&lt;!--</span></span>
-<span id="cb34-260"><a href="#cb34-260"></a><span class="co">## Text Buffer</span></span>
-<span id="cb34-261"><a href="#cb34-261"></a></span>
-<span id="cb34-262"><a href="#cb34-262"></a><span class="co">- Now we can add structures to represent a screen character and the text buffer:</span></span>
-<span id="cb34-263"><a href="#cb34-263"></a></span>
-<span id="cb34-264"><a href="#cb34-264"></a><span class="co">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-265"><a href="#cb34-265"></a><span class="co">#[derive(Debug, Clone, Copy, PartialEq, Eq)]</span></span>
-<span id="cb34-266"><a href="#cb34-266"></a><span class="co">#[repr(C)]</span></span>
-<span id="cb34-267"><a href="#cb34-267"></a><span class="co">struct ScreenChar {</span></span>
-<span id="cb34-268"><a href="#cb34-268"></a><span class="co">    ascii_character: u8,</span></span>
-<span id="cb34-269"><a href="#cb34-269"></a><span class="co">    color_code: ColorCode,</span></span>
-<span id="cb34-270"><a href="#cb34-270"></a><span class="co">}</span></span>
-<span id="cb34-271"><a href="#cb34-271"></a></span>
-<span id="cb34-272"><a href="#cb34-272"></a><span class="co">const BUFFER_HEIGHT: usize = 25;</span></span>
-<span id="cb34-273"><a href="#cb34-273"></a><span class="co">const BUFFER_WIDTH: usize = 80;</span></span>
-<span id="cb34-274"><a href="#cb34-274"></a></span>
-<span id="cb34-275"><a href="#cb34-275"></a><span class="co">#[repr(transparent)]</span></span>
-<span id="cb34-276"><a href="#cb34-276"></a><span class="co">struct Buffer {</span></span>
-<span id="cb34-277"><a href="#cb34-277"></a><span class="co">    chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],</span></span>
-<span id="cb34-278"><a href="#cb34-278"></a><span class="co">}</span></span>
-<span id="cb34-279"><a href="#cb34-279"></a><span class="co">```</span></span>
-<span id="cb34-280"><a href="#cb34-280"></a></span>
-<span id="cb34-281"><a href="#cb34-281"></a><span class="co">## C Representation</span></span>
-<span id="cb34-282"><a href="#cb34-282"></a></span>
-<span id="cb34-283"><a href="#cb34-283"></a><span class="co">- Field ordering in default structs is undefined in Rust!</span></span>
-<span id="cb34-284"><a href="#cb34-284"></a><span class="co">- Not so in the good language, C.</span></span>
-<span id="cb34-285"><a href="#cb34-285"></a><span class="co">- We use the [`repr(C)`] attribute. </span></span>
-<span id="cb34-286"><a href="#cb34-286"></a><span class="co">  - It guarantees that the struct's fields are laid out in order. `</span></span>
-<span id="cb34-287"><a href="#cb34-287"></a><span class="co">  - [`repr(C)`](https://doc.rust-lang.org/nightly/nomicon/other-reprs.html#reprc)</span></span>
-<span id="cb34-288"><a href="#cb34-288"></a><span class="co">- For the `Buffer` struct, we use [`repr(transparent)`] again to ensure that it has the same memory layout as its single field.</span></span>
-<span id="cb34-289"><a href="#cb34-289"></a><span class="co">--&gt;</span></span>
-<span id="cb34-290"><a href="#cb34-290"></a></span>
-<span id="cb34-291"><a href="#cb34-291"></a></span>
-<span id="cb34-292"><a href="#cb34-292"></a><span class="fu">## Standard Out</span></span>
-<span id="cb34-293"><a href="#cb34-293"></a></span>
-<span id="cb34-294"><a href="#cb34-294"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
-<span id="cb34-295"><a href="#cb34-295"></a><span class="ss">    - </span>Maintain the most recent position to which a character has been written.</span>
-<span id="cb34-296"><a href="#cb34-296"></a></span>
-<span id="cb34-297"><a href="#cb34-297"></a></span>
-<span id="cb34-298"><a href="#cb34-298"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-299"><a href="#cb34-299"></a><span class="in">static mut latest: usize = 0;</span></span>
-<span id="cb34-300"><a href="#cb34-300"></a><span class="in">```</span></span>
-<span id="cb34-301"><a href="#cb34-301"></a></span>
-<span id="cb34-302"><a href="#cb34-302"></a><span class="fu">## Location</span></span>
-<span id="cb34-303"><a href="#cb34-303"></a></span>
-<span id="cb34-304"><a href="#cb34-304"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
-<span id="cb34-305"><a href="#cb34-305"></a><span class="ss">    - </span>Maintain the most recent position to which a character has been written.</span>
-<span id="cb34-306"><a href="#cb34-306"></a><span class="ss">    - </span>Have a constant referring to to the VGA buffer address.</span>
-<span id="cb34-307"><a href="#cb34-307"></a></span>
-<span id="cb34-308"><a href="#cb34-308"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-309"><a href="#cb34-309"></a><span class="in">static mut latest:usize = 0;</span></span>
-<span id="cb34-310"><a href="#cb34-310"></a><span class="in">const MMIO = 0xb8000 as *mut u8;</span></span>
-<span id="cb34-311"><a href="#cb34-311"></a><span class="in">```</span></span>
-<span id="cb34-312"><a href="#cb34-312"></a></span>
-<span id="cb34-313"><a href="#cb34-313"></a><span class="fu">## Color</span></span>
-<span id="cb34-314"><a href="#cb34-314"></a></span>
-<span id="cb34-315"><a href="#cb34-315"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
-<span id="cb34-316"><a href="#cb34-316"></a><span class="ss">    - </span>Provide a way to write a character.</span>
-<span id="cb34-317"><a href="#cb34-317"></a><span class="ss">        - </span>I will use a <span class="in">`const`</span> for color and not worry about.</span>
-<span id="cb34-318"><a href="#cb34-318"></a></span>
-<span id="cb34-319"><a href="#cb34-319"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-320"><a href="#cb34-320"></a><span class="in">static mut latest:usize = 0;</span></span>
-<span id="cb34-321"><a href="#cb34-321"></a><span class="in">const MMIO = 0xb8000 as *mut u8;</span></span>
-<span id="cb34-322"><a href="#cb34-322"></a><span class="in">const COLOR: u = 0xF;</span></span>
-<span id="cb34-323"><a href="#cb34-323"></a><span class="in">```</span></span>
-<span id="cb34-324"><a href="#cb34-324"></a></span>
-<span id="cb34-325"><a href="#cb34-325"></a><span class="fu">## Character-wise</span></span>
-<span id="cb34-326"><a href="#cb34-326"></a></span>
-<span id="cb34-327"><a href="#cb34-327"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
-<span id="cb34-328"><a href="#cb34-328"></a><span class="ss">    - </span>Provide a way to write a character.</span>
-<span id="cb34-329"><a href="#cb34-329"></a><span class="ss">        - </span>I will write a function to push one character.</span>
-<span id="cb34-330"><a href="#cb34-330"></a></span>
-<span id="cb34-331"><a href="#cb34-331"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-332"><a href="#cb34-332"></a><span class="in">// Public for now</span></span>
-<span id="cb34-333"><a href="#cb34-333"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb34-334"><a href="#cb34-334"></a><span class="in">    todo!();</span></span>
-<span id="cb34-335"><a href="#cb34-335"></a><span class="in">}</span></span>
-<span id="cb34-336"><a href="#cb34-336"></a><span class="in">```</span></span>
-<span id="cb34-337"><a href="#cb34-337"></a></span>
-<span id="cb34-338"><a href="#cb34-338"></a><span class="fu">## Stepwise</span></span>
-<span id="cb34-339"><a href="#cb34-339"></a></span>
-<span id="cb34-340"><a href="#cb34-340"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
-<span id="cb34-341"><a href="#cb34-341"></a></span>
-<span id="cb34-342"><a href="#cb34-342"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-343"><a href="#cb34-343"></a><span class="in">// Public for now</span></span>
-<span id="cb34-344"><a href="#cb34-344"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb34-345"><a href="#cb34-345"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
-<span id="cb34-346"><a href="#cb34-346"></a><span class="in">}</span></span>
-<span id="cb34-347"><a href="#cb34-347"></a><span class="in">```</span></span>
-<span id="cb34-348"><a href="#cb34-348"></a></span>
-<span id="cb34-349"><a href="#cb34-349"></a><span class="fu">## Stepwise</span></span>
-<span id="cb34-350"><a href="#cb34-350"></a></span>
-<span id="cb34-351"><a href="#cb34-351"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
-<span id="cb34-352"><a href="#cb34-352"></a><span class="ss">2. </span>Store a value at that location.</span>
-<span id="cb34-353"><a href="#cb34-353"></a></span>
-<span id="cb34-354"><a href="#cb34-354"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-355"><a href="#cb34-355"></a><span class="in">// Public for now</span></span>
-<span id="cb34-356"><a href="#cb34-356"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb34-357"><a href="#cb34-357"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
-<span id="cb34-358"><a href="#cb34-358"></a><span class="in">    *rel = a;</span></span>
-<span id="cb34-359"><a href="#cb34-359"></a><span class="in">}</span></span>
-<span id="cb34-360"><a href="#cb34-360"></a><span class="in">```</span></span>
-<span id="cb34-361"><a href="#cb34-361"></a></span>
-<span id="cb34-362"><a href="#cb34-362"></a><span class="fu">## Stepwise</span></span>
-<span id="cb34-363"><a href="#cb34-363"></a></span>
-<span id="cb34-364"><a href="#cb34-364"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
-<span id="cb34-365"><a href="#cb34-365"></a><span class="ss">2. </span>Store a value at that location.</span>
-<span id="cb34-366"><a href="#cb34-366"></a><span class="ss">3. </span>Store a color at the next location.</span>
-<span id="cb34-367"><a href="#cb34-367"></a></span>
-<span id="cb34-368"><a href="#cb34-368"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-369"><a href="#cb34-369"></a><span class="in">// Public for now</span></span>
-<span id="cb34-370"><a href="#cb34-370"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb34-371"><a href="#cb34-371"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
-<span id="cb34-372"><a href="#cb34-372"></a><span class="in">    *rel = a;</span></span>
-<span id="cb34-373"><a href="#cb34-373"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb34-374"><a href="#cb34-374"></a><span class="in">}</span></span>
-<span id="cb34-375"><a href="#cb34-375"></a><span class="in">```</span></span>
-<span id="cb34-376"><a href="#cb34-376"></a></span>
-<span id="cb34-377"><a href="#cb34-377"></a><span class="fu">## Stepwise</span></span>
-<span id="cb34-378"><a href="#cb34-378"></a></span>
-<span id="cb34-379"><a href="#cb34-379"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
-<span id="cb34-380"><a href="#cb34-380"></a><span class="ss">2. </span>Store a value at that location.</span>
-<span id="cb34-381"><a href="#cb34-381"></a><span class="ss">3. </span>Store a color at the next location.</span>
-<span id="cb34-382"><a href="#cb34-382"></a><span class="ss">4. </span>Increment the latest.</span>
-<span id="cb34-383"><a href="#cb34-383"></a></span>
-<span id="cb34-384"><a href="#cb34-384"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-385"><a href="#cb34-385"></a><span class="in">// Public for now</span></span>
-<span id="cb34-386"><a href="#cb34-386"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb34-387"><a href="#cb34-387"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
-<span id="cb34-388"><a href="#cb34-388"></a><span class="in">    *rel = a;</span></span>
-<span id="cb34-389"><a href="#cb34-389"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb34-390"><a href="#cb34-390"></a><span class="in">        LATEST = LATEST + 1;</span></span>
-<span id="cb34-391"><a href="#cb34-391"></a><span class="in">}</span></span>
-<span id="cb34-392"><a href="#cb34-392"></a><span class="in">```</span></span>
-<span id="cb34-393"><a href="#cb34-393"></a></span>
-<span id="cb34-394"><a href="#cb34-394"></a><span class="fu">## Test it</span></span>
-<span id="cb34-395"><a href="#cb34-395"></a></span>
-<span id="cb34-396"><a href="#cb34-396"></a><span class="ss">- </span>It is trivial to test.</span>
-<span id="cb34-397"><a href="#cb34-397"></a></span>
-<span id="cb34-398"><a href="#cb34-398"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-399"><a href="#cb34-399"></a><span class="in">    let hi: &amp;[u8] = b"Hello World!";</span></span>
-<span id="cb34-400"><a href="#cb34-400"></a><span class="in">    for i in 0..12 {</span></span>
-<span id="cb34-401"><a href="#cb34-401"></a><span class="in">        vga::char_to_vga(hi[i]);</span></span>
-<span id="cb34-402"><a href="#cb34-402"></a><span class="in">    }</span></span>
-<span id="cb34-403"><a href="#cb34-403"></a><span class="in">```</span></span>
-<span id="cb34-404"><a href="#cb34-404"></a></span>
-<span id="cb34-405"><a href="#cb34-405"></a><span class="ss">- </span>"Works on my machine!" - me</span>
-<span id="cb34-406"><a href="#cb34-406"></a><span class="ss">    - </span>Unless?</span>
-<span id="cb34-407"><a href="#cb34-407"></a><span class="ss">    - </span>We'll come back to this.</span>
-<span id="cb34-408"><a href="#cb34-408"></a></span>
-<span id="cb34-409"><a href="#cb34-409"></a><span class="fu">## Annoying</span></span>
-<span id="cb34-410"><a href="#cb34-410"></a></span>
-<span id="cb34-411"><a href="#cb34-411"></a><span class="ss">- </span>Some of you may lack a strong work ethic and want to show entire a whole *string* rather than just a character at a time.</span>
-<span id="cb34-412"><a href="#cb34-412"></a><span class="ss">    - </span>Especially since using characters of a string in Rust is ludicrously opaque.</span>
-<span id="cb34-413"><a href="#cb34-413"></a><span class="ss">- </span>Not to worry.</span>
-<span id="cb34-414"><a href="#cb34-414"></a></span>
-<span id="cb34-415"><a href="#cb34-415"></a><span class="fu">## Target `&amp;str`</span></span>
-<span id="cb34-416"><a href="#cb34-416"></a></span>
-<span id="cb34-417"><a href="#cb34-417"></a><span class="ss">- </span>We can abstract to loop into <span class="in">`src/vga.rs`</span></span>
-<span id="cb34-418"><a href="#cb34-418"></a></span>
-<span id="cb34-419"><a href="#cb34-419"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-420"><a href="#cb34-420"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
-<span id="cb34-421"><a href="#cb34-421"></a><span class="in">    let v = s.as_bytes();</span></span>
-<span id="cb34-422"><a href="#cb34-422"></a><span class="in">    for i in 0..v.len() {</span></span>
-<span id="cb34-423"><a href="#cb34-423"></a><span class="in">        char_to_vga(v[i]);</span></span>
-<span id="cb34-424"><a href="#cb34-424"></a><span class="in">    }</span></span>
-<span id="cb34-425"><a href="#cb34-425"></a><span class="in">}</span></span>
-<span id="cb34-426"><a href="#cb34-426"></a><span class="in">```</span></span>
-<span id="cb34-427"><a href="#cb34-427"></a></span>
-<span id="cb34-428"><a href="#cb34-428"></a><span class="fu">## Aside</span></span>
-<span id="cb34-429"><a href="#cb34-429"></a></span>
-<span id="cb34-430"><a href="#cb34-430"></a><span class="ss">- </span>I am opinionated on <span class="in">`as_bytes`</span>.</span>
-<span id="cb34-431"><a href="#cb34-431"></a><span class="ss">- </span>Let's check some links.</span>
-<span id="cb34-432"><a href="#cb34-432"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`to_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=to_bytes)</span></span>
-<span id="cb34-433"><a href="#cb34-433"></a><span class="ss">        - </span><span class="co">[</span><span class="ot">`as_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=as_bytes)</span></span>
-<span id="cb34-434"><a href="#cb34-434"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=bytes)</span></span>
-<span id="cb34-435"><a href="#cb34-435"></a><span class="ss">- </span>Can you guess what always works?</span>
-<span id="cb34-436"><a href="#cb34-436"></a></span>
-<span id="cb34-437"><a href="#cb34-437"></a><span class="fu">## Aside</span></span>
-<span id="cb34-438"><a href="#cb34-438"></a></span>
-<span id="cb34-439"><a href="#cb34-439"></a><span class="ss">- </span>Big Rust doesn't want you to know you can use pointers.</span>
-<span id="cb34-440"><a href="#cb34-440"></a></span>
-<span id="cb34-441"><a href="#cb34-441"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-442"><a href="#cb34-442"></a><span class="in">    let ptr = s.as_ptr() as usize;</span></span>
-<span id="cb34-443"><a href="#cb34-443"></a><span class="in">    unsafe {</span></span>
-<span id="cb34-444"><a href="#cb34-444"></a><span class="in">        for i in 0..s.len() {</span></span>
-<span id="cb34-445"><a href="#cb34-445"></a><span class="in">            char_to_vga(*((ptr + i) as *const u8));</span></span>
-<span id="cb34-446"><a href="#cb34-446"></a><span class="in">        }</span></span>
-<span id="cb34-447"><a href="#cb34-447"></a><span class="in">    }</span></span>
-<span id="cb34-448"><a href="#cb34-448"></a><span class="in">```</span></span>
-<span id="cb34-449"><a href="#cb34-449"></a></span>
-<span id="cb34-450"><a href="#cb34-450"></a><span class="ss">- </span>I could make this even worse but I didn't.</span>
-<span id="cb34-451"><a href="#cb34-451"></a><span class="ss">- </span>Anyways don't do this.</span>
-<span id="cb34-452"><a href="#cb34-452"></a></span>
-<span id="cb34-453"><a href="#cb34-453"></a><span class="fu">## Update main</span></span>
-<span id="cb34-454"><a href="#cb34-454"></a></span>
-<span id="cb34-455"><a href="#cb34-455"></a><span class="ss">- </span>Look how nice that is!</span>
-<span id="cb34-456"><a href="#cb34-456"></a></span>
-<span id="cb34-457"><a href="#cb34-457"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-458"><a href="#cb34-458"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb34-459"><a href="#cb34-459"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb34-460"><a href="#cb34-460"></a><span class="in">    vga::str_to_vga("Hello, world!");</span></span>
-<span id="cb34-461"><a href="#cb34-461"></a><span class="in">    loop {}</span></span>
-<span id="cb34-462"><a href="#cb34-462"></a><span class="in">}</span></span>
-<span id="cb34-463"><a href="#cb34-463"></a><span class="in">```</span></span>
-<span id="cb34-464"><a href="#cb34-464"></a></span>
-<span id="cb34-465"><a href="#cb34-465"></a><span class="fu">## I bet...</span></span>
-<span id="cb34-466"><a href="#cb34-466"></a></span>
-<span id="cb34-467"><a href="#cb34-467"></a><span class="ss">- </span>I bet we can print *any* string.</span>
-<span id="cb34-468"><a href="#cb34-468"></a><span class="ss">- </span>Let's do like a comically easy string that will definitely print.</span>
-<span id="cb34-469"><a href="#cb34-469"></a><span class="ss">- </span>There's no way it will fail.</span>
-<span id="cb34-470"><a href="#cb34-470"></a></span>
-<span id="cb34-471"><a href="#cb34-471"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-472"><a href="#cb34-472"></a><span class="in">    vga::str_to_vga("Hello\nworld!");</span></span>
-<span id="cb34-473"><a href="#cb34-473"></a><span class="in">```</span></span>
-<span id="cb34-474"><a href="#cb34-474"></a></span>
-<span id="cb34-475"><a href="#cb34-475"></a><span class="ss">- </span>It worked right?</span>
-<span id="cb34-476"><a href="#cb34-476"></a></span>
-<span id="cb34-477"><a href="#cb34-477"></a><span class="fu">## Escape Codes</span></span>
-<span id="cb34-478"><a href="#cb34-478"></a></span>
-<span id="cb34-479"><a href="#cb34-479"></a><span class="ss">- </span>Okay so there's some things we need to treat differently.</span>
-<span id="cb34-480"><a href="#cb34-480"></a><span class="ss">    - </span>Minimally <span class="in">`\n`</span>.</span>
-<span id="cb34-481"><a href="#cb34-481"></a><span class="ss">    - </span>And therefore also <span class="in">`\\`</span> to show a single backslash.</span>
-<span id="cb34-482"><a href="#cb34-482"></a><span class="ss">    - </span>I don't even know if we need anything else, but I'll show the design pattern.</span>
-<span id="cb34-483"><a href="#cb34-483"></a></span>
-<span id="cb34-484"><a href="#cb34-484"></a><span class="fu">## Revisit Implementation</span></span>
-<span id="cb34-485"><a href="#cb34-485"></a></span>
-<span id="cb34-486"><a href="#cb34-486"></a><span class="ss">- </span>Recall our naive implementation.</span>
-<span id="cb34-487"><a href="#cb34-487"></a></span>
-<span id="cb34-488"><a href="#cb34-488"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-489"><a href="#cb34-489"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
-<span id="cb34-490"><a href="#cb34-490"></a><span class="in">    let v = s.as_bytes();</span></span>
-<span id="cb34-491"><a href="#cb34-491"></a><span class="in">    for i in 0..v.len() {</span></span>
-<span id="cb34-492"><a href="#cb34-492"></a><span class="in">        char_to_vga(v[i]);</span></span>
-<span id="cb34-493"><a href="#cb34-493"></a><span class="in">    }</span></span>
-<span id="cb34-494"><a href="#cb34-494"></a><span class="in">}</span></span>
-<span id="cb34-495"><a href="#cb34-495"></a><span class="in">```</span></span>
-<span id="cb34-496"><a href="#cb34-496"></a></span>
-<span id="cb34-497"><a href="#cb34-497"></a><span class="fu">## Case analysis</span></span>
-<span id="cb34-498"><a href="#cb34-498"></a></span>
-<span id="cb34-499"><a href="#cb34-499"></a><span class="ss">- </span>As far as I know (I didn't check) we only have to look for is:</span>
-<span id="cb34-500"><a href="#cb34-500"></a><span class="ss">    - </span><span class="in">`\n`</span></span>
-<span id="cb34-501"><a href="#cb34-501"></a><span class="ss">    - </span><span class="in">`10`</span> (I think?)</span>
-<span id="cb34-502"><a href="#cb34-502"></a><span class="ss">    - </span><span class="in">`0xa`</span></span>
-<span id="cb34-503"><a href="#cb34-503"></a><span class="ss">- </span>It will be a <span class="in">`u8`</span> within the loop (since we <span class="in">`as_bytes`</span> first)</span>
-<span id="cb34-504"><a href="#cb34-504"></a></span>
-<span id="cb34-505"><a href="#cb34-505"></a></span>
-<span id="cb34-506"><a href="#cb34-506"></a><span class="fu">## Trust but verify</span></span>
-<span id="cb34-507"><a href="#cb34-507"></a></span>
-<span id="cb34-508"><a href="#cb34-508"></a><span class="ss">- </span>I just checked in a different crate.</span>
-<span id="cb34-509"><a href="#cb34-509"></a><span class="in">```{.rs filename="../???/src/main.rs"}</span></span>
-<span id="cb34-510"><a href="#cb34-510"></a><span class="in">fn main() {</span></span>
-<span id="cb34-511"><a href="#cb34-511"></a><span class="in">    let s = "Hello\nworld!";</span></span>
-<span id="cb34-512"><a href="#cb34-512"></a><span class="in">    dbg!(s.as_bytes());</span></span>
-<span id="cb34-513"><a href="#cb34-513"></a><span class="in">}</span></span>
-<span id="cb34-514"><a href="#cb34-514"></a><span class="in">```</span></span>
-<span id="cb34-515"><a href="#cb34-515"></a><span class="ss">- </span>Looked like 10 to me.</span>
-<span id="cb34-516"><a href="#cb34-516"></a></span>
-<span id="cb34-517"><a href="#cb34-517"></a><span class="fu">## Now it works!</span></span>
-<span id="cb34-518"><a href="#cb34-518"></a></span>
-<span id="cb34-519"><a href="#cb34-519"></a><span class="ss">- </span>We can write vertically!</span>
-<span id="cb34-520"><a href="#cb34-520"></a><span class="ss">  - </span>I guess this could be a helper function or something.</span>
-<span id="cb34-521"><a href="#cb34-521"></a></span>
-<span id="cb34-522"><a href="#cb34-522"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-523"><a href="#cb34-523"></a><span class="in">    vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
-<span id="cb34-524"><a href="#cb34-524"></a><span class="in">```</span></span>
-<span id="cb34-525"><a href="#cb34-525"></a></span>
-<span id="cb34-526"><a href="#cb34-526"></a><span class="fu">## Good thing...</span></span>
-<span id="cb34-527"><a href="#cb34-527"></a></span>
-<span id="cb34-528"><a href="#cb34-528"></a><span class="ss">- </span>I can print that more than once!</span>
-<span id="cb34-529"><a href="#cb34-529"></a></span>
-<span id="cb34-530"><a href="#cb34-530"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-531"><a href="#cb34-531"></a><span class="in">    for _i in 0..3 {</span></span>
-<span id="cb34-532"><a href="#cb34-532"></a><span class="in">        vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
-<span id="cb34-533"><a href="#cb34-533"></a><span class="in">    }</span></span>
-<span id="cb34-534"><a href="#cb34-534"></a><span class="in">```</span></span>
-<span id="cb34-535"><a href="#cb34-535"></a><span class="ss">- </span>Wait a minute!</span>
-<span id="cb34-536"><a href="#cb34-536"></a></span>
-<span id="cb34-537"><a href="#cb34-537"></a><span class="fu">## We're doomed</span></span>
-<span id="cb34-538"><a href="#cb34-538"></a></span>
-<span id="cb34-539"><a href="#cb34-539"></a><span class="ss">- </span>We didn't save what was written to the previous lines.</span>
-<span id="cb34-540"><a href="#cb34-540"></a><span class="ss">- </span>Real ones know.</span>
-<span id="cb34-541"><a href="#cb34-541"></a></span>
-<span id="cb34-542"><a href="#cb34-542"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/1/16/BladeRunnerRoyBattySpeech.jpeg)</span></span>
-<span id="cb34-543"><a href="#cb34-543"></a></span>
-<span id="cb34-544"><a href="#cb34-544"></a><span class="fu">## Unless?</span></span>
-<span id="cb34-545"><a href="#cb34-545"></a></span>
-<span id="cb34-546"><a href="#cb34-546"></a><span class="ss">- </span>No way can we *read* from the VGA text buffer right.</span>
-<span id="cb34-547"><a href="#cb34-547"></a><span class="ss">- </span>That would be... extraordinary.</span>
-<span id="cb34-548"><a href="#cb34-548"></a><span class="ss">- </span>You can do whatever you want, I just want to show you one possible design choice.</span>
-<span id="cb34-549"><a href="#cb34-549"></a><span class="ss">    - </span>Mostly as a proof of concept.</span>
-<span id="cb34-550"><a href="#cb34-550"></a></span>
-<span id="cb34-551"><a href="#cb34-551"></a><span class="fu">## Scroll</span></span>
-<span id="cb34-552"><a href="#cb34-552"></a></span>
-<span id="cb34-553"><a href="#cb34-553"></a><span class="ss">- </span>I'll add some <span class="in">`const`</span>s and write a helper.</span>
-<span id="cb34-554"><a href="#cb34-554"></a></span>
-<span id="cb34-555"><a href="#cb34-555"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-556"><a href="#cb34-556"></a><span class="in">const ROWS: usize = 80;</span></span>
-<span id="cb34-557"><a href="#cb34-557"></a><span class="in">const COLS: usize = 25;</span></span>
-<span id="cb34-558"><a href="#cb34-558"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
-<span id="cb34-559"><a href="#cb34-559"></a></span>
-<span id="cb34-560"><a href="#cb34-560"></a><span class="in">fn scroll() {</span></span>
-<span id="cb34-561"><a href="#cb34-561"></a><span class="in">    </span></span>
-<span id="cb34-562"><a href="#cb34-562"></a><span class="in">}</span></span>
-<span id="cb34-563"><a href="#cb34-563"></a><span class="in">```</span></span>
-<span id="cb34-564"><a href="#cb34-564"></a></span>
-<span id="cb34-565"><a href="#cb34-565"></a><span class="fu">## Execution</span></span>
-<span id="cb34-566"><a href="#cb34-566"></a></span>
-<span id="cb34-567"><a href="#cb34-567"></a><span class="ss">- </span>Start at the first character that will remain visible.</span>
-<span id="cb34-568"><a href="#cb34-568"></a><span class="ss">- </span>Copy it to the earliest visible slot (start of buffer).</span>
-<span id="cb34-569"><a href="#cb34-569"></a><span class="ss">- </span>Iterate until the full buffer is moved.</span>
-<span id="cb34-570"><a href="#cb34-570"></a><span class="ss">- </span>We note this could be executed in a single <span class="in">`memmove`</span></span>
-<span id="cb34-571"><a href="#cb34-571"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://man7.org/linux/man-pages/man3/memmove.3.html)</span></span>
-<span id="cb34-572"><a href="#cb34-572"></a></span>
-<span id="cb34-573"><a href="#cb34-573"></a></span>
-<span id="cb34-574"><a href="#cb34-574"></a><span class="fu">## My Code</span></span>
-<span id="cb34-575"><a href="#cb34-575"></a></span>
-<span id="cb34-576"><a href="#cb34-576"></a><span class="ss">- </span>Public just to test.</span>
-<span id="cb34-577"><a href="#cb34-577"></a></span>
-<span id="cb34-578"><a href="#cb34-578"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-579"><a href="#cb34-579"></a><span class="in">pub fn scroll() {</span></span>
-<span id="cb34-580"><a href="#cb34-580"></a><span class="in">    for i in 80..MAX {</span></span>
-<span id="cb34-581"><a href="#cb34-581"></a><span class="in">        unsafe {</span></span>
-<span id="cb34-582"><a href="#cb34-582"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
-<span id="cb34-583"><a href="#cb34-583"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
-<span id="cb34-584"><a href="#cb34-584"></a><span class="in">            *dst = *src;</span></span>
-<span id="cb34-585"><a href="#cb34-585"></a><span class="in">        }</span></span>
-<span id="cb34-586"><a href="#cb34-586"></a><span class="in">    }</span></span>
-<span id="cb34-587"><a href="#cb34-587"></a><span class="in">}</span></span>
-<span id="cb34-588"><a href="#cb34-588"></a><span class="in">```</span></span>
-<span id="cb34-589"><a href="#cb34-589"></a></span>
-<span id="cb34-590"><a href="#cb34-590"></a><span class="fu">## My Test</span></span>
-<span id="cb34-591"><a href="#cb34-591"></a></span>
-<span id="cb34-592"><a href="#cb34-592"></a><span class="ss">- </span>I just sent line numbers then manually scrolled.</span>
-<span id="cb34-593"><a href="#cb34-593"></a></span>
-<span id="cb34-594"><a href="#cb34-594"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-595"><a href="#cb34-595"></a><span class="in">    vga::str_to_vga("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\nA\nB");</span></span>
-<span id="cb34-596"><a href="#cb34-596"></a><span class="in">    vga::scroll();</span></span>
-<span id="cb34-597"><a href="#cb34-597"></a><span class="in">```</span></span>
-<span id="cb34-598"><a href="#cb34-598"></a></span>
-<span id="cb34-599"><a href="#cb34-599"></a><span class="fu">## A better test</span></span>
-<span id="cb34-600"><a href="#cb34-600"></a></span>
-<span id="cb34-601"><a href="#cb34-601"></a><span class="ss">- </span>Here is a copy of the Project Gutenburg ebook of *Pride and Prejudice*.</span>
-<span id="cb34-602"><a href="#cb34-602"></a><span class="ss">- </span>It contains some quotes which might be a problem.</span>
-<span id="cb34-603"><a href="#cb34-603"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Link</span><span class="co">](https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt)</span></span>
-<span id="cb34-604"><a href="#cb34-604"></a><span class="in">```{.sh}</span></span>
-<span id="cb34-605"><a href="#cb34-605"></a><span class="in">https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt</span></span>
-<span id="cb34-606"><a href="#cb34-606"></a><span class="in">```</span></span>
-<span id="cb34-607"><a href="#cb34-607"></a></span>
-<span id="cb34-608"><a href="#cb34-608"></a><span class="fu">## Does it work?</span></span>
-<span id="cb34-609"><a href="#cb34-609"></a></span>
-<span id="cb34-610"><a href="#cb34-610"></a><span class="ss">- </span>What do we have to do?</span>
-<span id="cb34-611"><a href="#cb34-611"></a></span>
-<span id="cb34-612"><a href="#cb34-612"></a>&lt;details&gt;</span>
-<span id="cb34-613"><a href="#cb34-613"></a><span class="ss">1. </span>Add <span class="in">`scroll`</span> to <span class="in">`str_to_vga`</span></span>
-<span id="cb34-614"><a href="#cb34-614"></a><span class="ss">2. </span>Update <span class="in">`LATEST`</span> in <span class="in">`scroll`</span></span>
-<span id="cb34-615"><a href="#cb34-615"></a><span class="ss">3. </span>Blank out the last line, I used space (<span class="in">`0x20`</span> or <span class="in">`32`</span>)</span>
-<span id="cb34-616"><a href="#cb34-616"></a><span class="ss">4. </span>Make sure all color bytes are set.</span>
-<span id="cb34-617"><a href="#cb34-617"></a>&lt;/details&gt;</span>
-<span id="cb34-618"><a href="#cb34-618"></a></span>
-<span id="cb34-619"><a href="#cb34-619"></a><span class="fu">## Why do we blank out?</span></span>
-<span id="cb34-620"><a href="#cb34-620"></a></span>
-<span id="cb34-621"><a href="#cb34-621"></a><span class="ss">- </span>Recall we are writing to MMIO.</span>
-<span id="cb34-622"><a href="#cb34-622"></a><span class="ss">- </span>As soon as we exceed the MMIO range, we can *make no claims* about what memory we are vviewing.</span>
-<span id="cb34-623"><a href="#cb34-623"></a><span class="ss">- </span>So if we copy in data past the buffer, we could get *anything*.</span>
-<span id="cb34-624"><a href="#cb34-624"></a><span class="ss">- </span>So if we don't overwrite the buffer, we could get *anything*.</span>
-<span id="cb34-625"><a href="#cb34-625"></a></span>
-<span id="cb34-626"><a href="#cb34-626"></a><span class="fu">## We set color bytes?</span></span>
-<span id="cb34-627"><a href="#cb34-627"></a></span>
-<span id="cb34-628"><a href="#cb34-628"></a><span class="ss">- </span>Like lines off the MMIO range, the color bytes have no known value.</span>
-<span id="cb34-629"><a href="#cb34-629"></a><span class="ss">- </span>So if we e.g. have a newline anywhere and end up not initially setting colors...</span>
-<span id="cb34-630"><a href="#cb34-630"></a><span class="ss">- </span>Then copy text up to that line...</span>
-<span id="cb34-631"><a href="#cb34-631"></a><span class="ss">- </span>We will be showing text in an *unset* color.</span>
-<span id="cb34-632"><a href="#cb34-632"></a><span class="ss">    - </span>Just whatever bits happened to be there!</span>
-<span id="cb34-633"><a href="#cb34-633"></a></span>
-<span id="cb34-634"><a href="#cb34-634"></a><span class="fu">## This is unsafe!</span></span>
-<span id="cb34-635"><a href="#cb34-635"></a></span>
-<span id="cb34-636"><a href="#cb34-636"></a><span class="ss">- </span>Astute learners will notice this is all very unsafe.</span>
-<span id="cb34-637"><a href="#cb34-637"></a></span>
-<span id="cb34-638"><a href="#cb34-638"></a><span class="fu">## I'm loopy</span></span>
-<span id="cb34-639"><a href="#cb34-639"></a></span>
-<span id="cb34-640"><a href="#cb34-640"></a><span class="ss">- </span>I should not I do everything with <span class="in">`for`</span> loops and "single-equals-assignment"</span>
-<span id="cb34-641"><a href="#cb34-641"></a><span class="ss">    - </span>I mostly am teaching you *how to code*</span>
-<span id="cb34-642"><a href="#cb34-642"></a><span class="ss">    - </span>This is NOT teaching you *how to Rust* (or C)</span>
-<span id="cb34-643"><a href="#cb34-643"></a><span class="ss">- </span>Who needs <span class="in">`memmove`</span> (a C function) when we have the humble <span class="in">`for`</span> loop.</span>
-<span id="cb34-644"><a href="#cb34-644"></a><span class="ss">- </span>Read more: <span class="co">[</span><span class="ot">core::ptr::copy</span><span class="co">](https://doc.rust-lang.org/core/ptr/fn.copy.html)</span></span>
-<span id="cb34-645"><a href="#cb34-645"></a></span>
-<span id="cb34-646"><a href="#cb34-646"></a><span class="fu">## Caution!</span></span>
-<span id="cb34-647"><a href="#cb34-647"></a></span>
-<span id="cb34-648"><a href="#cb34-648"></a><span class="ss">- </span>I am building my crate without access to <span class="in">`memmove`</span>.</span>
-<span id="cb34-649"><a href="#cb34-649"></a><span class="ss">- </span>You may need to go back and add some configuration.</span>
-<span id="cb34-650"><a href="#cb34-650"></a><span class="ss">- </span>This was covered in the "Kernel" lecture.</span>
-<span id="cb34-651"><a href="#cb34-651"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Here</span><span class="co">](40_kernel.qmd#aside-notfutureproofing-1)</span></span>
-<span id="cb34-652"><a href="#cb34-652"></a></span>
-<span id="cb34-653"><a href="#cb34-653"></a></span>
-<span id="cb34-654"><a href="#cb34-654"></a><span class="fu">## My solution</span></span>
-<span id="cb34-655"><a href="#cb34-655"></a></span>
-<span id="cb34-656"><a href="#cb34-656"></a>&lt;details&gt;</span>
-<span id="cb34-657"><a href="#cb34-657"></a></span>
-<span id="cb34-658"><a href="#cb34-658"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-659"><a href="#cb34-659"></a><span class="in">const ROWS: usize = 80;</span></span>
-<span id="cb34-660"><a href="#cb34-660"></a><span class="in">const COLS: usize = 25;</span></span>
-<span id="cb34-661"><a href="#cb34-661"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
-<span id="cb34-662"><a href="#cb34-662"></a></span>
-<span id="cb34-663"><a href="#cb34-663"></a><span class="in">fn scroll() {</span></span>
-<span id="cb34-664"><a href="#cb34-664"></a><span class="in">    unsafe {</span></span>
-<span id="cb34-665"><a href="#cb34-665"></a><span class="in">        for i in 80..MAX {</span></span>
-<span id="cb34-666"><a href="#cb34-666"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
-<span id="cb34-667"><a href="#cb34-667"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
-<span id="cb34-668"><a href="#cb34-668"></a><span class="in">            *dst = *src;</span></span>
-<span id="cb34-669"><a href="#cb34-669"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb34-670"><a href="#cb34-670"></a><span class="in">        }</span></span>
-<span id="cb34-671"><a href="#cb34-671"></a><span class="in">        for i in (MAX-80)..MAX {</span></span>
-<span id="cb34-672"><a href="#cb34-672"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i) * 2)) as *mut u8;</span></span>
-<span id="cb34-673"><a href="#cb34-673"></a><span class="in">            *dst = 32;</span></span>
-<span id="cb34-674"><a href="#cb34-674"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb34-675"><a href="#cb34-675"></a><span class="in">        }</span></span>
-<span id="cb34-676"><a href="#cb34-676"></a><span class="in">        LATEST = LATEST - 80;</span></span>
-<span id="cb34-677"><a href="#cb34-677"></a><span class="in">    }</span></span>
-<span id="cb34-678"><a href="#cb34-678"></a><span class="in">}</span></span>
-<span id="cb34-679"><a href="#cb34-679"></a></span>
-<span id="cb34-680"><a href="#cb34-680"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
-<span id="cb34-681"><a href="#cb34-681"></a><span class="in">    let v = s.as_bytes();</span></span>
-<span id="cb34-682"><a href="#cb34-682"></a><span class="in">    unsafe {</span></span>
-<span id="cb34-683"><a href="#cb34-683"></a><span class="in">        for i in 0..v.len() {</span></span>
-<span id="cb34-684"><a href="#cb34-684"></a><span class="in">            if LATEST &gt; MAX {</span></span>
-<span id="cb34-685"><a href="#cb34-685"></a><span class="in">                scroll();</span></span>
-<span id="cb34-686"><a href="#cb34-686"></a><span class="in">            }</span></span>
-<span id="cb34-687"><a href="#cb34-687"></a><span class="in">            match v[i] {</span></span>
-<span id="cb34-688"><a href="#cb34-688"></a><span class="in">                10 =&gt; LATEST = ((LATEST / 80) + 1) * 80,</span></span>
-<span id="cb34-689"><a href="#cb34-689"></a><span class="in">                _ =&gt; char_to_vga(v[i]),</span></span>
-<span id="cb34-690"><a href="#cb34-690"></a><span class="in">            }</span></span>
-<span id="cb34-691"><a href="#cb34-691"></a><span class="in">        }</span></span>
-<span id="cb34-692"><a href="#cb34-692"></a><span class="in">    }</span></span>
-<span id="cb34-693"><a href="#cb34-693"></a><span class="in">}</span></span>
-<span id="cb34-694"><a href="#cb34-694"></a><span class="in">```</span></span>
-<span id="cb34-695"><a href="#cb34-695"></a></span>
-<span id="cb34-696"><a href="#cb34-696"></a>&lt;/details&gt;</span>
-<span id="cb34-697"><a href="#cb34-697"></a></span>
-<span id="cb34-698"><a href="#cb34-698"></a><span class="fu"># Volatile</span></span>
-<span id="cb34-699"><a href="#cb34-699"></a></span>
-<span id="cb34-700"><a href="#cb34-700"></a><span class="fu">## Best Practice</span></span>
-<span id="cb34-701"><a href="#cb34-701"></a></span>
-<span id="cb34-702"><a href="#cb34-702"></a><span class="ss">- </span>This works on my machine.</span>
-<span id="cb34-703"><a href="#cb34-703"></a><span class="ss">- </span>It may not always work.</span>
-<span id="cb34-704"><a href="#cb34-704"></a><span class="ss">- </span>Why? <span class="in">`rustc`</span> is a bit too smart.</span>
-<span id="cb34-705"><a href="#cb34-705"></a><span class="ss">    - </span>There is no obvious externally observable reason to write to fixed memory location.</span>
-<span id="cb34-706"><a href="#cb34-706"></a><span class="ss">    - </span>The compiler may optimize out such writes.</span>
-<span id="cb34-707"><a href="#cb34-707"></a><span class="ss">    - </span>I say "sure it will."</span>
-<span id="cb34-708"><a href="#cb34-708"></a></span>
-<span id="cb34-709"><a href="#cb34-709"></a><span class="fu">## Quote Blog</span></span>
-<span id="cb34-710"><a href="#cb34-710"></a></span>
-<span id="cb34-711"><a href="#cb34-711"></a><span class="at">&gt; The problem is that we only write to the buffer and never read from it again. </span></span>
-<span id="cb34-712"><a href="#cb34-712"></a></span>
-<span id="cb34-713"><a href="#cb34-713"></a><span class="ss">- </span>Okay so but here me out.</span>
-<span id="cb34-714"><a href="#cb34-714"></a><span class="ss">- </span>Our implementation does read from the buffer again.</span>
-<span id="cb34-715"><a href="#cb34-715"></a><span class="ss">    - </span>Sometimes the best way to do things is also the simplest.</span>
-<span id="cb34-716"><a href="#cb34-716"></a><span class="ss">    - </span>For some reason blog kept a local copy and only used that?</span>
-<span id="cb34-717"><a href="#cb34-717"></a></span>
-<span id="cb34-718"><a href="#cb34-718"></a><span class="fu">## Volatile</span></span>
-<span id="cb34-719"><a href="#cb34-719"></a></span>
-<span id="cb34-720"><a href="#cb34-720"></a><span class="ss">- </span>If we lacked the skill and bravery of the instructor of this course, we may have a problem.</span>
-<span id="cb34-721"><a href="#cb34-721"></a><span class="ss">- </span>To avoid an erroneous optimization omitting all writes, we need to specify writes as _[volatile]_. </span>
-<span id="cb34-722"><a href="#cb34-722"></a><span class="ss">- </span>This tells the compiler that the write has side effects and should not be optimized away.</span>
-<span id="cb34-723"><a href="#cb34-723"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Volatile_(computer_programming))</span>
-<span id="cb34-724"><a href="#cb34-724"></a></span>
-<span id="cb34-725"><a href="#cb34-725"></a><span class="fu">## Interested Students</span></span>
-<span id="cb34-726"><a href="#cb34-726"></a></span>
-<span id="cb34-727"><a href="#cb34-727"></a><span class="ss">- </span>There's a <span class="in">`read_volatile`</span> and <span class="in">`write_volatile`</span> in <span class="in">`std::ptr`</span> and another in <span class="in">`core::ptr`</span>, we might be able to use those.</span>
-<span id="cb34-728"><a href="#cb34-728"></a></span>
-<span id="cb34-729"><a href="#cb34-729"></a><span class="fu"># Fin</span></span>
-<span id="cb34-730"><a href="#cb34-730"></a></span>
-<span id="cb34-731"><a href="#cb34-731"></a><span class="fu">## Timeout</span></span>
-<span id="cb34-732"><a href="#cb34-732"></a></span>
-<span id="cb34-733"><a href="#cb34-733"></a><span class="ss">- </span>This is 700 lines of markdown source which usually is enough.</span>
-<span id="cb34-734"><a href="#cb34-734"></a><span class="ss">- </span>Otherwise we proceed to "Format".</span>
-<span id="cb34-735"><a href="#cb34-735"></a></span>
-<span id="cb34-736"><a href="#cb34-736"></a></span>
-<span id="cb34-737"><a href="#cb34-737"></a><span class="fu"># Format</span></span>
-<span id="cb34-738"><a href="#cb34-738"></a></span>
-<span id="cb34-739"><a href="#cb34-739"></a><span class="fu">## Formatting Macros</span></span>
-<span id="cb34-740"><a href="#cb34-740"></a></span>
-<span id="cb34-741"><a href="#cb34-741"></a><span class="ss">- </span>It would be nice to support Rust's formatting macros, too. </span>
-<span id="cb34-742"><a href="#cb34-742"></a><span class="ss">- </span>We will also discover that Rust is, in point of fact, an object-oriented language.</span>
-<span id="cb34-743"><a href="#cb34-743"></a><span class="ss">    - </span>Read: bad.</span>
-<span id="cb34-744"><a href="#cb34-744"></a><span class="ss">- </span>I was extremely annoyed by how to get this working, but I did it.</span>
-<span id="cb34-745"><a href="#cb34-745"></a></span>
-<span id="cb34-746"><a href="#cb34-746"></a><span class="fu">## Functionality</span></span>
-<span id="cb34-747"><a href="#cb34-747"></a></span>
-<span id="cb34-748"><a href="#cb34-748"></a><span class="ss">- </span>We need to implement the <span class="co">[</span><span class="ot">`core::fmt::Write`</span><span class="co">]</span> trait. </span>
-<span id="cb34-749"><a href="#cb34-749"></a><span class="ss">    - </span>I had foolishly assumed we could just use <span class="in">`format!`</span></span>
-<span id="cb34-750"><a href="#cb34-750"></a><span class="ss">    - </span>That would tragically be too reasonable.</span>
-<span id="cb34-751"><a href="#cb34-751"></a><span class="ss">    - </span>(It also would raise some unanswered questions about memory but whatever).</span>
-<span id="cb34-752"><a href="#cb34-752"></a><span class="ss">- </span>The only required method of this trait is <span class="in">`write_str`</span>:</span>
-<span id="cb34-753"><a href="#cb34-753"></a><span class="ss">  - </span><span class="co">[</span><span class="ot">`core::fmt::Write`</span><span class="co">](https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html)</span></span>
-<span id="cb34-754"><a href="#cb34-754"></a></span>
-<span id="cb34-755"><a href="#cb34-755"></a><span class="fu">## Sketch</span></span>
-<span id="cb34-756"><a href="#cb34-756"></a></span>
-<span id="cb34-757"><a href="#cb34-757"></a><span class="ss">- </span>Basically we need to write this:</span>
-<span id="cb34-758"><a href="#cb34-758"></a></span>
-<span id="cb34-759"><a href="#cb34-759"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-760"><a href="#cb34-760"></a><span class="in">impl core::fmt::Write for ??? {</span></span>
-<span id="cb34-761"><a href="#cb34-761"></a><span class="in">    fn write_str(&amp;mut self, s: &amp;str) -&gt; fmt::Result {</span></span>
-<span id="cb34-762"><a href="#cb34-762"></a><span class="in">        // Do the thing. </span></span>
-<span id="cb34-763"><a href="#cb34-763"></a><span class="in">        return Ok(());</span></span>
-<span id="cb34-764"><a href="#cb34-764"></a><span class="in">    }</span></span>
-<span id="cb34-765"><a href="#cb34-765"></a><span class="in">}</span></span>
-<span id="cb34-766"><a href="#cb34-766"></a><span class="in">```</span></span>
-<span id="cb34-767"><a href="#cb34-767"></a></span>
-<span id="cb34-768"><a href="#cb34-768"></a><span class="ss">- </span>The <span class="in">`Ok(())`</span> is just a <span class="in">`Ok`</span> Result containing the <span class="in">`()`</span> "unit type".</span>
-<span id="cb34-769"><a href="#cb34-769"></a></span>
-<span id="cb34-770"><a href="#cb34-770"></a><span class="fu">## Workaround</span></span>
-<span id="cb34-771"><a href="#cb34-771"></a></span>
-<span id="cb34-772"><a href="#cb34-772"></a><span class="ss">- </span>I already can write text!</span>
-<span id="cb34-773"><a href="#cb34-773"></a></span>
-<span id="cb34-774"><a href="#cb34-774"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-775"><a href="#cb34-775"></a><span class="in">impl core::fmt::Write for ??? {</span></span>
-<span id="cb34-776"><a href="#cb34-776"></a><span class="in">    fn write_str(&amp;mut self, s: &amp;str) -&gt; fmt::Result {</span></span>
-<span id="cb34-777"><a href="#cb34-777"></a><span class="in">        str_to_vga(s); </span></span>
-<span id="cb34-778"><a href="#cb34-778"></a><span class="in">        return Ok(());</span></span>
-<span id="cb34-779"><a href="#cb34-779"></a><span class="in">    }</span></span>
-<span id="cb34-780"><a href="#cb34-780"></a><span class="in">}</span></span>
-<span id="cb34-781"><a href="#cb34-781"></a><span class="in">```</span></span>
-<span id="cb34-782"><a href="#cb34-782"></a></span>
-<span id="cb34-783"><a href="#cb34-783"></a><span class="fu">## Dummy struct</span></span>
-<span id="cb34-784"><a href="#cb34-784"></a></span>
-<span id="cb34-785"><a href="#cb34-785"></a><span class="ss">- </span>I just make an arbitrary structure.</span>
-<span id="cb34-786"><a href="#cb34-786"></a></span>
-<span id="cb34-787"><a href="#cb34-787"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb34-788"><a href="#cb34-788"></a><span class="in">struct Dummy { } </span></span>
-<span id="cb34-789"><a href="#cb34-789"></a></span>
-<span id="cb34-790"><a href="#cb34-790"></a><span class="in">impl core::fmt::Write for Dummy {</span></span>
-<span id="cb34-791"><a href="#cb34-791"></a><span class="in">    fn write_str(&amp;mut self, s: &amp;str) -&gt; fmt::Result {</span></span>
-<span id="cb34-792"><a href="#cb34-792"></a><span class="in">        str_to_vga(s); </span></span>
-<span id="cb34-793"><a href="#cb34-793"></a><span class="in">        return Ok(());</span></span>
-<span id="cb34-794"><a href="#cb34-794"></a><span class="in">    }</span></span>
-<span id="cb34-795"><a href="#cb34-795"></a><span class="in">}</span></span>
-<span id="cb34-796"><a href="#cb34-796"></a><span class="in">```</span></span>
-<span id="cb34-797"><a href="#cb34-797"></a></span>
-<span id="cb34-798"><a href="#cb34-798"></a><span class="ss">- </span>Presumably it is clear why someone would find this an annoying way to do things.</span>
-<span id="cb34-799"><a href="#cb34-799"></a></span>
-<span id="cb34-800"><a href="#cb34-800"></a><span class="fu">## This works</span></span>
-<span id="cb34-801"><a href="#cb34-801"></a></span>
-<span id="cb34-802"><a href="#cb34-802"></a><span class="ss">- </span>I'm not kidding it actually does.</span>
-<span id="cb34-803"><a href="#cb34-803"></a><span class="ss">- </span>I was surprised too.</span>
-<span id="cb34-804"><a href="#cb34-804"></a><span class="ss">    - </span>I did forget to capitalized the W in write but...</span>
-<span id="cb34-805"><a href="#cb34-805"></a></span>
-<span id="cb34-806"><a href="#cb34-806"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb34-807"><a href="#cb34-807"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb34-808"><a href="#cb34-808"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb34-809"><a href="#cb34-809"></a><span class="in">    use core::fmt::Write;</span></span>
-<span id="cb34-810"><a href="#cb34-810"></a><span class="in">    let mut d = vga::Dummy { };</span></span>
-<span id="cb34-811"><a href="#cb34-811"></a><span class="in">    write!(d, "Hello {}!", "world");</span></span>
-<span id="cb34-812"><a href="#cb34-812"></a><span class="in">    loop {}</span></span>
-<span id="cb34-813"><a href="#cb34-813"></a><span class="in">}</span></span>
-<span id="cb34-814"><a href="#cb34-814"></a><span class="in">```</span></span>
-<span id="cb34-815"><a href="#cb34-815"></a></span>
-<span id="cb34-816"><a href="#cb34-816"></a><span class="ss">- </span>It throws an uninteresting warning.</span>
-<span id="cb34-817"><a href="#cb34-817"></a></span>
-<span id="cb34-818"><a href="#cb34-818"></a><span class="fu">### A println Macro</span></span>
-<span id="cb34-819"><a href="#cb34-819"></a></span>
-<span id="cb34-820"><a href="#cb34-820"></a>Now that we have a global writer, we can add a <span class="in">`println`</span> macro that can be used from anywhere in the codebase. Rust's <span class="co">[</span><span class="ot">macro syntax</span><span class="co">]</span> is a bit strange, so we won't try to write a macro from scratch. Instead, we look at the source of the <span class="co">[</span><span class="ot">`println!` macro</span><span class="co">]</span> in the standard library:</span>
-<span id="cb34-821"><a href="#cb34-821"></a></span>
-<span id="cb34-822"><a href="#cb34-822"></a><span class="ot">[macro syntax]: https://doc.rust-lang.org/nightly/book/ch20-05-macros.html#declarative-macros-for-general-metaprogramming</span></span>
-<span id="cb34-823"><a href="#cb34-823"></a><span class="ot">[`println!` macro]: https://doc.rust-lang.org/nightly/std/macro.println!.html</span></span>
-<span id="cb34-824"><a href="#cb34-824"></a></span>
-<span id="cb34-825"><a href="#cb34-825"></a><span class="in">```rust</span></span>
-<span id="cb34-826"><a href="#cb34-826"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb34-827"><a href="#cb34-827"></a><span class="pp">macro_rules!</span> println <span class="op">{</span></span>
-<span id="cb34-828"><a href="#cb34-828"></a>    () <span class="op">=&gt;</span> (<span class="pp">print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
-<span id="cb34-829"><a href="#cb34-829"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="pp">print!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> <span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb34-830"><a href="#cb34-830"></a><span class="op">}</span></span>
-<span id="cb34-831"><a href="#cb34-831"></a><span class="in">```</span></span>
-<span id="cb34-832"><a href="#cb34-832"></a></span>
-<span id="cb34-833"><a href="#cb34-833"></a>Macros are defined through one or more rules, similar to <span class="in">`match`</span> arms. The <span class="in">`println`</span> macro has two rules: The first rule is for invocations without arguments, e.g., <span class="in">`println!()`</span>, which is expanded to <span class="in">`print!("\n")`</span> and thus just prints a newline. The second rule is for invocations with parameters such as <span class="in">`println!("Hello")`</span> or <span class="in">`println!("Number: {}", 4)`</span>. It is also expanded to an invocation of the <span class="in">`print!`</span> macro, passing all arguments and an additional newline <span class="in">`\n`</span> at the end.</span>
-<span id="cb34-834"><a href="#cb34-834"></a></span>
-<span id="cb34-835"><a href="#cb34-835"></a>The <span class="in">`#[macro_export]`</span> attribute makes the macro available to the whole crate (not just the module it is defined in) and external crates. It also places the macro at the crate root, which means we have to import the macro through <span class="in">`use std::println`</span> instead of <span class="in">`std::macros::println`</span>.</span>
-<span id="cb34-836"><a href="#cb34-836"></a></span>
-<span id="cb34-837"><a href="#cb34-837"></a>The <span class="co">[</span><span class="ot">`print!` macro</span><span class="co">]</span> is defined as:</span>
-<span id="cb34-838"><a href="#cb34-838"></a></span>
-<span id="cb34-839"><a href="#cb34-839"></a><span class="ot">[`print!` macro]: https://doc.rust-lang.org/nightly/std/macro.print!.html</span></span>
-<span id="cb34-840"><a href="#cb34-840"></a></span>
-<span id="cb34-841"><a href="#cb34-841"></a><span class="in">```rust</span></span>
-<span id="cb34-842"><a href="#cb34-842"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb34-843"><a href="#cb34-843"></a><span class="pp">macro_rules!</span> print <span class="op">{</span></span>
-<span id="cb34-844"><a href="#cb34-844"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::io::</span>_print(<span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb34-845"><a href="#cb34-845"></a><span class="op">}</span></span>
-<span id="cb34-846"><a href="#cb34-846"></a><span class="in">```</span></span>
-<span id="cb34-847"><a href="#cb34-847"></a></span>
-<span id="cb34-848"><a href="#cb34-848"></a>The macro expands to a call of the <span class="co">[</span><span class="ot">`_print` function</span><span class="co">]</span> in the <span class="in">`io`</span> module. The <span class="co">[</span><span class="ot">`$crate` variable</span><span class="co">]</span> ensures that the macro also works from outside the <span class="in">`std`</span> crate by expanding to <span class="in">`std`</span> when it's used in other crates.</span>
-<span id="cb34-849"><a href="#cb34-849"></a></span>
-<span id="cb34-850"><a href="#cb34-850"></a>The <span class="co">[</span><span class="ot">`format_args` macro</span><span class="co">]</span> builds a <span class="co">[</span><span class="ot">fmt::Arguments</span><span class="co">]</span> type from the passed arguments, which is passed to <span class="in">`_print`</span>. The <span class="co">[</span><span class="ot">`_print` function</span><span class="co">]</span> of libstd calls <span class="in">`print_to`</span>, which is rather complicated because it supports different <span class="in">`Stdout`</span> devices. We don't need that complexity since we just want to print to the VGA buffer.</span>
-<span id="cb34-851"><a href="#cb34-851"></a></span>
-<span id="cb34-852"><a href="#cb34-852"></a><span class="ot">[`_print` function]: https://github.com/rust-lang/rust/blob/29f5c699b11a6a148f097f82eaa05202f8799bbc/src/libstd/io/stdio.rs#L698</span></span>
-<span id="cb34-853"><a href="#cb34-853"></a><span class="ot">[`$crate` variable]: https://doc.rust-lang.org/1.30.0/book/first-edition/macros.html#the-variable-crate</span></span>
-<span id="cb34-854"><a href="#cb34-854"></a><span class="ot">[`format_args` macro]: https://doc.rust-lang.org/nightly/std/macro.format_args.html</span></span>
-<span id="cb34-855"><a href="#cb34-855"></a><span class="ot">[fmt::Arguments]: https://doc.rust-lang.org/nightly/core/fmt/struct.Arguments.html</span></span>
-<span id="cb34-856"><a href="#cb34-856"></a></span>
-<span id="cb34-857"><a href="#cb34-857"></a>To print to the VGA buffer, we just copy the <span class="in">`println!`</span> and <span class="in">`print!`</span> macros, but modify them to use our own <span class="in">`_print`</span> function:</span>
-<span id="cb34-858"><a href="#cb34-858"></a></span>
-<span id="cb34-859"><a href="#cb34-859"></a><span class="in">```rust</span></span>
-<span id="cb34-860"><a href="#cb34-860"></a><span class="co">// in src/vga.rs</span></span>
-<span id="cb34-861"><a href="#cb34-861"></a></span>
-<span id="cb34-862"><a href="#cb34-862"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb34-863"><a href="#cb34-863"></a><span class="pp">macro_rules!</span> print <span class="op">{</span></span>
-<span id="cb34-864"><a href="#cb34-864"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::vga::</span>_print(<span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb34-865"><a href="#cb34-865"></a><span class="op">}</span></span>
-<span id="cb34-866"><a href="#cb34-866"></a></span>
-<span id="cb34-867"><a href="#cb34-867"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
-<span id="cb34-868"><a href="#cb34-868"></a><span class="pp">macro_rules!</span> println <span class="op">{</span></span>
-<span id="cb34-869"><a href="#cb34-869"></a>    () <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
-<span id="cb34-870"><a href="#cb34-870"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> <span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb34-871"><a href="#cb34-871"></a><span class="op">}</span></span>
-<span id="cb34-872"><a href="#cb34-872"></a></span>
-<span id="cb34-873"><a href="#cb34-873"></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
-<span id="cb34-874"><a href="#cb34-874"></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
-<span id="cb34-875"><a href="#cb34-875"></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb34-876"><a href="#cb34-876"></a>    WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
-<span id="cb34-877"><a href="#cb34-877"></a><span class="op">}</span></span>
-<span id="cb34-878"><a href="#cb34-878"></a><span class="in">```</span></span>
-<span id="cb34-879"><a href="#cb34-879"></a></span>
-<span id="cb34-880"><a href="#cb34-880"></a>One thing that we changed from the original <span class="in">`println`</span> definition is that we prefixed the invocations of the <span class="in">`print!`</span> macro with <span class="in">`$crate`</span> too. This ensures that we don't need to import the <span class="in">`print!`</span> macro too if we only want to use <span class="in">`println`</span>.</span>
-<span id="cb34-881"><a href="#cb34-881"></a></span>
-<span id="cb34-882"><a href="#cb34-882"></a>Like in the standard library, we add the <span class="in">`#[macro_export]`</span> attribute to both macros to make them available everywhere in our crate. Note that this places the macros in the root namespace of the crate, so importing them via <span class="in">`use crate::vga::println`</span> does not work. Instead, we have to do <span class="in">`use crate::println`</span>.</span>
-<span id="cb34-883"><a href="#cb34-883"></a></span>
-<span id="cb34-884"><a href="#cb34-884"></a>The <span class="in">`_print`</span> function locks our static <span class="in">`WRITER`</span> and calls the <span class="in">`write_fmt`</span> method on it. This method is from the <span class="in">`Write`</span> trait, which we need to import. The additional <span class="in">`unwrap()`</span> at the end panics if printing isn't successful. But since we always return <span class="in">`Ok`</span> in <span class="in">`write_str`</span>, that should not happen.</span>
-<span id="cb34-885"><a href="#cb34-885"></a></span>
-<span id="cb34-886"><a href="#cb34-886"></a>Since the macros need to be able to call <span class="in">`_print`</span> from outside of the module, the function needs to be public. However, since we consider this a private implementation detail, we add the <span class="co">[</span><span class="ot">`doc(hidden)` attribute</span><span class="co">]</span> to hide it from the generated documentation.</span>
-<span id="cb34-887"><a href="#cb34-887"></a></span>
-<span id="cb34-888"><a href="#cb34-888"></a><span class="ot">[`doc(hidden)` attribute]: https://doc.rust-lang.org/nightly/rustdoc/write-documentation/the-doc-attribute.html#hidden</span></span>
-<span id="cb34-889"><a href="#cb34-889"></a></span>
-<span id="cb34-890"><a href="#cb34-890"></a><span class="fu">### Hello World using `println`</span></span>
-<span id="cb34-891"><a href="#cb34-891"></a>Now we can use <span class="in">`println`</span> in our <span class="in">`_start`</span> function:</span>
-<span id="cb34-892"><a href="#cb34-892"></a></span>
-<span id="cb34-893"><a href="#cb34-893"></a><span class="in">```rust</span></span>
-<span id="cb34-894"><a href="#cb34-894"></a><span class="co">// in src/main.rs</span></span>
-<span id="cb34-895"><a href="#cb34-895"></a></span>
-<span id="cb34-896"><a href="#cb34-896"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb34-897"><a href="#cb34-897"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb34-898"><a href="#cb34-898"></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
-<span id="cb34-899"><a href="#cb34-899"></a></span>
-<span id="cb34-900"><a href="#cb34-900"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb34-901"><a href="#cb34-901"></a><span class="op">}</span></span>
-<span id="cb34-902"><a href="#cb34-902"></a><span class="in">```</span></span>
-<span id="cb34-903"><a href="#cb34-903"></a></span>
-<span id="cb34-904"><a href="#cb34-904"></a>Note that we don't have to import the macro in the main function, because it already lives in the root namespace.</span>
-<span id="cb34-905"><a href="#cb34-905"></a></span>
-<span id="cb34-906"><a href="#cb34-906"></a>As expected, we now see a _“Hello World!”_ on the screen:</span>
-<span id="cb34-907"><a href="#cb34-907"></a></span>
-<span id="cb34-908"><a href="#cb34-908"></a><span class="al">![QEMU printing “Hello World!”](vga-hello-world.png)</span></span>
-<span id="cb34-909"><a href="#cb34-909"></a></span>
-<span id="cb34-910"><a href="#cb34-910"></a><span class="fu">### Printing Panic Messages</span></span>
-<span id="cb34-911"><a href="#cb34-911"></a></span>
-<span id="cb34-912"><a href="#cb34-912"></a>Now that we have a <span class="in">`println`</span> macro, we can use it in our panic function to print the panic message and the location of the panic:</span>
-<span id="cb34-913"><a href="#cb34-913"></a></span>
-<span id="cb34-914"><a href="#cb34-914"></a><span class="in">```rust</span></span>
-<span id="cb34-915"><a href="#cb34-915"></a><span class="co">// in main.rs</span></span>
-<span id="cb34-916"><a href="#cb34-916"></a></span>
-<span id="cb34-917"><a href="#cb34-917"></a><span class="co">/// This function is called on panic.</span></span>
-<span id="cb34-918"><a href="#cb34-918"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb34-919"><a href="#cb34-919"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb34-920"><a href="#cb34-920"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
-<span id="cb34-921"><a href="#cb34-921"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb34-922"><a href="#cb34-922"></a><span class="op">}</span></span>
-<span id="cb34-923"><a href="#cb34-923"></a><span class="in">```</span></span>
-<span id="cb34-924"><a href="#cb34-924"></a></span>
-<span id="cb34-925"><a href="#cb34-925"></a>When we now insert <span class="in">`panic!("Some panic message");`</span> in our <span class="in">`_start`</span> function, we get the following output:</span>
-<span id="cb34-926"><a href="#cb34-926"></a></span>
-<span id="cb34-927"><a href="#cb34-927"></a><span class="al">![QEMU printing “panicked at 'Some panic message', src/main.rs:28:5](vga-panic.png)</span></span>
-<span id="cb34-928"><a href="#cb34-928"></a></span>
-<span id="cb34-929"><a href="#cb34-929"></a>So we know not only that a panic has occurred, but also the panic message and where in the code it happened.</span>
-<span id="cb34-930"><a href="#cb34-930"></a></span>
-<span id="cb34-931"><a href="#cb34-931"></a><span class="fu">## Summary</span></span>
-<span id="cb34-932"><a href="#cb34-932"></a>In this post, we learned about the structure of the VGA text buffer and how it can be written through the memory mapping at address <span class="in">`0xb8000`</span>. We created a Rust module that encapsulates the unsafety of writing to this memory-mapped buffer and presents a safe and convenient interface to the outside.</span>
-<span id="cb34-933"><a href="#cb34-933"></a></span>
-<span id="cb34-934"><a href="#cb34-934"></a>Thanks to cargo, we also saw how easy it is to add dependencies on third-party libraries. The two dependencies that we added, <span class="in">`lazy_static`</span> and <span class="in">`spin`</span>, are very useful in OS development and we will use them in more places in future posts.</span>
-<span id="cb34-935"><a href="#cb34-935"></a></span>
-<span id="cb34-936"><a href="#cb34-936"></a><span class="fu">## What's next?</span></span>
-<span id="cb34-937"><a href="#cb34-937"></a>The next post explains how to set up Rust's built-in unit test framework. We will then create some basic unit tests for the VGA buffer module from this post.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb25" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb25-1"><a href="#cb25-1"></a><span class="co">---</span></span>
+<span id="cb25-2"><a href="#cb25-2"></a><span class="an">title:</span><span class="co"> Text</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a><span class="co">---</span></span>
+<span id="cb25-4"><a href="#cb25-4"></a></span>
+<span id="cb25-5"><a href="#cb25-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb25-6"><a href="#cb25-6"></a></span>
+<span id="cb25-7"><a href="#cb25-7"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb25-8"><a href="#cb25-8"></a><span class="ss">  - </span>Do you text output yet?</span>
+<span id="cb25-9"><a href="#cb25-9"></a><span class="ss">    - </span>The coolest assignment ever for a third week in a row.</span>
+<span id="cb25-10"><a href="#cb25-10"></a><span class="ss">    - </span>How do I keep getting away with it.</span>
+<span id="cb25-11"><a href="#cb25-11"></a></span>
+<span id="cb25-12"><a href="#cb25-12"></a><span class="fu">## Citations</span></span>
+<span id="cb25-13"><a href="#cb25-13"></a></span>
+<span id="cb25-14"><a href="#cb25-14"></a><span class="ss">- </span>I tried to steal this but I thought it was too bad and changed everything. </span>
+<span id="cb25-15"><a href="#cb25-15"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">VGA Text Mode</span><span class="co">](https://os.phil-opp.com/vga-text-mode/)</span></span>
+<span id="cb25-16"><a href="#cb25-16"></a></span>
+<span id="cb25-17"><a href="#cb25-17"></a><span class="fu"># Background</span></span>
+<span id="cb25-18"><a href="#cb25-18"></a></span>
+<span id="cb25-19"><a href="#cb25-19"></a><span class="fu">## VGA Text Mode</span></span>
+<span id="cb25-20"><a href="#cb25-20"></a></span>
+<span id="cb25-21"><a href="#cb25-21"></a><span class="ss">- </span>We recall <span class="co">[</span><span class="ot">VGA text mode</span><span class="co">](https://en.wikipedia.org/wiki/VGA-compatible_text_mode)</span> from the homework. </span>
+<span id="cb25-22"><a href="#cb25-22"></a><span class="ss">    - </span>A simple way to print text to the screen. </span>
+<span id="cb25-23"><a href="#cb25-23"></a><span class="ss">- </span>We recall that Rust prints via a "macro"</span>
+<span id="cb25-24"><a href="#cb25-24"></a><span class="ss">- </span>Now we:</span>
+<span id="cb25-25"><a href="#cb25-25"></a><span class="ss">    - </span>Create an interface to encapsulating all unsafety in a separate module. </span>
+<span id="cb25-26"><a href="#cb25-26"></a><span class="ss">    - </span>We also implement support for Rust's <span class="co">[</span><span class="ot">formatting macros</span><span class="co">](https://en.wikipedia.org/wiki/VGA-compatible_text_mode)</span></span>
+<span id="cb25-27"><a href="#cb25-27"></a>    </span>
+<span id="cb25-28"><a href="#cb25-28"></a><span class="fu">## The Buffer</span></span>
+<span id="cb25-29"><a href="#cb25-29"></a></span>
+<span id="cb25-30"><a href="#cb25-30"></a><span class="ss">- </span>To print a character to the screen in VGA text mode, one has to write it to the text buffer of the VGA hardware. </span>
+<span id="cb25-31"><a href="#cb25-31"></a><span class="ss">    - </span>A byte passing over a bus to fixed location will render as ASCII on a screen.</span>
+<span id="cb25-32"><a href="#cb25-32"></a></span>
+<span id="cb25-33"><a href="#cb25-33"></a><span class="fu">## 1d or 2d</span></span>
+<span id="cb25-34"><a href="#cb25-34"></a></span>
+<span id="cb25-35"><a href="#cb25-35"></a><span class="ss">- </span>The VGA text buffer renders as two-dimensional array.</span>
+<span id="cb25-36"><a href="#cb25-36"></a><span class="ss">    - </span>Addressed as a one dimensional array.</span>
+<span id="cb25-37"><a href="#cb25-37"></a><span class="ss">    - </span>Safe to assume 25 rows and 80 columns.</span>
+<span id="cb25-38"><a href="#cb25-38"></a><span class="ss">    - </span>Each position is an ASCII (*not* unicode) character.</span>
+<span id="cb25-39"><a href="#cb25-39"></a>    </span>
+<span id="cb25-40"><a href="#cb25-40"></a><span class="fu">## Format</span></span>
+<span id="cb25-41"><a href="#cb25-41"></a></span>
+<span id="cb25-42"><a href="#cb25-42"></a><span class="ss">- </span>Describes a single screen character through the following format:</span>
+<span id="cb25-43"><a href="#cb25-43"></a></span>
+<span id="cb25-44"><a href="#cb25-44"></a>| Bit(s) | Value            |</span>
+<span id="cb25-45"><a href="#cb25-45"></a>| ------ | ---------------- |</span>
+<span id="cb25-46"><a href="#cb25-46"></a>| 0-7    | ASCII code point |</span>
+<span id="cb25-47"><a href="#cb25-47"></a>| 8-11   | Foreground color |</span>
+<span id="cb25-48"><a href="#cb25-48"></a>| 12-14  | Background color |</span>
+<span id="cb25-49"><a href="#cb25-49"></a>| 15     | Blink            |</span>
+<span id="cb25-50"><a href="#cb25-50"></a></span>
+<span id="cb25-51"><a href="#cb25-51"></a><span class="ss">- </span>I did not see blinking. </span>
+<span id="cb25-52"><a href="#cb25-52"></a></span>
+<span id="cb25-53"><a href="#cb25-53"></a><span class="fu">## First Byte</span></span>
+<span id="cb25-54"><a href="#cb25-54"></a></span>
+<span id="cb25-55"><a href="#cb25-55"></a><span class="ss">- </span>The first byte represents the character that should be printed in the <span class="co">[</span><span class="ot">ASCII encoding</span><span class="co">]</span>. </span>
+<span id="cb25-56"><a href="#cb25-56"></a><span class="ss">    - </span>We recall we say many mentions of Python in firmware jobs.</span>
+<span id="cb25-57"><a href="#cb25-57"></a><span class="in">```{.sh}</span></span>
+<span id="cb25-58"><a href="#cb25-58"></a><span class="in">python3 -c "[print(chr(a), ':', a) for a in range(ord('A'), ord('z')+1)]"</span></span>
+<span id="cb25-59"><a href="#cb25-59"></a><span class="in">```</span></span>
+<span id="cb25-60"><a href="#cb25-60"></a></span>
+<span id="cb25-61"><a href="#cb25-61"></a><span class="fu">## Except</span></span>
+<span id="cb25-62"><a href="#cb25-62"></a></span>
+<span id="cb25-63"><a href="#cb25-63"></a><span class="ss">- </span>Okay it isn't actually ASCII.</span>
+<span id="cb25-64"><a href="#cb25-64"></a><span class="ss">- </span>It's <span class="co">[</span><span class="ot">_code page 437_</span><span class="co">](https://en.wikipedia.org/wiki/Code_page_437)</span></span>
+<span id="cb25-65"><a href="#cb25-65"></a><span class="ss">- </span>We think of it as an IBM specific ASCII extension and just use the ASCII subset.</span>
+<span id="cb25-66"><a href="#cb25-66"></a></span>
+<span id="cb25-67"><a href="#cb25-67"></a><span class="fu">## Second Byte</span></span>
+<span id="cb25-68"><a href="#cb25-68"></a></span>
+<span id="cb25-69"><a href="#cb25-69"></a><span class="ss">- </span>The second **byte** defines how the character is displayed. </span>
+<span id="cb25-70"><a href="#cb25-70"></a><span class="ss">    - </span>The first **four** bits define the foreground color.</span>
+<span id="cb25-71"><a href="#cb25-71"></a><span class="ss">    - </span>The next three bits the background color</span>
+<span id="cb25-72"><a href="#cb25-72"></a><span class="ss">    - </span>*Nominally* the last bit whether the character should blink.</span>
+<span id="cb25-73"><a href="#cb25-73"></a><span class="ss">        - </span>I did not see blinking.</span>
+<span id="cb25-74"><a href="#cb25-74"></a><span class="ss">        - </span>May be a <span class="in">`qemu`</span> thing I'm not sure.</span>
+<span id="cb25-75"><a href="#cb25-75"></a></span>
+<span id="cb25-76"><a href="#cb25-76"></a><span class="fu">## Colors {.smaller} </span></span>
+<span id="cb25-77"><a href="#cb25-77"></a>        </span>
+<span id="cb25-78"><a href="#cb25-78"></a><span class="ss">- </span>Using octal.</span>
+<span id="cb25-79"><a href="#cb25-79"></a></span>
+<span id="cb25-80"><a href="#cb25-80"></a>| Number | Color      | Bright   | Bright Color |</span>
+<span id="cb25-81"><a href="#cb25-81"></a>| ------ | ---------- | ------------------- | ------------ |</span>
+<span id="cb25-82"><a href="#cb25-82"></a>| 0o00    | Black      | 0o10                 | Dark Gray    |</span>
+<span id="cb25-83"><a href="#cb25-83"></a>| 0o01    | Blue       | 0o11                 | Light Blue   |</span>
+<span id="cb25-84"><a href="#cb25-84"></a>| 0o02    | Green      | 0o12                 | Light Green  |</span>
+<span id="cb25-85"><a href="#cb25-85"></a>| 0o03    | Cyan       | 0o13                 | Light Cyan   |</span>
+<span id="cb25-86"><a href="#cb25-86"></a>| 0o04    | Red        | 0o14                 | Light Red    |</span>
+<span id="cb25-87"><a href="#cb25-87"></a>| 0o05    | Magenta    | 0o15                 | Pink         |</span>
+<span id="cb25-88"><a href="#cb25-88"></a>| 0o06    | Brown      | 0o16                 | Yellow       |</span>
+<span id="cb25-89"><a href="#cb25-89"></a>| 0o07    | Light Gray | 0o17                 | White        |</span>
+<span id="cb25-90"><a href="#cb25-90"></a></span>
+<span id="cb25-91"><a href="#cb25-91"></a><span class="fu">## Bright/Blink</span></span>
+<span id="cb25-92"><a href="#cb25-92"></a></span>
+<span id="cb25-93"><a href="#cb25-93"></a><span class="ss">- </span>Bit 4 is the _bright bit_.</span>
+<span id="cb25-94"><a href="#cb25-94"></a><span class="ss">    - </span>For example, blue into light blue. </span>
+<span id="cb25-95"><a href="#cb25-95"></a><span class="ss">- </span>For the background color, this bit is nominally repurposed as the blink bit.</span>
+<span id="cb25-96"><a href="#cb25-96"></a></span>
+<span id="cb25-97"><a href="#cb25-97"></a><span class="fu">## Memory-mapped I/O</span></span>
+<span id="cb25-98"><a href="#cb25-98"></a></span>
+<span id="cb25-99"><a href="#cb25-99"></a><span class="ss">- </span>Okay so this is cool.</span>
+<span id="cb25-100"><a href="#cb25-100"></a><span class="ss">- </span>Recall the bus!</span>
+<span id="cb25-101"><a href="#cb25-101"></a><span class="ss">- </span>We are going to steal some diagrams.</span>
+<span id="cb25-102"><a href="#cb25-102"></a><span class="ss">    - </span>Thanks <span class="co">[</span><span class="ot">Geeks for Geeks</span><span class="co">](https://www.geeksforgeeks.org/computer-organization-architecture/memory-mapped-i-o-and-isolated-i-o/)</span></span>
+<span id="cb25-103"><a href="#cb25-103"></a>    </span>
+<span id="cb25-104"><a href="#cb25-104"></a><span class="fu">## Isolated I/O</span></span>
+<span id="cb25-105"><a href="#cb25-105"></a></span>
+<span id="cb25-106"><a href="#cb25-106"></a><span class="ss">- </span>Imagine a form of I/O that isn't cool.</span>
+<span id="cb25-107"><a href="#cb25-107"></a><span class="ss">- </span>It may have separate address spaces.</span>
+<span id="cb25-108"><a href="#cb25-108"></a><span class="ss">    - </span>So there may be a <span class="in">`0x64`</span> memory location and also <span class="in">`0x64`</span> device.</span>
+<span id="cb25-109"><a href="#cb25-109"></a></span>
+<span id="cb25-110"><a href="#cb25-110"></a><span class="al">![](https://media.geeksforgeeks.org/wp-content/uploads/20250506151408311194/isolate-io.webp)</span></span>
+<span id="cb25-111"><a href="#cb25-111"></a></span>
+<span id="cb25-112"><a href="#cb25-112"></a><span class="fu">## This isn't cool</span></span>
+<span id="cb25-113"><a href="#cb25-113"></a></span>
+<span id="cb25-114"><a href="#cb25-114"></a><span class="ss">- </span>We already discussed Harvard vs. von Neumann architecture.</span>
+<span id="cb25-115"><a href="#cb25-115"></a><span class="ss">- </span>Having two memory spaces is not at all cool.</span>
+<span id="cb25-116"><a href="#cb25-116"></a><span class="ss">- </span>So we don't do it.</span>
+<span id="cb25-117"><a href="#cb25-117"></a><span class="ss">- </span>There's also port-mapped I/O (similarly not cool.</span>
+<span id="cb25-118"><a href="#cb25-118"></a></span>
+<span id="cb25-119"><a href="#cb25-119"></a><span class="fu">## Memory-Mapped I/O</span></span>
+<span id="cb25-120"><a href="#cb25-120"></a></span>
+<span id="cb25-121"><a href="#cb25-121"></a><span class="ss">- </span>Imagine the following.</span>
+<span id="cb25-122"><a href="#cb25-122"></a><span class="ss">  - </span>The bootloader lives at <span class="in">`0x0`</span></span>
+<span id="cb25-123"><a href="#cb25-123"></a><span class="ss">  - </span>The OS lives at <span class="in">`0x1`</span></span>
+<span id="cb25-124"><a href="#cb25-124"></a><span class="ss">  - </span>The keyboard lives at <span class="in">`0x2`</span></span>
+<span id="cb25-125"><a href="#cb25-125"></a><span class="ss">  - </span>The internet (via a network card) at <span class="in">`0x3`</span></span>
+<span id="cb25-126"><a href="#cb25-126"></a><span class="ss">  - </span>The monitor at <span class="in">`0x4`</span></span>
+<span id="cb25-127"><a href="#cb25-127"></a><span class="ss">- </span>This obviously cool.</span>
+<span id="cb25-128"><a href="#cb25-128"></a></span>
+<span id="cb25-129"><a href="#cb25-129"></a><span class="fu">## Altogether </span></span>
+<span id="cb25-130"><a href="#cb25-130"></a></span>
+<span id="cb25-131"><a href="#cb25-131"></a><span class="ss">- </span>One Big Happy Memory Space </span>
+<span id="cb25-132"><a href="#cb25-132"></a></span>
+<span id="cb25-133"><a href="#cb25-133"></a><span class="al">![](https://media.geeksforgeeks.org/wp-content/uploads/20250506151651561116/memory-io.webp)</span></span>
+<span id="cb25-134"><a href="#cb25-134"></a></span>
+<span id="cb25-135"><a href="#cb25-135"></a><span class="fu">## Downsides</span></span>
+<span id="cb25-136"><a href="#cb25-136"></a></span>
+<span id="cb25-137"><a href="#cb25-137"></a><span class="ss">- </span>MMIO is a helpful *abstraction* - we already know how to think about memory, so we don't need to learn much to do I/O.</span>
+<span id="cb25-138"><a href="#cb25-138"></a><span class="ss">    - </span>There's downsides.</span>
+<span id="cb25-139"><a href="#cb25-139"></a><span class="ss">    - </span>We shouldn't be able to write to keyboard, probably.</span>
+<span id="cb25-140"><a href="#cb25-140"></a><span class="ss">    - </span>Or read from a monitor.</span>
+<span id="cb25-141"><a href="#cb25-141"></a><span class="ss">- </span>But its fast and easy, like BIOS vs. UEFI.</span>
+<span id="cb25-142"><a href="#cb25-142"></a></span>
+<span id="cb25-143"><a href="#cb25-143"></a><span class="fu"># x86_64</span></span>
+<span id="cb25-144"><a href="#cb25-144"></a></span>
+<span id="cb25-145"><a href="#cb25-145"></a><span class="fu">## In x86_64</span></span>
+<span id="cb25-146"><a href="#cb25-146"></a></span>
+<span id="cb25-147"><a href="#cb25-147"></a><span class="ss">- </span>On our emulated device, VGA text buffer lives at address <span class="in">`0xb8000`</span>. </span>
+<span id="cb25-148"><a href="#cb25-148"></a><span class="ss">    - </span>Absolute geniuses will crack open C and get into trouble.</span>
+<span id="cb25-149"><a href="#cb25-149"></a><span class="ss">- </span>So any read to this location:</span>
+<span id="cb25-150"><a href="#cb25-150"></a><span class="ss">    - </span>Doesn't go to MMU/RAM/SSD</span>
+<span id="cb25-151"><a href="#cb25-151"></a><span class="ss">    - </span>Does go to VGA hardware</span>
+<span id="cb25-152"><a href="#cb25-152"></a></span>
+<span id="cb25-153"><a href="#cb25-153"></a></span>
+<span id="cb25-154"><a href="#cb25-154"></a><span class="fu">## Alert!</span></span>
+<span id="cb25-155"><a href="#cb25-155"></a></span>
+<span id="cb25-156"><a href="#cb25-156"></a><span class="ss">- </span>MMIO, especially older devices, might not support all normal operations. </span>
+<span id="cb25-157"><a href="#cb25-157"></a><span class="ss">- </span>For example, a device could only support byte-wise reads and return junk when a <span class="in">`u64`</span> is read. </span>
+<span id="cb25-158"><a href="#cb25-158"></a><span class="ss">    - </span>Block-write "Hello world!" is a homework extension. </span>
+<span id="cb25-159"><a href="#cb25-159"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://web.stanford.edu/class/cs140/projects/pintos/specs/freevga/vga/vgamem.htm#manip)</span></span>
+<span id="cb25-160"><a href="#cb25-160"></a></span>
+<span id="cb25-161"><a href="#cb25-161"></a><span class="fu">## A Rust Module</span></span>
+<span id="cb25-162"><a href="#cb25-162"></a></span>
+<span id="cb25-163"><a href="#cb25-163"></a><span class="ss">- </span>Now we "know" how the VGA buffer works.</span>
+<span id="cb25-164"><a href="#cb25-164"></a><span class="ss">- </span>We can create a Rust module to handle print and standard out:</span>
+<span id="cb25-165"><a href="#cb25-165"></a></span>
+<span id="cb25-166"><a href="#cb25-166"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-167"><a href="#cb25-167"></a><span class="in">mod vga;</span></span>
+<span id="cb25-168"><a href="#cb25-168"></a><span class="in">```</span></span>
+<span id="cb25-169"><a href="#cb25-169"></a></span>
+<span id="cb25-170"><a href="#cb25-170"></a><span class="ss">- </span>We also must create a new <span class="in">`src/vga.rs`</span> file.</span>
+<span id="cb25-171"><a href="#cb25-171"></a></span>
+<span id="cb25-172"><a href="#cb25-172"></a><span class="co">&lt;!--</span></span>
+<span id="cb25-173"><a href="#cb25-173"></a></span>
+<span id="cb25-174"><a href="#cb25-174"></a><span class="co">## Colors</span></span>
+<span id="cb25-175"><a href="#cb25-175"></a></span>
+<span id="cb25-176"><a href="#cb25-176"></a><span class="co">- Represent colors using an `enum`:</span></span>
+<span id="cb25-177"><a href="#cb25-177"></a></span>
+<span id="cb25-178"><a href="#cb25-178"></a><span class="co">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-179"><a href="#cb25-179"></a><span class="co">#[allow(dead_code)]</span></span>
+<span id="cb25-180"><a href="#cb25-180"></a><span class="co">#[derive(Debug, Clone, Copy, PartialEq, Eq)]</span></span>
+<span id="cb25-181"><a href="#cb25-181"></a><span class="co">#[repr(u8)]</span></span>
+<span id="cb25-182"><a href="#cb25-182"></a><span class="co">pub enum Color {</span></span>
+<span id="cb25-183"><a href="#cb25-183"></a><span class="co">    Blck = 0o00,</span></span>
+<span id="cb25-184"><a href="#cb25-184"></a><span class="co">    Blue = 0o01,</span></span>
+<span id="cb25-185"><a href="#cb25-185"></a><span class="co">    Gren = 0o02,</span></span>
+<span id="cb25-186"><a href="#cb25-186"></a><span class="co">    Cyan = 0o03,</span></span>
+<span id="cb25-187"><a href="#cb25-187"></a><span class="co">    Redd = 0o04,</span></span>
+<span id="cb25-188"><a href="#cb25-188"></a><span class="co">    Mgnt = 0o05,</span></span>
+<span id="cb25-189"><a href="#cb25-189"></a><span class="co">    Brwn = 0o06,</span></span>
+<span id="cb25-190"><a href="#cb25-190"></a><span class="co">    LGry = 0o07,</span></span>
+<span id="cb25-191"><a href="#cb25-191"></a><span class="co">    DGry = 0o10,</span></span>
+<span id="cb25-192"><a href="#cb25-192"></a><span class="co">    LBlu = 0o11,</span></span>
+<span id="cb25-193"><a href="#cb25-193"></a><span class="co">    LGrn = 0o12,</span></span>
+<span id="cb25-194"><a href="#cb25-194"></a><span class="co">    LCyn = 0o13,</span></span>
+<span id="cb25-195"><a href="#cb25-195"></a><span class="co">    LRed = 0o14,</span></span>
+<span id="cb25-196"><a href="#cb25-196"></a><span class="co">    Pink = 0o15,</span></span>
+<span id="cb25-197"><a href="#cb25-197"></a><span class="co">    Yelo = 0o16,</span></span>
+<span id="cb25-198"><a href="#cb25-198"></a><span class="co">    Whte = 0o17,</span></span>
+<span id="cb25-199"><a href="#cb25-199"></a><span class="co">}</span></span>
+<span id="cb25-200"><a href="#cb25-200"></a><span class="co">```</span></span>
+<span id="cb25-201"><a href="#cb25-201"></a></span>
+<span id="cb25-202"><a href="#cb25-202"></a><span class="co">## Notes</span></span>
+<span id="cb25-203"><a href="#cb25-203"></a></span>
+<span id="cb25-204"><a href="#cb25-204"></a><span class="co">- We use a [C-like enum] here to explicitly specify the number for each color. </span></span>
+<span id="cb25-205"><a href="#cb25-205"></a><span class="co">- Because of the `repr(u8)` attribute, each enum variant is stored as a `u8`. </span></span>
+<span id="cb25-206"><a href="#cb25-206"></a><span class="co">    - I would use `u4` type (a nib) if I was allowed to.</span></span>
+<span id="cb25-207"><a href="#cb25-207"></a><span class="co">-  Rust on the [C-like enum](https://doc.rust-lang.org/rust-by-example/custom_types/enum/c_like.html)</span></span>
+<span id="cb25-208"><a href="#cb25-208"></a><span class="co">    - At some point we have to figure out why we aren't writing C.</span></span>
+<span id="cb25-209"><a href="#cb25-209"></a></span>
+<span id="cb25-210"><a href="#cb25-210"></a><span class="co">## Suppress Warnings</span></span>
+<span id="cb25-211"><a href="#cb25-211"></a></span>
+<span id="cb25-212"><a href="#cb25-212"></a><span class="co">- Normally the compiler would issue a warning for each unused variant. </span></span>
+<span id="cb25-213"><a href="#cb25-213"></a><span class="co">    - This seems obviously annoying to me.</span></span>
+<span id="cb25-214"><a href="#cb25-214"></a><span class="co">- By using the `#[allow(dead_code)]` attribute, we disable these warnings for the `Color` enum.</span></span>
+<span id="cb25-215"><a href="#cb25-215"></a></span>
+<span id="cb25-216"><a href="#cb25-216"></a><span class="co">## Comparisons</span></span>
+<span id="cb25-217"><a href="#cb25-217"></a></span>
+<span id="cb25-218"><a href="#cb25-218"></a><span class="co">- By [deriving] the [`Copy`], [`Clone`], [`Debug`], [`PartialEq`], and [`Eq`] traits, we:</span></span>
+<span id="cb25-219"><a href="#cb25-219"></a><span class="co">    - Get stack-like (vs. heap-like) behavior.</span></span>
+<span id="cb25-220"><a href="#cb25-220"></a><span class="co">    - Make it printable.</span></span>
+<span id="cb25-221"><a href="#cb25-221"></a><span class="co">    - Make it comparable (e.g. via double-equals-equality `==`)</span></span>
+<span id="cb25-222"><a href="#cb25-222"></a><span class="co">- I would obviously just use an u8 here but don't be like me, I am wrong in some way that may be important latter.</span></span>
+<span id="cb25-223"><a href="#cb25-223"></a></span>
+<span id="cb25-224"><a href="#cb25-224"></a><span class="co">## Links</span></span>
+<span id="cb25-225"><a href="#cb25-225"></a></span>
+<span id="cb25-226"><a href="#cb25-226"></a><span class="co">- [deriving](https://doc.rust-lang.org/rust-by-example/trait/derive.html)</span></span>
+<span id="cb25-227"><a href="#cb25-227"></a><span class="co">- [`Copy`](https://doc.rust-lang.org/nightly/core/marker/trait.Copy.html)</span></span>
+<span id="cb25-228"><a href="#cb25-228"></a><span class="co">- [`Clone`](https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html)</span></span>
+<span id="cb25-229"><a href="#cb25-229"></a><span class="co">- [`Debug`](https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html)</span></span>
+<span id="cb25-230"><a href="#cb25-230"></a><span class="co">- [`PartialEq`](https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html)</span></span>
+<span id="cb25-231"><a href="#cb25-231"></a><span class="co">- [`Eq`](https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html)</span></span>
+<span id="cb25-232"><a href="#cb25-232"></a><span class="co">- [copy semantics](https://doc.rust-lang.org/1.30.0/book/first-edition/ownership.html#copy-types)</span></span>
+<span id="cb25-233"><a href="#cb25-233"></a></span>
+<span id="cb25-234"><a href="#cb25-234"></a></span>
+<span id="cb25-235"><a href="#cb25-235"></a><span class="co">## New Type</span></span>
+<span id="cb25-236"><a href="#cb25-236"></a></span>
+<span id="cb25-237"><a href="#cb25-237"></a><span class="co">- A full color code specifies foreground *and* background color</span></span>
+<span id="cb25-238"><a href="#cb25-238"></a><span class="co">- We create a [newtype](https://doc.rust-lang.org/rust-by-example/generics/new_types.html) on top of `u8`</span></span>
+<span id="cb25-239"><a href="#cb25-239"></a></span>
+<span id="cb25-240"><a href="#cb25-240"></a></span>
+<span id="cb25-241"><a href="#cb25-241"></a><span class="co">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-242"><a href="#cb25-242"></a><span class="co">#[derive(Debug, Clone, Copy, PartialEq, Eq)]</span></span>
+<span id="cb25-243"><a href="#cb25-243"></a><span class="co">#[repr(transparent)]</span></span>
+<span id="cb25-244"><a href="#cb25-244"></a><span class="co">struct ColorCode(u8);</span></span>
+<span id="cb25-245"><a href="#cb25-245"></a></span>
+<span id="cb25-246"><a href="#cb25-246"></a><span class="co">impl ColorCode {</span></span>
+<span id="cb25-247"><a href="#cb25-247"></a><span class="co">    fn new(fg: Color, b: Color) -&gt; ColorCode {</span></span>
+<span id="cb25-248"><a href="#cb25-248"></a><span class="co">        ColorCode((bg as u8) &lt;&lt; 4 | (fg as u8))</span></span>
+<span id="cb25-249"><a href="#cb25-249"></a><span class="co">    }</span></span>
+<span id="cb25-250"><a href="#cb25-250"></a><span class="co">}</span></span>
+<span id="cb25-251"><a href="#cb25-251"></a><span class="co">```</span></span>
+<span id="cb25-252"><a href="#cb25-252"></a></span>
+<span id="cb25-253"><a href="#cb25-253"></a><span class="co">## Transparency</span></span>
+<span id="cb25-254"><a href="#cb25-254"></a></span>
+<span id="cb25-255"><a href="#cb25-255"></a><span class="co">- Again, we derive the `Copy` and `Debug` traits for it. </span></span>
+<span id="cb25-256"><a href="#cb25-256"></a><span class="co">- When working with low level devices, we need to ensure bits are where we expect them to be.</span></span>
+<span id="cb25-257"><a href="#cb25-257"></a><span class="co">- To ensure that the `ColorCode` has the exact same data layout as a `u8`, we use the [`repr(transparent)`] attribute.</span></span>
+<span id="cb25-258"><a href="#cb25-258"></a><span class="co">    - [Read more](https://doc.rust-lang.org/nomicon/other-reprs.html#reprtransparent)</span></span>
+<span id="cb25-259"><a href="#cb25-259"></a><span class="co">&lt;!--</span></span>
+<span id="cb25-260"><a href="#cb25-260"></a><span class="co">## Text Buffer</span></span>
+<span id="cb25-261"><a href="#cb25-261"></a></span>
+<span id="cb25-262"><a href="#cb25-262"></a><span class="co">- Now we can add structures to represent a screen character and the text buffer:</span></span>
+<span id="cb25-263"><a href="#cb25-263"></a></span>
+<span id="cb25-264"><a href="#cb25-264"></a><span class="co">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-265"><a href="#cb25-265"></a><span class="co">#[derive(Debug, Clone, Copy, PartialEq, Eq)]</span></span>
+<span id="cb25-266"><a href="#cb25-266"></a><span class="co">#[repr(C)]</span></span>
+<span id="cb25-267"><a href="#cb25-267"></a><span class="co">struct ScreenChar {</span></span>
+<span id="cb25-268"><a href="#cb25-268"></a><span class="co">    ascii_character: u8,</span></span>
+<span id="cb25-269"><a href="#cb25-269"></a><span class="co">    color_code: ColorCode,</span></span>
+<span id="cb25-270"><a href="#cb25-270"></a><span class="co">}</span></span>
+<span id="cb25-271"><a href="#cb25-271"></a></span>
+<span id="cb25-272"><a href="#cb25-272"></a><span class="co">const BUFFER_HEIGHT: usize = 25;</span></span>
+<span id="cb25-273"><a href="#cb25-273"></a><span class="co">const BUFFER_WIDTH: usize = 80;</span></span>
+<span id="cb25-274"><a href="#cb25-274"></a></span>
+<span id="cb25-275"><a href="#cb25-275"></a><span class="co">#[repr(transparent)]</span></span>
+<span id="cb25-276"><a href="#cb25-276"></a><span class="co">struct Buffer {</span></span>
+<span id="cb25-277"><a href="#cb25-277"></a><span class="co">    chars: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],</span></span>
+<span id="cb25-278"><a href="#cb25-278"></a><span class="co">}</span></span>
+<span id="cb25-279"><a href="#cb25-279"></a><span class="co">```</span></span>
+<span id="cb25-280"><a href="#cb25-280"></a></span>
+<span id="cb25-281"><a href="#cb25-281"></a><span class="co">## C Representation</span></span>
+<span id="cb25-282"><a href="#cb25-282"></a></span>
+<span id="cb25-283"><a href="#cb25-283"></a><span class="co">- Field ordering in default structs is undefined in Rust!</span></span>
+<span id="cb25-284"><a href="#cb25-284"></a><span class="co">- Not so in the good language, C.</span></span>
+<span id="cb25-285"><a href="#cb25-285"></a><span class="co">- We use the [`repr(C)`] attribute. </span></span>
+<span id="cb25-286"><a href="#cb25-286"></a><span class="co">  - It guarantees that the struct's fields are laid out in order. `</span></span>
+<span id="cb25-287"><a href="#cb25-287"></a><span class="co">  - [`repr(C)`](https://doc.rust-lang.org/nightly/nomicon/other-reprs.html#reprc)</span></span>
+<span id="cb25-288"><a href="#cb25-288"></a><span class="co">- For the `Buffer` struct, we use [`repr(transparent)`] again to ensure that it has the same memory layout as its single field.</span></span>
+<span id="cb25-289"><a href="#cb25-289"></a><span class="co">--&gt;</span></span>
+<span id="cb25-290"><a href="#cb25-290"></a></span>
+<span id="cb25-291"><a href="#cb25-291"></a></span>
+<span id="cb25-292"><a href="#cb25-292"></a><span class="fu">## Standard Out</span></span>
+<span id="cb25-293"><a href="#cb25-293"></a></span>
+<span id="cb25-294"><a href="#cb25-294"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
+<span id="cb25-295"><a href="#cb25-295"></a><span class="ss">    - </span>Maintain the most recent position to which a character has been written.</span>
+<span id="cb25-296"><a href="#cb25-296"></a></span>
+<span id="cb25-297"><a href="#cb25-297"></a></span>
+<span id="cb25-298"><a href="#cb25-298"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-299"><a href="#cb25-299"></a><span class="in">static mut latest: usize = 0;</span></span>
+<span id="cb25-300"><a href="#cb25-300"></a><span class="in">```</span></span>
+<span id="cb25-301"><a href="#cb25-301"></a></span>
+<span id="cb25-302"><a href="#cb25-302"></a><span class="fu">## Location</span></span>
+<span id="cb25-303"><a href="#cb25-303"></a></span>
+<span id="cb25-304"><a href="#cb25-304"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
+<span id="cb25-305"><a href="#cb25-305"></a><span class="ss">    - </span>Maintain the most recent position to which a character has been written.</span>
+<span id="cb25-306"><a href="#cb25-306"></a><span class="ss">    - </span>Have a constant referring to to the VGA buffer address.</span>
+<span id="cb25-307"><a href="#cb25-307"></a></span>
+<span id="cb25-308"><a href="#cb25-308"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-309"><a href="#cb25-309"></a><span class="in">static mut latest:usize = 0;</span></span>
+<span id="cb25-310"><a href="#cb25-310"></a><span class="in">const MMIO = 0xb8000 as *mut u8;</span></span>
+<span id="cb25-311"><a href="#cb25-311"></a><span class="in">```</span></span>
+<span id="cb25-312"><a href="#cb25-312"></a></span>
+<span id="cb25-313"><a href="#cb25-313"></a><span class="fu">## Color</span></span>
+<span id="cb25-314"><a href="#cb25-314"></a></span>
+<span id="cb25-315"><a href="#cb25-315"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
+<span id="cb25-316"><a href="#cb25-316"></a><span class="ss">    - </span>Provide a way to write a character.</span>
+<span id="cb25-317"><a href="#cb25-317"></a><span class="ss">        - </span>I will use a <span class="in">`const`</span> for color and not worry about.</span>
+<span id="cb25-318"><a href="#cb25-318"></a></span>
+<span id="cb25-319"><a href="#cb25-319"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-320"><a href="#cb25-320"></a><span class="in">static mut latest:usize = 0;</span></span>
+<span id="cb25-321"><a href="#cb25-321"></a><span class="in">const MMIO = 0xb8000 as *mut u8;</span></span>
+<span id="cb25-322"><a href="#cb25-322"></a><span class="in">const COLOR: u = 0xF;</span></span>
+<span id="cb25-323"><a href="#cb25-323"></a><span class="in">```</span></span>
+<span id="cb25-324"><a href="#cb25-324"></a></span>
+<span id="cb25-325"><a href="#cb25-325"></a><span class="fu">## Character-wise</span></span>
+<span id="cb25-326"><a href="#cb25-326"></a></span>
+<span id="cb25-327"><a href="#cb25-327"></a><span class="ss">- </span>To provide "standard out" like functionality, I will:</span>
+<span id="cb25-328"><a href="#cb25-328"></a><span class="ss">    - </span>Provide a way to write a character.</span>
+<span id="cb25-329"><a href="#cb25-329"></a><span class="ss">        - </span>I will write a function to push one character.</span>
+<span id="cb25-330"><a href="#cb25-330"></a></span>
+<span id="cb25-331"><a href="#cb25-331"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-332"><a href="#cb25-332"></a><span class="in">// Public for now</span></span>
+<span id="cb25-333"><a href="#cb25-333"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
+<span id="cb25-334"><a href="#cb25-334"></a><span class="in">    todo!();</span></span>
+<span id="cb25-335"><a href="#cb25-335"></a><span class="in">}</span></span>
+<span id="cb25-336"><a href="#cb25-336"></a><span class="in">```</span></span>
+<span id="cb25-337"><a href="#cb25-337"></a></span>
+<span id="cb25-338"><a href="#cb25-338"></a><span class="fu">## Stepwise</span></span>
+<span id="cb25-339"><a href="#cb25-339"></a></span>
+<span id="cb25-340"><a href="#cb25-340"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
+<span id="cb25-341"><a href="#cb25-341"></a></span>
+<span id="cb25-342"><a href="#cb25-342"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-343"><a href="#cb25-343"></a><span class="in">// Public for now</span></span>
+<span id="cb25-344"><a href="#cb25-344"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
+<span id="cb25-345"><a href="#cb25-345"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-346"><a href="#cb25-346"></a><span class="in">}</span></span>
+<span id="cb25-347"><a href="#cb25-347"></a><span class="in">```</span></span>
+<span id="cb25-348"><a href="#cb25-348"></a></span>
+<span id="cb25-349"><a href="#cb25-349"></a><span class="fu">## Stepwise</span></span>
+<span id="cb25-350"><a href="#cb25-350"></a></span>
+<span id="cb25-351"><a href="#cb25-351"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
+<span id="cb25-352"><a href="#cb25-352"></a><span class="ss">2. </span>Store a value at that location.</span>
+<span id="cb25-353"><a href="#cb25-353"></a></span>
+<span id="cb25-354"><a href="#cb25-354"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-355"><a href="#cb25-355"></a><span class="in">// Public for now</span></span>
+<span id="cb25-356"><a href="#cb25-356"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
+<span id="cb25-357"><a href="#cb25-357"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-358"><a href="#cb25-358"></a><span class="in">    *rel = a;</span></span>
+<span id="cb25-359"><a href="#cb25-359"></a><span class="in">}</span></span>
+<span id="cb25-360"><a href="#cb25-360"></a><span class="in">```</span></span>
+<span id="cb25-361"><a href="#cb25-361"></a></span>
+<span id="cb25-362"><a href="#cb25-362"></a><span class="fu">## Stepwise</span></span>
+<span id="cb25-363"><a href="#cb25-363"></a></span>
+<span id="cb25-364"><a href="#cb25-364"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
+<span id="cb25-365"><a href="#cb25-365"></a><span class="ss">2. </span>Store a value at that location.</span>
+<span id="cb25-366"><a href="#cb25-366"></a><span class="ss">3. </span>Store a color at the next location.</span>
+<span id="cb25-367"><a href="#cb25-367"></a></span>
+<span id="cb25-368"><a href="#cb25-368"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-369"><a href="#cb25-369"></a><span class="in">// Public for now</span></span>
+<span id="cb25-370"><a href="#cb25-370"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
+<span id="cb25-371"><a href="#cb25-371"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-372"><a href="#cb25-372"></a><span class="in">    *rel = a;</span></span>
+<span id="cb25-373"><a href="#cb25-373"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-374"><a href="#cb25-374"></a><span class="in">}</span></span>
+<span id="cb25-375"><a href="#cb25-375"></a><span class="in">```</span></span>
+<span id="cb25-376"><a href="#cb25-376"></a></span>
+<span id="cb25-377"><a href="#cb25-377"></a><span class="fu">## Stepwise</span></span>
+<span id="cb25-378"><a href="#cb25-378"></a></span>
+<span id="cb25-379"><a href="#cb25-379"></a><span class="ss">1. </span>Compute absolute location from relative location.</span>
+<span id="cb25-380"><a href="#cb25-380"></a><span class="ss">2. </span>Store a value at that location.</span>
+<span id="cb25-381"><a href="#cb25-381"></a><span class="ss">3. </span>Store a color at the next location.</span>
+<span id="cb25-382"><a href="#cb25-382"></a><span class="ss">4. </span>Increment the latest.</span>
+<span id="cb25-383"><a href="#cb25-383"></a></span>
+<span id="cb25-384"><a href="#cb25-384"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-385"><a href="#cb25-385"></a><span class="in">// Public for now</span></span>
+<span id="cb25-386"><a href="#cb25-386"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
+<span id="cb25-387"><a href="#cb25-387"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-388"><a href="#cb25-388"></a><span class="in">    *rel = a;</span></span>
+<span id="cb25-389"><a href="#cb25-389"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-390"><a href="#cb25-390"></a><span class="in">        LATEST = LATEST + 1;</span></span>
+<span id="cb25-391"><a href="#cb25-391"></a><span class="in">}</span></span>
+<span id="cb25-392"><a href="#cb25-392"></a><span class="in">```</span></span>
+<span id="cb25-393"><a href="#cb25-393"></a></span>
+<span id="cb25-394"><a href="#cb25-394"></a><span class="fu">## Test it</span></span>
+<span id="cb25-395"><a href="#cb25-395"></a></span>
+<span id="cb25-396"><a href="#cb25-396"></a><span class="ss">- </span>It is trivial to test.</span>
+<span id="cb25-397"><a href="#cb25-397"></a></span>
+<span id="cb25-398"><a href="#cb25-398"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-399"><a href="#cb25-399"></a><span class="in">    let hi: &amp;[u8] = b"Hello World!";</span></span>
+<span id="cb25-400"><a href="#cb25-400"></a><span class="in">    for i in 0..12 {</span></span>
+<span id="cb25-401"><a href="#cb25-401"></a><span class="in">        vga::char_to_vga(hi[i]);</span></span>
+<span id="cb25-402"><a href="#cb25-402"></a><span class="in">    }</span></span>
+<span id="cb25-403"><a href="#cb25-403"></a><span class="in">```</span></span>
+<span id="cb25-404"><a href="#cb25-404"></a></span>
+<span id="cb25-405"><a href="#cb25-405"></a><span class="ss">- </span>"Works on my machine!" - me</span>
+<span id="cb25-406"><a href="#cb25-406"></a><span class="ss">    - </span>Unless?</span>
+<span id="cb25-407"><a href="#cb25-407"></a><span class="ss">    - </span>We'll come back to this.</span>
+<span id="cb25-408"><a href="#cb25-408"></a></span>
+<span id="cb25-409"><a href="#cb25-409"></a><span class="fu">## Annoying</span></span>
+<span id="cb25-410"><a href="#cb25-410"></a></span>
+<span id="cb25-411"><a href="#cb25-411"></a><span class="ss">- </span>Some of you may lack a strong work ethic and want to show entire a whole *string* rather than just a character at a time.</span>
+<span id="cb25-412"><a href="#cb25-412"></a><span class="ss">    - </span>Especially since using characters of a string in Rust is ludicrously opaque.</span>
+<span id="cb25-413"><a href="#cb25-413"></a><span class="ss">- </span>Not to worry.</span>
+<span id="cb25-414"><a href="#cb25-414"></a></span>
+<span id="cb25-415"><a href="#cb25-415"></a><span class="fu">## Target `&amp;str`</span></span>
+<span id="cb25-416"><a href="#cb25-416"></a></span>
+<span id="cb25-417"><a href="#cb25-417"></a><span class="ss">- </span>We can abstract to loop into <span class="in">`src/vga.rs`</span></span>
+<span id="cb25-418"><a href="#cb25-418"></a></span>
+<span id="cb25-419"><a href="#cb25-419"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-420"><a href="#cb25-420"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
+<span id="cb25-421"><a href="#cb25-421"></a><span class="in">    let v = s.as_bytes();</span></span>
+<span id="cb25-422"><a href="#cb25-422"></a><span class="in">    for i in 0..v.len() {</span></span>
+<span id="cb25-423"><a href="#cb25-423"></a><span class="in">        char_to_vga(v[i]);</span></span>
+<span id="cb25-424"><a href="#cb25-424"></a><span class="in">    }</span></span>
+<span id="cb25-425"><a href="#cb25-425"></a><span class="in">}</span></span>
+<span id="cb25-426"><a href="#cb25-426"></a><span class="in">```</span></span>
+<span id="cb25-427"><a href="#cb25-427"></a></span>
+<span id="cb25-428"><a href="#cb25-428"></a><span class="fu">## Aside</span></span>
+<span id="cb25-429"><a href="#cb25-429"></a></span>
+<span id="cb25-430"><a href="#cb25-430"></a><span class="ss">- </span>I am opinionated on <span class="in">`as_bytes`</span>.</span>
+<span id="cb25-431"><a href="#cb25-431"></a><span class="ss">- </span>Let's check some links.</span>
+<span id="cb25-432"><a href="#cb25-432"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`to_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=to_bytes)</span></span>
+<span id="cb25-433"><a href="#cb25-433"></a><span class="ss">        - </span><span class="co">[</span><span class="ot">`as_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=as_bytes)</span></span>
+<span id="cb25-434"><a href="#cb25-434"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=bytes)</span></span>
+<span id="cb25-435"><a href="#cb25-435"></a><span class="ss">- </span>Can you guess what always works?</span>
+<span id="cb25-436"><a href="#cb25-436"></a></span>
+<span id="cb25-437"><a href="#cb25-437"></a><span class="fu">## Aside</span></span>
+<span id="cb25-438"><a href="#cb25-438"></a></span>
+<span id="cb25-439"><a href="#cb25-439"></a><span class="ss">- </span>Big Rust doesn't want you to know you can use pointers.</span>
+<span id="cb25-440"><a href="#cb25-440"></a></span>
+<span id="cb25-441"><a href="#cb25-441"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-442"><a href="#cb25-442"></a><span class="in">    let ptr = s.as_ptr() as usize;</span></span>
+<span id="cb25-443"><a href="#cb25-443"></a><span class="in">    unsafe {</span></span>
+<span id="cb25-444"><a href="#cb25-444"></a><span class="in">        for i in 0..s.len() {</span></span>
+<span id="cb25-445"><a href="#cb25-445"></a><span class="in">            char_to_vga(*((ptr + i) as *const u8));</span></span>
+<span id="cb25-446"><a href="#cb25-446"></a><span class="in">        }</span></span>
+<span id="cb25-447"><a href="#cb25-447"></a><span class="in">    }</span></span>
+<span id="cb25-448"><a href="#cb25-448"></a><span class="in">```</span></span>
+<span id="cb25-449"><a href="#cb25-449"></a></span>
+<span id="cb25-450"><a href="#cb25-450"></a><span class="ss">- </span>I could make this even worse but I didn't.</span>
+<span id="cb25-451"><a href="#cb25-451"></a><span class="ss">- </span>Anyways don't do this.</span>
+<span id="cb25-452"><a href="#cb25-452"></a></span>
+<span id="cb25-453"><a href="#cb25-453"></a><span class="fu">## Update main</span></span>
+<span id="cb25-454"><a href="#cb25-454"></a></span>
+<span id="cb25-455"><a href="#cb25-455"></a><span class="ss">- </span>Look how nice that is!</span>
+<span id="cb25-456"><a href="#cb25-456"></a></span>
+<span id="cb25-457"><a href="#cb25-457"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-458"><a href="#cb25-458"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb25-459"><a href="#cb25-459"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb25-460"><a href="#cb25-460"></a><span class="in">    vga::str_to_vga("Hello, world!");</span></span>
+<span id="cb25-461"><a href="#cb25-461"></a><span class="in">    loop {}</span></span>
+<span id="cb25-462"><a href="#cb25-462"></a><span class="in">}</span></span>
+<span id="cb25-463"><a href="#cb25-463"></a><span class="in">```</span></span>
+<span id="cb25-464"><a href="#cb25-464"></a></span>
+<span id="cb25-465"><a href="#cb25-465"></a><span class="fu">## I bet...</span></span>
+<span id="cb25-466"><a href="#cb25-466"></a></span>
+<span id="cb25-467"><a href="#cb25-467"></a><span class="ss">- </span>I bet we can print *any* string.</span>
+<span id="cb25-468"><a href="#cb25-468"></a><span class="ss">- </span>Let's do like a comically easy string that will definitely print.</span>
+<span id="cb25-469"><a href="#cb25-469"></a><span class="ss">- </span>There's no way it will fail.</span>
+<span id="cb25-470"><a href="#cb25-470"></a></span>
+<span id="cb25-471"><a href="#cb25-471"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-472"><a href="#cb25-472"></a><span class="in">    vga::str_to_vga("Hello\nworld!");</span></span>
+<span id="cb25-473"><a href="#cb25-473"></a><span class="in">```</span></span>
+<span id="cb25-474"><a href="#cb25-474"></a></span>
+<span id="cb25-475"><a href="#cb25-475"></a><span class="ss">- </span>It worked right?</span>
+<span id="cb25-476"><a href="#cb25-476"></a></span>
+<span id="cb25-477"><a href="#cb25-477"></a><span class="fu">## Escape Codes</span></span>
+<span id="cb25-478"><a href="#cb25-478"></a></span>
+<span id="cb25-479"><a href="#cb25-479"></a><span class="ss">- </span>Okay so there's some things we need to treat differently.</span>
+<span id="cb25-480"><a href="#cb25-480"></a><span class="ss">    - </span>Minimally <span class="in">`\n`</span>.</span>
+<span id="cb25-481"><a href="#cb25-481"></a><span class="ss">    - </span>And therefore also <span class="in">`\\`</span> to show a single backslash.</span>
+<span id="cb25-482"><a href="#cb25-482"></a><span class="ss">    - </span>I don't even know if we need anything else, but I'll show the design pattern.</span>
+<span id="cb25-483"><a href="#cb25-483"></a></span>
+<span id="cb25-484"><a href="#cb25-484"></a><span class="fu">## Revisit Implementation</span></span>
+<span id="cb25-485"><a href="#cb25-485"></a></span>
+<span id="cb25-486"><a href="#cb25-486"></a><span class="ss">- </span>Recall our naive implementation.</span>
+<span id="cb25-487"><a href="#cb25-487"></a></span>
+<span id="cb25-488"><a href="#cb25-488"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-489"><a href="#cb25-489"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
+<span id="cb25-490"><a href="#cb25-490"></a><span class="in">    let v = s.as_bytes();</span></span>
+<span id="cb25-491"><a href="#cb25-491"></a><span class="in">    for i in 0..v.len() {</span></span>
+<span id="cb25-492"><a href="#cb25-492"></a><span class="in">        char_to_vga(v[i]);</span></span>
+<span id="cb25-493"><a href="#cb25-493"></a><span class="in">    }</span></span>
+<span id="cb25-494"><a href="#cb25-494"></a><span class="in">}</span></span>
+<span id="cb25-495"><a href="#cb25-495"></a><span class="in">```</span></span>
+<span id="cb25-496"><a href="#cb25-496"></a></span>
+<span id="cb25-497"><a href="#cb25-497"></a><span class="fu">## Case analysis</span></span>
+<span id="cb25-498"><a href="#cb25-498"></a></span>
+<span id="cb25-499"><a href="#cb25-499"></a><span class="ss">- </span>As far as I know (I didn't check) we only have to look for is:</span>
+<span id="cb25-500"><a href="#cb25-500"></a><span class="ss">    - </span><span class="in">`\n`</span></span>
+<span id="cb25-501"><a href="#cb25-501"></a><span class="ss">    - </span><span class="in">`10`</span> (I think?)</span>
+<span id="cb25-502"><a href="#cb25-502"></a><span class="ss">    - </span><span class="in">`0xa`</span></span>
+<span id="cb25-503"><a href="#cb25-503"></a><span class="ss">- </span>It will be a <span class="in">`u8`</span> within the loop (since we <span class="in">`as_bytes`</span> first)</span>
+<span id="cb25-504"><a href="#cb25-504"></a></span>
+<span id="cb25-505"><a href="#cb25-505"></a></span>
+<span id="cb25-506"><a href="#cb25-506"></a><span class="fu">## Trust but verify</span></span>
+<span id="cb25-507"><a href="#cb25-507"></a></span>
+<span id="cb25-508"><a href="#cb25-508"></a><span class="ss">- </span>I just checked in a different crate.</span>
+<span id="cb25-509"><a href="#cb25-509"></a><span class="in">```{.rs filename="../???/src/main.rs"}</span></span>
+<span id="cb25-510"><a href="#cb25-510"></a><span class="in">fn main() {</span></span>
+<span id="cb25-511"><a href="#cb25-511"></a><span class="in">    let s = "Hello\nworld!";</span></span>
+<span id="cb25-512"><a href="#cb25-512"></a><span class="in">    dbg!(s.as_bytes());</span></span>
+<span id="cb25-513"><a href="#cb25-513"></a><span class="in">}</span></span>
+<span id="cb25-514"><a href="#cb25-514"></a><span class="in">```</span></span>
+<span id="cb25-515"><a href="#cb25-515"></a><span class="ss">- </span>Looked like 10 to me.</span>
+<span id="cb25-516"><a href="#cb25-516"></a></span>
+<span id="cb25-517"><a href="#cb25-517"></a><span class="fu">## Now it works!</span></span>
+<span id="cb25-518"><a href="#cb25-518"></a></span>
+<span id="cb25-519"><a href="#cb25-519"></a><span class="ss">- </span>We can write vertically!</span>
+<span id="cb25-520"><a href="#cb25-520"></a><span class="ss">  - </span>I guess this could be a helper function or something.</span>
+<span id="cb25-521"><a href="#cb25-521"></a></span>
+<span id="cb25-522"><a href="#cb25-522"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-523"><a href="#cb25-523"></a><span class="in">    vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
+<span id="cb25-524"><a href="#cb25-524"></a><span class="in">```</span></span>
+<span id="cb25-525"><a href="#cb25-525"></a></span>
+<span id="cb25-526"><a href="#cb25-526"></a><span class="fu">## Good thing...</span></span>
+<span id="cb25-527"><a href="#cb25-527"></a></span>
+<span id="cb25-528"><a href="#cb25-528"></a><span class="ss">- </span>I can print that more than once!</span>
+<span id="cb25-529"><a href="#cb25-529"></a></span>
+<span id="cb25-530"><a href="#cb25-530"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-531"><a href="#cb25-531"></a><span class="in">    for _i in 0..3 {</span></span>
+<span id="cb25-532"><a href="#cb25-532"></a><span class="in">        vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
+<span id="cb25-533"><a href="#cb25-533"></a><span class="in">    }</span></span>
+<span id="cb25-534"><a href="#cb25-534"></a><span class="in">```</span></span>
+<span id="cb25-535"><a href="#cb25-535"></a><span class="ss">- </span>Wait a minute!</span>
+<span id="cb25-536"><a href="#cb25-536"></a></span>
+<span id="cb25-537"><a href="#cb25-537"></a><span class="fu">## We're doomed</span></span>
+<span id="cb25-538"><a href="#cb25-538"></a></span>
+<span id="cb25-539"><a href="#cb25-539"></a><span class="ss">- </span>We didn't save what was written to the previous lines.</span>
+<span id="cb25-540"><a href="#cb25-540"></a><span class="ss">- </span>Real ones know.</span>
+<span id="cb25-541"><a href="#cb25-541"></a></span>
+<span id="cb25-542"><a href="#cb25-542"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/1/16/BladeRunnerRoyBattySpeech.jpeg)</span></span>
+<span id="cb25-543"><a href="#cb25-543"></a></span>
+<span id="cb25-544"><a href="#cb25-544"></a><span class="fu">## Unless?</span></span>
+<span id="cb25-545"><a href="#cb25-545"></a></span>
+<span id="cb25-546"><a href="#cb25-546"></a><span class="ss">- </span>No way can we *read* from the VGA text buffer right.</span>
+<span id="cb25-547"><a href="#cb25-547"></a><span class="ss">- </span>That would be... extraordinary.</span>
+<span id="cb25-548"><a href="#cb25-548"></a><span class="ss">- </span>You can do whatever you want, I just want to show you one possible design choice.</span>
+<span id="cb25-549"><a href="#cb25-549"></a><span class="ss">    - </span>Mostly as a proof of concept.</span>
+<span id="cb25-550"><a href="#cb25-550"></a></span>
+<span id="cb25-551"><a href="#cb25-551"></a><span class="fu">## Scroll</span></span>
+<span id="cb25-552"><a href="#cb25-552"></a></span>
+<span id="cb25-553"><a href="#cb25-553"></a><span class="ss">- </span>I'll add some <span class="in">`const`</span>s and write a helper.</span>
+<span id="cb25-554"><a href="#cb25-554"></a></span>
+<span id="cb25-555"><a href="#cb25-555"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-556"><a href="#cb25-556"></a><span class="in">const ROWS: usize = 80;</span></span>
+<span id="cb25-557"><a href="#cb25-557"></a><span class="in">const COLS: usize = 25;</span></span>
+<span id="cb25-558"><a href="#cb25-558"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
+<span id="cb25-559"><a href="#cb25-559"></a></span>
+<span id="cb25-560"><a href="#cb25-560"></a><span class="in">fn scroll() {</span></span>
+<span id="cb25-561"><a href="#cb25-561"></a><span class="in">    </span></span>
+<span id="cb25-562"><a href="#cb25-562"></a><span class="in">}</span></span>
+<span id="cb25-563"><a href="#cb25-563"></a><span class="in">```</span></span>
+<span id="cb25-564"><a href="#cb25-564"></a></span>
+<span id="cb25-565"><a href="#cb25-565"></a><span class="fu">## Execution</span></span>
+<span id="cb25-566"><a href="#cb25-566"></a></span>
+<span id="cb25-567"><a href="#cb25-567"></a><span class="ss">- </span>Start at the first character that will remain visible.</span>
+<span id="cb25-568"><a href="#cb25-568"></a><span class="ss">- </span>Copy it to the earliest visible slot (start of buffer).</span>
+<span id="cb25-569"><a href="#cb25-569"></a><span class="ss">- </span>Iterate until the full buffer is moved.</span>
+<span id="cb25-570"><a href="#cb25-570"></a><span class="ss">- </span>We note this could be executed in a single <span class="in">`memmove`</span></span>
+<span id="cb25-571"><a href="#cb25-571"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://man7.org/linux/man-pages/man3/memmove.3.html)</span></span>
+<span id="cb25-572"><a href="#cb25-572"></a></span>
+<span id="cb25-573"><a href="#cb25-573"></a></span>
+<span id="cb25-574"><a href="#cb25-574"></a><span class="fu">## My Code</span></span>
+<span id="cb25-575"><a href="#cb25-575"></a></span>
+<span id="cb25-576"><a href="#cb25-576"></a><span class="ss">- </span>Public just to test.</span>
+<span id="cb25-577"><a href="#cb25-577"></a></span>
+<span id="cb25-578"><a href="#cb25-578"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-579"><a href="#cb25-579"></a><span class="in">pub fn scroll() {</span></span>
+<span id="cb25-580"><a href="#cb25-580"></a><span class="in">    for i in 80..MAX {</span></span>
+<span id="cb25-581"><a href="#cb25-581"></a><span class="in">        unsafe {</span></span>
+<span id="cb25-582"><a href="#cb25-582"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
+<span id="cb25-583"><a href="#cb25-583"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
+<span id="cb25-584"><a href="#cb25-584"></a><span class="in">            *dst = *src;</span></span>
+<span id="cb25-585"><a href="#cb25-585"></a><span class="in">        }</span></span>
+<span id="cb25-586"><a href="#cb25-586"></a><span class="in">    }</span></span>
+<span id="cb25-587"><a href="#cb25-587"></a><span class="in">}</span></span>
+<span id="cb25-588"><a href="#cb25-588"></a><span class="in">```</span></span>
+<span id="cb25-589"><a href="#cb25-589"></a></span>
+<span id="cb25-590"><a href="#cb25-590"></a><span class="fu">## My Test</span></span>
+<span id="cb25-591"><a href="#cb25-591"></a></span>
+<span id="cb25-592"><a href="#cb25-592"></a><span class="ss">- </span>I just sent line numbers then manually scrolled.</span>
+<span id="cb25-593"><a href="#cb25-593"></a></span>
+<span id="cb25-594"><a href="#cb25-594"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-595"><a href="#cb25-595"></a><span class="in">    vga::str_to_vga("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\nA\nB");</span></span>
+<span id="cb25-596"><a href="#cb25-596"></a><span class="in">    vga::scroll();</span></span>
+<span id="cb25-597"><a href="#cb25-597"></a><span class="in">```</span></span>
+<span id="cb25-598"><a href="#cb25-598"></a></span>
+<span id="cb25-599"><a href="#cb25-599"></a><span class="fu">## A better test</span></span>
+<span id="cb25-600"><a href="#cb25-600"></a></span>
+<span id="cb25-601"><a href="#cb25-601"></a><span class="ss">- </span>Here is a copy of the Project Gutenburg ebook of *Pride and Prejudice*.</span>
+<span id="cb25-602"><a href="#cb25-602"></a><span class="ss">- </span>It contains some quotes which might be a problem.</span>
+<span id="cb25-603"><a href="#cb25-603"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Link</span><span class="co">](https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt)</span></span>
+<span id="cb25-604"><a href="#cb25-604"></a><span class="in">```{.sh}</span></span>
+<span id="cb25-605"><a href="#cb25-605"></a><span class="in">https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt</span></span>
+<span id="cb25-606"><a href="#cb25-606"></a><span class="in">```</span></span>
+<span id="cb25-607"><a href="#cb25-607"></a></span>
+<span id="cb25-608"><a href="#cb25-608"></a><span class="fu">## Does it work?</span></span>
+<span id="cb25-609"><a href="#cb25-609"></a></span>
+<span id="cb25-610"><a href="#cb25-610"></a><span class="ss">- </span>What do we have to do?</span>
+<span id="cb25-611"><a href="#cb25-611"></a></span>
+<span id="cb25-612"><a href="#cb25-612"></a>&lt;details&gt;</span>
+<span id="cb25-613"><a href="#cb25-613"></a><span class="ss">1. </span>Add <span class="in">`scroll`</span> to <span class="in">`str_to_vga`</span></span>
+<span id="cb25-614"><a href="#cb25-614"></a><span class="ss">2. </span>Update <span class="in">`LATEST`</span> in <span class="in">`scroll`</span></span>
+<span id="cb25-615"><a href="#cb25-615"></a><span class="ss">3. </span>Blank out the last line, I used space (<span class="in">`0x20`</span> or <span class="in">`32`</span>)</span>
+<span id="cb25-616"><a href="#cb25-616"></a><span class="ss">4. </span>Make sure all color bytes are set.</span>
+<span id="cb25-617"><a href="#cb25-617"></a>&lt;/details&gt;</span>
+<span id="cb25-618"><a href="#cb25-618"></a></span>
+<span id="cb25-619"><a href="#cb25-619"></a><span class="fu">## Why do we blank out?</span></span>
+<span id="cb25-620"><a href="#cb25-620"></a></span>
+<span id="cb25-621"><a href="#cb25-621"></a><span class="ss">- </span>Recall we are writing to MMIO.</span>
+<span id="cb25-622"><a href="#cb25-622"></a><span class="ss">- </span>As soon as we exceed the MMIO range, we can *make no claims* about what memory we are vviewing.</span>
+<span id="cb25-623"><a href="#cb25-623"></a><span class="ss">- </span>So if we copy in data past the buffer, we could get *anything*.</span>
+<span id="cb25-624"><a href="#cb25-624"></a><span class="ss">- </span>So if we don't overwrite the buffer, we could get *anything*.</span>
+<span id="cb25-625"><a href="#cb25-625"></a></span>
+<span id="cb25-626"><a href="#cb25-626"></a><span class="fu">## We set color bytes?</span></span>
+<span id="cb25-627"><a href="#cb25-627"></a></span>
+<span id="cb25-628"><a href="#cb25-628"></a><span class="ss">- </span>Like lines off the MMIO range, the color bytes have no known value.</span>
+<span id="cb25-629"><a href="#cb25-629"></a><span class="ss">- </span>So if we e.g. have a newline anywhere and end up not initially setting colors...</span>
+<span id="cb25-630"><a href="#cb25-630"></a><span class="ss">- </span>Then copy text up to that line...</span>
+<span id="cb25-631"><a href="#cb25-631"></a><span class="ss">- </span>We will be showing text in an *unset* color.</span>
+<span id="cb25-632"><a href="#cb25-632"></a><span class="ss">    - </span>Just whatever bits happened to be there!</span>
+<span id="cb25-633"><a href="#cb25-633"></a></span>
+<span id="cb25-634"><a href="#cb25-634"></a><span class="fu">## This is unsafe!</span></span>
+<span id="cb25-635"><a href="#cb25-635"></a></span>
+<span id="cb25-636"><a href="#cb25-636"></a><span class="ss">- </span>Astute learners will notice this is all very unsafe.</span>
+<span id="cb25-637"><a href="#cb25-637"></a></span>
+<span id="cb25-638"><a href="#cb25-638"></a><span class="fu">## I'm loopy</span></span>
+<span id="cb25-639"><a href="#cb25-639"></a></span>
+<span id="cb25-640"><a href="#cb25-640"></a><span class="ss">- </span>I should not I do everything with <span class="in">`for`</span> loops and "single-equals-assignment"</span>
+<span id="cb25-641"><a href="#cb25-641"></a><span class="ss">    - </span>I mostly am teaching you *how to code*</span>
+<span id="cb25-642"><a href="#cb25-642"></a><span class="ss">    - </span>This is NOT teaching you *how to Rust* (or C)</span>
+<span id="cb25-643"><a href="#cb25-643"></a><span class="ss">- </span>Who needs <span class="in">`memmove`</span> (a C function) when we have the humble <span class="in">`for`</span> loop.</span>
+<span id="cb25-644"><a href="#cb25-644"></a><span class="ss">- </span>Read more: <span class="co">[</span><span class="ot">core::ptr::copy</span><span class="co">](https://doc.rust-lang.org/core/ptr/fn.copy.html)</span></span>
+<span id="cb25-645"><a href="#cb25-645"></a></span>
+<span id="cb25-646"><a href="#cb25-646"></a><span class="fu">## Caution!</span></span>
+<span id="cb25-647"><a href="#cb25-647"></a></span>
+<span id="cb25-648"><a href="#cb25-648"></a><span class="ss">- </span>I am building my crate without access to <span class="in">`memmove`</span>.</span>
+<span id="cb25-649"><a href="#cb25-649"></a><span class="ss">- </span>You may need to go back and add some configuration.</span>
+<span id="cb25-650"><a href="#cb25-650"></a><span class="ss">- </span>This was covered in the "Kernel" lecture.</span>
+<span id="cb25-651"><a href="#cb25-651"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Here</span><span class="co">](40_kernel.qmd#aside-notfutureproofing-1)</span></span>
+<span id="cb25-652"><a href="#cb25-652"></a></span>
+<span id="cb25-653"><a href="#cb25-653"></a></span>
+<span id="cb25-654"><a href="#cb25-654"></a><span class="fu">## My solution</span></span>
+<span id="cb25-655"><a href="#cb25-655"></a></span>
+<span id="cb25-656"><a href="#cb25-656"></a>&lt;details&gt;</span>
+<span id="cb25-657"><a href="#cb25-657"></a></span>
+<span id="cb25-658"><a href="#cb25-658"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-659"><a href="#cb25-659"></a><span class="in">const ROWS: usize = 80;</span></span>
+<span id="cb25-660"><a href="#cb25-660"></a><span class="in">const COLS: usize = 25;</span></span>
+<span id="cb25-661"><a href="#cb25-661"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
+<span id="cb25-662"><a href="#cb25-662"></a></span>
+<span id="cb25-663"><a href="#cb25-663"></a><span class="in">fn scroll() {</span></span>
+<span id="cb25-664"><a href="#cb25-664"></a><span class="in">    unsafe {</span></span>
+<span id="cb25-665"><a href="#cb25-665"></a><span class="in">        for i in 80..MAX {</span></span>
+<span id="cb25-666"><a href="#cb25-666"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
+<span id="cb25-667"><a href="#cb25-667"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
+<span id="cb25-668"><a href="#cb25-668"></a><span class="in">            *dst = *src;</span></span>
+<span id="cb25-669"><a href="#cb25-669"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-670"><a href="#cb25-670"></a><span class="in">        }</span></span>
+<span id="cb25-671"><a href="#cb25-671"></a><span class="in">        for i in (MAX-80)..MAX {</span></span>
+<span id="cb25-672"><a href="#cb25-672"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i) * 2)) as *mut u8;</span></span>
+<span id="cb25-673"><a href="#cb25-673"></a><span class="in">            *dst = 32;</span></span>
+<span id="cb25-674"><a href="#cb25-674"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-675"><a href="#cb25-675"></a><span class="in">        }</span></span>
+<span id="cb25-676"><a href="#cb25-676"></a><span class="in">        LATEST = LATEST - 80;</span></span>
+<span id="cb25-677"><a href="#cb25-677"></a><span class="in">    }</span></span>
+<span id="cb25-678"><a href="#cb25-678"></a><span class="in">}</span></span>
+<span id="cb25-679"><a href="#cb25-679"></a></span>
+<span id="cb25-680"><a href="#cb25-680"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
+<span id="cb25-681"><a href="#cb25-681"></a><span class="in">    let v = s.as_bytes();</span></span>
+<span id="cb25-682"><a href="#cb25-682"></a><span class="in">    unsafe {</span></span>
+<span id="cb25-683"><a href="#cb25-683"></a><span class="in">        for i in 0..v.len() {</span></span>
+<span id="cb25-684"><a href="#cb25-684"></a><span class="in">            if LATEST &gt; MAX {</span></span>
+<span id="cb25-685"><a href="#cb25-685"></a><span class="in">                scroll();</span></span>
+<span id="cb25-686"><a href="#cb25-686"></a><span class="in">            }</span></span>
+<span id="cb25-687"><a href="#cb25-687"></a><span class="in">            match v[i] {</span></span>
+<span id="cb25-688"><a href="#cb25-688"></a><span class="in">                10 =&gt; LATEST = ((LATEST / 80) + 1) * 80,</span></span>
+<span id="cb25-689"><a href="#cb25-689"></a><span class="in">                _ =&gt; char_to_vga(v[i]),</span></span>
+<span id="cb25-690"><a href="#cb25-690"></a><span class="in">            }</span></span>
+<span id="cb25-691"><a href="#cb25-691"></a><span class="in">        }</span></span>
+<span id="cb25-692"><a href="#cb25-692"></a><span class="in">    }</span></span>
+<span id="cb25-693"><a href="#cb25-693"></a><span class="in">}</span></span>
+<span id="cb25-694"><a href="#cb25-694"></a><span class="in">```</span></span>
+<span id="cb25-695"><a href="#cb25-695"></a></span>
+<span id="cb25-696"><a href="#cb25-696"></a>&lt;/details&gt;</span>
+<span id="cb25-697"><a href="#cb25-697"></a></span>
+<span id="cb25-698"><a href="#cb25-698"></a><span class="fu"># Volatile</span></span>
+<span id="cb25-699"><a href="#cb25-699"></a></span>
+<span id="cb25-700"><a href="#cb25-700"></a><span class="fu">## Best Practice</span></span>
+<span id="cb25-701"><a href="#cb25-701"></a></span>
+<span id="cb25-702"><a href="#cb25-702"></a><span class="ss">- </span>This works on my machine.</span>
+<span id="cb25-703"><a href="#cb25-703"></a><span class="ss">- </span>It may not always work.</span>
+<span id="cb25-704"><a href="#cb25-704"></a><span class="ss">- </span>Why? <span class="in">`rustc`</span> is a bit too smart.</span>
+<span id="cb25-705"><a href="#cb25-705"></a><span class="ss">    - </span>There is no obvious externally observable reason to write to fixed memory location.</span>
+<span id="cb25-706"><a href="#cb25-706"></a><span class="ss">    - </span>The compiler may optimize out such writes.</span>
+<span id="cb25-707"><a href="#cb25-707"></a><span class="ss">    - </span>I say "sure it will."</span>
+<span id="cb25-708"><a href="#cb25-708"></a></span>
+<span id="cb25-709"><a href="#cb25-709"></a><span class="fu">## Quote Blog</span></span>
+<span id="cb25-710"><a href="#cb25-710"></a></span>
+<span id="cb25-711"><a href="#cb25-711"></a><span class="at">&gt; The problem is that we only write to the buffer and never read from it again. </span></span>
+<span id="cb25-712"><a href="#cb25-712"></a></span>
+<span id="cb25-713"><a href="#cb25-713"></a><span class="ss">- </span>Okay so but here me out.</span>
+<span id="cb25-714"><a href="#cb25-714"></a><span class="ss">- </span>Our implementation does read from the buffer again.</span>
+<span id="cb25-715"><a href="#cb25-715"></a><span class="ss">    - </span>Sometimes the best way to do things is also the simplest.</span>
+<span id="cb25-716"><a href="#cb25-716"></a><span class="ss">    - </span>For some reason blog kept a local copy and only used that?</span>
+<span id="cb25-717"><a href="#cb25-717"></a></span>
+<span id="cb25-718"><a href="#cb25-718"></a><span class="fu">## Volatile</span></span>
+<span id="cb25-719"><a href="#cb25-719"></a></span>
+<span id="cb25-720"><a href="#cb25-720"></a><span class="ss">- </span>If we lacked the skill and bravery of the instructor of this course, we may have a problem.</span>
+<span id="cb25-721"><a href="#cb25-721"></a><span class="ss">- </span>To avoid an erroneous optimization omitting all writes, we need to specify writes as _[volatile]_. </span>
+<span id="cb25-722"><a href="#cb25-722"></a><span class="ss">- </span>This tells the compiler that the write has side effects and should not be optimized away.</span>
+<span id="cb25-723"><a href="#cb25-723"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Volatile_(computer_programming))</span>
+<span id="cb25-724"><a href="#cb25-724"></a></span>
+<span id="cb25-725"><a href="#cb25-725"></a><span class="fu">## Interested Students</span></span>
+<span id="cb25-726"><a href="#cb25-726"></a></span>
+<span id="cb25-727"><a href="#cb25-727"></a><span class="ss">- </span>There's a <span class="in">`read_volatile`</span> and <span class="in">`write_volatile`</span> in <span class="in">`std::ptr`</span> and another in <span class="in">`core::ptr`</span>, we might be able to use those.</span>
+<span id="cb25-728"><a href="#cb25-728"></a></span>
+<span id="cb25-729"><a href="#cb25-729"></a><span class="fu"># Fin</span></span>
+<span id="cb25-730"><a href="#cb25-730"></a></span>
+<span id="cb25-731"><a href="#cb25-731"></a><span class="fu">## Timeout</span></span>
+<span id="cb25-732"><a href="#cb25-732"></a></span>
+<span id="cb25-733"><a href="#cb25-733"></a><span class="ss">- </span>This is 700 lines of markdown source which usually is enough.</span>
+<span id="cb25-734"><a href="#cb25-734"></a><span class="ss">- </span>Otherwise we proceed to "Format".</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
