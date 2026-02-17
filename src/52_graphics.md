@@ -306,7 +306,7 @@ https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-M
 - And maybe the best for testing, an Adobe Stock [rainbow](https://stock.adobe.com/search?k=rainbow&asset_id=114495172)
     - The url looked unstable so I'm rehosting.
 ```{.sh}
-https://cd-public.github.io/os/img/rainbow.jpg
+https://cd-rs.github.io/os/img/rainbow.jpg
 ```
 
 ![](img/rainbow.jpg)
