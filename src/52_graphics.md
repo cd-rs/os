@@ -5,6 +5,16 @@ format: html
 
 <!--
 
+```{.py}
+import numpy as np
+from PIL import Image
+
+IMG_NAME = "dump.ppm"
+
+img = np.array(Image.open(IMG_NAME))
+print(img[0][::45])
+```
+
 array([[  0,   0,   0],
        [  0,   0, 168],
        [  0, 168,   0],
@@ -39,7 +49,7 @@ Be advised this is a multistage lab that is intended to be interesting rather th
    1. [ ] Download
    1. [ ] Scale
    1. [ ] Color map
-   1. [ ] Output to `src/img.rs` as a datatype of some kind.
+   1. [ ] Output to `src/colors/img.rs` as a datatype of some kind.
 1. [ ] Add a function to `src/colors.rs` to display the image in `src/img.rs`
 
 ## Step 0
@@ -124,6 +134,23 @@ pub extern "C" fn _start() -> ! {
 
 - It is obviously trivial to extract color values from this.
 - Fortunately, you are still required to include a `src/colors.rs` in your `52` folder.
+
+<!--
+
+```{.rs}
+pub fn colors() {
+    for i in 0..16 {
+        for j in 0..25 {
+            for k in 0..5 {
+                unsafe {
+                    *((0xb8000 + (5 * i + 80 * j + k) * 2 + 1) as *mut u8) = (i as u8) << 4;
+                }
+            }
+        }
+    }
+}
+```
+-->
 
 ## Step 2
 
@@ -226,6 +253,10 @@ cat dump.ppm | tail -1 | head -c4 | hexdump
 
 The following instructions assume students will proceed using Python's NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly [here](40_kernel.md#mmxsse).
 
+- As a fun bit, you may want to set up your script to optionally accept a URL at command line. 
+    - I did this, and it made testing a bit easier.
+    - I *also* had an `IMG_URL` pointed at something that would if there was no argument.
+
 ::: {.callout-note collapse="true"}
 
 ### Extension for Advanced Students
@@ -253,11 +284,32 @@ https://cd-public.github.io/ai101/images/photo-cat.jpg
 ```
 - Use `BytesIO` to interpret the HTTP response as a file.
 - Use PIL's `Image` API to open the image.
-- Coerce to a NumPy array using NumPy.
+    - You can [read this](https://cd-public.github.io/courses/old/ccf24/slides/04_1_img.html)
+- Coerce to the image to a NumPy array using NumPy.
+
+##### Images
+
+I only got `.jpg` and `.webp` to work for some reason; you are welcome to try to fix that (it's not a big deal).
+
+- I took [this](https://cd-public.github.io/ai101/images/photo-cat.jpg) myself so it is definitely free to use.
+```{.email}
+https://cd-public.github.io/ai101/images/photo-cat.jpg
+```
+- [This](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp) is a wide picture that should be fine, from a tourism bureau.
+    - [Read more](https://www.leadvilletwinlakes.com/listing/mt-massive/)
+```{.email}
+https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp
+```
+- And maybe the best for testing, an Adobe Stock [rainbow](https://stock.adobe.com/search?k=rainbow&asset_id=114495172)
+    - The url looked unstable so I'm rehosting.
+```{.sh}
+https://cd-public.github.io/os/img/rainbow.jpg
+```
+
 
 <!--
 
-```{.py}
+```{.py filename="url_to_rs.py"}
 from io import BytesIO
 import requests
 from PIL import Image
@@ -275,12 +327,28 @@ arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))
 - Do I look like I know how to scale images?
     - Probably either sample or average.
     - I don't think I care.
-- My code scales to fit the VGA buffer horizontally then crops to fit it vertically.
+- My code scales to fit the VGA buffer horizontally.
+    - Then either "squish" or "stretch" vertically.
+    - You could also crop horizontally.
+        - Doesn't matter to me.
     - Recall, the VGA buffer has more pixels than we are addressing.
     - You can only address characters, which are many pixels in size.
     - Your image will be *low* resolution.
+    
 
 #### Color Map
+
+::: {.callout-note appearance="simple"}
+
+## Code Structure Note
+
+I included my code extracting hex-values from `dump.ppm` here.
+
+I thought it made more sense than making a new file, it shared similar imports, and was only a few lines.
+
+Plus, if I run on another system, which may have a different color representation, I'll be able to quickly generate the `.ppm` and have no other steps!
+
+:::
 
 - You image will include colors that cannot be recognized by the VGA text buffer.
 - You will need to compute color distance between the 
@@ -304,6 +372,24 @@ There is first class support in Python, I hear, and you can learn more from this
 :::
 
 You are doing this in NumPy to take advantage of vectorized operations.
-- [Read more](https://cd-public.github.io/scicom/05_numpy.html#vectorization)
-- Regard it as "unsporting" to use loops.
 
+- [Read more](https://cd-public.github.io/scicom/05_numpy.html#vectorization)
+- Regard it as "unsporting" to use loops for a single pixel.
+    - I didn't vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).
+        
+#### Output
+
+- I used a single line of Python code to map my colormapper across the scaled pixel array, format to string, and write to a `.rs` file.
+    - You are not required to use a single line, obviously.
+- This is how long my script was.
+    - I wrote only single lines of code (no blocks) with open lines between.
+    - It was not minimized but it was not verbose either.
+```{.sh}
+$ wc url_to_rs.py
+ 19  65 671 url_to_rs.py
+$ wc src/img.rs
+    0  2005 21976 src/colors/img.rs
+```
+- I wrote to `src/colors/img.rs` as it was *I think* the place a file used by `src/colors.rs` should be.
+    - I didn't love this because I had to make a new directory.
+    - Do whatever you want here, as long as your `url_to_rs.py` writes to the right place.
