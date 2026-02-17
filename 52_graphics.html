@@ -303,6 +303,10 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#use-of-numpy" id="toc-use-of-numpy" class="nav-link" data-scroll-target="#use-of-numpy">Use of Numpy</a></li>
   </ul></li>
+  <li><a href="#step-5" id="toc-step-5" class="nav-link" data-scroll-target="#step-5">Step 5</a>
+  <ul class="collapse">
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -379,7 +383,10 @@ array([[  0,   0,   0],
 <li><label><input type="checkbox">Color map</label></li>
 <li><label><input type="checkbox">Output to <code>src/colors/img.rs</code> as a datatype of some kind.</label></li>
 </ol></li>
-<li><label><input type="checkbox">Add a function to <code>src/colors.rs</code> to display the image in <code>src/img.rs</code></label></li>
+<li><label><input type="checkbox">Add a function to <code>src/colors.rs</code> to display the image in <code>src/img.rs</code>.</label>
+<ol type="1">
+<li><label><input type="checkbox">And call the function from `src/main.rs</label></li>
+</ol></li>
 </ol>
 </section>
 <section id="step-0" class="level2">
@@ -458,6 +465,7 @@ array([[  0,   0,   0],
 <li>I am creating the below example using hexcodes I extracted and raw HTML.
 <ul>
 <li>It is hardcoded to 720 <span class="math inline">\(\times\)</span> 400 and may look odd on some screens.</li>
+<li>It is <em>not</em> an image.</li>
 </ul></li>
 </ul>
 <table style="border-collapse: collapse; border: none; padding: 0; margin: 0; line-height: 0;">
@@ -541,7 +549,7 @@ pub fn colors() {
 </ul></li>
 <li>At least try <code>help</code> and have at least on thought about it.
 <ul>
-<li><code>qemu</code> is listed on a job add for a Google position in Portland starting at 113k/yr as I type this.</li>
+<li><code>qemu</code> is listed on a job ad for a Google position in Portland starting at 113k/yr as I type this.</li>
 </ul></li>
 </ul>
 </section>
@@ -640,12 +648,12 @@ pub fn colors() {
 <li><label><input type="checkbox">Color map</label></li>
 <li><label><input type="checkbox">Output to <code>src/img.rs</code> as a (Rust) datatype of some kind.</label></li>
 </ol>
-<p>The following instructions assume students will proceed using Python’s NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly <a href="40_kernel.md#mmxsse">here</a>.</p>
+<p>The following instructions assume students will proceed using Python’s NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly <a href="./40_kernel.html#mmxsse">here</a>.</p>
 <ul>
 <li>As a fun bit, you may want to set up your script to optionally accept a URL at command line.
 <ul>
 <li>I did this, and it made testing a bit easier.</li>
-<li>I <em>also</em> had an <code>IMG_URL</code> pointed at something that would if there was no argument.</li>
+<li>I <em>also</em> had an <code>IMG_URL</code> pointed at something that would otherwise display if there was no argument.</li>
 </ul></li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -670,24 +678,25 @@ Extension for Advanced Students
 <h3 class="anchored" data-anchor-id="use-of-numpy">Use of Numpy</h3>
 <section id="download" class="level4">
 <h4 class="anchored" data-anchor-id="download">Download</h4>
-<p>Given this is an advanced class, I’m going to trust you to do the following without providing example code. - Regard is as “unsporting” to write a download a file and work with a local copy.</p>
+<p>Given this is an advanced class, I’m going to trust you to do the following without providing example code.</p>
 <ul>
-<li>Use <code>requests</code> to get an image by url.
+<li><p>Regard it as “unsporting” to download a file and work with a local copy.</p></li>
+<li><p>Use <code>requests</code> to get an image by url.</p>
 <ul>
 <li>You can <a href="https://cd-public.github.io/courses/cs1/slides/requests.html">read this</a></li>
 <li>You can use <a href="https://cd-public.github.io/ai101/images/photo-cat.jpg">this URL</a></li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb8-1"><a href="#cb8-1"></a>https://cd-public.github.io/ai101/images/photo-cat.jpg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li>Use <code>BytesIO</code> to interpret the HTTP response as a file.</li>
-<li>Use PIL’s <code>Image</code> API to open the image.
+<li><p>Use <code>BytesIO</code> to interpret the HTTP response as a file.</p></li>
+<li><p>Use PIL’s <code>Image</code> API to open the image.</p>
 <ul>
 <li>You can <a href="https://cd-public.github.io/courses/old/ccf24/slides/04_1_img.html">read this</a></li>
 </ul></li>
-<li>Coerce to the image to a NumPy array using NumPy.</li>
+<li><p>Coerce the image to a NumPy array using NumPy.</p></li>
 </ul>
 <section id="images" class="level5">
 <h5 class="anchored" data-anchor-id="images">Images</h5>
-<p>I only got <code>.jpg</code> and <code>.webp</code> to work for some reason; you are welcome to try to fix that (it’s not a big deal).</p>
+<p>I only got <code>.jpg</code> and <code>.webp</code> to work for some reason, but it’s not a big deal and you aren’t required to learn <code>PIL</code>.</p>
 <ul>
 <li>I took <a href="https://cd-public.github.io/ai101/images/photo-cat.jpg">this</a> myself so it is definitely free to use.</li>
 </ul>
@@ -704,6 +713,7 @@ Extension for Advanced Students
 </ul>
 <div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">https://cd-public.github.io/os/img/rainbow.jpg</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
+<p><img src="img/rainbow.jpg" class="img-fluid"></p>
 <!--
 
 ```{.py filename="url_to_rs.py"}
@@ -810,16 +820,92 @@ Extension for Advanced Students
 <li>I wrote only single lines of code (no blocks) with open lines between.</li>
 <li>It was not minimized but it was not verbose either.</li>
 </ul>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="ex">$</span> wc url_to_rs.py</span>
-<span id="cb12-2"><a href="#cb12-2"></a> <span class="ex">19</span>  65 671 url_to_rs.py</span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="ex">$</span> wc src/img.rs</span>
-<span id="cb12-4"><a href="#cb12-4"></a>  <span class="ex">0</span>  2005 21976 src/colors/img.rs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="ex">$</span> wc url_to_rs.py src/colors/img.rs</span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="ex">22</span>   75  704 url_to_rs.py</span>
+<span id="cb12-3"><a href="#cb12-3"></a> <span class="ex">0</span> 2006 9257 src/colors/img.rs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li>I wrote to <code>src/colors/img.rs</code> as it was <em>I think</em> the place a file used by <code>src/colors.rs</code> should be.
 <ul>
 <li>I didn’t love this because I had to make a new directory.</li>
 <li>Do whatever you want here, as long as your <code>url_to_rs.py</code> writes to the right place.</li>
 </ul></li>
 </ul>
+</section>
+</section>
+</section>
+<section id="step-5" class="level2">
+<h2 class="anchored" data-anchor-id="step-5">Step 5</h2>
+<ul>
+<li>Add a <code>image()</code> function to <code>src/colors.rs</code> that:
+<ul>
+<li>Reads the image data from <code>src/colors/img.rs</code></li>
+<li>Writes the image data to the VGA text buffer as background colors.</li>
+</ul></li>
+<li>Call this function from <code>src/main.rs</code></li>
+<li>Look at your image.</li>
+</ul>
+<section id="example" class="level3">
+<h3 class="anchored" data-anchor-id="example">Example</h3>
+<ul>
+<li>Here is my result over the “Mt. Massive” image from the tourism bureau.</li>
+</ul>
+<section id="original" class="level4">
+<h4 class="anchored" data-anchor-id="original">Original</h4>
+<ul>
+<li>Hosting cross-site.</li>
+</ul>
+<p><img src="https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp" class="img-fluid"></p>
+</section>
+<section id="vga-text-buffer" class="level4">
+<h4 class="anchored" data-anchor-id="vga-text-buffer">VGA Text Buffer</h4>
+<ul>
+<li>Extracted to <code>.ppm</code>, converted to <code>.png</code>, converted to base64 and directly embedded.</li>
+</ul>
+<p><img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAJ70lEQVR4nO3dQY7jugFAwTiYC3rF
+PqK48hE72wSINAN+PVnuqdoSoihKbTxw049t2/4FAFD697sXAAD8fIIDAMgJDgAgJzgAgJzgAABy
+ggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkO
+ACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACD3690L
+gJ9sjHHZveacC1dduUI+y9oXBXuccAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAA
+ADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQe2zbtnDZGOP0pfxt5px7Q2vbezDhTRw81+m7AfwM
+9/9l+6nWfrEPOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn
+OACAnOAAAHKCAwDICQ4AIPf4/v7eGzv4h/djjGY9AMCtreWBEw4AICc4AICc4AAAcoIDAMgJDgAg
+JzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAco9t2/bGDv6rPf/cnHNv
+yM4D8MM44QAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc
+4AAAcoIDAMgJDgAg99i27d1r+I0xxmX3mnMuXHWTFV65jJ/K9gJEnHAAADnBAQDkBAcAkBMcAEBO
+cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkPs1xjh3xjnnuRNe
+ea+D3Ti419oyTt/5n+r07V2b8OCqtXudvsKbfFFX/lXyz619oldOyI/hhAMAyAkOACAnOACAnOAA
+AHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACA3OP7+/uym805
+F64aYyxMeHDVmrXFr7n/4tdeytqEB658KbzL6/XaG9q2bW/oym8e+BNOOACAnOAAAHKCAwDICQ4A
+ICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDIPb6/v8+dcc55
+7oQfbYyxcNXBHh5MuHbV2jJIvV6vvaHn87kw4doHcODr62tvaG2FVzp9e2/ipz7X6V8v7+KEAwDI
+CQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4
+AIDcY9u2c2ccY5w74Zo5597QlSs8WAbv8nq99oaez+cdJjzd/VcIe9Z+sf32ptZeihMOACAnOACA
+nOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKP
+bdsuu9kY47J7XWnOuTd08MgHV51ubRmv12tv6Pl8/tM1/a+1FZ7+RX19fZ074YGDPbxy56908Fxr
+Pno3SN3kt5f/5oQDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc
+4AAAcoIDAMgJDgAgJzgAgNzj+/v7spvNOReuGmOcO+Gag2V8fX0tTPh8PveGXq/XuRMeOLjXwYRr
+u7E24YGDD2BtwjVrj3xg7aV8tPs/8toK7/9ccBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEB
+AOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkHtu2LVw2xli4as65MOHBVWter9fe
+0PP5PPde/KG1l3L/V3n6Cq/cqJu8lPu/5QNX7saB+2/U/X30d3gTTjgAgJzgAAByggMAyAkOACAn
+OACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyD22bdsbG2PsDc05
+m/W82ev12ht6Pp93WMaa0xd/k436aKfv4dqEH/0qT3/kK/mr/Bv8hX+VB5xwAAA5wQEA5AQHAJAT
+HABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7bNv27jX8
+xuv1OnfC5/P5I+91/2X8he6/8wcrPHCTxR+4/87Duda++bVfgAMH93LCAQDkBAcAkBMcAEBOcAAA
+OcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEDuMcZ49xrgUnPO
+vaH7/zl89OLhR3o+n+dO+Hq9LrvXlZxwAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBO
+cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7jDHevQb4bHPOvaEr/74OlnHgo38BbrLzwJ9w
+wgEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQH
+AJATHABA7nEwNsa4bB03MefcG/oLdwMAzuKEAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzg
+AAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AIDcY4yxcNmcc2/o9AnXrC3j/k7f+SutveX7
+Pxfc3Ef/bvBjOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn
+OACAnOAAAHKCAwDICQ4AIPfr9BnnnHtDY4yFCQ+uOrjXgdNXuLaMmzzX2r0OrO3hgdPfF9zclb+i
+cBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABA
+TnAAADnBAQDkHmOMd6+Bd5pz7g2tfRtrE95kGbDAxwZ/wgkHAJATHABATnAAADnBAQDkBAcAkBMc
+AEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAALnHGOPda4BFc869obUP+2DC
+A/6IAH7LCQcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDk
+BAcAkBMcAEBOcAAAuccY491r4PPMOfeGfFEpOw98KCccAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5
+wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQeY4x3r+Enm3PuDf2FO283buj0
+l+ItA/+XEw4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDI
+CQ4AICc4AICc4AAAcv8B/pXD9XQXqvEAAAAASUVORK5CYII="></p>
 
 
 <!-- -->
@@ -1361,349 +1447,421 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb13-50"><a href="#cb13-50"></a><span class="ss">   1. </span><span class="co">[ ]</span> Scale</span>
 <span id="cb13-51"><a href="#cb13-51"></a><span class="ss">   1. </span><span class="co">[ ]</span> Color map</span>
 <span id="cb13-52"><a href="#cb13-52"></a><span class="ss">   1. </span><span class="co">[ ]</span> Output to <span class="in">`src/colors/img.rs`</span> as a datatype of some kind.</span>
-<span id="cb13-53"><a href="#cb13-53"></a><span class="ss">1. </span><span class="co">[ ]</span> Add a function to <span class="in">`src/colors.rs`</span> to display the image in <span class="in">`src/img.rs`</span></span>
-<span id="cb13-54"><a href="#cb13-54"></a></span>
-<span id="cb13-55"><a href="#cb13-55"></a><span class="fu">## Step 0</span></span>
-<span id="cb13-56"><a href="#cb13-56"></a></span>
-<span id="cb13-57"><a href="#cb13-57"></a><span class="ss">- </span>Complete the "<span class="co">[</span><span class="ot">Format</span><span class="co">](51_format.md)</span>" lab.</span>
-<span id="cb13-58"><a href="#cb13-58"></a></span>
-<span id="cb13-59"><a href="#cb13-59"></a><span class="fu">## Step 1</span></span>
-<span id="cb13-60"><a href="#cb13-60"></a></span>
-<span id="cb13-61"><a href="#cb13-61"></a><span class="at">&gt; Add a function to </span><span class="in">`src/main.rs`</span><span class="at"> to display all background colors in </span><span class="in">`qemu`</span><span class="at"> via the VGA buffer.</span></span>
-<span id="cb13-62"><a href="#cb13-62"></a></span>
-<span id="cb13-63"><a href="#cb13-63"></a><span class="ss">- </span>For this lab, we will display images using the VGA text buffer background color.</span>
-<span id="cb13-64"><a href="#cb13-64"></a><span class="ss">- </span>To do that, we need to know what colors we have.</span>
-<span id="cb13-65"><a href="#cb13-65"></a><span class="ss">- </span>To learn what colors we have, we will first display all of them.</span>
-<span id="cb13-66"><a href="#cb13-66"></a></span>
-<span id="cb13-67"><a href="#cb13-67"></a><span class="fu">### Colors</span></span>
-<span id="cb13-68"><a href="#cb13-68"></a></span>
-<span id="cb13-69"><a href="#cb13-69"></a><span class="ss">- </span>I created a new file.</span>
-<span id="cb13-70"><a href="#cb13-70"></a><span class="ss">    - </span>I am planning to not use it after the lab so I factored it out.</span>
-<span id="cb13-71"><a href="#cb13-71"></a></span>
-<span id="cb13-72"><a href="#cb13-72"></a><span class="in">```{.rs filename="src/colors.rs"}   </span></span>
-<span id="cb13-73"><a href="#cb13-73"></a><span class="in">pub fn colors() {</span></span>
-<span id="cb13-74"><a href="#cb13-74"></a><span class="in">    // I had 9 total lines here.</span></span>
-<span id="cb13-75"><a href="#cb13-75"></a><span class="in">    // 1 line was in an unsafe block (which was 3 lines total)</span></span>
-<span id="cb13-76"><a href="#cb13-76"></a><span class="in">}</span></span>
-<span id="cb13-77"><a href="#cb13-77"></a><span class="in">```</span></span>
-<span id="cb13-78"><a href="#cb13-78"></a></span>
-<span id="cb13-79"><a href="#cb13-79"></a><span class="fu">### Main</span></span>
-<span id="cb13-80"><a href="#cb13-80"></a></span>
-<span id="cb13-81"><a href="#cb13-81"></a><span class="ss">- </span>There are two minor changes to main.</span>
-<span id="cb13-82"><a href="#cb13-82"></a><span class="ss">    - </span>I call <span class="in">`colors`</span> in <span class="in">`_start`</span> and nothing else.</span>
-<span id="cb13-83"><a href="#cb13-83"></a><span class="ss">    - </span>I add <span class="in">`mod colors;`</span> early in the file.</span>
-<span id="cb13-84"><a href="#cb13-84"></a>    </span>
-<span id="cb13-85"><a href="#cb13-85"></a><span class="in">```{.rs filename="src/main.rs" code-line-numbers="4,15" }</span></span>
-<span id="cb13-86"><a href="#cb13-86"></a><span class="in">#![no_std]</span></span>
-<span id="cb13-87"><a href="#cb13-87"></a><span class="in">#![no_main]</span></span>
-<span id="cb13-88"><a href="#cb13-88"></a></span>
-<span id="cb13-89"><a href="#cb13-89"></a><span class="in">mod colors;</span></span>
-<span id="cb13-90"><a href="#cb13-90"></a><span class="in">mod vga;</span></span>
-<span id="cb13-91"><a href="#cb13-91"></a></span>
-<span id="cb13-92"><a href="#cb13-92"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb13-93"><a href="#cb13-93"></a><span class="in">fn panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb13-94"><a href="#cb13-94"></a><span class="in">    println!("{}", info);</span></span>
-<span id="cb13-95"><a href="#cb13-95"></a><span class="in">    loop {}</span></span>
-<span id="cb13-96"><a href="#cb13-96"></a><span class="in">}</span></span>
-<span id="cb13-97"><a href="#cb13-97"></a></span>
-<span id="cb13-98"><a href="#cb13-98"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb13-99"><a href="#cb13-99"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb13-100"><a href="#cb13-100"></a><span class="in">    colors::colors();</span></span>
-<span id="cb13-101"><a href="#cb13-101"></a><span class="in">    loop {}</span></span>
-<span id="cb13-102"><a href="#cb13-102"></a><span class="in">}</span></span>
-<span id="cb13-103"><a href="#cb13-103"></a><span class="in">```</span></span>
-<span id="cb13-104"><a href="#cb13-104"></a></span>
-<span id="cb13-105"><a href="#cb13-105"></a><span class="fu">### Your task</span></span>
-<span id="cb13-106"><a href="#cb13-106"></a></span>
-<span id="cb13-107"><a href="#cb13-107"></a><span class="ss">- </span>Create 16 evenly sized columns, one for each background color, across the screen.</span>
-<span id="cb13-108"><a href="#cb13-108"></a><span class="ss">- </span>Display no text.</span>
-<span id="cb13-109"><a href="#cb13-109"></a><span class="ss">- </span>Recall that there are 80 horizontal by 25 vertical characters.</span>
-<span id="cb13-110"><a href="#cb13-110"></a><span class="ss">- </span>Recall that there are 720 horizontal by 400 vertical pixels.</span>
-<span id="cb13-111"><a href="#cb13-111"></a><span class="ss">- </span>I am creating the below example using hexcodes I extracted and raw HTML.</span>
-<span id="cb13-112"><a href="#cb13-112"></a><span class="ss">    - </span>It is hardcoded to 720 $\times$ 400 and may look odd on some screens.</span>
-<span id="cb13-113"><a href="#cb13-113"></a>    </span>
-<span id="cb13-114"><a href="#cb13-114"></a>&lt;table style="border-collapse: collapse; border: none; padding: 0; margin: 0; line-height: 0;"&gt;</span>
-<span id="cb13-115"><a href="#cb13-115"></a>  &lt;tr style="height: 400px;"&gt;</span>
-<span id="cb13-116"><a href="#cb13-116"></a>    &lt;td style="width: 45px; background-color: rgb(0, 0, 0); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-117"><a href="#cb13-117"></a>    &lt;td style="width: 45px; background-color: rgb(0, 0, 168); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-118"><a href="#cb13-118"></a>    &lt;td style="width: 45px; background-color: rgb(0, 168, 0); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-119"><a href="#cb13-119"></a>    &lt;td style="width: 45px; background-color: rgb(0, 168, 168); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-120"><a href="#cb13-120"></a>    &lt;td style="width: 45px; background-color: rgb(168, 0, 0); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-121"><a href="#cb13-121"></a>    &lt;td style="width: 45px; background-color: rgb(168, 0, 168); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-122"><a href="#cb13-122"></a>    &lt;td style="width: 45px; background-color: rgb(168, 87, 0); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-123"><a href="#cb13-123"></a>    &lt;td style="width: 45px; background-color: rgb(168, 168, 168); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-124"><a href="#cb13-124"></a>    &lt;td style="width: 45px; background-color: rgb(87, 87, 87); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-125"><a href="#cb13-125"></a>    &lt;td style="width: 45px; background-color: rgb(87, 87, 255); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-126"><a href="#cb13-126"></a>    &lt;td style="width: 45px; background-color: rgb(87, 255, 87); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-127"><a href="#cb13-127"></a>    &lt;td style="width: 45px; background-color: rgb(87, 255, 255); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-128"><a href="#cb13-128"></a>    &lt;td style="width: 45px; background-color: rgb(255, 87, 87); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-129"><a href="#cb13-129"></a>    &lt;td style="width: 45px; background-color: rgb(255, 87, 255); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-130"><a href="#cb13-130"></a>    &lt;td style="width: 45px; background-color: rgb(255, 255, 87); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-131"><a href="#cb13-131"></a>    &lt;td style="width: 45px; background-color: rgb(255, 255, 255); padding: 0;"&gt;&lt;/td&gt;</span>
-<span id="cb13-132"><a href="#cb13-132"></a>  &lt;/tr&gt;</span>
-<span id="cb13-133"><a href="#cb13-133"></a>&lt;/table&gt;</span>
-<span id="cb13-134"><a href="#cb13-134"></a></span>
-<span id="cb13-135"><a href="#cb13-135"></a><span class="ss">- </span>It is obviously trivial to extract color values from this.</span>
-<span id="cb13-136"><a href="#cb13-136"></a><span class="ss">- </span>Fortunately, you are still required to include a <span class="in">`src/colors.rs`</span> in your <span class="in">`52`</span> folder.</span>
-<span id="cb13-137"><a href="#cb13-137"></a></span>
-<span id="cb13-138"><a href="#cb13-138"></a><span class="co">&lt;!--</span></span>
+<span id="cb13-53"><a href="#cb13-53"></a><span class="ss">1. </span><span class="co">[ ]</span> Add a function to <span class="in">`src/colors.rs`</span> to display the image in <span class="in">`src/img.rs`</span>.</span>
+<span id="cb13-54"><a href="#cb13-54"></a><span class="ss">    1. </span><span class="co">[ ]</span> And call the function from `src/main.rs</span>
+<span id="cb13-55"><a href="#cb13-55"></a></span>
+<span id="cb13-56"><a href="#cb13-56"></a><span class="fu">## Step 0</span></span>
+<span id="cb13-57"><a href="#cb13-57"></a></span>
+<span id="cb13-58"><a href="#cb13-58"></a><span class="ss">- </span>Complete the "<span class="co">[</span><span class="ot">Format</span><span class="co">](51_format.md)</span>" lab.</span>
+<span id="cb13-59"><a href="#cb13-59"></a></span>
+<span id="cb13-60"><a href="#cb13-60"></a><span class="fu">## Step 1</span></span>
+<span id="cb13-61"><a href="#cb13-61"></a></span>
+<span id="cb13-62"><a href="#cb13-62"></a><span class="at">&gt; Add a function to </span><span class="in">`src/main.rs`</span><span class="at"> to display all background colors in </span><span class="in">`qemu`</span><span class="at"> via the VGA buffer.</span></span>
+<span id="cb13-63"><a href="#cb13-63"></a></span>
+<span id="cb13-64"><a href="#cb13-64"></a><span class="ss">- </span>For this lab, we will display images using the VGA text buffer background color.</span>
+<span id="cb13-65"><a href="#cb13-65"></a><span class="ss">- </span>To do that, we need to know what colors we have.</span>
+<span id="cb13-66"><a href="#cb13-66"></a><span class="ss">- </span>To learn what colors we have, we will first display all of them.</span>
+<span id="cb13-67"><a href="#cb13-67"></a></span>
+<span id="cb13-68"><a href="#cb13-68"></a><span class="fu">### Colors</span></span>
+<span id="cb13-69"><a href="#cb13-69"></a></span>
+<span id="cb13-70"><a href="#cb13-70"></a><span class="ss">- </span>I created a new file.</span>
+<span id="cb13-71"><a href="#cb13-71"></a><span class="ss">    - </span>I am planning to not use it after the lab so I factored it out.</span>
+<span id="cb13-72"><a href="#cb13-72"></a></span>
+<span id="cb13-73"><a href="#cb13-73"></a><span class="in">```{.rs filename="src/colors.rs"}   </span></span>
+<span id="cb13-74"><a href="#cb13-74"></a><span class="in">pub fn colors() {</span></span>
+<span id="cb13-75"><a href="#cb13-75"></a><span class="in">    // I had 9 total lines here.</span></span>
+<span id="cb13-76"><a href="#cb13-76"></a><span class="in">    // 1 line was in an unsafe block (which was 3 lines total)</span></span>
+<span id="cb13-77"><a href="#cb13-77"></a><span class="in">}</span></span>
+<span id="cb13-78"><a href="#cb13-78"></a><span class="in">```</span></span>
+<span id="cb13-79"><a href="#cb13-79"></a></span>
+<span id="cb13-80"><a href="#cb13-80"></a><span class="fu">### Main</span></span>
+<span id="cb13-81"><a href="#cb13-81"></a></span>
+<span id="cb13-82"><a href="#cb13-82"></a><span class="ss">- </span>There are two minor changes to main.</span>
+<span id="cb13-83"><a href="#cb13-83"></a><span class="ss">    - </span>I call <span class="in">`colors`</span> in <span class="in">`_start`</span> and nothing else.</span>
+<span id="cb13-84"><a href="#cb13-84"></a><span class="ss">    - </span>I add <span class="in">`mod colors;`</span> early in the file.</span>
+<span id="cb13-85"><a href="#cb13-85"></a>    </span>
+<span id="cb13-86"><a href="#cb13-86"></a><span class="in">```{.rs filename="src/main.rs" code-line-numbers="4,15" }</span></span>
+<span id="cb13-87"><a href="#cb13-87"></a><span class="in">#![no_std]</span></span>
+<span id="cb13-88"><a href="#cb13-88"></a><span class="in">#![no_main]</span></span>
+<span id="cb13-89"><a href="#cb13-89"></a></span>
+<span id="cb13-90"><a href="#cb13-90"></a><span class="in">mod colors;</span></span>
+<span id="cb13-91"><a href="#cb13-91"></a><span class="in">mod vga;</span></span>
+<span id="cb13-92"><a href="#cb13-92"></a></span>
+<span id="cb13-93"><a href="#cb13-93"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb13-94"><a href="#cb13-94"></a><span class="in">fn panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb13-95"><a href="#cb13-95"></a><span class="in">    println!("{}", info);</span></span>
+<span id="cb13-96"><a href="#cb13-96"></a><span class="in">    loop {}</span></span>
+<span id="cb13-97"><a href="#cb13-97"></a><span class="in">}</span></span>
+<span id="cb13-98"><a href="#cb13-98"></a></span>
+<span id="cb13-99"><a href="#cb13-99"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb13-100"><a href="#cb13-100"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb13-101"><a href="#cb13-101"></a><span class="in">    colors::colors();</span></span>
+<span id="cb13-102"><a href="#cb13-102"></a><span class="in">    loop {}</span></span>
+<span id="cb13-103"><a href="#cb13-103"></a><span class="in">}</span></span>
+<span id="cb13-104"><a href="#cb13-104"></a><span class="in">```</span></span>
+<span id="cb13-105"><a href="#cb13-105"></a></span>
+<span id="cb13-106"><a href="#cb13-106"></a><span class="fu">### Your task</span></span>
+<span id="cb13-107"><a href="#cb13-107"></a></span>
+<span id="cb13-108"><a href="#cb13-108"></a><span class="ss">- </span>Create 16 evenly sized columns, one for each background color, across the screen.</span>
+<span id="cb13-109"><a href="#cb13-109"></a><span class="ss">- </span>Display no text.</span>
+<span id="cb13-110"><a href="#cb13-110"></a><span class="ss">- </span>Recall that there are 80 horizontal by 25 vertical characters.</span>
+<span id="cb13-111"><a href="#cb13-111"></a><span class="ss">- </span>Recall that there are 720 horizontal by 400 vertical pixels.</span>
+<span id="cb13-112"><a href="#cb13-112"></a><span class="ss">- </span>I am creating the below example using hexcodes I extracted and raw HTML.</span>
+<span id="cb13-113"><a href="#cb13-113"></a><span class="ss">    - </span>It is hardcoded to 720 $\times$ 400 and may look odd on some screens.</span>
+<span id="cb13-114"><a href="#cb13-114"></a><span class="ss">    - </span>It is *not* an image.</span>
+<span id="cb13-115"><a href="#cb13-115"></a>    </span>
+<span id="cb13-116"><a href="#cb13-116"></a>&lt;table style="border-collapse: collapse; border: none; padding: 0; margin: 0; line-height: 0;"&gt;</span>
+<span id="cb13-117"><a href="#cb13-117"></a>  &lt;tr style="height: 400px;"&gt;</span>
+<span id="cb13-118"><a href="#cb13-118"></a>    &lt;td style="width: 45px; background-color: rgb(0, 0, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-119"><a href="#cb13-119"></a>    &lt;td style="width: 45px; background-color: rgb(0, 0, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-120"><a href="#cb13-120"></a>    &lt;td style="width: 45px; background-color: rgb(0, 168, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-121"><a href="#cb13-121"></a>    &lt;td style="width: 45px; background-color: rgb(0, 168, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-122"><a href="#cb13-122"></a>    &lt;td style="width: 45px; background-color: rgb(168, 0, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-123"><a href="#cb13-123"></a>    &lt;td style="width: 45px; background-color: rgb(168, 0, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-124"><a href="#cb13-124"></a>    &lt;td style="width: 45px; background-color: rgb(168, 87, 0); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-125"><a href="#cb13-125"></a>    &lt;td style="width: 45px; background-color: rgb(168, 168, 168); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-126"><a href="#cb13-126"></a>    &lt;td style="width: 45px; background-color: rgb(87, 87, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-127"><a href="#cb13-127"></a>    &lt;td style="width: 45px; background-color: rgb(87, 87, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-128"><a href="#cb13-128"></a>    &lt;td style="width: 45px; background-color: rgb(87, 255, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-129"><a href="#cb13-129"></a>    &lt;td style="width: 45px; background-color: rgb(87, 255, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-130"><a href="#cb13-130"></a>    &lt;td style="width: 45px; background-color: rgb(255, 87, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-131"><a href="#cb13-131"></a>    &lt;td style="width: 45px; background-color: rgb(255, 87, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-132"><a href="#cb13-132"></a>    &lt;td style="width: 45px; background-color: rgb(255, 255, 87); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-133"><a href="#cb13-133"></a>    &lt;td style="width: 45px; background-color: rgb(255, 255, 255); padding: 0;"&gt;&lt;/td&gt;</span>
+<span id="cb13-134"><a href="#cb13-134"></a>  &lt;/tr&gt;</span>
+<span id="cb13-135"><a href="#cb13-135"></a>&lt;/table&gt;</span>
+<span id="cb13-136"><a href="#cb13-136"></a></span>
+<span id="cb13-137"><a href="#cb13-137"></a><span class="ss">- </span>It is obviously trivial to extract color values from this.</span>
+<span id="cb13-138"><a href="#cb13-138"></a><span class="ss">- </span>Fortunately, you are still required to include a <span class="in">`src/colors.rs`</span> in your <span class="in">`52`</span> folder.</span>
 <span id="cb13-139"><a href="#cb13-139"></a></span>
-<span id="cb13-140"><a href="#cb13-140"></a><span class="co">```{.rs}</span></span>
-<span id="cb13-141"><a href="#cb13-141"></a><span class="co">pub fn colors() {</span></span>
-<span id="cb13-142"><a href="#cb13-142"></a><span class="co">    for i in 0..16 {</span></span>
-<span id="cb13-143"><a href="#cb13-143"></a><span class="co">        for j in 0..25 {</span></span>
-<span id="cb13-144"><a href="#cb13-144"></a><span class="co">            for k in 0..5 {</span></span>
-<span id="cb13-145"><a href="#cb13-145"></a><span class="co">                unsafe {</span></span>
-<span id="cb13-146"><a href="#cb13-146"></a><span class="co">                    *((0xb8000 + (5 * i + 80 * j + k) * 2 + 1) as *mut u8) = (i as u8) &lt;&lt; 4;</span></span>
-<span id="cb13-147"><a href="#cb13-147"></a><span class="co">                }</span></span>
-<span id="cb13-148"><a href="#cb13-148"></a><span class="co">            }</span></span>
-<span id="cb13-149"><a href="#cb13-149"></a><span class="co">        }</span></span>
-<span id="cb13-150"><a href="#cb13-150"></a><span class="co">    }</span></span>
-<span id="cb13-151"><a href="#cb13-151"></a><span class="co">}</span></span>
-<span id="cb13-152"><a href="#cb13-152"></a><span class="co">```</span></span>
-<span id="cb13-153"><a href="#cb13-153"></a><span class="co">--&gt;</span></span>
-<span id="cb13-154"><a href="#cb13-154"></a></span>
-<span id="cb13-155"><a href="#cb13-155"></a><span class="fu">## Step 2</span></span>
+<span id="cb13-140"><a href="#cb13-140"></a><span class="co">&lt;!--</span></span>
+<span id="cb13-141"><a href="#cb13-141"></a></span>
+<span id="cb13-142"><a href="#cb13-142"></a><span class="co">```{.rs}</span></span>
+<span id="cb13-143"><a href="#cb13-143"></a><span class="co">pub fn colors() {</span></span>
+<span id="cb13-144"><a href="#cb13-144"></a><span class="co">    for i in 0..16 {</span></span>
+<span id="cb13-145"><a href="#cb13-145"></a><span class="co">        for j in 0..25 {</span></span>
+<span id="cb13-146"><a href="#cb13-146"></a><span class="co">            for k in 0..5 {</span></span>
+<span id="cb13-147"><a href="#cb13-147"></a><span class="co">                unsafe {</span></span>
+<span id="cb13-148"><a href="#cb13-148"></a><span class="co">                    *((0xb8000 + (5 * i + 80 * j + k) * 2 + 1) as *mut u8) = (i as u8) &lt;&lt; 4;</span></span>
+<span id="cb13-149"><a href="#cb13-149"></a><span class="co">                }</span></span>
+<span id="cb13-150"><a href="#cb13-150"></a><span class="co">            }</span></span>
+<span id="cb13-151"><a href="#cb13-151"></a><span class="co">        }</span></span>
+<span id="cb13-152"><a href="#cb13-152"></a><span class="co">    }</span></span>
+<span id="cb13-153"><a href="#cb13-153"></a><span class="co">}</span></span>
+<span id="cb13-154"><a href="#cb13-154"></a><span class="co">```</span></span>
+<span id="cb13-155"><a href="#cb13-155"></a><span class="co">--&gt;</span></span>
 <span id="cb13-156"><a href="#cb13-156"></a></span>
-<span id="cb13-157"><a href="#cb13-157"></a><span class="at">&gt; Display and screendump the background colors to </span><span class="in">`.ppm`</span></span>
+<span id="cb13-157"><a href="#cb13-157"></a><span class="fu">## Step 2</span></span>
 <span id="cb13-158"><a href="#cb13-158"></a></span>
-<span id="cb13-159"><a href="#cb13-159"></a><span class="ss">- </span>Easy step.</span>
-<span id="cb13-160"><a href="#cb13-160"></a><span class="ss">- </span>Once your <span class="in">`qemu`</span> is displaying as above, you are ready to proceed.</span>
-<span id="cb13-161"><a href="#cb13-161"></a></span>
-<span id="cb13-162"><a href="#cb13-162"></a><span class="fu">### The Monitor</span></span>
+<span id="cb13-159"><a href="#cb13-159"></a><span class="at">&gt; Display and screendump the background colors to </span><span class="in">`.ppm`</span></span>
+<span id="cb13-160"><a href="#cb13-160"></a></span>
+<span id="cb13-161"><a href="#cb13-161"></a><span class="ss">- </span>Easy step.</span>
+<span id="cb13-162"><a href="#cb13-162"></a><span class="ss">- </span>Once your <span class="in">`qemu`</span> is displaying as above, you are ready to proceed.</span>
 <span id="cb13-163"><a href="#cb13-163"></a></span>
-<span id="cb13-164"><a href="#cb13-164"></a><span class="ss">- </span><span class="in">`qemu`</span> has more features than I can recall anymore; most of them very cool.</span>
-<span id="cb13-165"><a href="#cb13-165"></a><span class="ss">- </span>One is the "Monitor"</span>
-<span id="cb13-166"><a href="#cb13-166"></a><span class="ss">- </span>Within the QEMU window, you can use &lt;p&gt;&lt;kbd class="kbd compound docutils literal notranslate"&gt;&lt;kbd class="kbd docutils literal notranslate"&gt;Ctrl&lt;/kbd&gt;+&lt;kbd class="kbd docutils literal notranslate"&gt;Alt&lt;/kbd&gt;+&lt;kbd class="kbd docutils literal notranslate"&gt;2&lt;/kbd&gt;&lt;/kbd&gt;</span>
-<span id="cb13-167"><a href="#cb13-167"></a><span class="ss">- </span>From here, you can input a variety of commands.</span>
-<span id="cb13-168"><a href="#cb13-168"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://qemu-project.gitlab.io/qemu/system/monitor.html)</span></span>
-<span id="cb13-169"><a href="#cb13-169"></a><span class="ss">- </span>At least try <span class="in">`help`</span> and have at least on thought about it.</span>
-<span id="cb13-170"><a href="#cb13-170"></a><span class="ss">    - </span><span class="in">`qemu`</span> is listed on a job add for a Google position in Portland starting at 113k/yr as I type this.</span>
-<span id="cb13-171"><a href="#cb13-171"></a></span>
-<span id="cb13-172"><a href="#cb13-172"></a><span class="fu">### Screendump</span></span>
+<span id="cb13-164"><a href="#cb13-164"></a><span class="fu">### The Monitor</span></span>
+<span id="cb13-165"><a href="#cb13-165"></a></span>
+<span id="cb13-166"><a href="#cb13-166"></a><span class="ss">- </span><span class="in">`qemu`</span> has more features than I can recall anymore; most of them very cool.</span>
+<span id="cb13-167"><a href="#cb13-167"></a><span class="ss">- </span>One is the "Monitor"</span>
+<span id="cb13-168"><a href="#cb13-168"></a><span class="ss">- </span>Within the QEMU window, you can use &lt;p&gt;&lt;kbd class="kbd compound docutils literal notranslate"&gt;&lt;kbd class="kbd docutils literal notranslate"&gt;Ctrl&lt;/kbd&gt;+&lt;kbd class="kbd docutils literal notranslate"&gt;Alt&lt;/kbd&gt;+&lt;kbd class="kbd docutils literal notranslate"&gt;2&lt;/kbd&gt;&lt;/kbd&gt;</span>
+<span id="cb13-169"><a href="#cb13-169"></a><span class="ss">- </span>From here, you can input a variety of commands.</span>
+<span id="cb13-170"><a href="#cb13-170"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://qemu-project.gitlab.io/qemu/system/monitor.html)</span></span>
+<span id="cb13-171"><a href="#cb13-171"></a><span class="ss">- </span>At least try <span class="in">`help`</span> and have at least on thought about it.</span>
+<span id="cb13-172"><a href="#cb13-172"></a><span class="ss">    - </span><span class="in">`qemu`</span> is listed on a job ad for a Google position in Portland starting at 113k/yr as I type this.</span>
 <span id="cb13-173"><a href="#cb13-173"></a></span>
-<span id="cb13-174"><a href="#cb13-174"></a><span class="ss">- </span>Try to following.</span>
-<span id="cb13-175"><a href="#cb13-175"></a><span class="ss">    - </span>You can choose your own filename.</span>
-<span id="cb13-176"><a href="#cb13-176"></a><span class="ss">    - </span>I used <span class="in">`dump.ppm`</span></span>
-<span id="cb13-177"><a href="#cb13-177"></a><span class="ss">    - </span>You will want to use <span class="in">`.ppm`</span></span>
-<span id="cb13-178"><a href="#cb13-178"></a></span>
-<span id="cb13-179"><a href="#cb13-179"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-180"><a href="#cb13-180"></a><span class="in">screendump dump.ppm</span></span>
-<span id="cb13-181"><a href="#cb13-181"></a><span class="in">```</span></span>
-<span id="cb13-182"><a href="#cb13-182"></a></span>
-<span id="cb13-183"><a href="#cb13-183"></a><span class="ss">- </span>QEMU documentation states:</span>
+<span id="cb13-174"><a href="#cb13-174"></a><span class="fu">### Screendump</span></span>
+<span id="cb13-175"><a href="#cb13-175"></a></span>
+<span id="cb13-176"><a href="#cb13-176"></a><span class="ss">- </span>Try to following.</span>
+<span id="cb13-177"><a href="#cb13-177"></a><span class="ss">    - </span>You can choose your own filename.</span>
+<span id="cb13-178"><a href="#cb13-178"></a><span class="ss">    - </span>I used <span class="in">`dump.ppm`</span></span>
+<span id="cb13-179"><a href="#cb13-179"></a><span class="ss">    - </span>You will want to use <span class="in">`.ppm`</span></span>
+<span id="cb13-180"><a href="#cb13-180"></a></span>
+<span id="cb13-181"><a href="#cb13-181"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-182"><a href="#cb13-182"></a><span class="in">screendump dump.ppm</span></span>
+<span id="cb13-183"><a href="#cb13-183"></a><span class="in">```</span></span>
 <span id="cb13-184"><a href="#cb13-184"></a></span>
-<span id="cb13-185"><a href="#cb13-185"></a><span class="at">&gt; Save screen into PPM image *filename*.</span></span>
+<span id="cb13-185"><a href="#cb13-185"></a><span class="ss">- </span>QEMU documentation states:</span>
 <span id="cb13-186"><a href="#cb13-186"></a></span>
-<span id="cb13-187"><a href="#cb13-187"></a><span class="fu">## Step 3</span></span>
+<span id="cb13-187"><a href="#cb13-187"></a><span class="at">&gt; Save screen into PPM image *filename*.</span></span>
 <span id="cb13-188"><a href="#cb13-188"></a></span>
-<span id="cb13-189"><a href="#cb13-189"></a><span class="at">&gt; Extract hex values from the </span><span class="in">`.ppm`</span></span>
+<span id="cb13-189"><a href="#cb13-189"></a><span class="fu">## Step 3</span></span>
 <span id="cb13-190"><a href="#cb13-190"></a></span>
-<span id="cb13-191"><a href="#cb13-191"></a><span class="fu">### PPM files</span></span>
+<span id="cb13-191"><a href="#cb13-191"></a><span class="at">&gt; Extract hex values from the </span><span class="in">`.ppm`</span></span>
 <span id="cb13-192"><a href="#cb13-192"></a></span>
-<span id="cb13-193"><a href="#cb13-193"></a><span class="ss">- </span>The PPM file format is ancient and I'm not sure of the authoritative documentation.</span>
-<span id="cb13-194"><a href="#cb13-194"></a><span class="ss">- </span>This appears correct to me.  <span class="co">[</span><span class="ot">https://netpbm.sourceforge.net/doc/ppm.html</span><span class="co">](https://netpbm.sourceforge.net/doc/ppm.html)</span></span>
-<span id="cb13-195"><a href="#cb13-195"></a><span class="ss">- </span>You don't need to dwell on it overlong but:</span>
-<span id="cb13-196"><a href="#cb13-196"></a><span class="ss">    - </span>There is a header that gives the filetype, the size, and highest brightness value.</span>
-<span id="cb13-197"><a href="#cb13-197"></a><span class="ss">    - </span>There's a block write of pixels.</span>
-<span id="cb13-198"><a href="#cb13-198"></a></span>
-<span id="cb13-199"><a href="#cb13-199"></a><span class="fu">### `head`</span></span>
+<span id="cb13-193"><a href="#cb13-193"></a><span class="fu">### PPM files</span></span>
+<span id="cb13-194"><a href="#cb13-194"></a></span>
+<span id="cb13-195"><a href="#cb13-195"></a><span class="ss">- </span>The PPM file format is ancient and I'm not sure of the authoritative documentation.</span>
+<span id="cb13-196"><a href="#cb13-196"></a><span class="ss">- </span>This appears correct to me.  <span class="co">[</span><span class="ot">https://netpbm.sourceforge.net/doc/ppm.html</span><span class="co">](https://netpbm.sourceforge.net/doc/ppm.html)</span></span>
+<span id="cb13-197"><a href="#cb13-197"></a><span class="ss">- </span>You don't need to dwell on it overlong but:</span>
+<span id="cb13-198"><a href="#cb13-198"></a><span class="ss">    - </span>There is a header that gives the filetype, the size, and highest brightness value.</span>
+<span id="cb13-199"><a href="#cb13-199"></a><span class="ss">    - </span>There's a block write of pixels.</span>
 <span id="cb13-200"><a href="#cb13-200"></a></span>
-<span id="cb13-201"><a href="#cb13-201"></a><span class="ss">- </span>It is trivial to verify you have a well formed PPM file.</span>
-<span id="cb13-202"><a href="#cb13-202"></a><span class="ss">    - </span>We use <span class="in">`head`</span> to read the first $n$ lines of a file.</span>
-<span id="cb13-203"><a href="#cb13-203"></a><span class="ss">    - </span>We use <span class="in">`-3`</span> to specify that $n=3$</span>
-<span id="cb13-204"><a href="#cb13-204"></a><span class="ss">    - </span>Only the first 3 lines are human readable.</span>
-<span id="cb13-205"><a href="#cb13-205"></a></span>
-<span id="cb13-206"><a href="#cb13-206"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-207"><a href="#cb13-207"></a><span class="in">head -3 dump.ppm</span></span>
-<span id="cb13-208"><a href="#cb13-208"></a><span class="in">```</span></span>
-<span id="cb13-209"><a href="#cb13-209"></a></span>
-<span id="cb13-210"><a href="#cb13-210"></a><span class="ss">- </span>If you do not see the following, something went wrong.</span>
+<span id="cb13-201"><a href="#cb13-201"></a><span class="fu">### `head`</span></span>
+<span id="cb13-202"><a href="#cb13-202"></a></span>
+<span id="cb13-203"><a href="#cb13-203"></a><span class="ss">- </span>It is trivial to verify you have a well formed PPM file.</span>
+<span id="cb13-204"><a href="#cb13-204"></a><span class="ss">    - </span>We use <span class="in">`head`</span> to read the first $n$ lines of a file.</span>
+<span id="cb13-205"><a href="#cb13-205"></a><span class="ss">    - </span>We use <span class="in">`-3`</span> to specify that $n=3$</span>
+<span id="cb13-206"><a href="#cb13-206"></a><span class="ss">    - </span>Only the first 3 lines are human readable.</span>
+<span id="cb13-207"><a href="#cb13-207"></a></span>
+<span id="cb13-208"><a href="#cb13-208"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-209"><a href="#cb13-209"></a><span class="in">head -3 dump.ppm</span></span>
+<span id="cb13-210"><a href="#cb13-210"></a><span class="in">```</span></span>
 <span id="cb13-211"><a href="#cb13-211"></a></span>
-<span id="cb13-212"><a href="#cb13-212"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-213"><a href="#cb13-213"></a><span class="in">P6</span></span>
-<span id="cb13-214"><a href="#cb13-214"></a><span class="in">720 400</span></span>
-<span id="cb13-215"><a href="#cb13-215"></a><span class="in">255</span></span>
-<span id="cb13-216"><a href="#cb13-216"></a><span class="in">```</span></span>
-<span id="cb13-217"><a href="#cb13-217"></a></span>
-<span id="cb13-218"><a href="#cb13-218"></a><span class="ss">- </span>This states that:</span>
-<span id="cb13-219"><a href="#cb13-219"></a><span class="ss">    - </span>You have a PPM image of type P6, this is the most common format (there is a less used P3)</span>
-<span id="cb13-220"><a href="#cb13-220"></a><span class="ss">    - </span>Your image is 720 by 400 pixels</span>
-<span id="cb13-221"><a href="#cb13-221"></a><span class="ss">    - </span>Brightness is out of 255.</span>
-<span id="cb13-222"><a href="#cb13-222"></a><span class="ss">- </span>From here I perceive 2 "obvious" options.</span>
-<span id="cb13-223"><a href="#cb13-223"></a><span class="ss">    - </span>Use some combination of <span class="in">`head`</span>, <span class="in">`tail`</span>, <span class="in">`hexdump`</span> and other command line utilities to extract all hex values.</span>
-<span id="cb13-224"><a href="#cb13-224"></a><span class="ss">    - </span>Use Python, NumPy, and PIL, all of which you likely have on your device, to extract all hex values.</span>
-<span id="cb13-225"><a href="#cb13-225"></a><span class="ss">    - </span>Be advised you can compute the precise location of the first instance of every color in either a <span class="in">`.ppm`</span> file or a NumPy array as you have perfect knowledge about the number of pixels.</span>
-<span id="cb13-226"><a href="#cb13-226"></a><span class="ss">- </span>These two are free:</span>
-<span id="cb13-227"><a href="#cb13-227"></a></span>
-<span id="cb13-228"><a href="#cb13-228"></a><span class="in">```{.py}</span></span>
-<span id="cb13-229"><a href="#cb13-229"></a><span class="in">import numpy as np</span></span>
-<span id="cb13-230"><a href="#cb13-230"></a><span class="in">from PIL import Image</span></span>
-<span id="cb13-231"><a href="#cb13-231"></a></span>
-<span id="cb13-232"><a href="#cb13-232"></a><span class="in">IMG_NAME = "dump.ppm"</span></span>
+<span id="cb13-212"><a href="#cb13-212"></a><span class="ss">- </span>If you do not see the following, something went wrong.</span>
+<span id="cb13-213"><a href="#cb13-213"></a></span>
+<span id="cb13-214"><a href="#cb13-214"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-215"><a href="#cb13-215"></a><span class="in">P6</span></span>
+<span id="cb13-216"><a href="#cb13-216"></a><span class="in">720 400</span></span>
+<span id="cb13-217"><a href="#cb13-217"></a><span class="in">255</span></span>
+<span id="cb13-218"><a href="#cb13-218"></a><span class="in">```</span></span>
+<span id="cb13-219"><a href="#cb13-219"></a></span>
+<span id="cb13-220"><a href="#cb13-220"></a><span class="ss">- </span>This states that:</span>
+<span id="cb13-221"><a href="#cb13-221"></a><span class="ss">    - </span>You have a PPM image of type P6, this is the most common format (there is a less used P3)</span>
+<span id="cb13-222"><a href="#cb13-222"></a><span class="ss">    - </span>Your image is 720 by 400 pixels</span>
+<span id="cb13-223"><a href="#cb13-223"></a><span class="ss">    - </span>Brightness is out of 255.</span>
+<span id="cb13-224"><a href="#cb13-224"></a><span class="ss">- </span>From here I perceive 2 "obvious" options.</span>
+<span id="cb13-225"><a href="#cb13-225"></a><span class="ss">    - </span>Use some combination of <span class="in">`head`</span>, <span class="in">`tail`</span>, <span class="in">`hexdump`</span> and other command line utilities to extract all hex values.</span>
+<span id="cb13-226"><a href="#cb13-226"></a><span class="ss">    - </span>Use Python, NumPy, and PIL, all of which you likely have on your device, to extract all hex values.</span>
+<span id="cb13-227"><a href="#cb13-227"></a><span class="ss">    - </span>Be advised you can compute the precise location of the first instance of every color in either a <span class="in">`.ppm`</span> file or a NumPy array as you have perfect knowledge about the number of pixels.</span>
+<span id="cb13-228"><a href="#cb13-228"></a><span class="ss">- </span>These two are free:</span>
+<span id="cb13-229"><a href="#cb13-229"></a></span>
+<span id="cb13-230"><a href="#cb13-230"></a><span class="in">```{.py}</span></span>
+<span id="cb13-231"><a href="#cb13-231"></a><span class="in">import numpy as np</span></span>
+<span id="cb13-232"><a href="#cb13-232"></a><span class="in">from PIL import Image</span></span>
 <span id="cb13-233"><a href="#cb13-233"></a></span>
-<span id="cb13-234"><a href="#cb13-234"></a><span class="in">img = np.array(Image.open(IMG_NAME))</span></span>
-<span id="cb13-235"><a href="#cb13-235"></a><span class="in">print(img[0][:10])</span></span>
-<span id="cb13-236"><a href="#cb13-236"></a><span class="in">```</span></span>
-<span id="cb13-237"><a href="#cb13-237"></a></span>
-<span id="cb13-238"><a href="#cb13-238"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-239"><a href="#cb13-239"></a><span class="in">cat dump.ppm | tail -1 | head -c4 | hexdump</span></span>
-<span id="cb13-240"><a href="#cb13-240"></a><span class="in">```</span></span>
-<span id="cb13-241"><a href="#cb13-241"></a></span>
-<span id="cb13-242"><a href="#cb13-242"></a><span class="ss">- </span>I ended up using Python here because I was going to use Python for the next step.</span>
-<span id="cb13-243"><a href="#cb13-243"></a><span class="ss">    - </span>Unless?</span>
-<span id="cb13-244"><a href="#cb13-244"></a>    </span>
-<span id="cb13-245"><a href="#cb13-245"></a><span class="fu">## Step 4</span></span>
-<span id="cb13-246"><a href="#cb13-246"></a></span>
-<span id="cb13-247"><a href="#cb13-247"></a><span class="at">&gt; Create a script to convert images from url to VGA buffer array</span></span>
+<span id="cb13-234"><a href="#cb13-234"></a><span class="in">IMG_NAME = "dump.ppm"</span></span>
+<span id="cb13-235"><a href="#cb13-235"></a></span>
+<span id="cb13-236"><a href="#cb13-236"></a><span class="in">img = np.array(Image.open(IMG_NAME))</span></span>
+<span id="cb13-237"><a href="#cb13-237"></a><span class="in">print(img[0][:10])</span></span>
+<span id="cb13-238"><a href="#cb13-238"></a><span class="in">```</span></span>
+<span id="cb13-239"><a href="#cb13-239"></a></span>
+<span id="cb13-240"><a href="#cb13-240"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-241"><a href="#cb13-241"></a><span class="in">cat dump.ppm | tail -1 | head -c4 | hexdump</span></span>
+<span id="cb13-242"><a href="#cb13-242"></a><span class="in">```</span></span>
+<span id="cb13-243"><a href="#cb13-243"></a></span>
+<span id="cb13-244"><a href="#cb13-244"></a><span class="ss">- </span>I ended up using Python here because I was going to use Python for the next step.</span>
+<span id="cb13-245"><a href="#cb13-245"></a><span class="ss">    - </span>Unless?</span>
+<span id="cb13-246"><a href="#cb13-246"></a>    </span>
+<span id="cb13-247"><a href="#cb13-247"></a><span class="fu">## Step 4</span></span>
 <span id="cb13-248"><a href="#cb13-248"></a></span>
-<span id="cb13-249"><a href="#cb13-249"></a><span class="ss">1. </span><span class="co">[ ]</span> Download</span>
-<span id="cb13-250"><a href="#cb13-250"></a><span class="ss">1. </span><span class="co">[ ]</span> Scale</span>
-<span id="cb13-251"><a href="#cb13-251"></a><span class="ss">1. </span><span class="co">[ ]</span> Color map</span>
-<span id="cb13-252"><a href="#cb13-252"></a><span class="ss">1. </span><span class="co">[ ]</span> Output to <span class="in">`src/img.rs`</span> as a (Rust) datatype of some kind.</span>
-<span id="cb13-253"><a href="#cb13-253"></a></span>
-<span id="cb13-254"><a href="#cb13-254"></a>The following instructions assume students will proceed using Python's NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly <span class="co">[</span><span class="ot">here</span><span class="co">](40_kernel.md#mmxsse)</span>.</span>
+<span id="cb13-249"><a href="#cb13-249"></a><span class="at">&gt; Create a script to convert images from url to VGA buffer array</span></span>
+<span id="cb13-250"><a href="#cb13-250"></a></span>
+<span id="cb13-251"><a href="#cb13-251"></a><span class="ss">1. </span><span class="co">[ ]</span> Download</span>
+<span id="cb13-252"><a href="#cb13-252"></a><span class="ss">1. </span><span class="co">[ ]</span> Scale</span>
+<span id="cb13-253"><a href="#cb13-253"></a><span class="ss">1. </span><span class="co">[ ]</span> Color map</span>
+<span id="cb13-254"><a href="#cb13-254"></a><span class="ss">1. </span><span class="co">[ ]</span> Output to <span class="in">`src/img.rs`</span> as a (Rust) datatype of some kind.</span>
 <span id="cb13-255"><a href="#cb13-255"></a></span>
-<span id="cb13-256"><a href="#cb13-256"></a><span class="ss">- </span>As a fun bit, you may want to set up your script to optionally accept a URL at command line. </span>
-<span id="cb13-257"><a href="#cb13-257"></a><span class="ss">    - </span>I did this, and it made testing a bit easier.</span>
-<span id="cb13-258"><a href="#cb13-258"></a><span class="ss">    - </span>I *also* had an <span class="in">`IMG_URL`</span> pointed at something that would if there was no argument.</span>
-<span id="cb13-259"><a href="#cb13-259"></a></span>
-<span id="cb13-260"><a href="#cb13-260"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb13-256"><a href="#cb13-256"></a>The following instructions assume students will proceed using Python's NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly <span class="co">[</span><span class="ot">here</span><span class="co">](40_kernel.qmd#mmxsse)</span>.</span>
+<span id="cb13-257"><a href="#cb13-257"></a></span>
+<span id="cb13-258"><a href="#cb13-258"></a><span class="ss">- </span>As a fun bit, you may want to set up your script to optionally accept a URL at command line. </span>
+<span id="cb13-259"><a href="#cb13-259"></a><span class="ss">    - </span>I did this, and it made testing a bit easier.</span>
+<span id="cb13-260"><a href="#cb13-260"></a><span class="ss">    - </span>I *also* had an <span class="in">`IMG_URL`</span> pointed at something that would otherwise display if there was no argument.</span>
 <span id="cb13-261"><a href="#cb13-261"></a></span>
-<span id="cb13-262"><a href="#cb13-262"></a><span class="fu">### Extension for Advanced Students</span></span>
+<span id="cb13-262"><a href="#cb13-262"></a>::: {.callout-note collapse="true"}</span>
 <span id="cb13-263"><a href="#cb13-263"></a></span>
-<span id="cb13-264"><a href="#cb13-264"></a>Advanced students will already be familiar with these operations and with Python. They should complete Step 4 in CUDA C++, fulfilling the extension learning objective of familiarity with GPU programming and bus operations as mediated by the host/device metaphor. If you do not have access to a physical NVIDIA GPU, I provide instructions on usage in Colab <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/cd-public/coluda/blob/main/GPU_CUDA.ipynb)</span>.</span>
+<span id="cb13-264"><a href="#cb13-264"></a><span class="fu">### Extension for Advanced Students</span></span>
 <span id="cb13-265"><a href="#cb13-265"></a></span>
-<span id="cb13-266"><a href="#cb13-266"></a>Learning CUDA is straight-forward and an all-around good time. Learning C++ is quite the opposite. By combining both, you can practice moderation.</span>
+<span id="cb13-266"><a href="#cb13-266"></a>Advanced students will already be familiar with these operations and with Python. They should complete Step 4 in CUDA C++, fulfilling the extension learning objective of familiarity with GPU programming and bus operations as mediated by the host/device metaphor. If you do not have access to a physical NVIDIA GPU, I provide instructions on usage in Colab <span class="co">[</span><span class="ot">here</span><span class="co">](https://github.com/cd-public/coluda/blob/main/GPU_CUDA.ipynb)</span>.</span>
 <span id="cb13-267"><a href="#cb13-267"></a></span>
-<span id="cb13-268"><a href="#cb13-268"></a><span class="co">[</span><span class="ot">CUDA Programming Guide</span><span class="co">](https://docs.nvidia.com/cuda/cuda-programming-guide/)</span></span>
+<span id="cb13-268"><a href="#cb13-268"></a>Learning CUDA is straight-forward and an all-around good time. Learning C++ is quite the opposite. By combining both, you can practice moderation.</span>
 <span id="cb13-269"><a href="#cb13-269"></a></span>
-<span id="cb13-270"><a href="#cb13-270"></a>:::</span>
+<span id="cb13-270"><a href="#cb13-270"></a><span class="co">[</span><span class="ot">CUDA Programming Guide</span><span class="co">](https://docs.nvidia.com/cuda/cuda-programming-guide/)</span></span>
 <span id="cb13-271"><a href="#cb13-271"></a></span>
-<span id="cb13-272"><a href="#cb13-272"></a><span class="fu">### Use of Numpy</span></span>
+<span id="cb13-272"><a href="#cb13-272"></a>:::</span>
 <span id="cb13-273"><a href="#cb13-273"></a></span>
-<span id="cb13-274"><a href="#cb13-274"></a><span class="fu">#### Download</span></span>
+<span id="cb13-274"><a href="#cb13-274"></a><span class="fu">### Use of Numpy</span></span>
 <span id="cb13-275"><a href="#cb13-275"></a></span>
-<span id="cb13-276"><a href="#cb13-276"></a>Given this is an advanced class, I'm going to trust you to do the following without providing example code.</span>
-<span id="cb13-277"><a href="#cb13-277"></a><span class="ss">- </span>Regard is as "unsporting" to write a download a file and work with a local copy.</span>
-<span id="cb13-278"><a href="#cb13-278"></a></span>
-<span id="cb13-279"><a href="#cb13-279"></a><span class="ss">- </span>Use <span class="in">`requests`</span> to get an image by url.</span>
-<span id="cb13-280"><a href="#cb13-280"></a><span class="ss">    - </span>You can <span class="co">[</span><span class="ot">read this</span><span class="co">](https://cd-public.github.io/courses/cs1/slides/requests.html)</span></span>
-<span id="cb13-281"><a href="#cb13-281"></a><span class="ss">    - </span>You can use <span class="co">[</span><span class="ot">this URL</span><span class="co">](https://cd-public.github.io/ai101/images/photo-cat.jpg)</span></span>
-<span id="cb13-282"><a href="#cb13-282"></a><span class="in">```{.email}</span></span>
-<span id="cb13-283"><a href="#cb13-283"></a><span class="in">https://cd-public.github.io/ai101/images/photo-cat.jpg</span></span>
-<span id="cb13-284"><a href="#cb13-284"></a><span class="in">```</span></span>
-<span id="cb13-285"><a href="#cb13-285"></a><span class="ss">- </span>Use <span class="in">`BytesIO`</span> to interpret the HTTP response as a file.</span>
-<span id="cb13-286"><a href="#cb13-286"></a><span class="ss">- </span>Use PIL's <span class="in">`Image`</span> API to open the image.</span>
-<span id="cb13-287"><a href="#cb13-287"></a><span class="ss">    - </span>You can <span class="co">[</span><span class="ot">read this</span><span class="co">](https://cd-public.github.io/courses/old/ccf24/slides/04_1_img.html)</span></span>
-<span id="cb13-288"><a href="#cb13-288"></a><span class="ss">- </span>Coerce to the image to a NumPy array using NumPy.</span>
-<span id="cb13-289"><a href="#cb13-289"></a></span>
-<span id="cb13-290"><a href="#cb13-290"></a><span class="fu">##### Images</span></span>
-<span id="cb13-291"><a href="#cb13-291"></a></span>
-<span id="cb13-292"><a href="#cb13-292"></a>I only got <span class="in">`.jpg`</span> and <span class="in">`.webp`</span> to work for some reason; you are welcome to try to fix that (it's not a big deal).</span>
-<span id="cb13-293"><a href="#cb13-293"></a></span>
-<span id="cb13-294"><a href="#cb13-294"></a><span class="ss">- </span>I took <span class="co">[</span><span class="ot">this</span><span class="co">](https://cd-public.github.io/ai101/images/photo-cat.jpg)</span> myself so it is definitely free to use.</span>
-<span id="cb13-295"><a href="#cb13-295"></a><span class="in">```{.email}</span></span>
-<span id="cb13-296"><a href="#cb13-296"></a><span class="in">https://cd-public.github.io/ai101/images/photo-cat.jpg</span></span>
-<span id="cb13-297"><a href="#cb13-297"></a><span class="in">```</span></span>
-<span id="cb13-298"><a href="#cb13-298"></a><span class="ss">- </span><span class="co">[</span><span class="ot">This</span><span class="co">](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span> is a wide picture that should be fine, from a tourism bureau.</span>
-<span id="cb13-299"><a href="#cb13-299"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://www.leadvilletwinlakes.com/listing/mt-massive/)</span></span>
-<span id="cb13-300"><a href="#cb13-300"></a><span class="in">```{.email}</span></span>
-<span id="cb13-301"><a href="#cb13-301"></a><span class="in">https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp</span></span>
-<span id="cb13-302"><a href="#cb13-302"></a><span class="in">```</span></span>
-<span id="cb13-303"><a href="#cb13-303"></a><span class="ss">- </span>And maybe the best for testing, an Adobe Stock <span class="co">[</span><span class="ot">rainbow</span><span class="co">](https://stock.adobe.com/search?k=rainbow&amp;asset_id=114495172)</span></span>
-<span id="cb13-304"><a href="#cb13-304"></a><span class="ss">    - </span>The url looked unstable so I'm rehosting.</span>
-<span id="cb13-305"><a href="#cb13-305"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-306"><a href="#cb13-306"></a><span class="in">https://cd-public.github.io/os/img/rainbow.jpg</span></span>
-<span id="cb13-307"><a href="#cb13-307"></a><span class="in">```</span></span>
-<span id="cb13-308"><a href="#cb13-308"></a></span>
-<span id="cb13-309"><a href="#cb13-309"></a></span>
-<span id="cb13-310"><a href="#cb13-310"></a><span class="co">&lt;!--</span></span>
+<span id="cb13-276"><a href="#cb13-276"></a><span class="fu">#### Download</span></span>
+<span id="cb13-277"><a href="#cb13-277"></a></span>
+<span id="cb13-278"><a href="#cb13-278"></a>Given this is an advanced class, I'm going to trust you to do the following without providing example code.</span>
+<span id="cb13-279"><a href="#cb13-279"></a></span>
+<span id="cb13-280"><a href="#cb13-280"></a><span class="ss">- </span>Regard it as "unsporting" to download a file and work with a local copy.</span>
+<span id="cb13-281"><a href="#cb13-281"></a></span>
+<span id="cb13-282"><a href="#cb13-282"></a><span class="ss">- </span>Use <span class="in">`requests`</span> to get an image by url.</span>
+<span id="cb13-283"><a href="#cb13-283"></a><span class="ss">    - </span>You can <span class="co">[</span><span class="ot">read this</span><span class="co">](https://cd-public.github.io/courses/cs1/slides/requests.html)</span></span>
+<span id="cb13-284"><a href="#cb13-284"></a><span class="ss">    - </span>You can use <span class="co">[</span><span class="ot">this URL</span><span class="co">](https://cd-public.github.io/ai101/images/photo-cat.jpg)</span></span>
+<span id="cb13-285"><a href="#cb13-285"></a><span class="in">```{.email}</span></span>
+<span id="cb13-286"><a href="#cb13-286"></a><span class="in">https://cd-public.github.io/ai101/images/photo-cat.jpg</span></span>
+<span id="cb13-287"><a href="#cb13-287"></a><span class="in">```</span></span>
+<span id="cb13-288"><a href="#cb13-288"></a><span class="ss">- </span>Use <span class="in">`BytesIO`</span> to interpret the HTTP response as a file.</span>
+<span id="cb13-289"><a href="#cb13-289"></a><span class="ss">- </span>Use PIL's <span class="in">`Image`</span> API to open the image.</span>
+<span id="cb13-290"><a href="#cb13-290"></a><span class="ss">    - </span>You can <span class="co">[</span><span class="ot">read this</span><span class="co">](https://cd-public.github.io/courses/old/ccf24/slides/04_1_img.html)</span></span>
+<span id="cb13-291"><a href="#cb13-291"></a><span class="ss">- </span>Coerce the image to a NumPy array using NumPy.</span>
+<span id="cb13-292"><a href="#cb13-292"></a></span>
+<span id="cb13-293"><a href="#cb13-293"></a><span class="fu">##### Images</span></span>
+<span id="cb13-294"><a href="#cb13-294"></a></span>
+<span id="cb13-295"><a href="#cb13-295"></a>I only got <span class="in">`.jpg`</span> and <span class="in">`.webp`</span> to work for some reason, but it's not a big deal and you aren't required to learn <span class="in">`PIL`</span>.</span>
+<span id="cb13-296"><a href="#cb13-296"></a></span>
+<span id="cb13-297"><a href="#cb13-297"></a><span class="ss">- </span>I took <span class="co">[</span><span class="ot">this</span><span class="co">](https://cd-public.github.io/ai101/images/photo-cat.jpg)</span> myself so it is definitely free to use.</span>
+<span id="cb13-298"><a href="#cb13-298"></a><span class="in">```{.email}</span></span>
+<span id="cb13-299"><a href="#cb13-299"></a><span class="in">https://cd-public.github.io/ai101/images/photo-cat.jpg</span></span>
+<span id="cb13-300"><a href="#cb13-300"></a><span class="in">```</span></span>
+<span id="cb13-301"><a href="#cb13-301"></a><span class="ss">- </span><span class="co">[</span><span class="ot">This</span><span class="co">](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span> is a wide picture that should be fine, from a tourism bureau.</span>
+<span id="cb13-302"><a href="#cb13-302"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://www.leadvilletwinlakes.com/listing/mt-massive/)</span></span>
+<span id="cb13-303"><a href="#cb13-303"></a><span class="in">```{.email}</span></span>
+<span id="cb13-304"><a href="#cb13-304"></a><span class="in">https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp</span></span>
+<span id="cb13-305"><a href="#cb13-305"></a><span class="in">```</span></span>
+<span id="cb13-306"><a href="#cb13-306"></a><span class="ss">- </span>And maybe the best for testing, an Adobe Stock <span class="co">[</span><span class="ot">rainbow</span><span class="co">](https://stock.adobe.com/search?k=rainbow&amp;asset_id=114495172)</span></span>
+<span id="cb13-307"><a href="#cb13-307"></a><span class="ss">    - </span>The url looked unstable so I'm rehosting.</span>
+<span id="cb13-308"><a href="#cb13-308"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-309"><a href="#cb13-309"></a><span class="in">https://cd-public.github.io/os/img/rainbow.jpg</span></span>
+<span id="cb13-310"><a href="#cb13-310"></a><span class="in">```</span></span>
 <span id="cb13-311"><a href="#cb13-311"></a></span>
-<span id="cb13-312"><a href="#cb13-312"></a><span class="co">```{.py filename="url_to_rs.py"}</span></span>
-<span id="cb13-313"><a href="#cb13-313"></a><span class="co">from io import BytesIO</span></span>
-<span id="cb13-314"><a href="#cb13-314"></a><span class="co">import requests</span></span>
-<span id="cb13-315"><a href="#cb13-315"></a><span class="co">from PIL import Image</span></span>
-<span id="cb13-316"><a href="#cb13-316"></a><span class="co">import numpy as np</span></span>
-<span id="cb13-317"><a href="#cb13-317"></a></span>
-<span id="cb13-318"><a href="#cb13-318"></a><span class="co">IMG_URL = "https://cd-public.github.io/ai101/images/photo-cat.jpg"</span></span>
-<span id="cb13-319"><a href="#cb13-319"></a></span>
-<span id="cb13-320"><a href="#cb13-320"></a><span class="co">arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))</span></span>
-<span id="cb13-321"><a href="#cb13-321"></a><span class="co">```</span></span>
+<span id="cb13-312"><a href="#cb13-312"></a><span class="al">![](img/rainbow.jpg)</span></span>
+<span id="cb13-313"><a href="#cb13-313"></a></span>
+<span id="cb13-314"><a href="#cb13-314"></a></span>
+<span id="cb13-315"><a href="#cb13-315"></a><span class="co">&lt;!--</span></span>
+<span id="cb13-316"><a href="#cb13-316"></a></span>
+<span id="cb13-317"><a href="#cb13-317"></a><span class="co">```{.py filename="url_to_rs.py"}</span></span>
+<span id="cb13-318"><a href="#cb13-318"></a><span class="co">from io import BytesIO</span></span>
+<span id="cb13-319"><a href="#cb13-319"></a><span class="co">import requests</span></span>
+<span id="cb13-320"><a href="#cb13-320"></a><span class="co">from PIL import Image</span></span>
+<span id="cb13-321"><a href="#cb13-321"></a><span class="co">import numpy as np</span></span>
 <span id="cb13-322"><a href="#cb13-322"></a></span>
-<span id="cb13-323"><a href="#cb13-323"></a><span class="co">--&gt;</span></span>
+<span id="cb13-323"><a href="#cb13-323"></a><span class="co">IMG_URL = "https://cd-public.github.io/ai101/images/photo-cat.jpg"</span></span>
 <span id="cb13-324"><a href="#cb13-324"></a></span>
-<span id="cb13-325"><a href="#cb13-325"></a><span class="fu">#### Scale</span></span>
-<span id="cb13-326"><a href="#cb13-326"></a></span>
-<span id="cb13-327"><a href="#cb13-327"></a><span class="ss">- </span>Do I look like I know how to scale images?</span>
-<span id="cb13-328"><a href="#cb13-328"></a><span class="ss">    - </span>Probably either sample or average.</span>
-<span id="cb13-329"><a href="#cb13-329"></a><span class="ss">    - </span>I don't think I care.</span>
-<span id="cb13-330"><a href="#cb13-330"></a><span class="ss">- </span>My code scales to fit the VGA buffer horizontally.</span>
-<span id="cb13-331"><a href="#cb13-331"></a><span class="ss">    - </span>Then either "squish" or "stretch" vertically.</span>
-<span id="cb13-332"><a href="#cb13-332"></a><span class="ss">    - </span>You could also crop horizontally.</span>
-<span id="cb13-333"><a href="#cb13-333"></a><span class="ss">        - </span>Doesn't matter to me.</span>
-<span id="cb13-334"><a href="#cb13-334"></a><span class="ss">    - </span>Recall, the VGA buffer has more pixels than we are addressing.</span>
-<span id="cb13-335"><a href="#cb13-335"></a><span class="ss">    - </span>You can only address characters, which are many pixels in size.</span>
-<span id="cb13-336"><a href="#cb13-336"></a><span class="ss">    - </span>Your image will be *low* resolution.</span>
-<span id="cb13-337"><a href="#cb13-337"></a>    </span>
-<span id="cb13-338"><a href="#cb13-338"></a></span>
-<span id="cb13-339"><a href="#cb13-339"></a><span class="fu">#### Color Map</span></span>
-<span id="cb13-340"><a href="#cb13-340"></a></span>
-<span id="cb13-341"><a href="#cb13-341"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb13-325"><a href="#cb13-325"></a><span class="co">arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))</span></span>
+<span id="cb13-326"><a href="#cb13-326"></a><span class="co">```</span></span>
+<span id="cb13-327"><a href="#cb13-327"></a></span>
+<span id="cb13-328"><a href="#cb13-328"></a><span class="co">--&gt;</span></span>
+<span id="cb13-329"><a href="#cb13-329"></a></span>
+<span id="cb13-330"><a href="#cb13-330"></a><span class="fu">#### Scale</span></span>
+<span id="cb13-331"><a href="#cb13-331"></a></span>
+<span id="cb13-332"><a href="#cb13-332"></a><span class="ss">- </span>Do I look like I know how to scale images?</span>
+<span id="cb13-333"><a href="#cb13-333"></a><span class="ss">    - </span>Probably either sample or average.</span>
+<span id="cb13-334"><a href="#cb13-334"></a><span class="ss">    - </span>I don't think I care.</span>
+<span id="cb13-335"><a href="#cb13-335"></a><span class="ss">- </span>My code scales to fit the VGA buffer horizontally.</span>
+<span id="cb13-336"><a href="#cb13-336"></a><span class="ss">    - </span>Then either "squish" or "stretch" vertically.</span>
+<span id="cb13-337"><a href="#cb13-337"></a><span class="ss">    - </span>You could also crop horizontally.</span>
+<span id="cb13-338"><a href="#cb13-338"></a><span class="ss">        - </span>Doesn't matter to me.</span>
+<span id="cb13-339"><a href="#cb13-339"></a><span class="ss">    - </span>Recall, the VGA buffer has more pixels than we are addressing.</span>
+<span id="cb13-340"><a href="#cb13-340"></a><span class="ss">    - </span>You can only address characters, which are many pixels in size.</span>
+<span id="cb13-341"><a href="#cb13-341"></a><span class="ss">    - </span>Your image will be *low* resolution.</span>
 <span id="cb13-342"><a href="#cb13-342"></a></span>
-<span id="cb13-343"><a href="#cb13-343"></a><span class="fu">## Code Structure Note</span></span>
+<span id="cb13-343"><a href="#cb13-343"></a><span class="fu">#### Color Map</span></span>
 <span id="cb13-344"><a href="#cb13-344"></a></span>
-<span id="cb13-345"><a href="#cb13-345"></a>I included my code extracting hex-values from <span class="in">`dump.ppm`</span> here.</span>
+<span id="cb13-345"><a href="#cb13-345"></a>::: {.callout-note appearance="simple"}</span>
 <span id="cb13-346"><a href="#cb13-346"></a></span>
-<span id="cb13-347"><a href="#cb13-347"></a>I thought it made more sense than making a new file, it shared similar imports, and was only a few lines.</span>
+<span id="cb13-347"><a href="#cb13-347"></a><span class="fu">## Code Structure Note</span></span>
 <span id="cb13-348"><a href="#cb13-348"></a></span>
-<span id="cb13-349"><a href="#cb13-349"></a>Plus, if I run on another system, which may have a different color representation, I'll be able to quickly generate the <span class="in">`.ppm`</span> and have no other steps!</span>
+<span id="cb13-349"><a href="#cb13-349"></a>I included my code extracting hex-values from <span class="in">`dump.ppm`</span> here.</span>
 <span id="cb13-350"><a href="#cb13-350"></a></span>
-<span id="cb13-351"><a href="#cb13-351"></a>:::</span>
+<span id="cb13-351"><a href="#cb13-351"></a>I thought it made more sense than making a new file, it shared similar imports, and was only a few lines.</span>
 <span id="cb13-352"><a href="#cb13-352"></a></span>
-<span id="cb13-353"><a href="#cb13-353"></a><span class="ss">- </span>You image will include colors that cannot be recognized by the VGA text buffer.</span>
-<span id="cb13-354"><a href="#cb13-354"></a><span class="ss">- </span>You will need to compute color distance between the </span>
-<span id="cb13-355"><a href="#cb13-355"></a><span class="ss">    - </span>Color you are trying to show, and</span>
-<span id="cb13-356"><a href="#cb13-356"></a><span class="ss">    - </span>The 16 available colors you computed in a previous step.</span>
-<span id="cb13-357"><a href="#cb13-357"></a><span class="ss">- </span>A naive approached would be to regard colors in 3-space with dimensions of <span class="in">`R`</span>, <span class="in">`G`</span>, and <span class="in">`B`</span> values.</span>
-<span id="cb13-358"><a href="#cb13-358"></a><span class="ss">    - </span>This is appropriate, but sub-optimal.</span>
-<span id="cb13-359"><a href="#cb13-359"></a></span>
-<span id="cb13-360"><a href="#cb13-360"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb13-361"><a href="#cb13-361"></a></span>
-<span id="cb13-362"><a href="#cb13-362"></a><span class="fu">### Extension for Advanced Students</span></span>
+<span id="cb13-353"><a href="#cb13-353"></a>Plus, if I run on another system, which may have a different color representation, I'll be able to quickly generate the <span class="in">`.ppm`</span> and have no other steps!</span>
+<span id="cb13-354"><a href="#cb13-354"></a></span>
+<span id="cb13-355"><a href="#cb13-355"></a>:::</span>
+<span id="cb13-356"><a href="#cb13-356"></a></span>
+<span id="cb13-357"><a href="#cb13-357"></a><span class="ss">- </span>You image will include colors that cannot be recognized by the VGA text buffer.</span>
+<span id="cb13-358"><a href="#cb13-358"></a><span class="ss">- </span>You will need to compute color distance between the </span>
+<span id="cb13-359"><a href="#cb13-359"></a><span class="ss">    - </span>Color you are trying to show, and</span>
+<span id="cb13-360"><a href="#cb13-360"></a><span class="ss">    - </span>The 16 available colors you computed in a previous step.</span>
+<span id="cb13-361"><a href="#cb13-361"></a><span class="ss">- </span>A naive approached would be to regard colors in 3-space with dimensions of <span class="in">`R`</span>, <span class="in">`G`</span>, and <span class="in">`B`</span> values.</span>
+<span id="cb13-362"><a href="#cb13-362"></a><span class="ss">    - </span>This is appropriate, but sub-optimal.</span>
 <span id="cb13-363"><a href="#cb13-363"></a></span>
-<span id="cb13-364"><a href="#cb13-364"></a>Advanced students will already be familiar with distance in $n$-space and hexcodes and should use a perceptually uniform color space. In this case, <span class="in">`L*a*b`</span>.</span>
+<span id="cb13-364"><a href="#cb13-364"></a>::: {.callout-note collapse="true"}</span>
 <span id="cb13-365"><a href="#cb13-365"></a></span>
-<span id="cb13-366"><a href="#cb13-366"></a><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/CIELAB_color_space)</span></span>
+<span id="cb13-366"><a href="#cb13-366"></a><span class="fu">### Extension for Advanced Students</span></span>
 <span id="cb13-367"><a href="#cb13-367"></a></span>
-<span id="cb13-368"><a href="#cb13-368"></a>There is first class support in Python, I hear, and you can learn more from this poster, but one of Professor Brown's undergraduate researchers.</span>
+<span id="cb13-368"><a href="#cb13-368"></a>Advanced students will already be familiar with distance in $n$-space and hexcodes and should use a perceptually uniform color space. In this case, <span class="in">`L*a*b`</span>.</span>
 <span id="cb13-369"><a href="#cb13-369"></a></span>
-<span id="cb13-370"><a href="#cb13-370"></a><span class="co">[</span><span class="ot">Poster</span><span class="co">](https://luebke.us/publications/pdf/vss2019.poster1.pdf)</span></span>
+<span id="cb13-370"><a href="#cb13-370"></a><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/CIELAB_color_space)</span></span>
 <span id="cb13-371"><a href="#cb13-371"></a></span>
-<span id="cb13-372"><a href="#cb13-372"></a>:::</span>
+<span id="cb13-372"><a href="#cb13-372"></a>There is first class support in Python, I hear, and you can learn more from this poster, but one of Professor Brown's undergraduate researchers.</span>
 <span id="cb13-373"><a href="#cb13-373"></a></span>
-<span id="cb13-374"><a href="#cb13-374"></a>You are doing this in NumPy to take advantage of vectorized operations.</span>
+<span id="cb13-374"><a href="#cb13-374"></a><span class="co">[</span><span class="ot">Poster</span><span class="co">](https://luebke.us/publications/pdf/vss2019.poster1.pdf)</span></span>
 <span id="cb13-375"><a href="#cb13-375"></a></span>
-<span id="cb13-376"><a href="#cb13-376"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://cd-public.github.io/scicom/05_numpy.html#vectorization)</span></span>
-<span id="cb13-377"><a href="#cb13-377"></a><span class="ss">- </span>Regard it as "unsporting" to use loops for a single pixel.</span>
-<span id="cb13-378"><a href="#cb13-378"></a><span class="ss">    - </span>I didn't vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).</span>
-<span id="cb13-379"><a href="#cb13-379"></a>        </span>
-<span id="cb13-380"><a href="#cb13-380"></a><span class="fu">#### Output</span></span>
-<span id="cb13-381"><a href="#cb13-381"></a></span>
-<span id="cb13-382"><a href="#cb13-382"></a><span class="ss">- </span>I used a single line of Python code to map my colormapper across the scaled pixel array, format to string, and write to a <span class="in">`.rs`</span> file.</span>
-<span id="cb13-383"><a href="#cb13-383"></a><span class="ss">    - </span>You are not required to use a single line, obviously.</span>
-<span id="cb13-384"><a href="#cb13-384"></a><span class="ss">- </span>This is how long my script was.</span>
-<span id="cb13-385"><a href="#cb13-385"></a><span class="ss">    - </span>I wrote only single lines of code (no blocks) with open lines between.</span>
-<span id="cb13-386"><a href="#cb13-386"></a><span class="ss">    - </span>It was not minimized but it was not verbose either.</span>
-<span id="cb13-387"><a href="#cb13-387"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-388"><a href="#cb13-388"></a><span class="in">$ wc url_to_rs.py</span></span>
-<span id="cb13-389"><a href="#cb13-389"></a><span class="in"> 19  65 671 url_to_rs.py</span></span>
-<span id="cb13-390"><a href="#cb13-390"></a><span class="in">$ wc src/img.rs</span></span>
-<span id="cb13-391"><a href="#cb13-391"></a><span class="in">    0  2005 21976 src/colors/img.rs</span></span>
-<span id="cb13-392"><a href="#cb13-392"></a><span class="in">```</span></span>
-<span id="cb13-393"><a href="#cb13-393"></a><span class="ss">- </span>I wrote to <span class="in">`src/colors/img.rs`</span> as it was *I think* the place a file used by <span class="in">`src/colors.rs`</span> should be.</span>
-<span id="cb13-394"><a href="#cb13-394"></a><span class="ss">    - </span>I didn't love this because I had to make a new directory.</span>
-<span id="cb13-395"><a href="#cb13-395"></a><span class="ss">    - </span>Do whatever you want here, as long as your <span class="in">`url_to_rs.py`</span> writes to the right place.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb13-376"><a href="#cb13-376"></a>:::</span>
+<span id="cb13-377"><a href="#cb13-377"></a></span>
+<span id="cb13-378"><a href="#cb13-378"></a>You are doing this in NumPy to take advantage of vectorized operations.</span>
+<span id="cb13-379"><a href="#cb13-379"></a></span>
+<span id="cb13-380"><a href="#cb13-380"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://cd-public.github.io/scicom/05_numpy.html#vectorization)</span></span>
+<span id="cb13-381"><a href="#cb13-381"></a><span class="ss">- </span>Regard it as "unsporting" to use loops for a single pixel.</span>
+<span id="cb13-382"><a href="#cb13-382"></a><span class="ss">    - </span>I didn't vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).</span>
+<span id="cb13-383"><a href="#cb13-383"></a>        </span>
+<span id="cb13-384"><a href="#cb13-384"></a><span class="fu">#### Output</span></span>
+<span id="cb13-385"><a href="#cb13-385"></a></span>
+<span id="cb13-386"><a href="#cb13-386"></a><span class="ss">- </span>I used a single line of Python code to map my colormapper across the scaled pixel array, format to string, and write to a <span class="in">`.rs`</span> file.</span>
+<span id="cb13-387"><a href="#cb13-387"></a><span class="ss">    - </span>You are not required to use a single line, obviously.</span>
+<span id="cb13-388"><a href="#cb13-388"></a><span class="ss">- </span>This is how long my script was.</span>
+<span id="cb13-389"><a href="#cb13-389"></a><span class="ss">    - </span>I wrote only single lines of code (no blocks) with open lines between.</span>
+<span id="cb13-390"><a href="#cb13-390"></a><span class="ss">    - </span>It was not minimized but it was not verbose either.</span>
+<span id="cb13-391"><a href="#cb13-391"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-392"><a href="#cb13-392"></a><span class="in">$ wc url_to_rs.py src/colors/img.rs</span></span>
+<span id="cb13-393"><a href="#cb13-393"></a><span class="in">  22   75  704 url_to_rs.py</span></span>
+<span id="cb13-394"><a href="#cb13-394"></a><span class="in">   0 2006 9257 src/colors/img.rs</span></span>
+<span id="cb13-395"><a href="#cb13-395"></a><span class="in">```</span></span>
+<span id="cb13-396"><a href="#cb13-396"></a><span class="ss">- </span>I wrote to <span class="in">`src/colors/img.rs`</span> as it was *I think* the place a file used by <span class="in">`src/colors.rs`</span> should be.</span>
+<span id="cb13-397"><a href="#cb13-397"></a><span class="ss">    - </span>I didn't love this because I had to make a new directory.</span>
+<span id="cb13-398"><a href="#cb13-398"></a><span class="ss">    - </span>Do whatever you want here, as long as your <span class="in">`url_to_rs.py`</span> writes to the right place.</span>
+<span id="cb13-399"><a href="#cb13-399"></a>    </span>
+<span id="cb13-400"><a href="#cb13-400"></a><span class="fu">## Step 5</span></span>
+<span id="cb13-401"><a href="#cb13-401"></a></span>
+<span id="cb13-402"><a href="#cb13-402"></a><span class="ss">- </span>Add a <span class="in">`image()`</span> function to <span class="in">`src/colors.rs`</span> that:</span>
+<span id="cb13-403"><a href="#cb13-403"></a><span class="ss">    - </span>Reads the image data from <span class="in">`src/colors/img.rs`</span></span>
+<span id="cb13-404"><a href="#cb13-404"></a><span class="ss">    - </span>Writes the image data to the VGA text buffer as background colors.</span>
+<span id="cb13-405"><a href="#cb13-405"></a><span class="ss">- </span>Call this function from <span class="in">`src/main.rs`</span></span>
+<span id="cb13-406"><a href="#cb13-406"></a><span class="ss">- </span>Look at your image.</span>
+<span id="cb13-407"><a href="#cb13-407"></a></span>
+<span id="cb13-408"><a href="#cb13-408"></a><span class="fu">### Example</span></span>
+<span id="cb13-409"><a href="#cb13-409"></a></span>
+<span id="cb13-410"><a href="#cb13-410"></a><span class="ss">- </span>Here is my result over the "Mt. Massive" image from the tourism bureau.</span>
+<span id="cb13-411"><a href="#cb13-411"></a></span>
+<span id="cb13-412"><a href="#cb13-412"></a><span class="fu">#### Original</span></span>
+<span id="cb13-413"><a href="#cb13-413"></a></span>
+<span id="cb13-414"><a href="#cb13-414"></a><span class="ss">- </span>Hosting cross-site.</span>
+<span id="cb13-415"><a href="#cb13-415"></a></span>
+<span id="cb13-416"><a href="#cb13-416"></a><span class="al">![](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span></span>
+<span id="cb13-417"><a href="#cb13-417"></a></span>
+<span id="cb13-418"><a href="#cb13-418"></a><span class="fu">#### VGA Text Buffer</span></span>
+<span id="cb13-419"><a href="#cb13-419"></a></span>
+<span id="cb13-420"><a href="#cb13-420"></a><span class="ss">- </span>Extracted to <span class="in">`.ppm`</span>, converted to <span class="in">`.png`</span>, converted to base64 and directly embedded.</span>
+<span id="cb13-421"><a href="#cb13-421"></a></span>
+<span id="cb13-422"><a href="#cb13-422"></a>&lt;img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAJ70lEQVR4nO3dQY7jugFAwTiYC3rF</span>
+<span id="cb13-423"><a href="#cb13-423"></a>PqK48hE72wSINAN+PVnuqdoSoihKbTxw049t2/4FAFD697sXAAD8fIIDAMgJDgAgJzgAgJzgAABy</span>
+<span id="cb13-424"><a href="#cb13-424"></a>ggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkO</span>
+<span id="cb13-425"><a href="#cb13-425"></a>ACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACD3690L</span>
+<span id="cb13-426"><a href="#cb13-426"></a>gJ9sjHHZveacC1dduUI+y9oXBXuccAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAA</span>
+<span id="cb13-427"><a href="#cb13-427"></a>ADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQe2zbtnDZGOP0pfxt5px7Q2vbezDhTRw81+m7AfwM</span>
+<span id="cb13-428"><a href="#cb13-428"></a>9/9l+6nWfrEPOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn</span>
+<span id="cb13-429"><a href="#cb13-429"></a>OACAnOAAAHKCAwDICQ4AIPf4/v7eGzv4h/djjGY9AMCtreWBEw4AICc4AICc4AAAcoIDAMgJDgAg</span>
+<span id="cb13-430"><a href="#cb13-430"></a>JzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAco9t2/bGDv6rPf/cnHNv</span>
+<span id="cb13-431"><a href="#cb13-431"></a>yM4D8MM44QAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc</span>
+<span id="cb13-432"><a href="#cb13-432"></a>4AAAcoIDAMgJDgAg99i27d1r+I0xxmX3mnMuXHWTFV65jJ/K9gJEnHAAADnBAQDkBAcAkBMcAEBO</span>
+<span id="cb13-433"><a href="#cb13-433"></a>cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkPs1xjh3xjnnuRNe</span>
+<span id="cb13-434"><a href="#cb13-434"></a>ea+D3Ti419oyTt/5n+r07V2b8OCqtXudvsKbfFFX/lXyz619oldOyI/hhAMAyAkOACAnOACAnOAA</span>
+<span id="cb13-435"><a href="#cb13-435"></a>AHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACA3OP7+/uym805</span>
+<span id="cb13-436"><a href="#cb13-436"></a>F64aYyxMeHDVmrXFr7n/4tdeytqEB658KbzL6/XaG9q2bW/oym8e+BNOOACAnOAAAHKCAwDICQ4A</span>
+<span id="cb13-437"><a href="#cb13-437"></a>ICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDIPb6/v8+dcc55</span>
+<span id="cb13-438"><a href="#cb13-438"></a>7oQfbYyxcNXBHh5MuHbV2jJIvV6vvaHn87kw4doHcODr62tvaG2FVzp9e2/ipz7X6V8v7+KEAwDI</span>
+<span id="cb13-439"><a href="#cb13-439"></a>CQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4</span>
+<span id="cb13-440"><a href="#cb13-440"></a>AIDcY9u2c2ccY5w74Zo5597QlSs8WAbv8nq99oaez+cdJjzd/VcIe9Z+sf32ptZeihMOACAnOACA</span>
+<span id="cb13-441"><a href="#cb13-441"></a>nOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKP</span>
+<span id="cb13-442"><a href="#cb13-442"></a>bdsuu9kY47J7XWnOuTd08MgHV51ubRmv12tv6Pl8/tM1/a+1FZ7+RX19fZ074YGDPbxy56908Fxr</span>
+<span id="cb13-443"><a href="#cb13-443"></a>Pno3SN3kt5f/5oQDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc</span>
+<span id="cb13-444"><a href="#cb13-444"></a>4AAAcoIDAMgJDgAgJzgAgNzj+/v7spvNOReuGmOcO+Gag2V8fX0tTPh8PveGXq/XuRMeOLjXwYRr</span>
+<span id="cb13-445"><a href="#cb13-445"></a>u7E24YGDD2BtwjVrj3xg7aV8tPs/8toK7/9ccBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEB</span>
+<span id="cb13-446"><a href="#cb13-446"></a>AOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkHtu2LVw2xli4as65MOHBVWter9fe</span>
+<span id="cb13-447"><a href="#cb13-447"></a>0PP5PPde/KG1l3L/V3n6Cq/cqJu8lPu/5QNX7saB+2/U/X30d3gTTjgAgJzgAAByggMAyAkOACAn</span>
+<span id="cb13-448"><a href="#cb13-448"></a>OACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyD22bdsbG2PsDc05</span>
+<span id="cb13-449"><a href="#cb13-449"></a>m/W82ev12ht6Pp93WMaa0xd/k436aKfv4dqEH/0qT3/kK/mr/Bv8hX+VB5xwAAA5wQEA5AQHAJAT</span>
+<span id="cb13-450"><a href="#cb13-450"></a>HABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7bNv27jX8</span>
+<span id="cb13-451"><a href="#cb13-451"></a>xuv1OnfC5/P5I+91/2X8he6/8wcrPHCTxR+4/87Duda++bVfgAMH93LCAQDkBAcAkBMcAEBOcAAA</span>
+<span id="cb13-452"><a href="#cb13-452"></a>OcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEDuMcZ49xrgUnPO</span>
+<span id="cb13-453"><a href="#cb13-453"></a>vaH7/zl89OLhR3o+n+dO+Hq9LrvXlZxwAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBO</span>
+<span id="cb13-454"><a href="#cb13-454"></a>cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7jDHevQb4bHPOvaEr/74OlnHgo38BbrLzwJ9w</span>
+<span id="cb13-455"><a href="#cb13-455"></a>wgEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQH</span>
+<span id="cb13-456"><a href="#cb13-456"></a>AJATHABA7nEwNsa4bB03MefcG/oLdwMAzuKEAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzg</span>
+<span id="cb13-457"><a href="#cb13-457"></a>AAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AIDcY4yxcNmcc2/o9AnXrC3j/k7f+SutveX7</span>
+<span id="cb13-458"><a href="#cb13-458"></a>Pxfc3Ef/bvBjOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn</span>
+<span id="cb13-459"><a href="#cb13-459"></a>OACAnOAAAHKCAwDICQ4AIPfr9BnnnHtDY4yFCQ+uOrjXgdNXuLaMmzzX2r0OrO3hgdPfF9zclb+i</span>
+<span id="cb13-460"><a href="#cb13-460"></a>cBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABA</span>
+<span id="cb13-461"><a href="#cb13-461"></a>TnAAADnBAQDkHmOMd6+Bd5pz7g2tfRtrE95kGbDAxwZ/wgkHAJATHABATnAAADnBAQDkBAcAkBMc</span>
+<span id="cb13-462"><a href="#cb13-462"></a>AEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAALnHGOPda4BFc869obUP+2DC</span>
+<span id="cb13-463"><a href="#cb13-463"></a>A/6IAH7LCQcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDk</span>
+<span id="cb13-464"><a href="#cb13-464"></a>BAcAkBMcAEBOcAAAuccY491r4PPMOfeGfFEpOw98KCccAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5</span>
+<span id="cb13-465"><a href="#cb13-465"></a>wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQeY4x3r+Enm3PuDf2FO283buj0</span>
+<span id="cb13-466"><a href="#cb13-466"></a>l+ItA/+XEw4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDI</span>
+<span id="cb13-467"><a href="#cb13-467"></a>CQ4AICc4AICc4AAAcv8B/pXD9XQXqvEAAAAASUVORK5CYII="/&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

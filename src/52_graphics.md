@@ -50,7 +50,8 @@ Be advised this is a multistage lab that is intended to be interesting rather th
    1. [ ] Scale
    1. [ ] Color map
    1. [ ] Output to `src/colors/img.rs` as a datatype of some kind.
-1. [ ] Add a function to `src/colors.rs` to display the image in `src/img.rs`
+1. [ ] Add a function to `src/colors.rs` to display the image in `src/img.rs`.
+    1. [ ] And call the function from `src/main.rs
 
 ## Step 0
 
@@ -110,6 +111,7 @@ pub extern "C" fn _start() -> ! {
 - Recall that there are 720 horizontal by 400 vertical pixels.
 - I am creating the below example using hexcodes I extracted and raw HTML.
     - It is hardcoded to 720 $\times$ 400 and may look odd on some screens.
+    - It is *not* an image.
     
 <table style="border-collapse: collapse; border: none; padding: 0; margin: 0; line-height: 0;">
   <tr style="height: 400px;">
@@ -167,7 +169,7 @@ pub fn colors() {
 - From here, you can input a variety of commands.
     - [Read more](https://qemu-project.gitlab.io/qemu/system/monitor.html)
 - At least try `help` and have at least on thought about it.
-    - `qemu` is listed on a job add for a Google position in Portland starting at 113k/yr as I type this.
+    - `qemu` is listed on a job ad for a Google position in Portland starting at 113k/yr as I type this.
 
 ### Screendump
 
@@ -251,11 +253,11 @@ cat dump.ppm | tail -1 | head -c4 | hexdump
 1. [ ] Color map
 1. [ ] Output to `src/img.rs` as a (Rust) datatype of some kind.
 
-The following instructions assume students will proceed using Python's NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly [here](40_kernel.md#mmxsse).
+The following instructions assume students will proceed using Python's NumPy package. This fulfills a secondary learning objective of familiarity with vector operations that were discussed briefly [here](40_kernel.qmd#mmxsse).
 
 - As a fun bit, you may want to set up your script to optionally accept a URL at command line. 
     - I did this, and it made testing a bit easier.
-    - I *also* had an `IMG_URL` pointed at something that would if there was no argument.
+    - I *also* had an `IMG_URL` pointed at something that would otherwise display if there was no argument.
 
 ::: {.callout-note collapse="true"}
 
@@ -274,7 +276,8 @@ Learning CUDA is straight-forward and an all-around good time. Learning C++ is q
 #### Download
 
 Given this is an advanced class, I'm going to trust you to do the following without providing example code.
-- Regard is as "unsporting" to write a download a file and work with a local copy.
+
+- Regard it as "unsporting" to download a file and work with a local copy.
 
 - Use `requests` to get an image by url.
     - You can [read this](https://cd-public.github.io/courses/cs1/slides/requests.html)
@@ -285,11 +288,11 @@ https://cd-public.github.io/ai101/images/photo-cat.jpg
 - Use `BytesIO` to interpret the HTTP response as a file.
 - Use PIL's `Image` API to open the image.
     - You can [read this](https://cd-public.github.io/courses/old/ccf24/slides/04_1_img.html)
-- Coerce to the image to a NumPy array using NumPy.
+- Coerce the image to a NumPy array using NumPy.
 
 ##### Images
 
-I only got `.jpg` and `.webp` to work for some reason; you are welcome to try to fix that (it's not a big deal).
+I only got `.jpg` and `.webp` to work for some reason, but it's not a big deal and you aren't required to learn `PIL`.
 
 - I took [this](https://cd-public.github.io/ai101/images/photo-cat.jpg) myself so it is definitely free to use.
 ```{.email}
@@ -305,6 +308,8 @@ https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-M
 ```{.sh}
 https://cd-public.github.io/os/img/rainbow.jpg
 ```
+
+![](img/rainbow.jpg)
 
 
 <!--
@@ -334,7 +339,6 @@ arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))
     - Recall, the VGA buffer has more pixels than we are addressing.
     - You can only address characters, which are many pixels in size.
     - Your image will be *low* resolution.
-    
 
 #### Color Map
 
@@ -385,11 +389,79 @@ You are doing this in NumPy to take advantage of vectorized operations.
     - I wrote only single lines of code (no blocks) with open lines between.
     - It was not minimized but it was not verbose either.
 ```{.sh}
-$ wc url_to_rs.py
- 19  65 671 url_to_rs.py
-$ wc src/img.rs
-    0  2005 21976 src/colors/img.rs
+$ wc url_to_rs.py src/colors/img.rs
+  22   75  704 url_to_rs.py
+   0 2006 9257 src/colors/img.rs
 ```
 - I wrote to `src/colors/img.rs` as it was *I think* the place a file used by `src/colors.rs` should be.
     - I didn't love this because I had to make a new directory.
     - Do whatever you want here, as long as your `url_to_rs.py` writes to the right place.
+    
+## Step 5
+
+- Add a `image()` function to `src/colors.rs` that:
+    - Reads the image data from `src/colors/img.rs`
+    - Writes the image data to the VGA text buffer as background colors.
+- Call this function from `src/main.rs`
+- Look at your image.
+
+### Example
+
+- Here is my result over the "Mt. Massive" image from the tourism bureau.
+
+#### Original
+
+- Hosting cross-site.
+
+![](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)
+
+#### VGA Text Buffer
+
+- Extracted to `.ppm`, converted to `.png`, converted to base64 and directly embedded.
+
+<img src="data:image/png;base64, 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"/>
