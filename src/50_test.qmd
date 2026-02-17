@@ -306,8 +306,8 @@ static mut latest: usize = 0;
 	- Have a constant referring to to the VGA buffer address.
 
 ```{.rs filename="src/vga.rs"}
-static mut latest: usize = 0;
-const MMIO: usize = 0xb8000;
+static mut latest:usize = 0;
+const MMIO = 0xb8000 as *mut u8;
 ```
 
 ## Color
@@ -317,9 +317,9 @@ const MMIO: usize = 0xb8000;
 	  	- I will use a `const` for color and not worry about.
 
 ```{.rs filename="src/vga.rs"}
-static mut latest: usize = 0;
-const MMIO: usize = 0xb8000;
-const COLOR: u8 = 0xF;
+static mut latest:usize = 0;
+const MMIO = 0xb8000 as *mut u8;
+const COLOR: u = 0xF;
 ```
 
 ## Character-wise
@@ -342,7 +342,7 @@ pub fn char_to_vga(a: u8) {
 ```{.rs filename="src/vga.rs"}
 // Public for now
 pub fn char_to_vga(a: u8) {
-	let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
 }
 ```
 
@@ -354,7 +354,7 @@ pub fn char_to_vga(a: u8) {
 ```{.rs filename="src/vga.rs"}
 // Public for now
 pub fn char_to_vga(a: u8) {
-	let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
 	*rel = a;
 }
 ```
@@ -368,9 +368,9 @@ pub fn char_to_vga(a: u8) {
 ```{.rs filename="src/vga.rs"}
 // Public for now
 pub fn char_to_vga(a: u8) {
-	let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
 	*rel = a;
-    *((rel as usize + 1) as *mut u8) = COLOR;
+        *((rel as usize + 1) as *mut u8) = COLOR;
 }
 ```
 
@@ -384,10 +384,10 @@ pub fn char_to_vga(a: u8) {
 ```{.rs filename="src/vga.rs"}
 // Public for now
 pub fn char_to_vga(a: u8) {
-	let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;
+	let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;
 	*rel = a;
-    *((rel as usize + 1) as *mut u8) = COLOR;
-    LATEST = LATEST + 1;
+        *((rel as usize + 1) as *mut u8) = COLOR;
+        LATEST = LATEST + 1;
 }
 ```
 
@@ -430,7 +430,7 @@ pub fn str_to_vga(s: &str) {
 - I am opinionated on `as_bytes`.
 - Let's check some links.
 	- [`to_bytes`](https://doc.rust-lang.org/std/?search=to_bytes)
-    - [`as_bytes`](https://doc.rust-lang.org/std/?search=as_bytes)
+        - [`as_bytes`](https://doc.rust-lang.org/std/?search=as_bytes)
 	- [`bytes`](https://doc.rust-lang.org/std/?search=bytes)
 - Can you guess what always works?
 
@@ -506,7 +506,6 @@ pub fn str_to_vga(s: &str) {
 ## Trust but verify
 
 - I just checked in a different crate.
-
 ```{.rs filename="../???/src/main.rs"}
 fn main() {
     let s = "Hello\nworld!";
@@ -559,7 +558,7 @@ const COLS: usize = 25;
 const MAX: usize = ROWS * COLS;
 
 fn scroll() {
-    todo!();
+    
 }
 ```
 
@@ -614,7 +613,7 @@ https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt
 1. Add `scroll` to `str_to_vga`
 2. Update `LATEST` in `scroll`
 3. Blank out the last line, I used space (`0x20` or `32`)
-4. Make sure **all** color bytes are set.
+4. Make sure all color bytes are set.
 </details>
 
 ## Why do we blank out?
@@ -664,13 +663,13 @@ const MAX: usize = ROWS * COLS;
 fn scroll() {
     unsafe {
         for i in 80..MAX {
-            let src: *mut u8 = (MMIO + i * 2) as *mut u8;
-            let dst: *mut u8 = (MMIO + (i - 80) * 2)) as *mut u8;
+            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;
+            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;
             *dst = *src;
             *((dst as usize + 1) as *mut u8) = COLOR;
         }
         for i in (MAX-80)..MAX {
-            let dst: *mut u8 = (MMIO + i * 2) as *mut u8;
+            let dst: *mut u8 = ((MMIO as usize) + ((i) * 2)) as *mut u8;
             *dst = 32;
             *((dst as usize + 1) as *mut u8) = COLOR;
         }
@@ -728,3 +727,8 @@ pub fn str_to_vga(s: &str) {
 - There's a `read_volatile` and `write_volatile` in `std::ptr` and another in `core::ptr`, we might be able to use those.
 
 # Fin
+
+## Timeout
+
+- This is 700 lines of markdown source which usually is enough.
+- Otherwise we proceed to "Format".

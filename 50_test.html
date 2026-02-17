@@ -64,8 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./51_format.html" rel="next">
-<link href="./50_test.html" rel="prev">
+<link href="./50_text.html" rel="next">
+<link href="./42_hello.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -115,7 +115,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./50_text.html">Text</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./50_test.html">Text</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -226,13 +226,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./50_test.html" class="sidebar-item-text sidebar-link">
+  <a href="./50_test.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Text</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./50_text.html" class="sidebar-item-text sidebar-link active">
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Text</span></a>
   </div>
 </li>
@@ -326,9 +326,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#volatile-1" id="toc-volatile-1" class="nav-link" data-scroll-target="#volatile-1">Volatile</a></li>
   <li><a href="#interested-students" id="toc-interested-students" class="nav-link" data-scroll-target="#interested-students">Interested Students</a></li>
   </ul></li>
-  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a>
+  <ul class="collapse">
+  <li><a href="#timeout" id="toc-timeout" class="nav-link" data-scroll-target="#timeout">Timeout</a></li>
+  </ul></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="50_text.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="50_test.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -810,8 +813,8 @@ struct Buffer {
 <div class="code-with-filename-file">
 <pre><strong>src/vga.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb4" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">const</span> MMIO<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0xb8000</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span><span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">const</span> MMIO <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="color" class="level2">
@@ -829,9 +832,9 @@ struct Buffer {
 <div class="code-with-filename-file">
 <pre><strong>src/vga.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">const</span> MMIO<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0xb8000</span><span class="op">;</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="kw">const</span> COLOR<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0xF</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span><span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">const</span> MMIO <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="kw">const</span> COLOR<span class="op">:</span> u <span class="op">=</span> <span class="dv">0xF</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="character-wise" class="level2">
@@ -866,7 +869,7 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb7" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">// Public for now</span></span>
 <span id="cb7-2"><a href="#cb7-2"></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb7-3"><a href="#cb7-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb7-4"><a href="#cb7-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -882,7 +885,7 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb8" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">// Public for now</span></span>
 <span id="cb8-2"><a href="#cb8-2"></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb8-3"><a href="#cb8-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb8-4"><a href="#cb8-4"></a>    <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
 <span id="cb8-5"><a href="#cb8-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -900,9 +903,9 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb9" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">// Public for now</span></span>
 <span id="cb9-2"><a href="#cb9-2"></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb9-3"><a href="#cb9-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb9-4"><a href="#cb9-4"></a>    <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
-<span id="cb9-5"><a href="#cb9-5"></a>    <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>        <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
 <span id="cb9-6"><a href="#cb9-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -920,10 +923,10 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb10" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">// Public for now</span></span>
 <span id="cb10-2"><a href="#cb10-2"></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb10-3"><a href="#cb10-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb10-4"><a href="#cb10-4"></a>    <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
-<span id="cb10-5"><a href="#cb10-5"></a>    <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
-<span id="cb10-6"><a href="#cb10-6"></a>    LATEST <span class="op">=</span> LATEST <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>        <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>        LATEST <span class="op">=</span> LATEST <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
 <span id="cb10-7"><a href="#cb10-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -982,8 +985,10 @@ struct Buffer {
 <li>I am opinionated on <code>as_bytes</code>.</li>
 <li>Let’s check some links.
 <ul>
-<li><a href="https://doc.rust-lang.org/std/?search=to_bytes"><code>to_bytes</code></a></li>
+<li><a href="https://doc.rust-lang.org/std/?search=to_bytes"><code>to_bytes</code></a>
+<ul>
 <li><a href="https://doc.rust-lang.org/std/?search=as_bytes"><code>as_bytes</code></a></li>
+</ul></li>
 <li><a href="https://doc.rust-lang.org/std/?search=bytes"><code>bytes</code></a></li>
 </ul></li>
 <li>Can you guess what always works?</li>
@@ -1166,7 +1171,7 @@ struct Buffer {
 <span id="cb20-3"><a href="#cb20-3"></a><span class="kw">const</span> <span class="cn">MAX</span><span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> ROWS <span class="op">*</span> COLS<span class="op">;</span></span>
 <span id="cb20-4"><a href="#cb20-4"></a></span>
 <span id="cb20-5"><a href="#cb20-5"></a><span class="kw">fn</span> scroll() <span class="op">{</span></span>
-<span id="cb20-6"><a href="#cb20-6"></a>    <span class="pp">todo!</span>()<span class="op">;</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a>    </span>
 <span id="cb20-7"><a href="#cb20-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -1234,7 +1239,7 @@ struct Buffer {
 <li>Add <code>scroll</code> to <code>str_to_vga</code></li>
 <li>Update <code>LATEST</code> in <code>scroll</code></li>
 <li>Blank out the last line, I used space (<code>0x20</code> or <code>32</code>)</li>
-<li>Make sure <strong>all</strong> color bytes are set.</li>
+<li>Make sure all color bytes are set.</li>
 </ol>
 </details>
 </section>
@@ -1302,13 +1307,13 @@ struct Buffer {
 <span id="cb24-5"><a href="#cb24-5"></a><span class="kw">fn</span> scroll() <span class="op">{</span></span>
 <span id="cb24-6"><a href="#cb24-6"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
 <span id="cb24-7"><a href="#cb24-7"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">80</span><span class="op">..</span><span class="cn">MAX</span> <span class="op">{</span></span>
-<span id="cb24-8"><a href="#cb24-8"></a>            <span class="kw">let</span> src<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> i <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
-<span id="cb24-9"><a href="#cb24-9"></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (i <span class="op">-</span> <span class="dv">80</span>) <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-8"><a href="#cb24-8"></a>            <span class="kw">let</span> src<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (i <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-9"><a href="#cb24-9"></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> ((i <span class="op">-</span> <span class="dv">80</span>) <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb24-10"><a href="#cb24-10"></a>            <span class="op">*</span>dst <span class="op">=</span> <span class="op">*</span>src<span class="op">;</span></span>
 <span id="cb24-11"><a href="#cb24-11"></a>            <span class="op">*</span>((dst <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
 <span id="cb24-12"><a href="#cb24-12"></a>        <span class="op">}</span></span>
 <span id="cb24-13"><a href="#cb24-13"></a>        <span class="cf">for</span> i <span class="kw">in</span> (<span class="cn">MAX</span><span class="op">-</span><span class="dv">80</span>)<span class="op">..</span><span class="cn">MAX</span> <span class="op">{</span></span>
-<span id="cb24-14"><a href="#cb24-14"></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> i <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-14"><a href="#cb24-14"></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> ((i) <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb24-15"><a href="#cb24-15"></a>            <span class="op">*</span>dst <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
 <span id="cb24-16"><a href="#cb24-16"></a>            <span class="op">*</span>((dst <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
 <span id="cb24-17"><a href="#cb24-17"></a>        <span class="op">}</span></span>
@@ -1381,10 +1386,17 @@ struct Buffer {
 </section>
 <section id="fin" class="level1">
 <h1>Fin</h1>
+<section id="timeout" class="level2">
+<h2 class="anchored" data-anchor-id="timeout">Timeout</h2>
+<ul>
+<li>This is 700 lines of markdown source which usually is enough.</li>
+<li>Otherwise we proceed to “Format”.</li>
+</ul>
 
 
 <!-- -->
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1861,13 +1873,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./50_test.html" class="pagination-link" aria-label="Text">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Text</span>
+      <a href="./42_hello.html" class="pagination-link" aria-label="Hello">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Hello</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./51_format.html" class="pagination-link" aria-label="Format">
-        <span class="nav-page-text">Format</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./50_text.html" class="pagination-link" aria-label="Text">
+        <span class="nav-page-text">Text</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
@@ -2179,8 +2191,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-306"><a href="#cb25-306"></a><span class="ss">    - </span>Have a constant referring to to the VGA buffer address.</span>
 <span id="cb25-307"><a href="#cb25-307"></a></span>
 <span id="cb25-308"><a href="#cb25-308"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb25-309"><a href="#cb25-309"></a><span class="in">static mut latest: usize = 0;</span></span>
-<span id="cb25-310"><a href="#cb25-310"></a><span class="in">const MMIO: usize = 0xb8000;</span></span>
+<span id="cb25-309"><a href="#cb25-309"></a><span class="in">static mut latest:usize = 0;</span></span>
+<span id="cb25-310"><a href="#cb25-310"></a><span class="in">const MMIO = 0xb8000 as *mut u8;</span></span>
 <span id="cb25-311"><a href="#cb25-311"></a><span class="in">```</span></span>
 <span id="cb25-312"><a href="#cb25-312"></a></span>
 <span id="cb25-313"><a href="#cb25-313"></a><span class="fu">## Color</span></span>
@@ -2190,9 +2202,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-317"><a href="#cb25-317"></a><span class="ss">        - </span>I will use a <span class="in">`const`</span> for color and not worry about.</span>
 <span id="cb25-318"><a href="#cb25-318"></a></span>
 <span id="cb25-319"><a href="#cb25-319"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb25-320"><a href="#cb25-320"></a><span class="in">static mut latest: usize = 0;</span></span>
-<span id="cb25-321"><a href="#cb25-321"></a><span class="in">const MMIO: usize = 0xb8000;</span></span>
-<span id="cb25-322"><a href="#cb25-322"></a><span class="in">const COLOR: u8 = 0xF;</span></span>
+<span id="cb25-320"><a href="#cb25-320"></a><span class="in">static mut latest:usize = 0;</span></span>
+<span id="cb25-321"><a href="#cb25-321"></a><span class="in">const MMIO = 0xb8000 as *mut u8;</span></span>
+<span id="cb25-322"><a href="#cb25-322"></a><span class="in">const COLOR: u = 0xF;</span></span>
 <span id="cb25-323"><a href="#cb25-323"></a><span class="in">```</span></span>
 <span id="cb25-324"><a href="#cb25-324"></a></span>
 <span id="cb25-325"><a href="#cb25-325"></a><span class="fu">## Character-wise</span></span>
@@ -2215,7 +2227,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-342"><a href="#cb25-342"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
 <span id="cb25-343"><a href="#cb25-343"></a><span class="in">// Public for now</span></span>
 <span id="cb25-344"><a href="#cb25-344"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb25-345"><a href="#cb25-345"></a><span class="in">    let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-345"><a href="#cb25-345"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
 <span id="cb25-346"><a href="#cb25-346"></a><span class="in">}</span></span>
 <span id="cb25-347"><a href="#cb25-347"></a><span class="in">```</span></span>
 <span id="cb25-348"><a href="#cb25-348"></a></span>
@@ -2227,7 +2239,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-354"><a href="#cb25-354"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
 <span id="cb25-355"><a href="#cb25-355"></a><span class="in">// Public for now</span></span>
 <span id="cb25-356"><a href="#cb25-356"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb25-357"><a href="#cb25-357"></a><span class="in">    let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-357"><a href="#cb25-357"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
 <span id="cb25-358"><a href="#cb25-358"></a><span class="in">    *rel = a;</span></span>
 <span id="cb25-359"><a href="#cb25-359"></a><span class="in">}</span></span>
 <span id="cb25-360"><a href="#cb25-360"></a><span class="in">```</span></span>
@@ -2241,9 +2253,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-368"><a href="#cb25-368"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
 <span id="cb25-369"><a href="#cb25-369"></a><span class="in">// Public for now</span></span>
 <span id="cb25-370"><a href="#cb25-370"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb25-371"><a href="#cb25-371"></a><span class="in">    let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-371"><a href="#cb25-371"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
 <span id="cb25-372"><a href="#cb25-372"></a><span class="in">    *rel = a;</span></span>
-<span id="cb25-373"><a href="#cb25-373"></a><span class="in">    *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-373"><a href="#cb25-373"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
 <span id="cb25-374"><a href="#cb25-374"></a><span class="in">}</span></span>
 <span id="cb25-375"><a href="#cb25-375"></a><span class="in">```</span></span>
 <span id="cb25-376"><a href="#cb25-376"></a></span>
@@ -2257,10 +2269,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-384"><a href="#cb25-384"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
 <span id="cb25-385"><a href="#cb25-385"></a><span class="in">// Public for now</span></span>
 <span id="cb25-386"><a href="#cb25-386"></a><span class="in">pub fn char_to_vga(a: u8) {</span></span>
-<span id="cb25-387"><a href="#cb25-387"></a><span class="in">    let rel: *mut u8 = (MMIO + (latest * 2)) as *mut u8;</span></span>
+<span id="cb25-387"><a href="#cb25-387"></a><span class="in">    let rel: *mut u8 = ((MMIO as usize) + (latest * 2)) as *mut u8;</span></span>
 <span id="cb25-388"><a href="#cb25-388"></a><span class="in">    *rel = a;</span></span>
-<span id="cb25-389"><a href="#cb25-389"></a><span class="in">    *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb25-390"><a href="#cb25-390"></a><span class="in">    LATEST = LATEST + 1;</span></span>
+<span id="cb25-389"><a href="#cb25-389"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-390"><a href="#cb25-390"></a><span class="in">        LATEST = LATEST + 1;</span></span>
 <span id="cb25-391"><a href="#cb25-391"></a><span class="in">}</span></span>
 <span id="cb25-392"><a href="#cb25-392"></a><span class="in">```</span></span>
 <span id="cb25-393"><a href="#cb25-393"></a></span>
@@ -2303,7 +2315,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-430"><a href="#cb25-430"></a><span class="ss">- </span>I am opinionated on <span class="in">`as_bytes`</span>.</span>
 <span id="cb25-431"><a href="#cb25-431"></a><span class="ss">- </span>Let's check some links.</span>
 <span id="cb25-432"><a href="#cb25-432"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`to_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=to_bytes)</span></span>
-<span id="cb25-433"><a href="#cb25-433"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`as_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=as_bytes)</span></span>
+<span id="cb25-433"><a href="#cb25-433"></a><span class="ss">        - </span><span class="co">[</span><span class="ot">`as_bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=as_bytes)</span></span>
 <span id="cb25-434"><a href="#cb25-434"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`bytes`</span><span class="co">](https://doc.rust-lang.org/std/?search=bytes)</span></span>
 <span id="cb25-435"><a href="#cb25-435"></a><span class="ss">- </span>Can you guess what always works?</span>
 <span id="cb25-436"><a href="#cb25-436"></a></span>
@@ -2379,228 +2391,232 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb25-506"><a href="#cb25-506"></a><span class="fu">## Trust but verify</span></span>
 <span id="cb25-507"><a href="#cb25-507"></a></span>
 <span id="cb25-508"><a href="#cb25-508"></a><span class="ss">- </span>I just checked in a different crate.</span>
-<span id="cb25-509"><a href="#cb25-509"></a></span>
-<span id="cb25-510"><a href="#cb25-510"></a><span class="in">```{.rs filename="../???/src/main.rs"}</span></span>
-<span id="cb25-511"><a href="#cb25-511"></a><span class="in">fn main() {</span></span>
-<span id="cb25-512"><a href="#cb25-512"></a><span class="in">    let s = "Hello\nworld!";</span></span>
-<span id="cb25-513"><a href="#cb25-513"></a><span class="in">    dbg!(s.as_bytes());</span></span>
-<span id="cb25-514"><a href="#cb25-514"></a><span class="in">}</span></span>
-<span id="cb25-515"><a href="#cb25-515"></a><span class="in">```</span></span>
-<span id="cb25-516"><a href="#cb25-516"></a><span class="ss">- </span>Looked like 10 to me.</span>
-<span id="cb25-517"><a href="#cb25-517"></a></span>
-<span id="cb25-518"><a href="#cb25-518"></a><span class="fu">## Now it works!</span></span>
-<span id="cb25-519"><a href="#cb25-519"></a></span>
-<span id="cb25-520"><a href="#cb25-520"></a><span class="ss">- </span>We can write vertically!</span>
-<span id="cb25-521"><a href="#cb25-521"></a><span class="ss">  - </span>I guess this could be a helper function or something.</span>
-<span id="cb25-522"><a href="#cb25-522"></a></span>
-<span id="cb25-523"><a href="#cb25-523"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb25-524"><a href="#cb25-524"></a><span class="in">    vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
-<span id="cb25-525"><a href="#cb25-525"></a><span class="in">```</span></span>
-<span id="cb25-526"><a href="#cb25-526"></a></span>
-<span id="cb25-527"><a href="#cb25-527"></a><span class="fu">## Good thing...</span></span>
-<span id="cb25-528"><a href="#cb25-528"></a></span>
-<span id="cb25-529"><a href="#cb25-529"></a><span class="ss">- </span>I can print that more than once!</span>
-<span id="cb25-530"><a href="#cb25-530"></a></span>
-<span id="cb25-531"><a href="#cb25-531"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb25-532"><a href="#cb25-532"></a><span class="in">    for _i in 0..3 {</span></span>
-<span id="cb25-533"><a href="#cb25-533"></a><span class="in">        vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
-<span id="cb25-534"><a href="#cb25-534"></a><span class="in">    }</span></span>
-<span id="cb25-535"><a href="#cb25-535"></a><span class="in">```</span></span>
-<span id="cb25-536"><a href="#cb25-536"></a><span class="ss">- </span>Wait a minute!</span>
-<span id="cb25-537"><a href="#cb25-537"></a></span>
-<span id="cb25-538"><a href="#cb25-538"></a><span class="fu">## We're doomed</span></span>
-<span id="cb25-539"><a href="#cb25-539"></a></span>
-<span id="cb25-540"><a href="#cb25-540"></a><span class="ss">- </span>We didn't save what was written to the previous lines.</span>
-<span id="cb25-541"><a href="#cb25-541"></a><span class="ss">- </span>Real ones know.</span>
-<span id="cb25-542"><a href="#cb25-542"></a></span>
-<span id="cb25-543"><a href="#cb25-543"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/1/16/BladeRunnerRoyBattySpeech.jpeg)</span></span>
-<span id="cb25-544"><a href="#cb25-544"></a></span>
-<span id="cb25-545"><a href="#cb25-545"></a><span class="fu">## Unless?</span></span>
-<span id="cb25-546"><a href="#cb25-546"></a></span>
-<span id="cb25-547"><a href="#cb25-547"></a><span class="ss">- </span>No way can we *read* from the VGA text buffer right.</span>
-<span id="cb25-548"><a href="#cb25-548"></a><span class="ss">- </span>That would be... extraordinary.</span>
-<span id="cb25-549"><a href="#cb25-549"></a><span class="ss">- </span>You can do whatever you want, I just want to show you one possible design choice.</span>
-<span id="cb25-550"><a href="#cb25-550"></a><span class="ss">    - </span>Mostly as a proof of concept.</span>
-<span id="cb25-551"><a href="#cb25-551"></a></span>
-<span id="cb25-552"><a href="#cb25-552"></a><span class="fu">## Scroll</span></span>
-<span id="cb25-553"><a href="#cb25-553"></a></span>
-<span id="cb25-554"><a href="#cb25-554"></a><span class="ss">- </span>I'll add some <span class="in">`const`</span>s and write a helper.</span>
-<span id="cb25-555"><a href="#cb25-555"></a></span>
-<span id="cb25-556"><a href="#cb25-556"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb25-557"><a href="#cb25-557"></a><span class="in">const ROWS: usize = 80;</span></span>
-<span id="cb25-558"><a href="#cb25-558"></a><span class="in">const COLS: usize = 25;</span></span>
-<span id="cb25-559"><a href="#cb25-559"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
-<span id="cb25-560"><a href="#cb25-560"></a></span>
-<span id="cb25-561"><a href="#cb25-561"></a><span class="in">fn scroll() {</span></span>
-<span id="cb25-562"><a href="#cb25-562"></a><span class="in">    todo!();</span></span>
-<span id="cb25-563"><a href="#cb25-563"></a><span class="in">}</span></span>
-<span id="cb25-564"><a href="#cb25-564"></a><span class="in">```</span></span>
-<span id="cb25-565"><a href="#cb25-565"></a></span>
-<span id="cb25-566"><a href="#cb25-566"></a><span class="fu">## Execution</span></span>
-<span id="cb25-567"><a href="#cb25-567"></a></span>
-<span id="cb25-568"><a href="#cb25-568"></a><span class="ss">- </span>Start at the first character that will remain visible.</span>
-<span id="cb25-569"><a href="#cb25-569"></a><span class="ss">- </span>Copy it to the earliest visible slot (start of buffer).</span>
-<span id="cb25-570"><a href="#cb25-570"></a><span class="ss">- </span>Iterate until the full buffer is moved.</span>
-<span id="cb25-571"><a href="#cb25-571"></a><span class="ss">- </span>We note this could be executed in a single <span class="in">`memmove`</span></span>
-<span id="cb25-572"><a href="#cb25-572"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://man7.org/linux/man-pages/man3/memmove.3.html)</span></span>
+<span id="cb25-509"><a href="#cb25-509"></a><span class="in">```{.rs filename="../???/src/main.rs"}</span></span>
+<span id="cb25-510"><a href="#cb25-510"></a><span class="in">fn main() {</span></span>
+<span id="cb25-511"><a href="#cb25-511"></a><span class="in">    let s = "Hello\nworld!";</span></span>
+<span id="cb25-512"><a href="#cb25-512"></a><span class="in">    dbg!(s.as_bytes());</span></span>
+<span id="cb25-513"><a href="#cb25-513"></a><span class="in">}</span></span>
+<span id="cb25-514"><a href="#cb25-514"></a><span class="in">```</span></span>
+<span id="cb25-515"><a href="#cb25-515"></a><span class="ss">- </span>Looked like 10 to me.</span>
+<span id="cb25-516"><a href="#cb25-516"></a></span>
+<span id="cb25-517"><a href="#cb25-517"></a><span class="fu">## Now it works!</span></span>
+<span id="cb25-518"><a href="#cb25-518"></a></span>
+<span id="cb25-519"><a href="#cb25-519"></a><span class="ss">- </span>We can write vertically!</span>
+<span id="cb25-520"><a href="#cb25-520"></a><span class="ss">  - </span>I guess this could be a helper function or something.</span>
+<span id="cb25-521"><a href="#cb25-521"></a></span>
+<span id="cb25-522"><a href="#cb25-522"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-523"><a href="#cb25-523"></a><span class="in">    vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
+<span id="cb25-524"><a href="#cb25-524"></a><span class="in">```</span></span>
+<span id="cb25-525"><a href="#cb25-525"></a></span>
+<span id="cb25-526"><a href="#cb25-526"></a><span class="fu">## Good thing...</span></span>
+<span id="cb25-527"><a href="#cb25-527"></a></span>
+<span id="cb25-528"><a href="#cb25-528"></a><span class="ss">- </span>I can print that more than once!</span>
+<span id="cb25-529"><a href="#cb25-529"></a></span>
+<span id="cb25-530"><a href="#cb25-530"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-531"><a href="#cb25-531"></a><span class="in">    for _i in 0..3 {</span></span>
+<span id="cb25-532"><a href="#cb25-532"></a><span class="in">        vga::str_to_vga("H\ne\nl\nl\no\n\nw\no\nr\nl\nd\n!");</span></span>
+<span id="cb25-533"><a href="#cb25-533"></a><span class="in">    }</span></span>
+<span id="cb25-534"><a href="#cb25-534"></a><span class="in">```</span></span>
+<span id="cb25-535"><a href="#cb25-535"></a><span class="ss">- </span>Wait a minute!</span>
+<span id="cb25-536"><a href="#cb25-536"></a></span>
+<span id="cb25-537"><a href="#cb25-537"></a><span class="fu">## We're doomed</span></span>
+<span id="cb25-538"><a href="#cb25-538"></a></span>
+<span id="cb25-539"><a href="#cb25-539"></a><span class="ss">- </span>We didn't save what was written to the previous lines.</span>
+<span id="cb25-540"><a href="#cb25-540"></a><span class="ss">- </span>Real ones know.</span>
+<span id="cb25-541"><a href="#cb25-541"></a></span>
+<span id="cb25-542"><a href="#cb25-542"></a><span class="al">![](https://upload.wikimedia.org/wikipedia/en/1/16/BladeRunnerRoyBattySpeech.jpeg)</span></span>
+<span id="cb25-543"><a href="#cb25-543"></a></span>
+<span id="cb25-544"><a href="#cb25-544"></a><span class="fu">## Unless?</span></span>
+<span id="cb25-545"><a href="#cb25-545"></a></span>
+<span id="cb25-546"><a href="#cb25-546"></a><span class="ss">- </span>No way can we *read* from the VGA text buffer right.</span>
+<span id="cb25-547"><a href="#cb25-547"></a><span class="ss">- </span>That would be... extraordinary.</span>
+<span id="cb25-548"><a href="#cb25-548"></a><span class="ss">- </span>You can do whatever you want, I just want to show you one possible design choice.</span>
+<span id="cb25-549"><a href="#cb25-549"></a><span class="ss">    - </span>Mostly as a proof of concept.</span>
+<span id="cb25-550"><a href="#cb25-550"></a></span>
+<span id="cb25-551"><a href="#cb25-551"></a><span class="fu">## Scroll</span></span>
+<span id="cb25-552"><a href="#cb25-552"></a></span>
+<span id="cb25-553"><a href="#cb25-553"></a><span class="ss">- </span>I'll add some <span class="in">`const`</span>s and write a helper.</span>
+<span id="cb25-554"><a href="#cb25-554"></a></span>
+<span id="cb25-555"><a href="#cb25-555"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-556"><a href="#cb25-556"></a><span class="in">const ROWS: usize = 80;</span></span>
+<span id="cb25-557"><a href="#cb25-557"></a><span class="in">const COLS: usize = 25;</span></span>
+<span id="cb25-558"><a href="#cb25-558"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
+<span id="cb25-559"><a href="#cb25-559"></a></span>
+<span id="cb25-560"><a href="#cb25-560"></a><span class="in">fn scroll() {</span></span>
+<span id="cb25-561"><a href="#cb25-561"></a><span class="in">    </span></span>
+<span id="cb25-562"><a href="#cb25-562"></a><span class="in">}</span></span>
+<span id="cb25-563"><a href="#cb25-563"></a><span class="in">```</span></span>
+<span id="cb25-564"><a href="#cb25-564"></a></span>
+<span id="cb25-565"><a href="#cb25-565"></a><span class="fu">## Execution</span></span>
+<span id="cb25-566"><a href="#cb25-566"></a></span>
+<span id="cb25-567"><a href="#cb25-567"></a><span class="ss">- </span>Start at the first character that will remain visible.</span>
+<span id="cb25-568"><a href="#cb25-568"></a><span class="ss">- </span>Copy it to the earliest visible slot (start of buffer).</span>
+<span id="cb25-569"><a href="#cb25-569"></a><span class="ss">- </span>Iterate until the full buffer is moved.</span>
+<span id="cb25-570"><a href="#cb25-570"></a><span class="ss">- </span>We note this could be executed in a single <span class="in">`memmove`</span></span>
+<span id="cb25-571"><a href="#cb25-571"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://man7.org/linux/man-pages/man3/memmove.3.html)</span></span>
+<span id="cb25-572"><a href="#cb25-572"></a></span>
 <span id="cb25-573"><a href="#cb25-573"></a></span>
-<span id="cb25-574"><a href="#cb25-574"></a></span>
-<span id="cb25-575"><a href="#cb25-575"></a><span class="fu">## My Code</span></span>
-<span id="cb25-576"><a href="#cb25-576"></a></span>
-<span id="cb25-577"><a href="#cb25-577"></a><span class="ss">- </span>Public just to test.</span>
-<span id="cb25-578"><a href="#cb25-578"></a></span>
-<span id="cb25-579"><a href="#cb25-579"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb25-580"><a href="#cb25-580"></a><span class="in">pub fn scroll() {</span></span>
-<span id="cb25-581"><a href="#cb25-581"></a><span class="in">    for i in 80..MAX {</span></span>
-<span id="cb25-582"><a href="#cb25-582"></a><span class="in">        unsafe {</span></span>
-<span id="cb25-583"><a href="#cb25-583"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
-<span id="cb25-584"><a href="#cb25-584"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
-<span id="cb25-585"><a href="#cb25-585"></a><span class="in">            *dst = *src;</span></span>
-<span id="cb25-586"><a href="#cb25-586"></a><span class="in">        }</span></span>
-<span id="cb25-587"><a href="#cb25-587"></a><span class="in">    }</span></span>
-<span id="cb25-588"><a href="#cb25-588"></a><span class="in">}</span></span>
-<span id="cb25-589"><a href="#cb25-589"></a><span class="in">```</span></span>
-<span id="cb25-590"><a href="#cb25-590"></a></span>
-<span id="cb25-591"><a href="#cb25-591"></a><span class="fu">## My Test</span></span>
-<span id="cb25-592"><a href="#cb25-592"></a></span>
-<span id="cb25-593"><a href="#cb25-593"></a><span class="ss">- </span>I just sent line numbers then manually scrolled.</span>
-<span id="cb25-594"><a href="#cb25-594"></a></span>
-<span id="cb25-595"><a href="#cb25-595"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb25-596"><a href="#cb25-596"></a><span class="in">    vga::str_to_vga("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\nA\nB");</span></span>
-<span id="cb25-597"><a href="#cb25-597"></a><span class="in">    vga::scroll();</span></span>
-<span id="cb25-598"><a href="#cb25-598"></a><span class="in">```</span></span>
-<span id="cb25-599"><a href="#cb25-599"></a></span>
-<span id="cb25-600"><a href="#cb25-600"></a><span class="fu">## A better test</span></span>
-<span id="cb25-601"><a href="#cb25-601"></a></span>
-<span id="cb25-602"><a href="#cb25-602"></a><span class="ss">- </span>Here is a copy of the Project Gutenburg ebook of *Pride and Prejudice*.</span>
-<span id="cb25-603"><a href="#cb25-603"></a><span class="ss">- </span>It contains some quotes which might be a problem.</span>
-<span id="cb25-604"><a href="#cb25-604"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Link</span><span class="co">](https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt)</span></span>
-<span id="cb25-605"><a href="#cb25-605"></a><span class="in">```{.sh}</span></span>
-<span id="cb25-606"><a href="#cb25-606"></a><span class="in">https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt</span></span>
-<span id="cb25-607"><a href="#cb25-607"></a><span class="in">```</span></span>
-<span id="cb25-608"><a href="#cb25-608"></a></span>
-<span id="cb25-609"><a href="#cb25-609"></a><span class="fu">## Does it work?</span></span>
-<span id="cb25-610"><a href="#cb25-610"></a></span>
-<span id="cb25-611"><a href="#cb25-611"></a><span class="ss">- </span>What do we have to do?</span>
-<span id="cb25-612"><a href="#cb25-612"></a></span>
-<span id="cb25-613"><a href="#cb25-613"></a>&lt;details&gt;</span>
-<span id="cb25-614"><a href="#cb25-614"></a><span class="ss">1. </span>Add <span class="in">`scroll`</span> to <span class="in">`str_to_vga`</span></span>
-<span id="cb25-615"><a href="#cb25-615"></a><span class="ss">2. </span>Update <span class="in">`LATEST`</span> in <span class="in">`scroll`</span></span>
-<span id="cb25-616"><a href="#cb25-616"></a><span class="ss">3. </span>Blank out the last line, I used space (<span class="in">`0x20`</span> or <span class="in">`32`</span>)</span>
-<span id="cb25-617"><a href="#cb25-617"></a><span class="ss">4. </span>Make sure **all** color bytes are set.</span>
-<span id="cb25-618"><a href="#cb25-618"></a>&lt;/details&gt;</span>
-<span id="cb25-619"><a href="#cb25-619"></a></span>
-<span id="cb25-620"><a href="#cb25-620"></a><span class="fu">## Why do we blank out?</span></span>
-<span id="cb25-621"><a href="#cb25-621"></a></span>
-<span id="cb25-622"><a href="#cb25-622"></a><span class="ss">- </span>Recall we are writing to MMIO.</span>
-<span id="cb25-623"><a href="#cb25-623"></a><span class="ss">- </span>As soon as we exceed the MMIO range, we can *make no claims* about what memory we are vviewing.</span>
-<span id="cb25-624"><a href="#cb25-624"></a><span class="ss">- </span>So if we copy in data past the buffer, we could get *anything*.</span>
-<span id="cb25-625"><a href="#cb25-625"></a><span class="ss">- </span>So if we don't overwrite the buffer, we could get *anything*.</span>
-<span id="cb25-626"><a href="#cb25-626"></a></span>
-<span id="cb25-627"><a href="#cb25-627"></a><span class="fu">## We set color bytes?</span></span>
-<span id="cb25-628"><a href="#cb25-628"></a></span>
-<span id="cb25-629"><a href="#cb25-629"></a><span class="ss">- </span>Like lines off the MMIO range, the color bytes have no known value.</span>
-<span id="cb25-630"><a href="#cb25-630"></a><span class="ss">- </span>So if we e.g. have a newline anywhere and end up not initially setting colors...</span>
-<span id="cb25-631"><a href="#cb25-631"></a><span class="ss">- </span>Then copy text up to that line...</span>
-<span id="cb25-632"><a href="#cb25-632"></a><span class="ss">- </span>We will be showing text in an *unset* color.</span>
-<span id="cb25-633"><a href="#cb25-633"></a><span class="ss">    - </span>Just whatever bits happened to be there!</span>
-<span id="cb25-634"><a href="#cb25-634"></a></span>
-<span id="cb25-635"><a href="#cb25-635"></a><span class="fu">## This is unsafe!</span></span>
-<span id="cb25-636"><a href="#cb25-636"></a></span>
-<span id="cb25-637"><a href="#cb25-637"></a><span class="ss">- </span>Astute learners will notice this is all very unsafe.</span>
-<span id="cb25-638"><a href="#cb25-638"></a></span>
-<span id="cb25-639"><a href="#cb25-639"></a><span class="fu">## I'm loopy</span></span>
-<span id="cb25-640"><a href="#cb25-640"></a></span>
-<span id="cb25-641"><a href="#cb25-641"></a><span class="ss">- </span>I should not I do everything with <span class="in">`for`</span> loops and "single-equals-assignment"</span>
-<span id="cb25-642"><a href="#cb25-642"></a><span class="ss">    - </span>I mostly am teaching you *how to code*</span>
-<span id="cb25-643"><a href="#cb25-643"></a><span class="ss">    - </span>This is NOT teaching you *how to Rust* (or C)</span>
-<span id="cb25-644"><a href="#cb25-644"></a><span class="ss">- </span>Who needs <span class="in">`memmove`</span> (a C function) when we have the humble <span class="in">`for`</span> loop.</span>
-<span id="cb25-645"><a href="#cb25-645"></a><span class="ss">- </span>Read more: <span class="co">[</span><span class="ot">core::ptr::copy</span><span class="co">](https://doc.rust-lang.org/core/ptr/fn.copy.html)</span></span>
-<span id="cb25-646"><a href="#cb25-646"></a></span>
-<span id="cb25-647"><a href="#cb25-647"></a><span class="fu">## Caution!</span></span>
-<span id="cb25-648"><a href="#cb25-648"></a></span>
-<span id="cb25-649"><a href="#cb25-649"></a><span class="ss">- </span>I am building my crate without access to <span class="in">`memmove`</span>.</span>
-<span id="cb25-650"><a href="#cb25-650"></a><span class="ss">- </span>You may need to go back and add some configuration.</span>
-<span id="cb25-651"><a href="#cb25-651"></a><span class="ss">- </span>This was covered in the "Kernel" lecture.</span>
-<span id="cb25-652"><a href="#cb25-652"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Here</span><span class="co">](40_kernel.qmd#aside-notfutureproofing-1)</span></span>
+<span id="cb25-574"><a href="#cb25-574"></a><span class="fu">## My Code</span></span>
+<span id="cb25-575"><a href="#cb25-575"></a></span>
+<span id="cb25-576"><a href="#cb25-576"></a><span class="ss">- </span>Public just to test.</span>
+<span id="cb25-577"><a href="#cb25-577"></a></span>
+<span id="cb25-578"><a href="#cb25-578"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-579"><a href="#cb25-579"></a><span class="in">pub fn scroll() {</span></span>
+<span id="cb25-580"><a href="#cb25-580"></a><span class="in">    for i in 80..MAX {</span></span>
+<span id="cb25-581"><a href="#cb25-581"></a><span class="in">        unsafe {</span></span>
+<span id="cb25-582"><a href="#cb25-582"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
+<span id="cb25-583"><a href="#cb25-583"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
+<span id="cb25-584"><a href="#cb25-584"></a><span class="in">            *dst = *src;</span></span>
+<span id="cb25-585"><a href="#cb25-585"></a><span class="in">        }</span></span>
+<span id="cb25-586"><a href="#cb25-586"></a><span class="in">    }</span></span>
+<span id="cb25-587"><a href="#cb25-587"></a><span class="in">}</span></span>
+<span id="cb25-588"><a href="#cb25-588"></a><span class="in">```</span></span>
+<span id="cb25-589"><a href="#cb25-589"></a></span>
+<span id="cb25-590"><a href="#cb25-590"></a><span class="fu">## My Test</span></span>
+<span id="cb25-591"><a href="#cb25-591"></a></span>
+<span id="cb25-592"><a href="#cb25-592"></a><span class="ss">- </span>I just sent line numbers then manually scrolled.</span>
+<span id="cb25-593"><a href="#cb25-593"></a></span>
+<span id="cb25-594"><a href="#cb25-594"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb25-595"><a href="#cb25-595"></a><span class="in">    vga::str_to_vga("0\n1\n2\n3\n4\n5\n6\n7\n8\n9\nA\nB");</span></span>
+<span id="cb25-596"><a href="#cb25-596"></a><span class="in">    vga::scroll();</span></span>
+<span id="cb25-597"><a href="#cb25-597"></a><span class="in">```</span></span>
+<span id="cb25-598"><a href="#cb25-598"></a></span>
+<span id="cb25-599"><a href="#cb25-599"></a><span class="fu">## A better test</span></span>
+<span id="cb25-600"><a href="#cb25-600"></a></span>
+<span id="cb25-601"><a href="#cb25-601"></a><span class="ss">- </span>Here is a copy of the Project Gutenburg ebook of *Pride and Prejudice*.</span>
+<span id="cb25-602"><a href="#cb25-602"></a><span class="ss">- </span>It contains some quotes which might be a problem.</span>
+<span id="cb25-603"><a href="#cb25-603"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Link</span><span class="co">](https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt)</span></span>
+<span id="cb25-604"><a href="#cb25-604"></a><span class="in">```{.sh}</span></span>
+<span id="cb25-605"><a href="#cb25-605"></a><span class="in">https://raw.githubusercontent.com/cd-public/books/main/pg1342.txt</span></span>
+<span id="cb25-606"><a href="#cb25-606"></a><span class="in">```</span></span>
+<span id="cb25-607"><a href="#cb25-607"></a></span>
+<span id="cb25-608"><a href="#cb25-608"></a><span class="fu">## Does it work?</span></span>
+<span id="cb25-609"><a href="#cb25-609"></a></span>
+<span id="cb25-610"><a href="#cb25-610"></a><span class="ss">- </span>What do we have to do?</span>
+<span id="cb25-611"><a href="#cb25-611"></a></span>
+<span id="cb25-612"><a href="#cb25-612"></a>&lt;details&gt;</span>
+<span id="cb25-613"><a href="#cb25-613"></a><span class="ss">1. </span>Add <span class="in">`scroll`</span> to <span class="in">`str_to_vga`</span></span>
+<span id="cb25-614"><a href="#cb25-614"></a><span class="ss">2. </span>Update <span class="in">`LATEST`</span> in <span class="in">`scroll`</span></span>
+<span id="cb25-615"><a href="#cb25-615"></a><span class="ss">3. </span>Blank out the last line, I used space (<span class="in">`0x20`</span> or <span class="in">`32`</span>)</span>
+<span id="cb25-616"><a href="#cb25-616"></a><span class="ss">4. </span>Make sure all color bytes are set.</span>
+<span id="cb25-617"><a href="#cb25-617"></a>&lt;/details&gt;</span>
+<span id="cb25-618"><a href="#cb25-618"></a></span>
+<span id="cb25-619"><a href="#cb25-619"></a><span class="fu">## Why do we blank out?</span></span>
+<span id="cb25-620"><a href="#cb25-620"></a></span>
+<span id="cb25-621"><a href="#cb25-621"></a><span class="ss">- </span>Recall we are writing to MMIO.</span>
+<span id="cb25-622"><a href="#cb25-622"></a><span class="ss">- </span>As soon as we exceed the MMIO range, we can *make no claims* about what memory we are vviewing.</span>
+<span id="cb25-623"><a href="#cb25-623"></a><span class="ss">- </span>So if we copy in data past the buffer, we could get *anything*.</span>
+<span id="cb25-624"><a href="#cb25-624"></a><span class="ss">- </span>So if we don't overwrite the buffer, we could get *anything*.</span>
+<span id="cb25-625"><a href="#cb25-625"></a></span>
+<span id="cb25-626"><a href="#cb25-626"></a><span class="fu">## We set color bytes?</span></span>
+<span id="cb25-627"><a href="#cb25-627"></a></span>
+<span id="cb25-628"><a href="#cb25-628"></a><span class="ss">- </span>Like lines off the MMIO range, the color bytes have no known value.</span>
+<span id="cb25-629"><a href="#cb25-629"></a><span class="ss">- </span>So if we e.g. have a newline anywhere and end up not initially setting colors...</span>
+<span id="cb25-630"><a href="#cb25-630"></a><span class="ss">- </span>Then copy text up to that line...</span>
+<span id="cb25-631"><a href="#cb25-631"></a><span class="ss">- </span>We will be showing text in an *unset* color.</span>
+<span id="cb25-632"><a href="#cb25-632"></a><span class="ss">    - </span>Just whatever bits happened to be there!</span>
+<span id="cb25-633"><a href="#cb25-633"></a></span>
+<span id="cb25-634"><a href="#cb25-634"></a><span class="fu">## This is unsafe!</span></span>
+<span id="cb25-635"><a href="#cb25-635"></a></span>
+<span id="cb25-636"><a href="#cb25-636"></a><span class="ss">- </span>Astute learners will notice this is all very unsafe.</span>
+<span id="cb25-637"><a href="#cb25-637"></a></span>
+<span id="cb25-638"><a href="#cb25-638"></a><span class="fu">## I'm loopy</span></span>
+<span id="cb25-639"><a href="#cb25-639"></a></span>
+<span id="cb25-640"><a href="#cb25-640"></a><span class="ss">- </span>I should not I do everything with <span class="in">`for`</span> loops and "single-equals-assignment"</span>
+<span id="cb25-641"><a href="#cb25-641"></a><span class="ss">    - </span>I mostly am teaching you *how to code*</span>
+<span id="cb25-642"><a href="#cb25-642"></a><span class="ss">    - </span>This is NOT teaching you *how to Rust* (or C)</span>
+<span id="cb25-643"><a href="#cb25-643"></a><span class="ss">- </span>Who needs <span class="in">`memmove`</span> (a C function) when we have the humble <span class="in">`for`</span> loop.</span>
+<span id="cb25-644"><a href="#cb25-644"></a><span class="ss">- </span>Read more: <span class="co">[</span><span class="ot">core::ptr::copy</span><span class="co">](https://doc.rust-lang.org/core/ptr/fn.copy.html)</span></span>
+<span id="cb25-645"><a href="#cb25-645"></a></span>
+<span id="cb25-646"><a href="#cb25-646"></a><span class="fu">## Caution!</span></span>
+<span id="cb25-647"><a href="#cb25-647"></a></span>
+<span id="cb25-648"><a href="#cb25-648"></a><span class="ss">- </span>I am building my crate without access to <span class="in">`memmove`</span>.</span>
+<span id="cb25-649"><a href="#cb25-649"></a><span class="ss">- </span>You may need to go back and add some configuration.</span>
+<span id="cb25-650"><a href="#cb25-650"></a><span class="ss">- </span>This was covered in the "Kernel" lecture.</span>
+<span id="cb25-651"><a href="#cb25-651"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Here</span><span class="co">](40_kernel.qmd#aside-notfutureproofing-1)</span></span>
+<span id="cb25-652"><a href="#cb25-652"></a></span>
 <span id="cb25-653"><a href="#cb25-653"></a></span>
-<span id="cb25-654"><a href="#cb25-654"></a></span>
-<span id="cb25-655"><a href="#cb25-655"></a><span class="fu">## My solution</span></span>
-<span id="cb25-656"><a href="#cb25-656"></a></span>
-<span id="cb25-657"><a href="#cb25-657"></a>&lt;details&gt;</span>
-<span id="cb25-658"><a href="#cb25-658"></a></span>
-<span id="cb25-659"><a href="#cb25-659"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb25-660"><a href="#cb25-660"></a><span class="in">const ROWS: usize = 80;</span></span>
-<span id="cb25-661"><a href="#cb25-661"></a><span class="in">const COLS: usize = 25;</span></span>
-<span id="cb25-662"><a href="#cb25-662"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
-<span id="cb25-663"><a href="#cb25-663"></a></span>
-<span id="cb25-664"><a href="#cb25-664"></a><span class="in">fn scroll() {</span></span>
-<span id="cb25-665"><a href="#cb25-665"></a><span class="in">    unsafe {</span></span>
-<span id="cb25-666"><a href="#cb25-666"></a><span class="in">        for i in 80..MAX {</span></span>
-<span id="cb25-667"><a href="#cb25-667"></a><span class="in">            let src: *mut u8 = (MMIO + i * 2) as *mut u8;</span></span>
-<span id="cb25-668"><a href="#cb25-668"></a><span class="in">            let dst: *mut u8 = (MMIO + (i - 80) * 2)) as *mut u8;</span></span>
-<span id="cb25-669"><a href="#cb25-669"></a><span class="in">            *dst = *src;</span></span>
-<span id="cb25-670"><a href="#cb25-670"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb25-671"><a href="#cb25-671"></a><span class="in">        }</span></span>
-<span id="cb25-672"><a href="#cb25-672"></a><span class="in">        for i in (MAX-80)..MAX {</span></span>
-<span id="cb25-673"><a href="#cb25-673"></a><span class="in">            let dst: *mut u8 = (MMIO + i * 2) as *mut u8;</span></span>
-<span id="cb25-674"><a href="#cb25-674"></a><span class="in">            *dst = 32;</span></span>
-<span id="cb25-675"><a href="#cb25-675"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb25-676"><a href="#cb25-676"></a><span class="in">        }</span></span>
-<span id="cb25-677"><a href="#cb25-677"></a><span class="in">        LATEST = LATEST - 80;</span></span>
-<span id="cb25-678"><a href="#cb25-678"></a><span class="in">    }</span></span>
-<span id="cb25-679"><a href="#cb25-679"></a><span class="in">}</span></span>
-<span id="cb25-680"><a href="#cb25-680"></a></span>
-<span id="cb25-681"><a href="#cb25-681"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
-<span id="cb25-682"><a href="#cb25-682"></a><span class="in">    let v = s.as_bytes();</span></span>
-<span id="cb25-683"><a href="#cb25-683"></a><span class="in">    unsafe {</span></span>
-<span id="cb25-684"><a href="#cb25-684"></a><span class="in">        for i in 0..v.len() {</span></span>
-<span id="cb25-685"><a href="#cb25-685"></a><span class="in">            if LATEST &gt; MAX {</span></span>
-<span id="cb25-686"><a href="#cb25-686"></a><span class="in">                scroll();</span></span>
-<span id="cb25-687"><a href="#cb25-687"></a><span class="in">            }</span></span>
-<span id="cb25-688"><a href="#cb25-688"></a><span class="in">            match v[i] {</span></span>
-<span id="cb25-689"><a href="#cb25-689"></a><span class="in">                10 =&gt; LATEST = ((LATEST / 80) + 1) * 80,</span></span>
-<span id="cb25-690"><a href="#cb25-690"></a><span class="in">                _ =&gt; char_to_vga(v[i]),</span></span>
-<span id="cb25-691"><a href="#cb25-691"></a><span class="in">            }</span></span>
-<span id="cb25-692"><a href="#cb25-692"></a><span class="in">        }</span></span>
-<span id="cb25-693"><a href="#cb25-693"></a><span class="in">    }</span></span>
-<span id="cb25-694"><a href="#cb25-694"></a><span class="in">}</span></span>
-<span id="cb25-695"><a href="#cb25-695"></a><span class="in">```</span></span>
-<span id="cb25-696"><a href="#cb25-696"></a></span>
-<span id="cb25-697"><a href="#cb25-697"></a>&lt;/details&gt;</span>
-<span id="cb25-698"><a href="#cb25-698"></a></span>
-<span id="cb25-699"><a href="#cb25-699"></a><span class="fu"># Volatile</span></span>
-<span id="cb25-700"><a href="#cb25-700"></a></span>
-<span id="cb25-701"><a href="#cb25-701"></a><span class="fu">## Best Practice</span></span>
-<span id="cb25-702"><a href="#cb25-702"></a></span>
-<span id="cb25-703"><a href="#cb25-703"></a><span class="ss">- </span>This works on my machine.</span>
-<span id="cb25-704"><a href="#cb25-704"></a><span class="ss">- </span>It may not always work.</span>
-<span id="cb25-705"><a href="#cb25-705"></a><span class="ss">- </span>Why? <span class="in">`rustc`</span> is a bit too smart.</span>
-<span id="cb25-706"><a href="#cb25-706"></a><span class="ss">    - </span>There is no obvious externally observable reason to write to fixed memory location.</span>
-<span id="cb25-707"><a href="#cb25-707"></a><span class="ss">    - </span>The compiler may optimize out such writes.</span>
-<span id="cb25-708"><a href="#cb25-708"></a><span class="ss">    - </span>I say "sure it will."</span>
-<span id="cb25-709"><a href="#cb25-709"></a></span>
-<span id="cb25-710"><a href="#cb25-710"></a><span class="fu">## Quote Blog</span></span>
-<span id="cb25-711"><a href="#cb25-711"></a></span>
-<span id="cb25-712"><a href="#cb25-712"></a><span class="at">&gt; The problem is that we only write to the buffer and never read from it again. </span></span>
-<span id="cb25-713"><a href="#cb25-713"></a></span>
-<span id="cb25-714"><a href="#cb25-714"></a><span class="ss">- </span>Okay so but here me out.</span>
-<span id="cb25-715"><a href="#cb25-715"></a><span class="ss">- </span>Our implementation does read from the buffer again.</span>
-<span id="cb25-716"><a href="#cb25-716"></a><span class="ss">    - </span>Sometimes the best way to do things is also the simplest.</span>
-<span id="cb25-717"><a href="#cb25-717"></a><span class="ss">    - </span>For some reason blog kept a local copy and only used that?</span>
-<span id="cb25-718"><a href="#cb25-718"></a></span>
-<span id="cb25-719"><a href="#cb25-719"></a><span class="fu">## Volatile</span></span>
-<span id="cb25-720"><a href="#cb25-720"></a></span>
-<span id="cb25-721"><a href="#cb25-721"></a><span class="ss">- </span>If we lacked the skill and bravery of the instructor of this course, we may have a problem.</span>
-<span id="cb25-722"><a href="#cb25-722"></a><span class="ss">- </span>To avoid an erroneous optimization omitting all writes, we need to specify writes as _[volatile]_. </span>
-<span id="cb25-723"><a href="#cb25-723"></a><span class="ss">- </span>This tells the compiler that the write has side effects and should not be optimized away.</span>
-<span id="cb25-724"><a href="#cb25-724"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Volatile_(computer_programming))</span>
-<span id="cb25-725"><a href="#cb25-725"></a></span>
-<span id="cb25-726"><a href="#cb25-726"></a><span class="fu">## Interested Students</span></span>
-<span id="cb25-727"><a href="#cb25-727"></a></span>
-<span id="cb25-728"><a href="#cb25-728"></a><span class="ss">- </span>There's a <span class="in">`read_volatile`</span> and <span class="in">`write_volatile`</span> in <span class="in">`std::ptr`</span> and another in <span class="in">`core::ptr`</span>, we might be able to use those.</span>
-<span id="cb25-729"><a href="#cb25-729"></a></span>
-<span id="cb25-730"><a href="#cb25-730"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb25-654"><a href="#cb25-654"></a><span class="fu">## My solution</span></span>
+<span id="cb25-655"><a href="#cb25-655"></a></span>
+<span id="cb25-656"><a href="#cb25-656"></a>&lt;details&gt;</span>
+<span id="cb25-657"><a href="#cb25-657"></a></span>
+<span id="cb25-658"><a href="#cb25-658"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb25-659"><a href="#cb25-659"></a><span class="in">const ROWS: usize = 80;</span></span>
+<span id="cb25-660"><a href="#cb25-660"></a><span class="in">const COLS: usize = 25;</span></span>
+<span id="cb25-661"><a href="#cb25-661"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
+<span id="cb25-662"><a href="#cb25-662"></a></span>
+<span id="cb25-663"><a href="#cb25-663"></a><span class="in">fn scroll() {</span></span>
+<span id="cb25-664"><a href="#cb25-664"></a><span class="in">    unsafe {</span></span>
+<span id="cb25-665"><a href="#cb25-665"></a><span class="in">        for i in 80..MAX {</span></span>
+<span id="cb25-666"><a href="#cb25-666"></a><span class="in">            let src: *mut u8 = ((MMIO as usize) + (i * 2)) as *mut u8;</span></span>
+<span id="cb25-667"><a href="#cb25-667"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i - 80) * 2)) as *mut u8;</span></span>
+<span id="cb25-668"><a href="#cb25-668"></a><span class="in">            *dst = *src;</span></span>
+<span id="cb25-669"><a href="#cb25-669"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-670"><a href="#cb25-670"></a><span class="in">        }</span></span>
+<span id="cb25-671"><a href="#cb25-671"></a><span class="in">        for i in (MAX-80)..MAX {</span></span>
+<span id="cb25-672"><a href="#cb25-672"></a><span class="in">            let dst: *mut u8 = ((MMIO as usize) + ((i) * 2)) as *mut u8;</span></span>
+<span id="cb25-673"><a href="#cb25-673"></a><span class="in">            *dst = 32;</span></span>
+<span id="cb25-674"><a href="#cb25-674"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb25-675"><a href="#cb25-675"></a><span class="in">        }</span></span>
+<span id="cb25-676"><a href="#cb25-676"></a><span class="in">        LATEST = LATEST - 80;</span></span>
+<span id="cb25-677"><a href="#cb25-677"></a><span class="in">    }</span></span>
+<span id="cb25-678"><a href="#cb25-678"></a><span class="in">}</span></span>
+<span id="cb25-679"><a href="#cb25-679"></a></span>
+<span id="cb25-680"><a href="#cb25-680"></a><span class="in">pub fn str_to_vga(s: &amp;str) {</span></span>
+<span id="cb25-681"><a href="#cb25-681"></a><span class="in">    let v = s.as_bytes();</span></span>
+<span id="cb25-682"><a href="#cb25-682"></a><span class="in">    unsafe {</span></span>
+<span id="cb25-683"><a href="#cb25-683"></a><span class="in">        for i in 0..v.len() {</span></span>
+<span id="cb25-684"><a href="#cb25-684"></a><span class="in">            if LATEST &gt; MAX {</span></span>
+<span id="cb25-685"><a href="#cb25-685"></a><span class="in">                scroll();</span></span>
+<span id="cb25-686"><a href="#cb25-686"></a><span class="in">            }</span></span>
+<span id="cb25-687"><a href="#cb25-687"></a><span class="in">            match v[i] {</span></span>
+<span id="cb25-688"><a href="#cb25-688"></a><span class="in">                10 =&gt; LATEST = ((LATEST / 80) + 1) * 80,</span></span>
+<span id="cb25-689"><a href="#cb25-689"></a><span class="in">                _ =&gt; char_to_vga(v[i]),</span></span>
+<span id="cb25-690"><a href="#cb25-690"></a><span class="in">            }</span></span>
+<span id="cb25-691"><a href="#cb25-691"></a><span class="in">        }</span></span>
+<span id="cb25-692"><a href="#cb25-692"></a><span class="in">    }</span></span>
+<span id="cb25-693"><a href="#cb25-693"></a><span class="in">}</span></span>
+<span id="cb25-694"><a href="#cb25-694"></a><span class="in">```</span></span>
+<span id="cb25-695"><a href="#cb25-695"></a></span>
+<span id="cb25-696"><a href="#cb25-696"></a>&lt;/details&gt;</span>
+<span id="cb25-697"><a href="#cb25-697"></a></span>
+<span id="cb25-698"><a href="#cb25-698"></a><span class="fu"># Volatile</span></span>
+<span id="cb25-699"><a href="#cb25-699"></a></span>
+<span id="cb25-700"><a href="#cb25-700"></a><span class="fu">## Best Practice</span></span>
+<span id="cb25-701"><a href="#cb25-701"></a></span>
+<span id="cb25-702"><a href="#cb25-702"></a><span class="ss">- </span>This works on my machine.</span>
+<span id="cb25-703"><a href="#cb25-703"></a><span class="ss">- </span>It may not always work.</span>
+<span id="cb25-704"><a href="#cb25-704"></a><span class="ss">- </span>Why? <span class="in">`rustc`</span> is a bit too smart.</span>
+<span id="cb25-705"><a href="#cb25-705"></a><span class="ss">    - </span>There is no obvious externally observable reason to write to fixed memory location.</span>
+<span id="cb25-706"><a href="#cb25-706"></a><span class="ss">    - </span>The compiler may optimize out such writes.</span>
+<span id="cb25-707"><a href="#cb25-707"></a><span class="ss">    - </span>I say "sure it will."</span>
+<span id="cb25-708"><a href="#cb25-708"></a></span>
+<span id="cb25-709"><a href="#cb25-709"></a><span class="fu">## Quote Blog</span></span>
+<span id="cb25-710"><a href="#cb25-710"></a></span>
+<span id="cb25-711"><a href="#cb25-711"></a><span class="at">&gt; The problem is that we only write to the buffer and never read from it again. </span></span>
+<span id="cb25-712"><a href="#cb25-712"></a></span>
+<span id="cb25-713"><a href="#cb25-713"></a><span class="ss">- </span>Okay so but here me out.</span>
+<span id="cb25-714"><a href="#cb25-714"></a><span class="ss">- </span>Our implementation does read from the buffer again.</span>
+<span id="cb25-715"><a href="#cb25-715"></a><span class="ss">    - </span>Sometimes the best way to do things is also the simplest.</span>
+<span id="cb25-716"><a href="#cb25-716"></a><span class="ss">    - </span>For some reason blog kept a local copy and only used that?</span>
+<span id="cb25-717"><a href="#cb25-717"></a></span>
+<span id="cb25-718"><a href="#cb25-718"></a><span class="fu">## Volatile</span></span>
+<span id="cb25-719"><a href="#cb25-719"></a></span>
+<span id="cb25-720"><a href="#cb25-720"></a><span class="ss">- </span>If we lacked the skill and bravery of the instructor of this course, we may have a problem.</span>
+<span id="cb25-721"><a href="#cb25-721"></a><span class="ss">- </span>To avoid an erroneous optimization omitting all writes, we need to specify writes as _[volatile]_. </span>
+<span id="cb25-722"><a href="#cb25-722"></a><span class="ss">- </span>This tells the compiler that the write has side effects and should not be optimized away.</span>
+<span id="cb25-723"><a href="#cb25-723"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Volatile_(computer_programming))</span>
+<span id="cb25-724"><a href="#cb25-724"></a></span>
+<span id="cb25-725"><a href="#cb25-725"></a><span class="fu">## Interested Students</span></span>
+<span id="cb25-726"><a href="#cb25-726"></a></span>
+<span id="cb25-727"><a href="#cb25-727"></a><span class="ss">- </span>There's a <span class="in">`read_volatile`</span> and <span class="in">`write_volatile`</span> in <span class="in">`std::ptr`</span> and another in <span class="in">`core::ptr`</span>, we might be able to use those.</span>
+<span id="cb25-728"><a href="#cb25-728"></a></span>
+<span id="cb25-729"><a href="#cb25-729"></a><span class="fu"># Fin</span></span>
+<span id="cb25-730"><a href="#cb25-730"></a></span>
+<span id="cb25-731"><a href="#cb25-731"></a><span class="fu">## Timeout</span></span>
+<span id="cb25-732"><a href="#cb25-732"></a></span>
+<span id="cb25-733"><a href="#cb25-733"></a><span class="ss">- </span>This is 700 lines of markdown source which usually is enough.</span>
+<span id="cb25-734"><a href="#cb25-734"></a><span class="ss">- </span>Otherwise we proceed to "Format".</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

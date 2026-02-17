@@ -255,7 +255,7 @@ pub fn _print(args: core::fmt::Arguments) {
 Now we can use `println` in our `_start` function:
 
 ```{.rs filename="src/main.rs"}
-
+```{.rs filename="src/main.rs"}
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
@@ -267,7 +267,8 @@ pub extern "C" fn _start() -> ! {
 
 ## Printing Panic Messages
 
-- Now that we have a `println` macro, we can use it in our panic function to print the panic message and the location of the panic:
+Now that we have a `println` macro, we can use it in our panic function to print the panic message and the location of the panic.
+
 - Using your boundless intellect and and unbreakable work ethic, implement a panic handler that prints out some relevant information.
 - It is easy enough to test.
 

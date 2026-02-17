@@ -858,8 +858,8 @@ struct Buffer {
 <div class="code-with-filename-file">
 <pre><strong>src/vga.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb4" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb4-2"><a></a><span class="kw">const</span> MMIO<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0xb8000</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span><span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb4-2"><a></a><span class="kw">const</span> MMIO <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="color" class="slide level2">
@@ -877,9 +877,9 @@ struct Buffer {
 <div class="code-with-filename-file">
 <pre><strong>src/vga.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb5" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb5-2"><a></a><span class="kw">const</span> MMIO<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0xb8000</span><span class="op">;</span></span>
-<span id="cb5-3"><a></a><span class="kw">const</span> COLOR<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0xF</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="kw">static</span> <span class="kw">mut</span> latest<span class="op">:</span><span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb5-2"><a></a><span class="kw">const</span> MMIO <span class="op">=</span> <span class="dv">0xb8000</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb5-3"><a></a><span class="kw">const</span> COLOR<span class="op">:</span> u <span class="op">=</span> <span class="dv">0xF</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="character-wise" class="slide level2">
@@ -914,7 +914,7 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb7" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="co">// Public for now</span></span>
 <span id="cb7-2"><a></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb7-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb7-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb7-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -930,7 +930,7 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb8" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="co">// Public for now</span></span>
 <span id="cb8-2"><a></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb8-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb8-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb8-4"><a></a>    <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
 <span id="cb8-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -948,9 +948,9 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb9" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// Public for now</span></span>
 <span id="cb9-2"><a></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb9-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb9-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb9-4"><a></a>    <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
-<span id="cb9-5"><a></a>    <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb9-5"><a></a>        <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
 <span id="cb9-6"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -968,10 +968,10 @@ struct Buffer {
 </div>
 <div class="sourceCode" id="cb10" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="co">// Public for now</span></span>
 <span id="cb10-2"><a></a><span class="kw">pub</span> <span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
-<span id="cb10-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb10-3"><a></a>    <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (latest <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb10-4"><a></a>    <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
-<span id="cb10-5"><a></a>    <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
-<span id="cb10-6"><a></a>    LATEST <span class="op">=</span> LATEST <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb10-5"><a></a>        <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb10-6"><a></a>        LATEST <span class="op">=</span> LATEST <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
 <span id="cb10-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -1030,8 +1030,10 @@ struct Buffer {
 <li>I am opinionated on <code>as_bytes</code>.</li>
 <li>Let’s check some links.
 <ul>
-<li><a href="https://doc.rust-lang.org/std/?search=to_bytes"><code>to_bytes</code></a></li>
+<li><a href="https://doc.rust-lang.org/std/?search=to_bytes"><code>to_bytes</code></a>
+<ul>
 <li><a href="https://doc.rust-lang.org/std/?search=as_bytes"><code>as_bytes</code></a></li>
+</ul></li>
 <li><a href="https://doc.rust-lang.org/std/?search=bytes"><code>bytes</code></a></li>
 </ul></li>
 <li>Can you guess what always works?</li>
@@ -1214,7 +1216,7 @@ struct Buffer {
 <span id="cb20-3"><a></a><span class="kw">const</span> <span class="cn">MAX</span><span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> ROWS <span class="op">*</span> COLS<span class="op">;</span></span>
 <span id="cb20-4"><a></a></span>
 <span id="cb20-5"><a></a><span class="kw">fn</span> scroll() <span class="op">{</span></span>
-<span id="cb20-6"><a></a>    <span class="pp">todo!</span>()<span class="op">;</span></span>
+<span id="cb20-6"><a></a>    </span>
 <span id="cb20-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -1282,7 +1284,7 @@ struct Buffer {
 <li>Add <code>scroll</code> to <code>str_to_vga</code></li>
 <li>Update <code>LATEST</code> in <code>scroll</code></li>
 <li>Blank out the last line, I used space (<code>0x20</code> or <code>32</code>)</li>
-<li>Make sure <strong>all</strong> color bytes are set.</li>
+<li>Make sure all color bytes are set.</li>
 </ol>
 </details>
 </section>
@@ -1350,13 +1352,13 @@ struct Buffer {
 <span id="cb24-5"><a></a><span class="kw">fn</span> scroll() <span class="op">{</span></span>
 <span id="cb24-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
 <span id="cb24-7"><a></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">80</span><span class="op">..</span><span class="cn">MAX</span> <span class="op">{</span></span>
-<span id="cb24-8"><a></a>            <span class="kw">let</span> src<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> i <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
-<span id="cb24-9"><a></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (i <span class="op">-</span> <span class="dv">80</span>) <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-8"><a></a>            <span class="kw">let</span> src<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> (i <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-9"><a></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> ((i <span class="op">-</span> <span class="dv">80</span>) <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb24-10"><a></a>            <span class="op">*</span>dst <span class="op">=</span> <span class="op">*</span>src<span class="op">;</span></span>
 <span id="cb24-11"><a></a>            <span class="op">*</span>((dst <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
 <span id="cb24-12"><a></a>        <span class="op">}</span></span>
 <span id="cb24-13"><a></a>        <span class="cf">for</span> i <span class="kw">in</span> (<span class="cn">MAX</span><span class="op">-</span><span class="dv">80</span>)<span class="op">..</span><span class="cn">MAX</span> <span class="op">{</span></span>
-<span id="cb24-14"><a></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> i <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb24-14"><a></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> ((MMIO <span class="kw">as</span> <span class="dt">usize</span>) <span class="op">+</span> ((i) <span class="op">*</span> <span class="dv">2</span>)) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
 <span id="cb24-15"><a></a>            <span class="op">*</span>dst <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
 <span id="cb24-16"><a></a>            <span class="op">*</span>((dst <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
 <span id="cb24-17"><a></a>        <span class="op">}</span></span>
@@ -1428,11 +1430,20 @@ struct Buffer {
 <li>There’s a <code>read_volatile</code> and <code>write_volatile</code> in <code>std::ptr</code> and another in <code>core::ptr</code>, we might be able to use those.</li>
 </ul>
 </section></section>
+<section>
 <section id="fin" class="title-slide slide level1 center">
 <h1>Fin</h1>
 
-
 </section>
+<section id="timeout" class="slide level2">
+<h2>Timeout</h2>
+<ul>
+<li>This is 700 lines of markdown source which usually is enough.</li>
+<li>Otherwise we proceed to “Format”.</li>
+</ul>
+
+
+</section></section>
     </div>
   <div class="quarto-auto-generated-content" style="display: none;">
 <div class="footer footer-default">
