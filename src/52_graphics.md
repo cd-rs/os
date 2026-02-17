@@ -295,6 +295,7 @@ https://cd-public.github.io/ai101/images/photo-cat.jpg
 I only got `.jpg` and `.webp` to work for some reason, but it's not a big deal and you aren't required to learn `PIL`.
 
 - I took [this](https://cd-public.github.io/ai101/images/photo-cat.jpg) myself so it is definitely free to use.
+    - Her name is Ursula.
 ```{.email}
 https://cd-public.github.io/ai101/images/photo-cat.jpg
 ```
@@ -305,11 +306,10 @@ https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-M
 ```
 - And maybe the best for testing, an Adobe Stock [rainbow](https://stock.adobe.com/search?k=rainbow&asset_id=114495172)
     - The url looked unstable so I'm rehosting.
+    - Hopefully *I'm* hosting stably.
 ```{.sh}
 https://cd-rs.github.io/os/img/rainbow.jpg
 ```
-
-![](img/rainbow.jpg)
 
 
 <!--
@@ -319,10 +319,24 @@ from io import BytesIO
 import requests
 from PIL import Image
 import numpy as np
+import sys
 
-IMG_URL = "https://cd-public.github.io/ai101/images/photo-cat.jpg"
+IMG_URL = "https://t4.ftcdn.net/jpg/01/14/49/51/360_F_114495172_sTd0Eu8Tv1BP3LBYzgsd5YlADuF31Scj.jpg"
+IMG_NAME = "dump.ppm"
+ROWS = 80
+COLS = 25
 
-arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))
+len(sys.argv) > 1 and (IMG_URL := sys.argv[1],)
+
+colors = np.array(Image.open(IMG_NAME))[0][::45].astype(np.int32)
+
+arr = np.array(Image.open(BytesIO(requests.get(IMG_URL).content)))
+
+arr = arr[::len(arr)//COLS, ::len(arr[0])//ROWS][:COLS, :ROWS].reshape((ROWS*COLS,3))
+
+nearest = lambda color : int(np.argmin(np.sum((color - colors) ** 2, 1)))
+
+open("src/colors/img.rs", "w").write(f"pub const ARR: [u8; {ROWS*COLS}] = " + str([nearest(c) << 4 for c in arr]) + ";")
 ```
 
 -->
@@ -358,8 +372,9 @@ Plus, if I run on another system, which may have a different color representatio
 - You will need to compute color distance between the 
     - Color you are trying to show, and
     - The 16 available colors you computed in a previous step.
-- A naive approached would be to regard colors in 3-space with dimensions of `R`, `G`, and `B` values.
+- A naive approach would be to regard colors in 3-space with dimensions of `R`, `G`, and `B` values.
     - This is appropriate, but sub-optimal.
+    - So it's what I did.
 
 ::: {.callout-note collapse="true"}
 
@@ -380,14 +395,19 @@ You are doing this in NumPy to take advantage of vectorized operations.
 - [Read more](https://cd-public.github.io/scicom/05_numpy.html#vectorization)
 - Regard it as "unsporting" to use loops for a single pixel.
     - I didn't vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).
+    - You will want to look up "argmin".
         
 #### Output
 
-- I used a single line of Python code to map my colormapper across the scaled pixel array, format to string, and write to a `.rs` file.
+- I used a list comprehension to map my colormapper across the scaled pixel array, format to string, and write to a `.rs` file.
     - You are not required to use a single line, obviously.
-- This is how long my script was.
+- I want to show file sizes.
     - I wrote only single lines of code (no blocks) with open lines between.
     - It was not minimized but it was not verbose either.
+        - 5 `import`s
+        - 4 "constants"
+            - Python doesn't have constants.
+        - 6 lines of executable code.
 ```{.sh}
 $ wc url_to_rs.py src/colors/img.rs
   22   75  704 url_to_rs.py
@@ -395,6 +415,7 @@ $ wc url_to_rs.py src/colors/img.rs
 ```
 - I wrote to `src/colors/img.rs` as it was *I think* the place a file used by `src/colors.rs` should be.
     - I didn't love this because I had to make a new directory.
+        - I just `mkdir` once rather than scripting this step.
     - Do whatever you want here, as long as your `url_to_rs.py` writes to the right place.
     
 ## Step 5

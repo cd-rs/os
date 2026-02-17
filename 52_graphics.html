@@ -698,10 +698,11 @@ Extension for Advanced Students
 <h5 class="anchored" data-anchor-id="images">Images</h5>
 <p>I only got <code>.jpg</code> and <code>.webp</code> to work for some reason, but it’s not a big deal and you aren’t required to learn <code>PIL</code>.</p>
 <ul>
-<li>I took <a href="https://cd-public.github.io/ai101/images/photo-cat.jpg">this</a> myself so it is definitely free to use.</li>
-</ul>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb9-1"><a href="#cb9-1"></a>https://cd-public.github.io/ai101/images/photo-cat.jpg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<li>I took <a href="https://cd-public.github.io/ai101/images/photo-cat.jpg">this</a> myself so it is definitely free to use.
 <ul>
+<li>Her name is Ursula.</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb9-1"><a href="#cb9-1"></a>https://cd-public.github.io/ai101/images/photo-cat.jpg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><a href="https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp">This</a> is a wide picture that should be fine, from a tourism bureau.
 <ul>
 <li><a href="https://www.leadvilletwinlakes.com/listing/mt-massive/">Read more</a></li>
@@ -710,10 +711,10 @@ Extension for Advanced Students
 <li>And maybe the best for testing, an Adobe Stock <a href="https://stock.adobe.com/search?k=rainbow&amp;asset_id=114495172">rainbow</a>
 <ul>
 <li>The url looked unstable so I’m rehosting.</li>
+<li>Hopefully <em>I’m</em> hosting stably.</li>
 </ul>
 <div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">https://cd-rs.github.io/os/img/rainbow.jpg</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
-<p><img src="img/rainbow.jpg" class="img-fluid"></p>
 <!--
 
 ```{.py filename="url_to_rs.py"}
@@ -721,10 +722,24 @@ from io import BytesIO
 import requests
 from PIL import Image
 import numpy as np
+import sys
 
-IMG_URL = "https://cd-public.github.io/ai101/images/photo-cat.jpg"
+IMG_URL = "https://t4.ftcdn.net/jpg/01/14/49/51/360_F_114495172_sTd0Eu8Tv1BP3LBYzgsd5YlADuF31Scj.jpg"
+IMG_NAME = "dump.ppm"
+ROWS = 80
+COLS = 25
 
-arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))
+len(sys.argv) > 1 and (IMG_URL := sys.argv[1],)
+
+colors = np.array(Image.open(IMG_NAME))[0][::45].astype(np.int32)
+
+arr = np.array(Image.open(BytesIO(requests.get(IMG_URL).content)))
+
+arr = arr[::len(arr)//COLS, ::len(arr[0])//ROWS][:COLS, :ROWS].reshape((ROWS*COLS,3))
+
+nearest = lambda color : int(np.argmin(np.sum((color - colors) ** 2, 1)))
+
+open("src/colors/img.rs", "w").write(f"pub const ARR: [u8; {ROWS*COLS}] = " + str([nearest(c) << 4 for c in arr]) + ";")
 ```
 
 -->
@@ -775,9 +790,10 @@ Code Structure Note
 <li>Color you are trying to show, and</li>
 <li>The 16 available colors you computed in a previous step.</li>
 </ul></li>
-<li>A naive approached would be to regard colors in 3-space with dimensions of <code>R</code>, <code>G</code>, and <code>B</code> values.
+<li>A naive approach would be to regard colors in 3-space with dimensions of <code>R</code>, <code>G</code>, and <code>B</code> values.
 <ul>
 <li>This is appropriate, but sub-optimal.</li>
+<li>So it’s what I did.</li>
 </ul></li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -805,27 +821,39 @@ Extension for Advanced Students
 <li>Regard it as “unsporting” to use loops for a single pixel.
 <ul>
 <li>I didn’t vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).</li>
+<li>You will want to look up “argmin”.</li>
 </ul></li>
 </ul>
 </section>
 <section id="output" class="level4">
 <h4 class="anchored" data-anchor-id="output">Output</h4>
 <ul>
-<li>I used a single line of Python code to map my colormapper across the scaled pixel array, format to string, and write to a <code>.rs</code> file.
+<li>I used a list comprehension to map my colormapper across the scaled pixel array, format to string, and write to a <code>.rs</code> file.
 <ul>
 <li>You are not required to use a single line, obviously.</li>
 </ul></li>
-<li>This is how long my script was.
+<li>I want to show file sizes.
 <ul>
 <li>I wrote only single lines of code (no blocks) with open lines between.</li>
-<li>It was not minimized but it was not verbose either.</li>
+<li>It was not minimized but it was not verbose either.
+<ul>
+<li>5 <code>import</code>s</li>
+<li>4 “constants”
+<ul>
+<li>Python doesn’t have constants.</li>
+</ul></li>
+<li>6 lines of executable code.</li>
 </ul>
 <div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1"></a><span class="ex">$</span> wc url_to_rs.py src/colors/img.rs</span>
 <span id="cb12-2"><a href="#cb12-2"></a><span class="ex">22</span>   75  704 url_to_rs.py</span>
 <span id="cb12-3"><a href="#cb12-3"></a> <span class="ex">0</span> 2006 9257 src/colors/img.rs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
 <li>I wrote to <code>src/colors/img.rs</code> as it was <em>I think</em> the place a file used by <code>src/colors.rs</code> should be.
 <ul>
-<li>I didn’t love this because I had to make a new directory.</li>
+<li>I didn’t love this because I had to make a new directory.
+<ul>
+<li>I just <code>mkdir</code> once rather than scripting this step.</li>
+</ul></li>
 <li>Do whatever you want here, as long as your <code>url_to_rs.py</code> writes to the right place.</li>
 </ul></li>
 </ul>
@@ -1692,21 +1720,21 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb13-295"><a href="#cb13-295"></a>I only got <span class="in">`.jpg`</span> and <span class="in">`.webp`</span> to work for some reason, but it's not a big deal and you aren't required to learn <span class="in">`PIL`</span>.</span>
 <span id="cb13-296"><a href="#cb13-296"></a></span>
 <span id="cb13-297"><a href="#cb13-297"></a><span class="ss">- </span>I took <span class="co">[</span><span class="ot">this</span><span class="co">](https://cd-public.github.io/ai101/images/photo-cat.jpg)</span> myself so it is definitely free to use.</span>
-<span id="cb13-298"><a href="#cb13-298"></a><span class="in">```{.email}</span></span>
-<span id="cb13-299"><a href="#cb13-299"></a><span class="in">https://cd-public.github.io/ai101/images/photo-cat.jpg</span></span>
-<span id="cb13-300"><a href="#cb13-300"></a><span class="in">```</span></span>
-<span id="cb13-301"><a href="#cb13-301"></a><span class="ss">- </span><span class="co">[</span><span class="ot">This</span><span class="co">](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span> is a wide picture that should be fine, from a tourism bureau.</span>
-<span id="cb13-302"><a href="#cb13-302"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://www.leadvilletwinlakes.com/listing/mt-massive/)</span></span>
-<span id="cb13-303"><a href="#cb13-303"></a><span class="in">```{.email}</span></span>
-<span id="cb13-304"><a href="#cb13-304"></a><span class="in">https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp</span></span>
-<span id="cb13-305"><a href="#cb13-305"></a><span class="in">```</span></span>
-<span id="cb13-306"><a href="#cb13-306"></a><span class="ss">- </span>And maybe the best for testing, an Adobe Stock <span class="co">[</span><span class="ot">rainbow</span><span class="co">](https://stock.adobe.com/search?k=rainbow&amp;asset_id=114495172)</span></span>
-<span id="cb13-307"><a href="#cb13-307"></a><span class="ss">    - </span>The url looked unstable so I'm rehosting.</span>
-<span id="cb13-308"><a href="#cb13-308"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-309"><a href="#cb13-309"></a><span class="in">https://cd-rs.github.io/os/img/rainbow.jpg</span></span>
-<span id="cb13-310"><a href="#cb13-310"></a><span class="in">```</span></span>
-<span id="cb13-311"><a href="#cb13-311"></a></span>
-<span id="cb13-312"><a href="#cb13-312"></a><span class="al">![](img/rainbow.jpg)</span></span>
+<span id="cb13-298"><a href="#cb13-298"></a><span class="ss">    - </span>Her name is Ursula.</span>
+<span id="cb13-299"><a href="#cb13-299"></a><span class="in">```{.email}</span></span>
+<span id="cb13-300"><a href="#cb13-300"></a><span class="in">https://cd-public.github.io/ai101/images/photo-cat.jpg</span></span>
+<span id="cb13-301"><a href="#cb13-301"></a><span class="in">```</span></span>
+<span id="cb13-302"><a href="#cb13-302"></a><span class="ss">- </span><span class="co">[</span><span class="ot">This</span><span class="co">](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span> is a wide picture that should be fine, from a tourism bureau.</span>
+<span id="cb13-303"><a href="#cb13-303"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://www.leadvilletwinlakes.com/listing/mt-massive/)</span></span>
+<span id="cb13-304"><a href="#cb13-304"></a><span class="in">```{.email}</span></span>
+<span id="cb13-305"><a href="#cb13-305"></a><span class="in">https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp</span></span>
+<span id="cb13-306"><a href="#cb13-306"></a><span class="in">```</span></span>
+<span id="cb13-307"><a href="#cb13-307"></a><span class="ss">- </span>And maybe the best for testing, an Adobe Stock <span class="co">[</span><span class="ot">rainbow</span><span class="co">](https://stock.adobe.com/search?k=rainbow&amp;asset_id=114495172)</span></span>
+<span id="cb13-308"><a href="#cb13-308"></a><span class="ss">    - </span>The url looked unstable so I'm rehosting.</span>
+<span id="cb13-309"><a href="#cb13-309"></a><span class="ss">    - </span>Hopefully *I'm* hosting stably.</span>
+<span id="cb13-310"><a href="#cb13-310"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-311"><a href="#cb13-311"></a><span class="in">https://cd-rs.github.io/os/img/rainbow.jpg</span></span>
+<span id="cb13-312"><a href="#cb13-312"></a><span class="in">```</span></span>
 <span id="cb13-313"><a href="#cb13-313"></a></span>
 <span id="cb13-314"><a href="#cb13-314"></a></span>
 <span id="cb13-315"><a href="#cb13-315"></a><span class="co">&lt;!--</span></span>
@@ -1716,152 +1744,173 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb13-319"><a href="#cb13-319"></a><span class="co">import requests</span></span>
 <span id="cb13-320"><a href="#cb13-320"></a><span class="co">from PIL import Image</span></span>
 <span id="cb13-321"><a href="#cb13-321"></a><span class="co">import numpy as np</span></span>
-<span id="cb13-322"><a href="#cb13-322"></a></span>
-<span id="cb13-323"><a href="#cb13-323"></a><span class="co">IMG_URL = "https://cd-public.github.io/ai101/images/photo-cat.jpg"</span></span>
-<span id="cb13-324"><a href="#cb13-324"></a></span>
-<span id="cb13-325"><a href="#cb13-325"></a><span class="co">arr = np.asarray(Image.open(BytesIO(requests.get(IMG_URL).content)))</span></span>
-<span id="cb13-326"><a href="#cb13-326"></a><span class="co">```</span></span>
-<span id="cb13-327"><a href="#cb13-327"></a></span>
-<span id="cb13-328"><a href="#cb13-328"></a><span class="co">--&gt;</span></span>
-<span id="cb13-329"><a href="#cb13-329"></a></span>
-<span id="cb13-330"><a href="#cb13-330"></a><span class="fu">#### Scale</span></span>
-<span id="cb13-331"><a href="#cb13-331"></a></span>
-<span id="cb13-332"><a href="#cb13-332"></a><span class="ss">- </span>Do I look like I know how to scale images?</span>
-<span id="cb13-333"><a href="#cb13-333"></a><span class="ss">    - </span>Probably either sample or average.</span>
-<span id="cb13-334"><a href="#cb13-334"></a><span class="ss">    - </span>I don't think I care.</span>
-<span id="cb13-335"><a href="#cb13-335"></a><span class="ss">- </span>My code scales to fit the VGA buffer horizontally.</span>
-<span id="cb13-336"><a href="#cb13-336"></a><span class="ss">    - </span>Then either "squish" or "stretch" vertically.</span>
-<span id="cb13-337"><a href="#cb13-337"></a><span class="ss">    - </span>You could also crop horizontally.</span>
-<span id="cb13-338"><a href="#cb13-338"></a><span class="ss">        - </span>Doesn't matter to me.</span>
-<span id="cb13-339"><a href="#cb13-339"></a><span class="ss">    - </span>Recall, the VGA buffer has more pixels than we are addressing.</span>
-<span id="cb13-340"><a href="#cb13-340"></a><span class="ss">    - </span>You can only address characters, which are many pixels in size.</span>
-<span id="cb13-341"><a href="#cb13-341"></a><span class="ss">    - </span>Your image will be *low* resolution.</span>
-<span id="cb13-342"><a href="#cb13-342"></a></span>
-<span id="cb13-343"><a href="#cb13-343"></a><span class="fu">#### Color Map</span></span>
-<span id="cb13-344"><a href="#cb13-344"></a></span>
-<span id="cb13-345"><a href="#cb13-345"></a>::: {.callout-note appearance="simple"}</span>
-<span id="cb13-346"><a href="#cb13-346"></a></span>
-<span id="cb13-347"><a href="#cb13-347"></a><span class="fu">## Code Structure Note</span></span>
-<span id="cb13-348"><a href="#cb13-348"></a></span>
-<span id="cb13-349"><a href="#cb13-349"></a>I included my code extracting hex-values from <span class="in">`dump.ppm`</span> here.</span>
-<span id="cb13-350"><a href="#cb13-350"></a></span>
-<span id="cb13-351"><a href="#cb13-351"></a>I thought it made more sense than making a new file, it shared similar imports, and was only a few lines.</span>
-<span id="cb13-352"><a href="#cb13-352"></a></span>
-<span id="cb13-353"><a href="#cb13-353"></a>Plus, if I run on another system, which may have a different color representation, I'll be able to quickly generate the <span class="in">`.ppm`</span> and have no other steps!</span>
-<span id="cb13-354"><a href="#cb13-354"></a></span>
-<span id="cb13-355"><a href="#cb13-355"></a>:::</span>
+<span id="cb13-322"><a href="#cb13-322"></a><span class="co">import sys</span></span>
+<span id="cb13-323"><a href="#cb13-323"></a></span>
+<span id="cb13-324"><a href="#cb13-324"></a><span class="co">IMG_URL = "https://t4.ftcdn.net/jpg/01/14/49/51/360_F_114495172_sTd0Eu8Tv1BP3LBYzgsd5YlADuF31Scj.jpg"</span></span>
+<span id="cb13-325"><a href="#cb13-325"></a><span class="co">IMG_NAME = "dump.ppm"</span></span>
+<span id="cb13-326"><a href="#cb13-326"></a><span class="co">ROWS = 80</span></span>
+<span id="cb13-327"><a href="#cb13-327"></a><span class="co">COLS = 25</span></span>
+<span id="cb13-328"><a href="#cb13-328"></a></span>
+<span id="cb13-329"><a href="#cb13-329"></a><span class="co">len(sys.argv) &gt; 1 and (IMG_URL := sys.argv[1],)</span></span>
+<span id="cb13-330"><a href="#cb13-330"></a></span>
+<span id="cb13-331"><a href="#cb13-331"></a><span class="co">colors = np.array(Image.open(IMG_NAME))[0][::45].astype(np.int32)</span></span>
+<span id="cb13-332"><a href="#cb13-332"></a></span>
+<span id="cb13-333"><a href="#cb13-333"></a><span class="co">arr = np.array(Image.open(BytesIO(requests.get(IMG_URL).content)))</span></span>
+<span id="cb13-334"><a href="#cb13-334"></a></span>
+<span id="cb13-335"><a href="#cb13-335"></a><span class="co">arr = arr[::len(arr)//COLS, ::len(arr[0])//ROWS][:COLS, :ROWS].reshape((ROWS*COLS,3))</span></span>
+<span id="cb13-336"><a href="#cb13-336"></a></span>
+<span id="cb13-337"><a href="#cb13-337"></a><span class="co">nearest = lambda color : int(np.argmin(np.sum((color - colors) ** 2, 1)))</span></span>
+<span id="cb13-338"><a href="#cb13-338"></a></span>
+<span id="cb13-339"><a href="#cb13-339"></a><span class="co">open("src/colors/img.rs", "w").write(f"pub const ARR: [u8; {ROWS*COLS}] = " + str([nearest(c) &lt;&lt; 4 for c in arr]) + ";")</span></span>
+<span id="cb13-340"><a href="#cb13-340"></a><span class="co">```</span></span>
+<span id="cb13-341"><a href="#cb13-341"></a></span>
+<span id="cb13-342"><a href="#cb13-342"></a><span class="co">--&gt;</span></span>
+<span id="cb13-343"><a href="#cb13-343"></a></span>
+<span id="cb13-344"><a href="#cb13-344"></a><span class="fu">#### Scale</span></span>
+<span id="cb13-345"><a href="#cb13-345"></a></span>
+<span id="cb13-346"><a href="#cb13-346"></a><span class="ss">- </span>Do I look like I know how to scale images?</span>
+<span id="cb13-347"><a href="#cb13-347"></a><span class="ss">    - </span>Probably either sample or average.</span>
+<span id="cb13-348"><a href="#cb13-348"></a><span class="ss">    - </span>I don't think I care.</span>
+<span id="cb13-349"><a href="#cb13-349"></a><span class="ss">- </span>My code scales to fit the VGA buffer horizontally.</span>
+<span id="cb13-350"><a href="#cb13-350"></a><span class="ss">    - </span>Then either "squish" or "stretch" vertically.</span>
+<span id="cb13-351"><a href="#cb13-351"></a><span class="ss">    - </span>You could also crop horizontally.</span>
+<span id="cb13-352"><a href="#cb13-352"></a><span class="ss">        - </span>Doesn't matter to me.</span>
+<span id="cb13-353"><a href="#cb13-353"></a><span class="ss">    - </span>Recall, the VGA buffer has more pixels than we are addressing.</span>
+<span id="cb13-354"><a href="#cb13-354"></a><span class="ss">    - </span>You can only address characters, which are many pixels in size.</span>
+<span id="cb13-355"><a href="#cb13-355"></a><span class="ss">    - </span>Your image will be *low* resolution.</span>
 <span id="cb13-356"><a href="#cb13-356"></a></span>
-<span id="cb13-357"><a href="#cb13-357"></a><span class="ss">- </span>You image will include colors that cannot be recognized by the VGA text buffer.</span>
-<span id="cb13-358"><a href="#cb13-358"></a><span class="ss">- </span>You will need to compute color distance between the </span>
-<span id="cb13-359"><a href="#cb13-359"></a><span class="ss">    - </span>Color you are trying to show, and</span>
-<span id="cb13-360"><a href="#cb13-360"></a><span class="ss">    - </span>The 16 available colors you computed in a previous step.</span>
-<span id="cb13-361"><a href="#cb13-361"></a><span class="ss">- </span>A naive approached would be to regard colors in 3-space with dimensions of <span class="in">`R`</span>, <span class="in">`G`</span>, and <span class="in">`B`</span> values.</span>
-<span id="cb13-362"><a href="#cb13-362"></a><span class="ss">    - </span>This is appropriate, but sub-optimal.</span>
-<span id="cb13-363"><a href="#cb13-363"></a></span>
-<span id="cb13-364"><a href="#cb13-364"></a>::: {.callout-note collapse="true"}</span>
-<span id="cb13-365"><a href="#cb13-365"></a></span>
-<span id="cb13-366"><a href="#cb13-366"></a><span class="fu">### Extension for Advanced Students</span></span>
-<span id="cb13-367"><a href="#cb13-367"></a></span>
-<span id="cb13-368"><a href="#cb13-368"></a>Advanced students will already be familiar with distance in $n$-space and hexcodes and should use a perceptually uniform color space. In this case, <span class="in">`L*a*b`</span>.</span>
-<span id="cb13-369"><a href="#cb13-369"></a></span>
-<span id="cb13-370"><a href="#cb13-370"></a><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/CIELAB_color_space)</span></span>
-<span id="cb13-371"><a href="#cb13-371"></a></span>
-<span id="cb13-372"><a href="#cb13-372"></a>There is first class support in Python, I hear, and you can learn more from this poster, but one of Professor Brown's undergraduate researchers.</span>
-<span id="cb13-373"><a href="#cb13-373"></a></span>
-<span id="cb13-374"><a href="#cb13-374"></a><span class="co">[</span><span class="ot">Poster</span><span class="co">](https://luebke.us/publications/pdf/vss2019.poster1.pdf)</span></span>
-<span id="cb13-375"><a href="#cb13-375"></a></span>
-<span id="cb13-376"><a href="#cb13-376"></a>:::</span>
-<span id="cb13-377"><a href="#cb13-377"></a></span>
-<span id="cb13-378"><a href="#cb13-378"></a>You are doing this in NumPy to take advantage of vectorized operations.</span>
-<span id="cb13-379"><a href="#cb13-379"></a></span>
-<span id="cb13-380"><a href="#cb13-380"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://cd-public.github.io/scicom/05_numpy.html#vectorization)</span></span>
-<span id="cb13-381"><a href="#cb13-381"></a><span class="ss">- </span>Regard it as "unsporting" to use loops for a single pixel.</span>
-<span id="cb13-382"><a href="#cb13-382"></a><span class="ss">    - </span>I didn't vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).</span>
-<span id="cb13-383"><a href="#cb13-383"></a>        </span>
-<span id="cb13-384"><a href="#cb13-384"></a><span class="fu">#### Output</span></span>
-<span id="cb13-385"><a href="#cb13-385"></a></span>
-<span id="cb13-386"><a href="#cb13-386"></a><span class="ss">- </span>I used a single line of Python code to map my colormapper across the scaled pixel array, format to string, and write to a <span class="in">`.rs`</span> file.</span>
-<span id="cb13-387"><a href="#cb13-387"></a><span class="ss">    - </span>You are not required to use a single line, obviously.</span>
-<span id="cb13-388"><a href="#cb13-388"></a><span class="ss">- </span>This is how long my script was.</span>
-<span id="cb13-389"><a href="#cb13-389"></a><span class="ss">    - </span>I wrote only single lines of code (no blocks) with open lines between.</span>
-<span id="cb13-390"><a href="#cb13-390"></a><span class="ss">    - </span>It was not minimized but it was not verbose either.</span>
-<span id="cb13-391"><a href="#cb13-391"></a><span class="in">```{.sh}</span></span>
-<span id="cb13-392"><a href="#cb13-392"></a><span class="in">$ wc url_to_rs.py src/colors/img.rs</span></span>
-<span id="cb13-393"><a href="#cb13-393"></a><span class="in">  22   75  704 url_to_rs.py</span></span>
-<span id="cb13-394"><a href="#cb13-394"></a><span class="in">   0 2006 9257 src/colors/img.rs</span></span>
-<span id="cb13-395"><a href="#cb13-395"></a><span class="in">```</span></span>
-<span id="cb13-396"><a href="#cb13-396"></a><span class="ss">- </span>I wrote to <span class="in">`src/colors/img.rs`</span> as it was *I think* the place a file used by <span class="in">`src/colors.rs`</span> should be.</span>
-<span id="cb13-397"><a href="#cb13-397"></a><span class="ss">    - </span>I didn't love this because I had to make a new directory.</span>
-<span id="cb13-398"><a href="#cb13-398"></a><span class="ss">    - </span>Do whatever you want here, as long as your <span class="in">`url_to_rs.py`</span> writes to the right place.</span>
-<span id="cb13-399"><a href="#cb13-399"></a>    </span>
-<span id="cb13-400"><a href="#cb13-400"></a><span class="fu">## Step 5</span></span>
+<span id="cb13-357"><a href="#cb13-357"></a><span class="fu">#### Color Map</span></span>
+<span id="cb13-358"><a href="#cb13-358"></a></span>
+<span id="cb13-359"><a href="#cb13-359"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb13-360"><a href="#cb13-360"></a></span>
+<span id="cb13-361"><a href="#cb13-361"></a><span class="fu">## Code Structure Note</span></span>
+<span id="cb13-362"><a href="#cb13-362"></a></span>
+<span id="cb13-363"><a href="#cb13-363"></a>I included my code extracting hex-values from <span class="in">`dump.ppm`</span> here.</span>
+<span id="cb13-364"><a href="#cb13-364"></a></span>
+<span id="cb13-365"><a href="#cb13-365"></a>I thought it made more sense than making a new file, it shared similar imports, and was only a few lines.</span>
+<span id="cb13-366"><a href="#cb13-366"></a></span>
+<span id="cb13-367"><a href="#cb13-367"></a>Plus, if I run on another system, which may have a different color representation, I'll be able to quickly generate the <span class="in">`.ppm`</span> and have no other steps!</span>
+<span id="cb13-368"><a href="#cb13-368"></a></span>
+<span id="cb13-369"><a href="#cb13-369"></a>:::</span>
+<span id="cb13-370"><a href="#cb13-370"></a></span>
+<span id="cb13-371"><a href="#cb13-371"></a><span class="ss">- </span>You image will include colors that cannot be recognized by the VGA text buffer.</span>
+<span id="cb13-372"><a href="#cb13-372"></a><span class="ss">- </span>You will need to compute color distance between the </span>
+<span id="cb13-373"><a href="#cb13-373"></a><span class="ss">    - </span>Color you are trying to show, and</span>
+<span id="cb13-374"><a href="#cb13-374"></a><span class="ss">    - </span>The 16 available colors you computed in a previous step.</span>
+<span id="cb13-375"><a href="#cb13-375"></a><span class="ss">- </span>A naive approach would be to regard colors in 3-space with dimensions of <span class="in">`R`</span>, <span class="in">`G`</span>, and <span class="in">`B`</span> values.</span>
+<span id="cb13-376"><a href="#cb13-376"></a><span class="ss">    - </span>This is appropriate, but sub-optimal.</span>
+<span id="cb13-377"><a href="#cb13-377"></a><span class="ss">    - </span>So it's what I did.</span>
+<span id="cb13-378"><a href="#cb13-378"></a></span>
+<span id="cb13-379"><a href="#cb13-379"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb13-380"><a href="#cb13-380"></a></span>
+<span id="cb13-381"><a href="#cb13-381"></a><span class="fu">### Extension for Advanced Students</span></span>
+<span id="cb13-382"><a href="#cb13-382"></a></span>
+<span id="cb13-383"><a href="#cb13-383"></a>Advanced students will already be familiar with distance in $n$-space and hexcodes and should use a perceptually uniform color space. In this case, <span class="in">`L*a*b`</span>.</span>
+<span id="cb13-384"><a href="#cb13-384"></a></span>
+<span id="cb13-385"><a href="#cb13-385"></a><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/CIELAB_color_space)</span></span>
+<span id="cb13-386"><a href="#cb13-386"></a></span>
+<span id="cb13-387"><a href="#cb13-387"></a>There is first class support in Python, I hear, and you can learn more from this poster, but one of Professor Brown's undergraduate researchers.</span>
+<span id="cb13-388"><a href="#cb13-388"></a></span>
+<span id="cb13-389"><a href="#cb13-389"></a><span class="co">[</span><span class="ot">Poster</span><span class="co">](https://luebke.us/publications/pdf/vss2019.poster1.pdf)</span></span>
+<span id="cb13-390"><a href="#cb13-390"></a></span>
+<span id="cb13-391"><a href="#cb13-391"></a>:::</span>
+<span id="cb13-392"><a href="#cb13-392"></a></span>
+<span id="cb13-393"><a href="#cb13-393"></a>You are doing this in NumPy to take advantage of vectorized operations.</span>
+<span id="cb13-394"><a href="#cb13-394"></a></span>
+<span id="cb13-395"><a href="#cb13-395"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://cd-public.github.io/scicom/05_numpy.html#vectorization)</span></span>
+<span id="cb13-396"><a href="#cb13-396"></a><span class="ss">- </span>Regard it as "unsporting" to use loops for a single pixel.</span>
+<span id="cb13-397"><a href="#cb13-397"></a><span class="ss">    - </span>I didn't vectorize across the full pixel array because I converted to a string in the same stage (as a list comprehension).</span>
+<span id="cb13-398"><a href="#cb13-398"></a><span class="ss">    - </span>You will want to look up "argmin".</span>
+<span id="cb13-399"><a href="#cb13-399"></a>        </span>
+<span id="cb13-400"><a href="#cb13-400"></a><span class="fu">#### Output</span></span>
 <span id="cb13-401"><a href="#cb13-401"></a></span>
-<span id="cb13-402"><a href="#cb13-402"></a><span class="ss">- </span>Add a <span class="in">`image()`</span> function to <span class="in">`src/colors.rs`</span> that:</span>
-<span id="cb13-403"><a href="#cb13-403"></a><span class="ss">    - </span>Reads the image data from <span class="in">`src/colors/img.rs`</span></span>
-<span id="cb13-404"><a href="#cb13-404"></a><span class="ss">    - </span>Writes the image data to the VGA text buffer as background colors.</span>
-<span id="cb13-405"><a href="#cb13-405"></a><span class="ss">- </span>Call this function from <span class="in">`src/main.rs`</span></span>
-<span id="cb13-406"><a href="#cb13-406"></a><span class="ss">- </span>Look at your image.</span>
-<span id="cb13-407"><a href="#cb13-407"></a></span>
-<span id="cb13-408"><a href="#cb13-408"></a><span class="fu">### Example</span></span>
-<span id="cb13-409"><a href="#cb13-409"></a></span>
-<span id="cb13-410"><a href="#cb13-410"></a><span class="ss">- </span>Here is my result over the "Mt. Massive" image from the tourism bureau.</span>
-<span id="cb13-411"><a href="#cb13-411"></a></span>
-<span id="cb13-412"><a href="#cb13-412"></a><span class="fu">#### Original</span></span>
-<span id="cb13-413"><a href="#cb13-413"></a></span>
-<span id="cb13-414"><a href="#cb13-414"></a><span class="ss">- </span>Hosting cross-site.</span>
-<span id="cb13-415"><a href="#cb13-415"></a></span>
-<span id="cb13-416"><a href="#cb13-416"></a><span class="al">![](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span></span>
-<span id="cb13-417"><a href="#cb13-417"></a></span>
-<span id="cb13-418"><a href="#cb13-418"></a><span class="fu">#### VGA Text Buffer</span></span>
-<span id="cb13-419"><a href="#cb13-419"></a></span>
-<span id="cb13-420"><a href="#cb13-420"></a><span class="ss">- </span>Extracted to <span class="in">`.ppm`</span>, converted to <span class="in">`.png`</span>, converted to base64 and directly embedded.</span>
-<span id="cb13-421"><a href="#cb13-421"></a></span>
-<span id="cb13-422"><a href="#cb13-422"></a>&lt;img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAJ70lEQVR4nO3dQY7jugFAwTiYC3rF</span>
-<span id="cb13-423"><a href="#cb13-423"></a>PqK48hE72wSINAN+PVnuqdoSoihKbTxw049t2/4FAFD697sXAAD8fIIDAMgJDgAgJzgAgJzgAABy</span>
-<span id="cb13-424"><a href="#cb13-424"></a>ggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkO</span>
-<span id="cb13-425"><a href="#cb13-425"></a>ACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACD3690L</span>
-<span id="cb13-426"><a href="#cb13-426"></a>gJ9sjHHZveacC1dduUI+y9oXBXuccAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAA</span>
-<span id="cb13-427"><a href="#cb13-427"></a>ADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQe2zbtnDZGOP0pfxt5px7Q2vbezDhTRw81+m7AfwM</span>
-<span id="cb13-428"><a href="#cb13-428"></a>9/9l+6nWfrEPOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn</span>
-<span id="cb13-429"><a href="#cb13-429"></a>OACAnOAAAHKCAwDICQ4AIPf4/v7eGzv4h/djjGY9AMCtreWBEw4AICc4AICc4AAAcoIDAMgJDgAg</span>
-<span id="cb13-430"><a href="#cb13-430"></a>JzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAco9t2/bGDv6rPf/cnHNv</span>
-<span id="cb13-431"><a href="#cb13-431"></a>yM4D8MM44QAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc</span>
-<span id="cb13-432"><a href="#cb13-432"></a>4AAAcoIDAMgJDgAg99i27d1r+I0xxmX3mnMuXHWTFV65jJ/K9gJEnHAAADnBAQDkBAcAkBMcAEBO</span>
-<span id="cb13-433"><a href="#cb13-433"></a>cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkPs1xjh3xjnnuRNe</span>
-<span id="cb13-434"><a href="#cb13-434"></a>ea+D3Ti419oyTt/5n+r07V2b8OCqtXudvsKbfFFX/lXyz619oldOyI/hhAMAyAkOACAnOACAnOAA</span>
-<span id="cb13-435"><a href="#cb13-435"></a>AHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACA3OP7+/uym805</span>
-<span id="cb13-436"><a href="#cb13-436"></a>F64aYyxMeHDVmrXFr7n/4tdeytqEB658KbzL6/XaG9q2bW/oym8e+BNOOACAnOAAAHKCAwDICQ4A</span>
-<span id="cb13-437"><a href="#cb13-437"></a>ICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDIPb6/v8+dcc55</span>
-<span id="cb13-438"><a href="#cb13-438"></a>7oQfbYyxcNXBHh5MuHbV2jJIvV6vvaHn87kw4doHcODr62tvaG2FVzp9e2/ipz7X6V8v7+KEAwDI</span>
-<span id="cb13-439"><a href="#cb13-439"></a>CQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4</span>
-<span id="cb13-440"><a href="#cb13-440"></a>AIDcY9u2c2ccY5w74Zo5597QlSs8WAbv8nq99oaez+cdJjzd/VcIe9Z+sf32ptZeihMOACAnOACA</span>
-<span id="cb13-441"><a href="#cb13-441"></a>nOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKP</span>
-<span id="cb13-442"><a href="#cb13-442"></a>bdsuu9kY47J7XWnOuTd08MgHV51ubRmv12tv6Pl8/tM1/a+1FZ7+RX19fZ074YGDPbxy56908Fxr</span>
-<span id="cb13-443"><a href="#cb13-443"></a>Pno3SN3kt5f/5oQDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc</span>
-<span id="cb13-444"><a href="#cb13-444"></a>4AAAcoIDAMgJDgAgJzgAgNzj+/v7spvNOReuGmOcO+Gag2V8fX0tTPh8PveGXq/XuRMeOLjXwYRr</span>
-<span id="cb13-445"><a href="#cb13-445"></a>u7E24YGDD2BtwjVrj3xg7aV8tPs/8toK7/9ccBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEB</span>
-<span id="cb13-446"><a href="#cb13-446"></a>AOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkHtu2LVw2xli4as65MOHBVWter9fe</span>
-<span id="cb13-447"><a href="#cb13-447"></a>0PP5PPde/KG1l3L/V3n6Cq/cqJu8lPu/5QNX7saB+2/U/X30d3gTTjgAgJzgAAByggMAyAkOACAn</span>
-<span id="cb13-448"><a href="#cb13-448"></a>OACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyD22bdsbG2PsDc05</span>
-<span id="cb13-449"><a href="#cb13-449"></a>m/W82ev12ht6Pp93WMaa0xd/k436aKfv4dqEH/0qT3/kK/mr/Bv8hX+VB5xwAAA5wQEA5AQHAJAT</span>
-<span id="cb13-450"><a href="#cb13-450"></a>HABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7bNv27jX8</span>
-<span id="cb13-451"><a href="#cb13-451"></a>xuv1OnfC5/P5I+91/2X8he6/8wcrPHCTxR+4/87Duda++bVfgAMH93LCAQDkBAcAkBMcAEBOcAAA</span>
-<span id="cb13-452"><a href="#cb13-452"></a>OcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEDuMcZ49xrgUnPO</span>
-<span id="cb13-453"><a href="#cb13-453"></a>vaH7/zl89OLhR3o+n+dO+Hq9LrvXlZxwAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBO</span>
-<span id="cb13-454"><a href="#cb13-454"></a>cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7jDHevQb4bHPOvaEr/74OlnHgo38BbrLzwJ9w</span>
-<span id="cb13-455"><a href="#cb13-455"></a>wgEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQH</span>
-<span id="cb13-456"><a href="#cb13-456"></a>AJATHABA7nEwNsa4bB03MefcG/oLdwMAzuKEAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzg</span>
-<span id="cb13-457"><a href="#cb13-457"></a>AAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AIDcY4yxcNmcc2/o9AnXrC3j/k7f+SutveX7</span>
-<span id="cb13-458"><a href="#cb13-458"></a>Pxfc3Ef/bvBjOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn</span>
-<span id="cb13-459"><a href="#cb13-459"></a>OACAnOAAAHKCAwDICQ4AIPfr9BnnnHtDY4yFCQ+uOrjXgdNXuLaMmzzX2r0OrO3hgdPfF9zclb+i</span>
-<span id="cb13-460"><a href="#cb13-460"></a>cBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABA</span>
-<span id="cb13-461"><a href="#cb13-461"></a>TnAAADnBAQDkHmOMd6+Bd5pz7g2tfRtrE95kGbDAxwZ/wgkHAJATHABATnAAADnBAQDkBAcAkBMc</span>
-<span id="cb13-462"><a href="#cb13-462"></a>AEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAALnHGOPda4BFc869obUP+2DC</span>
-<span id="cb13-463"><a href="#cb13-463"></a>A/6IAH7LCQcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDk</span>
-<span id="cb13-464"><a href="#cb13-464"></a>BAcAkBMcAEBOcAAAuccY491r4PPMOfeGfFEpOw98KCccAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5</span>
-<span id="cb13-465"><a href="#cb13-465"></a>wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQeY4x3r+Enm3PuDf2FO283buj0</span>
-<span id="cb13-466"><a href="#cb13-466"></a>l+ItA/+XEw4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDI</span>
-<span id="cb13-467"><a href="#cb13-467"></a>CQ4AICc4AICc4AAAcv8B/pXD9XQXqvEAAAAASUVORK5CYII="/&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb13-402"><a href="#cb13-402"></a><span class="ss">- </span>I used a list comprehension to map my colormapper across the scaled pixel array, format to string, and write to a <span class="in">`.rs`</span> file.</span>
+<span id="cb13-403"><a href="#cb13-403"></a><span class="ss">    - </span>You are not required to use a single line, obviously.</span>
+<span id="cb13-404"><a href="#cb13-404"></a><span class="ss">- </span>I want to show file sizes.</span>
+<span id="cb13-405"><a href="#cb13-405"></a><span class="ss">    - </span>I wrote only single lines of code (no blocks) with open lines between.</span>
+<span id="cb13-406"><a href="#cb13-406"></a><span class="ss">    - </span>It was not minimized but it was not verbose either.</span>
+<span id="cb13-407"><a href="#cb13-407"></a><span class="ss">        - </span>5 <span class="in">`import`</span>s</span>
+<span id="cb13-408"><a href="#cb13-408"></a><span class="ss">        - </span>4 "constants"</span>
+<span id="cb13-409"><a href="#cb13-409"></a><span class="ss">            - </span>Python doesn't have constants.</span>
+<span id="cb13-410"><a href="#cb13-410"></a><span class="ss">        - </span>6 lines of executable code.</span>
+<span id="cb13-411"><a href="#cb13-411"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-412"><a href="#cb13-412"></a><span class="in">$ wc url_to_rs.py src/colors/img.rs</span></span>
+<span id="cb13-413"><a href="#cb13-413"></a><span class="in">  22   75  704 url_to_rs.py</span></span>
+<span id="cb13-414"><a href="#cb13-414"></a><span class="in">   0 2006 9257 src/colors/img.rs</span></span>
+<span id="cb13-415"><a href="#cb13-415"></a><span class="in">```</span></span>
+<span id="cb13-416"><a href="#cb13-416"></a><span class="ss">- </span>I wrote to <span class="in">`src/colors/img.rs`</span> as it was *I think* the place a file used by <span class="in">`src/colors.rs`</span> should be.</span>
+<span id="cb13-417"><a href="#cb13-417"></a><span class="ss">    - </span>I didn't love this because I had to make a new directory.</span>
+<span id="cb13-418"><a href="#cb13-418"></a><span class="ss">        - </span>I just <span class="in">`mkdir`</span> once rather than scripting this step.</span>
+<span id="cb13-419"><a href="#cb13-419"></a><span class="ss">    - </span>Do whatever you want here, as long as your <span class="in">`url_to_rs.py`</span> writes to the right place.</span>
+<span id="cb13-420"><a href="#cb13-420"></a>    </span>
+<span id="cb13-421"><a href="#cb13-421"></a><span class="fu">## Step 5</span></span>
+<span id="cb13-422"><a href="#cb13-422"></a></span>
+<span id="cb13-423"><a href="#cb13-423"></a><span class="ss">- </span>Add a <span class="in">`image()`</span> function to <span class="in">`src/colors.rs`</span> that:</span>
+<span id="cb13-424"><a href="#cb13-424"></a><span class="ss">    - </span>Reads the image data from <span class="in">`src/colors/img.rs`</span></span>
+<span id="cb13-425"><a href="#cb13-425"></a><span class="ss">    - </span>Writes the image data to the VGA text buffer as background colors.</span>
+<span id="cb13-426"><a href="#cb13-426"></a><span class="ss">- </span>Call this function from <span class="in">`src/main.rs`</span></span>
+<span id="cb13-427"><a href="#cb13-427"></a><span class="ss">- </span>Look at your image.</span>
+<span id="cb13-428"><a href="#cb13-428"></a></span>
+<span id="cb13-429"><a href="#cb13-429"></a><span class="fu">### Example</span></span>
+<span id="cb13-430"><a href="#cb13-430"></a></span>
+<span id="cb13-431"><a href="#cb13-431"></a><span class="ss">- </span>Here is my result over the "Mt. Massive" image from the tourism bureau.</span>
+<span id="cb13-432"><a href="#cb13-432"></a></span>
+<span id="cb13-433"><a href="#cb13-433"></a><span class="fu">#### Original</span></span>
+<span id="cb13-434"><a href="#cb13-434"></a></span>
+<span id="cb13-435"><a href="#cb13-435"></a><span class="ss">- </span>Hosting cross-site.</span>
+<span id="cb13-436"><a href="#cb13-436"></a></span>
+<span id="cb13-437"><a href="#cb13-437"></a><span class="al">![](https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp)</span></span>
+<span id="cb13-438"><a href="#cb13-438"></a></span>
+<span id="cb13-439"><a href="#cb13-439"></a><span class="fu">#### VGA Text Buffer</span></span>
+<span id="cb13-440"><a href="#cb13-440"></a></span>
+<span id="cb13-441"><a href="#cb13-441"></a><span class="ss">- </span>Extracted to <span class="in">`.ppm`</span>, converted to <span class="in">`.png`</span>, converted to base64 and directly embedded.</span>
+<span id="cb13-442"><a href="#cb13-442"></a></span>
+<span id="cb13-443"><a href="#cb13-443"></a>&lt;img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAJ70lEQVR4nO3dQY7jugFAwTiYC3rF</span>
+<span id="cb13-444"><a href="#cb13-444"></a>PqK48hE72wSINAN+PVnuqdoSoihKbTxw049t2/4FAFD697sXAAD8fIIDAMgJDgAgJzgAgJzgAABy</span>
+<span id="cb13-445"><a href="#cb13-445"></a>ggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkO</span>
+<span id="cb13-446"><a href="#cb13-446"></a>ACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACD3690L</span>
+<span id="cb13-447"><a href="#cb13-447"></a>gJ9sjHHZveacC1dduUI+y9oXBXuccAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAA</span>
+<span id="cb13-448"><a href="#cb13-448"></a>ADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQe2zbtnDZGOP0pfxt5px7Q2vbezDhTRw81+m7AfwM</span>
+<span id="cb13-449"><a href="#cb13-449"></a>9/9l+6nWfrEPOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn</span>
+<span id="cb13-450"><a href="#cb13-450"></a>OACAnOAAAHKCAwDICQ4AIPf4/v7eGzv4h/djjGY9AMCtreWBEw4AICc4AICc4AAAcoIDAMgJDgAg</span>
+<span id="cb13-451"><a href="#cb13-451"></a>JzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc4AAAco9t2/bGDv6rPf/cnHNv</span>
+<span id="cb13-452"><a href="#cb13-452"></a>yM4D8MM44QAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc</span>
+<span id="cb13-453"><a href="#cb13-453"></a>4AAAcoIDAMgJDgAg99i27d1r+I0xxmX3mnMuXHWTFV65jJ/K9gJEnHAAADnBAQDkBAcAkBMcAEBO</span>
+<span id="cb13-454"><a href="#cb13-454"></a>cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkPs1xjh3xjnnuRNe</span>
+<span id="cb13-455"><a href="#cb13-455"></a>ea+D3Ti419oyTt/5n+r07V2b8OCqtXudvsKbfFFX/lXyz619oldOyI/hhAMAyAkOACAnOACAnOAA</span>
+<span id="cb13-456"><a href="#cb13-456"></a>AHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACA3OP7+/uym805</span>
+<span id="cb13-457"><a href="#cb13-457"></a>F64aYyxMeHDVmrXFr7n/4tdeytqEB658KbzL6/XaG9q2bW/oym8e+BNOOACAnOAAAHKCAwDICQ4A</span>
+<span id="cb13-458"><a href="#cb13-458"></a>ICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDIPb6/v8+dcc55</span>
+<span id="cb13-459"><a href="#cb13-459"></a>7oQfbYyxcNXBHh5MuHbV2jJIvV6vvaHn87kw4doHcODr62tvaG2FVzp9e2/ipz7X6V8v7+KEAwDI</span>
+<span id="cb13-460"><a href="#cb13-460"></a>CQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4</span>
+<span id="cb13-461"><a href="#cb13-461"></a>AIDcY9u2c2ccY5w74Zo5597QlSs8WAbv8nq99oaez+cdJjzd/VcIe9Z+sf32ptZeihMOACAnOACA</span>
+<span id="cb13-462"><a href="#cb13-462"></a>nOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKP</span>
+<span id="cb13-463"><a href="#cb13-463"></a>bdsuu9kY47J7XWnOuTd08MgHV51ubRmv12tv6Pl8/tM1/a+1FZ7+RX19fZ074YGDPbxy56908Fxr</span>
+<span id="cb13-464"><a href="#cb13-464"></a>Pno3SN3kt5f/5oQDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AICc</span>
+<span id="cb13-465"><a href="#cb13-465"></a>4AAAcoIDAMgJDgAgJzgAgNzj+/v7spvNOReuGmOcO+Gag2V8fX0tTPh8PveGXq/XuRMeOLjXwYRr</span>
+<span id="cb13-466"><a href="#cb13-466"></a>u7E24YGDD2BtwjVrj3xg7aV8tPs/8toK7/9ccBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEB</span>
+<span id="cb13-467"><a href="#cb13-467"></a>AOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkHtu2LVw2xli4as65MOHBVWter9fe</span>
+<span id="cb13-468"><a href="#cb13-468"></a>0PP5PPde/KG1l3L/V3n6Cq/cqJu8lPu/5QNX7saB+2/U/X30d3gTTjgAgJzgAAByggMAyAkOACAn</span>
+<span id="cb13-469"><a href="#cb13-469"></a>OACAnOAAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyD22bdsbG2PsDc05</span>
+<span id="cb13-470"><a href="#cb13-470"></a>m/W82ev12ht6Pp93WMaa0xd/k436aKfv4dqEH/0qT3/kK/mr/Bv8hX+VB5xwAAA5wQEA5AQHAJAT</span>
+<span id="cb13-471"><a href="#cb13-471"></a>HABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7bNv27jX8</span>
+<span id="cb13-472"><a href="#cb13-472"></a>xuv1OnfC5/P5I+91/2X8he6/8wcrPHCTxR+4/87Duda++bVfgAMH93LCAQDkBAcAkBMcAEBOcAAA</span>
+<span id="cb13-473"><a href="#cb13-473"></a>OcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEDuMcZ49xrgUnPO</span>
+<span id="cb13-474"><a href="#cb13-474"></a>vaH7/zl89OLhR3o+n+dO+Hq9LrvXlZxwAAA5wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBO</span>
+<span id="cb13-475"><a href="#cb13-475"></a>cAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJB7jDHevQb4bHPOvaEr/74OlnHgo38BbrLzwJ9w</span>
+<span id="cb13-476"><a href="#cb13-476"></a>wgEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQH</span>
+<span id="cb13-477"><a href="#cb13-477"></a>AJATHABA7nEwNsa4bB03MefcG/oLdwMAzuKEAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzg</span>
+<span id="cb13-478"><a href="#cb13-478"></a>AAByggMAyAkOACAnOACAnOAAAHKCAwDICQ4AICc4AIDcY4yxcNmcc2/o9AnXrC3j/k7f+SutveX7</span>
+<span id="cb13-479"><a href="#cb13-479"></a>Pxfc3Ef/bvBjOOEAAHKCAwDICQ4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAn</span>
+<span id="cb13-480"><a href="#cb13-480"></a>OACAnOAAAHKCAwDICQ4AIPfr9BnnnHtDY4yFCQ+uOrjXgdNXuLaMmzzX2r0OrO3hgdPfF9zclb+i</span>
+<span id="cb13-481"><a href="#cb13-481"></a>cBknHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABA</span>
+<span id="cb13-482"><a href="#cb13-482"></a>TnAAADnBAQDkHmOMd6+Bd5pz7g2tfRtrE95kGbDAxwZ/wgkHAJATHABATnAAADnBAQDkBAcAkBMc</span>
+<span id="cb13-483"><a href="#cb13-483"></a>AEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAALnHGOPda4BFc869obUP+2DC</span>
+<span id="cb13-484"><a href="#cb13-484"></a>A/6IAH7LCQcAkBMcAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5wQEA5AQHAJATHABATnAAADnBAQDk</span>
+<span id="cb13-485"><a href="#cb13-485"></a>BAcAkBMcAEBOcAAAuccY491r4PPMOfeGfFEpOw98KCccAEBOcAAAOcEBAOQEBwCQExwAQE5wAAA5</span>
+<span id="cb13-486"><a href="#cb13-486"></a>wQEA5AQHAJATHABATnAAADnBAQDkBAcAkBMcAEBOcAAAOcEBAOQeY4x3r+Enm3PuDf2FO283buj0</span>
+<span id="cb13-487"><a href="#cb13-487"></a>l+ItA/+XEw4AICc4AICc4AAAcoIDAMgJDgAgJzgAgJzgAAByggMAyAkOACAnOACAnOAAAHKCAwDI</span>
+<span id="cb13-488"><a href="#cb13-488"></a>CQ4AICc4AICc4AAAcv8B/pXD9XQXqvEAAAAASUVORK5CYII="/&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
