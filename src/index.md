@@ -36,7 +36,7 @@ format: html
 |0x2|01/26|[OSes](20_os.qmd)|[Transmute](21_xmute.md)|[malloc](22_malloc.md)| 
 |0x3|02/02|[Bare Metal](30_metal.qmd)|[Linker](31_linker.md)|[RISC-V](32_r5.md)| 
 |0x4|02/09|[Kernel](40_kernel.qmd)|[Boot](41_boot.md)|[Hello](42_hello.md)|
-|0x5|02/16|[Text](50_text.qmd)|[Format](51_format.md)|[Graphics](52_graphics.qmd)|
+|0x5|02/16|[Text](50_text.qmd)|[Format](51_format.md)|[Graphics](52_graphics.md)|
 |0x6|02/23|[Test](60_test.qmd)|[Serial](61_serial.qmd)|[Integration](62_integration.qmd)|
 |0x7|03/02|Exceptions|
 |0x8|03/09|Faults|
