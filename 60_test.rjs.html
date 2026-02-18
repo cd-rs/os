@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.6.30">
+
+  <title>OS in Rust – Test</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #f8f8f2;  }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #f8f8f2; } /* Normal */
+    code span.al { color: #f07178; background-color: #2a0f15; font-weight: bold; } /* Alert */
+    code span.an { color: #d4d0ab; } /* Annotation */
+    code span.at { color: #00e0e0; } /* Attribute */
+    code span.bn { color: #d4d0ab; } /* BaseN */
+    code span.bu { color: #abe338; } /* BuiltIn */
+    code span.cf { color: #ffa07a; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #abe338; } /* Char */
+    code span.cn { color: #ffd700; } /* Constant */
+    code span.co { color: #f8f8f2; font-style: italic; } /* Comment */
+    code span.cv { color: #ffd700; } /* CommentVar */
+    code span.do { color: #f8f8f2; } /* Documentation */
+    code span.dt { color: #ffa07a; } /* DataType */
+    code span.dv { color: #d4d0ab; } /* DecVal */
+    code span.er { color: #f07178; text-decoration: underline; } /* Error */
+    code span.ex { color: #00e0e0; font-weight: bold; } /* Extension */
+    code span.fl { color: #d4d0ab; } /* Float */
+    code span.fu { color: #ffa07a; } /* Function */
+    code span.im { color: #abe338; } /* Import */
+    code span.in { color: #d4d0ab; } /* Information */
+    code span.kw { color: #ffa07a; font-weight: bold; } /* Keyword */
+    code span.op { color: #ffa07a; } /* Operator */
+    code span.ot { color: #00e0e0; } /* Other */
+    code span.pp { color: #dcc6e0; } /* Preprocessor */
+    code span.re { color: #00e0e0; background-color: #f8f8f2; } /* RegionMarker */
+    code span.sc { color: #abe338; } /* SpecialChar */
+    code span.ss { color: #abe338; } /* SpecialString */
+    code span.st { color: #abe338; } /* String */
+    code span.va { color: #00e0e0; } /* Variable */
+    code span.vs { color: #abe338; } /* VerbatimString */
+    code span.wa { color: #dcc6e0; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-0f071606cd187ea9c4f27a73aca9ddf7.css">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-dark">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Test</h1>
+  <p class="subtitle">OS in Rust</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="announcements" class="slide level2">
+<h2>Announcements</h2>
+<ul>
+<li><strong>Action Items</strong>:
+<ul>
+<li>How is graphics?
+<ul>
+<li>Are you learning NumPy?</li>
+<li>Anyone using CUDA?</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="slide level2">
+<h2>Citations</h2>
+<ul>
+<li>I am geniunely convinced of the usefulness of automated testing when developing a system.</li>
+<li>The most high profile case of this is the testing framework for <a href="https://cd-public.github.io/crypto/qmd/bigadd.html"><code>4096_t.c</code></a></li>
+<li>Hard to persuade students of the usefulness of this on small class assignments.</li>
+<li><span class="math inline">\(\therefore\)</span> I’ve never written anything of any reasonable size in Rust, so</li>
+<li><a href="https://os.phil-opp.com/testing/">Testing</a></li>
+</ul>
+</section>
+<section id="today" class="slide level2">
+<h2>Today</h2>
+<ul>
+<li>Testing under <code>no_std</code></li>
+<li>QEMU</li>
+<li><code>bootimage</code>
+<ul>
+<li>Still not in love with this dependency, but we do what we can.</li>
+</ul></li>
+</ul>
+</section>
+<section id="pre-work" class="slide level2">
+<h2>Pre-work</h2>
+<ul>
+<li>Make sure you have a <code>.cargo/config.toml</code></li>
+<li>No idea how you wouldn’t have one of these yet!</li>
+<li>Just make sure you have it.</li>
+</ul>
+</section>
+<section id="modern-language" class="slide level2">
+<h2>Modern Language</h2>
+<ul>
+<li>Like Python with Pytest, and unlike the only other systems language, Rust has a testing framework.</li>
+<li>It’s covered in <a href="https://doc.rust-lang.org/book/ch11-00-testing.html">Rust book</a></li>
+<li>Naturally I skipped this chapter.</li>
+</ul>
+</section>
+<section id="framework" class="slide level2">
+<h2>Framework</h2>
+<ul>
+<li>Use the <code>#[test]</code> attribute on some functions.</li>
+<li>Including <em>assertions</em> within those functions.</li>
+<li><code>cargo test</code> or, if you see someone around, <code>cargo t</code>, will check the assertions.</li>
+<li>The crate will otherwise be non-impacted.</li>
+</ul>
+</section>
+<section id="review" class="slide level2">
+<h2>Review</h2>
+<ul>
+<li>To enable testing for our kernel binary, we can set the <code>test</code> flag in the Cargo.toml to <code>true</code>.</li>
+<li>We recall our <code>Cargo.toml</code> - mine no longer has an allusions to panic with the introduction of a JSON target.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Cargo.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="Cargo.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb1-1"><a></a><span class="kw">[package]</span></span>
+<span id="cb1-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
+<span id="cb1-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb1-4"><a></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2024"</span></span>
+<span id="cb1-5"><a></a></span>
+<span id="cb1-6"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb1-7"><a></a><span class="dt">bootloader</span> <span class="op">=</span> <span class="st">"0.9"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="enable" class="slide level2">
+<h2>Enable</h2>
+<ul>
+<li>This is necessary but not sufficient.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Cargo.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="Cargo.toml" data-code-line-numbers="9,10,11,12"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb2-1"><a></a><span class="kw">[package]</span></span>
+<span id="cb2-2"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
+<span id="cb2-3"><a></a><span class="dt">version</span> <span class="op">=</span> <span class="st">"0.1.0"</span></span>
+<span id="cb2-4"><a></a><span class="dt">edition</span> <span class="op">=</span> <span class="st">"2024"</span></span>
+<span id="cb2-5"><a></a></span>
+<span id="cb2-6"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb2-7"><a></a><span class="dt">bootloader</span> <span class="op">=</span> <span class="st">"0.9"</span></span>
+<span id="cb2-8"><a></a></span>
+<span id="cb2-9"><a></a><span class="kw">[[bin]]</span></span>
+<span id="cb2-10"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"osirs"</span></span>
+<span id="cb2-11"><a></a><span class="dt">test</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb2-12"><a></a><span class="dt">bench</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="on-bin" class="slide level2">
+<h2>On <code>[[bin]]</code></h2>
+<blockquote>
+<p><a href="https://doc.rust-lang.org/cargo/reference/cargo-targets.html#configuring-a-target">The double-bracket sections like <code>[[bin]]</code> are array-of-table of TOML, which means you can write more than one <code>[[bin]]</code> section to make several executables in your crate.</a></p>
+</blockquote>
+<ul>
+<li>Just one for us for now.</li>
+</ul>
+</section>
+<section id="working-within-no_std" class="slide level2">
+<h2>Working within <code>no_std</code></h2>
+<ul>
+<li>Testing is complicated by <code>no_std</code>.</li>
+<li>Rust implicitly uses the <code>test</code> library, which depends on <code>std</code>
+<ul>
+<li><a href="https://doc.rust-lang.org/test/index.html">More on <code>test</code></a></li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a></a><span class="ex">$</span> cargo t</span>
+<span id="cb3-2"><a></a>   <span class="ex">Compiling</span> bootloader v0.9.34</span>
+<span id="cb3-3"><a></a><span class="va">error</span><span class="op">[</span>E0463<span class="op">]</span><span class="ex">:</span> can<span class="st">'t find crate for `core`</span></span>
+<span id="cb3-4"><a></a><span class="st">  |</span></span>
+<span id="cb3-5"><a></a><span class="st">  = note: the `x86_64-osirs` target may not be installed</span></span>
+<span id="cb3-6"><a></a><span class="st">  = help: consider downloading the target with `rustup target add x86_64-osirs`</span></span>
+<span id="cb3-7"><a></a></span>
+<span id="cb3-8"><a></a><span class="st">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb3-9"><a></a><span class="st">error: could not compile `bootloader` (lib) due to 1 previous error</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="what-we-lose" class="slide level2">
+<h2>What We Lose</h2>
+<ul>
+<li>Vs. <code>std</code>, we lose e.g.&nbsp;<code>should_panic</code> tests.
+<ul>
+<li><a href="https://doc.rust-lang.org/book/ch11-01-writing-tests.html#checking-for-panics-with-should_panic">On those</a></li>
+</ul></li>
+<li>That’s okay, we are crafty (and wrote our own panic handler anyway).</li>
+</ul>
+</section>
+<section id="to-main" class="slide level2">
+<h2>To Main</h2>
+<ul>
+<li>My main looks like this:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb4-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb4-3"><a></a></span>
+<span id="cb4-4"><a></a><span class="kw">mod</span> colors<span class="op">;</span></span>
+<span id="cb4-5"><a></a><span class="kw">mod</span> vga<span class="op">;</span></span>
+<span id="cb4-6"><a></a></span>
+<span id="cb4-7"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb4-8"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb4-9"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb4-10"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb4-11"><a></a><span class="op">}</span></span>
+<span id="cb4-12"><a></a></span>
+<span id="cb4-13"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb4-14"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb4-15"><a></a>    <span class="pp">colors::</span>colors()<span class="op">;</span></span>
+<span id="cb4-16"><a></a>    <span class="pp">colors::</span>image()<span class="op">;</span></span>
+<span id="cb4-17"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb4-18"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="just-a-note" class="slide level2">
+<h2>Just a note</h2>
+<ul>
+<li>When you make a new version for today (<code>60</code>)
+<ul>
+<li>Probably leave out colors (<code>52</code>) and</li>
+<li>Instead start with something with <code>println!</code> (likely <code>51</code>)</li>
+</ul></li>
+</ul>
+</section>
+<section id="todays-starting-point" class="slide level2">
+<h2>Today’s Starting Point</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb5-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb5-3"><a></a></span>
+<span id="cb5-4"><a></a><span class="kw">mod</span> vga<span class="op">;</span></span>
+<span id="cb5-5"><a></a></span>
+<span id="cb5-6"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb5-7"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb5-8"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb5-9"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb5-10"><a></a><span class="op">}</span></span>
+<span id="cb5-11"><a></a></span>
+<span id="cb5-12"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb5-13"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb5-14"><a></a>    <span class="pp">println!</span>(<span class="st">"Hello world!"</span>)<span class="op">;</span></span>
+<span id="cb5-15"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb5-16"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="adding-to-main" class="slide level2">
+<h2>Adding to Main</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="src/main.rs" data-code-line-numbers="3,4,8-14"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb6-2"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb6-3"><a></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb6-4"><a></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="kw">crate</span><span class="pp">::</span>test_runner<span class="at">)]</span></span>
+<span id="cb6-5"><a></a></span>
+<span id="cb6-6"><a></a><span class="kw">mod</span> vga<span class="op">;</span></span>
+<span id="cb6-7"><a></a></span>
+<span id="cb6-8"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb6-9"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb6-10"><a></a>    <span class="pp">println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb6-11"><a></a>    <span class="cf">for</span> test <span class="kw">in</span> tests <span class="op">{</span></span>
+<span id="cb6-12"><a></a>        test()<span class="op">;</span></span>
+<span id="cb6-13"><a></a>    <span class="op">}</span></span>
+<span id="cb6-14"><a></a><span class="op">}</span></span>
+<span id="cb6-15"><a></a></span>
+<span id="cb6-16"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb6-17"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb6-18"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb6-19"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb6-20"><a></a><span class="op">}</span></span>
+<span id="cb6-21"><a></a></span>
+<span id="cb6-22"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb6-23"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb6-24"><a></a>    <span class="pp">println!</span>(<span class="st">"Hello world!"</span>)<span class="op">;</span></span>
+<span id="cb6-25"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb6-26"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="wait-a-minute" class="slide level2">
+<h2>Wait a minute</h2>
+<ul>
+<li>What is <code>&amp;dyn</code>?</li>
+<li><a href="https://doc.rust-lang.org/std/keyword.dyn.html">“Keyword <code>dyn</code></a></li>
+</ul>
+<blockquote>
+<p>The <code>dyn</code> keyword is used to highlight that calls to methods on the associated <code>Trait</code> are dynamically dispatched.</p>
+</blockquote>
+</section>
+<section id="dynamic-dispatch" class="slide level2">
+<h2>Dynamic Dispatch</h2>
+<blockquote>
+<p><a href="https://en.wikipedia.org/wiki/Dynamic_dispatch">In computer science, <strong>dynamic dispatch</strong> is the process of selecting which implementation of a polymorphic operation (method or function) to call at run time. It is commonly employed in, and considered a prime characteristic of, object-oriented programming (OOP) languages and systems.</a></p>
+</blockquote>
+</section>
+<section id="oop" class="slide level2">
+<h2>OOP</h2>
+<ul>
+<li>Yeah I’m not doing that.</li>
+<li>We’ll maintain a list of functions.</li>
+<li>If you want to learn about OOP, here is a tutorial on writing a Java app for Android.
+<ul>
+<li><a href="https://developer.android.com/codelabs/basic-android-kotlin-compose-first-app?continue=https%3A%2F%2Fdeveloper.android.com%2Fcourses%2Fpathways%2Fandroid-basics-compose-unit-1-pathway-2%23codelab-https%3A%2F%2Fdeveloper.android.com%2Fcodelabs%2Fbasic-android-kotlin-compose-first-app#0">Create your first Android app</a></li>
+<li>Whoops its Kotlin (multi-paradigm).</li>
+<li>Yet more evidence of the correctness of OOP.</li>
+</ul></li>
+</ul>
+</section>
+<section id="write-two-functions" class="slide level2">
+<h2>Write Two Functions</h2>
+<ul>
+<li>Doesn’t matter but nice to have externally observable functions.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="kw">fn</span> hi() <span class="op">{</span></span>
+<span id="cb7-2"><a></a>    <span class="pp">println!</span>(<span class="st">"Hello world!"</span>)<span class="op">;</span></span>
+<span id="cb7-3"><a></a>    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb7-4"><a></a><span class="op">}</span></span>
+<span id="cb7-5"><a></a></span>
+<span id="cb7-6"><a></a><span class="kw">fn</span> bye() <span class="op">{</span></span>
+<span id="cb7-7"><a></a>    <span class="pp">println!</span>(<span class="st">"Goodbye space!"</span>)<span class="op">;</span></span>
+<span id="cb7-8"><a></a>    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb7-9"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="make-an-array" class="slide level2">
+<h2>Make an array</h2>
+<ul>
+<li>Just in <code>_start</code> for now.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb8-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb8-3"><a></a>    <span class="kw">let</span> fs <span class="op">=</span> [hi<span class="op">,</span> bye]<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="loop-over-the-array" class="slide level2">
+<h2>Loop over the array</h2>
+<ul>
+<li>Same as any other for each loop.
+<ul>
+<li>I am willing to use the for each loop, but still regard it with suspicion.</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a>    <span class="kw">let</span> fs <span class="op">=</span> [hi<span class="op">,</span> bye]<span class="op">;</span></span>
+<span id="cb9-2"><a></a>    <span class="cf">for</span> f <span class="kw">in</span> fs <span class="op">{</span></span>
+<span id="cb9-3"><a></a>        <span class="pp">todo!</span>()<span class="op">;</span></span>
+<span id="cb9-4"><a></a>    <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="call-each-function" class="slide level2">
+<h2>Call each function</h2>
+<ul>
+<li>What do you see?</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a>    <span class="kw">let</span> fs <span class="op">=</span> [hi<span class="op">,</span> bye]<span class="op">;</span></span>
+<span id="cb10-2"><a></a>    <span class="cf">for</span> f <span class="kw">in</span> fs <span class="op">{</span></span>
+<span id="cb10-3"><a></a>        f()<span class="op">;</span></span>
+<span id="cb10-4"><a></a>    <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="sample-out" class="slide level2">
+<h2>Sample out</h2>
+
+<img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAFJ0lEQVR4nO3dyXaDIBQAUMzp//9y
+ujAlVgw+p4TovasaFKEb8DGlBAAAAPDtuvv9nlLquq6/Hl3W9TdP3l9JakS9hLNVa7ZeANCg25aH
+K41u++1xvYSvUnNHJP8BAMza1OEAAIj4qSePvuO3xy1WZFgOYQx/eZVhvmfF4I7oBQDs6xHhuP8Z
+puU2u5c2t8TvzHB4uehd9Ska+ff2x4wAoB2PCMcoMDD07Z/7i3oGJoQCwBFmhlRSS63vlt5AO7UA
+gAua73Awou8CAEstWKVSTvJ4p3bWo372/wAA32hm46/6opJhajBp3bKXcu7nbAkrZQuWMK9wmaya
+OAcAAAA0pKuMDviIBwB2YadRAAAAAAAAAIDPiy4iXaE8NW3FOWqnYTEtAFd2S/+PQEv77axVNq6X
+bW7b2bUMAD7iNvryvmyfAAA4zsRZKsGNQeObkJbK8YUtG57W31I+lTOfHOIJbp9aeSpeQgC4iNo+
+HMOhltFoSyUpBeYrLBq7qb9rxVP5cjLD2Uot/W8kASQALu8Z4dhr3mhwdmQfYOhb/Xi2caP84zUK
+vqjM0PwMAHjl2eHYd8bo7lb0gXKfI/54eUrcoSUEgIs4+dbmuy+92V4SALigWyPtcVwOWsRvO6KO
+lWJMJgWLDQCnNLEl13Bexbp1GaPchqnxDINPVXyw8K9meAhyAEBDjo4HiDcAwDu1OIdDMAAATqaV
+Rv2dG2cdcXAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ/ULzGetS97yp6YAAAAA
+SUVORK5CYII=" class="r-stretch"></section>
+<section>
+<section id="aside-bits" class="title-slide slide level1 center">
+<h1>Aside: Bits</h1>
+
+</section>
+<section id="pulling-back-the-curtain" class="slide level2">
+<h2>Pulling back the curtain</h2>
+<ul>
+<li>I’m insane.</li>
+<li>I ran this then screendumped (in QEMU) to <code>fs.ppm</code></li>
+<li>I converted to <code>.png</code></li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">"from PIL import Image; Image.open('fs.ppm').save('fs.png')"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>I <code>base64</code> the PNG.
+<ul>
+<li>See next slide.</li>
+</ul></li>
+</ul>
+</section>
+<section id="its-tiny" class="slide level2">
+<h2>It’s tiny!</h2>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a></a><span class="ex">$</span> base64 fs.png <span class="kw">|</span> <span class="fu">wc</span></span>
+<span id="cb12-2"><a></a>     <span class="ex">25</span>      25    1861</span>
+<span id="cb12-3"><a></a><span class="ex">$</span> base64 fs.png</span>
+<span id="cb12-4"><a></a><span class="ex">iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAFJ0lEQVR4nO3dyXaDIBQAUMzp//9y</span></span>
+<span id="cb12-5"><a></a><span class="ex">ujAlVgw+p4TovasaFKEb8DGlBAAAAPDtuvv9nlLquq6/Hl3W9TdP3l9JakS9hLNVa7ZeANCg25aH</span></span>
+<span id="cb12-6"><a></a><span class="ex">K41u++1xvYSvUnNHJP8BAMza1OEAAIj4qSePvuO3xy1WZFgOYQx/eZVhvmfF4I7oBQDs6xHhuP8Z</span></span>
+<span id="cb12-7"><a></a><span class="ex">puU2u5c2t8TvzHB4uehd9Ska+ff2x4wAoB2PCMcoMDD07Z/7i3oGJoQCwBFmhlRSS63vlt5AO7UA</span></span>
+<span id="cb12-8"><a></a><span class="ex">gAua73Awou8CAEstWKVSTvJ4p3bWo372/wAA32hm46/6opJhajBp3bKXcu7nbAkrZQuWMK9wmaya</span></span>
+<span id="cb12-9"><a></a><span class="ex">OAcAAAA0pKuMDviIBwB2YadRAAAAAAAAAIDPiy4iXaE8NW3FOWqnYTEtAFd2S/+PQEv77axVNq6X</span></span>
+<span id="cb12-10"><a></a><span class="ex">bW7b2bUMAD7iNvryvmyfAAA4zsRZKsGNQeObkJbK8YUtG57W31I+lTOfHOIJbp9aeSpeQgC4iNo+</span></span>
+<span id="cb12-11"><a></a><span class="ex">HMOhltFoSyUpBeYrLBq7qb9rxVP5cjLD2Uot/W8kASQALu8Z4dhr3mhwdmQfYOhb/Xi2caP84zUK</span></span>
+<span id="cb12-12"><a></a><span class="ex">vqjM0PwMAHjl2eHYd8bo7lb0gXKfI/54eUrcoSUEgIs4+dbmuy+92V4SALigWyPtcVwOWsRvO6KO</span></span>
+<span id="cb12-13"><a></a><span class="ex">lWJMJgWLDQCnNLEl13Bexbp1GaPchqnxDINPVXyw8K9meAhyAEBDjo4HiDcAwDu1OIdDMAAATqaV</span></span>
+<span id="cb12-14"><a></a><span class="ex">Rv2dG2cdcXAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-15"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-16"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-17"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-18"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-19"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-20"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-21"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-22"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-23"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-24"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-25"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-26"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</span></span>
+<span id="cb12-27"><a></a><span class="ex">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ/ULzGetS97yp6YAAAAA</span></span>
+<span id="cb12-28"><a></a><span class="va">SUVORK5CYII</span><span class="op">=</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="to-html" class="slide level2">
+<h2>To HTML</h2>
+<ul>
+<li>I read <a href="https://stackoverflow.com/a/8499716">this stackoverflow answer</a></li>
+<li>It contains this snippet</li>
+</ul>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb13-1"><a></a><span class="dt">&lt;</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb13-2"><a></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Taken from wikpedia<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-3"><a></a>  <span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAUA</span></span>
+<span id="cb13-4"><a></a><span class="st">    AAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO</span></span>
+<span id="cb13-5"><a></a><span class="st">        9TXL0Y4OHwAAAABJRU5ErkJggg=="</span><span class="ot"> alt</span><span class="op">=</span><span class="st">"Red dot"</span><span class="ot"> </span><span class="dt">/&gt;</span></span>
+<span id="cb13-6"><a></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>I only need this:</li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb14-1"><a></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">"data:image/png;base64, "</span><span class="dt">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="here-it-is" class="slide level2">
+<h2>Here it is</h2>
+<ul>
+<li>And then I placed that exact HTML within my Markdown.
+<ul>
+<li>With the <code>base64</code> PNG data within.</li>
+</ul></li>
+</ul>
+
+<img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAFJ0lEQVR4nO3dyXaDIBQAUMzp//9y
+ujAlVgw+p4TovasaFKEb8DGlBAAAAPDtuvv9nlLquq6/Hl3W9TdP3l9JakS9hLNVa7ZeANCg25aH
+K41u++1xvYSvUnNHJP8BAMza1OEAAIj4qSePvuO3xy1WZFgOYQx/eZVhvmfF4I7oBQDs6xHhuP8Z
+puU2u5c2t8TvzHB4uehd9Ska+ff2x4wAoB2PCMcoMDD07Z/7i3oGJoQCwBFmhlRSS63vlt5AO7UA
+gAua73Awou8CAEstWKVSTvJ4p3bWo372/wAA32hm46/6opJhajBp3bKXcu7nbAkrZQuWMK9wmaya
+OAcAAAA0pKuMDviIBwB2YadRAAAAAAAAAIDPiy4iXaE8NW3FOWqnYTEtAFd2S/+PQEv77axVNq6X
+bW7b2bUMAD7iNvryvmyfAAA4zsRZKsGNQeObkJbK8YUtG57W31I+lTOfHOIJbp9aeSpeQgC4iNo+
+HMOhltFoSyUpBeYrLBq7qb9rxVP5cjLD2Uot/W8kASQALu8Z4dhr3mhwdmQfYOhb/Xi2caP84zUK
+vqjM0PwMAHjl2eHYd8bo7lb0gXKfI/54eUrcoSUEgIs4+dbmuy+92V4SALigWyPtcVwOWsRvO6KO
+lWJMJgWLDQCnNLEl13Bexbp1GaPchqnxDINPVXyw8K9meAhyAEBDjo4HiDcAwDu1OIdDMAAATqaV
+Rv2dG2cdcXAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ/ULzGetS97yp6YAAAAA
+SUVORK5CYII=" class="r-stretch"></section>
+<section id="by-the-way" class="slide level2">
+<h2>By the way</h2>
+<ul>
+<li>You can use that as a URL.</li>
+<li><a href="data:image/png;base64,%20iVBORw0KGgoAAAANSUhEUgAAAtAAAAGQCAIAAAAIhcA6AAAFJ0lEQVR4nO3dyXaDIBQAUMzp//9y%20ujAlVgw+p4TovasaFKEb8DGlBAAAAPDtuvv9nlLquq6/Hl3W9TdP3l9JakS9hLNVa7ZeANCg25aH%20K41u++1xvYSvUnNHJP8BAMza1OEAAIj4qSePvuO3xy1WZFgOYQx/eZVhvmfF4I7oBQDs6xHhuP8Z%20puU2u5c2t8TvzHB4uehd9Ska+ff2x4wAoB2PCMcoMDD07Z/7i3oGJoQCwBFmhlRSS63vlt5AO7UA%20gAua73Awou8CAEstWKVSTvJ4p3bWo372/wAA32hm46/6opJhajBp3bKXcu7nbAkrZQuWMK9wmaya%20OAcAAAA0pKuMDviIBwB2YadRAAAAAAAAAIDPiy4iXaE8NW3FOWqnYTEtAFd2S/+PQEv77axVNq6X%20bW7b2bUMAD7iNvryvmyfAAA4zsRZKsGNQeObkJbK8YUtG57W31I+lTOfHOIJbp9aeSpeQgC4iNo+%20HMOhltFoSyUpBeYrLBq7qb9rxVP5cjLD2Uot/W8kASQALu8Z4dhr3mhwdmQfYOhb/Xi2caP84zUK%20vqjM0PwMAHjl2eHYd8bo7lb0gXKfI/54eUrcoSUEgIs4+dbmuy+92V4SALigWyPtcVwOWsRvO6KO%20lWJMJgWLDQCnNLEl13Bexbp1GaPchqnxDINPVXyw8K9meAhyAEBDjo4HiDcAwDu1OIdDMAAATqaV%20Rv2dG2cdcXAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA%20AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZ/ULzGetS97yp6YAAAAA%20SUVORK5CYII=">Click me</a></li>
+<li>Okay back to work.</li>
+</ul>
+</section>
+<section id="wait-just-kidding" class="slide level2">
+<h2>Wait Just Kidding</h2>
+<ul>
+<li>Manually edit the data.</li>
+<li>Delete <em>exactly</em> 24 <code>A</code> values in the big block.
+<ul>
+<li>24 values at 6 bits of information each yields 144 bits or 18 bytes.</li>
+<li>What do you see?</li>
+<li>What if you delete not a multiple of 24?</li>
+<li>What if you delete a different 24?</li>
+</ul></li>
+</ul>
+</section>
+<section id="quote-me" class="slide level2">
+<h2>Quote Me</h2>
+<blockquote>
+<p>“They’re my bits, in my computer - let me use them!”</p>
+</blockquote>
+</section></section>
+<section>
+<section id="back-to-work" class="title-slide slide level1 center">
+<h1>Back to Work</h1>
+
+</section>
+<section id="recall" class="slide level2">
+<h2>Recall</h2>
+<ul>
+<li>Rust is trying to get us to write Java instead of C.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb15" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb15-2"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb15-3"><a></a>    <span class="pp">println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb15-4"><a></a>    <span class="cf">for</span> test <span class="kw">in</span> tests <span class="op">{</span></span>
+<span id="cb15-5"><a></a>        test()<span class="op">;</span></span>
+<span id="cb15-6"><a></a>    <span class="op">}</span></span>
+<span id="cb15-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="outsmart-rust" class="slide level2">
+<h2>Outsmart Rust</h2>
+<ul>
+<li>Ignore the argument via <code>_</code></li>
+<li>Include the stuff from inside <code>_start</code>.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb16" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb16-2"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_runner(_tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb16-3"><a></a>    <span class="kw">let</span> fs <span class="op">=</span> [hi<span class="op">,</span> bye]<span class="op">;</span></span>
+<span id="cb16-4"><a></a>    <span class="pp">println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> fs<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb16-5"><a></a>    <span class="cf">for</span> f <span class="kw">in</span> fs <span class="op">{</span></span>
+<span id="cb16-6"><a></a>        f()<span class="op">;</span></span>
+<span id="cb16-7"><a></a>    <span class="op">}</span></span>
+<span id="cb16-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Probably change <code>main</code> too so you know what is running, mine says “I’m main”.</li>
+</ul>
+</section>
+<section id="check-it" class="slide level2">
+<h2>Check it</h2>
+<ul>
+<li>You can run the tests via:</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="ex">cargo</span> +nightly t</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Wow that <code>+nightly</code> is getting annoying.
+<ul>
+<li>Time for an aside.</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
+<section id="aside-nightly" class="title-slide slide level1 center">
+<h1>Aside: Nightly</h1>
+
+</section>
+<section id="back-to-stack" class="slide level2">
+<h2>Back to Stack</h2>
+<ul>
+<li>I love stackoverflow.
+<ul>
+<li>Too bad it is slowly being incinerated by generative AI</li>
+<li>Surely this will lead to no long-term problems.</li>
+</ul></li>
+<li>Check out <a href="https://stackoverflow.com/questions/67094650/set-a-project-to-use-nightly-by-default">this answer</a></li>
+</ul>
+</section>
+<section id="it-states" class="slide level2">
+<h2>It states</h2>
+<blockquote>
+<p>you can add a rust-toolchain.toml file, for example</p>
+</blockquote>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>rust-toolchain.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb18" data-filename="rust-toolchain.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb18-1"><a></a><span class="kw">[toolchain]</span></span>
+<span id="cb18-2"><a></a><span class="dt">channel</span> <span class="op">=</span> <span class="st">"nightly"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>I am doing this now.</li>
+</ul>
+</section>
+<section id="what-i-see" class="slide level2">
+<h2>What I see</h2>
+<ul>
+<li>I removed my <code>target</code> for clarity.</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="ex">$</span> rm <span class="at">-rf</span> target/</span>
+<span id="cb19-2"><a></a><span class="ex">$</span> tree</span>
+<span id="cb19-3"><a></a><span class="bu">.</span></span>
+<span id="cb19-4"><a></a><span class="ex">├──</span> Cargo.lock</span>
+<span id="cb19-5"><a></a><span class="ex">├──</span> Cargo.toml</span>
+<span id="cb19-6"><a></a><span class="ex">├──</span> rust-toolchain.toml</span>
+<span id="cb19-7"><a></a><span class="ex">├──</span> src</span>
+<span id="cb19-8"><a></a><span class="ex">│&nbsp;&nbsp;</span> ├── main.rs</span>
+<span id="cb19-9"><a></a><span class="ex">│&nbsp;&nbsp;</span> └── vga.rs</span>
+<span id="cb19-10"><a></a><span class="ex">└──</span> x86_64-osirs.json</span>
+<span id="cb19-11"><a></a></span>
+<span id="cb19-12"><a></a><span class="ex">1</span> directory, 6 files</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="the-other-way" class="slide level2">
+<h2>The other way</h2>
+<ul>
+<li>If you wish to use nightly in all projects, you can check <a href="https://stackoverflow.com/a/65644807">this answer</a>.</li>
+<li>There are a variety of intermediate ways, of course.</li>
+<li>Okay back to work.</li>
+</ul>
+</section></section>
+<section>
+<section id="back-to-work-1" class="title-slide slide level1 center">
+<h1>Back to Work</h1>
+
+</section>
+<section id="recall-1" class="slide level2">
+<h2>Recall</h2>
+<ul>
+<li>We were trying to run tests.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb20-1"><a></a><span class="ex">cargo</span> t <span class="co"># FINALLY</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>You may notice this is just running <code>_start</code>.</li>
+<li>That is because <code>src/main.rs</code> is a fan of the Black Eyed Peas.
+<ul>
+<li><a href="https://www.youtube.com/watch?v=IKqV7DB8Iwg">Learn more</a></li>
+<li>Note to Calvin - do not click that in class.</li>
+</ul></li>
+</ul>
+</section>
+<section id="surprise" class="slide level2">
+<h2>Surprise!</h2>
+<ul>
+<li>Something not going as planned on the first try?</li>
+<li>Our <code>_start</code> function is still used as entry point.
+<ul>
+<li>It is, after all, the <code>_start</code> function.</li>
+</ul></li>
+</ul>
+</section>
+<section id="the-problem" class="slide level2">
+<h2>The Problem</h2>
+<ul>
+<li>The custom test frameworks feature generates a <code>main</code> function that calls <code>test_runner</code>
+<ul>
+<li>What is it for? Software?</li>
+<li>Might as well use Kotlin!</li>
+</ul></li>
+<li>Our OS, of course, never calls <code>main</code>.</li>
+</ul>
+</section>
+<section id="maybe-problem" class="slide level2">
+<h2>Maybe problem</h2>
+<ul>
+<li>If you see “duplicate lang item” expand:</li>
+</ul>
+<details>
+<p><strong>Note:</strong> There is currently a bug in cargo that leads to “duplicate lang item” errors on <code>cargo test</code> in some cases. It occurs when you have set <code>panic = "abort"</code> for a profile in your <code>Cargo.toml</code>. Try removing it, then <code>cargo test</code> should work. Alternatively, if that doesn’t work, then add <code>panic-abort-tests = true</code> to the <code>[unstable]</code> section of your <code>.cargo/config.toml</code> file. See the <a href="https://github.com/rust-lang/cargo/issues/7359">cargo issue</a> for more information on this.</p>
+</details>
+</section>
+<section id="fine-ill-do-it-myself" class="slide level2">
+<h2>Fine, I’ll do it myself</h2>
+<ul>
+<li>Simply call <code>test_runner</code> from <code>_start</code>
+<ul>
+<li>It needs a borrowed array of whatevers, so give it one.</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb21" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb21-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb21-3"><a></a>    <span class="pp">println!</span>(<span class="st">"I'm main."</span>)<span class="op">;</span></span>
+<span id="cb21-4"><a></a>    test_runner(<span class="op">&amp;</span>[])<span class="op">;</span></span>
+<span id="cb21-5"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb21-6"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="only-problem" class="slide level2">
+<h2>Only problem</h2>
+<ul>
+<li>What if we <code>run</code> instead of <code>test</code>?</li>
+</ul>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb22-1"><a></a><span class="ex">$</span> cargo r</span>
+<span id="cb22-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/work</span><span class="kw">)</span></span>
+<span id="cb22-3"><a></a><span class="va">error</span><span class="op">[</span>E0423<span class="op">]</span><span class="ex">:</span> expected function, found built-in attribute <span class="kw">`</span><span class="ex">test_runner</span><span class="kw">`</span></span>
+<span id="cb22-4"><a></a>  <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:26:5</span>
+<span id="cb22-5"><a></a>   <span class="kw">|</span></span>
+<span id="cb22-6"><a></a><span class="ex">26</span> <span class="kw">|</span>     <span class="ex">test_runner</span><span class="er">(</span><span class="kw">&amp;</span><span class="ex">[]</span><span class="kw">);</span></span>
+<span id="cb22-7"><a></a>   <span class="kw">|</span>     <span class="ex">^^^^^^^^^^^</span> not a function</span>
+<span id="cb22-8"><a></a>   <span class="kw">|</span></span>
+<span id="cb22-9"><a></a><span class="ex">note:</span> found an item that was configured out</span>
+<span id="cb22-10"><a></a>  <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:9:4</span>
+<span id="cb22-11"><a></a>   <span class="kw">|</span></span>
+<span id="cb22-12"><a></a> <span class="ex">8</span> <span class="kw">|</span> <span class="co">#[cfg(test)]</span></span>
+<span id="cb22-13"><a></a>   <span class="kw">|</span>       <span class="ex">----</span> the item is gated here</span>
+<span id="cb22-14"><a></a> <span class="ex">9</span> <span class="kw">|</span> <span class="ex">fn</span> test_runner<span class="er">(</span><span class="ex">_tests:</span> <span class="kw">&amp;</span><span class="ex">[</span><span class="kw">&amp;</span><span class="ex">dyn</span> Fn<span class="er">(</span><span class="kw">)</span><span class="ex">]</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb22-15"><a></a>   <span class="kw">|</span>    <span class="ex">^^^^^^^^^^^</span></span>
+<span id="cb22-16"><a></a></span>
+<span id="cb22-17"><a></a><span class="ex">For</span> more information about this error, try <span class="kw">`</span><span class="ex">rustc</span> <span class="at">--explain</span> E0423<span class="kw">`</span>.</span>
+<span id="cb22-18"><a></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">osirs</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"osirs"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="conditional-compilation" class="slide level2">
+<h2>Conditional Compilation</h2>
+<ul>
+<li>We need to <em>conditionally</em> compile <code>_start</code> to either call <code>test_runner</code> or not.</li>
+<li>No problem, we already know how to do this!</li>
+<li><code>#[cfg(test)]</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb23" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb23-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb23-3"><a></a>    <span class="pp">println!</span>(<span class="st">"I'm main{}"</span><span class="op">,</span> <span class="st">"."</span>)<span class="op">;</span></span>
+<span id="cb23-4"><a></a></span>
+<span id="cb23-5"><a></a>    <span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb23-6"><a></a>    test_runner(<span class="op">&amp;</span>[])<span class="op">;</span></span>
+<span id="cb23-7"><a></a></span>
+<span id="cb23-8"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb23-9"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="only-problem-1" class="slide level2">
+<h2>Only problem</h2>
+<ul>
+<li>What if we <code>run</code> instead of <code>test</code>?</li>
+</ul>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a></a><span class="ex">$</span> cargo r</span>
+<span id="cb24-2"><a></a>   <span class="ex">Compiling</span> osirs v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/work</span><span class="kw">)</span></span>
+<span id="cb24-3"><a></a><span class="ex">warning:</span> function <span class="kw">`</span><span class="ex">hi</span><span class="kw">`</span> is never used</span>
+<span id="cb24-4"><a></a>  <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:32:4</span>
+<span id="cb24-5"><a></a>   <span class="kw">|</span></span>
+<span id="cb24-6"><a></a><span class="ex">32</span> <span class="kw">|</span> <span class="ex">fn</span> hi<span class="er">(</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb24-7"><a></a>   <span class="kw">|</span>    <span class="ex">^^</span></span>
+<span id="cb24-8"><a></a>   <span class="kw">|</span></span>
+<span id="cb24-9"><a></a>   <span class="ex">=</span> note: <span class="kw">`</span><span class="co">#[warn(dead_code)]</span><span class="kw">`</span> <span class="er">(</span><span class="ex">part</span> of <span class="kw">`</span><span class="co">#[warn(unused)]</span><span class="kw">`)</span> <span class="ex">on</span> by default</span>
+<span id="cb24-10"><a></a></span>
+<span id="cb24-11"><a></a><span class="ex">warning:</span> function <span class="kw">`</span><span class="ex">bye</span><span class="kw">`</span> is never used</span>
+<span id="cb24-12"><a></a>  <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:37:4</span>
+<span id="cb24-13"><a></a>   <span class="kw">|</span></span>
+<span id="cb24-14"><a></a><span class="ex">37</span> <span class="kw">|</span> <span class="ex">fn</span> bye<span class="er">(</span><span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb24-15"><a></a>   <span class="kw">|</span>    <span class="ex">^^^</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="correct-way" class="slide level2">
+<h2>Correct Way</h2>
+<ul>
+<li>There is a correct way to solve this.</li>
+<li>Separately, there is the opposite: my way.</li>
+<li>I renamed them with a <code>_</code> prefix.</li>
+</ul>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb25-1"><a></a>    <span class="cf">for</span> f <span class="kw">in</span> [_hi<span class="op">,</span> _bye] <span class="op">{</span></span>
+<span id="cb25-2"><a></a>        f()<span class="op">;</span></span>
+<span id="cb25-3"><a></a>    <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="todo" class="slide level2">
+<h2>Todo</h2>
+<p>We are now ready to create our first test function:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb26-2"><a></a></span>
+<span id="cb26-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb26-4"><a></a><span class="kw">fn</span> trivial_assertion() <span class="op">{</span></span>
+<span id="cb26-5"><a></a>    <span class="pp">print!</span>(<span class="st">"trivial assertion... "</span>)<span class="op">;</span></span>
+<span id="cb26-6"><a></a>    <span class="pp">assert_eq!</span>(<span class="dv">1</span><span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb26-7"><a></a>    <span class="pp">println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb26-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we run <code>cargo test</code> now, we see the following output:</p>
+
+<img data-src="qemu-test-runner-output.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU printing “Hello World!”, “Running 1 tests”, and “trivial assertion… [ok]”</p><p>The <code>tests</code> slice passed to our <code>test_runner</code> function now contains a reference to the <code>trivial_assertion</code> function. From the <code>trivial assertion... [ok]</code> output on the screen, we see that the test was called and that it succeeded.</p>
+<p>After executing the tests, our <code>test_runner</code> returns to the <code>test_main</code> function, which in turn returns to our <code>_start</code> entry point function. At the end of <code>_start</code>, we enter an endless loop because the entry point function is not allowed to return. This is a problem, because we want <code>cargo test</code> to exit after running all tests.</p>
+</section>
+<section id="exiting-qemu" class="slide level2">
+<h2>Exiting QEMU</h2>
+<p>Right now, we have an endless loop at the end of our <code>_start</code> function and need to close QEMU manually on each execution of <code>cargo test</code>. This is unfortunate because we also want to run <code>cargo test</code> in scripts without user interaction. The clean solution to this would be to implement a proper way to shutdown our OS. Unfortunately, this is relatively complex because it requires implementing support for either the <a href="https://wiki.osdev.org/APM">APM</a> or <a href="https://wiki.osdev.org/ACPI">ACPI</a> power management standard.</p>
+<p>Luckily, there is an escape hatch: QEMU supports a special <code>isa-debug-exit</code> device, which provides an easy way to exit QEMU from the guest system. To enable it, we need to pass a <code>-device</code> argument to QEMU. We can do so by adding a <code>package.metadata.bootimage.test-args</code> configuration key in our <code>Cargo.toml</code>:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb27-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb27-2"><a></a></span>
+<span id="cb27-3"><a></a><span class="kw">[package.metadata.bootimage]</span></span>
+<span id="cb27-4"><a></a><span class="dt">test-args</span> <span class="op">=</span> <span class="op">[</span><span class="st">"-device"</span><span class="op">,</span> <span class="st">"isa-debug-exit,iobase=0xf4,iosize=0x04"</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>bootimage runner</code> appends the <code>test-args</code> to the default QEMU command for all test executables. For a normal <code>cargo run</code>, the arguments are ignored.</p>
+<p>Together with the device name (<code>isa-debug-exit</code>), we pass the two parameters <code>iobase</code> and <code>iosize</code> that specify the <em>I/O port</em> through which the device can be reached from our kernel.</p>
+<h3 id="io-ports">I/O Ports</h3>
+<p>There are two different approaches for communicating between the CPU and peripheral hardware on x86, <strong>memory-mapped I/O</strong> and <strong>port-mapped I/O</strong>. We already used memory-mapped I/O for accessing the <a href="@/edition-2/posts/03-vga-text-buffer/index.md">VGA text buffer</a> through the memory address <code>0xb8000</code>. This address is not mapped to RAM but to some memory on the VGA device.</p>
+<p>In contrast, port-mapped I/O uses a separate I/O bus for communication. Each connected peripheral has one or more port numbers. To communicate with such an I/O port, there are special CPU instructions called <code>in</code> and <code>out</code>, which take a port number and a data byte (there are also variations of these commands that allow sending a <code>u16</code> or <code>u32</code>).</p>
+<p>The <code>isa-debug-exit</code> device uses port-mapped I/O. The <code>iobase</code> parameter specifies on which port address the device should live (<code>0xf4</code> is a <a href="https://wiki.osdev.org/I/O_Ports#The_list">generally unused</a> port on the x86’s IO bus) and the <code>iosize</code> specifies the port size (<code>0x04</code> means four bytes).</p>
+<h3 id="using-the-exit-device">Using the Exit Device</h3>
+<p>The functionality of the <code>isa-debug-exit</code> device is very simple. When a <code>value</code> is written to the I/O port specified by <code>iobase</code>, it causes QEMU to exit with <a href="https://en.wikipedia.org/wiki/Exit_status">exit status</a> <code>(value &lt;&lt; 1) | 1</code>. So when we write <code>0</code> to the port, QEMU will exit with exit status <code>(0 &lt;&lt; 1) | 1 = 1</code>, and when we write <code>1</code> to the port, it will exit with exit status <code>(1 &lt;&lt; 1) | 1 = 3</code>.</p>
+<p>Instead of manually invoking the <code>in</code> and <code>out</code> assembly instructions, we use the abstractions provided by the <a href="https://docs.rs/x86_64/0.14.2/x86_64/"><code>x86_64</code></a> crate. To add a dependency on that crate, we add it to the <code>dependencies</code> section in our <code>Cargo.toml</code>:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb28-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb28-2"><a></a></span>
+<span id="cb28-3"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb28-4"><a></a><span class="dt">x86_64</span> <span class="op">=</span> <span class="st">"0.14.2"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now we can use the <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/port/struct.Port.html"><code>Port</code></a> type provided by the crate to create an <code>exit_qemu</code> function:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb29-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb29-2"><a></a></span>
+<span id="cb29-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="op">,</span> <span class="bu">PartialEq</span><span class="op">,</span> <span class="bu">Eq</span><span class="at">)]</span></span>
+<span id="cb29-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u32</span><span class="at">)]</span></span>
+<span id="cb29-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> QemuExitCode <span class="op">{</span></span>
+<span id="cb29-6"><a></a>    <span class="cn">Success</span> <span class="op">=</span> <span class="dv">0x10</span><span class="op">,</span></span>
+<span id="cb29-7"><a></a>    Failed <span class="op">=</span> <span class="dv">0x11</span><span class="op">,</span></span>
+<span id="cb29-8"><a></a><span class="op">}</span></span>
+<span id="cb29-9"><a></a></span>
+<span id="cb29-10"><a></a><span class="kw">pub</span> <span class="kw">fn</span> exit_qemu(exit_code<span class="op">:</span> QemuExitCode) <span class="op">{</span></span>
+<span id="cb29-11"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb29-12"><a></a></span>
+<span id="cb29-13"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb29-14"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0xf4</span>)<span class="op">;</span></span>
+<span id="cb29-15"><a></a>        port<span class="op">.</span>write(exit_code <span class="kw">as</span> <span class="dt">u32</span>)<span class="op">;</span></span>
+<span id="cb29-16"><a></a>    <span class="op">}</span></span>
+<span id="cb29-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The function creates a new <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/port/struct.Port.html"><code>Port</code></a> at <code>0xf4</code>, which is the <code>iobase</code> of the <code>isa-debug-exit</code> device. Then it writes the passed exit code to the port. We use <code>u32</code> because we specified the <code>iosize</code> of the <code>isa-debug-exit</code> device as 4 bytes. Both operations are unsafe because writing to an I/O port can generally result in arbitrary behavior.</p>
+<p>To specify the exit status, we create a <code>QemuExitCode</code> enum. The idea is to exit with the success exit code if all tests succeeded and with the failure exit code otherwise. The enum is marked as <code>#[repr(u32)]</code> to represent each variant by a <code>u32</code> integer. We use the exit code <code>0x10</code> for success and <code>0x11</code> for failure. The actual exit codes don’t matter much, as long as they don’t clash with the default exit codes of QEMU. For example, using exit code <code>0</code> for success is not a good idea because it becomes <code>(0 &lt;&lt; 1) | 1 = 1</code> after the transformation, which is the default exit code when QEMU fails to run. So we could not differentiate a QEMU error from a successful test run.</p>
+<p>We can now update our <code>test_runner</code> to exit QEMU after all tests have run:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb30-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb30-2"><a></a></span>
+<span id="cb30-3"><a></a><span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb30-4"><a></a>    <span class="pp">println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb30-5"><a></a>    <span class="cf">for</span> test <span class="kw">in</span> tests <span class="op">{</span></span>
+<span id="cb30-6"><a></a>        test()<span class="op">;</span></span>
+<span id="cb30-7"><a></a>    <span class="op">}</span></span>
+<span id="cb30-8"><a></a>    <span class="co">/// new</span></span>
+<span id="cb30-9"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb30-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we run <code>cargo test</code> now, we see that QEMU immediately closes after executing the tests. The problem is that <code>cargo test</code> interprets the test as failed even though we passed our <code>Success</code> exit code:</p>
+<pre><code>&gt; cargo test
+    Finished dev [unoptimized + debuginfo] target(s) in 0.03s
+     Running target/x86_64-blog_os/debug/deps/blog_os-5804fc7d2dd4c9be
+Building bootloader
+   Compiling bootloader v0.5.3 (/home/philipp/Documents/bootloader)
+    Finished release [optimized + debuginfo] target(s) in 1.07s
+Running: `qemu-system-x86_64 -drive format=raw,file=/…/target/x86_64-blog_os/debug/
+    deps/bootimage-blog_os-5804fc7d2dd4c9be.bin -device isa-debug-exit,iobase=0xf4,
+    iosize=0x04`
+error: test failed, to rerun pass '--bin blog_os'</code></pre>
+<p>The problem is that <code>cargo test</code> considers all error codes other than <code>0</code> as failure.</p>
+<h3 id="success-exit-code">Success Exit Code</h3>
+<p>To work around this, <code>bootimage</code> provides a <code>test-success-exit-code</code> configuration key that maps a specified exit code to the exit code <code>0</code>:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb32-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb32-2"><a></a></span>
+<span id="cb32-3"><a></a><span class="kw">[package.metadata.bootimage]</span></span>
+<span id="cb32-4"><a></a><span class="dt">test-args</span> <span class="op">=</span> <span class="op">[</span><span class="er">…</span><span class="op">]</span></span>
+<span id="cb32-5"><a></a><span class="dt">test-success-exit-code</span> <span class="op">=</span> <span class="dv">33</span>         <span class="co"># (0x10 &lt;&lt; 1) | 1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>With this configuration, <code>bootimage</code> maps our success exit code to exit code 0, so that <code>cargo test</code> correctly recognizes the success case and does not count the test as failed.</p>
+<p>Our test runner now automatically closes QEMU and correctly reports the test results. We still see the QEMU window open for a very short time, but it does not suffice to read the results. It would be nice if we could print the test results to the console instead, so we can still see them after QEMU exits.</p>
+</section>
+<section id="printing-to-the-console" class="slide level2">
+<h2>Printing to the Console</h2>
+<p>To see the test output on the console, we need to send the data from our kernel to the host system somehow. There are various ways to achieve this, for example, by sending the data over a TCP network interface. However, setting up a networking stack is quite a complex task, so we will choose a simpler solution instead.</p>
+<h3 id="serial-port">Serial Port</h3>
+<p>A simple way to send the data is to use the <a href="https://en.wikipedia.org/wiki/Serial_port">serial port</a>, an old interface standard which is no longer found in modern computers. It is easy to program and QEMU can redirect the bytes sent over serial to the host’s standard output or a file.</p>
+<p>The chips implementing a serial interface are called <a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter">UARTs</a>. There are <a href="https://en.wikipedia.org/wiki/Universal_asynchronous_receiver-transmitter#Models">lots of UART models</a> on x86, but fortunately the only differences between them are some advanced features we don’t need. The common UARTs today are all compatible with the <a href="https://en.wikipedia.org/wiki/16550_UART">16550 UART</a>, so we will use that model for our testing framework.</p>
+<p>We will use the <a href="https://docs.rs/uart_16550"><code>uart_16550</code></a> crate to initialize the UART and send data over the serial port. To add it as a dependency, we update our <code>Cargo.toml</code> and <code>main.rs</code>:</p>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb33-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb33-2"><a></a></span>
+<span id="cb33-3"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb33-4"><a></a><span class="dt">uart_16550</span> <span class="op">=</span> <span class="st">"0.2.0"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>uart_16550</code> crate contains a <code>SerialPort</code> struct that represents the UART registers, but we still need to construct an instance of it ourselves. For that, we create a new <code>serial</code> module with the following content:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb34-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb34-2"><a></a></span>
+<span id="cb34-3"><a></a><span class="kw">mod</span> serial<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb35-1"><a></a><span class="co">// in src/serial.rs</span></span>
+<span id="cb35-2"><a></a></span>
+<span id="cb35-3"><a></a><span class="kw">use</span> <span class="pp">uart_16550::</span>SerialPort<span class="op">;</span></span>
+<span id="cb35-4"><a></a><span class="kw">use</span> <span class="pp">spin::</span>Mutex<span class="op">;</span></span>
+<span id="cb35-5"><a></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
+<span id="cb35-6"><a></a></span>
+<span id="cb35-7"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb35-8"><a></a>    <span class="kw">pub</span> <span class="kw">static</span> <span class="kw">ref</span> SERIAL1<span class="op">:</span> Mutex<span class="op">&lt;</span>SerialPort<span class="op">&gt;</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb35-9"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> serial_port <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">SerialPort::</span>new(<span class="dv">0x3F8</span>) <span class="op">};</span></span>
+<span id="cb35-10"><a></a>        serial_port<span class="op">.</span>init()<span class="op">;</span></span>
+<span id="cb35-11"><a></a>        <span class="pp">Mutex::</span>new(serial_port)</span>
+<span id="cb35-12"><a></a>    <span class="op">};</span></span>
+<span id="cb35-13"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Like with the <a href="@/edition-2/posts/03-vga-text-buffer/index.md#lazy-statics">VGA text buffer</a>, we use <code>lazy_static</code> and a spinlock to create a <code>static</code> writer instance. By using <code>lazy_static</code> we can ensure that the <code>init</code> method is called exactly once on its first use.</p>
+<p>Like the <code>isa-debug-exit</code> device, the UART is programmed using port I/O. Since the UART is more complex, it uses multiple I/O ports for programming different device registers. The unsafe <code>SerialPort::new</code> function expects the address of the first I/O port of the UART as an argument, from which it can calculate the addresses of all needed ports. We’re passing the port address <code>0x3F8</code>, which is the standard port number for the first serial interface.</p>
+<p>To make the serial port easily usable, we add <code>serial_print!</code> and <code>serial_println!</code> macros:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb36-1"><a></a><span class="co">// in src/serial.rs</span></span>
+<span id="cb36-2"><a></a></span>
+<span id="cb36-3"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
+<span id="cb36-4"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">::core::fmt::</span>Arguments) <span class="op">{</span></span>
+<span id="cb36-5"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
+<span id="cb36-6"><a></a>    SERIAL1<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>expect(<span class="st">"Printing to serial failed"</span>)<span class="op">;</span></span>
+<span id="cb36-7"><a></a><span class="op">}</span></span>
+<span id="cb36-8"><a></a></span>
+<span id="cb36-9"><a></a><span class="co">/// Prints to the host through the serial interface.</span></span>
+<span id="cb36-10"><a></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
+<span id="cb36-11"><a></a><span class="pp">macro_rules!</span> serial_print <span class="op">{</span></span>
+<span id="cb36-12"><a></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb36-13"><a></a>        <span class="op">$</span><span class="pp">crate::serial::</span>_print(<span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>))<span class="op">;</span></span>
+<span id="cb36-14"><a></a>    <span class="op">};</span></span>
+<span id="cb36-15"><a></a><span class="op">}</span></span>
+<span id="cb36-16"><a></a></span>
+<span id="cb36-17"><a></a><span class="co">/// Prints to the host through the serial interface, appending a newline.</span></span>
+<span id="cb36-18"><a></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
+<span id="cb36-19"><a></a><span class="pp">macro_rules!</span> serial_println <span class="op">{</span></span>
+<span id="cb36-20"><a></a>    () <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::serial_print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
+<span id="cb36-21"><a></a>    (<span class="op">$</span>fmt<span class="op">:</span>expr) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::serial_print!</span>(<span class="pp">concat!</span>(<span class="op">$</span>fmt<span class="op">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)))<span class="op">;</span></span>
+<span id="cb36-22"><a></a>    (<span class="op">$</span>fmt<span class="op">:</span>expr<span class="op">,</span> <span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::serial_print!</span>(</span>
+<span id="cb36-23"><a></a>        <span class="pp">concat!</span>(<span class="op">$</span>fmt<span class="op">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)<span class="op">,</span> <span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>))<span class="op">;</span></span>
+<span id="cb36-24"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The implementation is very similar to the implementation of our <code>print</code> and <code>println</code> macros. Since the <code>SerialPort</code> type already implements the <a href="https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html"><code>fmt::Write</code></a> trait, we don’t need to provide our own implementation.</p>
+<p>Now we can print to the serial interface instead of the VGA text buffer in our test code:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb37-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb37-2"><a></a></span>
+<span id="cb37-3"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb37-4"><a></a><span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb37-5"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb37-6"><a></a>    […]</span>
+<span id="cb37-7"><a></a><span class="op">}</span></span>
+<span id="cb37-8"><a></a></span>
+<span id="cb37-9"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb37-10"><a></a><span class="kw">fn</span> trivial_assertion() <span class="op">{</span></span>
+<span id="cb37-11"><a></a>    <span class="pp">serial_print!</span>(<span class="st">"trivial assertion... "</span>)<span class="op">;</span></span>
+<span id="cb37-12"><a></a>    <span class="pp">assert_eq!</span>(<span class="dv">1</span><span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb37-13"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb37-14"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that the <code>serial_println</code> macro lives directly under the root namespace because we used the <code>#[macro_export]</code> attribute, so importing it through <code>use crate::serial::serial_println</code> will not work.</p>
+<h3 id="qemu-arguments">QEMU Arguments</h3>
+<p>To see the serial output from QEMU, we need to use the <code>-serial</code> argument to redirect the output to stdout:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb38-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb38-2"><a></a></span>
+<span id="cb38-3"><a></a><span class="kw">[package.metadata.bootimage]</span></span>
+<span id="cb38-4"><a></a><span class="dt">test-args</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb38-5"><a></a>    <span class="st">"-device"</span><span class="op">,</span> <span class="st">"isa-debug-exit,iobase=0xf4,iosize=0x04"</span><span class="op">,</span> <span class="st">"-serial"</span><span class="op">,</span> <span class="st">"stdio"</span></span>
+<span id="cb38-6"><a></a><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we run <code>cargo test</code> now, we see the test output directly in the console:</p>
+<pre><code>&gt; cargo test
+    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
+     Running target/x86_64-blog_os/debug/deps/blog_os-7b7c37b4ad62551a
+Building bootloader
+    Finished release [optimized + debuginfo] target(s) in 0.02s
+Running: `qemu-system-x86_64 -drive format=raw,file=/…/target/x86_64-blog_os/debug/
+    deps/bootimage-blog_os-7b7c37b4ad62551a.bin -device
+    isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio`
+Running 1 tests
+trivial assertion... [ok]</code></pre>
+<p>However, when a test fails, we still see the output inside QEMU because our panic handler still uses <code>println</code>. To simulate this, we can change the assertion in our <code>trivial_assertion</code> test to <code>assert_eq!(0, 1)</code>:</p>
+
+<img data-src="qemu-failed-test.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU printing “Hello World!” and “panicked at ‘assertion failed: <code>(left == right)</code> left: <code>0</code>, right: <code>1</code>’, src/main.rs:55:5</p><p>We see that the panic message is still printed to the VGA buffer, while the other test output is printed to the serial port. The panic message is quite useful, so it would be useful to see it in the console too.</p>
+<h3 id="print-an-error-message-on-panic">Print an Error Message on Panic</h3>
+<p>To exit QEMU with an error message on a panic, we can use <a href="https://doc.rust-lang.org/1.30.0/book/first-edition/conditional-compilation.html">conditional compilation</a> to use a different panic handler in testing mode:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb40-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb40-2"><a></a></span>
+<span id="cb40-3"><a></a><span class="co">// our existing panic handler</span></span>
+<span id="cb40-4"><a></a><span class="at">#[</span>cfg<span class="at">(</span>not<span class="at">(</span>test<span class="at">))]</span> <span class="co">// new attribute</span></span>
+<span id="cb40-5"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb40-6"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb40-7"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb40-8"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb40-9"><a></a><span class="op">}</span></span>
+<span id="cb40-10"><a></a></span>
+<span id="cb40-11"><a></a><span class="co">// our panic handler in test mode</span></span>
+<span id="cb40-12"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb40-13"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb40-14"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb40-15"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[failed]</span><span class="sc">\n</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb40-16"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Error: {}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb40-17"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
+<span id="cb40-18"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb40-19"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For our test panic handler, we use <code>serial_println</code> instead of <code>println</code> and then exit QEMU with a failure exit code. Note that we still need an endless <code>loop</code> after the <code>exit_qemu</code> call because the compiler does not know that the <code>isa-debug-exit</code> device causes a program exit.</p>
+<p>Now QEMU also exits for failed tests and prints a useful error message on the console:</p>
+<pre><code>&gt; cargo test
+    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
+     Running target/x86_64-blog_os/debug/deps/blog_os-7b7c37b4ad62551a
+Building bootloader
+    Finished release [optimized + debuginfo] target(s) in 0.02s
+Running: `qemu-system-x86_64 -drive format=raw,file=/…/target/x86_64-blog_os/debug/
+    deps/bootimage-blog_os-7b7c37b4ad62551a.bin -device
+    isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio`
+Running 1 tests
+trivial assertion... [failed]
+
+Error: panicked at 'assertion failed: `(left == right)`
+  left: `0`,
+ right: `1`', src/main.rs:65:5</code></pre>
+<p>Since we see all test output on the console now, we no longer need the QEMU window that pops up for a short time. So we can hide it completely.</p>
+<h3 id="hiding-qemu">Hiding QEMU</h3>
+<p>Since we report out the complete test results using the <code>isa-debug-exit</code> device and the serial port, we don’t need the QEMU window anymore. We can hide it by passing the <code>-display none</code> argument to QEMU:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb42-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb42-2"><a></a></span>
+<span id="cb42-3"><a></a><span class="kw">[package.metadata.bootimage]</span></span>
+<span id="cb42-4"><a></a><span class="dt">test-args</span> <span class="op">=</span> <span class="op">[</span></span>
+<span id="cb42-5"><a></a>    <span class="st">"-device"</span><span class="op">,</span> <span class="st">"isa-debug-exit,iobase=0xf4,iosize=0x04"</span><span class="op">,</span> <span class="st">"-serial"</span><span class="op">,</span> <span class="st">"stdio"</span><span class="op">,</span></span>
+<span id="cb42-6"><a></a>    <span class="st">"-display"</span><span class="op">,</span> <span class="st">"none"</span></span>
+<span id="cb42-7"><a></a><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now QEMU runs completely in the background and no window gets opened anymore. This is not only less annoying, but also allows our test framework to run in environments without a graphical user interface, such as CI services or <a href="https://en.wikipedia.org/wiki/Secure_Shell">SSH</a> connections.</p>
+<h3 id="timeouts">Timeouts</h3>
+<p>Since <code>cargo test</code> waits until the test runner exits, a test that never returns can block the test runner forever. That’s unfortunate, but not a big problem in practice since it’s usually easy to avoid endless loops. In our case, however, endless loops can occur in various situations:</p>
+<ul>
+<li>The bootloader fails to load our kernel, which causes the system to reboot endlessly.</li>
+<li>The BIOS/UEFI firmware fails to load the bootloader, which causes the same endless rebooting.</li>
+<li>The CPU enters a <code>loop {}</code> statement at the end of some of our functions, for example because the QEMU exit device doesn’t work properly.</li>
+<li>The hardware causes a system reset, for example when a CPU exception is not caught (explained in a future post).</li>
+</ul>
+<p>Since endless loops can occur in so many situations, the <code>bootimage</code> tool sets a timeout of 5 minutes for each test executable by default. If the test does not finish within this time, it is marked as failed and a “Timed Out” error is printed to the console. This feature ensures that tests that are stuck in an endless loop don’t block <code>cargo test</code> forever.</p>
+<p>You can try it yourself by adding a <code>loop {}</code> statement in the <code>trivial_assertion</code> test. When you run <code>cargo test</code>, you see that the test is marked as timed out after 5 minutes. The timeout duration is <a href="https://github.com/rust-osdev/bootimage#configuration">configurable</a> through a <code>test-timeout</code> key in the Cargo.toml:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb43-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb43-2"><a></a></span>
+<span id="cb43-3"><a></a><span class="kw">[package.metadata.bootimage]</span></span>
+<span id="cb43-4"><a></a><span class="dt">test-timeout</span> <span class="op">=</span> <span class="dv">300</span>          <span class="co"># (in seconds)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you don’t want to wait 5 minutes for the <code>trivial_assertion</code> test to time out, you can temporarily decrease the above value.</p>
+<h3 id="insert-printing-automatically">Insert Printing Automatically</h3>
+<p>Our <code>trivial_assertion</code> test currently needs to print its own status information using <code>serial_print!</code>/<code>serial_println!</code>:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb44-1"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb44-2"><a></a><span class="kw">fn</span> trivial_assertion() <span class="op">{</span></span>
+<span id="cb44-3"><a></a>    <span class="pp">serial_print!</span>(<span class="st">"trivial assertion... "</span>)<span class="op">;</span></span>
+<span id="cb44-4"><a></a>    <span class="pp">assert_eq!</span>(<span class="dv">1</span><span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb44-5"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb44-6"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Manually adding these print statements for every test we write is cumbersome, so let’s update our <code>test_runner</code> to print these messages automatically. To do that, we need to create a new <code>Testable</code> trait:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb45-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb45-2"><a></a></span>
+<span id="cb45-3"><a></a><span class="kw">pub</span> <span class="kw">trait</span> Testable <span class="op">{</span></span>
+<span id="cb45-4"><a></a>    <span class="kw">fn</span> run(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> ()<span class="op">;</span></span>
+<span id="cb45-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The trick now is to implement this trait for all types <code>T</code> that implement the <a href="https://doc.rust-lang.org/stable/core/ops/trait.Fn.html"><code>Fn()</code> trait</a>:</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb46-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb46-2"><a></a></span>
+<span id="cb46-3"><a></a><span class="kw">impl</span><span class="op">&lt;</span>T<span class="op">&gt;</span> Testable <span class="cf">for</span> T</span>
+<span id="cb46-4"><a></a><span class="kw">where</span></span>
+<span id="cb46-5"><a></a>    T<span class="op">:</span> <span class="bu">Fn</span>()<span class="op">,</span></span>
+<span id="cb46-6"><a></a><span class="op">{</span></span>
+<span id="cb46-7"><a></a>    <span class="kw">fn</span> run(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb46-8"><a></a>        <span class="pp">serial_print!</span>(<span class="st">"{}...</span><span class="sc">\t</span><span class="st">"</span><span class="op">,</span> <span class="pp">core::any::type_name::</span><span class="op">&lt;</span>T<span class="op">&gt;</span>())<span class="op">;</span></span>
+<span id="cb46-9"><a></a>        <span class="kw">self</span>()<span class="op">;</span></span>
+<span id="cb46-10"><a></a>        <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb46-11"><a></a>    <span class="op">}</span></span>
+<span id="cb46-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We implement the <code>run</code> function by first printing the function name using the <a href="https://doc.rust-lang.org/stable/core/any/fn.type_name.html"><code>any::type_name</code></a> function. This function is implemented directly in the compiler and returns a string description of every type. For functions, the type is their name, so this is exactly what we want in this case. The <code>\t</code> character is the <a href="https://en.wikipedia.org/wiki/Tab_character">tab character</a>, which adds some alignment to the <code>[ok]</code> messages.</p>
+<p>After printing the function name, we invoke the test function through <code>self()</code>. This only works because we require that <code>self</code> implements the <code>Fn()</code> trait. After the test function returns, we print <code>[ok]</code> to indicate that the function did not panic.</p>
+<p>The last step is to update our <code>test_runner</code> to use the new <code>Testable</code> trait:</p>
+<div class="sourceCode" id="cb47"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb47-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb47-2"><a></a></span>
+<span id="cb47-3"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb47-4"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> Testable]) <span class="op">{</span> <span class="co">// new</span></span>
+<span id="cb47-5"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb47-6"><a></a>    <span class="cf">for</span> test <span class="kw">in</span> tests <span class="op">{</span></span>
+<span id="cb47-7"><a></a>        test<span class="op">.</span>run()<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb47-8"><a></a>    <span class="op">}</span></span>
+<span id="cb47-9"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb47-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The only two changes are the type of the <code>tests</code> argument from <code>&amp;[&amp;dyn Fn()]</code> to <code>&amp;[&amp;dyn Testable]</code> and the fact that we now call <code>test.run()</code> instead of <code>test()</code>.</p>
+<p>We can now remove the print statements from our <code>trivial_assertion</code> test since they’re now printed automatically:</p>
+<div class="sourceCode" id="cb48"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb48-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb48-2"><a></a></span>
+<span id="cb48-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb48-4"><a></a><span class="kw">fn</span> trivial_assertion() <span class="op">{</span></span>
+<span id="cb48-5"><a></a>    <span class="pp">assert_eq!</span>(<span class="dv">1</span><span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb48-6"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>cargo test</code> output now looks like this:</p>
+<pre><code>Running 1 tests
+blog_os::trivial_assertion...   [ok]</code></pre>
+<p>The function name now includes the full path to the function, which is useful when test functions in different modules have the same name. Otherwise, the output looks the same as before, but we no longer need to add print statements to our tests manually.</p>
+</section>
+<section id="testing-the-vga-buffer" class="slide level2">
+<h2>Testing the VGA Buffer</h2>
+<p>Now that we have a working test framework, we can create a few tests for our VGA buffer implementation. First, we create a very simple test to verify that <code>println</code> works without panicking:</p>
+<div class="sourceCode" id="cb50"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb50-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb50-2"><a></a></span>
+<span id="cb50-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb50-4"><a></a><span class="kw">fn</span> test_println_simple() <span class="op">{</span></span>
+<span id="cb50-5"><a></a>    <span class="pp">println!</span>(<span class="st">"test_println_simple output"</span>)<span class="op">;</span></span>
+<span id="cb50-6"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The test just prints something to the VGA buffer. If it finishes without panicking, it means that the <code>println</code> invocation did not panic either.</p>
+<p>To ensure that no panic occurs even if many lines are printed and lines are shifted off the screen, we can create another test:</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb51-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb51-2"><a></a></span>
+<span id="cb51-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb51-4"><a></a><span class="kw">fn</span> test_println_many() <span class="op">{</span></span>
+<span id="cb51-5"><a></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">200</span> <span class="op">{</span></span>
+<span id="cb51-6"><a></a>        <span class="pp">println!</span>(<span class="st">"test_println_many output"</span>)<span class="op">;</span></span>
+<span id="cb51-7"><a></a>    <span class="op">}</span></span>
+<span id="cb51-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can also create a test function to verify that the printed lines really appear on the screen:</p>
+<div class="sourceCode" id="cb52"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb52-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb52-2"><a></a></span>
+<span id="cb52-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb52-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
+<span id="cb52-5"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Some test string that fits on a single line"</span><span class="op">;</span></span>
+<span id="cb52-6"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> s)<span class="op">;</span></span>
+<span id="cb52-7"><a></a>    <span class="cf">for</span> (i<span class="op">,</span> c) <span class="kw">in</span> s<span class="op">.</span>chars()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb52-8"><a></a>        <span class="kw">let</span> screen_char <span class="op">=</span> WRITER<span class="op">.</span>lock()<span class="op">.</span>buffer<span class="op">.</span>chars[BUFFER_HEIGHT <span class="op">-</span> <span class="dv">2</span>][i]<span class="op">.</span>read()<span class="op">;</span></span>
+<span id="cb52-9"><a></a>        <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
+<span id="cb52-10"><a></a>    <span class="op">}</span></span>
+<span id="cb52-11"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The function defines a test string, prints it using <code>println</code>, and then iterates over the screen characters of the static <code>WRITER</code>, which represents the VGA text buffer. Since <code>println</code> prints to the last screen line and then immediately appends a newline, the string should appear on line <code>BUFFER_HEIGHT - 2</code>.</p>
+<p>By using <a href="https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.enumerate"><code>enumerate</code></a>, we count the number of iterations in the variable <code>i</code>, which we then use for loading the screen character corresponding to <code>c</code>. By comparing the <code>ascii_character</code> of the screen character with <code>c</code>, we ensure that each character of the string really appears in the VGA text buffer.</p>
+<p>As you can imagine, we could create many more test functions. For example, a function that tests that no panic occurs when printing very long lines and that they’re wrapped correctly, or a function for testing that newlines, non-printable characters, and non-unicode characters are handled correctly.</p>
+<p>For the rest of this post, however, we will explain how to create <em>integration tests</em> to test the interaction of different components together.</p>
+</section>
+<section id="integration-tests" class="slide level2">
+<h2>Integration Tests</h2>
+<p>The convention for <a href="https://doc.rust-lang.org/book/ch11-03-test-organization.html#integration-tests">integration tests</a> in Rust is to put them into a <code>tests</code> directory in the project root (i.e., next to the <code>src</code> directory). Both the default test framework and custom test frameworks will automatically pick up and execute all tests in that directory.</p>
+<p>All integration tests are their own executables and completely separate from our <code>main.rs</code>. This means that each test needs to define its own entry point function. Let’s create an example integration test named <code>basic_boot</code> to see how it works in detail:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb53-1"><a></a><span class="co">// in tests/basic_boot.rs</span></span>
+<span id="cb53-2"><a></a></span>
+<span id="cb53-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb53-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb53-5"><a></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb53-6"><a></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="kw">crate</span><span class="pp">::</span>test_runner<span class="at">)]</span></span>
+<span id="cb53-7"><a></a><span class="at">#![</span>reexport_test_harness_main <span class="op">=</span> <span class="st">"test_main"</span><span class="at">]</span></span>
+<span id="cb53-8"><a></a></span>
+<span id="cb53-9"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb53-10"><a></a></span>
+<span id="cb53-11"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb53-12"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb53-13"><a></a>    test_main()<span class="op">;</span></span>
+<span id="cb53-14"><a></a></span>
+<span id="cb53-15"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb53-16"><a></a><span class="op">}</span></span>
+<span id="cb53-17"><a></a></span>
+<span id="cb53-18"><a></a><span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb53-19"><a></a>    <span class="pp">unimplemented!</span>()<span class="op">;</span></span>
+<span id="cb53-20"><a></a><span class="op">}</span></span>
+<span id="cb53-21"><a></a></span>
+<span id="cb53-22"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb53-23"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb53-24"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb53-25"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Since integration tests are separate executables, we need to provide all the crate attributes (<code>no_std</code>, <code>no_main</code>, <code>test_runner</code>, etc.) again. We also need to create a new entry point function <code>_start</code>, which calls the test entry point function <code>test_main</code>. We don’t need any <code>cfg(test)</code> attributes because integration test executables are never built in non-test mode.</p>
+<p>We use the <a href="https://doc.rust-lang.org/core/macro.unimplemented.html"><code>unimplemented</code></a> macro that always panics as a placeholder for the <code>test_runner</code> function and just <code>loop</code> in the <code>panic</code> handler for now. Ideally, we want to implement these functions exactly as we did in our <code>main.rs</code> using the <code>serial_println</code> macro and the <code>exit_qemu</code> function. The problem is that we don’t have access to these functions since tests are built completely separately from our <code>main.rs</code> executable.</p>
+<p>If you run <code>cargo test</code> at this stage, you will get an endless loop because the panic handler loops endlessly. You need to use the <code>ctrl+c</code> keyboard shortcut for exiting QEMU.</p>
+<h3 id="create-a-library">Create a Library</h3>
+<p>To make the required functions available to our integration test, we need to split off a library from our <code>main.rs</code>, which can be included by other crates and integration test executables. To do this, we create a new <code>src/lib.rs</code> file:</p>
+<div class="sourceCode" id="cb54"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb54-1"><a></a><span class="co">// src/lib.rs</span></span>
+<span id="cb54-2"><a></a></span>
+<span id="cb54-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Like the <code>main.rs</code>, the <code>lib.rs</code> is a special file that is automatically recognized by cargo. The library is a separate compilation unit, so we need to specify the <code>#![no_std]</code> attribute again.</p>
+<p>To make our library work with <code>cargo test</code>, we need to also move the test functions and attributes from <code>main.rs</code> to <code>lib.rs</code>:</p>
+<div class="sourceCode" id="cb55"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb55-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb55-2"><a></a></span>
+<span id="cb55-3"><a></a><span class="at">#![</span>cfg_attr<span class="at">(</span>test<span class="op">,</span> no_main<span class="at">)]</span></span>
+<span id="cb55-4"><a></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb55-5"><a></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="kw">crate</span><span class="pp">::</span>test_runner<span class="at">)]</span></span>
+<span id="cb55-6"><a></a><span class="at">#![</span>reexport_test_harness_main <span class="op">=</span> <span class="st">"test_main"</span><span class="at">]</span></span>
+<span id="cb55-7"><a></a></span>
+<span id="cb55-8"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb55-9"><a></a></span>
+<span id="cb55-10"><a></a><span class="kw">pub</span> <span class="kw">trait</span> Testable <span class="op">{</span></span>
+<span id="cb55-11"><a></a>    <span class="kw">fn</span> run(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">-&gt;</span> ()<span class="op">;</span></span>
+<span id="cb55-12"><a></a><span class="op">}</span></span>
+<span id="cb55-13"><a></a></span>
+<span id="cb55-14"><a></a><span class="kw">impl</span><span class="op">&lt;</span>T<span class="op">&gt;</span> Testable <span class="cf">for</span> T</span>
+<span id="cb55-15"><a></a><span class="kw">where</span></span>
+<span id="cb55-16"><a></a>    T<span class="op">:</span> <span class="bu">Fn</span>()<span class="op">,</span></span>
+<span id="cb55-17"><a></a><span class="op">{</span></span>
+<span id="cb55-18"><a></a>    <span class="kw">fn</span> run(<span class="op">&amp;</span><span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb55-19"><a></a>        <span class="pp">serial_print!</span>(<span class="st">"{}...</span><span class="sc">\t</span><span class="st">"</span><span class="op">,</span> <span class="pp">core::any::type_name::</span><span class="op">&lt;</span>T<span class="op">&gt;</span>())<span class="op">;</span></span>
+<span id="cb55-20"><a></a>        <span class="kw">self</span>()<span class="op">;</span></span>
+<span id="cb55-21"><a></a>        <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb55-22"><a></a>    <span class="op">}</span></span>
+<span id="cb55-23"><a></a><span class="op">}</span></span>
+<span id="cb55-24"><a></a></span>
+<span id="cb55-25"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> Testable]) <span class="op">{</span></span>
+<span id="cb55-26"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb55-27"><a></a>    <span class="cf">for</span> test <span class="kw">in</span> tests <span class="op">{</span></span>
+<span id="cb55-28"><a></a>        test<span class="op">.</span>run()<span class="op">;</span></span>
+<span id="cb55-29"><a></a>    <span class="op">}</span></span>
+<span id="cb55-30"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb55-31"><a></a><span class="op">}</span></span>
+<span id="cb55-32"><a></a></span>
+<span id="cb55-33"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_panic_handler(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb55-34"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[failed]</span><span class="sc">\n</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb55-35"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Error: {}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb55-36"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
+<span id="cb55-37"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb55-38"><a></a><span class="op">}</span></span>
+<span id="cb55-39"><a></a></span>
+<span id="cb55-40"><a></a><span class="co">/// Entry point for `cargo test`</span></span>
+<span id="cb55-41"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb55-42"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb55-43"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb55-44"><a></a>    test_main()<span class="op">;</span></span>
+<span id="cb55-45"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb55-46"><a></a><span class="op">}</span></span>
+<span id="cb55-47"><a></a></span>
+<span id="cb55-48"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb55-49"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb55-50"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb55-51"><a></a>    test_panic_handler(info)</span>
+<span id="cb55-52"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To make our <code>test_runner</code> available to executables and integration tests, we make it public and don’t apply the <code>cfg(test)</code> attribute to it. We also factor out the implementation of our panic handler into a public <code>test_panic_handler</code> function, so that it is available for executables too.</p>
+<p>Since our <code>lib.rs</code> is tested independently of our <code>main.rs</code>, we need to add a <code>_start</code> entry point and a panic handler when the library is compiled in test mode. By using the <a href="https://doc.rust-lang.org/reference/conditional-compilation.html#the-cfg_attr-attribute"><code>cfg_attr</code></a> crate attribute, we conditionally enable the <code>no_main</code> attribute in this case.</p>
+<p>We also move over the <code>QemuExitCode</code> enum and the <code>exit_qemu</code> function and make them public:</p>
+<div class="sourceCode" id="cb56"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb56-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb56-2"><a></a></span>
+<span id="cb56-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="op">,</span> <span class="bu">PartialEq</span><span class="op">,</span> <span class="bu">Eq</span><span class="at">)]</span></span>
+<span id="cb56-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u32</span><span class="at">)]</span></span>
+<span id="cb56-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> QemuExitCode <span class="op">{</span></span>
+<span id="cb56-6"><a></a>    <span class="cn">Success</span> <span class="op">=</span> <span class="dv">0x10</span><span class="op">,</span></span>
+<span id="cb56-7"><a></a>    Failed <span class="op">=</span> <span class="dv">0x11</span><span class="op">,</span></span>
+<span id="cb56-8"><a></a><span class="op">}</span></span>
+<span id="cb56-9"><a></a></span>
+<span id="cb56-10"><a></a><span class="kw">pub</span> <span class="kw">fn</span> exit_qemu(exit_code<span class="op">:</span> QemuExitCode) <span class="op">{</span></span>
+<span id="cb56-11"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb56-12"><a></a></span>
+<span id="cb56-13"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb56-14"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0xf4</span>)<span class="op">;</span></span>
+<span id="cb56-15"><a></a>        port<span class="op">.</span>write(exit_code <span class="kw">as</span> <span class="dt">u32</span>)<span class="op">;</span></span>
+<span id="cb56-16"><a></a>    <span class="op">}</span></span>
+<span id="cb56-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now executables and integration tests can import these functions from the library and don’t need to define their own implementations. To also make <code>println</code> and <code>serial_println</code> available, we move the module declarations too:</p>
+<div class="sourceCode" id="cb57"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb57-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb57-2"><a></a></span>
+<span id="cb57-3"><a></a><span class="kw">pub</span> <span class="kw">mod</span> serial<span class="op">;</span></span>
+<span id="cb57-4"><a></a><span class="kw">pub</span> <span class="kw">mod</span> vga_buffer<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We make the modules public to make them usable outside of our library. This is also required for making our <code>println</code> and <code>serial_println</code> macros usable since they use the <code>_print</code> functions of the modules.</p>
+<p>Now we can update our <code>main.rs</code> to use the library:</p>
+<div class="sourceCode" id="cb58"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb58-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb58-2"><a></a></span>
+<span id="cb58-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb58-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb58-5"><a></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb58-6"><a></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">blog_os::</span>test_runner<span class="at">)]</span></span>
+<span id="cb58-7"><a></a><span class="at">#![</span>reexport_test_harness_main <span class="op">=</span> <span class="st">"test_main"</span><span class="at">]</span></span>
+<span id="cb58-8"><a></a></span>
+<span id="cb58-9"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb58-10"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span>println<span class="op">;</span></span>
+<span id="cb58-11"><a></a></span>
+<span id="cb58-12"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb58-13"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb58-14"><a></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
+<span id="cb58-15"><a></a></span>
+<span id="cb58-16"><a></a>    <span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb58-17"><a></a>    test_main()<span class="op">;</span></span>
+<span id="cb58-18"><a></a></span>
+<span id="cb58-19"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb58-20"><a></a><span class="op">}</span></span>
+<span id="cb58-21"><a></a></span>
+<span id="cb58-22"><a></a><span class="co">/// This function is called on panic.</span></span>
+<span id="cb58-23"><a></a><span class="at">#[</span>cfg<span class="at">(</span>not<span class="at">(</span>test<span class="at">))]</span></span>
+<span id="cb58-24"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb58-25"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb58-26"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb58-27"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb58-28"><a></a><span class="op">}</span></span>
+<span id="cb58-29"><a></a></span>
+<span id="cb58-30"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb58-31"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb58-32"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb58-33"><a></a>    <span class="pp">blog_os::</span>test_panic_handler(info)</span>
+<span id="cb58-34"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The library is usable like a normal external crate. It is called <code>blog_os</code>, like our crate. The above code uses the <code>blog_os::test_runner</code> function in the <code>test_runner</code> attribute and the <code>blog_os::test_panic_handler</code> function in our <code>cfg(test)</code> panic handler. It also imports the <code>println</code> macro to make it available to our <code>_start</code> and <code>panic</code> functions.</p>
+<p>At this point, <code>cargo run</code> and <code>cargo test</code> should work again. Of course, <code>cargo test</code> still loops endlessly (you can exit with <code>ctrl+c</code>). Let’s fix this by using the required library functions in our integration test.</p>
+<h3 id="completing-the-integration-test">Completing the Integration Test</h3>
+<p>Like our <code>src/main.rs</code>, our <code>tests/basic_boot.rs</code> executable can import types from our new library. This allows us to import the missing components to complete our test:</p>
+<div class="sourceCode" id="cb59"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb59-1"><a></a><span class="co">// in tests/basic_boot.rs</span></span>
+<span id="cb59-2"><a></a></span>
+<span id="cb59-3"><a></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">blog_os::</span>test_runner<span class="at">)]</span></span>
+<span id="cb59-4"><a></a></span>
+<span id="cb59-5"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb59-6"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb59-7"><a></a>    <span class="pp">blog_os::</span>test_panic_handler(info)</span>
+<span id="cb59-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Instead of reimplementing the test runner, we use the <code>test_runner</code> function from our library by changing the <code>#![test_runner(crate::test_runner)]</code> attribute to <code>#![test_runner(blog_os::test_runner)]</code>. We then don’t need the <code>test_runner</code> stub function in <code>basic_boot.rs</code> anymore, so we can remove it. For our <code>panic</code> handler, we call the <code>blog_os::test_panic_handler</code> function like we did in our <code>main.rs</code>.</p>
+<p>Now <code>cargo test</code> exits normally again. When you run it, you will see that it builds and runs the tests for our <code>lib.rs</code>, <code>main.rs</code>, and <code>basic_boot.rs</code> separately after each other. For the <code>main.rs</code> and the <code>basic_boot</code> integration tests, it reports “Running 0 tests” since these files don’t have any functions annotated with <code>#[test_case]</code>.</p>
+<p>We can now add tests to our <code>basic_boot.rs</code>. For example, we can test that <code>println</code> works without panicking, like we did in the VGA buffer tests:</p>
+<div class="sourceCode" id="cb60"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb60-1"><a></a><span class="co">// in tests/basic_boot.rs</span></span>
+<span id="cb60-2"><a></a></span>
+<span id="cb60-3"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span>println<span class="op">;</span></span>
+<span id="cb60-4"><a></a></span>
+<span id="cb60-5"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb60-6"><a></a><span class="kw">fn</span> test_println() <span class="op">{</span></span>
+<span id="cb60-7"><a></a>    <span class="pp">println!</span>(<span class="st">"test_println output"</span>)<span class="op">;</span></span>
+<span id="cb60-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we run <code>cargo test</code> now, we see that it finds and executes the test function.</p>
+<p>The test might seem a bit useless right now since it’s almost identical to one of the VGA buffer tests. However, in the future, the <code>_start</code> functions of our <code>main.rs</code> and <code>lib.rs</code> might grow and call various initialization routines before running the <code>test_main</code> function, so that the two tests are executed in very different environments.</p>
+<p>By testing <code>println</code> in a <code>basic_boot</code> environment without calling any initialization routines in <code>_start</code>, we can ensure that <code>println</code> works right after booting. This is important because we rely on it, e.g., for printing panic messages.</p>
+<h3 id="future-tests">Future Tests</h3>
+<p>The power of integration tests is that they’re treated as completely separate executables. This gives them complete control over the environment, which makes it possible to test that the code interacts correctly with the CPU or hardware devices.</p>
+<p>Our <code>basic_boot</code> test is a very simple example of an integration test. In the future, our kernel will become much more featureful and interact with the hardware in various ways. By adding integration tests, we can ensure that these interactions work (and keep working) as expected. Some ideas for possible future tests are:</p>
+<ul>
+<li><strong>CPU Exceptions</strong>: When the code performs invalid operations (e.g., divides by zero), the CPU throws an exception. The kernel can register handler functions for such exceptions. An integration test could verify that the correct exception handler is called when a CPU exception occurs or that the execution continues correctly after a resolvable exception.</li>
+<li><strong>Page Tables</strong>: Page tables define which memory regions are valid and accessible. By modifying the page tables, it is possible to allocate new memory regions, for example when launching programs. An integration test could modify the page tables in the <code>_start</code> function and verify that the modifications have the desired effects in <code>#[test_case]</code> functions.</li>
+<li><strong>Userspace Programs</strong>: Userspace programs are programs with limited access to the system’s resources. For example, they don’t have access to kernel data structures or to the memory of other programs. An integration test could launch userspace programs that perform forbidden operations and verify that the kernel prevents them all.</li>
+</ul>
+<p>As you can imagine, many more tests are possible. By adding such tests, we can ensure that we don’t break them accidentally when we add new features to our kernel or refactor our code. This is especially important when our kernel becomes larger and more complex.</p>
+<h3 id="tests-that-should-panic">Tests that Should Panic</h3>
+<p>The test framework of the standard library supports a <a href="https://doc.rust-lang.org/rust-by-example/testing/unit_testing.html#testing-panics"><code>#[should_panic]</code> attribute</a> that allows constructing tests that should fail. This is useful, for example, to verify that a function fails when an invalid argument is passed. Unfortunately, this attribute isn’t supported in <code>#[no_std]</code> crates since it requires support from the standard library.</p>
+<p>While we can’t use the <code>#[should_panic]</code> attribute in our kernel, we can get similar behavior by creating an integration test that exits with a success error code from the panic handler. Let’s start creating such a test with the name <code>should_panic</code>:</p>
+<div class="sourceCode" id="cb61"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb61-1"><a></a><span class="co">// in tests/should_panic.rs</span></span>
+<span id="cb61-2"><a></a></span>
+<span id="cb61-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb61-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb61-5"><a></a></span>
+<span id="cb61-6"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb61-7"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span><span class="op">{</span>QemuExitCode<span class="op">,</span> exit_qemu<span class="op">,</span> serial_println<span class="op">};</span></span>
+<span id="cb61-8"><a></a></span>
+<span id="cb61-9"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb61-10"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb61-11"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb61-12"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb61-13"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb61-14"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This test is still incomplete as it doesn’t define a <code>_start</code> function or any of the custom test runner attributes yet. Let’s add the missing parts:</p>
+<div class="sourceCode" id="cb62"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb62-1"><a></a><span class="co">// in tests/should_panic.rs</span></span>
+<span id="cb62-2"><a></a></span>
+<span id="cb62-3"><a></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb62-4"><a></a><span class="at">#![</span>test_runner<span class="at">(</span>test_runner<span class="at">)]</span></span>
+<span id="cb62-5"><a></a><span class="at">#![</span>reexport_test_harness_main <span class="op">=</span> <span class="st">"test_main"</span><span class="at">]</span></span>
+<span id="cb62-6"><a></a></span>
+<span id="cb62-7"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb62-8"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb62-9"><a></a>    test_main()<span class="op">;</span></span>
+<span id="cb62-10"><a></a></span>
+<span id="cb62-11"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb62-12"><a></a><span class="op">}</span></span>
+<span id="cb62-13"><a></a></span>
+<span id="cb62-14"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_runner(tests<span class="op">:</span> <span class="op">&amp;</span>[<span class="op">&amp;</span><span class="kw">dyn</span> <span class="bu">Fn</span>()]) <span class="op">{</span></span>
+<span id="cb62-15"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Running {} tests"</span><span class="op">,</span> tests<span class="op">.</span>len())<span class="op">;</span></span>
+<span id="cb62-16"><a></a>    <span class="cf">for</span> test <span class="kw">in</span> tests <span class="op">{</span></span>
+<span id="cb62-17"><a></a>        test()<span class="op">;</span></span>
+<span id="cb62-18"><a></a>        <span class="pp">serial_println!</span>(<span class="st">"[test did not panic]"</span>)<span class="op">;</span></span>
+<span id="cb62-19"><a></a>        exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
+<span id="cb62-20"><a></a>    <span class="op">}</span></span>
+<span id="cb62-21"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb62-22"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Instead of reusing the <code>test_runner</code> from our <code>lib.rs</code>, the test defines its own <code>test_runner</code> function that exits with a failure exit code when a test returns without panicking (we want our tests to panic). If no test function is defined, the runner exits with a success error code. Since the runner always exits after running a single test, it does not make sense to define more than one <code>#[test_case]</code> function.</p>
+<p>Now we can create a test that should fail:</p>
+<div class="sourceCode" id="cb63"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb63-1"><a></a><span class="co">// in tests/should_panic.rs</span></span>
+<span id="cb63-2"><a></a></span>
+<span id="cb63-3"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span>serial_print<span class="op">;</span></span>
+<span id="cb63-4"><a></a></span>
+<span id="cb63-5"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb63-6"><a></a><span class="kw">fn</span> should_fail() <span class="op">{</span></span>
+<span id="cb63-7"><a></a>    <span class="pp">serial_print!</span>(<span class="st">"should_panic::should_fail...</span><span class="sc">\t</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb63-8"><a></a>    <span class="pp">assert_eq!</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb63-9"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The test uses <code>assert_eq</code> to assert that <code>0</code> and <code>1</code> are equal. Of course, this fails, so our test panics as desired. Note that we need to manually print the function name using <code>serial_print!</code> here because we don’t use the <code>Testable</code> trait.</p>
+<p>When we run the test through <code>cargo test --test should_panic</code> we see that it is successful because the test panicked as expected. When we comment out the assertion and run the test again, we see that it indeed fails with the <em>“test did not panic”</em> message.</p>
+<p>A significant drawback of this approach is that it only works for a single test function. With multiple <code>#[test_case]</code> functions, only the first function is executed because the execution cannot continue after the panic handler has been called. I currently don’t know of a good way to solve this problem, so let me know if you have an idea!</p>
+<h3 id="no-harness-tests">No Harness Tests</h3>
+<p>For integration tests that only have a single test function (like our <code>should_panic</code> test), the test runner isn’t really needed. For cases like this, we can disable the test runner completely and run our test directly in the <code>_start</code> function.</p>
+<p>The key to this is to disable the <code>harness</code> flag for the test in the <code>Cargo.toml</code>, which defines whether a test runner is used for an integration test. When it’s set to <code>false</code>, both the default test runner and the custom test runner feature are disabled, so that the test is treated like a normal executable.</p>
+<p>Let’s disable the <code>harness</code> flag for our <code>should_panic</code> test:</p>
+<div class="sourceCode" id="cb64"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb64-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb64-2"><a></a></span>
+<span id="cb64-3"><a></a><span class="kw">[[test]]</span></span>
+<span id="cb64-4"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"should_panic"</span></span>
+<span id="cb64-5"><a></a><span class="dt">harness</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now we vastly simplify our <code>should_panic</code> test by removing the <code>test_runner</code>-related code. The result looks like this:</p>
+<div class="sourceCode" id="cb65"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb65-1"><a></a><span class="co">// in tests/should_panic.rs</span></span>
+<span id="cb65-2"><a></a></span>
+<span id="cb65-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb65-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb65-5"><a></a></span>
+<span id="cb65-6"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb65-7"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span><span class="op">{</span>exit_qemu<span class="op">,</span> serial_print<span class="op">,</span> serial_println<span class="op">,</span> QemuExitCode<span class="op">};</span></span>
+<span id="cb65-8"><a></a></span>
+<span id="cb65-9"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb65-10"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb65-11"><a></a>    should_fail()<span class="op">;</span></span>
+<span id="cb65-12"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[test did not panic]"</span>)<span class="op">;</span></span>
+<span id="cb65-13"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
+<span id="cb65-14"><a></a>    <span class="cf">loop</span><span class="op">{}</span></span>
+<span id="cb65-15"><a></a><span class="op">}</span></span>
+<span id="cb65-16"><a></a></span>
+<span id="cb65-17"><a></a><span class="kw">fn</span> should_fail() <span class="op">{</span></span>
+<span id="cb65-18"><a></a>    <span class="pp">serial_print!</span>(<span class="st">"should_panic::should_fail...</span><span class="sc">\t</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb65-19"><a></a>    <span class="pp">assert_eq!</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb65-20"><a></a><span class="op">}</span></span>
+<span id="cb65-21"><a></a></span>
+<span id="cb65-22"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb65-23"><a></a><span class="kw">fn</span> panic(_info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb65-24"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb65-25"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb65-26"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb65-27"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We now call the <code>should_fail</code> function directly from our <code>_start</code> function and exit with a failure exit code if it returns. When we run <code>cargo test --test should_panic</code> now, we see that the test behaves exactly as before.</p>
+<p>Apart from creating <code>should_panic</code> tests, disabling the <code>harness</code> attribute can also be useful for complex integration tests, for example, when the individual test functions have side effects and need to be run in a specified order.</p>
+</section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<p>Testing is a very useful technique to ensure that certain components have the desired behavior. Even if they cannot show the absence of bugs, they’re still a useful tool for finding them and especially for avoiding regressions.</p>
+<p>This post explained how to set up a test framework for our Rust kernel. We used Rust’s custom test frameworks feature to implement support for a simple <code>#[test_case]</code> attribute in our bare-metal environment. Using the <code>isa-debug-exit</code> device of QEMU, our test runner can exit QEMU after running the tests and report the test status. To print error messages to the console instead of the VGA buffer, we created a basic driver for the serial port.</p>
+<p>After creating some tests for our <code>println</code> macro, we explored integration tests in the second half of the post. We learned that they live in the <code>tests</code> directory and are treated as completely separate executables. To give them access to the <code>exit_qemu</code> function and the <code>serial_println</code> macro, we moved most of our code into a library that can be imported by all executables and integration tests. Since integration tests run in their own separate environment, they make it possible to test interactions with the hardware or to create tests that should panic.</p>
+<p>We now have a test framework that runs in a realistic environment inside QEMU. By creating more tests in future posts, we can keep our kernel maintainable when it becomes more complex.</p>
+</section>
+<section id="whats-next" class="slide level2">
+<h2>What’s next?</h2>
+<p>In the next post, we will explore <em>CPU exceptions</em>. These exceptions are thrown by the CPU when something illegal happens, such as a division by zero or an access to an unmapped memory page (a so-called “page fault”). Being able to catch and examine these exceptions is very important for debugging future errors. Exception handling is also very similar to the handling of hardware interrupts, which is required for keyboard support.</p>
+</section></section>
+<section>
+<section id="fin" class="title-slide slide level1 center">
+<h1>Fin</h1>
+
+</section>
+<section id="timeout" class="slide level2">
+<h2>Timeout</h2>
+<ul>
+<li>This is 700 lines of markdown source which usually is enough.</li>
+<li>Otherwise we proceed to “Format”.</li>
+</ul>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p><a href="index.html">Home</a></p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
+      });
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>

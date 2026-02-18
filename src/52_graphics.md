@@ -304,7 +304,7 @@ https://cd-public.github.io/ai101/images/photo-cat.jpg
 ```{.email}
 https://www.leadvilletwinlakes.com/wp-content/themes/yootheme/cache/ba/View-of-Mount-Massive-LCTP-Cropped-scaled-ba58e696.webp
 ```
-- And maybe the best for testing, an Adobe Stock [rainbow](https://stock.adobe.com/search?k=rainbow&asset_id=114495172)
+- And maybe the best for testing, an Adobe Stock [rainbow](https://stock.adobe.com/search?k=rainbow&asset_id=114495172).
     - The url looked unstable so I'm [rehosting](https://cd-rs.github.io/os/img/rainbow.jpg).
     - Hopefully *I'm* hosting stably.
 ```{.sh}
