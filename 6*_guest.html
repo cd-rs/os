@@ -106,6 +106,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -309,9 +338,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="part-i" class="level2">
 <h2 class="anchored" data-anchor-id="part-i">Part I</h2>
 <ul>
-<li>Motivated by <em>Calvin Deutschbein Thought</em> on Rust: “It’s good because of error handling.</li>
+<li>Motivated by <em>Calvin Deutschbein Thought</em> on Rust: “It’s good because of error handling.”</li>
 <li>We welcome Jane Lusby, who is at high probability <a href="https://github.com/yaahc">this Jane Losare-Lusby</a></li>
-<li>Jane’s talk at RustConf 2020 is title “Error handling Isn’t All About Errors” and I find it’s thesis convincing.</li>
+<li>Jane’s talk at RustConf 2020 is titled “Error handling Isn’t All About Errors” and I find it’s thesis convincing.</li>
 <li>Here is a <a href="https://www.youtube.com/watch?v=rAF8mLI0naQ">direct link</a>.</li>
 <li>Here is an embed:</li>
 </ul>
@@ -321,14 +350,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="part-ii" class="level2">
 <h2 class="anchored" data-anchor-id="part-ii">Part II</h2>
 <ul>
-<li>Motivated by the planned extension for the final week of class, novel techniques in asynchronous computing.</li>
-<li>A great way to under <code>async</code> is write 20 lines of JavaScript.
+<li>Motivated by the planned extension for the final week of class, on asynchronous computing.</li>
+<li>A great way to understand <code>async</code> is write 20 lines of JavaScript.
 <ul>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function">Like this</a></li>
 </ul></li>
 <li>You should also be thinking about a looming problem.
 <ul>
-<li>What happens if you want to be updating the VGA text buffer to, for example, display an animation.</li>
+<li>What happens if you want to be updating the VGA text buffer to, for example, display an animation that changes ever <span class="math inline">\(n\)</span> nanoseconds.</li>
 <li>What happens if at the same time, you direct inputs into the OS through some means (to be introduced this and in coming weeks).</li>
 <li>How does the OS juggle timing-based and what we usually call <em>interrupt</em>-based (e.g.&nbsp;driven by exogenous factors) tasks?</li>
 </ul></li>
@@ -816,9 +845,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-9"><a href="#cb1-9"></a></span>
 <span id="cb1-10"><a href="#cb1-10"></a><span class="fu">## Part I </span></span>
 <span id="cb1-11"><a href="#cb1-11"></a></span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="ss">- </span>Motivated by *Calvin Deutschbein Thought* on Rust: "It's good because of error handling.</span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="ss">- </span>Motivated by *Calvin Deutschbein Thought* on Rust: "It's good because of error handling."</span>
 <span id="cb1-13"><a href="#cb1-13"></a><span class="ss">- </span>We welcome Jane Lusby, who is at high probability <span class="co">[</span><span class="ot">this Jane Losare-Lusby</span><span class="co">](https://github.com/yaahc)</span></span>
-<span id="cb1-14"><a href="#cb1-14"></a><span class="ss">- </span>Jane's talk at RustConf 2020 is title "Error handling Isn't All About Errors" and I find it's thesis convincing.</span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="ss">- </span>Jane's talk at RustConf 2020 is titled "Error handling Isn't All About Errors" and I find it's thesis convincing.</span>
 <span id="cb1-15"><a href="#cb1-15"></a><span class="ss">- </span>Here is a <span class="co">[</span><span class="ot">direct link</span><span class="co">](https://www.youtube.com/watch?v=rAF8mLI0naQ)</span>.</span>
 <span id="cb1-16"><a href="#cb1-16"></a><span class="ss">- </span>Here is an embed:</span>
 <span id="cb1-17"><a href="#cb1-17"></a></span>
@@ -826,11 +855,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-19"><a href="#cb1-19"></a></span>
 <span id="cb1-20"><a href="#cb1-20"></a><span class="fu">## Part II</span></span>
 <span id="cb1-21"><a href="#cb1-21"></a></span>
-<span id="cb1-22"><a href="#cb1-22"></a><span class="ss">- </span>Motivated by the planned extension for the final week of class, novel techniques in asynchronous computing.</span>
-<span id="cb1-23"><a href="#cb1-23"></a><span class="ss">- </span>A great way to under <span class="in">`async`</span> is write 20 lines of JavaScript.</span>
+<span id="cb1-22"><a href="#cb1-22"></a><span class="ss">- </span>Motivated by the planned extension for the final week of class, on asynchronous computing.</span>
+<span id="cb1-23"><a href="#cb1-23"></a><span class="ss">- </span>A great way to understand <span class="in">`async`</span> is write 20 lines of JavaScript.</span>
 <span id="cb1-24"><a href="#cb1-24"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Like this</span><span class="co">](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)</span></span>
 <span id="cb1-25"><a href="#cb1-25"></a><span class="ss">- </span>You should also be thinking about a looming problem.</span>
-<span id="cb1-26"><a href="#cb1-26"></a><span class="ss">    - </span>What happens if you want to be updating the VGA text buffer to, for example, display an animation.</span>
+<span id="cb1-26"><a href="#cb1-26"></a><span class="ss">    - </span>What happens if you want to be updating the VGA text buffer to, for example, display an animation that changes ever $n$ nanoseconds.</span>
 <span id="cb1-27"><a href="#cb1-27"></a><span class="ss">    - </span>What happens if at the same time, you direct inputs into the OS through some means (to be introduced this and in coming weeks).</span>
 <span id="cb1-28"><a href="#cb1-28"></a><span class="ss">    - </span>How does the OS juggle timing-based and what we usually call *interrupt*-based (e.g. driven by exogenous factors) tasks?</span>
 <span id="cb1-29"><a href="#cb1-29"></a><span class="ss">- </span>This essay is hosted on a talk webpage, and can be seen at <span class="co">[</span><span class="ot">https://sunshowers.io/posts/cancelling-async-rust/</span><span class="co">](https://sunshowers.io/posts/cancelling-async-rust/)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>

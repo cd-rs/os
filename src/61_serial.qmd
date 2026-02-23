@@ -3,7 +3,7 @@ title: Serial
 format: html
 ---
 
-## Recall
+# Your Task
 
 - We are trying to get automated testing working.
 - We can quickly open and close QEMU.
@@ -25,6 +25,17 @@ format: html
 
 > It was one of the earliest computer communication devices, used to attach teletypewriters for an operator console. It was also an early hardware system for the Internet. 
 
+
+## Two Parts
+
+We will proceed in two parts:
+1. [ ] Configure Rust to print to the serial port.
+2. [ ] Configure QEMU to display the messages relayed via the serial port to a terminal.
+
+There is also a mysterious third part, panic handling.
+
+# Rust
+
 ## Popular
 
 - UART 16550 is popular, nominally, so we'll use that.
@@ -32,55 +43,36 @@ format: html
 - There is, naturally, a [`uart_165001`](https://docs.rs/uart_16550) crate.
   - Add it to your dependencies in the expect manner (in `Cargo.toml`).
 
-## TODO
-```toml
-# in Cargo.toml
-
+```{.toml filename="cargo.toml" code-line-numbers="4"}
 [dependencies]
+bootloader = "0.9"
+x86_64 = "0.14.2"
 uart_16550 = "0.2.0"
 ```
 
-The `uart_16550` crate contains a `SerialPort` struct that represents the UART registers, but we still need to construct an instance of it ourselves. For that, we create a new `serial` module with the following content:
+## Using UART
 
-```rust
-// in src/main.rs
+- `uart_16550` implements a `SerialPort` struct.
+  	- It *represents* the UART registers.
+- Like `println`, I do this in a new file.
 
+### Add to Main
+
+```{.rs filename="src/main.rs"}
 mod serial;
 ```
 
-```rust
-// in src/serial.rs
+## Create Serial File
 
-use uart_16550::SerialPort;
-use spin::Mutex;
-use lazy_static::lazy_static;
+- Make a new file, `src/serial.rs`, that will implement functions which print to the serial ports.
+  	- Not to the VGA buffer!
+	- We will hope to eventually see the text in on host device.
+	  	- That is, the same command line we invoke `cargo t` from.
+- To begin, we will use the same `print` and `println` macros from `src/vga.rs`, but prepend them with "serial" so know they are for special external usage.
+	- This will probably look roughly as expected.
+	- It's a headache so I'm providing it.
 
-lazy_static! {
-    pub static ref SERIAL1: Mutex<SerialPort> = {
-        let mut serial_port = unsafe { SerialPort::new(0x3F8) };
-        serial_port.init();
-        Mutex::new(serial_port)
-    };
-}
-```
-
-Like with the [VGA text buffer][vga lazy-static], we use `lazy_static` and a spinlock to create a `static` writer instance. By using `lazy_static` we can ensure that the `init` method is called exactly once on its first use.
-
-Like the `isa-debug-exit` device, the UART is programmed using port I/O. Since the UART is more complex, it uses multiple I/O ports for programming different device registers. The unsafe `SerialPort::new` function expects the address of the first I/O port of the UART as an argument, from which it can calculate the addresses of all needed ports. We're passing the port address `0x3F8`, which is the standard port number for the first serial interface.
-
-[vga lazy-static]: @/edition-2/posts/03-vga-text-buffer/index.md#lazy-statics
-
-To make the serial port easily usable, we add `serial_print!` and `serial_println!` macros:
-
-```rust
-// in src/serial.rs
-
-#[doc(hidden)]
-pub fn _print(args: ::core::fmt::Arguments) {
-    use core::fmt::Write;
-    SERIAL1.lock().write_fmt(args).expect("Printing to serial failed");
-}
-
+```{.rs filename="src/serial.rs"}
 /// Prints to the host through the serial interface.
 #[macro_export]
 macro_rules! serial_print {
@@ -99,244 +91,353 @@ macro_rules! serial_println {
 }
 ```
 
-The implementation is very similar to the implementation of our `print` and `println` macros. Since the `SerialPort` type already implements the [`fmt::Write`] trait, we don't need to provide our own implementation.
+## `_print`
 
-[`fmt::Write`]: https://doc.rust-lang.org/nightly/core/fmt/trait.Write.html
+- With these macros furnished, all that remains is to implement the `_print` function which is called internally within the macros, namely in the most indented line of `serial_print`.
+- Vs. VGA, this will be much easier.
+  	- We don't need to worry about linbreaks.
+  	- We don't need to worry about newlines.
+	- We don't need to worry about scrolling.
+- In fact, we don't have to do any formatting at all!
+	- The `uart_16550::SerialPort` *already has* the `.write_fmt` Trait that we needed to implement `println` for the VGA buffer.
+- All that remains is to properly set up the serial port for printing (and to print to it).
 
-Now we can print to the serial interface instead of the VGA text buffer in our test code:
+## Recall
 
-```rust
-// in src/main.rs
+- My haters, of which there are many, may have been opinionated on how I got access to `.write_fmt` for the VGA buffer.
 
+```{.rs filename="src/vga.rs"}
+pub struct Dummy {}
+
+impl core::fmt::Write for Dummy {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        str_to_vga(s);
+        Ok(())
+    }
+}
+
+pub fn _print(args: core::fmt::Arguments) {
+    use core::fmt::Write;
+    let mut d = Dummy {};
+    d.write_fmt(args).unwrap();
+}
+```
+
+- We will only need to borrow `_print`, as `SerialPort` is already a (1) `struct` that (2) `impl core::fmt::Write`.
+
+## So...
+
+- Something like this.
+
+```{.rs filename="src/serial.rs"}
+pub fn _print(args: core::fmt::Arguments) {
+    use core::fmt::Write;
+    let mut serial_port = Dummy {};
+    serial_port.write_fmt(args).unwrap();
+}
+```
+
+- Instead of a `Dummy` we need a `uart_16500::SerialPort`.
+
+## Left as Exercise
+
+- Getting the rest of this to work is left as an exercise, and not too bad.
+- But you can't test it yet.
+
+# Testing
+
+## Usage of Serial
+
+- Previously, we worked with the following `test_runner`
+
+```{.rs filename="src/main.rs"}
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
-    serial_println!("Running {} tests", tests.len());
-    […]
-}
-
-#[test_case]
-fn trivial_assertion() {
-    serial_print!("trivial assertion... ");
-    assert_eq!(1, 1);
-    serial_println!("[ok]");
+fn test_runner(_tests: &[&dyn Fn()]) {
+    let fs = [_ex];
+    for i in 0..fs.len() {
+        print!("Running test case {:0x}... ", i);
+        fs[i]();
+        println!("Success.");
+    }
 }
 ```
 
-Note that the `serial_println` macro lives directly under the root namespace because we used the `#[macro_export]` attribute, so importing it through `use crate::serial::serial_println` will not work.
+- There would be some benefit to either of the following formulations.
 
-### QEMU Arguments
+### Print to Serial Only
 
-To see the serial output from QEMU, we need to use the `-serial` argument to redirect the output to stdout:
+- This works well once you know your serial printer is working as intended.
 
-```toml
-# in Cargo.toml
+```{.rs filename="src/main.rs"}
+#[cfg(test)]
+fn test_runner(_tests: &[&dyn Fn()]) {
+    let fs = [_ex];
+    for i in 0..fs.len() {
+        serial_print!("Running test case {:0x}... ", i);
+        fs[i]();
+        serial_println!("Success.");
+    }
+}
+```
 
+### Double Print
+
+- When getting my code to work, I used both `print` and `serial_print`.
+  - This reduced my error handling cases (as I could check the VGA buffer for text as well as host device).
+  - I was only using this during debugging or I would've written a wrapper.
+
+```{.rs filename="src/main.rs"}
+#[cfg(test)]
+fn test_runner(_tests: &[&dyn Fn()]) {
+    let fs = [_ex];
+    for i in 0..fs.len() {
+        serial_print!("Running test case {:0x}... ", i);
+        print!("Running test case {:0x}... ", i);
+        fs[i]();
+        println!("Success.");
+        serial_println!("Success.");
+    }
+}
+```
+
+### Takeaways
+
+- In any case, make sure you have some that (1) prints to serial in the (2) test case.
+
+# QEMU
+
+## A Fun Story
+
+- I spent several hours thinking I didn't get serial ports working when, in fact, I had, I simply had configured QEMU to display the results of serial port writes, so I wasn't see anything.
+- Do not be like me.
+
+## QEMU Options
+
+- So going forward, we assume the correctness of the `serial_println` macro.
+	- You won't be able to test it until you've done this section!
+	- That is okay, we can do two things at once.
+
+## Return to Cargo
+
+- To see the serial output from QEMU, we need to use the `-serial` argument to redirect the output to "Standard I/O" `stdio`.
+  	- For now, we are only using `stdout` but `stdout` $\in$ `stdio`
+
+```{.toml filename="Cargo.toml"}
 [package.metadata.bootimage]
-test-args = [
-    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio"
-]
+test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio"]
 ```
 
-When we run `cargo test` now, we see the test output directly in the console:
+## Massaging Main
 
+- I also wanted to do multiple tests, so I updated `test_runner`.
+- It wasn't *too* exciting, I just added some formatting to look nice.
+- I also run the test multiple times, to mimic running multiple tests.
+
+```{.rs filename="src/main.rs"}
+fn test_runner(_tests: &[&dyn Fn()]) {
+    let fs = [_ex, _ex, _ex];
+    for i in 0..fs.len() {
+        serial_print!("Beginning test 0x{:02x}...", i);
+        fs[i]();
+        serial_println!(" [Pass]");
+    }
+    unsafe { x86_64::instructions::port::Port::new(0xf4).write(0xAu32) };
+}
 ```
-> cargo test
-    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
-     Running target/x86_64-blog_os/debug/deps/blog_os-7b7c37b4ad62551a
+
+## Testing Tests
+
+- When we run `cargo test` now, we see the test output directly in the console:
+
+```{.sh}
+$ cargo t
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-f4313fd1ed2d08da)
 Building bootloader
-    Finished release [optimized + debuginfo] target(s) in 0.02s
-Running: `qemu-system-x86_64 -drive format=raw,file=/…/target/x86_64-blog_os/debug/
-    deps/bootimage-blog_os-7b7c37b4ad62551a.bin -device
-    isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio`
-Running 1 tests
-trivial assertion... [ok]
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.07s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/calvin/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-f4313fd1ed2d08da.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+Beginning test 0x00... [Pass]
+Beginning test 0x01... [Pass]
+Beginning test 0x02... [Pass]
 ```
 
-However, when a test fails, we still see the output inside QEMU because our panic handler still uses `println`. To simulate this, we can change the assertion in our `trivial_assertion` test to `assert_eq!(0, 1)`:
+## Good Enough?
 
-![QEMU printing "Hello World!" and "panicked at 'assertion failed: `(left == right)`
-    left: `0`, right: `1`', src/main.rs:55:5](qemu-failed-test.png)
+- Surely that is a good enough... right?
+  - Wrong.
+- It is extremely annoying to have the graphics window rapidly open and close.
+  	- It is visually distracting.
+	- I won't work well in all environments, such as GitHub Actions
+	- It is resource intensive.
 
-We see that the panic message is still printed to the VGA buffer, while the other test output is printed to the serial port. The panic message is quite useful, so it would be useful to see it in the console too.
+## Hiding QEMU
 
-### Print an Error Message on Panic
+- We can prevent the display window launch by passing the `-display none` argument to QEMU...
+  	- Though we would *only* want to do this when conducting automated testing.
 
-To exit QEMU with an error message on a panic, we can use [conditional compilation] to use a different panic handler in testing mode:
+```{.toml filename="Cargo.toml"}
+[package.metadata.bootimage]
+test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio", "-display", "none"]
+```
 
-[conditional compilation]: https://doc.rust-lang.org/1.30.0/book/first-edition/conditional-compilation.html
+## Quoth Blog
 
-```rust
-// in src/main.rs
+> This is not only less annoying, but also allows our test framework to run in environments without a graphical user interface, such as CI services or SSH connections.
 
-// our existing panic handler
-#[cfg(not(test))] // new attribute
+- [CI - Continuious integration with GitHub Actions](https://docs.github.com/en/actions/get-started/continuous-integration)
+- [SSH - Secure Shell](https://en.wikipedia.org/wiki/Secure_Shell)
+
+## Good Enough?
+
+- Imagine this test:
+
+```{.rs filename="src/main.rs"}
+fn _ex() {
+    loop {}
+}
+```
+
+
+## Timeouts
+
+- `cargo t` waits until the test runner exits.
+- A test that never returns can block the test runner forever. 
+- That's unfortunate, but not a big problem in practice since it's usually easy to avoid endless loops.
+- We have no cases of `loop {}` in our code, right?
+
+## Systems Design
+
+In our case, however, endless loops can occur in various situations:
+- The bootloader fails to load our kernel
+- The BIOS/UEFI firmware fails to load the bootloader
+- The CPU enters a `loop {}` statement.
+  - Perhaps after QEMU bug.
+- The hardware causes a system reset.
+
+## Set a Timeout
+
+- By default, apparently timeout is 300 seconds or 5 minutes.
+  	- That is *way* too long.
+	- I give up on problems instantly.
+- We can manually set it to be shorter, like 1 second.
+- [bootimage config](https://github.com/rust-osdev/bootimage#configuration)
+
+```{.toml filename="Cargo.toml"}
+[package.metadata.bootimage]
+test-timeout = 1 
+```
+
+## Test It
+
+- Try this now:
+
+```{.rs filename="src/main.rs"}
+fn _ex() {
+    loop {}
+}
+```
+
+## What I see
+
+- The takeaway here is that I get my console back in a finite amount of time (5 minutes is infinite).
+
+```{.sh}
+$ cargo t 
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-f4313fd1ed2d08da)
+Building bootloader
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.07s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/calvin/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-f4313fd1ed2d08da.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+Beginning test 0x00...Error: Test timed out
+error: test failed, to rerun pass `--bin osirs`
+
+Caused by:
+  process didn't exit successfully: `bootimage runner /home/calvin/tmp/work/target/x86_64-osirs/debug/deps/osirs-f4313fd1ed2d08da` (exit status: 1)
+note: test exited abnormally; to see the full output pass --no-capture to the harness.
+```
+
+# Panics
+
+## One More
+
+- Okay, so a test can pass or stall infinitely, but what about fail.
+
+```{.rs filename="src/main.rs"}
+fn _bad() {
+    assert!(false);
+}
+```
+
+## Huh?
+
+- What is happening here?
+
+```{.sh}
+Beginning test 0x00... [Pass]
+Beginning test 0x01...Error: Test timed out
+```
+
+1. An assertion is made.
+2. The assertion fails.
+3. The failed assertion triggers a panic.
+4. The panic handler broadcasts an error message to the VGA buffer, which is not being displayed.
+5. The panic handler enters an infinite loop.
+6. Eventually, the timeout occurs and terminates the test suite.
+
+## Instead
+
+- We should write a *custom panic handler* for the testing context.
+- We use *conditional compilation*.
+- I used the following template:
+```{.rs filename="src/main.rs"}
+#[cfg(not(test))]
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
+fn panic(info: &core::panic::PanicInfo) -> ! {
     println!("{}", info);
     loop {}
 }
 
-// our panic handler in test mode
 #[cfg(test)]
 #[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
-    serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failed);
+fn panic(info: &core::panic::PanicInfo) -> ! {
+    // Your code here
     loop {}
 }
 ```
-
-For our test panic handler, we use `serial_println` instead of `println` and then exit QEMU with a failure exit code. Note that we still need an endless `loop` after the `exit_qemu` call because the compiler does not know that the `isa-debug-exit` device causes a program exit.
-
-Now QEMU also exits for failed tests and prints a useful error message on the console:
-
-```
-> cargo test
-    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
-     Running target/x86_64-blog_os/debug/deps/blog_os-7b7c37b4ad62551a
+- You should:
+  	- Print a message denoting the test failed.
+	- Print a message decribing what the failure was.
+	- Exit QEMU.
+	  	- With a status code *other* than success.
+		- I used `0xF` vs. `0xA` which I used in my `test_runner`.
+- Here is an example output:
+```{.sh}
+$ cargo t
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-f4313fd1ed2d08da)
 Building bootloader
-    Finished release [optimized + debuginfo] target(s) in 0.02s
-Running: `qemu-system-x86_64 -drive format=raw,file=/…/target/x86_64-blog_os/debug/
-    deps/bootimage-blog_os-7b7c37b4ad62551a.bin -device
-    isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio`
-Running 1 tests
-trivial assertion... [failed]
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.07s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/calvin/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-f4313fd1ed2d08da.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+Beginning test 0x00... [Pass]
+Beginning test 0x01... [Fail]
+panicked at src/main.rs:51:5:
+assertion failed: false
+error: test failed, to rerun pass `--bin osirs`
 
-Error: panicked at 'assertion failed: `(left == right)`
-  left: `0`,
- right: `1`', src/main.rs:65:5
+Caused by:
+  process didn't exit successfully: `bootimage runner /home/calvin/tmp/work/target/x86_64-osirs/debug/deps/osirs-f4313fd1ed2d08da` (exit status: 31)
+note: test exited abnormally; to see the full output pass --no-capture to the harness.
 ```
 
-Since we see all test output on the console now, we no longer need the QEMU window that pops up for a short time. So we can hide it completely.
+# Fin
 
-### Hiding QEMU
+## Deliverables
 
-Since we report out the complete test results using the `isa-debug-exit` device and the serial port, we don't need the QEMU window anymore. We can hide it by passing the `-display none` argument to QEMU:
+- [ ] Ensure you have a testing suite that can run without a graphics window and handle pass, fail, and divergence.
 
-```toml
-# in Cargo.toml
+<!--
 
-[package.metadata.bootimage]
-test-args = [
-    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", "-serial", "stdio",
-    "-display", "none"
-]
-```
-
-Now QEMU runs completely in the background and no window gets opened anymore. This is not only less annoying, but also allows our test framework to run in environments without a graphical user interface, such as CI services or [SSH] connections.
-
-[SSH]: https://en.wikipedia.org/wiki/Secure_Shell
-
-### Timeouts
-
-Since `cargo test` waits until the test runner exits, a test that never returns can block the test runner forever. That's unfortunate, but not a big problem in practice since it's usually easy to avoid endless loops. In our case, however, endless loops can occur in various situations:
-
-- The bootloader fails to load our kernel, which causes the system to reboot endlessly.
-- The BIOS/UEFI firmware fails to load the bootloader, which causes the same endless rebooting.
-- The CPU enters a `loop {}` statement at the end of some of our functions, for example because the QEMU exit device doesn't work properly.
-- The hardware causes a system reset, for example when a CPU exception is not caught (explained in a future post).
-
-Since endless loops can occur in so many situations, the `bootimage` tool sets a timeout of 5 minutes for each test executable by default. If the test does not finish within this time, it is marked as failed and a "Timed Out" error is printed to the console. This feature ensures that tests that are stuck in an endless loop don't block `cargo test` forever.
-
-You can try it yourself by adding a `loop {}` statement in the `trivial_assertion` test. When you run `cargo test`, you see that the test is marked as timed out after 5 minutes. The timeout duration is [configurable][bootimage config] through a `test-timeout` key in the Cargo.toml:
-
-[bootimage config]: https://github.com/rust-osdev/bootimage#configuration
-
-```toml
-# in Cargo.toml
-
-[package.metadata.bootimage]
-test-timeout = 300          # (in seconds)
-```
-
-If you don't want to wait 5 minutes for the `trivial_assertion` test to time out, you can temporarily decrease the above value.
-
-### Insert Printing Automatically
-
-Our `trivial_assertion` test currently needs to print its own status information using `serial_print!`/`serial_println!`:
-
-```rust
-#[test_case]
-fn trivial_assertion() {
-    serial_print!("trivial assertion... ");
-    assert_eq!(1, 1);
-    serial_println!("[ok]");
-}
-```
-
-Manually adding these print statements for every test we write is cumbersome, so let's update our `test_runner` to print these messages automatically. To do that, we need to create a new `Testable` trait:
-
-```rust
-// in src/main.rs
-
-pub trait Testable {
-    fn run(&self) -> ();
-}
-```
-
-The trick now is to implement this trait for all types `T` that implement the [`Fn()` trait]:
-
-[`Fn()` trait]: https://doc.rust-lang.org/stable/core/ops/trait.Fn.html
-
-```rust
-// in src/main.rs
-
-impl<T> Testable for T
-where
-    T: Fn(),
-{
-    fn run(&self) {
-        serial_print!("{}...\t", core::any::type_name::<T>());
-        self();
-        serial_println!("[ok]");
-    }
-}
-```
-
-We implement the `run` function by first printing the function name using the [`any::type_name`] function. This function is implemented directly in the compiler and returns a string description of every type. For functions, the type is their name, so this is exactly what we want in this case. The `\t` character is the [tab character], which adds some alignment to the `[ok]` messages.
-
-[`any::type_name`]: https://doc.rust-lang.org/stable/core/any/fn.type_name.html
-[tab character]: https://en.wikipedia.org/wiki/Tab_character
-
-After printing the function name, we invoke the test function through `self()`. This only works because we require that `self` implements the `Fn()` trait. After the test function returns, we print `[ok]` to indicate that the function did not panic.
-
-The last step is to update our `test_runner` to use the new `Testable` trait:
-
-```rust
-// in src/main.rs
-
-#[cfg(test)]
-pub fn test_runner(tests: &[&dyn Testable]) { // new
-    serial_println!("Running {} tests", tests.len());
-    for test in tests {
-        test.run(); // new
-    }
-    exit_qemu(QemuExitCode::Success);
-}
-```
-
-The only two changes are the type of the `tests` argument from `&[&dyn Fn()]` to `&[&dyn Testable]` and the fact that we now call `test.run()` instead of `test()`.
-
-We can now remove the print statements from our `trivial_assertion` test since they're now printed automatically:
-
-```rust
-// in src/main.rs
-
-#[test_case]
-fn trivial_assertion() {
-    assert_eq!(1, 1);
-}
-```
-
-The `cargo test` output now looks like this:
-
-```
-Running 1 tests
-blog_os::trivial_assertion...	[ok]
-```
-
-The function name now includes the full path to the function, which is useful when test functions in different modules have the same name. Otherwise, the output looks the same as before, but we no longer need to add print statements to our tests manually.
+# TODO
 
 ## Testing the VGA Buffer
 
@@ -785,3 +886,5 @@ In the next post, we will explore _CPU exceptions_. These exceptions are thrown 
 
 - This is 700 lines of markdown source which usually is enough.
 - Otherwise we proceed to "Format".
+
+-->
