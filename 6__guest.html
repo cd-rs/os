@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="">
 
-<title>OS in Rust</title>
+<title>Guest – OS in Rust</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,6 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./60_test.html" rel="next">
+<link href="./52_graphics.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -143,9 +144,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
-      OS in Rust
-      </li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./6__guest.html">Guest</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -274,7 +273,7 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Guest</span></a>
   </div>
 </li>
@@ -300,14 +299,11 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#cs-371-os-in-rust" id="toc-cs-371-os-in-rust" class="nav-link active" data-scroll-target="#cs-371-os-in-rust">CS 371 “OS in Rust”</a>
+  <li><a href="#guest-lecture" id="toc-guest-lecture" class="nav-link active" data-scroll-target="#guest-lecture">Guest Lecture</a>
   <ul class="collapse">
-  <li><a href="#mw-1310-1440" id="toc-mw-1310-1440" class="nav-link" data-scroll-target="#mw-1310-1440">MW 1310-1440</a></li>
-  <li><a href="#prof.-calvin" id="toc-prof.-calvin" class="nav-link" data-scroll-target="#prof.-calvin">Prof.&nbsp;Calvin</a></li>
-  <li><a href="#syllabus" id="toc-syllabus" class="nav-link" data-scroll-target="#syllabus">Syllabus</a></li>
+  <li><a href="#part-i" id="toc-part-i" class="nav-link" data-scroll-target="#part-i">Part I</a></li>
+  <li><a href="#part-ii" id="toc-part-ii" class="nav-link" data-scroll-target="#part-ii">Part II</a></li>
   </ul></li>
-  <li><a href="#calendar" id="toc-calendar" class="nav-link" data-scroll-target="#calendar">Calendar</a></li>
-  <li><a href="#lecture-recordings" id="toc-lecture-recordings" class="nav-link" data-scroll-target="#lecture-recordings">Lecture Recordings</a></li>
   </ul>
 </nav>
     </div>
@@ -316,7 +312,8 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">OS in Rust</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Guest</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
 </div>
 
 
@@ -333,184 +330,42 @@ window.Quarto = {
 </header>
 
 
-<section id="cs-371-os-in-rust" class="level1">
-<h1>CS 371 “OS in Rust”</h1>
+<section id="guest-lecture" class="level1">
+<h1>Guest Lecture</h1>
+<p>Today we are taking a brief reprieve from the lecture-lab cadence to allow my voice to recover.</p>
+<section id="part-i" class="level2">
+<h2 class="anchored" data-anchor-id="part-i">Part I</h2>
 <ul>
-<li>Called:
-<ul>
-<li>CS 371: Advanced Systems Computing, Adv. Operating Systems</li>
-</ul></li>
-<li>The second semester class in a:
-<ul>
-<li>Compiled language, with</li>
-<li>No garbage collector.</li>
-</ul></li>
-<li>In the second semester, one of the <span class="math inline">\(n\)</span> great systems
-<ul>
-<li>Operating System (OS)</li>
-<li>Compiler</li>
-<li>Web Server</li>
-</ul></li>
-<li>Taught this year on OS and in Rust.
-<ul>
-<li>So to me, “OS in Rust”</li>
-</ul></li>
+<li>Motivated by <em>Calvin Deutschbein Thought</em> on Rust: “It’s good because of error handling.”</li>
+<li>We welcome Jane Lusby, who is at high probability <a href="https://github.com/yaahc">this Jane Losare-Lusby</a></li>
+<li>Jane’s talk at RustConf 2020 is titled “Error handling Isn’t All About Errors” and I find it’s thesis convincing.</li>
+<li>Here is a <a href="https://www.youtube.com/watch?v=rAF8mLI0naQ">direct link</a>.</li>
+<li>Here is an embed:</li>
 </ul>
-<section id="mw-1310-1440" class="level3">
-<h3 class="anchored" data-anchor-id="mw-1310-1440">MW 1310-1440</h3>
-</section>
-<section id="prof.-calvin" class="level3">
-<h3 class="anchored" data-anchor-id="prof.-calvin"><a href="mailto:ckdeutschbein@willamette.edu">Prof.&nbsp;Calvin</a></h3>
-</section>
-<section id="syllabus" class="level3">
-<h3 class="anchored" data-anchor-id="syllabus">Syllabus</h3>
-<ul>
-<li><a href="syllabus/syllabus.pdf">Syllabus link</a></li>
-</ul>
-</section>
-</section>
-<section id="calendar" class="level1">
-<h1>Calendar</h1>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th style="text-align: center;">Week</th>
-<th style="text-align: left;">Date (M)</th>
-<th style="text-align: left;">Lecture (M)</th>
-<th style="text-align: left;">Lab (W)</th>
-<th style="text-align: left;">HW (F)</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: center;">0x0</td>
-<td style="text-align: left;">01/12</td>
-<td style="text-align: left;"><a href="./00_derust.html">Derust</a></td>
-<td style="text-align: left;"><a href="./01_wc.html"><code>wc</code></a></td>
-<td style="text-align: left;"><a href="./02_cli.html">CLI</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0x1</td>
-<td style="text-align: left;">01/19</td>
-<td style="text-align: left;"><a href="https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf"><code>None</code></a></td>
-<td style="text-align: left;"><a href="./11_unsafe.html">Unsafe</a></td>
-<td style="text-align: left;"><a href="./12_split_at.html">Splits</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0x2</td>
-<td style="text-align: left;">01/26</td>
-<td style="text-align: left;"><a href="./20_os.html">OSes</a></td>
-<td style="text-align: left;"><a href="./21_xmute.html">Transmute</a></td>
-<td style="text-align: left;"><a href="./22_malloc.html">malloc</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0x3</td>
-<td style="text-align: left;">02/02</td>
-<td style="text-align: left;"><a href="./30_metal.html">Bare Metal</a></td>
-<td style="text-align: left;"><a href="./31_linker.html">Linker</a></td>
-<td style="text-align: left;"><a href="./32_r5.html">RISC-V</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0x4</td>
-<td style="text-align: left;">02/09</td>
-<td style="text-align: left;"><a href="./40_kernel.html">Kernel</a></td>
-<td style="text-align: left;"><a href="./41_boot.html">Boot</a></td>
-<td style="text-align: left;"><a href="./42_hello.html">Hello</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0x5</td>
-<td style="text-align: left;">02/16</td>
-<td style="text-align: left;"><a href="./50_text.html">Text</a></td>
-<td style="text-align: left;"><a href="./51_format.html">Format</a></td>
-<td style="text-align: left;"><a href="./52_graphics.html">Graphics</a></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0x6</td>
-<td style="text-align: left;">02/23</td>
-<td style="text-align: left;"><a href="6*_guest.md">Guest</a></td>
-<td style="text-align: left;"><a href="./60_test.html">Test</a></td>
-<td style="text-align: left;"><a href="./61_serial.html">Serial</a></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0x7</td>
-<td style="text-align: left;">03/02</td>
-<td style="text-align: left;">Exceptions</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0x8</td>
-<td style="text-align: left;">03/09</td>
-<td style="text-align: left;">Faults</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0x9</td>
-<td style="text-align: left;">03/16</td>
-<td style="text-align: left;">Interrupts</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0bX</td>
-<td style="text-align: left;">03/23</td>
-<td style="text-align: left;"><code>None</code></td>
-<td style="text-align: left;"><code>None</code></td>
-<td style="text-align: left;"><code>None</code></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0xA</td>
-<td style="text-align: left;">03/30</td>
-<td style="text-align: left;">Paging</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0xB</td>
-<td style="text-align: left;">03/06</td>
-<td style="text-align: left;">Page Tables</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0xC</td>
-<td style="text-align: left;">04/13</td>
-<td style="text-align: left;">The Heap</td>
-<td style="text-align: left;"><a href="https://my.willamette.edu/site/ssrd"><code>None</code></a></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="odd">
-<td style="text-align: center;">0xD</td>
-<td style="text-align: left;">04/20</td>
-<td style="text-align: left;">Allocators</td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"></td>
-</tr>
-<tr class="even">
-<td style="text-align: center;">0xE</td>
-<td style="text-align: left;">04/29</td>
-<td style="text-align: left;"><code>async</code></td>
-<td style="text-align: left;"></td>
-<td style="text-align: left;"><code>None</code></td>
-</tr>
-</tbody>
-</table>
-<!--
-stack
-    miri on malloc
-    red zone
--->
-<p><em>Final OS due <a href="https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations">Tuesday, May 5th, from 2:00 pm - 5:00 pm</a> (5 PM ET on 5/5)</em></p>
-</section>
-<section id="lecture-recordings" class="level1">
-<h1>Lecture Recordings</h1>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=bvtnSylucjMxr3PM&amp;list=PLu3KAnn4RkATSGCaGGAiBBKJhtplKfp-m" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/rAF8mLI0naQ?si=6gdPawbuBVUl9-rc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
 </iframe>
+</section>
+<section id="part-ii" class="level2">
+<h2 class="anchored" data-anchor-id="part-ii">Part II</h2>
+<ul>
+<li>Motivated by the planned extension for the final week of class, on asynchronous computing.</li>
+<li>A great way to understand <code>async</code> is write 20 lines of JavaScript.
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function">Like this</a></li>
+</ul></li>
+<li>You should also be thinking about a looming problem.
+<ul>
+<li>What happens if you want to be updating the VGA text buffer to, for example, display an animation that changes ever <span class="math inline">\(n\)</span> nanoseconds.</li>
+<li>What happens if at the same time, you direct inputs into the OS through some means (to be introduced this and in coming weeks).</li>
+<li>How does the OS juggle timing-based and what we usually call <em>interrupt</em>-based (e.g.&nbsp;driven by exogenous factors) tasks?</li>
+</ul></li>
+<li>This essay is hosted on a talk webpage, and can be seen at <a href="https://sunshowers.io/posts/cancelling-async-rust/">https://sunshowers.io/posts/cancelling-async-rust/</a></li>
+</ul>
 
 
 <!-- -->
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -984,69 +839,48 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
-</script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./52_graphics.html" class="pagination-link" aria-label="Graphics">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Graphics</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./60_test.html" class="pagination-link" aria-label="Test">
+        <span class="nav-page-text">Test</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="an">title:</span><span class="co"> OS in Rust</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="an">author:</span><span class="co"> ""</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="an">subtitle:</span><span class="co"> ""</span></span>
-<span id="cb1-5"><a href="#cb1-5"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb1-6"><a href="#cb1-6"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="an">title:</span><span class="co"> Guest</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co">---</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="fu"># Guest Lecture</span></span>
 <span id="cb1-7"><a href="#cb1-7"></a></span>
-<span id="cb1-8"><a href="#cb1-8"></a><span class="fu"># CS 371 "OS in Rust"</span></span>
+<span id="cb1-8"><a href="#cb1-8"></a>Today we are taking a brief reprieve from the lecture-lab cadence to allow my voice to recover.</span>
 <span id="cb1-9"><a href="#cb1-9"></a></span>
-<span id="cb1-10"><a href="#cb1-10"></a><span class="ss">- </span>Called:</span>
-<span id="cb1-11"><a href="#cb1-11"></a><span class="ss">    - </span>CS 371: Advanced Systems Computing, Adv. Operating Systems</span>
-<span id="cb1-12"><a href="#cb1-12"></a><span class="ss">- </span>The second semester class in a:</span>
-<span id="cb1-13"><a href="#cb1-13"></a><span class="ss">    - </span>Compiled language, with</span>
-<span id="cb1-14"><a href="#cb1-14"></a><span class="ss">    - </span>No garbage collector.</span>
-<span id="cb1-15"><a href="#cb1-15"></a><span class="ss">- </span>In the second semester, one of the $n$ great systems</span>
-<span id="cb1-16"><a href="#cb1-16"></a><span class="ss">    - </span>Operating System (OS)</span>
-<span id="cb1-17"><a href="#cb1-17"></a><span class="ss">    - </span>Compiler</span>
-<span id="cb1-18"><a href="#cb1-18"></a><span class="ss">    - </span>Web Server</span>
-<span id="cb1-19"><a href="#cb1-19"></a><span class="ss">- </span>Taught this year on OS and in Rust.</span>
-<span id="cb1-20"><a href="#cb1-20"></a><span class="ss">    - </span>So to me, "OS in Rust"</span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="fu">## Part I </span></span>
+<span id="cb1-11"><a href="#cb1-11"></a></span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="ss">- </span>Motivated by *Calvin Deutschbein Thought* on Rust: "It's good because of error handling."</span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="ss">- </span>We welcome Jane Lusby, who is at high probability <span class="co">[</span><span class="ot">this Jane Losare-Lusby</span><span class="co">](https://github.com/yaahc)</span></span>
+<span id="cb1-14"><a href="#cb1-14"></a><span class="ss">- </span>Jane's talk at RustConf 2020 is titled "Error handling Isn't All About Errors" and I find it's thesis convincing.</span>
+<span id="cb1-15"><a href="#cb1-15"></a><span class="ss">- </span>Here is a <span class="co">[</span><span class="ot">direct link</span><span class="co">](https://www.youtube.com/watch?v=rAF8mLI0naQ)</span>.</span>
+<span id="cb1-16"><a href="#cb1-16"></a><span class="ss">- </span>Here is an embed:</span>
+<span id="cb1-17"><a href="#cb1-17"></a></span>
+<span id="cb1-18"><a href="#cb1-18"></a>&lt;iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/rAF8mLI0naQ?si=6gdPawbuBVUl9-rc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen&gt;&lt;/iframe&gt;</span>
+<span id="cb1-19"><a href="#cb1-19"></a></span>
+<span id="cb1-20"><a href="#cb1-20"></a><span class="fu">## Part II</span></span>
 <span id="cb1-21"><a href="#cb1-21"></a></span>
-<span id="cb1-22"><a href="#cb1-22"></a><span class="fu">### MW 1310-1440</span></span>
-<span id="cb1-23"><a href="#cb1-23"></a></span>
-<span id="cb1-24"><a href="#cb1-24"></a><span class="fu">### [Prof. Calvin](mailto:ckdeutschbein@willamette.edu)</span></span>
-<span id="cb1-25"><a href="#cb1-25"></a></span>
-<span id="cb1-26"><a href="#cb1-26"></a><span class="fu">### Syllabus</span></span>
-<span id="cb1-27"><a href="#cb1-27"></a></span>
-<span id="cb1-28"><a href="#cb1-28"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Syllabus link</span><span class="co">](syllabus/syllabus.pdf)</span></span>
-<span id="cb1-29"><a href="#cb1-29"></a></span>
-<span id="cb1-30"><a href="#cb1-30"></a><span class="fu"># Calendar</span></span>
-<span id="cb1-31"><a href="#cb1-31"></a></span>
-<span id="cb1-32"><a href="#cb1-32"></a>|Week|Date (M)|Lecture (M)|Lab (W)|HW (F)|</span>
-<span id="cb1-33"><a href="#cb1-33"></a>|:--:|:---|:----|:-------|:-------|</span>
-<span id="cb1-34"><a href="#cb1-34"></a>|0x0|01/12|<span class="co">[</span><span class="ot">Derust</span><span class="co">](00_derust.qmd)</span>|<span class="co">[</span><span class="ot">`wc`</span><span class="co">](01_wc.md)</span>|<span class="co">[</span><span class="ot">CLI</span><span class="co">](02_cli.md)</span>|</span>
-<span id="cb1-35"><a href="#cb1-35"></a>|0x1|01/19|<span class="co">[</span><span class="ot">`None`</span><span class="co">](https://www2.hawaii.edu/~freeman/courses/phil100/17.%20MLK%20Beyond%20Vietnam.pdf)</span>|<span class="co">[</span><span class="ot">Unsafe</span><span class="co">](11_unsafe.qmd)</span>|<span class="co">[</span><span class="ot">Splits</span><span class="co">](12_split_at.qmd)</span>|</span>
-<span id="cb1-36"><a href="#cb1-36"></a>|0x2|01/26|<span class="co">[</span><span class="ot">OSes</span><span class="co">](20_os.qmd)</span>|<span class="co">[</span><span class="ot">Transmute</span><span class="co">](21_xmute.md)</span>|<span class="co">[</span><span class="ot">malloc</span><span class="co">](22_malloc.md)</span>| </span>
-<span id="cb1-37"><a href="#cb1-37"></a>|0x3|02/02|<span class="co">[</span><span class="ot">Bare Metal</span><span class="co">](30_metal.qmd)</span>|<span class="co">[</span><span class="ot">Linker</span><span class="co">](31_linker.md)</span>|<span class="co">[</span><span class="ot">RISC-V</span><span class="co">](32_r5.md)</span>| </span>
-<span id="cb1-38"><a href="#cb1-38"></a>|0x4|02/09|<span class="co">[</span><span class="ot">Kernel</span><span class="co">](40_kernel.qmd)</span>|<span class="co">[</span><span class="ot">Boot</span><span class="co">](41_boot.md)</span>|<span class="co">[</span><span class="ot">Hello</span><span class="co">](42_hello.md)</span>|</span>
-<span id="cb1-39"><a href="#cb1-39"></a>|0x5|02/16|<span class="co">[</span><span class="ot">Text</span><span class="co">](50_text.qmd)</span>|<span class="co">[</span><span class="ot">Format</span><span class="co">](51_format.md)</span>|<span class="co">[</span><span class="ot">Graphics</span><span class="co">](52_graphics.md)</span>|</span>
-<span id="cb1-40"><a href="#cb1-40"></a>|0x6|02/23|<span class="co">[</span><span class="ot">Guest</span><span class="co">](6*_guest.md)</span>|<span class="co">[</span><span class="ot">Test</span><span class="co">](60_test.qmd)</span>|<span class="co">[</span><span class="ot">Serial</span><span class="co">](61_serial.qmd)</span>|<span class="co">&lt;!--[Integration](62_integration.qmd)|--&gt;</span></span>
-<span id="cb1-41"><a href="#cb1-41"></a>|0x7|03/02|Exceptions|</span>
-<span id="cb1-42"><a href="#cb1-42"></a>|0x8|03/09|Faults|</span>
-<span id="cb1-43"><a href="#cb1-43"></a>|0x9|03/16|Interrupts|</span>
-<span id="cb1-44"><a href="#cb1-44"></a>|0bX|03/23|<span class="in">`None`</span>|<span class="in">`None`</span>|<span class="in">`None`</span>|</span>
-<span id="cb1-45"><a href="#cb1-45"></a>|0xA|03/30|Paging|</span>
-<span id="cb1-46"><a href="#cb1-46"></a>|0xB|03/06|Page Tables|</span>
-<span id="cb1-47"><a href="#cb1-47"></a>|0xC|04/13|The Heap|<span class="co">[</span><span class="ot">`None`</span><span class="co">](https://my.willamette.edu/site/ssrd)</span>||</span>
-<span id="cb1-48"><a href="#cb1-48"></a>|0xD|04/20|Allocators|</span>
-<span id="cb1-49"><a href="#cb1-49"></a>|0xE|04/29|<span class="in">`async`</span>||<span class="in">`None`</span>|</span>
-<span id="cb1-50"><a href="#cb1-50"></a></span>
-<span id="cb1-51"><a href="#cb1-51"></a><span class="co">&lt;!--</span></span>
-<span id="cb1-52"><a href="#cb1-52"></a><span class="co">stack</span></span>
-<span id="cb1-53"><a href="#cb1-53"></a><span class="co">    miri on malloc</span></span>
-<span id="cb1-54"><a href="#cb1-54"></a><span class="co">    red zone</span></span>
-<span id="cb1-55"><a href="#cb1-55"></a><span class="co">--&gt;</span></span>
-<span id="cb1-56"><a href="#cb1-56"></a></span>
-<span id="cb1-57"><a href="#cb1-57"></a>*Final OS due [Tuesday, May 5th, from 2:00 pm - 5:00 pm](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations) (5 PM ET on 5/5)*</span>
-<span id="cb1-58"><a href="#cb1-58"></a></span>
-<span id="cb1-59"><a href="#cb1-59"></a></span>
-<span id="cb1-60"><a href="#cb1-60"></a><span class="fu"># Lecture Recordings</span></span>
-<span id="cb1-61"><a href="#cb1-61"></a></span>
-<span id="cb1-62"><a href="#cb1-62"></a>&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/videoseries?si=bvtnSylucjMxr3PM<span class="dv">&amp;amp;</span>list=PLu3KAnn4RkATSGCaGGAiBBKJhtplKfp-m" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen&gt;&lt;/iframe&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb1-22"><a href="#cb1-22"></a><span class="ss">- </span>Motivated by the planned extension for the final week of class, on asynchronous computing.</span>
+<span id="cb1-23"><a href="#cb1-23"></a><span class="ss">- </span>A great way to understand <span class="in">`async`</span> is write 20 lines of JavaScript.</span>
+<span id="cb1-24"><a href="#cb1-24"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Like this</span><span class="co">](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function)</span></span>
+<span id="cb1-25"><a href="#cb1-25"></a><span class="ss">- </span>You should also be thinking about a looming problem.</span>
+<span id="cb1-26"><a href="#cb1-26"></a><span class="ss">    - </span>What happens if you want to be updating the VGA text buffer to, for example, display an animation that changes ever $n$ nanoseconds.</span>
+<span id="cb1-27"><a href="#cb1-27"></a><span class="ss">    - </span>What happens if at the same time, you direct inputs into the OS through some means (to be introduced this and in coming weeks).</span>
+<span id="cb1-28"><a href="#cb1-28"></a><span class="ss">    - </span>How does the OS juggle timing-based and what we usually call *interrupt*-based (e.g. driven by exogenous factors) tasks?</span>
+<span id="cb1-29"><a href="#cb1-29"></a><span class="ss">- </span>This essay is hosted on a talk webpage, and can be seen at <span class="co">[</span><span class="ot">https://sunshowers.io/posts/cancelling-async-rust/</span><span class="co">](https://sunshowers.io/posts/cancelling-async-rust/)</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
