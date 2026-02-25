@@ -37,21 +37,18 @@ format: html
 |0x3|02/02|[Bare Metal](30_metal.qmd)|[Linker](31_linker.md)|[RISC-V](32_r5.md)| 
 |0x4|02/09|[Kernel](40_kernel.qmd)|[Boot](41_boot.md)|[Hello](42_hello.md)|
 |0x5|02/16|[Text](50_text.qmd)|[Format](51_format.md)|[Graphics](52_graphics.md)|
-|0x6|02/23|[Guest](6*_guest.md)|[Test](60_test.qmd)|[Serial](61_serial.qmd)|<!--[Integration](62_integration.qmd)|-->
-|0x7|03/02|Exceptions|
-|0x8|03/09|Faults|
-|0x9|03/16|Interrupts|
+|0x6|02/23|[Guest](6__guest.md)|Work Session|<!--[Integration](62_integration.qmd)|-->
+|0x7|03/02|[Test](60_test.qmd)|[Serial](61_serial.qmd)|
+|0x8|03/09|Exceptions|
+|0x9|03/16|Faults|
 |0bX|03/23|`None`|`None`|`None`|
-|0xA|03/30|Paging|
-|0xB|03/06|Page Tables|
-|0xC|04/13|The Heap|[`None`](https://my.willamette.edu/site/ssrd)||
-|0xD|04/20|Allocators|
-|0xE|04/29|`async`||`None`|
-
+|0xA|03/30|Interrupts|
+|0xB|03/06|Paging|
+|0xC|04/13|Page Tables|[`None`](https://my.willamette.edu/site/ssrd)||
+|0xD|04/20|The Heap|
+|0xE|04/29|Allocators|
 <!--
-stack
-    miri on malloc
-    red zone
+|0xE|04/29|`async`||`None`|
 -->
 
 *Final OS due [Tuesday, May 5th, from 2:00 pm - 5:00 pm](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations) (5 PM ET on 5/5)*
