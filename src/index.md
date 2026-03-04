@@ -38,7 +38,7 @@ format: html
 |0x4|02/09|[Kernel](40_kernel.qmd)|[Boot](41_boot.md)|[Hello](42_hello.md)|
 |0x5|02/16|[Text](50_text.qmd)|[Format](51_format.md)|[Graphics](52_graphics.md)|
 |0x6|02/23|[Guest](6__guest.md)|Work Session|<!--[Integration](62_integration.qmd)|-->
-|0x7|03/02|[Test](60_test.qmd)|[Serial](61_serial.qmd)|
+|0x7|03/02|[Test](60_test.qmd)|[Serial](61_serial.qmd)|[Integration](62_integration.qmd)|
 |0x8|03/09|Exceptions|
 |0x9|03/16|Faults|
 |0bX|03/23|`None`|`None`|`None`|

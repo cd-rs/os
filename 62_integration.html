@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Integration – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./61_serial.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./62_integration.html">Integration</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#homework" id="toc-homework" class="nav-link active" data-scroll-target="#homework">Homework</a></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#test-println" id="toc-test-println" class="nav-link" data-scroll-target="#test-println">Test <code>println!</code></a>
+  <ul class="collapse">
+  <li><a href="#requirements-1" id="toc-requirements-1" class="nav-link" data-scroll-target="#requirements-1">Requirements</a></li>
+  <li><a href="#assessment" id="toc-assessment" class="nav-link" data-scroll-target="#assessment">Assessment</a></li>
+  </ul></li>
+  <li><a href="#factor-tests" id="toc-factor-tests" class="nav-link" data-scroll-target="#factor-tests">Factor Tests</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#requirements-2" id="toc-requirements-2" class="nav-link" data-scroll-target="#requirements-2">Requirements</a></li>
+  <li><a href="#hint" id="toc-hint" class="nav-link" data-scroll-target="#hint">Hint</a></li>
+  <li><a href="#testing-requirements" id="toc-testing-requirements" class="nav-link" data-scroll-target="#testing-requirements">Testing Requirements</a></li>
+  <li><a href="#assessment-1" id="toc-assessment-1" class="nav-link" data-scroll-target="#assessment-1">Assessment</a></li>
+  </ul></li>
+  <li><a href="#construct-integration-tests" id="toc-construct-integration-tests" class="nav-link" data-scroll-target="#construct-integration-tests">Construct integration tests</a>
+  <ul class="collapse">
+  <li><a href="#integration-testing" id="toc-integration-testing" class="nav-link" data-scroll-target="#integration-testing">Integration Testing</a></li>
+  <li><a href="#assessment-2" id="toc-assessment-2" class="nav-link" data-scroll-target="#assessment-2">Assessment</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Integration</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="homework" class="level2">
+<h2 class="anchored" data-anchor-id="homework">Homework</h2>
+<ul>
+<li>Homeworks are due on the Friday <em>after</em> the week they correspond to lecture.</li>
+<li>So 9 days after the corresponding lab.</li>
+</ul>
+</section>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<p>This is a three stage lab.</p>
+<ol type="1">
+<li><label><input type="checkbox">Test <code>println!</code></label></li>
+<li><label><input type="checkbox">Factor tests.</label></li>
+<li><label><input type="checkbox">Construct integration tests.</label>
+<ul>
+<li>For <code>println</code></li>
+<li>A “should panic”</li>
+</ul></li>
+</ol>
+</section>
+<section id="test-println" class="level1">
+<h1>Test <code>println!</code></h1>
+<section id="requirements-1" class="level2">
+<h2 class="anchored" data-anchor-id="requirements-1">Requirements</h2>
+<p><code>println!</code> should <a href="./50_text.html#does-it-work">scroll</a>.</p>
+<ul>
+<li>Print something
+<ul>
+<li>Verify it appears at the top of screen.</li>
+</ul></li>
+<li>Print something wraps around to the next line.
+<ul>
+<li>Verify wrapping.</li>
+</ul></li>
+<li>Print until the screen fills and then at least one more line.
+<ul>
+<li>Verify that lines are moved up.</li>
+<li>Verify coloration is maintained.</li>
+<li>Test both newline terminated and wrapped.</li>
+</ul></li>
+</ul>
+<p>This is logically equivalent to the things I checked for by printing <em>Pride and Prejudice</em>.</p>
+<p>These do not have to all be, and probably should not be, all in one test.</p>
+<p>Hint:</p>
+<details>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a>    <span class="co">// Set the first character in the first 3 lines to the line number</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="pp">osirs::println!</span>(<span class="st">"{:081x}"</span><span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>    <span class="pp">osirs::println!</span>(<span class="st">"{:x}"</span><span class="op">,</span><span class="dv">2</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
+<section id="assessment" class="level2">
+<h2 class="anchored" data-anchor-id="assessment">Assessment</h2>
+<p>You can assess your <code>println</code> tests once they are factored, but for now have something non-trivial to serve as example tests to ensure your testing framework works successfully.</p>
+<ul class="task-list">
+<li><label><input type="checkbox"><code>cargo run</code> draws no warnings or errors.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> draws no warnings or errors.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> logs errors to <code>stdout</code> via the serial interface.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> does not launch a graphics window.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> would result in a failed test if <code>_print</code> in <code>src/vga.rs</code> did nothing.</label></li>
+</ul>
+</section>
+</section>
+<section id="factor-tests" class="level1">
+<h1>Factor Tests</h1>
+<section id="motivation" class="level2">
+<h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
+<p>It is obnoxious and not-at-all-good design to place everything in main. You should factor in two ways:</p>
+<ul>
+<li>Tests for a specific functionality should be contained to a dedicated <code>.rs</code> file.</li>
+<li>Code supporting testing generally should be factored into a distinct <code>.rs</code> file.</li>
+</ul>
+</section>
+<section id="requirements-2" class="level2">
+<h2 class="anchored" data-anchor-id="requirements-2">Requirements</h2>
+<p>To begin, you should factor the following out of <code>src/main.rs</code> and into <code>src/lib.rs</code></p>
+<ul class="task-list">
+<li><label><input type="checkbox">A QEMU quitting function, which quits QEMU through the <a href="./60_test.html#exit-status"><code>isa-debug-exit</code></a> using the <code>x86_64</code> crate.</label></li>
+<li><label><input type="checkbox">A test specific panic handler helper, which prints <code>PanicInfo</code> to serial.</label></li>
+<li><label><input type="checkbox">A test runner that accepts a <code>&amp;[&amp;dyn Fn()]</code> and runs and logs each function therein.</label></li>
+</ul>
+<p>Your <code>src/main.rs</code> should retain only the following:</p>
+<ul>
+<li>A panic handler for use outside of a test setting.</li>
+<li>A <code>_start</code> function, that conditionally quits QEMU under a test configuration.</li>
+</ul>
+</section>
+<section id="hint" class="level2">
+<h2 class="anchored" data-anchor-id="hint">Hint</h2>
+<ul>
+<li>I find Rust and/or Cargo namespaces to be completely undocumented.
+<ul>
+<li>Nominally there are chapters in Rust and Cargo books, none of which have ever answered a single one of my questions.</li>
+<li>I’m not linking them here for a reason. They are worse than useless.</li>
+</ul></li>
+<li>I expect you will need the following header in your <code>src/lib.rs</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a><span class="at">#![</span>test_runner<span class="at">(</span>_test_runner<span class="at">)]</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a></span>
+<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">pub</span> <span class="kw">mod</span> vga<span class="op">;</span></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">pub</span> <span class="kw">mod</span> serial<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>I expect you will need the following header in <code>src/main.rs</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">osirs::</span>_test_runner<span class="at">)]</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a></span>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">mod</span> vga<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Give some thought to the difference in test_runner specification therein.</li>
+<li>When you encounter errors from Cargo, try different permutations of
+<ul>
+<li><code>pub</code> specification on functions or other things</li>
+<li>underscore prefixed functions or other things</li>
+<li>namespace manipulation using <code>crate::</code> and <code>osirs::</code> (or your crate name).</li>
+</ul></li>
+<li>You can also have code in two places while trying to get things working, but generally you’ll want to avoid doing this.</li>
+</ul>
+</section>
+<section id="testing-requirements" class="level2">
+<h2 class="anchored" data-anchor-id="testing-requirements">Testing Requirements</h2>
+<ul>
+<li>For some reason, the test framework seemed to want my <code>src/lib.rs</code> to be executable.
+<ul>
+<li>I have no idea why that would happen.</li>
+<li>It meant <code>src/lib.rs</code> required a <code>_start</code> and a panic handler.</li>
+<li>This panic handler was distinct from the testing panic handler helper, which my required panic handler simply called.</li>
+</ul></li>
+<li>There is presumably a way to turn this off - if you do that, it is also correct.</li>
+</ul>
+</section>
+<section id="assessment-1" class="level2">
+<h2 class="anchored" data-anchor-id="assessment-1">Assessment</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"><code>cargo run</code> draws no warnings or errors.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> draws no warnings or errors.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> executes code that is not present in <code>src/main.rs</code></label></li>
+</ul>
+</section>
+</section>
+<section id="construct-integration-tests" class="level1">
+<h1>Construct integration tests</h1>
+<section id="integration-testing" class="level2">
+<h2 class="anchored" data-anchor-id="integration-testing">Integration Testing</h2>
+<ul>
+<li>Sometimes you want a test to be a free-standing executable.</li>
+<li>The most obvious case is testing cases which should panic, in which case you’ll need a distinct panic handler that says “good” job.</li>
+<li>This one is free.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tests/should_panic.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="tests/should_panic.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">osirs::</span>_test_runner<span class="at">)]</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a><span class="kw">fn</span> test_panic(_info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>    <span class="pp">osirs::serial_println!</span>(<span class="st">"[Pass]"</span>)<span class="op">;</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>    <span class="pp">osirs::</span>qemu_quit(<span class="pp">osirs::</span>QEMU_PASS)<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a><span class="op">}</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="kw">fn</span> bad() <span class="op">{</span></span>
+<span id="cb4-14"><a href="#cb4-14"></a>    <span class="pp">assert!</span>(<span class="cn">false</span>)<span class="op">;</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="op">}</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a></span>
+<span id="cb4-17"><a href="#cb4-17"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb4-18"><a href="#cb4-18"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb4-19"><a href="#cb4-19"></a>    <span class="pp">osirs::</span>_test_runner(<span class="op">&amp;</span>[<span class="op">&amp;</span>bad])<span class="op">;</span></span>
+<span id="cb4-20"><a href="#cb4-20"></a>    <span class="pp">osirs::</span>qemu_quit(<span class="pp">osirs::</span>QEMU_FAIL)<span class="op">;</span></span>
+<span id="cb4-21"><a href="#cb4-21"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>It also is just as reasonable to put all your <code>println</code> tests in <code>tests/println.rs</code>.
+<ul>
+<li>Do this.</li>
+</ul></li>
+</ul>
+</section>
+<section id="assessment-2" class="level2">
+<h2 class="anchored" data-anchor-id="assessment-2">Assessment</h2>
+<ul class="task-list">
+<li><label><input type="checkbox"><code>cargo run</code> draws no warnings or errors.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> draws no warnings or errors.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> executes <code>tests/should_panic.rs</code> and passes.</label></li>
+<li><label><input type="checkbox"><code>cargo test</code> executes <code>tests/println.rs</code> which meets the earlier testing requirements and passes.</label></li>
+</ul>
+<p>Mine looks like this, you can expand it’s just big.</p>
+<details>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb5-1"><a href="#cb5-1"></a>    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s</span>
+<span id="cb5-2"><a href="#cb5-2"></a>     Running unittests src/lib.rs (target/x86_64-osirs/debug/deps/osirs-97fff0361887fe8d)</span>
+<span id="cb5-3"><a href="#cb5-3"></a>Building bootloader</span>
+<span id="cb5-4"><a href="#cb5-4"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb5-5"><a href="#cb5-5"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span>
+<span id="cb5-6"><a href="#cb5-6"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-97fff0361887fe8d.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb5-7"><a href="#cb5-7"></a>     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-66b57a63df3ec3d9)</span>
+<span id="cb5-8"><a href="#cb5-8"></a>Building bootloader</span>
+<span id="cb5-9"><a href="#cb5-9"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb5-10"><a href="#cb5-10"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span>
+<span id="cb5-11"><a href="#cb5-11"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-66b57a63df3ec3d9.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb5-12"><a href="#cb5-12"></a>     Running tests/println.rs (target/x86_64-osirs/debug/deps/println-d4ca6644f20d51b2)</span>
+<span id="cb5-13"><a href="#cb5-13"></a>Building bootloader</span>
+<span id="cb5-14"><a href="#cb5-14"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb5-15"><a href="#cb5-15"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span>
+<span id="cb5-16"><a href="#cb5-16"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-println-d4ca6644f20d51b2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb5-17"><a href="#cb5-17"></a>Initiating test 0x00... [Pass]</span>
+<span id="cb5-18"><a href="#cb5-18"></a>     Running tests/should_panic.rs (target/x86_64-osirs/debug/deps/should_panic-2397b9ee1ac15e67)</span>
+<span id="cb5-19"><a href="#cb5-19"></a>Building bootloader</span>
+<span id="cb5-20"><a href="#cb5-20"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb5-21"><a href="#cb5-21"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.58s</span>
+<span id="cb5-22"><a href="#cb5-22"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-should_panic-2397b9ee1ac15e67.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb5-23"><a href="#cb5-23"></a>Initiating test 0x00... [Pass]</span>
+<span id="cb5-24"><a href="#cb5-24"></a>   Doc-tests osirs</span>
+<span id="cb5-25"><a href="#cb5-25"></a></span>
+<span id="cb5-26"><a href="#cb5-26"></a>running 0 tests</span>
+<span id="cb5-27"><a href="#cb5-27"></a></span>
+<span id="cb5-28"><a href="#cb5-28"></a>test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<p>It will be easy to tell if you your <code>tests/println.rs</code> doesn’t test for things that <code>println</code> isn’t supposed to do (this is a double negative). Simply test <em>my</em> <code>src/vga.rs</code>.</p>
+<details>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/vga.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">static</span> <span class="kw">mut</span> LATEST<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="kw">const</span> MMIO<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0xb8000</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="kw">const</span> COLOR<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0xF</span><span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a></span>
+<span id="cb6-5"><a href="#cb6-5"></a><span class="kw">fn</span> char_to_vga(a<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
+<span id="cb6-6"><a href="#cb6-6"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a>        <span class="kw">let</span> rel<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> LATEST <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8"></a>        <span class="op">*</span>rel <span class="op">=</span> a<span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a>        <span class="op">*</span>((rel <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a>        LATEST <span class="op">=</span> LATEST <span class="op">+</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb6-11"><a href="#cb6-11"></a>    <span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a>    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="op">}</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a></span>
+<span id="cb6-15"><a href="#cb6-15"></a><span class="kw">const</span> ROWS<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">80</span><span class="op">;</span></span>
+<span id="cb6-16"><a href="#cb6-16"></a><span class="kw">const</span> COLS<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">25</span><span class="op">;</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a><span class="kw">const</span> <span class="cn">MAX</span><span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> ROWS <span class="op">*</span> COLS<span class="op">;</span></span>
+<span id="cb6-18"><a href="#cb6-18"></a><span class="kw">const</span> SPACE<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
+<span id="cb6-19"><a href="#cb6-19"></a><span class="kw">const</span> ENTER<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">10</span><span class="op">;</span></span>
+<span id="cb6-20"><a href="#cb6-20"></a></span>
+<span id="cb6-21"><a href="#cb6-21"></a><span class="kw">fn</span> scroll() <span class="op">{</span></span>
+<span id="cb6-22"><a href="#cb6-22"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb6-23"><a href="#cb6-23"></a>        <span class="cf">for</span> i <span class="kw">in</span> ROWS<span class="op">..=</span><span class="cn">MAX</span> <span class="op">{</span></span>
+<span id="cb6-24"><a href="#cb6-24"></a>            <span class="kw">let</span> src<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO  <span class="op">+</span> i <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb6-25"><a href="#cb6-25"></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (i <span class="op">-</span> ROWS) <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb6-26"><a href="#cb6-26"></a>            <span class="op">*</span>dst <span class="op">=</span> <span class="op">*</span>src<span class="op">;</span></span>
+<span id="cb6-27"><a href="#cb6-27"></a>            <span class="op">*</span>((dst <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb6-28"><a href="#cb6-28"></a>        <span class="op">}</span></span>
+<span id="cb6-29"><a href="#cb6-29"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">1</span><span class="op">..=</span>ROWS <span class="op">{</span></span>
+<span id="cb6-30"><a href="#cb6-30"></a>            <span class="kw">let</span> dst<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">=</span> (MMIO <span class="op">+</span> (<span class="cn">MAX</span> <span class="op">+</span> i <span class="op">-</span> ROWS) <span class="op">*</span> <span class="dv">2</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb6-31"><a href="#cb6-31"></a>            <span class="op">*</span>dst <span class="op">=</span> SPACE<span class="op">;</span></span>
+<span id="cb6-32"><a href="#cb6-32"></a>            <span class="op">*</span>((dst <span class="kw">as</span> <span class="dt">usize</span> <span class="op">+</span> <span class="dv">1</span>) <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> COLOR<span class="op">;</span></span>
+<span id="cb6-33"><a href="#cb6-33"></a>        <span class="op">}</span></span>
+<span id="cb6-34"><a href="#cb6-34"></a>        LATEST <span class="op">=</span> LATEST <span class="op">-</span> ROWS<span class="op">;</span></span>
+<span id="cb6-35"><a href="#cb6-35"></a>    <span class="op">}</span></span>
+<span id="cb6-36"><a href="#cb6-36"></a>    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb6-37"><a href="#cb6-37"></a><span class="op">}</span></span>
+<span id="cb6-38"><a href="#cb6-38"></a></span>
+<span id="cb6-39"><a href="#cb6-39"></a><span class="kw">fn</span> str_to_vga(s<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">{</span></span>
+<span id="cb6-40"><a href="#cb6-40"></a>    <span class="kw">let</span> v <span class="op">=</span> s<span class="op">.</span>as_bytes()<span class="op">;</span></span>
+<span id="cb6-41"><a href="#cb6-41"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb6-42"><a href="#cb6-42"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>v<span class="op">.</span>len() <span class="op">{</span></span>
+<span id="cb6-43"><a href="#cb6-43"></a>            <span class="cf">if</span> LATEST <span class="op">&gt;</span> <span class="cn">MAX</span> <span class="op">{</span></span>
+<span id="cb6-44"><a href="#cb6-44"></a>                scroll()<span class="op">;</span></span>
+<span id="cb6-45"><a href="#cb6-45"></a>            <span class="op">}</span></span>
+<span id="cb6-46"><a href="#cb6-46"></a>            <span class="cf">match</span> v[i] <span class="op">{</span></span>
+<span id="cb6-47"><a href="#cb6-47"></a>                ENTER <span class="op">=&gt;</span> LATEST <span class="op">=</span> ((LATEST <span class="op">/</span> ROWS) <span class="op">+</span> <span class="dv">1</span>) <span class="op">*</span> ROWS<span class="op">,</span> <span class="co">// newline</span></span>
+<span id="cb6-48"><a href="#cb6-48"></a>                _ <span class="op">=&gt;</span> char_to_vga(v[i])<span class="op">,</span></span>
+<span id="cb6-49"><a href="#cb6-49"></a>            <span class="op">}</span></span>
+<span id="cb6-50"><a href="#cb6-50"></a>        <span class="op">}</span></span>
+<span id="cb6-51"><a href="#cb6-51"></a>    <span class="op">}</span></span>
+<span id="cb6-52"><a href="#cb6-52"></a>    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb6-53"><a href="#cb6-53"></a><span class="op">}</span></span>
+<span id="cb6-54"><a href="#cb6-54"></a></span>
+<span id="cb6-55"><a href="#cb6-55"></a><span class="kw">pub</span> <span class="kw">struct</span> Dummy <span class="op">{}</span></span>
+<span id="cb6-56"><a href="#cb6-56"></a></span>
+<span id="cb6-57"><a href="#cb6-57"></a><span class="kw">impl</span> <span class="pp">core::fmt::</span><span class="bu">Write</span> <span class="cf">for</span> Dummy <span class="op">{</span></span>
+<span id="cb6-58"><a href="#cb6-58"></a>    <span class="kw">fn</span> write_str(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> s<span class="op">:</span> <span class="op">&amp;</span><span class="dt">str</span>) <span class="op">-&gt;</span> <span class="pp">core::fmt::</span><span class="dt">Result</span> <span class="op">{</span></span>
+<span id="cb6-59"><a href="#cb6-59"></a>        str_to_vga(s)<span class="op">;</span></span>
+<span id="cb6-60"><a href="#cb6-60"></a>        <span class="cf">return</span> <span class="pp">core::result::</span><span class="dt">Result</span><span class="pp">::</span><span class="cn">Ok</span>(())<span class="op">;</span></span>
+<span id="cb6-61"><a href="#cb6-61"></a>    <span class="op">}</span></span>
+<span id="cb6-62"><a href="#cb6-62"></a><span class="op">}</span></span>
+<span id="cb6-63"><a href="#cb6-63"></a></span>
+<span id="cb6-64"><a href="#cb6-64"></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">core::fmt::</span>Arguments) <span class="op">{</span></span>
+<span id="cb6-65"><a href="#cb6-65"></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
+<span id="cb6-66"><a href="#cb6-66"></a>    <span class="kw">let</span> <span class="kw">mut</span> d <span class="op">=</span> Dummy <span class="op">{};</span></span>
+<span id="cb6-67"><a href="#cb6-67"></a>    d<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb6-68"><a href="#cb6-68"></a>    <span class="cf">return</span><span class="op">;</span></span>
+<span id="cb6-69"><a href="#cb6-69"></a><span class="op">}</span></span>
+<span id="cb6-70"><a href="#cb6-70"></a></span>
+<span id="cb6-71"><a href="#cb6-71"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
+<span id="cb6-72"><a href="#cb6-72"></a><span class="pp">macro_rules!</span> print <span class="op">{</span></span>
+<span id="cb6-73"><a href="#cb6-73"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::vga::</span>_print(<span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
+<span id="cb6-74"><a href="#cb6-74"></a><span class="op">}</span></span>
+<span id="cb6-75"><a href="#cb6-75"></a></span>
+<span id="cb6-76"><a href="#cb6-76"></a><span class="at">#[</span>macro_export<span class="at">]</span></span>
+<span id="cb6-77"><a href="#cb6-77"></a><span class="pp">macro_rules!</span> println <span class="op">{</span></span>
+<span id="cb6-78"><a href="#cb6-78"></a>    () <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
+<span id="cb6-79"><a href="#cb6-79"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> <span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
+<span id="cb6-80"><a href="#cb6-80"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</details>
+<p>It does exactly what I think <code>println</code> should do. After all, I wrote it, and with the benefit of <code>unsafe</code> I actually got to write what I wanted instead of what <code>rustc</code> wanted me to write. <em>This is called “writing code” and <code>cargo</code> is trying to make it illegal.</em></p>
+
+
+<!-- -->
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./61_serial.html" class="pagination-link" aria-label="Serial">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Serial</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">---</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="an">title:</span><span class="co"> Integration</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a><span class="co">---</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="fu">## Homework</span></span>
+<span id="cb7-7"><a href="#cb7-7"></a></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="ss">- </span>Homeworks are due on the Friday *after* the week they correspond to lecture.</span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="ss">- </span>So 9 days after the corresponding lab.</span>
+<span id="cb7-10"><a href="#cb7-10"></a></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="fu">## Requirements</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a>This is a three stage lab.</span>
+<span id="cb7-14"><a href="#cb7-14"></a></span>
+<span id="cb7-15"><a href="#cb7-15"></a><span class="ss">1. </span><span class="co">[ ]</span> Test <span class="in">`println!`</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a><span class="ss">1. </span><span class="co">[ ]</span> Factor tests.</span>
+<span id="cb7-17"><a href="#cb7-17"></a><span class="ss">1. </span><span class="co">[ ]</span> Construct integration tests.</span>
+<span id="cb7-18"><a href="#cb7-18"></a><span class="ss">    - </span>For <span class="in">`println`</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a><span class="ss">    - </span>A "should panic"</span>
+<span id="cb7-20"><a href="#cb7-20"></a></span>
+<span id="cb7-21"><a href="#cb7-21"></a></span>
+<span id="cb7-22"><a href="#cb7-22"></a><span class="fu"># Test `println!`</span></span>
+<span id="cb7-23"><a href="#cb7-23"></a></span>
+<span id="cb7-24"><a href="#cb7-24"></a><span class="fu">## Requirements</span></span>
+<span id="cb7-25"><a href="#cb7-25"></a></span>
+<span id="cb7-26"><a href="#cb7-26"></a><span class="in">`println!`</span> should <span class="co">[</span><span class="ot">scroll</span><span class="co">](50_text.qmd#does-it-work)</span>.</span>
+<span id="cb7-27"><a href="#cb7-27"></a></span>
+<span id="cb7-28"><a href="#cb7-28"></a><span class="ss">- </span>Print something</span>
+<span id="cb7-29"><a href="#cb7-29"></a><span class="ss">    - </span>Verify it appears at the top of screen.</span>
+<span id="cb7-30"><a href="#cb7-30"></a><span class="ss">- </span>Print something wraps around to the next line.</span>
+<span id="cb7-31"><a href="#cb7-31"></a><span class="ss">    - </span>Verify wrapping.</span>
+<span id="cb7-32"><a href="#cb7-32"></a><span class="ss">- </span>Print until the screen fills and then at least one more line.</span>
+<span id="cb7-33"><a href="#cb7-33"></a><span class="ss">    - </span>Verify that lines are moved up.</span>
+<span id="cb7-34"><a href="#cb7-34"></a><span class="ss">    - </span>Verify coloration is maintained.</span>
+<span id="cb7-35"><a href="#cb7-35"></a><span class="ss">    - </span>Test both newline terminated and wrapped.</span>
+<span id="cb7-36"><a href="#cb7-36"></a>    </span>
+<span id="cb7-37"><a href="#cb7-37"></a>This is logically equivalent to the things I checked for by printing *Pride and Prejudice*.</span>
+<span id="cb7-38"><a href="#cb7-38"></a></span>
+<span id="cb7-39"><a href="#cb7-39"></a>These do not have to all be, and probably should not be, all in one test.</span>
+<span id="cb7-40"><a href="#cb7-40"></a></span>
+<span id="cb7-41"><a href="#cb7-41"></a>Hint:</span>
+<span id="cb7-42"><a href="#cb7-42"></a></span>
+<span id="cb7-43"><a href="#cb7-43"></a>&lt;details&gt;</span>
+<span id="cb7-44"><a href="#cb7-44"></a></span>
+<span id="cb7-45"><a href="#cb7-45"></a><span class="in">```{.rs}</span></span>
+<span id="cb7-46"><a href="#cb7-46"></a><span class="in">    // Set the first character in the first 3 lines to the line number</span></span>
+<span id="cb7-47"><a href="#cb7-47"></a><span class="in">    osirs::println!("{:081x}",1);</span></span>
+<span id="cb7-48"><a href="#cb7-48"></a><span class="in">    osirs::println!("{:x}",2);</span></span>
+<span id="cb7-49"><a href="#cb7-49"></a><span class="in">```</span></span>
+<span id="cb7-50"><a href="#cb7-50"></a></span>
+<span id="cb7-51"><a href="#cb7-51"></a>&lt;/details&gt;</span>
+<span id="cb7-52"><a href="#cb7-52"></a></span>
+<span id="cb7-53"><a href="#cb7-53"></a><span class="fu">## Assessment</span></span>
+<span id="cb7-54"><a href="#cb7-54"></a></span>
+<span id="cb7-55"><a href="#cb7-55"></a>You can assess your <span class="in">`println`</span> tests once they are factored, but for now have something non-trivial to serve as example tests to ensure your testing framework works successfully.</span>
+<span id="cb7-56"><a href="#cb7-56"></a></span>
+<span id="cb7-57"><a href="#cb7-57"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo run`</span> draws no warnings or errors.</span>
+<span id="cb7-58"><a href="#cb7-58"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> draws no warnings or errors.</span>
+<span id="cb7-59"><a href="#cb7-59"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> logs errors to <span class="in">`stdout`</span> via the serial interface.</span>
+<span id="cb7-60"><a href="#cb7-60"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> does not launch a graphics window.</span>
+<span id="cb7-61"><a href="#cb7-61"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> would result in a failed test if <span class="in">`_print`</span> in <span class="in">`src/vga.rs`</span> did nothing.</span>
+<span id="cb7-62"><a href="#cb7-62"></a></span>
+<span id="cb7-63"><a href="#cb7-63"></a><span class="fu"># Factor Tests</span></span>
+<span id="cb7-64"><a href="#cb7-64"></a></span>
+<span id="cb7-65"><a href="#cb7-65"></a><span class="fu">## Motivation</span></span>
+<span id="cb7-66"><a href="#cb7-66"></a></span>
+<span id="cb7-67"><a href="#cb7-67"></a>It is obnoxious and not-at-all-good design to place everything in main. You should factor in two ways:</span>
+<span id="cb7-68"><a href="#cb7-68"></a></span>
+<span id="cb7-69"><a href="#cb7-69"></a><span class="ss">- </span>Tests for a specific functionality should be contained to a dedicated <span class="in">`.rs`</span> file.</span>
+<span id="cb7-70"><a href="#cb7-70"></a><span class="ss">- </span>Code supporting testing generally should be factored into a distinct <span class="in">`.rs`</span> file.</span>
+<span id="cb7-71"><a href="#cb7-71"></a></span>
+<span id="cb7-72"><a href="#cb7-72"></a><span class="fu">## Requirements</span></span>
+<span id="cb7-73"><a href="#cb7-73"></a></span>
+<span id="cb7-74"><a href="#cb7-74"></a>To begin, you should factor the following out of <span class="in">`src/main.rs`</span> and into <span class="in">`src/lib.rs`</span></span>
+<span id="cb7-75"><a href="#cb7-75"></a></span>
+<span id="cb7-76"><a href="#cb7-76"></a><span class="ss">- </span><span class="va">[ ]</span> A QEMU quitting function, which quits QEMU through the <span class="co">[</span><span class="ot">`isa-debug-exit`</span><span class="co">](60_test.qmd#exit-status)</span> using the <span class="in">`x86_64`</span> crate.</span>
+<span id="cb7-77"><a href="#cb7-77"></a><span class="ss">- </span><span class="va">[ ]</span> A test specific panic handler helper, which prints <span class="in">`PanicInfo`</span> to serial.</span>
+<span id="cb7-78"><a href="#cb7-78"></a><span class="ss">- </span><span class="va">[ ]</span> A test runner that accepts a <span class="in">`&amp;[&amp;dyn Fn()]`</span> and runs and logs each function therein.</span>
+<span id="cb7-79"><a href="#cb7-79"></a></span>
+<span id="cb7-80"><a href="#cb7-80"></a>Your <span class="in">`src/main.rs`</span> should retain only the following:</span>
+<span id="cb7-81"><a href="#cb7-81"></a></span>
+<span id="cb7-82"><a href="#cb7-82"></a><span class="ss">- </span>A panic handler for use outside of a test setting.</span>
+<span id="cb7-83"><a href="#cb7-83"></a><span class="ss">- </span>A <span class="in">`_start`</span> function, that conditionally quits QEMU under a test configuration.</span>
+<span id="cb7-84"><a href="#cb7-84"></a></span>
+<span id="cb7-85"><a href="#cb7-85"></a><span class="fu">## Hint</span></span>
+<span id="cb7-86"><a href="#cb7-86"></a></span>
+<span id="cb7-87"><a href="#cb7-87"></a><span class="ss">- </span>I find Rust and/or Cargo namespaces to be completely undocumented.</span>
+<span id="cb7-88"><a href="#cb7-88"></a><span class="ss">    - </span>Nominally there are chapters in Rust and Cargo books, none of which have ever answered a single one of my questions.</span>
+<span id="cb7-89"><a href="#cb7-89"></a><span class="ss">    - </span>I'm not linking them here for a reason. They are worse than useless.</span>
+<span id="cb7-90"><a href="#cb7-90"></a><span class="ss">- </span>I expect you will need the following header in your <span class="in">`src/lib.rs`</span></span>
+<span id="cb7-91"><a href="#cb7-91"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb7-92"><a href="#cb7-92"></a><span class="in">#![no_main]</span></span>
+<span id="cb7-93"><a href="#cb7-93"></a><span class="in">#![no_std]</span></span>
+<span id="cb7-94"><a href="#cb7-94"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb7-95"><a href="#cb7-95"></a><span class="in">#![test_runner(_test_runner)]</span></span>
+<span id="cb7-96"><a href="#cb7-96"></a></span>
+<span id="cb7-97"><a href="#cb7-97"></a><span class="in">pub mod vga;</span></span>
+<span id="cb7-98"><a href="#cb7-98"></a><span class="in">pub mod serial;</span></span>
+<span id="cb7-99"><a href="#cb7-99"></a><span class="in">```</span></span>
+<span id="cb7-100"><a href="#cb7-100"></a><span class="ss">- </span>I expect you will need the following header in <span class="in">`src/main.rs`</span></span>
+<span id="cb7-101"><a href="#cb7-101"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb7-102"><a href="#cb7-102"></a><span class="in">#![no_main]</span></span>
+<span id="cb7-103"><a href="#cb7-103"></a><span class="in">#![no_std]</span></span>
+<span id="cb7-104"><a href="#cb7-104"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb7-105"><a href="#cb7-105"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
+<span id="cb7-106"><a href="#cb7-106"></a></span>
+<span id="cb7-107"><a href="#cb7-107"></a><span class="in">mod vga;</span></span>
+<span id="cb7-108"><a href="#cb7-108"></a><span class="in">```</span></span>
+<span id="cb7-109"><a href="#cb7-109"></a><span class="ss">- </span>Give some thought to the difference in test_runner specification therein.</span>
+<span id="cb7-110"><a href="#cb7-110"></a><span class="ss">- </span>When you encounter errors from Cargo, try different permutations of </span>
+<span id="cb7-111"><a href="#cb7-111"></a><span class="ss">    - </span><span class="in">`pub`</span> specification on functions or other things</span>
+<span id="cb7-112"><a href="#cb7-112"></a><span class="ss">    - </span>underscore prefixed functions or other things</span>
+<span id="cb7-113"><a href="#cb7-113"></a><span class="ss">    - </span>namespace manipulation using <span class="in">`crate::`</span> and <span class="in">`osirs::`</span> (or your crate name).</span>
+<span id="cb7-114"><a href="#cb7-114"></a><span class="ss">- </span>You can also have code in two places while trying to get things working, but generally you'll want to avoid doing this.</span>
+<span id="cb7-115"><a href="#cb7-115"></a></span>
+<span id="cb7-116"><a href="#cb7-116"></a><span class="fu">## Testing Requirements</span></span>
+<span id="cb7-117"><a href="#cb7-117"></a></span>
+<span id="cb7-118"><a href="#cb7-118"></a><span class="ss">- </span>For some reason, the test framework seemed to want my <span class="in">`src/lib.rs`</span> to be executable.</span>
+<span id="cb7-119"><a href="#cb7-119"></a><span class="ss">    - </span>I have no idea why that would happen.</span>
+<span id="cb7-120"><a href="#cb7-120"></a><span class="ss">    - </span>It meant <span class="in">`src/lib.rs`</span> required a <span class="in">`_start`</span> and a panic handler.</span>
+<span id="cb7-121"><a href="#cb7-121"></a><span class="ss">    - </span>This panic handler was distinct from the testing panic handler helper, which my required panic handler simply called.</span>
+<span id="cb7-122"><a href="#cb7-122"></a><span class="ss">- </span>There is presumably a way to turn this off - if you do that, it is also correct.</span>
+<span id="cb7-123"><a href="#cb7-123"></a></span>
+<span id="cb7-124"><a href="#cb7-124"></a><span class="fu">## Assessment</span></span>
+<span id="cb7-125"><a href="#cb7-125"></a></span>
+<span id="cb7-126"><a href="#cb7-126"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo run`</span> draws no warnings or errors.</span>
+<span id="cb7-127"><a href="#cb7-127"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> draws no warnings or errors.</span>
+<span id="cb7-128"><a href="#cb7-128"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> executes code that is not present in <span class="in">`src/main.rs`</span></span>
+<span id="cb7-129"><a href="#cb7-129"></a></span>
+<span id="cb7-130"><a href="#cb7-130"></a><span class="fu"># Construct integration tests</span></span>
+<span id="cb7-131"><a href="#cb7-131"></a></span>
+<span id="cb7-132"><a href="#cb7-132"></a><span class="fu">## Integration Testing</span></span>
+<span id="cb7-133"><a href="#cb7-133"></a></span>
+<span id="cb7-134"><a href="#cb7-134"></a><span class="ss">- </span>Sometimes you want a test to be a free-standing executable.</span>
+<span id="cb7-135"><a href="#cb7-135"></a><span class="ss">- </span>The most obvious case is testing cases which should panic, in which case you'll need a distinct panic handler that says "good" job.</span>
+<span id="cb7-136"><a href="#cb7-136"></a><span class="ss">- </span>This one is free.</span>
+<span id="cb7-137"><a href="#cb7-137"></a></span>
+<span id="cb7-138"><a href="#cb7-138"></a><span class="in">```{.rs filename="tests/should_panic.rs"}</span></span>
+<span id="cb7-139"><a href="#cb7-139"></a><span class="in">#![no_std]</span></span>
+<span id="cb7-140"><a href="#cb7-140"></a><span class="in">#![no_main]</span></span>
+<span id="cb7-141"><a href="#cb7-141"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb7-142"><a href="#cb7-142"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
+<span id="cb7-143"><a href="#cb7-143"></a></span>
+<span id="cb7-144"><a href="#cb7-144"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb7-145"><a href="#cb7-145"></a><span class="in">fn test_panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb7-146"><a href="#cb7-146"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
+<span id="cb7-147"><a href="#cb7-147"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb7-148"><a href="#cb7-148"></a><span class="in">    loop {}</span></span>
+<span id="cb7-149"><a href="#cb7-149"></a><span class="in">}</span></span>
+<span id="cb7-150"><a href="#cb7-150"></a></span>
+<span id="cb7-151"><a href="#cb7-151"></a><span class="in">fn bad() {</span></span>
+<span id="cb7-152"><a href="#cb7-152"></a><span class="in">    assert!(false);</span></span>
+<span id="cb7-153"><a href="#cb7-153"></a><span class="in">}</span></span>
+<span id="cb7-154"><a href="#cb7-154"></a></span>
+<span id="cb7-155"><a href="#cb7-155"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb7-156"><a href="#cb7-156"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb7-157"><a href="#cb7-157"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
+<span id="cb7-158"><a href="#cb7-158"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
+<span id="cb7-159"><a href="#cb7-159"></a><span class="in">    loop {}</span></span>
+<span id="cb7-160"><a href="#cb7-160"></a><span class="in">}</span></span>
+<span id="cb7-161"><a href="#cb7-161"></a><span class="in">```</span></span>
+<span id="cb7-162"><a href="#cb7-162"></a><span class="ss">- </span>It also is just as reasonable to put all your <span class="in">`println`</span> tests in <span class="in">`tests/println.rs`</span>.</span>
+<span id="cb7-163"><a href="#cb7-163"></a><span class="ss">    - </span>Do this.</span>
+<span id="cb7-164"><a href="#cb7-164"></a></span>
+<span id="cb7-165"><a href="#cb7-165"></a><span class="fu">## Assessment</span></span>
+<span id="cb7-166"><a href="#cb7-166"></a></span>
+<span id="cb7-167"><a href="#cb7-167"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo run`</span> draws no warnings or errors.</span>
+<span id="cb7-168"><a href="#cb7-168"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> draws no warnings or errors.</span>
+<span id="cb7-169"><a href="#cb7-169"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> executes <span class="in">`tests/should_panic.rs`</span> and passes.</span>
+<span id="cb7-170"><a href="#cb7-170"></a><span class="ss">- </span><span class="va">[ ]</span> <span class="in">`cargo test`</span> executes <span class="in">`tests/println.rs`</span> which meets the earlier testing requirements and passes.</span>
+<span id="cb7-171"><a href="#cb7-171"></a></span>
+<span id="cb7-172"><a href="#cb7-172"></a>Mine looks like this, you can expand it's just big.</span>
+<span id="cb7-173"><a href="#cb7-173"></a></span>
+<span id="cb7-174"><a href="#cb7-174"></a>&lt;details&gt;</span>
+<span id="cb7-175"><a href="#cb7-175"></a></span>
+<span id="cb7-176"><a href="#cb7-176"></a><span class="in">```{.email}</span></span>
+<span id="cb7-177"><a href="#cb7-177"></a><span class="in">    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s</span></span>
+<span id="cb7-178"><a href="#cb7-178"></a><span class="in">     Running unittests src/lib.rs (target/x86_64-osirs/debug/deps/osirs-97fff0361887fe8d)</span></span>
+<span id="cb7-179"><a href="#cb7-179"></a><span class="in">Building bootloader</span></span>
+<span id="cb7-180"><a href="#cb7-180"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
+<span id="cb7-181"><a href="#cb7-181"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span></span>
+<span id="cb7-182"><a href="#cb7-182"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-97fff0361887fe8d.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
+<span id="cb7-183"><a href="#cb7-183"></a><span class="in">     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-66b57a63df3ec3d9)</span></span>
+<span id="cb7-184"><a href="#cb7-184"></a><span class="in">Building bootloader</span></span>
+<span id="cb7-185"><a href="#cb7-185"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
+<span id="cb7-186"><a href="#cb7-186"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span></span>
+<span id="cb7-187"><a href="#cb7-187"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-66b57a63df3ec3d9.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
+<span id="cb7-188"><a href="#cb7-188"></a><span class="in">     Running tests/println.rs (target/x86_64-osirs/debug/deps/println-d4ca6644f20d51b2)</span></span>
+<span id="cb7-189"><a href="#cb7-189"></a><span class="in">Building bootloader</span></span>
+<span id="cb7-190"><a href="#cb7-190"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
+<span id="cb7-191"><a href="#cb7-191"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span></span>
+<span id="cb7-192"><a href="#cb7-192"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-println-d4ca6644f20d51b2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
+<span id="cb7-193"><a href="#cb7-193"></a><span class="in">Initiating test 0x00... [Pass]</span></span>
+<span id="cb7-194"><a href="#cb7-194"></a><span class="in">     Running tests/should_panic.rs (target/x86_64-osirs/debug/deps/should_panic-2397b9ee1ac15e67)</span></span>
+<span id="cb7-195"><a href="#cb7-195"></a><span class="in">Building bootloader</span></span>
+<span id="cb7-196"><a href="#cb7-196"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
+<span id="cb7-197"><a href="#cb7-197"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.58s</span></span>
+<span id="cb7-198"><a href="#cb7-198"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-should_panic-2397b9ee1ac15e67.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
+<span id="cb7-199"><a href="#cb7-199"></a><span class="in">Initiating test 0x00... [Pass]</span></span>
+<span id="cb7-200"><a href="#cb7-200"></a><span class="in">   Doc-tests osirs</span></span>
+<span id="cb7-201"><a href="#cb7-201"></a></span>
+<span id="cb7-202"><a href="#cb7-202"></a><span class="in">running 0 tests</span></span>
+<span id="cb7-203"><a href="#cb7-203"></a></span>
+<span id="cb7-204"><a href="#cb7-204"></a><span class="in">test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</span></span>
+<span id="cb7-205"><a href="#cb7-205"></a><span class="in">```</span></span>
+<span id="cb7-206"><a href="#cb7-206"></a></span>
+<span id="cb7-207"><a href="#cb7-207"></a>&lt;/details&gt;</span>
+<span id="cb7-208"><a href="#cb7-208"></a></span>
+<span id="cb7-209"><a href="#cb7-209"></a>It will be easy to tell if you your <span class="in">`tests/println.rs`</span> doesn't test for things that <span class="in">`println`</span> isn't supposed to do (this is a double negative). Simply test *my* <span class="in">`src/vga.rs`</span>.</span>
+<span id="cb7-210"><a href="#cb7-210"></a></span>
+<span id="cb7-211"><a href="#cb7-211"></a>&lt;details&gt;</span>
+<span id="cb7-212"><a href="#cb7-212"></a></span>
+<span id="cb7-213"><a href="#cb7-213"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
+<span id="cb7-214"><a href="#cb7-214"></a><span class="in">static mut LATEST: usize = 0;</span></span>
+<span id="cb7-215"><a href="#cb7-215"></a><span class="in">const MMIO: usize = 0xb8000;</span></span>
+<span id="cb7-216"><a href="#cb7-216"></a><span class="in">const COLOR: u8 = 0xF;</span></span>
+<span id="cb7-217"><a href="#cb7-217"></a></span>
+<span id="cb7-218"><a href="#cb7-218"></a><span class="in">fn char_to_vga(a: u8) {</span></span>
+<span id="cb7-219"><a href="#cb7-219"></a><span class="in">    unsafe {</span></span>
+<span id="cb7-220"><a href="#cb7-220"></a><span class="in">        let rel: *mut u8 = (MMIO + LATEST * 2) as *mut u8;</span></span>
+<span id="cb7-221"><a href="#cb7-221"></a><span class="in">        *rel = a;</span></span>
+<span id="cb7-222"><a href="#cb7-222"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb7-223"><a href="#cb7-223"></a><span class="in">        LATEST = LATEST + 1;</span></span>
+<span id="cb7-224"><a href="#cb7-224"></a><span class="in">    }</span></span>
+<span id="cb7-225"><a href="#cb7-225"></a><span class="in">    return;</span></span>
+<span id="cb7-226"><a href="#cb7-226"></a><span class="in">}</span></span>
+<span id="cb7-227"><a href="#cb7-227"></a></span>
+<span id="cb7-228"><a href="#cb7-228"></a><span class="in">const ROWS: usize = 80;</span></span>
+<span id="cb7-229"><a href="#cb7-229"></a><span class="in">const COLS: usize = 25;</span></span>
+<span id="cb7-230"><a href="#cb7-230"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
+<span id="cb7-231"><a href="#cb7-231"></a><span class="in">const SPACE: u8 = 32;</span></span>
+<span id="cb7-232"><a href="#cb7-232"></a><span class="in">const ENTER: u8 = 10;</span></span>
+<span id="cb7-233"><a href="#cb7-233"></a></span>
+<span id="cb7-234"><a href="#cb7-234"></a><span class="in">fn scroll() {</span></span>
+<span id="cb7-235"><a href="#cb7-235"></a><span class="in">    unsafe {</span></span>
+<span id="cb7-236"><a href="#cb7-236"></a><span class="in">        for i in ROWS..=MAX {</span></span>
+<span id="cb7-237"><a href="#cb7-237"></a><span class="in">            let src: *mut u8 = (MMIO  + i * 2) as *mut u8;</span></span>
+<span id="cb7-238"><a href="#cb7-238"></a><span class="in">            let dst: *mut u8 = (MMIO + (i - ROWS) * 2) as *mut u8;</span></span>
+<span id="cb7-239"><a href="#cb7-239"></a><span class="in">            *dst = *src;</span></span>
+<span id="cb7-240"><a href="#cb7-240"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb7-241"><a href="#cb7-241"></a><span class="in">        }</span></span>
+<span id="cb7-242"><a href="#cb7-242"></a><span class="in">        for i in 1..=ROWS {</span></span>
+<span id="cb7-243"><a href="#cb7-243"></a><span class="in">            let dst: *mut u8 = (MMIO + (MAX + i - ROWS) * 2) as *mut u8;</span></span>
+<span id="cb7-244"><a href="#cb7-244"></a><span class="in">            *dst = SPACE;</span></span>
+<span id="cb7-245"><a href="#cb7-245"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
+<span id="cb7-246"><a href="#cb7-246"></a><span class="in">        }</span></span>
+<span id="cb7-247"><a href="#cb7-247"></a><span class="in">        LATEST = LATEST - ROWS;</span></span>
+<span id="cb7-248"><a href="#cb7-248"></a><span class="in">    }</span></span>
+<span id="cb7-249"><a href="#cb7-249"></a><span class="in">    return;</span></span>
+<span id="cb7-250"><a href="#cb7-250"></a><span class="in">}</span></span>
+<span id="cb7-251"><a href="#cb7-251"></a></span>
+<span id="cb7-252"><a href="#cb7-252"></a><span class="in">fn str_to_vga(s: &amp;str) {</span></span>
+<span id="cb7-253"><a href="#cb7-253"></a><span class="in">    let v = s.as_bytes();</span></span>
+<span id="cb7-254"><a href="#cb7-254"></a><span class="in">    unsafe {</span></span>
+<span id="cb7-255"><a href="#cb7-255"></a><span class="in">        for i in 0..v.len() {</span></span>
+<span id="cb7-256"><a href="#cb7-256"></a><span class="in">            if LATEST &gt; MAX {</span></span>
+<span id="cb7-257"><a href="#cb7-257"></a><span class="in">                scroll();</span></span>
+<span id="cb7-258"><a href="#cb7-258"></a><span class="in">            }</span></span>
+<span id="cb7-259"><a href="#cb7-259"></a><span class="in">            match v[i] {</span></span>
+<span id="cb7-260"><a href="#cb7-260"></a><span class="in">                ENTER =&gt; LATEST = ((LATEST / ROWS) + 1) * ROWS, // newline</span></span>
+<span id="cb7-261"><a href="#cb7-261"></a><span class="in">                _ =&gt; char_to_vga(v[i]),</span></span>
+<span id="cb7-262"><a href="#cb7-262"></a><span class="in">            }</span></span>
+<span id="cb7-263"><a href="#cb7-263"></a><span class="in">        }</span></span>
+<span id="cb7-264"><a href="#cb7-264"></a><span class="in">    }</span></span>
+<span id="cb7-265"><a href="#cb7-265"></a><span class="in">    return;</span></span>
+<span id="cb7-266"><a href="#cb7-266"></a><span class="in">}</span></span>
+<span id="cb7-267"><a href="#cb7-267"></a></span>
+<span id="cb7-268"><a href="#cb7-268"></a><span class="in">pub struct Dummy {}</span></span>
+<span id="cb7-269"><a href="#cb7-269"></a></span>
+<span id="cb7-270"><a href="#cb7-270"></a><span class="in">impl core::fmt::Write for Dummy {</span></span>
+<span id="cb7-271"><a href="#cb7-271"></a><span class="in">    fn write_str(&amp;mut self, s: &amp;str) -&gt; core::fmt::Result {</span></span>
+<span id="cb7-272"><a href="#cb7-272"></a><span class="in">        str_to_vga(s);</span></span>
+<span id="cb7-273"><a href="#cb7-273"></a><span class="in">        return core::result::Result::Ok(());</span></span>
+<span id="cb7-274"><a href="#cb7-274"></a><span class="in">    }</span></span>
+<span id="cb7-275"><a href="#cb7-275"></a><span class="in">}</span></span>
+<span id="cb7-276"><a href="#cb7-276"></a></span>
+<span id="cb7-277"><a href="#cb7-277"></a><span class="in">pub fn _print(args: core::fmt::Arguments) {</span></span>
+<span id="cb7-278"><a href="#cb7-278"></a><span class="in">    use core::fmt::Write;</span></span>
+<span id="cb7-279"><a href="#cb7-279"></a><span class="in">    let mut d = Dummy {};</span></span>
+<span id="cb7-280"><a href="#cb7-280"></a><span class="in">    d.write_fmt(args).unwrap();</span></span>
+<span id="cb7-281"><a href="#cb7-281"></a><span class="in">    return;</span></span>
+<span id="cb7-282"><a href="#cb7-282"></a><span class="in">}</span></span>
+<span id="cb7-283"><a href="#cb7-283"></a></span>
+<span id="cb7-284"><a href="#cb7-284"></a><span class="in">#[macro_export]</span></span>
+<span id="cb7-285"><a href="#cb7-285"></a><span class="in">macro_rules! print {</span></span>
+<span id="cb7-286"><a href="#cb7-286"></a><span class="in">    ($($arg:tt)*) =&gt; ($crate::vga::_print(format_args!($($arg)*)));</span></span>
+<span id="cb7-287"><a href="#cb7-287"></a><span class="in">}</span></span>
+<span id="cb7-288"><a href="#cb7-288"></a></span>
+<span id="cb7-289"><a href="#cb7-289"></a><span class="in">#[macro_export]</span></span>
+<span id="cb7-290"><a href="#cb7-290"></a><span class="in">macro_rules! println {</span></span>
+<span id="cb7-291"><a href="#cb7-291"></a><span class="in">    () =&gt; ($crate::print!("\n"));</span></span>
+<span id="cb7-292"><a href="#cb7-292"></a><span class="in">    ($($arg:tt)*) =&gt; ($crate::print!("{}\n", format_args!($($arg)*)));</span></span>
+<span id="cb7-293"><a href="#cb7-293"></a><span class="in">}</span></span>
+<span id="cb7-294"><a href="#cb7-294"></a><span class="in">```</span></span>
+<span id="cb7-295"><a href="#cb7-295"></a></span>
+<span id="cb7-296"><a href="#cb7-296"></a>&lt;/details&gt;</span>
+<span id="cb7-297"><a href="#cb7-297"></a></span>
+<span id="cb7-298"><a href="#cb7-298"></a>It does exactly what I think <span class="in">`println`</span> should do. After all, I wrote it, and with the benefit of <span class="in">`unsafe`</span> I actually got to write what I wanted instead of what <span class="in">`rustc`</span> wanted me to write. *This is called "writing code" and `cargo` is trying to make it illegal.*</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

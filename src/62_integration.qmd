@@ -1,0 +1,298 @@
+---
+title: Integration
+format: html
+---
+
+## Homework
+
+- Homeworks are due on the Friday *after* the week they correspond to lecture.
+- So 9 days after the corresponding lab.
+
+## Requirements
+
+This is a three stage lab.
+
+1. [ ] Test `println!`
+1. [ ] Factor tests.
+1. [ ] Construct integration tests.
+    - For `println`
+    - A "should panic"
+
+
+# Test `println!`
+
+## Requirements
+
+`println!` should [scroll](50_text.qmd#does-it-work).
+
+- Print something
+    - Verify it appears at the top of screen.
+- Print something wraps around to the next line.
+    - Verify wrapping.
+- Print until the screen fills and then at least one more line.
+    - Verify that lines are moved up.
+    - Verify coloration is maintained.
+    - Test both newline terminated and wrapped.
+    
+This is logically equivalent to the things I checked for by printing *Pride and Prejudice*.
+
+These do not have to all be, and probably should not be, all in one test.
+
+Hint:
+
+<details>
+
+```{.rs}
+    // Set the first character in the first 3 lines to the line number
+    osirs::println!("{:081x}",1);
+    osirs::println!("{:x}",2);
+```
+
+</details>
+
+## Assessment
+
+You can assess your `println` tests once they are factored, but for now have something non-trivial to serve as example tests to ensure your testing framework works successfully.
+
+- [ ] `cargo run` draws no warnings or errors.
+- [ ] `cargo test` draws no warnings or errors.
+- [ ] `cargo test` logs errors to `stdout` via the serial interface.
+- [ ] `cargo test` does not launch a graphics window.
+- [ ] `cargo test` would result in a failed test if `_print` in `src/vga.rs` did nothing.
+
+# Factor Tests
+
+## Motivation
+
+It is obnoxious and not-at-all-good design to place everything in main. You should factor in two ways:
+
+- Tests for a specific functionality should be contained to a dedicated `.rs` file.
+- Code supporting testing generally should be factored into a distinct `.rs` file.
+
+## Requirements
+
+To begin, you should factor the following out of `src/main.rs` and into `src/lib.rs`
+
+- [ ] A QEMU quitting function, which quits QEMU through the [`isa-debug-exit`](60_test.qmd#exit-status) using the `x86_64` crate.
+- [ ] A test specific panic handler helper, which prints `PanicInfo` to serial.
+- [ ] A test runner that accepts a `&[&dyn Fn()]` and runs and logs each function therein.
+
+Your `src/main.rs` should retain only the following:
+
+- A panic handler for use outside of a test setting.
+- A `_start` function, that conditionally quits QEMU under a test configuration.
+
+## Hint
+
+- I find Rust and/or Cargo namespaces to be completely undocumented.
+    - Nominally there are chapters in Rust and Cargo books, none of which have ever answered a single one of my questions.
+    - I'm not linking them here for a reason. They are worse than useless.
+- I expect you will need the following header in your `src/lib.rs`
+```{.rs filename="src/lib.rs"}
+#![no_main]
+#![no_std]
+#![feature(custom_test_frameworks)]
+#![test_runner(_test_runner)]
+
+pub mod vga;
+pub mod serial;
+```
+- I expect you will need the following header in `src/main.rs`
+```{.rs filename="src/main.rs"}
+#![no_main]
+#![no_std]
+#![feature(custom_test_frameworks)]
+#![test_runner(osirs::_test_runner)]
+
+mod vga;
+```
+- Give some thought to the difference in test_runner specification therein.
+- When you encounter errors from Cargo, try different permutations of 
+    - `pub` specification on functions or other things
+    - underscore prefixed functions or other things
+    - namespace manipulation using `crate::` and `osirs::` (or your crate name).
+- You can also have code in two places while trying to get things working, but generally you'll want to avoid doing this.
+
+## Testing Requirements
+
+- For some reason, the test framework seemed to want my `src/lib.rs` to be executable.
+    - I have no idea why that would happen.
+    - It meant `src/lib.rs` required a `_start` and a panic handler.
+    - This panic handler was distinct from the testing panic handler helper, which my required panic handler simply called.
+- There is presumably a way to turn this off - if you do that, it is also correct.
+
+## Assessment
+
+- [ ] `cargo run` draws no warnings or errors.
+- [ ] `cargo test` draws no warnings or errors.
+- [ ] `cargo test` executes code that is not present in `src/main.rs`
+
+# Construct integration tests
+
+## Integration Testing
+
+- Sometimes you want a test to be a free-standing executable.
+- The most obvious case is testing cases which should panic, in which case you'll need a distinct panic handler that says "good" job.
+- This one is free.
+
+```{.rs filename="tests/should_panic.rs"}
+#![no_std]
+#![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(osirs::_test_runner)]
+
+#[panic_handler]
+fn test_panic(_info: &core::panic::PanicInfo) -> ! {
+    osirs::serial_println!("[Pass]");
+    osirs::qemu_quit(osirs::QEMU_PASS);
+    loop {}
+}
+
+fn bad() {
+    assert!(false);
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    osirs::_test_runner(&[&bad]);
+    osirs::qemu_quit(osirs::QEMU_FAIL);
+    loop {}
+}
+```
+- It also is just as reasonable to put all your `println` tests in `tests/println.rs`.
+    - Do this.
+
+## Assessment
+
+- [ ] `cargo run` draws no warnings or errors.
+- [ ] `cargo test` draws no warnings or errors.
+- [ ] `cargo test` executes `tests/should_panic.rs` and passes.
+- [ ] `cargo test` executes `tests/println.rs` which meets the earlier testing requirements and passes.
+
+Mine looks like this, you can expand it's just big.
+
+<details>
+
+```{.email}
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s
+     Running unittests src/lib.rs (target/x86_64-osirs/debug/deps/osirs-97fff0361887fe8d)
+Building bootloader
+   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-97fff0361887fe8d.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-66b57a63df3ec3d9)
+Building bootloader
+   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-66b57a63df3ec3d9.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+     Running tests/println.rs (target/x86_64-osirs/debug/deps/println-d4ca6644f20d51b2)
+Building bootloader
+   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-println-d4ca6644f20d51b2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+Initiating test 0x00... [Pass]
+     Running tests/should_panic.rs (target/x86_64-osirs/debug/deps/should_panic-2397b9ee1ac15e67)
+Building bootloader
+   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)
+    Finished `release` profile [optimized + debuginfo] target(s) in 0.58s
+Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-should_panic-2397b9ee1ac15e67.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
+Initiating test 0x00... [Pass]
+   Doc-tests osirs
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+</details>
+
+It will be easy to tell if you your `tests/println.rs` doesn't test for things that `println` isn't supposed to do (this is a double negative). Simply test *my* `src/vga.rs`.
+
+<details>
+
+```{.rs filename="src/vga.rs"}
+static mut LATEST: usize = 0;
+const MMIO: usize = 0xb8000;
+const COLOR: u8 = 0xF;
+
+fn char_to_vga(a: u8) {
+    unsafe {
+        let rel: *mut u8 = (MMIO + LATEST * 2) as *mut u8;
+        *rel = a;
+        *((rel as usize + 1) as *mut u8) = COLOR;
+        LATEST = LATEST + 1;
+    }
+    return;
+}
+
+const ROWS: usize = 80;
+const COLS: usize = 25;
+const MAX: usize = ROWS * COLS;
+const SPACE: u8 = 32;
+const ENTER: u8 = 10;
+
+fn scroll() {
+    unsafe {
+        for i in ROWS..=MAX {
+            let src: *mut u8 = (MMIO  + i * 2) as *mut u8;
+            let dst: *mut u8 = (MMIO + (i - ROWS) * 2) as *mut u8;
+            *dst = *src;
+            *((dst as usize + 1) as *mut u8) = COLOR;
+        }
+        for i in 1..=ROWS {
+            let dst: *mut u8 = (MMIO + (MAX + i - ROWS) * 2) as *mut u8;
+            *dst = SPACE;
+            *((dst as usize + 1) as *mut u8) = COLOR;
+        }
+        LATEST = LATEST - ROWS;
+    }
+    return;
+}
+
+fn str_to_vga(s: &str) {
+    let v = s.as_bytes();
+    unsafe {
+        for i in 0..v.len() {
+            if LATEST > MAX {
+                scroll();
+            }
+            match v[i] {
+                ENTER => LATEST = ((LATEST / ROWS) + 1) * ROWS, // newline
+                _ => char_to_vga(v[i]),
+            }
+        }
+    }
+    return;
+}
+
+pub struct Dummy {}
+
+impl core::fmt::Write for Dummy {
+    fn write_str(&mut self, s: &str) -> core::fmt::Result {
+        str_to_vga(s);
+        return core::result::Result::Ok(());
+    }
+}
+
+pub fn _print(args: core::fmt::Arguments) {
+    use core::fmt::Write;
+    let mut d = Dummy {};
+    d.write_fmt(args).unwrap();
+    return;
+}
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::vga::_print(format_args!($($arg)*)));
+}
+
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
+```
+
+</details>
+
+It does exactly what I think `println` should do. After all, I wrote it, and with the benefit of `unsafe` I actually got to write what I wanted instead of what `rustc` wanted me to write. *This is called "writing code" and `cargo` is trying to make it illegal.*
