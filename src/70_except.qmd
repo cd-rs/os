@@ -1,0 +1,880 @@
+---
+title: Exceptions
+---
+
+## Announcements
+
+- **Action Items**:
+  - Graphics done.
+  - Integration testing ongoing.
+
+## Citations
+
+- CPU exceptions are algorithmically interesting but technically tedius.
+- [CPU Exceptions](https://os.phil-opp.com/cpu-exceptions/)
+
+# Background
+
+## Exceptions
+
+- CPU exceptions occur in various erroneous situations
+    - Accessing an invalid memory address
+    - Dividing by zero 
+- We have to set up an _interrupt descriptor table_.. 
+- This week, our kernel will be able to catch [breakpoint exceptions](https://wiki.osdev.org/Exceptions#Breakpoint).
+
+## Meaning
+
+- An exception signals that something is wrong with the current instruction. 
+    - Machine-level line-of-code.
+- For example, divide by `0`. 
+- When an exception occurs, the CPU interrupts its current work and immediately calls a specific exception handler function, depending on the exception type.
+    - The *OS* manages these handler functions.
+
+## Rust
+
+- Rust is pretty safe and generally doesn't want to let you cause the easier CPU exceptions.
+- The most famous is zero division.
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    // Print so isn't optimized out.
+    println!("{}", 1 / 0);
+}
+```
+
+## `rustc` protects
+
+- Modern languages won't allow this.
+
+```{.sh}
+$ cargo r
+   Compiling divzero v0.1.0 (/home/user/tmp/divzero)
+error: this operation will panic at runtime
+ --> src/main.rs:3:20
+  |
+3 |     println!("{}", 1 / 0);
+  |                    ^^^^^ attempt to divide `1_i32` by zero
+  |
+  = note: `#[deny(unconditional_panic)]` on by default
+
+error: could not compile `divzero` (bin "divzero") due to 1 previous error
+```
+
+## Permit
+
+- We can of course `#[allow(unconditional_panic)]`
+- (Or take user input, of course.)
+
+```{.rs filename="src/main.rs"}
+$ cat src/main.rs
+fn main() {
+    #[allow(unconditional_panic)]
+    let _x = 1 / 0;
+}
+```
+
+## See a panic
+
+- Presumably this is hitting the CPU then a `rustc` provided panic handler.
+
+```{.sh}
+$ cargo r
+   Compiling divzero v0.1.0 (/home/user/tmp/divzero)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running `target/debug/divzero`
+
+thread 'main' (2292) panicked at src/main.rs:3:14:
+attempt to divide by zero
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+## Much Easier
+
+- We can just use a language that let's us use the computer.
+
+```{.c filename="main.c"}
+int main() {
+        int x = 1 / 0;
+        return 0;
+}
+```
+
+## Permitted
+
+- It will warn us but not stop us.
+
+```{.sh}
+$ gcc main.c -o main
+main.c: In function ‘main’:
+main.c:2:19: warning: division by zero [-Wdiv-by-zero]
+    2 |         int x = 1 / 0;
+      |                   ^
+```
+
+## Modernizing
+
+- Naturally, in a C class this would be banned through use of compiler options.
+
+```{.makefile filename="Makefile"}
+CC = gcc # or clang
+CFLAGS = -std=c89 -Wall -Wextra -Werror -Wpedantic -O2
+```
+
+- This yields:
+
+```{.sh}
+$ gcc main.c -std=c89 -Wall -Wextra -Werror -Wpedantic -O2 -o main
+main.c: In function ‘main’:
+main.c:2:19: error: division by zero [-Werror=div-by-zero]
+    2 |         int x = 1 / 0;
+      |                   ^
+main.c:2:13: error: unused variable ‘x’ [-Werror=unused-variable]
+    2 |         int x = 1 / 0;
+      |             ^
+cc1: all warnings being treated as errors
+```
+
+## Results
+
+- In any case, if you do use naive `gcc` you will get the following:
+
+```{.sh}
+$ ./main
+Floating point exception (core dumped)
+```
+
+- This is of course ludicrously confusing.
+    - There is no usage of floating point at all.
+
+## Clang
+
+- There are `clang` fans (vs. `gcc`)
+- Compilation is identical though the warning format differs.
+
+```{.sh}
+$ clang main.c -o main
+main.c:2:12: warning: division by zero is undefined [-Wdivision-by-zero]
+        int x = 1 / 0;
+                  ^ ~
+1 warning generated.
+```
+
+## Difference
+
+- `clang` *does not* trigger an exception.
+
+```{.sh}
+$ cat main.c
+#include <stdio.h>
+
+int main() {
+        int x = 1 / 0;
+        printf("%d\n", x);
+        return 0;
+}
+user@cd-desk:~/tmp/divzero$ clang main.c -o main
+main.c:4:12: warning: division by zero is undefined [-Wdivision-by-zero]
+        int x = 1 / 0;
+                  ^ ~
+1 warning generated.
+user@cd-desk:~/tmp/divzero$ ./main
+267243840
+user@cd-desk:~/tmp/divzero$ ./main
+2140340544
+```
+
+## Aside
+
+- Checkmate `clang` fans.
+- That should definitely explode.
+    - *Not* because the language is specified that way.
+    - Because `gcc` does and therefore so should you.
+
+# Exceptions
+
+## Types
+
+On x86, there are about 20 different CPU exception types. The most important are:
+
+- **Page Fault**: A page fault occurs on illegal memory accesses. For example, if the current instruction tries to read from an unmapped page or tries to write to a read-only page.
+    - Pages are numerical regions of memory.
+    - We imagine, for example, missing the VGA buffer due to faulty arithmetic.
+
+## Types
+
+On x86, there are about 20 different CPU exception types. The most important are:
+
+- **Invalid Opcode**: This exception occurs when the current instruction is invalid, for example, when we try to use new [SSE instructions](https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions) on an old CPU that does not support them.
+    - If we naively accelerate graphics code this is an issue.
+    - Common in "early" (1995-2005) game design.
+
+
+## Types
+
+On x86, there are about 20 different CPU exception types. The most important are:
+
+- **General Protection Fault**: This is the exception with the broadest range of causes. 
+    - Usually prevents a user from elevating their own privilege level by trying to overwrite a *protected* value that defines privilege level.
+    - Used to prevent virtual machine escape, safely sandbox browser code.
+
+
+## Types
+
+On x86, there are about 20 different CPU exception types. The most important are:
+
+- **Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. 
+    - This exception also occurs when there is no handler function registered for an exception.
+    
+
+## Types
+
+On x86, there are about 20 different CPU exception types. The most important are:
+
+- **Triple Fault**: If an exception occurs while handling a double fault, the CPU issues a fatal _triple fault_. We can't catch or handle a triple fault. 
+    - Most processors react by resetting themselves and rebooting the OS.
+    - Usually caused by some recursive fault pattern.
+
+## Interrupt Descriptor Table
+
+- In order to catch and handle exceptions, we have to set up a so-called _Interrupt Descriptor Table_ (IDT). 
+- Special case of a dispatch table.
+
+> [In computer science, a dispatch table is a table of pointers or memory addresses to functions or methods.](https://en.wikipedia.org/wiki/Dispatch_table)
+
+## Aside
+
+- Dispatch tables are cool as all get-out.
+- I recently performed an advanced manuever (taught them in CS 151).
+- [Video](https://www.youtube.com/watch?v=MtI7bBGDuiM&feature=youtu.be)
+- [Code](https://gist.github.com/cd-public/d17f7c0cf114052fe719266251745fb0)
+- Python a functional language within my life time, oversoul willing.
+
+## Format
+
+- Keys are exceptions; values are functions.
+    - Helpfully, exceptions are numeric so can implement as an array/vector/"table"
+- The hardware uses this table directly, so we need to follow a predefined format. 
+- Each entry must have a 16-byte structure.
+
+## Python Style
+
+- ♪♫♪ key-value storage my old friend ♫♪♫
+- ♫♪♫ ive come to code with you again ♪♫♪
+
+```{.py}
+fs = {
+    "ADD" : lambda x , y : x + y ,
+    "SUB" : lambda x , y : x - y ,
+    "MUL" : lambda x , y : x * y ,
+    "DIV" : lambda x , y : x / y ,
+    "MOD" : lambda x , y : x % y ,
+    "NEG" : lambda x , y :   - x ,
+    "ODD" : lambda x , y : x % 2 ,
+    "ZER" : lambda x , y :     0 ,
+    "EXT" : lambda x , y : exit(),
+}
+```
+
+## Rust Style
+
+- Wait a minute wasn't that our test runner????
+
+```{.rs filename="tests/println.rs"}
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    osirs::_test_runner(&[&at_top, &wraps, &scrolls, &colors, &newlines]);
+    osirs::qemu_quit(osirs::QEMU_PASS);
+    loop {}
+}
+```
+
+## Layout {.smaller}
+
+| Type | Name                     | Description                                                  |
+| ---- | ------------------------ | ------------------------------------------------------------ |
+| u16  | Function Pointer [0:15]  | The lower bits of the pointer to the handler function.       |
+| u16  | GDT selector             | Selector of a code segment in the [global descriptor table](https://en.wikipedia.org/wiki/Global_Descriptor_Table). |
+| u16  | Options                  | (next slide) |
+| u16  | Function Pointer [16:31] | The middle bits of the pointer to the handler function.      |
+| u32  | Function Pointer [32:63] | The remaining bits of the pointer to the handler function.   |
+| u32  | Reserved                 |
+
+## Options {.smaller}
+
+| Bits  | Name                             | Description                                                                                                     |
+| ----- | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 0-2   | Interrupt Stack Table Index      | 0: Don't switch stacks, 1-7: Switch to the n-th stack in the Interrupt Stack Table when this handler is called. |
+| 3-7   | Reserved                         |
+| 8     | 0: Interrupt Gate, 1: Trap Gate  | If this bit is 0, interrupts are disabled when this handler is called.                                          |
+| 9-11  | must be one                      |
+| 12    | must be zero                     |
+| 13-14 | Descriptor Privilege Level (DPL) | The minimal privilege level required for calling this handler.                                                  |
+| 15    | Present                          |
+
+## The Keys
+
+- Each exception has a predefined IDT index. 
+    - Set by the hardware designers.
+    - Invalid opcode exception has table index 6
+    - Page fault exception has table index 14
+- $\therefore$ hardware can automatically load the corresponding IDT entry for any exception.
+
+## Step 1
+
+When an exception occurs, the CPU roughly does the following:
+
+- Push some registers on the stack, including the instruction pointer and the **FLAGS** register.
+    - The instruction pointer keeps track of the current machine-level line-of-code
+        - It is like the stack pointer (which keeps track of the top of the stack of values.
+        - A special hardware variable.
+
+# Aside: Hardware Security
+
+## FLAGS
+
+- The **FLAGS** register (16 bit) and it's cousins, **EFLAGS** (**e**xtended 32 bit) and **RFLAGS** (**register** 64 bit) are *very* important.
+    - [Read more](https://en.wikipedia.org/wiki/FLAGS_register)
+    - Whether a carry occurred.
+    - Whether a value is zero.
+    - Whether the sign is positive or negative.
+    - Whether a trap occurs (more soon).
+    - Whether interrupts are enabled (more soon).
+    
+## On FLAGS {.smaller}
+
+| Bit | Mask | Name | Description | Category | =1 | =0 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 0 | 0x0001 | **CF** | Carry flag | Status | CY (Carry) | NC (No Carry) |
+| 1 | 0x0002 | — | Reserved, always 1 in EFLAGS | — | — | — |
+| 2 | 0x0004 | **PF** | Parity flag | Status | PE (Parity Even) | PO (Parity Odd) |
+| 3 | 0x0008 | — | Reserved | — | — | — |
+| 4 | 0x0010 | **AF** | Auxiliary Carry flag | Status | AC (Auxiliary Carry) | NA (No Auxiliary Carry) |
+| 5 | 0x0020 | — | Reserved | — | — | — |
+
+
+## On FLAGS {.smaller}
+
+| Bit | Mask | Name | Description | Category | =1 | =0 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 6 | 0x0040 | **ZF** | Zero flag | Status | ZR (Zero) | NZ (Not Zero) |
+| 7 | 0x0080 | **SF** | Sign flag | Status | NG (Negative) | PL (Positive) |
+| 8 | 0x0100 | **TF** | Trap flag (single step) | Control | — | — |
+| 9 | 0x0200 | **IF** | Interrupt enable flag | Control | EI (Enable Interrupt) | DI (Disable Interrupt) |
+| 10 | 0x0400 | **DF** | Direction flag | Control | DN (Down) | UP (Up) |
+
+
+## On FLAGS {.smaller}
+
+| Bit | Mask | Name | Description | Category | =1 | =0 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 11 | 0x0800 | **OF** | Overflow flag | Status | OV (Overflow) | NV (Not Overflow) |
+| 12–13 | 0x3000 | **IOPL** | I/O privilege level (286+) | System | — | — |
+| 14 | 0x4000 | **NT** | Nested task flag (286+) | System | — | — |
+| 15 | 0x8000 | **MD** | Mode flag (NEC V-series only) | Control | Native Mode (186) | Emulation Mode (8080) |    
+    
+## My research
+
+- I used **RFLAGS** in my research to get the doctorate that I *do* have.
+- You can mostly understand this sentence now:
+
+> [...when the `in` instruction executes, the I/O privilege level (`IOPL`, as
+given by bit 13 of the status `EFLAGS` register) must be greater
+than or equal to the current privilege level (`CPL`, as given
+by bit 13 of the Code Segment `CS` register)](https://cd-public.github.io/papers/2020/HOST2020.pdf)
+
+## Named instructions
+
+> the `in` instruction
+
+- From blog:
+
+> To communicate with such an I/O port, there are special CPU instructions called `in` and `out`, which take a port number and a data byte
+
+- You used `in` via the `x86_64` crate to print to serial.
+
+## Privilege levels
+
+> current privilege level
+
+- We haven't dwelt on these but have noted, with respect to the general protection fault:
+
+> Used to prevent virtual machine escape, safely sandbox browser code.
+
+## Segments
+
+- We will return to segments soon, but basically...
+- Memory got too big to comfortably fit in a single register, so it got split into a "neighborhood" (segment) and offset (the stack pointer, instruction pointer, etc.).
+- This is a big performance win since usually the high 32-48 bits are fixed within an executable.
+
+# Back to Work
+
+## Step 1
+
+When an exception occurs, the CPU roughly does the following:
+
+- Push some registers on the stack, including the instruction pointer and the **FLAGS** register.
+    - Naturally it is not important whether a carry occured immediately prior to an exception, and if it is you can read it from the stack.
+
+
+## Step 2
+
+When an exception occurs, the CPU roughly does the following:
+
+- Push some registers on the stack.
+- Read the corresponding entry from the Interrupt Descriptor Table (IDT). 
+    - For example, the CPU reads the 14th entry when a page fault occurs.
+    
+    
+
+## Step 3
+
+When an exception occurs, the CPU roughly does the following:
+
+- Push some registers on the stack.
+- Read the corresponding entry from IDT.       
+- Check if the entry is present and, if not, raise a double fault.
+    - *This is why the Rust option is so important to OS!*
+
+## Step 4
+
+When an exception occurs, the CPU roughly does the following:
+
+- Push some registers on the stack.
+- Read the corresponding entry from IDT.     
+- Check entry or raise a double fault.
+- Disable hardware interrupts if the entry is an interrupt gate (bit 40 not set).
+    - Okay what does this mean.
+
+    
+## Gate Types
+
+> [There are basically two kinds of interrupts: ones that occur when code execution has encountered an Exception due to bad code, or ones that occur to handle events unrelated to currently executing code.](https://wiki.osdev.org/Interrupt_Descriptor_Table#Gate_Types)
+
+- They become "visible" to CPU by appearing within some hardware "gate".
+
+## Two Kinds
+
+- Term some "Traps" - where execution is frozen, stopped, or "trapped" in some way.
+- Term some "Interrupts" - some exogenous factor (generally I/O) causes the CPU to divert control flow elsewhere.
+- Interrupts preempt other hardware interrupts, but exceptions don't.
+
+## Steps
+
+When an exception occurs, the CPU roughly does the following:
+
+- Push some registers on the stack.
+- Read the corresponding entry from IDT.     
+- Check entry or raise a double fault.
+- Perhaps disable hardware interrupts.
+- Load the specified [GDT](https://en.wikipedia.org/wiki/Global_Descriptor_Table) selector into the CS (code segment).
+
+## GDT
+
+- Basically a table of memory segments.
+    - The "neighborhoods" of memory
+- There are three kinds:
+    - Code segments: regions of memory that contain executable instructions.
+    - Data segments: used to store program data.
+    - System segments, like Task State Segment (TSS).
+    
+## CS (Code Segment)
+
+- The region where the currently executing code lives...
+    - Was: possibly anywhere
+    - Is now: wherever the OS keeps exception handlers.
+- The CS (and other segments) contain more than just addresses!    
+
+## Visually
+
+- Easier visually.
+- [Read more](https://en.wikipedia.org/wiki/Segment_descriptor)
+
+<a title="Lars H. Rohwedder (User:RokerHRO, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:SegmentDescriptor.svg"><img  src="https://upload.wikimedia.org/wikipedia/commons/0/0a/SegmentDescriptor.svg"></a>
+
+## Takeaways
+
+- The "DPL" is what I tend to regard as important.
+    - The DPL of the CS is the CPL, which determines if user mode vs. super mode.
+        - Descriptor Privilege Level
+        - Code Segment
+        - Current Privilege Level
+        - 2 bits, but both are always equal on every wildly known OS.
+
+
+## Steps
+
+When an exception occurs, the CPU roughly does the following:
+
+1. Push some registers on the stack.
+1. Read the corresponding entry from IDT.     
+1. Check entry or raise a double fault.
+1. Perhaps disable hardware interrupts.
+1. Update the CS (code segment).
+1. Jump to the specified handler function.
+
+# Handlers
+
+## An IDT Type
+
+- No real benefit to making our own IDT.
+- It's hardware defined and we just want to implement exceptions.
+- We'll use [`InterruptDescriptorTable` struct](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html) of the `x86_64` crate.
+
+## It's big
+
+```{.rs}
+#[repr(C)]
+pub struct InterruptDescriptorTable {
+    pub divide_by_zero: Entry<HandlerFunc>,
+    pub debug: Entry<HandlerFunc>,
+    pub non_maskable_interrupt: Entry<HandlerFunc>,
+    pub breakpoint: Entry<HandlerFunc>,
+    pub overflow: Entry<HandlerFunc>,
+    pub bound_range_exceeded: Entry<HandlerFunc>,
+    pub invalid_opcode: Entry<HandlerFunc>,
+    pub device_not_available: Entry<HandlerFunc>,
+    pub double_fault: Entry<HandlerFuncWithErrCode>,
+    pub invalid_tss: Entry<HandlerFuncWithErrCode>,
+    pub segment_not_present: Entry<HandlerFuncWithErrCode>,
+    pub stack_segment_fault: Entry<HandlerFuncWithErrCode>,
+    pub general_protection_fault: Entry<HandlerFuncWithErrCode>,
+    pub page_fault: Entry<PageFaultHandlerFunc>,
+    pub x87_floating_point: Entry<HandlerFunc>,
+    pub alignment_check: Entry<HandlerFuncWithErrCode>,
+    pub machine_check: Entry<HandlerFunc>,
+    pub simd_floating_point: Entry<HandlerFunc>,
+    pub virtualization: Entry<HandlerFunc>,
+    pub security_exception: Entry<HandlerFuncWithErrCode>,
+    // some fields omitted
+}
+```
+
+## Format
+
+- The fields have the type [`idt::Entry<F>`](ttps://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.Entry.html)
+    - We introduced this previously - a function pointer and options, basically.
+- The type parameter `F` defines the expected handler function type.
+    - [`HandlerFunc`](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/type.HandlerFunc.html)
+    - [`HandlerFuncWithErrCode`](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/type.HandlerFuncWithErrCode.html)
+    - [`PageFaultHandlerFunc`](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/type.PageFaultHandlerFunc.html)
+
+## First
+
+- `HandlerFunc`  first:
+
+```{.rs}
+type HandlerFunc = extern "x86-interrupt" fn(_: InterruptStackFrame);
+```
+
+- That's a function alright.
+    - A [type alias](https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases) for an `extern "x86-interrupt" fn` type
+    - Usually use `extern` for C, here we use it to interface with hardware.
+    
+## Calling Functions
+
+- The `x86-interrupt` calling convention:
+    - Usually, with functions, the processor and compile can anticipate a future call.
+        - The compiler loads certain values in certain registers.
+        - The processor avoids overwriting certain registers.
+    - Not so with interrupts.
+    
+## Easy Mode
+
+- By convention, a function call is invoked voluntarily by a compiler-inserted `call` instruction.
+    - This is less true than people would like it to be, but we can handwave for now.
+    - The compiler loads up a bunch of registers and presses the "call" button.
+    - The OS loads up a new memory location with new instructions, which use registers in the anticipated way.
+    
+## Hard Mode
+
+- Imagine if you had to write a function where you didn't know:
+    - How many arguments would be provided.
+    - The types of the arguments.
+    - Whether heap-allocated arguments are valid pointers.
+- Each of these can happen on an interrupt since *the state of processor is not fixed*.
+
+## Calling Conventions
+
+- Return to the level of languages.
+- [Calling conventions](https://en.wikipedia.org/wiki/Calling_convention) specify the details of a function call.
+    - Where the arguments are, for example.
+    - Whether the function gets a new stack.
+    - What happens when you return.
+- On x86_64 Linux, the following rules apply for C functions (specified in the [System V ABI](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf))
+
+# Aside: Architecture and Registers
+
+## x86 registers
+
+- We recall the RFLAGS register.
+- There are [many x86 registers](https://commons.wikimedia.org/wiki/File:Table_of_x86_Registers_svg.svg).
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- **ZMM0** is a vector register, and enormous (512 bytes)
+    - It contains half and quarter registers **YMM0** and **XMM0**
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+
+## Some Examples
+
+- **ST(0)** is a combined SIMD/float register as is MM0.
+    - We recall some uproar over using software floats when disabling SIMD.
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- **?AX** are the 8, 16, 32, and 64 bit general purpose "X" registers.
+    - Names change as 8-bit devices had both smaller and fewer registers.    
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- Most ending in "P" are stack or interrupt or debug or etc. pointers.
+- Most ending in "S" are segment or backup segment registers.  
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- "CR" registers are hardware specific control registers.
+- "DR" registers are debug registers. 
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+# Back to work
+
+## Calling Conventions
+
+- Return to the level of languages.
+- [Calling conventions](https://en.wikipedia.org/wiki/Calling_convention) specify the details of a function call.
+    - Where the arguments are, for example.
+    - Whether the function gets a new stack.
+    - What happens when you return.
+- On x86_64 Linux, the following rules apply for C functions (specified in the [System V ABI](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf))
+
+
+### Preserved/Scratch
+
+- The calling convention divides the registers into two parts:
+    - _preserved_ registers, and 
+    - _scratch_ registers.
+    
+## Preserved Registers
+
+- The values of _preserved_ registers must remain unchanged across function calls. 
+    - Not "at all times", only "across function calls.
+    - You can use them temporarily by popping onto stack and then pushing back to register before returning. 
+- Refer to these as _“callee-saved”_
+    - The _"callee"_ is the function that... was called.
+    
+## Scratch Registers
+
+- A called function is allowed to overwrite _scratch_ registers without restrictions.
+    - If a caller wants to keep a value, it has to push the value to its own (the caller) stack.
+    - The stack will be maintained across function calles.
+- Refer to these as _caller-saved_
+
+## Interrupt Calling Convention
+
+- The first *six* integer arguments are passed in registers **RDI**, **RSI**, **RDX**, **RCX**, **R8**, **R9**
+    - When we say integer we mean 64 bit, as those are 64 bit registers.
+    - Cue my rant about Rust `i32` default.
+- Additional arguments are passed on the stack
+- Results are returned in **RAX** and **RDX**
+    - Not on the stack!
+    
+## Default Calling Convention
+
+- The [default calling convention](https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170) differs slightly.
+    - The x87 register stack is unused. 
+    - Integer arguments are passed in registers **RCX**, **RDX**, **R8**, and **R9**.
+        - That is, not **RDI** and **RSI**
+    - *Floating point* arguments are passed in **XMM0L**, **XMM1L**, **XMM2L**, and **XMM3L**.
+
+## Rust Calling Convention
+
+- It doesn't have one.
+- [GitHub RFC](https://github.com/rust-lang/rfcs/issues/600)
+- Oh maybe that's why we have to use `extern "C"` all the time.
+- Rust: Possibly up to half of a language.
+
+## C Calling Convention
+
+| preserved registers                             | scratch registers                                           |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| `rbp`, `rbx`, `rsp`, `r12`, `r13`, `r14`, `r15` | `rax`, `rcx`, `rdx`, `rsi`, `rdi`, `r8`, `r9`, `r10`, `r11` |
+| _callee-saved_                                  | _caller-saved_ |
+
+Compiled C code will necessarily respect this convention (or it isn't C code).
+
+## Exceptions
+
+- In contrast to function calls, exceptions can occur on _any_ instruction. 
+- In most cases, we don't even know at compile time if the generated code will cause an exception. 
+- For example, the compiler can't know if an instruction causes a stack overflow or a page fault.
+
+## Can't Backup
+
+- Exceptions can't use a calling convention that relies on caller-saved registers for exception handlers. 
+- Instead, preserve _all registers_. 
+- The `x86-interrupt` calling convention is such a calling convention.
+    - It guarantees that all register values are restored to their original values on function return.
+    
+## Recall
+
+- `HandlerFunc` definition:
+
+```{.rs}
+type HandlerFunc = extern "x86-interrupt" fn(_: InterruptStackFrame);
+```
+
+- That's a function alright.
+    - A [type alias](https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases) for an `extern "x86-interrupt" fn` type
+    - Usually use `extern` for C, here we use it to interface with hardware.
+
+## In Practice
+
+- The compiler only backs up the registers that are overwritten by the function. 
+    - In e.g. conditional branches, can "just in time" pop registers to stack immediately before using them.
+    - More overhead but more efficient.
+- This way, very efficient code can be generated for short functions that only use a few registers.
+
+## Stack Frames
+
+- On a normal function call (using the `call` instruction), the CPU pushes the return address before jumping to the target function. 
+- On function return (using the `ret` instruction), the CPU pops this return address and jumps to it. 
+
+## Visually
+
+- The "stack frame" of a normal function call looks like this:
+
+<img src="https://os.phil-opp.com/cpu-exceptions/function-stack-frame.svg" style="filter:invert(.9)">
+
+## Interrupt Frames
+
+For exception and interrupt handlers:
+    - Pushing a return address would not suffice, 
+        - Interrupt handlers often run in a different context (stack pointer, CPU flags, etc.). 
+    - Providing return values is not ideal.
+        - Whatever code executed during the interrupt is not anticipating alterations to its register state
+        
+## Step 0
+
+0. Saving the old stack pointer
+
+The CPU reads the stack pointer (**RSP**) and stack segment (**SS**) register values to a safe memory location.
+        
+## Step 1
+
+0. Saving the old stack pointer
+1. Aligning the stack pointer
+
+Some CPU instructions require that the stack pointer be aligned on a 16-byte boundary, so the CPU performs such an alignment right after the interrupt.
+
+## Step 2
+
+0. Saving the old stack pointer
+1. Aligning the stack pointer
+2. Switching stacks
+
+An exception may require a change in privilege level (e.g. user to OS). Conditionally switch to the "_Interrupt Stack Table_" (next lecture).
+
+## Step 3
+
+0. Saving the old stack pointer
+1. Aligning the stack pointer
+2. Switching stacks
+3. Pushing the old stack pointer
+
+The CPU pushes the stack pointer (**RSP**) and stack segment (**SS**) register values from step 0 to the stack to restore the stack pointer on return.
+
+## Step 3.1
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Pushing the old stack pointer and the **RFLAGS** register: 
+
+On interrupt entry, the original **RFLAGS** is probably not appropriate - save it and get a new one.
+
+## Step 3.2
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Push in order **RSP**, **SS**, **RFLAGS** and the instruction pointer: 
+
+On return, it is important to restore not just data (the stack pointer) but also instruction pointer (**RIP** and the code segment **CS**).
+
+## Step 3.3
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Push in order **RSP**, **SS**, **RFLAGS**, **RIP**, **CS** and... conditionally an error code. 
+
+For some specific exceptions, such as page faults, the CPU pushes an error code, which describes the cause of the exception.
+
+## Step 4
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Push in order **RSP**, **SS**, **RFLAGS**, **RIP**, **CS** etc. 
+4. Invoking the interrupt handler
+
+The CPU reads the address and the segment descriptor of the interrupt handler function from the corresponding field in the IDT and loads the values into **RIP** and **CS**.
+
+## Visually
+
+- The "interrupt stack frame":
+
+<img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)">
+
+# Crates for Days
+
+## Handwaving
+
+- The `x86-interrupt` calling convention is a powerful abstraction that hides almost all of the messy details of the exception handling process. 
+- However, sometimes it's useful to know what's happening behind the curtain. 
+- Briefly, what we handwave.
+
+## Retrieving the arguments
+
+- Most calling conventions expect that the arguments are passed in registers
+- This is not possible for exception handlers since we must not overwrite any register values before backing them up on the stack
+- Instead, the `x86-interrupt` calling convention is aware that the arguments already lie on the stack at a specific offset
+
+## Returning using `iretq`
+
+- Since the interrupt stack frame completely differs from stack frames of normal function calls, we can't return from handler functions through the normal `ret` instruction
+- So instead, the `iretq` instruction must be used
+    - You'll never guess what `q` stands for...
+    - Quad word, it's the 64 bit `iret`
+
+
+## Handling the error code
+
+- Conditional error codes complicate matters:
+    - Conditional arguments.
+    - Stack alignment.
+    - Return pops.
+- So code must use the correct function type for each exception
+- Luckily, the `InterruptDescriptorTable` type does so.
+
+## Aligning the stack
+
+- Some instructions (especially SSE instructions) require a 16-byte stack alignment
+- The CPU ensures this alignment whenever an exception occurs, but for some exceptions it destroys it again later when it pushes an error code
+- The `x86-interrupt` calling convention takes care of this by realigning the stack in this case
+
+## Read more
+
+- There is a "hard mode" version of exception handling.
+- [Read more](https://os.phil-opp.com/edition-1/extra/naked-exceptions/)
+
+
+# Fin

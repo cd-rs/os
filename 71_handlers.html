@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Handlers – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./70_except.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./71_handlers.html">Handlers</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./70_except.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exceptions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./71_handlers.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Handlers</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#your-task" id="toc-your-task" class="nav-link active" data-scroll-target="#your-task">Your Task</a>
+  <ul class="collapse">
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a>
+  <ul class="collapse">
+  <li><a href="#loading-the-idt" id="toc-loading-the-idt" class="nav-link" data-scroll-target="#loading-the-idt">Loading the IDT</a></li>
+  <li><a href="#running-it" id="toc-running-it" class="nav-link" data-scroll-target="#running-it">Running it</a></li>
+  <li><a href="#adding-a-test" id="toc-adding-a-test" class="nav-link" data-scroll-target="#adding-a-test">Adding a Test</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Handlers</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="your-task" class="level1">
+<h1>Your Task</h1>
+<ul>
+<li>We are trying to get a working exception handler.</li>
+</ul>
+<section id="implementation" class="level2">
+<h2 class="anchored" data-anchor-id="implementation">Implementation</h2>
+<p>Now that we’ve understood the theory, it’s time to handle CPU exceptions in our kernel. We’ll start by creating a new interrupts module in <code>src/interrupts.rs</code>, that first creates an <code>init_idt</code> function that creates a new <code>InterruptDescriptorTable</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">pub</span> <span class="kw">mod</span> interrupts<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptDescriptorTable<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can add handler functions. We start by adding a handler for the <a href="https://wiki.osdev.org/Exceptions#Breakpoint">breakpoint exception</a>. The breakpoint exception is the perfect exception to test exception handling. Its only purpose is to temporarily pause a program when the breakpoint instruction <code>int3</code> is executed.</p>
+<p>The breakpoint exception is commonly used in debuggers: When the user sets a breakpoint, the debugger overwrites the corresponding instruction with the <code>int3</code> instruction so that the CPU throws the breakpoint exception when it reaches that line. When the user wants to continue the program, the debugger replaces the <code>int3</code> instruction with the original instruction again and continues the program.</p>
+<p>For our use case, we don’t need to overwrite any instructions. Instead, we just want to print a message when the breakpoint instruction is executed and then continue the program. So let’s create a simple <code>breakpoint_handler</code> function and add it to our IDT:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span><span class="op">{</span>InterruptDescriptorTable<span class="op">,</span> InterruptStackFrame<span class="op">};</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>println<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>    <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>    idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="op">}</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> breakpoint_handler(</span>
+<span id="cb3-10"><a href="#cb3-10"></a>    stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="op">{</span></span>
+<span id="cb3-12"><a href="#cb3-12"></a>    <span class="pp">println!</span>(<span class="st">"EXCEPTION: BREAKPOINT</span><span class="sc">\n</span><span class="st">{:#?}"</span><span class="op">,</span> stack_frame)<span class="op">;</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Our handler just outputs a message and pretty-prints the interrupt stack frame.</p>
+<p>When we try to compile it, the following error occurs:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="va">error</span><span class="op">[</span>E0658<span class="op">]</span><span class="ex">:</span> x86-interrupt ABI is experimental and subject to change <span class="er">(</span><span class="ex">see</span> issue <span class="co">#40180)</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>  <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:53:1</span>
+<span id="cb4-3"><a href="#cb4-3"></a>   <span class="kw">|</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a><span class="ex">53</span> <span class="kw">|</span> <span class="ex">/</span> extern <span class="st">"x86-interrupt"</span> fn breakpoint_handler<span class="er">(</span><span class="ex">stack_frame:</span> InterruptStackFrame<span class="kw">)</span> <span class="kw">{</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="ex">54</span> <span class="kw">|</span> <span class="kw">|</span>     <span class="ex">println!</span><span class="er">(</span><span class="st">"EXCEPTION: BREAKPOINT\n{:#?}"</span><span class="ex">,</span> stack_frame<span class="kw">);</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a><span class="ex">55</span> <span class="kw">|</span> <span class="kw">|</span> <span class="kw">}</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>   <span class="kw">|</span> <span class="kw">|</span><span class="ex">_^</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>   <span class="kw">|</span></span>
+<span id="cb4-9"><a href="#cb4-9"></a>   <span class="ex">=</span> help: add <span class="co">#![feature(abi_x86_interrupt)] to the crate attributes to enable</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This error occurs because the <code>x86-interrupt</code> calling convention is still unstable. To use it anyway, we have to explicitly enable it by adding <code>#![feature(abi_x86_interrupt)]</code> at the top of our <code>lib.rs</code>.</p>
+<section id="loading-the-idt" class="level3">
+<h3 class="anchored" data-anchor-id="loading-the-idt">Loading the IDT</h3>
+<p>In order for the CPU to use our new interrupt descriptor table, we need to load it using the <a href="https://www.felixcloutier.com/x86/lgdt:lidt"><code>lidt</code></a> instruction. The <code>InterruptDescriptorTable</code> struct of the <code>x86_64</code> crate provides a [<code>load</code>][InterruptDescriptorTable::load](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html#method.load) method for that. Let’s try to use it:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>    <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>    idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>    idt<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When we try to compile it now, the following error occurs:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">error:</span> <span class="kw">`</span><span class="ex">idt</span><span class="kw">`</span> does not live long enough</span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="ex">--</span><span class="op">&gt;</span> src/interrupts/mod.rs:43:5</span>
+<span id="cb6-3"><a href="#cb6-3"></a>   <span class="kw">|</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="ex">43</span> <span class="kw">|</span>     <span class="fu">idt.load()</span><span class="kw">;</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a>   <span class="kw">|</span>     <span class="ex">^^^</span> does not live long enough</span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="ex">44</span> <span class="kw">|</span> <span class="er">}</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a>   <span class="kw">|</span> <span class="ex">-</span> borrowed value only lives until here</span>
+<span id="cb6-8"><a href="#cb6-8"></a>   <span class="kw">|</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a>   <span class="ex">=</span> note: borrowed value must be valid for the static lifetime...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So the <code>load</code> method expects a <code>&amp;'static self</code>, that is, a reference valid for the complete runtime of the program. The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than <code>'static</code> could lead to use-after-free bugs.</p>
+<p>In fact, this is exactly what happens here. Our <code>idt</code> is created on the stack, so it is only valid inside the <code>init</code> function. Afterwards, the stack memory is reused for other functions, so the CPU would interpret random stack memory as IDT. Luckily, the <code>InterruptDescriptorTable::load</code> method encodes this lifetime requirement in its function definition, so that the Rust compiler is able to prevent this possible bug at compile time.</p>
+<p>In order to fix this problem, we need to store our <code>idt</code> at a place where it has a <code>'static</code> lifetime. To achieve this, we could allocate our IDT on the heap using <a href="https://doc.rust-lang.org/std/boxed/struct.Box.html"><code>Box</code></a> and then convert it to a <code>'static</code> reference, but we are writing an OS kernel and thus don’t have a heap (yet).</p>
+<p>As an alternative, we could try to store the IDT as a <code>static</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">static</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>    IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>    IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>However, there is a problem: Statics are immutable, so we can’t modify the breakpoint entry from our <code>init</code> function. We could solve this problem by using a <a href="https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable"><code>static mut</code></a>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">static</span> <span class="kw">mut</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="op">}</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This variant compiles without errors but it’s far from idiomatic. <code>static mut</code>s are very prone to data races, so we need an <code>unsafe</code> block on each access.</p>
+</section>
+<section id="running-it" class="level3">
+<h3 class="anchored" data-anchor-id="running-it">Running it</h3>
+<p>The last step for making exceptions work in our kernel is to call the <code>init_idt</code> function from our <code>main.rs</code>. Instead of calling it directly, we introduce a general <code>init</code> function in our <code>lib.rs</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>With this function, we now have a central place for initialization routines that can be shared between the different <code>_start</code> functions in our <code>main.rs</code>, <code>lib.rs</code>, and integration tests.</p>
+<p>Now we can update the <code>_start</code> function of our <code>main.rs</code> to call <code>init</code> and then trigger a breakpoint exception:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="pp">blog_os::</span>init()<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a></span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="co">// invoke a breakpoint exception</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>    <span class="pp">x86_64::instructions::interrupts::</span>int3()<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a></span>
+<span id="cb10-10"><a href="#cb10-10"></a>    <span class="co">// as before</span></span>
+<span id="cb10-11"><a href="#cb10-11"></a>    <span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a>    test_main()<span class="op">;</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a></span>
+<span id="cb10-14"><a href="#cb10-14"></a>    <span class="pp">println!</span>(<span class="st">"It did not crash!"</span>)<span class="op">;</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>When we run it in QEMU now (using <code>cargo run</code>), we see the following:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="qemu-breakpoint-exception.png" class="img-fluid figure-img"></p>
+<figcaption>QEMU printing <code>EXCEPTION: BREAKPOINT</code> and the interrupt stack frame</figcaption>
+</figure>
+</div>
+<p>It works! The CPU successfully invokes our breakpoint handler, which prints the message, and then returns back to the <code>_start</code> function, where the <code>It did not crash!</code> message is printed.</p>
+<p>We see that the interrupt stack frame tells us the instruction and stack pointers at the time when the exception occurred. This information is very useful when debugging unexpected exceptions.</p>
+</section>
+<section id="adding-a-test" class="level3">
+<h3 class="anchored" data-anchor-id="adding-a-test">Adding a Test</h3>
+<p>Let’s create a test that ensures that the above continues to work. First, we update the <code>_start</code> function to also call <code>init</code>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb11" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">/// Entry point for `cargo test`</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>    init()<span class="op">;</span>      <span class="co">// new</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>    test_main()<span class="op">;</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Remember, this <code>_start</code> function is used when running <code>cargo test --lib</code>, since Rust tests the <code>lib.rs</code> completely independently of the <code>main.rs</code>. We need to call <code>init</code> here to set up an IDT before running the tests.</p>
+<p>Now we can create a <code>test_breakpoint_exception</code> test:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb12" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1"></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a><span class="kw">fn</span> test_breakpoint_exception() <span class="op">{</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>    <span class="co">// invoke a breakpoint exception</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a>    <span class="pp">x86_64::instructions::interrupts::</span>int3()<span class="op">;</span></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>The test invokes the <code>int3</code> function to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.</p>
+<p>You can try this new test by running <code>cargo test</code> (all tests) or <code>cargo test --lib</code> (only tests of <code>lib.rs</code> and its modules).</p>
+
+
+<!-- -->
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./70_except.html" class="pagination-link" aria-label="Exceptions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exceptions</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb13" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">---</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a><span class="an">title:</span><span class="co"> Handlers</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="co">---</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="fu"># Your Task</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="ss">- </span>We are trying to get a working exception handler.</span>
+<span id="cb13-9"><a href="#cb13-9"></a></span>
+<span id="cb13-10"><a href="#cb13-10"></a><span class="fu">## Implementation</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a></span>
+<span id="cb13-12"><a href="#cb13-12"></a>Now that we've understood the theory, it's time to handle CPU exceptions in our kernel. We'll start by creating a new interrupts module in <span class="in">`src/interrupts.rs`</span>, that first creates an <span class="in">`init_idt`</span> function that creates a new <span class="in">`InterruptDescriptorTable`</span>:</span>
+<span id="cb13-13"><a href="#cb13-13"></a></span>
+<span id="cb13-14"><a href="#cb13-14"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb13-15"><a href="#cb13-15"></a><span class="in">pub mod interrupts;</span></span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="in">```</span></span>
+<span id="cb13-17"><a href="#cb13-17"></a></span>
+<span id="cb13-18"><a href="#cb13-18"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb13-19"><a href="#cb13-19"></a><span class="in">use x86_64::structures::idt::InterruptDescriptorTable;</span></span>
+<span id="cb13-20"><a href="#cb13-20"></a></span>
+<span id="cb13-21"><a href="#cb13-21"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb13-22"><a href="#cb13-22"></a><span class="in">    let mut idt = InterruptDescriptorTable::new();</span></span>
+<span id="cb13-23"><a href="#cb13-23"></a><span class="in">}</span></span>
+<span id="cb13-24"><a href="#cb13-24"></a><span class="in">```</span></span>
+<span id="cb13-25"><a href="#cb13-25"></a></span>
+<span id="cb13-26"><a href="#cb13-26"></a>Now we can add handler functions. We start by adding a handler for the <span class="co">[</span><span class="ot">breakpoint exception</span><span class="co">](https://wiki.osdev.org/Exceptions#Breakpoint)</span>. The breakpoint exception is the perfect exception to test exception handling. Its only purpose is to temporarily pause a program when the breakpoint instruction <span class="in">`int3`</span> is executed.</span>
+<span id="cb13-27"><a href="#cb13-27"></a></span>
+<span id="cb13-28"><a href="#cb13-28"></a></span>
+<span id="cb13-29"><a href="#cb13-29"></a>The breakpoint exception is commonly used in debuggers: When the user sets a breakpoint, the debugger overwrites the corresponding instruction with the <span class="in">`int3`</span> instruction so that the CPU throws the breakpoint exception when it reaches that line. When the user wants to continue the program, the debugger replaces the <span class="in">`int3`</span> instruction with the original instruction again and continues the program.</span>
+<span id="cb13-30"><a href="#cb13-30"></a></span>
+<span id="cb13-31"><a href="#cb13-31"></a>For our use case, we don't need to overwrite any instructions. Instead, we just want to print a message when the breakpoint instruction is executed and then continue the program. So let's create a simple <span class="in">`breakpoint_handler`</span> function and add it to our IDT:</span>
+<span id="cb13-32"><a href="#cb13-32"></a></span>
+<span id="cb13-33"><a href="#cb13-33"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb13-34"><a href="#cb13-34"></a><span class="in">use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};</span></span>
+<span id="cb13-35"><a href="#cb13-35"></a><span class="in">use crate::println;</span></span>
+<span id="cb13-36"><a href="#cb13-36"></a></span>
+<span id="cb13-37"><a href="#cb13-37"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb13-38"><a href="#cb13-38"></a><span class="in">    let mut idt = InterruptDescriptorTable::new();</span></span>
+<span id="cb13-39"><a href="#cb13-39"></a><span class="in">    idt.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb13-40"><a href="#cb13-40"></a><span class="in">}</span></span>
+<span id="cb13-41"><a href="#cb13-41"></a></span>
+<span id="cb13-42"><a href="#cb13-42"></a><span class="in">extern "x86-interrupt" fn breakpoint_handler(</span></span>
+<span id="cb13-43"><a href="#cb13-43"></a><span class="in">    stack_frame: InterruptStackFrame)</span></span>
+<span id="cb13-44"><a href="#cb13-44"></a><span class="in">{</span></span>
+<span id="cb13-45"><a href="#cb13-45"></a><span class="in">    println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);</span></span>
+<span id="cb13-46"><a href="#cb13-46"></a><span class="in">}</span></span>
+<span id="cb13-47"><a href="#cb13-47"></a><span class="in">```</span></span>
+<span id="cb13-48"><a href="#cb13-48"></a></span>
+<span id="cb13-49"><a href="#cb13-49"></a>Our handler just outputs a message and pretty-prints the interrupt stack frame.</span>
+<span id="cb13-50"><a href="#cb13-50"></a></span>
+<span id="cb13-51"><a href="#cb13-51"></a>When we try to compile it, the following error occurs:</span>
+<span id="cb13-52"><a href="#cb13-52"></a></span>
+<span id="cb13-53"><a href="#cb13-53"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-54"><a href="#cb13-54"></a><span class="in">error[E0658]: x86-interrupt ABI is experimental and subject to change (see issue #40180)</span></span>
+<span id="cb13-55"><a href="#cb13-55"></a><span class="in">  --&gt; src/main.rs:53:1</span></span>
+<span id="cb13-56"><a href="#cb13-56"></a><span class="in">   |</span></span>
+<span id="cb13-57"><a href="#cb13-57"></a><span class="in">53 | / extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {</span></span>
+<span id="cb13-58"><a href="#cb13-58"></a><span class="in">54 | |     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);</span></span>
+<span id="cb13-59"><a href="#cb13-59"></a><span class="in">55 | | }</span></span>
+<span id="cb13-60"><a href="#cb13-60"></a><span class="in">   | |_^</span></span>
+<span id="cb13-61"><a href="#cb13-61"></a><span class="in">   |</span></span>
+<span id="cb13-62"><a href="#cb13-62"></a><span class="in">   = help: add #![feature(abi_x86_interrupt)] to the crate attributes to enable</span></span>
+<span id="cb13-63"><a href="#cb13-63"></a><span class="in">```</span></span>
+<span id="cb13-64"><a href="#cb13-64"></a></span>
+<span id="cb13-65"><a href="#cb13-65"></a>This error occurs because the <span class="in">`x86-interrupt`</span> calling convention is still unstable. To use it anyway, we have to explicitly enable it by adding <span class="in">`#![feature(abi_x86_interrupt)]`</span> at the top of our <span class="in">`lib.rs`</span>.</span>
+<span id="cb13-66"><a href="#cb13-66"></a></span>
+<span id="cb13-67"><a href="#cb13-67"></a><span class="fu">### Loading the IDT</span></span>
+<span id="cb13-68"><a href="#cb13-68"></a></span>
+<span id="cb13-69"><a href="#cb13-69"></a>In order for the CPU to use our new interrupt descriptor table, we need to load it using the <span class="co">[</span><span class="ot">`lidt`</span><span class="co">](https://www.felixcloutier.com/x86/lgdt:lidt)</span> instruction. The <span class="in">`InterruptDescriptorTable`</span> struct of the <span class="in">`x86_64`</span> crate provides a <span class="co">[</span><span class="ot">`load`</span><span class="co">][InterruptDescriptorTable::load]</span>(https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html#method.load) method for that. Let's try to use it:</span>
+<span id="cb13-70"><a href="#cb13-70"></a></span>
+<span id="cb13-71"><a href="#cb13-71"></a></span>
+<span id="cb13-72"><a href="#cb13-72"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb13-73"><a href="#cb13-73"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb13-74"><a href="#cb13-74"></a><span class="in">    let mut idt = InterruptDescriptorTable::new();</span></span>
+<span id="cb13-75"><a href="#cb13-75"></a><span class="in">    idt.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb13-76"><a href="#cb13-76"></a><span class="in">    idt.load();</span></span>
+<span id="cb13-77"><a href="#cb13-77"></a><span class="in">}</span></span>
+<span id="cb13-78"><a href="#cb13-78"></a><span class="in">```</span></span>
+<span id="cb13-79"><a href="#cb13-79"></a></span>
+<span id="cb13-80"><a href="#cb13-80"></a>When we try to compile it now, the following error occurs:</span>
+<span id="cb13-81"><a href="#cb13-81"></a></span>
+<span id="cb13-82"><a href="#cb13-82"></a><span class="in">```{.sh}</span></span>
+<span id="cb13-83"><a href="#cb13-83"></a><span class="in">error: `idt` does not live long enough</span></span>
+<span id="cb13-84"><a href="#cb13-84"></a><span class="in">  --&gt; src/interrupts/mod.rs:43:5</span></span>
+<span id="cb13-85"><a href="#cb13-85"></a><span class="in">   |</span></span>
+<span id="cb13-86"><a href="#cb13-86"></a><span class="in">43 |     idt.load();</span></span>
+<span id="cb13-87"><a href="#cb13-87"></a><span class="in">   |     ^^^ does not live long enough</span></span>
+<span id="cb13-88"><a href="#cb13-88"></a><span class="in">44 | }</span></span>
+<span id="cb13-89"><a href="#cb13-89"></a><span class="in">   | - borrowed value only lives until here</span></span>
+<span id="cb13-90"><a href="#cb13-90"></a><span class="in">   |</span></span>
+<span id="cb13-91"><a href="#cb13-91"></a><span class="in">   = note: borrowed value must be valid for the static lifetime...</span></span>
+<span id="cb13-92"><a href="#cb13-92"></a><span class="in">```</span></span>
+<span id="cb13-93"><a href="#cb13-93"></a></span>
+<span id="cb13-94"><a href="#cb13-94"></a>So the <span class="in">`load`</span> method expects a <span class="in">`&amp;'static self`</span>, that is, a reference valid for the complete runtime of the program. The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than <span class="in">`'static`</span> could lead to use-after-free bugs.</span>
+<span id="cb13-95"><a href="#cb13-95"></a></span>
+<span id="cb13-96"><a href="#cb13-96"></a>In fact, this is exactly what happens here. Our <span class="in">`idt`</span> is created on the stack, so it is only valid inside the <span class="in">`init`</span> function. Afterwards, the stack memory is reused for other functions, so the CPU would interpret random stack memory as IDT. Luckily, the <span class="in">`InterruptDescriptorTable::load`</span> method encodes this lifetime requirement in its function definition, so that the Rust compiler is able to prevent this possible bug at compile time.</span>
+<span id="cb13-97"><a href="#cb13-97"></a></span>
+<span id="cb13-98"><a href="#cb13-98"></a>In order to fix this problem, we need to store our <span class="in">`idt`</span> at a place where it has a <span class="in">`'static`</span> lifetime. To achieve this, we could allocate our IDT on the heap using <span class="co">[</span><span class="ot">`Box`</span><span class="co">]</span> and then convert it to a <span class="in">`'static`</span> reference, but we are writing an OS kernel and thus don't have a heap (yet).</span>
+<span id="cb13-99"><a href="#cb13-99"></a></span>
+<span id="cb13-100"><a href="#cb13-100"></a><span class="ot">[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html</span></span>
+<span id="cb13-101"><a href="#cb13-101"></a></span>
+<span id="cb13-102"><a href="#cb13-102"></a></span>
+<span id="cb13-103"><a href="#cb13-103"></a>As an alternative, we could try to store the IDT as a <span class="in">`static`</span>:</span>
+<span id="cb13-104"><a href="#cb13-104"></a></span>
+<span id="cb13-105"><a href="#cb13-105"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb13-106"><a href="#cb13-106"></a><span class="in">static IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();</span></span>
+<span id="cb13-107"><a href="#cb13-107"></a></span>
+<span id="cb13-108"><a href="#cb13-108"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb13-109"><a href="#cb13-109"></a><span class="in">    IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb13-110"><a href="#cb13-110"></a><span class="in">    IDT.load();</span></span>
+<span id="cb13-111"><a href="#cb13-111"></a><span class="in">}</span></span>
+<span id="cb13-112"><a href="#cb13-112"></a><span class="in">```</span></span>
+<span id="cb13-113"><a href="#cb13-113"></a></span>
+<span id="cb13-114"><a href="#cb13-114"></a>However, there is a problem: Statics are immutable, so we can't modify the breakpoint entry from our <span class="in">`init`</span> function. We could solve this problem by using a <span class="co">[</span><span class="ot">`static mut`</span><span class="co">]</span>:</span>
+<span id="cb13-115"><a href="#cb13-115"></a></span>
+<span id="cb13-116"><a href="#cb13-116"></a><span class="ot">[`static mut`]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable</span></span>
+<span id="cb13-117"><a href="#cb13-117"></a></span>
+<span id="cb13-118"><a href="#cb13-118"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb13-119"><a href="#cb13-119"></a><span class="in">static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();</span></span>
+<span id="cb13-120"><a href="#cb13-120"></a></span>
+<span id="cb13-121"><a href="#cb13-121"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb13-122"><a href="#cb13-122"></a><span class="in">    unsafe {</span></span>
+<span id="cb13-123"><a href="#cb13-123"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb13-124"><a href="#cb13-124"></a><span class="in">        IDT.load();</span></span>
+<span id="cb13-125"><a href="#cb13-125"></a><span class="in">    }</span></span>
+<span id="cb13-126"><a href="#cb13-126"></a><span class="in">}</span></span>
+<span id="cb13-127"><a href="#cb13-127"></a><span class="in">```</span></span>
+<span id="cb13-128"><a href="#cb13-128"></a></span>
+<span id="cb13-129"><a href="#cb13-129"></a>This variant compiles without errors but it's far from idiomatic. <span class="in">`static mut`</span>s are very prone to data races, so we need an <span class="in">`unsafe`</span> block on each access.</span>
+<span id="cb13-130"><a href="#cb13-130"></a></span>
+<span id="cb13-131"><a href="#cb13-131"></a><span class="fu">### Running it</span></span>
+<span id="cb13-132"><a href="#cb13-132"></a></span>
+<span id="cb13-133"><a href="#cb13-133"></a>The last step for making exceptions work in our kernel is to call the <span class="in">`init_idt`</span> function from our <span class="in">`main.rs`</span>. Instead of calling it directly, we introduce a general <span class="in">`init`</span> function in our <span class="in">`lib.rs`</span>:</span>
+<span id="cb13-134"><a href="#cb13-134"></a></span>
+<span id="cb13-135"><a href="#cb13-135"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb13-136"><a href="#cb13-136"></a><span class="in">pub fn init() {</span></span>
+<span id="cb13-137"><a href="#cb13-137"></a><span class="in">    interrupts::init_idt();</span></span>
+<span id="cb13-138"><a href="#cb13-138"></a><span class="in">}</span></span>
+<span id="cb13-139"><a href="#cb13-139"></a><span class="in">```</span></span>
+<span id="cb13-140"><a href="#cb13-140"></a></span>
+<span id="cb13-141"><a href="#cb13-141"></a>With this function, we now have a central place for initialization routines that can be shared between the different <span class="in">`_start`</span> functions in our <span class="in">`main.rs`</span>, <span class="in">`lib.rs`</span>, and integration tests.</span>
+<span id="cb13-142"><a href="#cb13-142"></a></span>
+<span id="cb13-143"><a href="#cb13-143"></a>Now we can update the <span class="in">`_start`</span> function of our <span class="in">`main.rs`</span> to call <span class="in">`init`</span> and then trigger a breakpoint exception:</span>
+<span id="cb13-144"><a href="#cb13-144"></a></span>
+<span id="cb13-145"><a href="#cb13-145"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb13-146"><a href="#cb13-146"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb13-147"><a href="#cb13-147"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb13-148"><a href="#cb13-148"></a><span class="in">    println!("Hello World{}", "!");</span></span>
+<span id="cb13-149"><a href="#cb13-149"></a></span>
+<span id="cb13-150"><a href="#cb13-150"></a><span class="in">    blog_os::init(); // new</span></span>
+<span id="cb13-151"><a href="#cb13-151"></a></span>
+<span id="cb13-152"><a href="#cb13-152"></a><span class="in">    // invoke a breakpoint exception</span></span>
+<span id="cb13-153"><a href="#cb13-153"></a><span class="in">    x86_64::instructions::interrupts::int3(); // new</span></span>
+<span id="cb13-154"><a href="#cb13-154"></a></span>
+<span id="cb13-155"><a href="#cb13-155"></a><span class="in">    // as before</span></span>
+<span id="cb13-156"><a href="#cb13-156"></a><span class="in">    #[cfg(test)]</span></span>
+<span id="cb13-157"><a href="#cb13-157"></a><span class="in">    test_main();</span></span>
+<span id="cb13-158"><a href="#cb13-158"></a></span>
+<span id="cb13-159"><a href="#cb13-159"></a><span class="in">    println!("It did not crash!");</span></span>
+<span id="cb13-160"><a href="#cb13-160"></a><span class="in">    loop {}</span></span>
+<span id="cb13-161"><a href="#cb13-161"></a><span class="in">}</span></span>
+<span id="cb13-162"><a href="#cb13-162"></a><span class="in">```</span></span>
+<span id="cb13-163"><a href="#cb13-163"></a></span>
+<span id="cb13-164"><a href="#cb13-164"></a>When we run it in QEMU now (using <span class="in">`cargo run`</span>), we see the following:</span>
+<span id="cb13-165"><a href="#cb13-165"></a></span>
+<span id="cb13-166"><a href="#cb13-166"></a><span class="al">![QEMU printing `EXCEPTION: BREAKPOINT` and the interrupt stack frame](qemu-breakpoint-exception.png)</span></span>
+<span id="cb13-167"><a href="#cb13-167"></a></span>
+<span id="cb13-168"><a href="#cb13-168"></a>It works! The CPU successfully invokes our breakpoint handler, which prints the message, and then returns back to the <span class="in">`_start`</span> function, where the <span class="in">`It did not crash!`</span> message is printed.</span>
+<span id="cb13-169"><a href="#cb13-169"></a></span>
+<span id="cb13-170"><a href="#cb13-170"></a>We see that the interrupt stack frame tells us the instruction and stack pointers at the time when the exception occurred. This information is very useful when debugging unexpected exceptions.</span>
+<span id="cb13-171"><a href="#cb13-171"></a></span>
+<span id="cb13-172"><a href="#cb13-172"></a><span class="fu">### Adding a Test</span></span>
+<span id="cb13-173"><a href="#cb13-173"></a></span>
+<span id="cb13-174"><a href="#cb13-174"></a>Let's create a test that ensures that the above continues to work. First, we update the <span class="in">`_start`</span> function to also call <span class="in">`init`</span>:</span>
+<span id="cb13-175"><a href="#cb13-175"></a></span>
+<span id="cb13-176"><a href="#cb13-176"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb13-177"><a href="#cb13-177"></a><span class="in">/// Entry point for `cargo test`</span></span>
+<span id="cb13-178"><a href="#cb13-178"></a><span class="in">#[cfg(test)]</span></span>
+<span id="cb13-179"><a href="#cb13-179"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb13-180"><a href="#cb13-180"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb13-181"><a href="#cb13-181"></a><span class="in">    init();      // new</span></span>
+<span id="cb13-182"><a href="#cb13-182"></a><span class="in">    test_main();</span></span>
+<span id="cb13-183"><a href="#cb13-183"></a><span class="in">    loop {}</span></span>
+<span id="cb13-184"><a href="#cb13-184"></a><span class="in">}</span></span>
+<span id="cb13-185"><a href="#cb13-185"></a><span class="in">```</span></span>
+<span id="cb13-186"><a href="#cb13-186"></a></span>
+<span id="cb13-187"><a href="#cb13-187"></a>Remember, this <span class="in">`_start`</span> function is used when running <span class="in">`cargo test --lib`</span>, since Rust tests the <span class="in">`lib.rs`</span> completely independently of the <span class="in">`main.rs`</span>. We need to call <span class="in">`init`</span> here to set up an IDT before running the tests.</span>
+<span id="cb13-188"><a href="#cb13-188"></a></span>
+<span id="cb13-189"><a href="#cb13-189"></a>Now we can create a <span class="in">`test_breakpoint_exception`</span> test:</span>
+<span id="cb13-190"><a href="#cb13-190"></a></span>
+<span id="cb13-191"><a href="#cb13-191"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb13-192"><a href="#cb13-192"></a><span class="in">#[test_case]</span></span>
+<span id="cb13-193"><a href="#cb13-193"></a><span class="in">fn test_breakpoint_exception() {</span></span>
+<span id="cb13-194"><a href="#cb13-194"></a><span class="in">    // invoke a breakpoint exception</span></span>
+<span id="cb13-195"><a href="#cb13-195"></a><span class="in">    x86_64::instructions::interrupts::int3();</span></span>
+<span id="cb13-196"><a href="#cb13-196"></a><span class="in">}</span></span>
+<span id="cb13-197"><a href="#cb13-197"></a><span class="in">```</span></span>
+<span id="cb13-198"><a href="#cb13-198"></a></span>
+<span id="cb13-199"><a href="#cb13-199"></a>The test invokes the <span class="in">`int3`</span> function to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.</span>
+<span id="cb13-200"><a href="#cb13-200"></a></span>
+<span id="cb13-201"><a href="#cb13-201"></a>You can try this new test by running <span class="in">`cargo test`</span> (all tests) or <span class="in">`cargo test --lib`</span> (only tests of <span class="in">`lib.rs`</span> and its modules).</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

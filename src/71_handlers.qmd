@@ -1,0 +1,201 @@
+---
+title: Handlers
+format: html
+---
+
+# Your Task
+
+- We are trying to get a working exception handler.
+
+## Implementation
+
+Now that we've understood the theory, it's time to handle CPU exceptions in our kernel. We'll start by creating a new interrupts module in `src/interrupts.rs`, that first creates an `init_idt` function that creates a new `InterruptDescriptorTable`:
+
+```{.rs filename="src/lib.rs"}
+pub mod interrupts;
+```
+
+```{.rs filename="src/interrupts.rs"}
+use x86_64::structures::idt::InterruptDescriptorTable;
+
+pub fn init_idt() {
+    let mut idt = InterruptDescriptorTable::new();
+}
+```
+
+Now we can add handler functions. We start by adding a handler for the [breakpoint exception](https://wiki.osdev.org/Exceptions#Breakpoint). The breakpoint exception is the perfect exception to test exception handling. Its only purpose is to temporarily pause a program when the breakpoint instruction `int3` is executed.
+
+
+The breakpoint exception is commonly used in debuggers: When the user sets a breakpoint, the debugger overwrites the corresponding instruction with the `int3` instruction so that the CPU throws the breakpoint exception when it reaches that line. When the user wants to continue the program, the debugger replaces the `int3` instruction with the original instruction again and continues the program.
+
+For our use case, we don't need to overwrite any instructions. Instead, we just want to print a message when the breakpoint instruction is executed and then continue the program. So let's create a simple `breakpoint_handler` function and add it to our IDT:
+
+```{.rs filename="src/interrupts.rs"}
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
+use crate::println;
+
+pub fn init_idt() {
+    let mut idt = InterruptDescriptorTable::new();
+    idt.breakpoint.set_handler_fn(breakpoint_handler);
+}
+
+extern "x86-interrupt" fn breakpoint_handler(
+    stack_frame: InterruptStackFrame)
+{
+    println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+}
+```
+
+Our handler just outputs a message and pretty-prints the interrupt stack frame.
+
+When we try to compile it, the following error occurs:
+
+```{.sh}
+error[E0658]: x86-interrupt ABI is experimental and subject to change (see issue #40180)
+  --> src/main.rs:53:1
+   |
+53 | / extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
+54 | |     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+55 | | }
+   | |_^
+   |
+   = help: add #![feature(abi_x86_interrupt)] to the crate attributes to enable
+```
+
+This error occurs because the `x86-interrupt` calling convention is still unstable. To use it anyway, we have to explicitly enable it by adding `#![feature(abi_x86_interrupt)]` at the top of our `lib.rs`.
+
+### Loading the IDT
+
+In order for the CPU to use our new interrupt descriptor table, we need to load it using the [`lidt`](https://www.felixcloutier.com/x86/lgdt:lidt) instruction. The `InterruptDescriptorTable` struct of the `x86_64` crate provides a [`load`][InterruptDescriptorTable::load](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html#method.load) method for that. Let's try to use it:
+
+
+```{.rs filename="src/interrupts.rs"}
+pub fn init_idt() {
+    let mut idt = InterruptDescriptorTable::new();
+    idt.breakpoint.set_handler_fn(breakpoint_handler);
+    idt.load();
+}
+```
+
+When we try to compile it now, the following error occurs:
+
+```{.sh}
+error: `idt` does not live long enough
+  --> src/interrupts/mod.rs:43:5
+   |
+43 |     idt.load();
+   |     ^^^ does not live long enough
+44 | }
+   | - borrowed value only lives until here
+   |
+   = note: borrowed value must be valid for the static lifetime...
+```
+
+So the `load` method expects a `&'static self`, that is, a reference valid for the complete runtime of the program. The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than `'static` could lead to use-after-free bugs.
+
+In fact, this is exactly what happens here. Our `idt` is created on the stack, so it is only valid inside the `init` function. Afterwards, the stack memory is reused for other functions, so the CPU would interpret random stack memory as IDT. Luckily, the `InterruptDescriptorTable::load` method encodes this lifetime requirement in its function definition, so that the Rust compiler is able to prevent this possible bug at compile time.
+
+In order to fix this problem, we need to store our `idt` at a place where it has a `'static` lifetime. To achieve this, we could allocate our IDT on the heap using [`Box`] and then convert it to a `'static` reference, but we are writing an OS kernel and thus don't have a heap (yet).
+
+[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html
+
+
+As an alternative, we could try to store the IDT as a `static`:
+
+```{.rs filename="src/interrupts.rs"}
+static IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
+
+pub fn init_idt() {
+    IDT.breakpoint.set_handler_fn(breakpoint_handler);
+    IDT.load();
+}
+```
+
+However, there is a problem: Statics are immutable, so we can't modify the breakpoint entry from our `init` function. We could solve this problem by using a [`static mut`]:
+
+[`static mut`]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable
+
+```{.rs filename="src/interrupts.rs"}
+static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
+
+pub fn init_idt() {
+    unsafe {
+        IDT.breakpoint.set_handler_fn(breakpoint_handler);
+        IDT.load();
+    }
+}
+```
+
+This variant compiles without errors but it's far from idiomatic. `static mut`s are very prone to data races, so we need an `unsafe` block on each access.
+
+### Running it
+
+The last step for making exceptions work in our kernel is to call the `init_idt` function from our `main.rs`. Instead of calling it directly, we introduce a general `init` function in our `lib.rs`:
+
+```{.rs filename="src/lib.rs"}
+pub fn init() {
+    interrupts::init_idt();
+}
+```
+
+With this function, we now have a central place for initialization routines that can be shared between the different `_start` functions in our `main.rs`, `lib.rs`, and integration tests.
+
+Now we can update the `_start` function of our `main.rs` to call `init` and then trigger a breakpoint exception:
+
+```{.rs filename="src/main.rs"}
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    println!("Hello World{}", "!");
+
+    blog_os::init(); // new
+
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3(); // new
+
+    // as before
+    #[cfg(test)]
+    test_main();
+
+    println!("It did not crash!");
+    loop {}
+}
+```
+
+When we run it in QEMU now (using `cargo run`), we see the following:
+
+![QEMU printing `EXCEPTION: BREAKPOINT` and the interrupt stack frame](qemu-breakpoint-exception.png)
+
+It works! The CPU successfully invokes our breakpoint handler, which prints the message, and then returns back to the `_start` function, where the `It did not crash!` message is printed.
+
+We see that the interrupt stack frame tells us the instruction and stack pointers at the time when the exception occurred. This information is very useful when debugging unexpected exceptions.
+
+### Adding a Test
+
+Let's create a test that ensures that the above continues to work. First, we update the `_start` function to also call `init`:
+
+```{.rs filename="src/lib.rs"}
+/// Entry point for `cargo test`
+#[cfg(test)]
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    init();      // new
+    test_main();
+    loop {}
+}
+```
+
+Remember, this `_start` function is used when running `cargo test --lib`, since Rust tests the `lib.rs` completely independently of the `main.rs`. We need to call `init` here to set up an IDT before running the tests.
+
+Now we can create a `test_breakpoint_exception` test:
+
+```{.rs filename="src/interrupts.rs"}
+#[test_case]
+fn test_breakpoint_exception() {
+    // invoke a breakpoint exception
+    x86_64::instructions::interrupts::int3();
+}
+```
+
+The test invokes the `int3` function to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.
+
+You can try this new test by running `cargo test` (all tests) or `cargo test --lib` (only tests of `lib.rs` and its modules).

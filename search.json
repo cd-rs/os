@@ -4,7 +4,1581 @@
     "href": "index.html",
     "title": "OS in Rust",
     "section": "",
-    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nTransmute\nmalloc\n\n\n0x3\n02/02\nBare Metal\nLinker\nRISC-V\n\n\n0x4\n02/09\nKernel\nBoot\nHello\n\n\n0x5\n02/16\nText\nFormat\nGraphics\n\n\n0x6\n02/23\nGuest\nWork Session\n\n\n\n0x7\n03/02\nTest\nSerial\nIntegration\n\n\n0x8\n03/09\nExceptions\n\n\n\n\n0x9\n03/16\nFaults\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nInterrupts\n\n\n\n\n0xB\n03/06\nPaging\n\n\n\n\n0xC\n04/13\nPage Tables\nNone\n\n\n\n0xD\n04/20\nThe Heap\n\n\n\n\n0xE\n04/29\nAllocators\n\n\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
+    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nTransmute\nmalloc\n\n\n0x3\n02/02\nBare Metal\nLinker\nRISC-V\n\n\n0x4\n02/09\nKernel\nBoot\nHello\n\n\n0x5\n02/16\nText\nFormat\nGraphics\n\n\n0x6\n02/23\nGuest\nWork Session\n\n\n\n0x7\n03/02\nTest\nSerial\nIntegration\n\n\n0x8\n03/09\n[Exceptions](70_except.qmd.\nHandlers\n\n\n\n0x9\n03/16\nFaults\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nInterrupts\n\n\n\n\n0xB\n03/06\nPaging\n\n\n\n\n0xC\n04/13\nPage Tables\nNone\n\n\n\n0xD\n04/20\nThe Heap\n\n\n\n\n0xE\n04/29\nAllocators\n\n\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
+  },
+  {
+    "objectID": "70_except.html",
+    "href": "70_except.html",
+    "title": "Exceptions",
+    "section": "",
+    "text": "Action Items:\n\nGraphics done.\nIntegration testing ongoing.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#announcements",
+    "href": "70_except.html#announcements",
+    "title": "Exceptions",
+    "section": "",
+    "text": "Action Items:\n\nGraphics done.\nIntegration testing ongoing.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#citations",
+    "href": "70_except.html#citations",
+    "title": "Exceptions",
+    "section": "Citations",
+    "text": "Citations\n\nCPU exceptions are algorithmically interesting but technically tedius.\nCPU Exceptions",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#exceptions",
+    "href": "70_except.html#exceptions",
+    "title": "Exceptions",
+    "section": "Exceptions",
+    "text": "Exceptions\n\nCPU exceptions occur in various erroneous situations\n\nAccessing an invalid memory address\nDividing by zero\n\nWe have to set up an interrupt descriptor table..\nThis week, our kernel will be able to catch breakpoint exceptions.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#meaning",
+    "href": "70_except.html#meaning",
+    "title": "Exceptions",
+    "section": "Meaning",
+    "text": "Meaning\n\nAn exception signals that something is wrong with the current instruction.\n\nMachine-level line-of-code.\n\nFor example, divide by 0.\nWhen an exception occurs, the CPU interrupts its current work and immediately calls a specific exception handler function, depending on the exception type.\n\nThe OS manages these handler functions.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#rust",
+    "href": "70_except.html#rust",
+    "title": "Exceptions",
+    "section": "Rust",
+    "text": "Rust\n\nRust is pretty safe and generally doesn’t want to let you cause the easier CPU exceptions.\nThe most famous is zero division.\n\n\n\nsrc/main.rs\n\nfn main() {\n    // Print so isn't optimized out.\n    println!(\"{}\", 1 / 0);\n}",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#rustc-protects",
+    "href": "70_except.html#rustc-protects",
+    "title": "Exceptions",
+    "section": "rustc protects",
+    "text": "rustc protects\n\nModern languages won’t allow this.\n\n$ cargo r\n   Compiling divzero v0.1.0 (/home/user/tmp/divzero)\nerror: this operation will panic at runtime\n --&gt; src/main.rs:3:20\n  |\n3 |     println!(\"{}\", 1 / 0);\n  |                    ^^^^^ attempt to divide `1_i32` by zero\n  |\n  = note: `#[deny(unconditional_panic)]` on by default\n\nerror: could not compile `divzero` (bin \"divzero\") due to 1 previous error",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#permit",
+    "href": "70_except.html#permit",
+    "title": "Exceptions",
+    "section": "Permit",
+    "text": "Permit\n\nWe can of course #[allow(unconditional_panic)]\n(Or take user input, of course.)\n\n\n\nsrc/main.rs\n\n$ cat src/main.rs\nfn main() {\n    #[allow(unconditional_panic)]\n    let _x = 1 / 0;\n}",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#see-a-panic",
+    "href": "70_except.html#see-a-panic",
+    "title": "Exceptions",
+    "section": "See a panic",
+    "text": "See a panic\n\nPresumably this is hitting the CPU then a rustc provided panic handler.\n\n$ cargo r\n   Compiling divzero v0.1.0 (/home/user/tmp/divzero)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s\n     Running `target/debug/divzero`\n\nthread 'main' (2292) panicked at src/main.rs:3:14:\nattempt to divide by zero\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#much-easier",
+    "href": "70_except.html#much-easier",
+    "title": "Exceptions",
+    "section": "Much Easier",
+    "text": "Much Easier\n\nWe can just use a language that let’s us use the computer.\n\n\n\nmain.c\n\nint main() {\n        int x = 1 / 0;\n        return 0;\n}",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#permitted",
+    "href": "70_except.html#permitted",
+    "title": "Exceptions",
+    "section": "Permitted",
+    "text": "Permitted\n\nIt will warn us but not stop us.\n\n$ gcc main.c -o main\nmain.c: In function ‘main’:\nmain.c:2:19: warning: division by zero [-Wdiv-by-zero]\n    2 |         int x = 1 / 0;\n      |                   ^",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#modernizing",
+    "href": "70_except.html#modernizing",
+    "title": "Exceptions",
+    "section": "Modernizing",
+    "text": "Modernizing\n\nNaturally, in a C class this would be banned through use of compiler options.\n\n\n\nMakefile\n\nCC = gcc # or clang\nCFLAGS = -std=c89 -Wall -Wextra -Werror -Wpedantic -O2\n\n\nThis yields:\n\n$ gcc main.c -std=c89 -Wall -Wextra -Werror -Wpedantic -O2 -o main\nmain.c: In function ‘main’:\nmain.c:2:19: error: division by zero [-Werror=div-by-zero]\n    2 |         int x = 1 / 0;\n      |                   ^\nmain.c:2:13: error: unused variable ‘x’ [-Werror=unused-variable]\n    2 |         int x = 1 / 0;\n      |             ^\ncc1: all warnings being treated as errors",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#results",
+    "href": "70_except.html#results",
+    "title": "Exceptions",
+    "section": "Results",
+    "text": "Results\n\nIn any case, if you do use naive gcc you will get the following:\n\n$ ./main\nFloating point exception (core dumped)\n\nThis is of course ludicrously confusing.\n\nThere is no usage of floating point at all.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#clang",
+    "href": "70_except.html#clang",
+    "title": "Exceptions",
+    "section": "Clang",
+    "text": "Clang\n\nThere are clang fans (vs. gcc)\nCompilation is identical though the warning format differs.\n\n$ clang main.c -o main\nmain.c:2:12: warning: division by zero is undefined [-Wdivision-by-zero]\n        int x = 1 / 0;\n                  ^ ~\n1 warning generated.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#difference",
+    "href": "70_except.html#difference",
+    "title": "Exceptions",
+    "section": "Difference",
+    "text": "Difference\n\nclang does not trigger an exception.\n\n$ cat main.c\n#include &lt;stdio.h&gt;\n\nint main() {\n        int x = 1 / 0;\n        printf(\"%d\\n\", x);\n        return 0;\n}\nuser@cd-desk:~/tmp/divzero$ clang main.c -o main\nmain.c:4:12: warning: division by zero is undefined [-Wdivision-by-zero]\n        int x = 1 / 0;\n                  ^ ~\n1 warning generated.\nuser@cd-desk:~/tmp/divzero$ ./main\n267243840\nuser@cd-desk:~/tmp/divzero$ ./main\n2140340544",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#aside",
+    "href": "70_except.html#aside",
+    "title": "Exceptions",
+    "section": "Aside",
+    "text": "Aside\n\nCheckmate clang fans.\nThat should definitely explode.\n\nNot because the language is specified that way.\nBecause gcc does and therefore so should you.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#types",
+    "href": "70_except.html#types",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nPage Fault: A page fault occurs on illegal memory accesses. For example, if the current instruction tries to read from an unmapped page or tries to write to a read-only page.\n\nPages are numerical regions of memory.\nWe imagine, for example, missing the VGA buffer due to faulty arithmetic.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#types-1",
+    "href": "70_except.html#types-1",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nInvalid Opcode: This exception occurs when the current instruction is invalid, for example, when we try to use new SSE instructions on an old CPU that does not support them.\n\nIf we naively accelerate graphics code this is an issue.\nCommon in “early” (1995-2005) game design.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#types-2",
+    "href": "70_except.html#types-2",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nGeneral Protection Fault: This is the exception with the broadest range of causes.\n\nUsually prevents a user from elevating their own privilege level by trying to overwrite a protected value that defines privilege level.\nUsed to prevent virtual machine escape, safely sandbox browser code.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#types-3",
+    "href": "70_except.html#types-3",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nDouble Fault: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs while calling the exception handler, the CPU raises a double fault exception.\n\nThis exception also occurs when there is no handler function registered for an exception.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#types-4",
+    "href": "70_except.html#types-4",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nTriple Fault: If an exception occurs while handling a double fault, the CPU issues a fatal triple fault. We can’t catch or handle a triple fault.\n\nMost processors react by resetting themselves and rebooting the OS.\nUsually caused by some recursive fault pattern.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#interrupt-descriptor-table",
+    "href": "70_except.html#interrupt-descriptor-table",
+    "title": "Exceptions",
+    "section": "Interrupt Descriptor Table",
+    "text": "Interrupt Descriptor Table\n\nIn order to catch and handle exceptions, we have to set up a so-called Interrupt Descriptor Table (IDT).\nSpecial case of a dispatch table.\n\n\nIn computer science, a dispatch table is a table of pointers or memory addresses to functions or methods.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#aside-1",
+    "href": "70_except.html#aside-1",
+    "title": "Exceptions",
+    "section": "Aside",
+    "text": "Aside\n\nDispatch tables are cool as all get-out.\nI recently performed an advanced manuever (taught them in CS 151).\nVideo\nCode\nPython a functional language within my life time, oversoul willing.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#format",
+    "href": "70_except.html#format",
+    "title": "Exceptions",
+    "section": "Format",
+    "text": "Format\n\nKeys are exceptions; values are functions.\n\nHelpfully, exceptions are numeric so can implement as an array/vector/“table”\n\nThe hardware uses this table directly, so we need to follow a predefined format.\nEach entry must have a 16-byte structure.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#python-style",
+    "href": "70_except.html#python-style",
+    "title": "Exceptions",
+    "section": "Python Style",
+    "text": "Python Style\n\n♪♫♪ key-value storage my old friend ♫♪♫\n♫♪♫ ive come to code with you again ♪♫♪\n\nfs = {\n    \"ADD\" : lambda x , y : x + y ,\n    \"SUB\" : lambda x , y : x - y ,\n    \"MUL\" : lambda x , y : x * y ,\n    \"DIV\" : lambda x , y : x / y ,\n    \"MOD\" : lambda x , y : x % y ,\n    \"NEG\" : lambda x , y :   - x ,\n    \"ODD\" : lambda x , y : x % 2 ,\n    \"ZER\" : lambda x , y :     0 ,\n    \"EXT\" : lambda x , y : exit(),\n}",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#rust-style",
+    "href": "70_except.html#rust-style",
+    "title": "Exceptions",
+    "section": "Rust Style",
+    "text": "Rust Style\n\nWait a minute wasn’t that our test runner????\n\n\n\ntests/println.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    osirs::_test_runner(&[&at_top, &wraps, &scrolls, &colors, &newlines]);\n    osirs::qemu_quit(osirs::QEMU_PASS);\n    loop {}\n}",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#layout",
+    "href": "70_except.html#layout",
+    "title": "Exceptions",
+    "section": "Layout",
+    "text": "Layout\n\n\n\nType\nName\nDescription\n\n\n\n\nu16\nFunction Pointer [0:15]\nThe lower bits of the pointer to the handler function.\n\n\nu16\nGDT selector\nSelector of a code segment in the global descriptor table.\n\n\nu16\nOptions\n(next slide)\n\n\nu16\nFunction Pointer [16:31]\nThe middle bits of the pointer to the handler function.\n\n\nu32\nFunction Pointer [32:63]\nThe remaining bits of the pointer to the handler function.\n\n\nu32\nReserved",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#options",
+    "href": "70_except.html#options",
+    "title": "Exceptions",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nBits\nName\nDescription\n\n\n\n\n0-2\nInterrupt Stack Table Index\n0: Don’t switch stacks, 1-7: Switch to the n-th stack in the Interrupt Stack Table when this handler is called.\n\n\n3-7\nReserved\n\n\n\n8\n0: Interrupt Gate, 1: Trap Gate\nIf this bit is 0, interrupts are disabled when this handler is called.\n\n\n9-11\nmust be one\n\n\n\n12\nmust be zero\n\n\n\n13-14\nDescriptor Privilege Level (DPL)\nThe minimal privilege level required for calling this handler.\n\n\n15\nPresent",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#the-keys",
+    "href": "70_except.html#the-keys",
+    "title": "Exceptions",
+    "section": "The Keys",
+    "text": "The Keys\n\nEach exception has a predefined IDT index.\n\nSet by the hardware designers.\nInvalid opcode exception has table index 6\nPage fault exception has table index 14\n\n\\(\\therefore\\) hardware can automatically load the corresponding IDT entry for any exception.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-1",
+    "href": "70_except.html#step-1",
+    "title": "Exceptions",
+    "section": "Step 1",
+    "text": "Step 1\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack, including the instruction pointer and the FLAGS register.\n\nThe instruction pointer keeps track of the current machine-level line-of-code\n\nIt is like the stack pointer (which keeps track of the top of the stack of values.\nA special hardware variable.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#flags",
+    "href": "70_except.html#flags",
+    "title": "Exceptions",
+    "section": "FLAGS",
+    "text": "FLAGS\n\nThe FLAGS register (16 bit) and it’s cousins, EFLAGS (extended 32 bit) and RFLAGS (register 64 bit) are very important.\n\nRead more\nWhether a carry occurred.\nWhether a value is zero.\nWhether the sign is positive or negative.\nWhether a trap occurs (more soon).\nWhether interrupts are enabled (more soon).",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#on-flags",
+    "href": "70_except.html#on-flags",
+    "title": "Exceptions",
+    "section": "On FLAGS",
+    "text": "On FLAGS\n\n\n\n\n\n\n\n\n\n\n\n\nBit\nMask\nName\nDescription\nCategory\n=1\n=0\n\n\n\n\n0\n0x0001\nCF\nCarry flag\nStatus\nCY (Carry)\nNC (No Carry)\n\n\n1\n0x0002\n—\nReserved, always 1 in EFLAGS\n—\n—\n—\n\n\n2\n0x0004\nPF\nParity flag\nStatus\nPE (Parity Even)\nPO (Parity Odd)\n\n\n3\n0x0008\n—\nReserved\n—\n—\n—\n\n\n4\n0x0010\nAF\nAuxiliary Carry flag\nStatus\nAC (Auxiliary Carry)\nNA (No Auxiliary Carry)\n\n\n5\n0x0020\n—\nReserved\n—\n—\n—",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#on-flags-1",
+    "href": "70_except.html#on-flags-1",
+    "title": "Exceptions",
+    "section": "On FLAGS",
+    "text": "On FLAGS\n\n\n\n\n\n\n\n\n\n\n\n\nBit\nMask\nName\nDescription\nCategory\n=1\n=0\n\n\n\n\n6\n0x0040\nZF\nZero flag\nStatus\nZR (Zero)\nNZ (Not Zero)\n\n\n7\n0x0080\nSF\nSign flag\nStatus\nNG (Negative)\nPL (Positive)\n\n\n8\n0x0100\nTF\nTrap flag (single step)\nControl\n—\n—\n\n\n9\n0x0200\nIF\nInterrupt enable flag\nControl\nEI (Enable Interrupt)\nDI (Disable Interrupt)\n\n\n10\n0x0400\nDF\nDirection flag\nControl\nDN (Down)\nUP (Up)",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#on-flags-2",
+    "href": "70_except.html#on-flags-2",
+    "title": "Exceptions",
+    "section": "On FLAGS",
+    "text": "On FLAGS\n\n\n\n\n\n\n\n\n\n\n\n\nBit\nMask\nName\nDescription\nCategory\n=1\n=0\n\n\n\n\n11\n0x0800\nOF\nOverflow flag\nStatus\nOV (Overflow)\nNV (Not Overflow)\n\n\n12–13\n0x3000\nIOPL\nI/O privilege level (286+)\nSystem\n—\n—\n\n\n14\n0x4000\nNT\nNested task flag (286+)\nSystem\n—\n—\n\n\n15\n0x8000\nMD\nMode flag (NEC V-series only)\nControl\nNative Mode (186)\nEmulation Mode (8080)",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#my-research",
+    "href": "70_except.html#my-research",
+    "title": "Exceptions",
+    "section": "My research",
+    "text": "My research\n\nI used RFLAGS in my research to get the doctorate that I do have.\nYou can mostly understand this sentence now:\n\n\n…when the in instruction executes, the I/O privilege level (IOPL, as given by bit 13 of the status EFLAGS register) must be greater than or equal to the current privilege level (CPL, as given by bit 13 of the Code Segment CS register)",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#named-instructions",
+    "href": "70_except.html#named-instructions",
+    "title": "Exceptions",
+    "section": "Named instructions",
+    "text": "Named instructions\n\nthe in instruction\n\n\nFrom blog:\n\n\nTo communicate with such an I/O port, there are special CPU instructions called in and out, which take a port number and a data byte\n\n\nYou used in via the x86_64 crate to print to serial.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#privilege-levels",
+    "href": "70_except.html#privilege-levels",
+    "title": "Exceptions",
+    "section": "Privilege levels",
+    "text": "Privilege levels\n\ncurrent privilege level\n\n\nWe haven’t dwelt on these but have noted, with respect to the general protection fault:\n\n\nUsed to prevent virtual machine escape, safely sandbox browser code.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#segments",
+    "href": "70_except.html#segments",
+    "title": "Exceptions",
+    "section": "Segments",
+    "text": "Segments\n\nWe will return to segments soon, but basically…\nMemory got too big to comfortably fit in a single register, so it got split into a “neighborhood” (segment) and offset (the stack pointer, instruction pointer, etc.).\nThis is a big performance win since usually the high 32-48 bits are fixed within an executable.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-1-1",
+    "href": "70_except.html#step-1-1",
+    "title": "Exceptions",
+    "section": "Step 1",
+    "text": "Step 1\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack, including the instruction pointer and the FLAGS register.\n\nNaturally it is not important whether a carry occured immediately prior to an exception, and if it is you can read it from the stack.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-2",
+    "href": "70_except.html#step-2",
+    "title": "Exceptions",
+    "section": "Step 2",
+    "text": "Step 2\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from the Interrupt Descriptor Table (IDT).\n\nFor example, the CPU reads the 14th entry when a page fault occurs.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-3",
+    "href": "70_except.html#step-3",
+    "title": "Exceptions",
+    "section": "Step 3",
+    "text": "Step 3\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck if the entry is present and, if not, raise a double fault.\n\nThis is why the Rust option is so important to OS!",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-4",
+    "href": "70_except.html#step-4",
+    "title": "Exceptions",
+    "section": "Step 4",
+    "text": "Step 4\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck entry or raise a double fault.\nDisable hardware interrupts if the entry is an interrupt gate (bit 40 not set).\n\nOkay what does this mean.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#gate-types",
+    "href": "70_except.html#gate-types",
+    "title": "Exceptions",
+    "section": "Gate Types",
+    "text": "Gate Types\n\nThere are basically two kinds of interrupts: ones that occur when code execution has encountered an Exception due to bad code, or ones that occur to handle events unrelated to currently executing code.\n\n\nThey become “visible” to CPU by appearing within some hardware “gate”.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#two-kinds",
+    "href": "70_except.html#two-kinds",
+    "title": "Exceptions",
+    "section": "Two Kinds",
+    "text": "Two Kinds\n\nTerm some “Traps” - where execution is frozen, stopped, or “trapped” in some way.\nTerm some “Interrupts” - some exogenous factor (generally I/O) causes the CPU to divert control flow elsewhere.\nInterrupts preempt other hardware interrupts, but exceptions don’t.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#steps",
+    "href": "70_except.html#steps",
+    "title": "Exceptions",
+    "section": "Steps",
+    "text": "Steps\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck entry or raise a double fault.\nPerhaps disable hardware interrupts.\nLoad the specified GDT selector into the CS (code segment).",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#gdt",
+    "href": "70_except.html#gdt",
+    "title": "Exceptions",
+    "section": "GDT",
+    "text": "GDT\n\nBasically a table of memory segments.\n\nThe “neighborhoods” of memory\n\nThere are three kinds:\n\nCode segments: regions of memory that contain executable instructions.\nData segments: used to store program data.\nSystem segments, like Task State Segment (TSS).",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#cs-code-segment",
+    "href": "70_except.html#cs-code-segment",
+    "title": "Exceptions",
+    "section": "CS (Code Segment)",
+    "text": "CS (Code Segment)\n\nThe region where the currently executing code lives…\n\nWas: possibly anywhere\nIs now: wherever the OS keeps exception handlers.\n\nThe CS (and other segments) contain more than just addresses!",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#visually",
+    "href": "70_except.html#visually",
+    "title": "Exceptions",
+    "section": "Visually",
+    "text": "Visually\n\nEasier visually.\nRead more",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#takeaways",
+    "href": "70_except.html#takeaways",
+    "title": "Exceptions",
+    "section": "Takeaways",
+    "text": "Takeaways\n\nThe “DPL” is what I tend to regard as important.\n\nThe DPL of the CS is the CPL, which determines if user mode vs. super mode.\n\nDescriptor Privilege Level\nCode Segment\nCurrent Privilege Level\n2 bits, but both are always equal on every wildly known OS.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#steps-1",
+    "href": "70_except.html#steps-1",
+    "title": "Exceptions",
+    "section": "Steps",
+    "text": "Steps\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck entry or raise a double fault.\nPerhaps disable hardware interrupts.\nUpdate the CS (code segment).\nJump to the specified handler function.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#an-idt-type",
+    "href": "70_except.html#an-idt-type",
+    "title": "Exceptions",
+    "section": "An IDT Type",
+    "text": "An IDT Type\n\nNo real benefit to making our own IDT.\nIt’s hardware defined and we just want to implement exceptions.\nWe’ll use InterruptDescriptorTable struct of the x86_64 crate.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#its-big",
+    "href": "70_except.html#its-big",
+    "title": "Exceptions",
+    "section": "It’s big",
+    "text": "It’s big\n#[repr(C)]\npub struct InterruptDescriptorTable {\n    pub divide_by_zero: Entry&lt;HandlerFunc&gt;,\n    pub debug: Entry&lt;HandlerFunc&gt;,\n    pub non_maskable_interrupt: Entry&lt;HandlerFunc&gt;,\n    pub breakpoint: Entry&lt;HandlerFunc&gt;,\n    pub overflow: Entry&lt;HandlerFunc&gt;,\n    pub bound_range_exceeded: Entry&lt;HandlerFunc&gt;,\n    pub invalid_opcode: Entry&lt;HandlerFunc&gt;,\n    pub device_not_available: Entry&lt;HandlerFunc&gt;,\n    pub double_fault: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub invalid_tss: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub segment_not_present: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub stack_segment_fault: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub general_protection_fault: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub page_fault: Entry&lt;PageFaultHandlerFunc&gt;,\n    pub x87_floating_point: Entry&lt;HandlerFunc&gt;,\n    pub alignment_check: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub machine_check: Entry&lt;HandlerFunc&gt;,\n    pub simd_floating_point: Entry&lt;HandlerFunc&gt;,\n    pub virtualization: Entry&lt;HandlerFunc&gt;,\n    pub security_exception: Entry&lt;HandlerFuncWithErrCode&gt;,\n    // some fields omitted\n}",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#format-1",
+    "href": "70_except.html#format-1",
+    "title": "Exceptions",
+    "section": "Format",
+    "text": "Format\n\nThe fields have the type idt::Entry&lt;F&gt;\n\nWe introduced this previously - a function pointer and options, basically.\n\nThe type parameter F defines the expected handler function type.\n\nHandlerFunc\nHandlerFuncWithErrCode\nPageFaultHandlerFunc",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#first",
+    "href": "70_except.html#first",
+    "title": "Exceptions",
+    "section": "First",
+    "text": "First\n\nHandlerFunc first:\n\ntype HandlerFunc = extern \"x86-interrupt\" fn(_: InterruptStackFrame);\n\nThat’s a function alright.\n\nA type alias for an extern \"x86-interrupt\" fn type\nUsually use extern for C, here we use it to interface with hardware.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#calling-functions",
+    "href": "70_except.html#calling-functions",
+    "title": "Exceptions",
+    "section": "Calling Functions",
+    "text": "Calling Functions\n\nThe x86-interrupt calling convention:\n\nUsually, with functions, the processor and compile can anticipate a future call.\n\nThe compiler loads certain values in certain registers.\nThe processor avoids overwriting certain registers.\n\nNot so with interrupts.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#easy-mode",
+    "href": "70_except.html#easy-mode",
+    "title": "Exceptions",
+    "section": "Easy Mode",
+    "text": "Easy Mode\n\nBy convention, a function call is invoked voluntarily by a compiler-inserted call instruction.\n\nThis is less true than people would like it to be, but we can handwave for now.\nThe compiler loads up a bunch of registers and presses the “call” button.\nThe OS loads up a new memory location with new instructions, which use registers in the anticipated way.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#hard-mode",
+    "href": "70_except.html#hard-mode",
+    "title": "Exceptions",
+    "section": "Hard Mode",
+    "text": "Hard Mode\n\nImagine if you had to write a function where you didn’t know:\n\nHow many arguments would be provided.\nThe types of the arguments.\nWhether heap-allocated arguments are valid pointers.\n\nEach of these can happen on an interrupt since the state of processor is not fixed.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#calling-conventions",
+    "href": "70_except.html#calling-conventions",
+    "title": "Exceptions",
+    "section": "Calling Conventions",
+    "text": "Calling Conventions\n\nReturn to the level of languages.\nCalling conventions specify the details of a function call.\n\nWhere the arguments are, for example.\nWhether the function gets a new stack.\nWhat happens when you return.\n\nOn x86_64 Linux, the following rules apply for C functions (specified in the System V ABI)",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#x86-registers",
+    "href": "70_except.html#x86-registers",
+    "title": "Exceptions",
+    "section": "x86 registers",
+    "text": "x86 registers\n\nWe recall the RFLAGS register.\nThere are many x86 registers.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#some-examples",
+    "href": "70_except.html#some-examples",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\nZMM0 is a vector register, and enormous (512 bytes)\n\nIt contains half and quarter registers YMM0 and XMM0",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#some-examples-1",
+    "href": "70_except.html#some-examples-1",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\nST(0) is a combined SIMD/float register as is MM0.\n\nWe recall some uproar over using software floats when disabling SIMD.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#some-examples-2",
+    "href": "70_except.html#some-examples-2",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\n?AX are the 8, 16, 32, and 64 bit general purpose “X” registers.\n\nNames change as 8-bit devices had both smaller and fewer registers.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#some-examples-3",
+    "href": "70_except.html#some-examples-3",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\nMost ending in “P” are stack or interrupt or debug or etc. pointers.\nMost ending in “S” are segment or backup segment registers.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#some-examples-4",
+    "href": "70_except.html#some-examples-4",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\n“CR” registers are hardware specific control registers.\n“DR” registers are debug registers.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#calling-conventions-1",
+    "href": "70_except.html#calling-conventions-1",
+    "title": "Exceptions",
+    "section": "Calling Conventions",
+    "text": "Calling Conventions\n\nReturn to the level of languages.\nCalling conventions specify the details of a function call.\n\nWhere the arguments are, for example.\nWhether the function gets a new stack.\nWhat happens when you return.\n\nOn x86_64 Linux, the following rules apply for C functions (specified in the System V ABI)\n\n\nPreserved/Scratch\n\nThe calling convention divides the registers into two parts:\n\npreserved registers, and\nscratch registers.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#preserved-registers",
+    "href": "70_except.html#preserved-registers",
+    "title": "Exceptions",
+    "section": "Preserved Registers",
+    "text": "Preserved Registers\n\nThe values of preserved registers must remain unchanged across function calls.\n\nNot “at all times”, only “across function calls.\nYou can use them temporarily by popping onto stack and then pushing back to register before returning.\n\nRefer to these as “callee-saved”\n\nThe “callee” is the function that… was called.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#scratch-registers",
+    "href": "70_except.html#scratch-registers",
+    "title": "Exceptions",
+    "section": "Scratch Registers",
+    "text": "Scratch Registers\n\nA called function is allowed to overwrite scratch registers without restrictions.\n\nIf a caller wants to keep a value, it has to push the value to its own (the caller) stack.\nThe stack will be maintained across function calles.\n\nRefer to these as caller-saved",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#interrupt-calling-convention",
+    "href": "70_except.html#interrupt-calling-convention",
+    "title": "Exceptions",
+    "section": "Interrupt Calling Convention",
+    "text": "Interrupt Calling Convention\n\nThe first six integer arguments are passed in registers RDI, RSI, RDX, RCX, R8, R9\n\nWhen we say integer we mean 64 bit, as those are 64 bit registers.\nCue my rant about Rust i32 default.\n\nAdditional arguments are passed on the stack\nResults are returned in RAX and RDX\n\nNot on the stack!",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#default-calling-convention",
+    "href": "70_except.html#default-calling-convention",
+    "title": "Exceptions",
+    "section": "Default Calling Convention",
+    "text": "Default Calling Convention\n\nThe default calling convention differs slightly.\n\nThe x87 register stack is unused.\nInteger arguments are passed in registers RCX, RDX, R8, and R9.\n\nThat is, not RDI and RSI\n\nFloating point arguments are passed in XMM0L, XMM1L, XMM2L, and XMM3L.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#rust-calling-convention",
+    "href": "70_except.html#rust-calling-convention",
+    "title": "Exceptions",
+    "section": "Rust Calling Convention",
+    "text": "Rust Calling Convention\n\nIt doesn’t have one.\nGitHub RFC\nOh maybe that’s why we have to use extern \"C\" all the time.\nRust: Possibly up to half of a language.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#c-calling-convention",
+    "href": "70_except.html#c-calling-convention",
+    "title": "Exceptions",
+    "section": "C Calling Convention",
+    "text": "C Calling Convention\n\n\n\n\n\n\n\npreserved registers\nscratch registers\n\n\n\n\nrbp, rbx, rsp, r12, r13, r14, r15\nrax, rcx, rdx, rsi, rdi, r8, r9, r10, r11\n\n\ncallee-saved\ncaller-saved\n\n\n\nCompiled C code will necessarily respect this convention (or it isn’t C code).",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#exceptions-2",
+    "href": "70_except.html#exceptions-2",
+    "title": "Exceptions",
+    "section": "Exceptions",
+    "text": "Exceptions\n\nIn contrast to function calls, exceptions can occur on any instruction.\nIn most cases, we don’t even know at compile time if the generated code will cause an exception.\nFor example, the compiler can’t know if an instruction causes a stack overflow or a page fault.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#cant-backup",
+    "href": "70_except.html#cant-backup",
+    "title": "Exceptions",
+    "section": "Can’t Backup",
+    "text": "Can’t Backup\n\nExceptions can’t use a calling convention that relies on caller-saved registers for exception handlers.\nInstead, preserve all registers.\nThe x86-interrupt calling convention is such a calling convention.\n\nIt guarantees that all register values are restored to their original values on function return.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#recall",
+    "href": "70_except.html#recall",
+    "title": "Exceptions",
+    "section": "Recall",
+    "text": "Recall\n\nHandlerFunc definition:\n\ntype HandlerFunc = extern \"x86-interrupt\" fn(_: InterruptStackFrame);\n\nThat’s a function alright.\n\nA type alias for an extern \"x86-interrupt\" fn type\nUsually use extern for C, here we use it to interface with hardware.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#in-practice",
+    "href": "70_except.html#in-practice",
+    "title": "Exceptions",
+    "section": "In Practice",
+    "text": "In Practice\n\nThe compiler only backs up the registers that are overwritten by the function.\n\nIn e.g. conditional branches, can “just in time” pop registers to stack immediately before using them.\nMore overhead but more efficient.\n\nThis way, very efficient code can be generated for short functions that only use a few registers.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#stack-frames",
+    "href": "70_except.html#stack-frames",
+    "title": "Exceptions",
+    "section": "Stack Frames",
+    "text": "Stack Frames\n\nOn a normal function call (using the call instruction), the CPU pushes the return address before jumping to the target function.\nOn function return (using the ret instruction), the CPU pops this return address and jumps to it.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#visually-1",
+    "href": "70_except.html#visually-1",
+    "title": "Exceptions",
+    "section": "Visually",
+    "text": "Visually\n\nThe “stack frame” of a normal function call looks like this:",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#interrupt-frames",
+    "href": "70_except.html#interrupt-frames",
+    "title": "Exceptions",
+    "section": "Interrupt Frames",
+    "text": "Interrupt Frames\nFor exception and interrupt handlers: - Pushing a return address would not suffice, - Interrupt handlers often run in a different context (stack pointer, CPU flags, etc.). - Providing return values is not ideal. - Whatever code executed during the interrupt is not anticipating alterations to its register state",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-0",
+    "href": "70_except.html#step-0",
+    "title": "Exceptions",
+    "section": "Step 0",
+    "text": "Step 0\n\nSaving the old stack pointer\n\nThe CPU reads the stack pointer (RSP) and stack segment (SS) register values to a safe memory location.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-1-2",
+    "href": "70_except.html#step-1-2",
+    "title": "Exceptions",
+    "section": "Step 1",
+    "text": "Step 1\n\nSaving the old stack pointer\nAligning the stack pointer\n\nSome CPU instructions require that the stack pointer be aligned on a 16-byte boundary, so the CPU performs such an alignment right after the interrupt.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-2-1",
+    "href": "70_except.html#step-2-1",
+    "title": "Exceptions",
+    "section": "Step 2",
+    "text": "Step 2\n\nSaving the old stack pointer\nAligning the stack pointer\nSwitching stacks\n\nAn exception may require a change in privilege level (e.g. user to OS). Conditionally switch to the “Interrupt Stack Table” (next lecture).",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-3-1",
+    "href": "70_except.html#step-3-1",
+    "title": "Exceptions",
+    "section": "Step 3",
+    "text": "Step 3\n\nSaving the old stack pointer\nAligning the stack pointer\nSwitching stacks\nPushing the old stack pointer\n\nThe CPU pushes the stack pointer (RSP) and stack segment (SS) register values from step 0 to the stack to restore the stack pointer on return.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-3.1",
+    "href": "70_except.html#step-3.1",
+    "title": "Exceptions",
+    "section": "Step 3.1",
+    "text": "Step 3.1\n\nAligning the stack pointer\nSwitching stacks\nPushing the old stack pointer and the RFLAGS register:\n\nOn interrupt entry, the original RFLAGS is probably not appropriate - save it and get a new one.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-3.2",
+    "href": "70_except.html#step-3.2",
+    "title": "Exceptions",
+    "section": "Step 3.2",
+    "text": "Step 3.2\n\nAligning the stack pointer\nSwitching stacks\nPush in order RSP, SS, RFLAGS and the instruction pointer:\n\nOn return, it is important to restore not just data (the stack pointer) but also instruction pointer (RIP and the code segment CS).",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-3.3",
+    "href": "70_except.html#step-3.3",
+    "title": "Exceptions",
+    "section": "Step 3.3",
+    "text": "Step 3.3\n\nAligning the stack pointer\nSwitching stacks\nPush in order RSP, SS, RFLAGS, RIP, CS and… conditionally an error code.\n\nFor some specific exceptions, such as page faults, the CPU pushes an error code, which describes the cause of the exception.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#step-4-1",
+    "href": "70_except.html#step-4-1",
+    "title": "Exceptions",
+    "section": "Step 4",
+    "text": "Step 4\n\nAligning the stack pointer\nSwitching stacks\nPush in order RSP, SS, RFLAGS, RIP, CS etc.\nInvoking the interrupt handler\n\nThe CPU reads the address and the segment descriptor of the interrupt handler function from the corresponding field in the IDT and loads the values into RIP and CS.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#visually-2",
+    "href": "70_except.html#visually-2",
+    "title": "Exceptions",
+    "section": "Visually",
+    "text": "Visually\n\nThe “interrupt stack frame”:",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#handwaving",
+    "href": "70_except.html#handwaving",
+    "title": "Exceptions",
+    "section": "Handwaving",
+    "text": "Handwaving\n\nThe x86-interrupt calling convention is a powerful abstraction that hides almost all of the messy details of the exception handling process.\nHowever, sometimes it’s useful to know what’s happening behind the curtain.\nBriefly, what we handwave.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#retrieving-the-arguments",
+    "href": "70_except.html#retrieving-the-arguments",
+    "title": "Exceptions",
+    "section": "Retrieving the arguments",
+    "text": "Retrieving the arguments\n\nMost calling conventions expect that the arguments are passed in registers\nThis is not possible for exception handlers since we must not overwrite any register values before backing them up on the stack\nInstead, the x86-interrupt calling convention is aware that the arguments already lie on the stack at a specific offset",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#returning-using-iretq",
+    "href": "70_except.html#returning-using-iretq",
+    "title": "Exceptions",
+    "section": "Returning using iretq",
+    "text": "Returning using iretq\n\nSince the interrupt stack frame completely differs from stack frames of normal function calls, we can’t return from handler functions through the normal ret instruction\nSo instead, the iretq instruction must be used\n\nYou’ll never guess what q stands for…\nQuad word, it’s the 64 bit iret",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#handling-the-error-code",
+    "href": "70_except.html#handling-the-error-code",
+    "title": "Exceptions",
+    "section": "Handling the error code",
+    "text": "Handling the error code\n\nConditional error codes complicate matters:\n\nConditional arguments.\nStack alignment.\nReturn pops.\n\nSo code must use the correct function type for each exception\nLuckily, the InterruptDescriptorTable type does so.",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#aligning-the-stack",
+    "href": "70_except.html#aligning-the-stack",
+    "title": "Exceptions",
+    "section": "Aligning the stack",
+    "text": "Aligning the stack\n\nSome instructions (especially SSE instructions) require a 16-byte stack alignment\nThe CPU ensures this alignment whenever an exception occurs, but for some exceptions it destroys it again later when it pushes an error code\nThe x86-interrupt calling convention takes care of this by realigning the stack in this case",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.html#read-more",
+    "href": "70_except.html#read-more",
+    "title": "Exceptions",
+    "section": "Read more",
+    "text": "Read more\n\nThere is a “hard mode” version of exception handling.\nRead more",
+    "crumbs": [
+      "Exceptions"
+    ]
+  },
+  {
+    "objectID": "70_except.rjs.html#announcements",
+    "href": "70_except.rjs.html#announcements",
+    "title": "Exceptions",
+    "section": "Announcements",
+    "text": "Announcements\n\nAction Items:\n\nGraphics done.\nIntegration testing ongoing."
+  },
+  {
+    "objectID": "70_except.rjs.html#citations",
+    "href": "70_except.rjs.html#citations",
+    "title": "Exceptions",
+    "section": "Citations",
+    "text": "Citations\n\nCPU exceptions are algorithmically interesting but technically tedius.\nCPU Exceptions"
+  },
+  {
+    "objectID": "70_except.rjs.html#exceptions",
+    "href": "70_except.rjs.html#exceptions",
+    "title": "Exceptions",
+    "section": "Exceptions",
+    "text": "Exceptions\n\nCPU exceptions occur in various erroneous situations\n\nAccessing an invalid memory address\nDividing by zero\n\nWe have to set up an interrupt descriptor table..\nThis week, our kernel will be able to catch breakpoint exceptions."
+  },
+  {
+    "objectID": "70_except.rjs.html#meaning",
+    "href": "70_except.rjs.html#meaning",
+    "title": "Exceptions",
+    "section": "Meaning",
+    "text": "Meaning\n\nAn exception signals that something is wrong with the current instruction.\n\nMachine-level line-of-code.\n\nFor example, divide by 0.\nWhen an exception occurs, the CPU interrupts its current work and immediately calls a specific exception handler function, depending on the exception type.\n\nThe OS manages these handler functions."
+  },
+  {
+    "objectID": "70_except.rjs.html#rust",
+    "href": "70_except.rjs.html#rust",
+    "title": "Exceptions",
+    "section": "Rust",
+    "text": "Rust\n\nRust is pretty safe and generally doesn’t want to let you cause the easier CPU exceptions.\nThe most famous is zero division.\n\n\n\nsrc/main.rs\n\nfn main() {\n    // Print so isn't optimized out.\n    println!(\"{}\", 1 / 0);\n}"
+  },
+  {
+    "objectID": "70_except.rjs.html#rustc-protects",
+    "href": "70_except.rjs.html#rustc-protects",
+    "title": "Exceptions",
+    "section": "rustc protects",
+    "text": "rustc protects\n\nModern languages won’t allow this.\n\n$ cargo r\n   Compiling divzero v0.1.0 (/home/user/tmp/divzero)\nerror: this operation will panic at runtime\n --&gt; src/main.rs:3:20\n  |\n3 |     println!(\"{}\", 1 / 0);\n  |                    ^^^^^ attempt to divide `1_i32` by zero\n  |\n  = note: `#[deny(unconditional_panic)]` on by default\n\nerror: could not compile `divzero` (bin \"divzero\") due to 1 previous error"
+  },
+  {
+    "objectID": "70_except.rjs.html#permit",
+    "href": "70_except.rjs.html#permit",
+    "title": "Exceptions",
+    "section": "Permit",
+    "text": "Permit\n\nWe can of course #[allow(unconditional_panic)]\n(Or take user input, of course.)\n\n\n\nsrc/main.rs\n\n$ cat src/main.rs\nfn main() {\n    #[allow(unconditional_panic)]\n    let _x = 1 / 0;\n}"
+  },
+  {
+    "objectID": "70_except.rjs.html#see-a-panic",
+    "href": "70_except.rjs.html#see-a-panic",
+    "title": "Exceptions",
+    "section": "See a panic",
+    "text": "See a panic\n\nPresumably this is hitting the CPU then a rustc provided panic handler.\n\n$ cargo r\n   Compiling divzero v0.1.0 (/home/user/tmp/divzero)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s\n     Running `target/debug/divzero`\n\nthread 'main' (2292) panicked at src/main.rs:3:14:\nattempt to divide by zero\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+  },
+  {
+    "objectID": "70_except.rjs.html#much-easier",
+    "href": "70_except.rjs.html#much-easier",
+    "title": "Exceptions",
+    "section": "Much Easier",
+    "text": "Much Easier\n\nWe can just use a language that let’s us use the computer.\n\n\n\nmain.c\n\nint main() {\n        int x = 1 / 0;\n        return 0;\n}"
+  },
+  {
+    "objectID": "70_except.rjs.html#permitted",
+    "href": "70_except.rjs.html#permitted",
+    "title": "Exceptions",
+    "section": "Permitted",
+    "text": "Permitted\n\nIt will warn us but not stop us.\n\n$ gcc main.c -o main\nmain.c: In function ‘main’:\nmain.c:2:19: warning: division by zero [-Wdiv-by-zero]\n    2 |         int x = 1 / 0;\n      |                   ^"
+  },
+  {
+    "objectID": "70_except.rjs.html#modernizing",
+    "href": "70_except.rjs.html#modernizing",
+    "title": "Exceptions",
+    "section": "Modernizing",
+    "text": "Modernizing\n\nNaturally, in a C class this would be banned through use of compiler options.\n\n\n\nMakefile\n\nCC = gcc # or clang\nCFLAGS = -std=c89 -Wall -Wextra -Werror -Wpedantic -O2\n\n\nThis yields:\n\n$ gcc main.c -std=c89 -Wall -Wextra -Werror -Wpedantic -O2 -o main\nmain.c: In function ‘main’:\nmain.c:2:19: error: division by zero [-Werror=div-by-zero]\n    2 |         int x = 1 / 0;\n      |                   ^\nmain.c:2:13: error: unused variable ‘x’ [-Werror=unused-variable]\n    2 |         int x = 1 / 0;\n      |             ^\ncc1: all warnings being treated as errors"
+  },
+  {
+    "objectID": "70_except.rjs.html#results",
+    "href": "70_except.rjs.html#results",
+    "title": "Exceptions",
+    "section": "Results",
+    "text": "Results\n\nIn any case, if you do use naive gcc you will get the following:\n\n$ ./main\nFloating point exception (core dumped)\n\nThis is of course ludicrously confusing.\n\nThere is no usage of floating point at all."
+  },
+  {
+    "objectID": "70_except.rjs.html#clang",
+    "href": "70_except.rjs.html#clang",
+    "title": "Exceptions",
+    "section": "Clang",
+    "text": "Clang\n\nThere are clang fans (vs. gcc)\nCompilation is identical though the warning format differs.\n\n$ clang main.c -o main\nmain.c:2:12: warning: division by zero is undefined [-Wdivision-by-zero]\n        int x = 1 / 0;\n                  ^ ~\n1 warning generated."
+  },
+  {
+    "objectID": "70_except.rjs.html#difference",
+    "href": "70_except.rjs.html#difference",
+    "title": "Exceptions",
+    "section": "Difference",
+    "text": "Difference\n\nclang does not trigger an exception.\n\n$ cat main.c\n#include &lt;stdio.h&gt;\n\nint main() {\n        int x = 1 / 0;\n        printf(\"%d\\n\", x);\n        return 0;\n}\nuser@cd-desk:~/tmp/divzero$ clang main.c -o main\nmain.c:4:12: warning: division by zero is undefined [-Wdivision-by-zero]\n        int x = 1 / 0;\n                  ^ ~\n1 warning generated.\nuser@cd-desk:~/tmp/divzero$ ./main\n267243840\nuser@cd-desk:~/tmp/divzero$ ./main\n2140340544"
+  },
+  {
+    "objectID": "70_except.rjs.html#aside",
+    "href": "70_except.rjs.html#aside",
+    "title": "Exceptions",
+    "section": "Aside",
+    "text": "Aside\n\nCheckmate clang fans.\nThat should definitely explode.\n\nNot because the language is specified that way.\nBecause gcc does and therefore so should you."
+  },
+  {
+    "objectID": "70_except.rjs.html#types",
+    "href": "70_except.rjs.html#types",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nPage Fault: A page fault occurs on illegal memory accesses. For example, if the current instruction tries to read from an unmapped page or tries to write to a read-only page.\n\nPages are numerical regions of memory.\nWe imagine, for example, missing the VGA buffer due to faulty arithmetic."
+  },
+  {
+    "objectID": "70_except.rjs.html#types-1",
+    "href": "70_except.rjs.html#types-1",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nInvalid Opcode: This exception occurs when the current instruction is invalid, for example, when we try to use new SSE instructions on an old CPU that does not support them.\n\nIf we naively accelerate graphics code this is an issue.\nCommon in “early” (1995-2005) game design."
+  },
+  {
+    "objectID": "70_except.rjs.html#types-2",
+    "href": "70_except.rjs.html#types-2",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nGeneral Protection Fault: This is the exception with the broadest range of causes.\n\nUsually prevents a user from elevating their own privilege level by trying to overwrite a protected value that defines privilege level.\nUsed to prevent virtual machine escape, safely sandbox browser code."
+  },
+  {
+    "objectID": "70_except.rjs.html#types-3",
+    "href": "70_except.rjs.html#types-3",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nDouble Fault: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs while calling the exception handler, the CPU raises a double fault exception.\n\nThis exception also occurs when there is no handler function registered for an exception."
+  },
+  {
+    "objectID": "70_except.rjs.html#types-4",
+    "href": "70_except.rjs.html#types-4",
+    "title": "Exceptions",
+    "section": "Types",
+    "text": "Types\nOn x86, there are about 20 different CPU exception types. The most important are:\n\nTriple Fault: If an exception occurs while handling a double fault, the CPU issues a fatal triple fault. We can’t catch or handle a triple fault.\n\nMost processors react by resetting themselves and rebooting the OS.\nUsually caused by some recursive fault pattern."
+  },
+  {
+    "objectID": "70_except.rjs.html#interrupt-descriptor-table",
+    "href": "70_except.rjs.html#interrupt-descriptor-table",
+    "title": "Exceptions",
+    "section": "Interrupt Descriptor Table",
+    "text": "Interrupt Descriptor Table\n\nIn order to catch and handle exceptions, we have to set up a so-called Interrupt Descriptor Table (IDT).\nSpecial case of a dispatch table.\n\n\nIn computer science, a dispatch table is a table of pointers or memory addresses to functions or methods."
+  },
+  {
+    "objectID": "70_except.rjs.html#aside-1",
+    "href": "70_except.rjs.html#aside-1",
+    "title": "Exceptions",
+    "section": "Aside",
+    "text": "Aside\n\nDispatch tables are cool as all get-out.\nI recently performed an advanced manuever (taught them in CS 151).\nVideo\nCode\nPython a functional language within my life time, oversoul willing."
+  },
+  {
+    "objectID": "70_except.rjs.html#format",
+    "href": "70_except.rjs.html#format",
+    "title": "Exceptions",
+    "section": "Format",
+    "text": "Format\n\nKeys are exceptions; values are functions.\n\nHelpfully, exceptions are numeric so can implement as an array/vector/“table”\n\nThe hardware uses this table directly, so we need to follow a predefined format.\nEach entry must have a 16-byte structure."
+  },
+  {
+    "objectID": "70_except.rjs.html#python-style",
+    "href": "70_except.rjs.html#python-style",
+    "title": "Exceptions",
+    "section": "Python Style",
+    "text": "Python Style\n\n♪♫♪ key-value storage my old friend ♫♪♫\n♫♪♫ ive come to code with you again ♪♫♪\n\nfs = {\n    \"ADD\" : lambda x , y : x + y ,\n    \"SUB\" : lambda x , y : x - y ,\n    \"MUL\" : lambda x , y : x * y ,\n    \"DIV\" : lambda x , y : x / y ,\n    \"MOD\" : lambda x , y : x % y ,\n    \"NEG\" : lambda x , y :   - x ,\n    \"ODD\" : lambda x , y : x % 2 ,\n    \"ZER\" : lambda x , y :     0 ,\n    \"EXT\" : lambda x , y : exit(),\n}"
+  },
+  {
+    "objectID": "70_except.rjs.html#rust-style",
+    "href": "70_except.rjs.html#rust-style",
+    "title": "Exceptions",
+    "section": "Rust Style",
+    "text": "Rust Style\n\nWait a minute wasn’t that our test runner????\n\n\n\ntests/println.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    osirs::_test_runner(&[&at_top, &wraps, &scrolls, &colors, &newlines]);\n    osirs::qemu_quit(osirs::QEMU_PASS);\n    loop {}\n}"
+  },
+  {
+    "objectID": "70_except.rjs.html#layout",
+    "href": "70_except.rjs.html#layout",
+    "title": "Exceptions",
+    "section": "Layout",
+    "text": "Layout\n\n\n\nType\nName\nDescription\n\n\n\n\nu16\nFunction Pointer [0:15]\nThe lower bits of the pointer to the handler function.\n\n\nu16\nGDT selector\nSelector of a code segment in the global descriptor table.\n\n\nu16\nOptions\n(next slide)\n\n\nu16\nFunction Pointer [16:31]\nThe middle bits of the pointer to the handler function.\n\n\nu32\nFunction Pointer [32:63]\nThe remaining bits of the pointer to the handler function.\n\n\nu32\nReserved"
+  },
+  {
+    "objectID": "70_except.rjs.html#options",
+    "href": "70_except.rjs.html#options",
+    "title": "Exceptions",
+    "section": "Options",
+    "text": "Options\n\n\n\n\n\n\n\n\nBits\nName\nDescription\n\n\n\n\n0-2\nInterrupt Stack Table Index\n0: Don’t switch stacks, 1-7: Switch to the n-th stack in the Interrupt Stack Table when this handler is called.\n\n\n3-7\nReserved\n\n\n\n8\n0: Interrupt Gate, 1: Trap Gate\nIf this bit is 0, interrupts are disabled when this handler is called.\n\n\n9-11\nmust be one\n\n\n\n12\nmust be zero\n\n\n\n13-14\nDescriptor Privilege Level (DPL)\nThe minimal privilege level required for calling this handler.\n\n\n15\nPresent"
+  },
+  {
+    "objectID": "70_except.rjs.html#the-keys",
+    "href": "70_except.rjs.html#the-keys",
+    "title": "Exceptions",
+    "section": "The Keys",
+    "text": "The Keys\n\nEach exception has a predefined IDT index.\n\nSet by the hardware designers.\nInvalid opcode exception has table index 6\nPage fault exception has table index 14\n\n\\(\\therefore\\) hardware can automatically load the corresponding IDT entry for any exception."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-1",
+    "href": "70_except.rjs.html#step-1",
+    "title": "Exceptions",
+    "section": "Step 1",
+    "text": "Step 1\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack, including the instruction pointer and the FLAGS register.\n\nThe instruction pointer keeps track of the current machine-level line-of-code\n\nIt is like the stack pointer (which keeps track of the top of the stack of values.\nA special hardware variable."
+  },
+  {
+    "objectID": "70_except.rjs.html#flags",
+    "href": "70_except.rjs.html#flags",
+    "title": "Exceptions",
+    "section": "FLAGS",
+    "text": "FLAGS\n\nThe FLAGS register (16 bit) and it’s cousins, EFLAGS (extended 32 bit) and RFLAGS (register 64 bit) are very important.\n\nRead more\nWhether a carry occurred.\nWhether a value is zero.\nWhether the sign is positive or negative.\nWhether a trap occurs (more soon).\nWhether interrupts are enabled (more soon)."
+  },
+  {
+    "objectID": "70_except.rjs.html#on-flags",
+    "href": "70_except.rjs.html#on-flags",
+    "title": "Exceptions",
+    "section": "On FLAGS",
+    "text": "On FLAGS\n\n\n\n\n\n\n\n\n\n\n\n\nBit\nMask\nName\nDescription\nCategory\n=1\n=0\n\n\n\n\n0\n0x0001\nCF\nCarry flag\nStatus\nCY (Carry)\nNC (No Carry)\n\n\n1\n0x0002\n—\nReserved, always 1 in EFLAGS\n—\n—\n—\n\n\n2\n0x0004\nPF\nParity flag\nStatus\nPE (Parity Even)\nPO (Parity Odd)\n\n\n3\n0x0008\n—\nReserved\n—\n—\n—\n\n\n4\n0x0010\nAF\nAuxiliary Carry flag\nStatus\nAC (Auxiliary Carry)\nNA (No Auxiliary Carry)\n\n\n5\n0x0020\n—\nReserved\n—\n—\n—"
+  },
+  {
+    "objectID": "70_except.rjs.html#on-flags-1",
+    "href": "70_except.rjs.html#on-flags-1",
+    "title": "Exceptions",
+    "section": "On FLAGS",
+    "text": "On FLAGS\n\n\n\n\n\n\n\n\n\n\n\n\nBit\nMask\nName\nDescription\nCategory\n=1\n=0\n\n\n\n\n6\n0x0040\nZF\nZero flag\nStatus\nZR (Zero)\nNZ (Not Zero)\n\n\n7\n0x0080\nSF\nSign flag\nStatus\nNG (Negative)\nPL (Positive)\n\n\n8\n0x0100\nTF\nTrap flag (single step)\nControl\n—\n—\n\n\n9\n0x0200\nIF\nInterrupt enable flag\nControl\nEI (Enable Interrupt)\nDI (Disable Interrupt)\n\n\n10\n0x0400\nDF\nDirection flag\nControl\nDN (Down)\nUP (Up)"
+  },
+  {
+    "objectID": "70_except.rjs.html#on-flags-2",
+    "href": "70_except.rjs.html#on-flags-2",
+    "title": "Exceptions",
+    "section": "On FLAGS",
+    "text": "On FLAGS\n\n\n\n\n\n\n\n\n\n\n\n\nBit\nMask\nName\nDescription\nCategory\n=1\n=0\n\n\n\n\n11\n0x0800\nOF\nOverflow flag\nStatus\nOV (Overflow)\nNV (Not Overflow)\n\n\n12–13\n0x3000\nIOPL\nI/O privilege level (286+)\nSystem\n—\n—\n\n\n14\n0x4000\nNT\nNested task flag (286+)\nSystem\n—\n—\n\n\n15\n0x8000\nMD\nMode flag (NEC V-series only)\nControl\nNative Mode (186)\nEmulation Mode (8080)"
+  },
+  {
+    "objectID": "70_except.rjs.html#my-research",
+    "href": "70_except.rjs.html#my-research",
+    "title": "Exceptions",
+    "section": "My research",
+    "text": "My research\n\nI used RFLAGS in my research to get the doctorate that I do have.\nYou can mostly understand this sentence now:\n\n\n…when the in instruction executes, the I/O privilege level (IOPL, as given by bit 13 of the status EFLAGS register) must be greater than or equal to the current privilege level (CPL, as given by bit 13 of the Code Segment CS register)"
+  },
+  {
+    "objectID": "70_except.rjs.html#named-instructions",
+    "href": "70_except.rjs.html#named-instructions",
+    "title": "Exceptions",
+    "section": "Named instructions",
+    "text": "Named instructions\n\nthe in instruction\n\n\nFrom blog:\n\n\nTo communicate with such an I/O port, there are special CPU instructions called in and out, which take a port number and a data byte\n\n\nYou used in via the x86_64 crate to print to serial."
+  },
+  {
+    "objectID": "70_except.rjs.html#privilege-levels",
+    "href": "70_except.rjs.html#privilege-levels",
+    "title": "Exceptions",
+    "section": "Privilege levels",
+    "text": "Privilege levels\n\ncurrent privilege level\n\n\nWe haven’t dwelt on these but have noted, with respect to the general protection fault:\n\n\nUsed to prevent virtual machine escape, safely sandbox browser code."
+  },
+  {
+    "objectID": "70_except.rjs.html#segments",
+    "href": "70_except.rjs.html#segments",
+    "title": "Exceptions",
+    "section": "Segments",
+    "text": "Segments\n\nWe will return to segments soon, but basically…\nMemory got too big to comfortably fit in a single register, so it got split into a “neighborhood” (segment) and offset (the stack pointer, instruction pointer, etc.).\nThis is a big performance win since usually the high 32-48 bits are fixed within an executable."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-1-1",
+    "href": "70_except.rjs.html#step-1-1",
+    "title": "Exceptions",
+    "section": "Step 1",
+    "text": "Step 1\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack, including the instruction pointer and the FLAGS register.\n\nNaturally it is not important whether a carry occured immediately prior to an exception, and if it is you can read it from the stack."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-2",
+    "href": "70_except.rjs.html#step-2",
+    "title": "Exceptions",
+    "section": "Step 2",
+    "text": "Step 2\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from the Interrupt Descriptor Table (IDT).\n\nFor example, the CPU reads the 14th entry when a page fault occurs."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-3",
+    "href": "70_except.rjs.html#step-3",
+    "title": "Exceptions",
+    "section": "Step 3",
+    "text": "Step 3\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck if the entry is present and, if not, raise a double fault.\n\nThis is why the Rust option is so important to OS!"
+  },
+  {
+    "objectID": "70_except.rjs.html#step-4",
+    "href": "70_except.rjs.html#step-4",
+    "title": "Exceptions",
+    "section": "Step 4",
+    "text": "Step 4\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck entry or raise a double fault.\nDisable hardware interrupts if the entry is an interrupt gate (bit 40 not set).\n\nOkay what does this mean."
+  },
+  {
+    "objectID": "70_except.rjs.html#gate-types",
+    "href": "70_except.rjs.html#gate-types",
+    "title": "Exceptions",
+    "section": "Gate Types",
+    "text": "Gate Types\n\nThere are basically two kinds of interrupts: ones that occur when code execution has encountered an Exception due to bad code, or ones that occur to handle events unrelated to currently executing code.\n\n\nThey become “visible” to CPU by appearing within some hardware “gate”."
+  },
+  {
+    "objectID": "70_except.rjs.html#two-kinds",
+    "href": "70_except.rjs.html#two-kinds",
+    "title": "Exceptions",
+    "section": "Two Kinds",
+    "text": "Two Kinds\n\nTerm some “Traps” - where execution is frozen, stopped, or “trapped” in some way.\nTerm some “Interrupts” - some exogenous factor (generally I/O) causes the CPU to divert control flow elsewhere.\nInterrupts preempt other hardware interrupts, but exceptions don’t."
+  },
+  {
+    "objectID": "70_except.rjs.html#steps",
+    "href": "70_except.rjs.html#steps",
+    "title": "Exceptions",
+    "section": "Steps",
+    "text": "Steps\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck entry or raise a double fault.\nPerhaps disable hardware interrupts.\nLoad the specified GDT selector into the CS (code segment)."
+  },
+  {
+    "objectID": "70_except.rjs.html#gdt",
+    "href": "70_except.rjs.html#gdt",
+    "title": "Exceptions",
+    "section": "GDT",
+    "text": "GDT\n\nBasically a table of memory segments.\n\nThe “neighborhoods” of memory\n\nThere are three kinds:\n\nCode segments: regions of memory that contain executable instructions.\nData segments: used to store program data.\nSystem segments, like Task State Segment (TSS)."
+  },
+  {
+    "objectID": "70_except.rjs.html#cs-code-segment",
+    "href": "70_except.rjs.html#cs-code-segment",
+    "title": "Exceptions",
+    "section": "CS (Code Segment)",
+    "text": "CS (Code Segment)\n\nThe region where the currently executing code lives…\n\nWas: possibly anywhere\nIs now: wherever the OS keeps exception handlers.\n\nThe CS (and other segments) contain more than just addresses!"
+  },
+  {
+    "objectID": "70_except.rjs.html#visually",
+    "href": "70_except.rjs.html#visually",
+    "title": "Exceptions",
+    "section": "Visually",
+    "text": "Visually\n\nEasier visually.\nRead more"
+  },
+  {
+    "objectID": "70_except.rjs.html#takeaways",
+    "href": "70_except.rjs.html#takeaways",
+    "title": "Exceptions",
+    "section": "Takeaways",
+    "text": "Takeaways\n\nThe “DPL” is what I tend to regard as important.\n\nThe DPL of the CS is the CPL, which determines if user mode vs. super mode.\n\nDescriptor Privilege Level\nCode Segment\nCurrent Privilege Level\n2 bits, but both are always equal on every wildly known OS."
+  },
+  {
+    "objectID": "70_except.rjs.html#steps-1",
+    "href": "70_except.rjs.html#steps-1",
+    "title": "Exceptions",
+    "section": "Steps",
+    "text": "Steps\nWhen an exception occurs, the CPU roughly does the following:\n\nPush some registers on the stack.\nRead the corresponding entry from IDT.\n\nCheck entry or raise a double fault.\nPerhaps disable hardware interrupts.\nUpdate the CS (code segment).\nJump to the specified handler function."
+  },
+  {
+    "objectID": "70_except.rjs.html#an-idt-type",
+    "href": "70_except.rjs.html#an-idt-type",
+    "title": "Exceptions",
+    "section": "An IDT Type",
+    "text": "An IDT Type\n\nNo real benefit to making our own IDT.\nIt’s hardware defined and we just want to implement exceptions.\nWe’ll use InterruptDescriptorTable struct of the x86_64 crate."
+  },
+  {
+    "objectID": "70_except.rjs.html#its-big",
+    "href": "70_except.rjs.html#its-big",
+    "title": "Exceptions",
+    "section": "It’s big",
+    "text": "It’s big\n#[repr(C)]\npub struct InterruptDescriptorTable {\n    pub divide_by_zero: Entry&lt;HandlerFunc&gt;,\n    pub debug: Entry&lt;HandlerFunc&gt;,\n    pub non_maskable_interrupt: Entry&lt;HandlerFunc&gt;,\n    pub breakpoint: Entry&lt;HandlerFunc&gt;,\n    pub overflow: Entry&lt;HandlerFunc&gt;,\n    pub bound_range_exceeded: Entry&lt;HandlerFunc&gt;,\n    pub invalid_opcode: Entry&lt;HandlerFunc&gt;,\n    pub device_not_available: Entry&lt;HandlerFunc&gt;,\n    pub double_fault: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub invalid_tss: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub segment_not_present: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub stack_segment_fault: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub general_protection_fault: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub page_fault: Entry&lt;PageFaultHandlerFunc&gt;,\n    pub x87_floating_point: Entry&lt;HandlerFunc&gt;,\n    pub alignment_check: Entry&lt;HandlerFuncWithErrCode&gt;,\n    pub machine_check: Entry&lt;HandlerFunc&gt;,\n    pub simd_floating_point: Entry&lt;HandlerFunc&gt;,\n    pub virtualization: Entry&lt;HandlerFunc&gt;,\n    pub security_exception: Entry&lt;HandlerFuncWithErrCode&gt;,\n    // some fields omitted\n}"
+  },
+  {
+    "objectID": "70_except.rjs.html#format-1",
+    "href": "70_except.rjs.html#format-1",
+    "title": "Exceptions",
+    "section": "Format",
+    "text": "Format\n\nThe fields have the type idt::Entry&lt;F&gt;\n\nWe introduced this previously - a function pointer and options, basically.\n\nThe type parameter F defines the expected handler function type.\n\nHandlerFunc\nHandlerFuncWithErrCode\nPageFaultHandlerFunc"
+  },
+  {
+    "objectID": "70_except.rjs.html#first",
+    "href": "70_except.rjs.html#first",
+    "title": "Exceptions",
+    "section": "First",
+    "text": "First\n\nHandlerFunc first:\n\ntype HandlerFunc = extern \"x86-interrupt\" fn(_: InterruptStackFrame);\n\nThat’s a function alright.\n\nA type alias for an extern \"x86-interrupt\" fn type\nUsually use extern for C, here we use it to interface with hardware."
+  },
+  {
+    "objectID": "70_except.rjs.html#calling-functions",
+    "href": "70_except.rjs.html#calling-functions",
+    "title": "Exceptions",
+    "section": "Calling Functions",
+    "text": "Calling Functions\n\nThe x86-interrupt calling convention:\n\nUsually, with functions, the processor and compile can anticipate a future call.\n\nThe compiler loads certain values in certain registers.\nThe processor avoids overwriting certain registers.\n\nNot so with interrupts."
+  },
+  {
+    "objectID": "70_except.rjs.html#easy-mode",
+    "href": "70_except.rjs.html#easy-mode",
+    "title": "Exceptions",
+    "section": "Easy Mode",
+    "text": "Easy Mode\n\nBy convention, a function call is invoked voluntarily by a compiler-inserted call instruction.\n\nThis is less true than people would like it to be, but we can handwave for now.\nThe compiler loads up a bunch of registers and presses the “call” button.\nThe OS loads up a new memory location with new instructions, which use registers in the anticipated way."
+  },
+  {
+    "objectID": "70_except.rjs.html#hard-mode",
+    "href": "70_except.rjs.html#hard-mode",
+    "title": "Exceptions",
+    "section": "Hard Mode",
+    "text": "Hard Mode\n\nImagine if you had to write a function where you didn’t know:\n\nHow many arguments would be provided.\nThe types of the arguments.\nWhether heap-allocated arguments are valid pointers.\n\nEach of these can happen on an interrupt since the state of processor is not fixed."
+  },
+  {
+    "objectID": "70_except.rjs.html#calling-conventions",
+    "href": "70_except.rjs.html#calling-conventions",
+    "title": "Exceptions",
+    "section": "Calling Conventions",
+    "text": "Calling Conventions\n\nReturn to the level of languages.\nCalling conventions specify the details of a function call.\n\nWhere the arguments are, for example.\nWhether the function gets a new stack.\nWhat happens when you return.\n\nOn x86_64 Linux, the following rules apply for C functions (specified in the System V ABI)"
+  },
+  {
+    "objectID": "70_except.rjs.html#x86-registers",
+    "href": "70_except.rjs.html#x86-registers",
+    "title": "Exceptions",
+    "section": "x86 registers",
+    "text": "x86 registers\n\nWe recall the RFLAGS register.\nThere are many x86 registers."
+  },
+  {
+    "objectID": "70_except.rjs.html#some-examples",
+    "href": "70_except.rjs.html#some-examples",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\nZMM0 is a vector register, and enormous (512 bytes)\n\nIt contains half and quarter registers YMM0 and XMM0"
+  },
+  {
+    "objectID": "70_except.rjs.html#some-examples-1",
+    "href": "70_except.rjs.html#some-examples-1",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\nST(0) is a combined SIMD/float register as is MM0.\n\nWe recall some uproar over using software floats when disabling SIMD."
+  },
+  {
+    "objectID": "70_except.rjs.html#some-examples-2",
+    "href": "70_except.rjs.html#some-examples-2",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\n?AX are the 8, 16, 32, and 64 bit general purpose “X” registers.\n\nNames change as 8-bit devices had both smaller and fewer registers."
+  },
+  {
+    "objectID": "70_except.rjs.html#some-examples-3",
+    "href": "70_except.rjs.html#some-examples-3",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\nMost ending in “P” are stack or interrupt or debug or etc. pointers.\nMost ending in “S” are segment or backup segment registers."
+  },
+  {
+    "objectID": "70_except.rjs.html#some-examples-4",
+    "href": "70_except.rjs.html#some-examples-4",
+    "title": "Exceptions",
+    "section": "Some Examples",
+    "text": "Some Examples\n\n“CR” registers are hardware specific control registers.\n“DR” registers are debug registers."
+  },
+  {
+    "objectID": "70_except.rjs.html#calling-conventions-1",
+    "href": "70_except.rjs.html#calling-conventions-1",
+    "title": "Exceptions",
+    "section": "Calling Conventions",
+    "text": "Calling Conventions\n\nReturn to the level of languages.\nCalling conventions specify the details of a function call.\n\nWhere the arguments are, for example.\nWhether the function gets a new stack.\nWhat happens when you return.\n\nOn x86_64 Linux, the following rules apply for C functions (specified in the System V ABI)\n\nPreserved/Scratch\n\nThe calling convention divides the registers into two parts:\n\npreserved registers, and\nscratch registers."
+  },
+  {
+    "objectID": "70_except.rjs.html#preserved-registers",
+    "href": "70_except.rjs.html#preserved-registers",
+    "title": "Exceptions",
+    "section": "Preserved Registers",
+    "text": "Preserved Registers\n\nThe values of preserved registers must remain unchanged across function calls.\n\nNot “at all times”, only “across function calls.\nYou can use them temporarily by popping onto stack and then pushing back to register before returning.\n\nRefer to these as “callee-saved”\n\nThe “callee” is the function that… was called."
+  },
+  {
+    "objectID": "70_except.rjs.html#scratch-registers",
+    "href": "70_except.rjs.html#scratch-registers",
+    "title": "Exceptions",
+    "section": "Scratch Registers",
+    "text": "Scratch Registers\n\nA called function is allowed to overwrite scratch registers without restrictions.\n\nIf a caller wants to keep a value, it has to push the value to its own (the caller) stack.\nThe stack will be maintained across function calles.\n\nRefer to these as caller-saved"
+  },
+  {
+    "objectID": "70_except.rjs.html#interrupt-calling-convention",
+    "href": "70_except.rjs.html#interrupt-calling-convention",
+    "title": "Exceptions",
+    "section": "Interrupt Calling Convention",
+    "text": "Interrupt Calling Convention\n\nThe first six integer arguments are passed in registers RDI, RSI, RDX, RCX, R8, R9\n\nWhen we say integer we mean 64 bit, as those are 64 bit registers.\nCue my rant about Rust i32 default.\n\nAdditional arguments are passed on the stack\nResults are returned in RAX and RDX\n\nNot on the stack!"
+  },
+  {
+    "objectID": "70_except.rjs.html#default-calling-convention",
+    "href": "70_except.rjs.html#default-calling-convention",
+    "title": "Exceptions",
+    "section": "Default Calling Convention",
+    "text": "Default Calling Convention\n\nThe default calling convention differs slightly.\n\nThe x87 register stack is unused.\nInteger arguments are passed in registers RCX, RDX, R8, and R9.\n\nThat is, not RDI and RSI\n\nFloating point arguments are passed in XMM0L, XMM1L, XMM2L, and XMM3L."
+  },
+  {
+    "objectID": "70_except.rjs.html#rust-calling-convention",
+    "href": "70_except.rjs.html#rust-calling-convention",
+    "title": "Exceptions",
+    "section": "Rust Calling Convention",
+    "text": "Rust Calling Convention\n\nIt doesn’t have one.\nGitHub RFC\nOh maybe that’s why we have to use extern \"C\" all the time.\nRust: Possibly up to half of a language."
+  },
+  {
+    "objectID": "70_except.rjs.html#c-calling-convention",
+    "href": "70_except.rjs.html#c-calling-convention",
+    "title": "Exceptions",
+    "section": "C Calling Convention",
+    "text": "C Calling Convention\n\n\n\n\n\n\n\npreserved registers\nscratch registers\n\n\n\n\nrbp, rbx, rsp, r12, r13, r14, r15\nrax, rcx, rdx, rsi, rdi, r8, r9, r10, r11\n\n\ncallee-saved\ncaller-saved\n\n\n\nCompiled C code will necessarily respect this convention (or it isn’t C code)."
+  },
+  {
+    "objectID": "70_except.rjs.html#exceptions-2",
+    "href": "70_except.rjs.html#exceptions-2",
+    "title": "Exceptions",
+    "section": "Exceptions",
+    "text": "Exceptions\n\nIn contrast to function calls, exceptions can occur on any instruction.\nIn most cases, we don’t even know at compile time if the generated code will cause an exception.\nFor example, the compiler can’t know if an instruction causes a stack overflow or a page fault."
+  },
+  {
+    "objectID": "70_except.rjs.html#cant-backup",
+    "href": "70_except.rjs.html#cant-backup",
+    "title": "Exceptions",
+    "section": "Can’t Backup",
+    "text": "Can’t Backup\n\nExceptions can’t use a calling convention that relies on caller-saved registers for exception handlers.\nInstead, preserve all registers.\nThe x86-interrupt calling convention is such a calling convention.\n\nIt guarantees that all register values are restored to their original values on function return."
+  },
+  {
+    "objectID": "70_except.rjs.html#recall",
+    "href": "70_except.rjs.html#recall",
+    "title": "Exceptions",
+    "section": "Recall",
+    "text": "Recall\n\nHandlerFunc definition:\n\ntype HandlerFunc = extern \"x86-interrupt\" fn(_: InterruptStackFrame);\n\nThat’s a function alright.\n\nA type alias for an extern \"x86-interrupt\" fn type\nUsually use extern for C, here we use it to interface with hardware."
+  },
+  {
+    "objectID": "70_except.rjs.html#in-practice",
+    "href": "70_except.rjs.html#in-practice",
+    "title": "Exceptions",
+    "section": "In Practice",
+    "text": "In Practice\n\nThe compiler only backs up the registers that are overwritten by the function.\n\nIn e.g. conditional branches, can “just in time” pop registers to stack immediately before using them.\nMore overhead but more efficient.\n\nThis way, very efficient code can be generated for short functions that only use a few registers."
+  },
+  {
+    "objectID": "70_except.rjs.html#stack-frames",
+    "href": "70_except.rjs.html#stack-frames",
+    "title": "Exceptions",
+    "section": "Stack Frames",
+    "text": "Stack Frames\n\nOn a normal function call (using the call instruction), the CPU pushes the return address before jumping to the target function.\nOn function return (using the ret instruction), the CPU pops this return address and jumps to it."
+  },
+  {
+    "objectID": "70_except.rjs.html#visually-1",
+    "href": "70_except.rjs.html#visually-1",
+    "title": "Exceptions",
+    "section": "Visually",
+    "text": "Visually\n\nThe “stack frame” of a normal function call looks like this:"
+  },
+  {
+    "objectID": "70_except.rjs.html#interrupt-frames",
+    "href": "70_except.rjs.html#interrupt-frames",
+    "title": "Exceptions",
+    "section": "Interrupt Frames",
+    "text": "Interrupt Frames\nFor exception and interrupt handlers: - Pushing a return address would not suffice, - Interrupt handlers often run in a different context (stack pointer, CPU flags, etc.). - Providing return values is not ideal. - Whatever code executed during the interrupt is not anticipating alterations to its register state"
+  },
+  {
+    "objectID": "70_except.rjs.html#step-0",
+    "href": "70_except.rjs.html#step-0",
+    "title": "Exceptions",
+    "section": "Step 0",
+    "text": "Step 0\n\nSaving the old stack pointer\n\nThe CPU reads the stack pointer (RSP) and stack segment (SS) register values to a safe memory location."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-1-2",
+    "href": "70_except.rjs.html#step-1-2",
+    "title": "Exceptions",
+    "section": "Step 1",
+    "text": "Step 1\n\nSaving the old stack pointer\nAligning the stack pointer\n\nSome CPU instructions require that the stack pointer be aligned on a 16-byte boundary, so the CPU performs such an alignment right after the interrupt."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-2-1",
+    "href": "70_except.rjs.html#step-2-1",
+    "title": "Exceptions",
+    "section": "Step 2",
+    "text": "Step 2\n\nSaving the old stack pointer\nAligning the stack pointer\nSwitching stacks\n\nAn exception may require a change in privilege level (e.g. user to OS). Conditionally switch to the “Interrupt Stack Table” (next lecture)."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-3-1",
+    "href": "70_except.rjs.html#step-3-1",
+    "title": "Exceptions",
+    "section": "Step 3",
+    "text": "Step 3\n\nSaving the old stack pointer\nAligning the stack pointer\nSwitching stacks\nPushing the old stack pointer\n\nThe CPU pushes the stack pointer (RSP) and stack segment (SS) register values from step 0 to the stack to restore the stack pointer on return."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-3.1",
+    "href": "70_except.rjs.html#step-3.1",
+    "title": "Exceptions",
+    "section": "Step 3.1",
+    "text": "Step 3.1\n\nAligning the stack pointer\nSwitching stacks\nPushing the old stack pointer and the RFLAGS register:\n\nOn interrupt entry, the original RFLAGS is probably not appropriate - save it and get a new one."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-3.2",
+    "href": "70_except.rjs.html#step-3.2",
+    "title": "Exceptions",
+    "section": "Step 3.2",
+    "text": "Step 3.2\n\nAligning the stack pointer\nSwitching stacks\nPush in order RSP, SS, RFLAGS and the instruction pointer:\n\nOn return, it is important to restore not just data (the stack pointer) but also instruction pointer (RIP and the code segment CS)."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-3.3",
+    "href": "70_except.rjs.html#step-3.3",
+    "title": "Exceptions",
+    "section": "Step 3.3",
+    "text": "Step 3.3\n\nAligning the stack pointer\nSwitching stacks\nPush in order RSP, SS, RFLAGS, RIP, CS and… conditionally an error code.\n\nFor some specific exceptions, such as page faults, the CPU pushes an error code, which describes the cause of the exception."
+  },
+  {
+    "objectID": "70_except.rjs.html#step-4-1",
+    "href": "70_except.rjs.html#step-4-1",
+    "title": "Exceptions",
+    "section": "Step 4",
+    "text": "Step 4\n\nAligning the stack pointer\nSwitching stacks\nPush in order RSP, SS, RFLAGS, RIP, CS etc.\nInvoking the interrupt handler\n\nThe CPU reads the address and the segment descriptor of the interrupt handler function from the corresponding field in the IDT and loads the values into RIP and CS."
+  },
+  {
+    "objectID": "70_except.rjs.html#visually-2",
+    "href": "70_except.rjs.html#visually-2",
+    "title": "Exceptions",
+    "section": "Visually",
+    "text": "Visually\n\nThe “interrupt stack frame”:"
+  },
+  {
+    "objectID": "70_except.rjs.html#handwaving",
+    "href": "70_except.rjs.html#handwaving",
+    "title": "Exceptions",
+    "section": "Handwaving",
+    "text": "Handwaving\n\nThe x86-interrupt calling convention is a powerful abstraction that hides almost all of the messy details of the exception handling process.\nHowever, sometimes it’s useful to know what’s happening behind the curtain.\nBriefly, what we handwave."
+  },
+  {
+    "objectID": "70_except.rjs.html#retrieving-the-arguments",
+    "href": "70_except.rjs.html#retrieving-the-arguments",
+    "title": "Exceptions",
+    "section": "Retrieving the arguments",
+    "text": "Retrieving the arguments\n\nMost calling conventions expect that the arguments are passed in registers\nThis is not possible for exception handlers since we must not overwrite any register values before backing them up on the stack\nInstead, the x86-interrupt calling convention is aware that the arguments already lie on the stack at a specific offset"
+  },
+  {
+    "objectID": "70_except.rjs.html#returning-using-iretq",
+    "href": "70_except.rjs.html#returning-using-iretq",
+    "title": "Exceptions",
+    "section": "Returning using iretq",
+    "text": "Returning using iretq\n\nSince the interrupt stack frame completely differs from stack frames of normal function calls, we can’t return from handler functions through the normal ret instruction\nSo instead, the iretq instruction must be used\n\nYou’ll never guess what q stands for…\nQuad word, it’s the 64 bit iret"
+  },
+  {
+    "objectID": "70_except.rjs.html#handling-the-error-code",
+    "href": "70_except.rjs.html#handling-the-error-code",
+    "title": "Exceptions",
+    "section": "Handling the error code",
+    "text": "Handling the error code\n\nConditional error codes complicate matters:\n\nConditional arguments.\nStack alignment.\nReturn pops.\n\nSo code must use the correct function type for each exception\nLuckily, the InterruptDescriptorTable type does so."
+  },
+  {
+    "objectID": "70_except.rjs.html#aligning-the-stack",
+    "href": "70_except.rjs.html#aligning-the-stack",
+    "title": "Exceptions",
+    "section": "Aligning the stack",
+    "text": "Aligning the stack\n\nSome instructions (especially SSE instructions) require a 16-byte stack alignment\nThe CPU ensures this alignment whenever an exception occurs, but for some exceptions it destroys it again later when it pushes an error code\nThe x86-interrupt calling convention takes care of this by realigning the stack in this case"
+  },
+  {
+    "objectID": "70_except.rjs.html#read-more",
+    "href": "70_except.rjs.html#read-more",
+    "title": "Exceptions",
+    "section": "Read more",
+    "text": "Read more\n\nThere is a “hard mode” version of exception handling.\nRead more"
   },
   {
     "objectID": "62_integration.html",
@@ -8730,6 +10304,26 @@
     "text": "Motivated by the planned extension for the final week of class, on asynchronous computing.\nA great way to understand async is write 20 lines of JavaScript.\n\nLike this\n\nYou should also be thinking about a looming problem.\n\nWhat happens if you want to be updating the VGA text buffer to, for example, display an animation that changes ever \\(n\\) nanoseconds.\nWhat happens if at the same time, you direct inputs into the OS through some means (to be introduced this and in coming weeks).\nHow does the OS juggle timing-based and what we usually call interrupt-based (e.g. driven by exogenous factors) tasks?\n\nThis essay is hosted on a talk webpage, and can be seen at https://sunshowers.io/posts/cancelling-async-rust/",
     "crumbs": [
       "Guest"
+    ]
+  },
+  {
+    "objectID": "71_handlers.html",
+    "href": "71_handlers.html",
+    "title": "Handlers",
+    "section": "",
+    "text": "We are trying to get a working exception handler.\n\n\n\nNow that we’ve understood the theory, it’s time to handle CPU exceptions in our kernel. We’ll start by creating a new interrupts module in src/interrupts.rs, that first creates an init_idt function that creates a new InterruptDescriptorTable:\n\n\nsrc/lib.rs\n\npub mod interrupts;\n\n\n\nsrc/interrupts.rs\n\nuse x86_64::structures::idt::InterruptDescriptorTable;\n\npub fn init_idt() {\n    let mut idt = InterruptDescriptorTable::new();\n}\n\nNow we can add handler functions. We start by adding a handler for the breakpoint exception. The breakpoint exception is the perfect exception to test exception handling. Its only purpose is to temporarily pause a program when the breakpoint instruction int3 is executed.\nThe breakpoint exception is commonly used in debuggers: When the user sets a breakpoint, the debugger overwrites the corresponding instruction with the int3 instruction so that the CPU throws the breakpoint exception when it reaches that line. When the user wants to continue the program, the debugger replaces the int3 instruction with the original instruction again and continues the program.\nFor our use case, we don’t need to overwrite any instructions. Instead, we just want to print a message when the breakpoint instruction is executed and then continue the program. So let’s create a simple breakpoint_handler function and add it to our IDT:\n\n\nsrc/interrupts.rs\n\nuse x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};\nuse crate::println;\n\npub fn init_idt() {\n    let mut idt = InterruptDescriptorTable::new();\n    idt.breakpoint.set_handler_fn(breakpoint_handler);\n}\n\nextern \"x86-interrupt\" fn breakpoint_handler(\n    stack_frame: InterruptStackFrame)\n{\n    println!(\"EXCEPTION: BREAKPOINT\\n{:#?}\", stack_frame);\n}\n\nOur handler just outputs a message and pretty-prints the interrupt stack frame.\nWhen we try to compile it, the following error occurs:\nerror[E0658]: x86-interrupt ABI is experimental and subject to change (see issue #40180)\n  --&gt; src/main.rs:53:1\n   |\n53 | / extern \"x86-interrupt\" fn breakpoint_handler(stack_frame: InterruptStackFrame) {\n54 | |     println!(\"EXCEPTION: BREAKPOINT\\n{:#?}\", stack_frame);\n55 | | }\n   | |_^\n   |\n   = help: add #![feature(abi_x86_interrupt)] to the crate attributes to enable\nThis error occurs because the x86-interrupt calling convention is still unstable. To use it anyway, we have to explicitly enable it by adding #![feature(abi_x86_interrupt)] at the top of our lib.rs.\n\n\nIn order for the CPU to use our new interrupt descriptor table, we need to load it using the lidt instruction. The InterruptDescriptorTable struct of the x86_64 crate provides a [load][InterruptDescriptorTable::load](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html#method.load) method for that. Let’s try to use it:\n\n\nsrc/interrupts.rs\n\npub fn init_idt() {\n    let mut idt = InterruptDescriptorTable::new();\n    idt.breakpoint.set_handler_fn(breakpoint_handler);\n    idt.load();\n}\n\nWhen we try to compile it now, the following error occurs:\nerror: `idt` does not live long enough\n  --&gt; src/interrupts/mod.rs:43:5\n   |\n43 |     idt.load();\n   |     ^^^ does not live long enough\n44 | }\n   | - borrowed value only lives until here\n   |\n   = note: borrowed value must be valid for the static lifetime...\nSo the load method expects a &'static self, that is, a reference valid for the complete runtime of the program. The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than 'static could lead to use-after-free bugs.\nIn fact, this is exactly what happens here. Our idt is created on the stack, so it is only valid inside the init function. Afterwards, the stack memory is reused for other functions, so the CPU would interpret random stack memory as IDT. Luckily, the InterruptDescriptorTable::load method encodes this lifetime requirement in its function definition, so that the Rust compiler is able to prevent this possible bug at compile time.\nIn order to fix this problem, we need to store our idt at a place where it has a 'static lifetime. To achieve this, we could allocate our IDT on the heap using Box and then convert it to a 'static reference, but we are writing an OS kernel and thus don’t have a heap (yet).\nAs an alternative, we could try to store the IDT as a static:\n\n\nsrc/interrupts.rs\n\nstatic IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();\n\npub fn init_idt() {\n    IDT.breakpoint.set_handler_fn(breakpoint_handler);\n    IDT.load();\n}\n\nHowever, there is a problem: Statics are immutable, so we can’t modify the breakpoint entry from our init function. We could solve this problem by using a static mut:\n\n\nsrc/interrupts.rs\n\nstatic mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.load();\n    }\n}\n\nThis variant compiles without errors but it’s far from idiomatic. static muts are very prone to data races, so we need an unsafe block on each access.\n\n\n\nThe last step for making exceptions work in our kernel is to call the init_idt function from our main.rs. Instead of calling it directly, we introduce a general init function in our lib.rs:\n\n\nsrc/lib.rs\n\npub fn init() {\n    interrupts::init_idt();\n}\n\nWith this function, we now have a central place for initialization routines that can be shared between the different _start functions in our main.rs, lib.rs, and integration tests.\nNow we can update the _start function of our main.rs to call init and then trigger a breakpoint exception:\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    println!(\"Hello World{}\", \"!\");\n\n    blog_os::init(); // new\n\n    // invoke a breakpoint exception\n    x86_64::instructions::interrupts::int3(); // new\n\n    // as before\n    #[cfg(test)]\n    test_main();\n\n    println!(\"It did not crash!\");\n    loop {}\n}\n\nWhen we run it in QEMU now (using cargo run), we see the following:\n\n\n\nQEMU printing EXCEPTION: BREAKPOINT and the interrupt stack frame\n\n\nIt works! The CPU successfully invokes our breakpoint handler, which prints the message, and then returns back to the _start function, where the It did not crash! message is printed.\nWe see that the interrupt stack frame tells us the instruction and stack pointers at the time when the exception occurred. This information is very useful when debugging unexpected exceptions.\n\n\n\nLet’s create a test that ensures that the above continues to work. First, we update the _start function to also call init:\n\n\nsrc/lib.rs\n\n/// Entry point for `cargo test`\n#[cfg(test)]\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    init();      // new\n    test_main();\n    loop {}\n}\n\nRemember, this _start function is used when running cargo test --lib, since Rust tests the lib.rs completely independently of the main.rs. We need to call init here to set up an IDT before running the tests.\nNow we can create a test_breakpoint_exception test:\n\n\nsrc/interrupts.rs\n\n#[test_case]\nfn test_breakpoint_exception() {\n    // invoke a breakpoint exception\n    x86_64::instructions::interrupts::int3();\n}\n\nThe test invokes the int3 function to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.\nYou can try this new test by running cargo test (all tests) or cargo test --lib (only tests of lib.rs and its modules).",
+    "crumbs": [
+      "Handlers"
+    ]
+  },
+  {
+    "objectID": "71_handlers.html#implementation",
+    "href": "71_handlers.html#implementation",
+    "title": "Handlers",
+    "section": "",
+    "text": "Now that we’ve understood the theory, it’s time to handle CPU exceptions in our kernel. We’ll start by creating a new interrupts module in src/interrupts.rs, that first creates an init_idt function that creates a new InterruptDescriptorTable:\n\n\nsrc/lib.rs\n\npub mod interrupts;\n\n\n\nsrc/interrupts.rs\n\nuse x86_64::structures::idt::InterruptDescriptorTable;\n\npub fn init_idt() {\n    let mut idt = InterruptDescriptorTable::new();\n}\n\nNow we can add handler functions. We start by adding a handler for the breakpoint exception. The breakpoint exception is the perfect exception to test exception handling. Its only purpose is to temporarily pause a program when the breakpoint instruction int3 is executed.\nThe breakpoint exception is commonly used in debuggers: When the user sets a breakpoint, the debugger overwrites the corresponding instruction with the int3 instruction so that the CPU throws the breakpoint exception when it reaches that line. When the user wants to continue the program, the debugger replaces the int3 instruction with the original instruction again and continues the program.\nFor our use case, we don’t need to overwrite any instructions. Instead, we just want to print a message when the breakpoint instruction is executed and then continue the program. So let’s create a simple breakpoint_handler function and add it to our IDT:\n\n\nsrc/interrupts.rs\n\nuse x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};\nuse crate::println;\n\npub fn init_idt() {\n    let mut idt = InterruptDescriptorTable::new();\n    idt.breakpoint.set_handler_fn(breakpoint_handler);\n}\n\nextern \"x86-interrupt\" fn breakpoint_handler(\n    stack_frame: InterruptStackFrame)\n{\n    println!(\"EXCEPTION: BREAKPOINT\\n{:#?}\", stack_frame);\n}\n\nOur handler just outputs a message and pretty-prints the interrupt stack frame.\nWhen we try to compile it, the following error occurs:\nerror[E0658]: x86-interrupt ABI is experimental and subject to change (see issue #40180)\n  --&gt; src/main.rs:53:1\n   |\n53 | / extern \"x86-interrupt\" fn breakpoint_handler(stack_frame: InterruptStackFrame) {\n54 | |     println!(\"EXCEPTION: BREAKPOINT\\n{:#?}\", stack_frame);\n55 | | }\n   | |_^\n   |\n   = help: add #![feature(abi_x86_interrupt)] to the crate attributes to enable\nThis error occurs because the x86-interrupt calling convention is still unstable. To use it anyway, we have to explicitly enable it by adding #![feature(abi_x86_interrupt)] at the top of our lib.rs.\n\n\nIn order for the CPU to use our new interrupt descriptor table, we need to load it using the lidt instruction. The InterruptDescriptorTable struct of the x86_64 crate provides a [load][InterruptDescriptorTable::load](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html#method.load) method for that. Let’s try to use it:\n\n\nsrc/interrupts.rs\n\npub fn init_idt() {\n    let mut idt = InterruptDescriptorTable::new();\n    idt.breakpoint.set_handler_fn(breakpoint_handler);\n    idt.load();\n}\n\nWhen we try to compile it now, the following error occurs:\nerror: `idt` does not live long enough\n  --&gt; src/interrupts/mod.rs:43:5\n   |\n43 |     idt.load();\n   |     ^^^ does not live long enough\n44 | }\n   | - borrowed value only lives until here\n   |\n   = note: borrowed value must be valid for the static lifetime...\nSo the load method expects a &'static self, that is, a reference valid for the complete runtime of the program. The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than 'static could lead to use-after-free bugs.\nIn fact, this is exactly what happens here. Our idt is created on the stack, so it is only valid inside the init function. Afterwards, the stack memory is reused for other functions, so the CPU would interpret random stack memory as IDT. Luckily, the InterruptDescriptorTable::load method encodes this lifetime requirement in its function definition, so that the Rust compiler is able to prevent this possible bug at compile time.\nIn order to fix this problem, we need to store our idt at a place where it has a 'static lifetime. To achieve this, we could allocate our IDT on the heap using Box and then convert it to a 'static reference, but we are writing an OS kernel and thus don’t have a heap (yet).\nAs an alternative, we could try to store the IDT as a static:\n\n\nsrc/interrupts.rs\n\nstatic IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();\n\npub fn init_idt() {\n    IDT.breakpoint.set_handler_fn(breakpoint_handler);\n    IDT.load();\n}\n\nHowever, there is a problem: Statics are immutable, so we can’t modify the breakpoint entry from our init function. We could solve this problem by using a static mut:\n\n\nsrc/interrupts.rs\n\nstatic mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.load();\n    }\n}\n\nThis variant compiles without errors but it’s far from idiomatic. static muts are very prone to data races, so we need an unsafe block on each access.\n\n\n\nThe last step for making exceptions work in our kernel is to call the init_idt function from our main.rs. Instead of calling it directly, we introduce a general init function in our lib.rs:\n\n\nsrc/lib.rs\n\npub fn init() {\n    interrupts::init_idt();\n}\n\nWith this function, we now have a central place for initialization routines that can be shared between the different _start functions in our main.rs, lib.rs, and integration tests.\nNow we can update the _start function of our main.rs to call init and then trigger a breakpoint exception:\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    println!(\"Hello World{}\", \"!\");\n\n    blog_os::init(); // new\n\n    // invoke a breakpoint exception\n    x86_64::instructions::interrupts::int3(); // new\n\n    // as before\n    #[cfg(test)]\n    test_main();\n\n    println!(\"It did not crash!\");\n    loop {}\n}\n\nWhen we run it in QEMU now (using cargo run), we see the following:\n\n\n\nQEMU printing EXCEPTION: BREAKPOINT and the interrupt stack frame\n\n\nIt works! The CPU successfully invokes our breakpoint handler, which prints the message, and then returns back to the _start function, where the It did not crash! message is printed.\nWe see that the interrupt stack frame tells us the instruction and stack pointers at the time when the exception occurred. This information is very useful when debugging unexpected exceptions.\n\n\n\nLet’s create a test that ensures that the above continues to work. First, we update the _start function to also call init:\n\n\nsrc/lib.rs\n\n/// Entry point for `cargo test`\n#[cfg(test)]\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    init();      // new\n    test_main();\n    loop {}\n}\n\nRemember, this _start function is used when running cargo test --lib, since Rust tests the lib.rs completely independently of the main.rs. We need to call init here to set up an IDT before running the tests.\nNow we can create a test_breakpoint_exception test:\n\n\nsrc/interrupts.rs\n\n#[test_case]\nfn test_breakpoint_exception() {\n    // invoke a breakpoint exception\n    x86_64::instructions::interrupts::int3();\n}\n\nThe test invokes the int3 function to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.\nYou can try this new test by running cargo test (all tests) or cargo test --lib (only tests of lib.rs and its modules).",
+    "crumbs": [
+      "Handlers"
     ]
   }
 ]
