@@ -16,10 +16,8 @@ pub mod interrupts;
 ```
 
 ```{.rs filename="src/interrupts.rs"}
-use x86_64::structures::idt::InterruptDescriptorTable;
-
 pub fn init_idt() {
-    let mut idt = InterruptDescriptorTable::new();
+    let mut idt = x86_64::structures::idt::InterruptDescriptorTable::new();
 }
 ```
 
@@ -31,18 +29,15 @@ The breakpoint exception is commonly used in debuggers: When the user sets a bre
 For our use case, we don't need to overwrite any instructions. Instead, we just want to print a message when the breakpoint instruction is executed and then continue the program. So let's create a simple `breakpoint_handler` function and add it to our IDT:
 
 ```{.rs filename="src/interrupts.rs"}
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
-use crate::println;
-
 pub fn init_idt() {
-    let mut idt = InterruptDescriptorTable::new();
+    let mut idt = x86_64::structures::idt::InterruptDescriptorTable::new();
     idt.breakpoint.set_handler_fn(breakpoint_handler);
 }
 
 extern "x86-interrupt" fn breakpoint_handler(
-    stack_frame: InterruptStackFrame)
+    stack_frame: x86_64::structures::idt::InterruptStackFrame)
 {
-    println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
+    crate::println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
 }
 ```
 
@@ -51,15 +46,18 @@ Our handler just outputs a message and pretty-prints the interrupt stack frame.
 When we try to compile it, the following error occurs:
 
 ```{.sh}
-error[E0658]: x86-interrupt ABI is experimental and subject to change (see issue #40180)
-  --> src/main.rs:53:1
-   |
-53 | / extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
-54 | |     println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
-55 | | }
-   | |_^
-   |
-   = help: add #![feature(abi_x86_interrupt)] to the crate attributes to enable
+error[E0658]: the extern "x86-interrupt" ABI is experimental and subject to change
+ --> src/interrupts.rs:6:8
+  |
+6 | extern "x86-interrupt" fn breakpoint_handler(
+  |        ^^^^^^^^^^^^^^^
+  |
+  = note: see issue #40180 <https://github.com/rust-lang/rust/issues/40180> for more information
+  = help: add `#![feature(abi_x86_interrupt)]` to the crate attributes to enable
+  = note: this compiler was built on 2026-02-06; consider upgrading it if it is out of date
+
+For more information about this error, try `rustc --explain E0658`.
+error: could not compile `osirs` (lib) due to 1 previous error
 ```
 
 This error occurs because the `x86-interrupt` calling convention is still unstable. To use it anyway, we have to explicitly enable it by adding `#![feature(abi_x86_interrupt)]` at the top of our `lib.rs`.
@@ -80,30 +78,39 @@ pub fn init_idt() {
 When we try to compile it now, the following error occurs:
 
 ```{.sh}
-error: `idt` does not live long enough
-  --> src/interrupts/mod.rs:43:5
-   |
-43 |     idt.load();
-   |     ^^^ does not live long enough
-44 | }
-   | - borrowed value only lives until here
-   |
-   = note: borrowed value must be valid for the static lifetime...
+error[E0597]: `idt` does not live long enough
+ --> src/interrupts.rs:4:5
+  |
+2 |     let mut idt = x86_64::structures::idt::InterruptDescriptorTable::new();
+  |         ------- binding `idt` declared here
+3 |     idt.breakpoint.set_handler_fn(breakpoint_handler);
+4 |     idt.load();
+  |     ^^^-------
+  |     |
+  |     borrowed value does not live long enough
+  |     argument requires that `idt` is borrowed for `'static`
+5 | }
+  | - `idt` dropped here while still borrowed
+
+For more information about this error, try `rustc --explain E0597`.
+error: could not compile `osirs` (lib) due to 1 previous error
 ```
 
-So the `load` method expects a `&'static self`, that is, a reference valid for the complete runtime of the program. The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than `'static` could lead to use-after-free bugs.
+So the `load` method expects a `&'static self`, that is, a reference valid for the complete runtime of the program. 
+
+> I am *completely* capable of getting Rust to do whatever I want without engaging with the "lifetime" system, which I find to be (1) clunky and (2) a *very* poor fit for anything hardware relevant.
+
+The reason is that the CPU will access this table on every interrupt until we load a different IDT. So using a shorter lifetime than `'static` could lead to use-after-free bugs.
 
 In fact, this is exactly what happens here. Our `idt` is created on the stack, so it is only valid inside the `init` function. Afterwards, the stack memory is reused for other functions, so the CPU would interpret random stack memory as IDT. Luckily, the `InterruptDescriptorTable::load` method encodes this lifetime requirement in its function definition, so that the Rust compiler is able to prevent this possible bug at compile time.
 
-In order to fix this problem, we need to store our `idt` at a place where it has a `'static` lifetime. To achieve this, we could allocate our IDT on the heap using [`Box`] and then convert it to a `'static` reference, but we are writing an OS kernel and thus don't have a heap (yet).
-
-[`Box`]: https://doc.rust-lang.org/std/boxed/struct.Box.html
-
+In order to fix this problem, we need to store our `idt` at a place where it has a `'static` lifetime. To achieve this, we could allocate our IDT on the heap using [`Box`] (https://doc.rust-lang.org/std/boxed/struct.Box.html) and then convert it to a `'static` reference, but we are writing an OS kernel and thus don't have a heap (yet).
 
 As an alternative, we could try to store the IDT as a `static`:
 
 ```{.rs filename="src/interrupts.rs"}
-static IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
+static IDT: x86_64::structures::idt::InterruptDescriptorTable =
+    x86_64::structures::idt::InterruptDescriptorTable::new();
 
 pub fn init_idt() {
     IDT.breakpoint.set_handler_fn(breakpoint_handler);
@@ -111,22 +118,28 @@ pub fn init_idt() {
 }
 ```
 
-However, there is a problem: Statics are immutable, so we can't modify the breakpoint entry from our `init` function. We could solve this problem by using a [`static mut`]:
+However, there is a problem: Statics are immutable, so we can't modify the breakpoint entry from our `init` function. 
 
-[`static mut`]: https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable
+```{.sh}
+error[E0596]: cannot borrow `IDT.breakpoint` as mutable, as `IDT` is an immutable static item
+ --> src/interrupts.rs:5:5
+  |
+1 | static IDT: x86_64::structures::idt::InterruptDescriptorTable =
+  | ------------------------------------------------------------- this `static` cannot be borrowed as mutable
+...
+5 |     IDT.breakpoint.set_handler_fn(breakpoint_handler);
+  |     ^^^^^^^^^^^^^^ cannot borrow as mutable
+
+For more information about this error, try `rustc --explain E0596`.
+```
+
+We could solve this problem by using our most beloved [`static mut`](https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#accessing-or-modifying-a-mutable-static-variable)
 
 ```{.rs filename="src/interrupts.rs"}
 static mut IDT: InterruptDescriptorTable = InterruptDescriptorTable::new();
-
-pub fn init_idt() {
-    unsafe {
-        IDT.breakpoint.set_handler_fn(breakpoint_handler);
-        IDT.load();
-    }
-}
 ```
 
-This variant compiles without errors but it's far from idiomatic. `static mut`s are very prone to data races, so we need an `unsafe` block on each access.
+I draw a series of errors here that are left as an exercise to the student.
 
 ### Running it
 
@@ -147,7 +160,7 @@ Now we can update the `_start` function of our `main.rs` to call `init` and then
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
 
-    blog_os::init(); // new
+    osirs::init(); // new
 
     // invoke a breakpoint exception
     x86_64::instructions::interrupts::int3(); // new
@@ -163,7 +176,20 @@ pub extern "C" fn _start() -> ! {
 
 When we run it in QEMU now (using `cargo run`), we see the following:
 
-![QEMU printing `EXCEPTION: BREAKPOINT` and the interrupt stack frame](qemu-breakpoint-exception.png)
+```{.sh}
+EXCEPTION: BREAKPOINT
+InterruptStackFrame {
+    instruction_pointer: VirtAddr(
+        0x203d61,
+    ),
+    code_segment: 8,
+    cpu_flags: 0x6,
+    stack_pointer: VirtAddr(
+        0x10000201fe8,
+    ),
+    stack_segment: 0,
+}
+```
 
 It works! The CPU successfully invokes our breakpoint handler, which prints the message, and then returns back to the `_start` function, where the `It did not crash!` message is printed.
 
@@ -188,10 +214,8 @@ Remember, this `_start` function is used when running `cargo test --lib`, since 
 
 Now we can create a `test_breakpoint_exception` test:
 
-```{.rs filename="src/interrupts.rs"}
-#[test_case]
+```{.rs}
 fn test_breakpoint_exception() {
-    // invoke a breakpoint exception
     x86_64::instructions::interrupts::int3();
 }
 ```

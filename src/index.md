@@ -39,7 +39,7 @@ format: html
 |0x5|02/16|[Text](50_text.qmd)|[Format](51_format.md)|[Graphics](52_graphics.md)|
 |0x6|02/23|[Guest](6__guest.md)|Work Session|<!--[Integration](62_integration.qmd)|-->
 |0x7|03/02|[Test](60_test.qmd)|[Serial](61_serial.qmd)|[Integration](62_integration.qmd)|
-|0x8|03/09|[Exceptions](70_except.qmd)|[Handlers](71_handlers.qmd)|
+|0x8|03/09|[Exceptions](70_except.qmd)|[The Call](71_calls.qmd)|[Handlers](72_handlers.qmd)|
 |0x9|03/16|Faults|
 |0bX|03/23|`None`|`None`|`None`|
 |0xA|03/30|Interrupts|

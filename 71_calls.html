@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>The Call – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./72_handlers.html" rel="next">
+<link href="./70_except.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./71_calls.html">The Call</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./70_except.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exceptions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./71_calls.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">The Call</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./72_handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handlers</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#recall" id="toc-recall" class="nav-link" data-scroll-target="#recall">Recall</a>
+  <ul class="collapse">
+  <li><a href="#calling-conventions" id="toc-calling-conventions" class="nav-link" data-scroll-target="#calling-conventions">Calling Conventions</a></li>
+  <li><a href="#exception-handling" id="toc-exception-handling" class="nav-link" data-scroll-target="#exception-handling">Exception Handling</a></li>
+  <li><a href="#registers" id="toc-registers" class="nav-link" data-scroll-target="#registers">Registers</a></li>
+  </ul></li>
+  <li><a href="#registers-1" id="toc-registers-1" class="nav-link" data-scroll-target="#registers-1">Registers</a>
+  <ul class="collapse">
+  <li><a href="#x86-registers" id="toc-x86-registers" class="nav-link" data-scroll-target="#x86-registers">x86 registers</a></li>
+  <li><a href="#some-examples" id="toc-some-examples" class="nav-link" data-scroll-target="#some-examples">Some Examples</a></li>
+  <li><a href="#some-examples-1" id="toc-some-examples-1" class="nav-link" data-scroll-target="#some-examples-1">Some Examples</a></li>
+  <li><a href="#some-examples-2" id="toc-some-examples-2" class="nav-link" data-scroll-target="#some-examples-2">Some Examples</a></li>
+  <li><a href="#some-examples-3" id="toc-some-examples-3" class="nav-link" data-scroll-target="#some-examples-3">Some Examples</a></li>
+  <li><a href="#some-examples-4" id="toc-some-examples-4" class="nav-link" data-scroll-target="#some-examples-4">Some Examples</a></li>
+  </ul></li>
+  <li><a href="#back-to-work" id="toc-back-to-work" class="nav-link" data-scroll-target="#back-to-work">Back to work</a>
+  <ul class="collapse">
+  <li><a href="#calling-conventions-1" id="toc-calling-conventions-1" class="nav-link" data-scroll-target="#calling-conventions-1">Calling Conventions</a>
+  <ul class="collapse">
+  <li><a href="#preservedscratch" id="toc-preservedscratch" class="nav-link" data-scroll-target="#preservedscratch">Preserved/Scratch</a></li>
+  </ul></li>
+  <li><a href="#preserved-registers" id="toc-preserved-registers" class="nav-link" data-scroll-target="#preserved-registers">Preserved Registers</a></li>
+  <li><a href="#scratch-registers" id="toc-scratch-registers" class="nav-link" data-scroll-target="#scratch-registers">Scratch Registers</a></li>
+  <li><a href="#interrupt-calling-convention" id="toc-interrupt-calling-convention" class="nav-link" data-scroll-target="#interrupt-calling-convention">Interrupt Calling Convention</a></li>
+  <li><a href="#default-calling-convention" id="toc-default-calling-convention" class="nav-link" data-scroll-target="#default-calling-convention">Default Calling Convention</a></li>
+  <li><a href="#rust-calling-convention" id="toc-rust-calling-convention" class="nav-link" data-scroll-target="#rust-calling-convention">Rust Calling Convention</a></li>
+  <li><a href="#c-calling-convention" id="toc-c-calling-convention" class="nav-link" data-scroll-target="#c-calling-convention">C Calling Convention</a></li>
+  <li><a href="#exceptions" id="toc-exceptions" class="nav-link" data-scroll-target="#exceptions">Exceptions</a></li>
+  <li><a href="#cant-backup" id="toc-cant-backup" class="nav-link" data-scroll-target="#cant-backup">Can’t Backup</a></li>
+  <li><a href="#recall-1" id="toc-recall-1" class="nav-link" data-scroll-target="#recall-1">Recall</a></li>
+  <li><a href="#in-practice" id="toc-in-practice" class="nav-link" data-scroll-target="#in-practice">In Practice</a></li>
+  <li><a href="#stack-frames" id="toc-stack-frames" class="nav-link" data-scroll-target="#stack-frames">Stack Frames</a></li>
+  <li><a href="#visually" id="toc-visually" class="nav-link" data-scroll-target="#visually">Visually</a></li>
+  <li><a href="#interrupt-frames" id="toc-interrupt-frames" class="nav-link" data-scroll-target="#interrupt-frames">Interrupt Frames</a></li>
+  <li><a href="#step-0" id="toc-step-0" class="nav-link" data-scroll-target="#step-0">Step 0</a></li>
+  <li><a href="#step-1" id="toc-step-1" class="nav-link" data-scroll-target="#step-1">Step 1</a></li>
+  <li><a href="#step-2" id="toc-step-2" class="nav-link" data-scroll-target="#step-2">Step 2</a></li>
+  <li><a href="#step-3" id="toc-step-3" class="nav-link" data-scroll-target="#step-3">Step 3</a></li>
+  <li><a href="#step-3.1" id="toc-step-3.1" class="nav-link" data-scroll-target="#step-3.1">Step 3.1</a></li>
+  <li><a href="#step-3.2" id="toc-step-3.2" class="nav-link" data-scroll-target="#step-3.2">Step 3.2</a></li>
+  <li><a href="#step-3.3" id="toc-step-3.3" class="nav-link" data-scroll-target="#step-3.3">Step 3.3</a></li>
+  <li><a href="#step-4" id="toc-step-4" class="nav-link" data-scroll-target="#step-4">Step 4</a></li>
+  <li><a href="#visually-1" id="toc-visually-1" class="nav-link" data-scroll-target="#visually-1">Visually</a></li>
+  </ul></li>
+  <li><a href="#crates-for-days" id="toc-crates-for-days" class="nav-link" data-scroll-target="#crates-for-days">Crates for Days</a>
+  <ul class="collapse">
+  <li><a href="#handwaving" id="toc-handwaving" class="nav-link" data-scroll-target="#handwaving">Handwaving</a></li>
+  <li><a href="#retrieving-the-arguments" id="toc-retrieving-the-arguments" class="nav-link" data-scroll-target="#retrieving-the-arguments">Retrieving the arguments</a></li>
+  <li><a href="#returning-using-iretq" id="toc-returning-using-iretq" class="nav-link" data-scroll-target="#returning-using-iretq">Returning using <code>iretq</code></a></li>
+  <li><a href="#handling-the-error-code" id="toc-handling-the-error-code" class="nav-link" data-scroll-target="#handling-the-error-code">Handling the error code</a></li>
+  <li><a href="#aligning-the-stack" id="toc-aligning-the-stack" class="nav-link" data-scroll-target="#aligning-the-stack">Aligning the stack</a></li>
+  <li><a href="#read-more" id="toc-read-more" class="nav-link" data-scroll-target="#read-more">Read more</a></li>
+  </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="71_calls.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">The Call</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li>Special bonus lecture.
+<ul>
+<li>Exceptions have too much theory content.</li>
+<li>No <code>71</code> lab crate required this week.</li>
+<li>Only deliverable is <code>72</code> on exception handlers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>CPU exceptions are algorithmically interesting but technically tedius.</li>
+<li><a href="https://os.phil-opp.com/cpu-exceptions/">CPU Exceptions</a></li>
+</ul>
+</section>
+<section id="recall" class="level1">
+<h1>Recall</h1>
+<section id="calling-conventions" class="level2">
+<h2 class="anchored" data-anchor-id="calling-conventions">Calling Conventions</h2>
+<ul>
+<li>At the end of last lecture we introduced <em>calling conventions</em>
+<ul>
+<li>Typical compiled code follows one conventions.</li>
+<li>Exceptions must follow another that is:
+<ul>
+<li>Less restrictive but less efficient</li>
+<li>Hardware rather than compiler defined</li>
+<li>Mediated by the operating system</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="exception-handling" class="level2">
+<h2 class="anchored" data-anchor-id="exception-handling">Exception Handling</h2>
+<p>When an exception occurs, the CPU roughly does the following:</p>
+<ol type="1">
+<li>Push some registers on the stack.</li>
+<li>Read the corresponding entry from IDT.<br>
+</li>
+<li>Check entry or raise a double fault.</li>
+<li>Perhaps disable hardware interrupts.</li>
+<li>Update the CS (code segment).</li>
+<li>Jump to the specified handler function.</li>
+</ol>
+</section>
+<section id="registers" class="level2">
+<h2 class="anchored" data-anchor-id="registers">Registers</h2>
+<ul>
+<li>We briefly go over some architecture so we can refer back to it.
+<ul>
+<li>The code segment.</li>
+<li>The stack pointer.</li>
+<li>General purpose registers.</li>
+<li>And more!</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="registers-1" class="level1">
+<h1>Registers</h1>
+<section id="x86-registers" class="level2">
+<h2 class="anchored" data-anchor-id="x86-registers">x86 registers</h2>
+<ul>
+<li>We recall the RFLAGS register.</li>
+<li>There are <a href="https://commons.wikimedia.org/wiki/File:Table_of_x86_Registers_svg.svg">many x86 registers</a>.</li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"></p>
+</section>
+<section id="some-examples" class="level2">
+<h2 class="anchored" data-anchor-id="some-examples">Some Examples</h2>
+<ul>
+<li><strong>ZMM0</strong> is a vector register, and enormous (512 bytes)
+<ul>
+<li>It contains half and quarter registers <strong>YMM0</strong> and <strong>XMM0</strong></li>
+</ul></li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"></p>
+</section>
+<section id="some-examples-1" class="level2">
+<h2 class="anchored" data-anchor-id="some-examples-1">Some Examples</h2>
+<ul>
+<li><strong>ST(0)</strong> is a combined SIMD/float register as is MM0.
+<ul>
+<li>We recall some uproar over using software floats when disabling SIMD.</li>
+</ul></li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"></p>
+</section>
+<section id="some-examples-2" class="level2">
+<h2 class="anchored" data-anchor-id="some-examples-2">Some Examples</h2>
+<ul>
+<li><strong>?AX</strong> are the 8, 16, 32, and 64 bit general purpose “X” registers.
+<ul>
+<li>Names change as 8-bit devices had both smaller and fewer registers.</li>
+</ul></li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"></p>
+</section>
+<section id="some-examples-3" class="level2">
+<h2 class="anchored" data-anchor-id="some-examples-3">Some Examples</h2>
+<ul>
+<li>Most ending in “P” are stack or interrupt or debug or etc. pointers.</li>
+<li>Most ending in “S” are segment or backup segment registers.</li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"></p>
+</section>
+<section id="some-examples-4" class="level2">
+<h2 class="anchored" data-anchor-id="some-examples-4">Some Examples</h2>
+<ul>
+<li>“CR” registers are hardware specific control registers.</li>
+<li>“DR” registers are debug registers.</li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"></p>
+</section>
+</section>
+<section id="back-to-work" class="level1">
+<h1>Back to work</h1>
+<section id="calling-conventions-1" class="level2">
+<h2 class="anchored" data-anchor-id="calling-conventions-1">Calling Conventions</h2>
+<ul>
+<li>Return to the level of languages.</li>
+<li><a href="https://en.wikipedia.org/wiki/Calling_convention">Calling conventions</a> specify the details of a function call.
+<ul>
+<li>Where the arguments are, for example.</li>
+<li>Whether the function gets a new stack.</li>
+<li>What happens when you return.</li>
+</ul></li>
+<li>On x86_64 Linux, the following rules apply for C functions (specified in the <a href="https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf">System V ABI</a>)</li>
+</ul>
+<section id="preservedscratch" class="level3">
+<h3 class="anchored" data-anchor-id="preservedscratch">Preserved/Scratch</h3>
+<ul>
+<li>The calling convention divides the registers into two parts:
+<ul>
+<li><em>preserved</em> registers, and</li>
+<li><em>scratch</em> registers.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="preserved-registers" class="level2">
+<h2 class="anchored" data-anchor-id="preserved-registers">Preserved Registers</h2>
+<ul>
+<li>The values of <em>preserved</em> registers must remain unchanged across function calls.
+<ul>
+<li>Not “at all times”, only “across function calls.</li>
+<li>You can use them temporarily by popping onto stack and then pushing back to register before returning.</li>
+</ul></li>
+<li>Refer to these as <em>“callee-saved”</em>
+<ul>
+<li>The <em>“callee”</em> is the function that… was called.</li>
+</ul></li>
+</ul>
+</section>
+<section id="scratch-registers" class="level2">
+<h2 class="anchored" data-anchor-id="scratch-registers">Scratch Registers</h2>
+<ul>
+<li>A called function is allowed to overwrite <em>scratch</em> registers without restrictions.
+<ul>
+<li>If a caller wants to keep a value, it has to push the value to its own (the caller) stack.</li>
+<li>The stack will be maintained across function calles.</li>
+</ul></li>
+<li>Refer to these as <em>caller-saved</em></li>
+</ul>
+</section>
+<section id="interrupt-calling-convention" class="level2">
+<h2 class="anchored" data-anchor-id="interrupt-calling-convention">Interrupt Calling Convention</h2>
+<ul>
+<li>The first <em>six</em> integer arguments are passed in registers <strong>RDI</strong>, <strong>RSI</strong>, <strong>RDX</strong>, <strong>RCX</strong>, <strong>R8</strong>, <strong>R9</strong>
+<ul>
+<li>When we say integer we mean 64 bit, as those are 64 bit registers.</li>
+<li>Cue my rant about Rust <code>i32</code> default.</li>
+</ul></li>
+<li>Additional arguments are passed on the stack</li>
+<li>Results are returned in <strong>RAX</strong> and <strong>RDX</strong>
+<ul>
+<li>Not on the stack!</li>
+</ul></li>
+</ul>
+</section>
+<section id="default-calling-convention" class="level2">
+<h2 class="anchored" data-anchor-id="default-calling-convention">Default Calling Convention</h2>
+<ul>
+<li>The <a href="https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170">default calling convention</a> differs slightly.
+<ul>
+<li>The x87 register stack is unused.</li>
+<li>Integer arguments are passed in registers <strong>RCX</strong>, <strong>RDX</strong>, <strong>R8</strong>, and <strong>R9</strong>.
+<ul>
+<li>That is, not <strong>RDI</strong> and <strong>RSI</strong></li>
+</ul></li>
+<li><em>Floating point</em> arguments are passed in <strong>XMM0L</strong>, <strong>XMM1L</strong>, <strong>XMM2L</strong>, and <strong>XMM3L</strong>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="rust-calling-convention" class="level2">
+<h2 class="anchored" data-anchor-id="rust-calling-convention">Rust Calling Convention</h2>
+<ul>
+<li>It doesn’t have one.</li>
+<li><a href="https://github.com/rust-lang/rfcs/issues/600">GitHub RFC</a></li>
+<li>Oh maybe that’s why we have to use <code>extern "C"</code> all the time.</li>
+<li>Rust: Possibly up to half of a language.</li>
+</ul>
+</section>
+<section id="c-calling-convention" class="level2">
+<h2 class="anchored" data-anchor-id="c-calling-convention">C Calling Convention</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 44%">
+<col style="width: 55%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>preserved registers</th>
+<th>scratch registers</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>rbp</code>, <code>rbx</code>, <code>rsp</code>, <code>r12</code>, <code>r13</code>, <code>r14</code>, <code>r15</code></td>
+<td><code>rax</code>, <code>rcx</code>, <code>rdx</code>, <code>rsi</code>, <code>rdi</code>, <code>r8</code>, <code>r9</code>, <code>r10</code>, <code>r11</code></td>
+</tr>
+<tr class="even">
+<td><em>callee-saved</em></td>
+<td><em>caller-saved</em></td>
+</tr>
+</tbody>
+</table>
+<p>Compiled C code will necessarily respect this convention (or it isn’t C code).</p>
+</section>
+<section id="exceptions" class="level2">
+<h2 class="anchored" data-anchor-id="exceptions">Exceptions</h2>
+<ul>
+<li>In contrast to function calls, exceptions can occur on <em>any</em> instruction.</li>
+<li>In most cases, we don’t even know at compile time if the generated code will cause an exception.</li>
+<li>For example, the compiler can’t know if an instruction causes a stack overflow or a page fault.</li>
+</ul>
+</section>
+<section id="cant-backup" class="level2">
+<h2 class="anchored" data-anchor-id="cant-backup">Can’t Backup</h2>
+<ul>
+<li>Exceptions can’t use a calling convention that relies on caller-saved registers for exception handlers.</li>
+<li>Instead, preserve <em>all registers</em>.</li>
+<li>The <code>x86-interrupt</code> calling convention is such a calling convention.
+<ul>
+<li>It guarantees that all register values are restored to their original values on function return.</li>
+</ul></li>
+</ul>
+</section>
+<section id="recall-1" class="level2">
+<h2 class="anchored" data-anchor-id="recall-1">Recall</h2>
+<ul>
+<li><code>HandlerFunc</code> definition:</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">type</span> HandlerFunc <span class="op">=</span> <span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span>(_<span class="op">:</span> InterruptStackFrame)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>That’s a function alright.
+<ul>
+<li>A <a href="https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases">type alias</a> for an <code>extern "x86-interrupt" fn</code> type</li>
+<li>Usually use <code>extern</code> for C, here we use it to interface with hardware.</li>
+</ul></li>
+</ul>
+</section>
+<section id="in-practice" class="level2">
+<h2 class="anchored" data-anchor-id="in-practice">In Practice</h2>
+<ul>
+<li>The compiler only backs up the registers that are overwritten by the function.
+<ul>
+<li>In e.g.&nbsp;conditional branches, can “just in time” pop registers to stack immediately before using them.</li>
+<li>More overhead but more efficient.</li>
+</ul></li>
+<li>This way, very efficient code can be generated for short functions that only use a few registers.</li>
+</ul>
+</section>
+<section id="stack-frames" class="level2">
+<h2 class="anchored" data-anchor-id="stack-frames">Stack Frames</h2>
+<ul>
+<li>On a normal function call (using the <code>call</code> instruction), the CPU pushes the return address before jumping to the target function.</li>
+<li>On function return (using the <code>ret</code> instruction), the CPU pops this return address and jumps to it.</li>
+</ul>
+</section>
+<section id="visually" class="level2">
+<h2 class="anchored" data-anchor-id="visually">Visually</h2>
+<ul>
+<li>The “stack frame” of a normal function call looks like this:</li>
+</ul>
+<p><img src="https://os.phil-opp.com/cpu-exceptions/function-stack-frame.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="interrupt-frames" class="level2">
+<h2 class="anchored" data-anchor-id="interrupt-frames">Interrupt Frames</h2>
+<p>For exception and interrupt handlers: - Pushing a return address would not suffice, - Interrupt handlers often run in a different context (stack pointer, CPU flags, etc.). - Providing return values is not ideal. - Whatever code executed during the interrupt is not anticipating alterations to its register state</p>
+</section>
+<section id="step-0" class="level2">
+<h2 class="anchored" data-anchor-id="step-0">Step 0</h2>
+<ol start="0" type="1">
+<li>Saving the old stack pointer</li>
+</ol>
+<p>The CPU reads the stack pointer (<strong>RSP</strong>) and stack segment (<strong>SS</strong>) register values to a safe memory location.</p>
+</section>
+<section id="step-1" class="level2">
+<h2 class="anchored" data-anchor-id="step-1">Step 1</h2>
+<ol start="0" type="1">
+<li>Saving the old stack pointer</li>
+<li>Aligning the stack pointer</li>
+</ol>
+<p>Some CPU instructions require that the stack pointer be aligned on a 16-byte boundary, so the CPU performs such an alignment right after the interrupt.</p>
+</section>
+<section id="step-2" class="level2">
+<h2 class="anchored" data-anchor-id="step-2">Step 2</h2>
+<ol start="0" type="1">
+<li>Saving the old stack pointer</li>
+<li>Aligning the stack pointer</li>
+<li>Switching stacks</li>
+</ol>
+<p>An exception may require a change in privilege level (e.g.&nbsp;user to OS). Conditionally switch to the “<em>Interrupt Stack Table</em>” (next lecture).</p>
+</section>
+<section id="step-3" class="level2">
+<h2 class="anchored" data-anchor-id="step-3">Step 3</h2>
+<ol start="0" type="1">
+<li>Saving the old stack pointer</li>
+<li>Aligning the stack pointer</li>
+<li>Switching stacks</li>
+<li>Pushing the old stack pointer</li>
+</ol>
+<p>The CPU pushes the stack pointer (<strong>RSP</strong>) and stack segment (<strong>SS</strong>) register values from step 0 to the stack to restore the stack pointer on return.</p>
+</section>
+<section id="step-3.1" class="level2">
+<h2 class="anchored" data-anchor-id="step-3.1">Step 3.1</h2>
+<ol type="1">
+<li>Aligning the stack pointer</li>
+<li>Switching stacks</li>
+<li>Pushing the old stack pointer and the <strong>RFLAGS</strong> register:</li>
+</ol>
+<p>On interrupt entry, the original <strong>RFLAGS</strong> is probably not appropriate - save it and get a new one.</p>
+</section>
+<section id="step-3.2" class="level2">
+<h2 class="anchored" data-anchor-id="step-3.2">Step 3.2</h2>
+<ol type="1">
+<li>Aligning the stack pointer</li>
+<li>Switching stacks</li>
+<li>Push in order <strong>RSP</strong>, <strong>SS</strong>, <strong>RFLAGS</strong> and the instruction pointer:</li>
+</ol>
+<p>On return, it is important to restore not just data (the stack pointer) but also instruction pointer (<strong>RIP</strong> and the code segment <strong>CS</strong>).</p>
+</section>
+<section id="step-3.3" class="level2">
+<h2 class="anchored" data-anchor-id="step-3.3">Step 3.3</h2>
+<ol type="1">
+<li>Aligning the stack pointer</li>
+<li>Switching stacks</li>
+<li>Push in order <strong>RSP</strong>, <strong>SS</strong>, <strong>RFLAGS</strong>, <strong>RIP</strong>, <strong>CS</strong> and… conditionally an error code.</li>
+</ol>
+<p>For some specific exceptions, such as page faults, the CPU pushes an error code, which describes the cause of the exception.</p>
+</section>
+<section id="step-4" class="level2">
+<h2 class="anchored" data-anchor-id="step-4">Step 4</h2>
+<ol type="1">
+<li>Aligning the stack pointer</li>
+<li>Switching stacks</li>
+<li>Push in order <strong>RSP</strong>, <strong>SS</strong>, <strong>RFLAGS</strong>, <strong>RIP</strong>, <strong>CS</strong> etc.</li>
+<li>Invoking the interrupt handler</li>
+</ol>
+<p>The CPU reads the address and the segment descriptor of the interrupt handler function from the corresponding field in the IDT and loads the values into <strong>RIP</strong> and <strong>CS</strong>.</p>
+</section>
+<section id="visually-1" class="level2">
+<h2 class="anchored" data-anchor-id="visually-1">Visually</h2>
+<ul>
+<li>The “interrupt stack frame”:</li>
+</ul>
+<p><img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)"></p>
+</section>
+</section>
+<section id="crates-for-days" class="level1">
+<h1>Crates for Days</h1>
+<section id="handwaving" class="level2">
+<h2 class="anchored" data-anchor-id="handwaving">Handwaving</h2>
+<ul>
+<li>The <code>x86-interrupt</code> calling convention is a powerful abstraction that hides almost all of the messy details of the exception handling process.</li>
+<li>However, sometimes it’s useful to know what’s happening behind the curtain.</li>
+<li>Briefly, what we handwave.</li>
+</ul>
+</section>
+<section id="retrieving-the-arguments" class="level2">
+<h2 class="anchored" data-anchor-id="retrieving-the-arguments">Retrieving the arguments</h2>
+<ul>
+<li>Most calling conventions expect that the arguments are passed in registers</li>
+<li>This is not possible for exception handlers since we must not overwrite any register values before backing them up on the stack</li>
+<li>Instead, the <code>x86-interrupt</code> calling convention is aware that the arguments already lie on the stack at a specific offset</li>
+</ul>
+</section>
+<section id="returning-using-iretq" class="level2">
+<h2 class="anchored" data-anchor-id="returning-using-iretq">Returning using <code>iretq</code></h2>
+<ul>
+<li>Since the interrupt stack frame completely differs from stack frames of normal function calls, we can’t return from handler functions through the normal <code>ret</code> instruction</li>
+<li>So instead, the <code>iretq</code> instruction must be used
+<ul>
+<li>You’ll never guess what <code>q</code> stands for…</li>
+<li>Quad word, it’s the 64 bit <code>iret</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="handling-the-error-code" class="level2">
+<h2 class="anchored" data-anchor-id="handling-the-error-code">Handling the error code</h2>
+<ul>
+<li>Conditional error codes complicate matters:
+<ul>
+<li>Conditional arguments.</li>
+<li>Stack alignment.</li>
+<li>Return pops.</li>
+</ul></li>
+<li>So code must use the correct function type for each exception</li>
+<li>Luckily, the <code>InterruptDescriptorTable</code> type does so.</li>
+</ul>
+</section>
+<section id="aligning-the-stack" class="level2">
+<h2 class="anchored" data-anchor-id="aligning-the-stack">Aligning the stack</h2>
+<ul>
+<li>Some instructions (especially SSE instructions) require a 16-byte stack alignment</li>
+<li>The CPU ensures this alignment whenever an exception occurs, but for some exceptions it destroys it again later when it pushes an error code</li>
+<li>The <code>x86-interrupt</code> calling convention takes care of this by realigning the stack in this case</li>
+</ul>
+</section>
+<section id="read-more" class="level2">
+<h2 class="anchored" data-anchor-id="read-more">Read more</h2>
+<ul>
+<li>There is a “hard mode” version of exception handling.</li>
+<li><a href="https://os.phil-opp.com/edition-1/extra/naked-exceptions/">Read more</a></li>
+</ul>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>Fin</h1>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./70_except.html" class="pagination-link" aria-label="Exceptions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Exceptions</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./72_handlers.html" class="pagination-link" aria-label="Handlers">
+        <span class="nav-page-text">Handlers</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">---</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="an">title:</span><span class="co"> The Call</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a><span class="co">---</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a></span>
+<span id="cb2-5"><a href="#cb2-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="ss">- </span>Special bonus lecture.</span>
+<span id="cb2-8"><a href="#cb2-8"></a><span class="ss">    - </span>Exceptions have too much theory content.</span>
+<span id="cb2-9"><a href="#cb2-9"></a><span class="ss">    - </span>No <span class="in">`71`</span> lab crate required this week.</span>
+<span id="cb2-10"><a href="#cb2-10"></a><span class="ss">    - </span>Only deliverable is <span class="in">`72`</span> on exception handlers.</span>
+<span id="cb2-11"><a href="#cb2-11"></a></span>
+<span id="cb2-12"><a href="#cb2-12"></a><span class="fu">## Citations</span></span>
+<span id="cb2-13"><a href="#cb2-13"></a></span>
+<span id="cb2-14"><a href="#cb2-14"></a><span class="ss">- </span>CPU exceptions are algorithmically interesting but technically tedius.</span>
+<span id="cb2-15"><a href="#cb2-15"></a><span class="ss">- </span><span class="co">[</span><span class="ot">CPU Exceptions</span><span class="co">](https://os.phil-opp.com/cpu-exceptions/)</span></span>
+<span id="cb2-16"><a href="#cb2-16"></a></span>
+<span id="cb2-17"><a href="#cb2-17"></a><span class="fu"># Recall</span></span>
+<span id="cb2-18"><a href="#cb2-18"></a></span>
+<span id="cb2-19"><a href="#cb2-19"></a><span class="fu">## Calling Conventions</span></span>
+<span id="cb2-20"><a href="#cb2-20"></a></span>
+<span id="cb2-21"><a href="#cb2-21"></a><span class="ss">- </span>At the end of last lecture we introduced *calling conventions*</span>
+<span id="cb2-22"><a href="#cb2-22"></a><span class="ss">    - </span>Typical compiled code follows one conventions.</span>
+<span id="cb2-23"><a href="#cb2-23"></a><span class="ss">    - </span>Exceptions must follow another that is:</span>
+<span id="cb2-24"><a href="#cb2-24"></a><span class="ss">        - </span>Less restrictive but less efficient</span>
+<span id="cb2-25"><a href="#cb2-25"></a><span class="ss">        - </span>Hardware rather than compiler defined</span>
+<span id="cb2-26"><a href="#cb2-26"></a><span class="ss">        - </span>Mediated by the operating system</span>
+<span id="cb2-27"><a href="#cb2-27"></a></span>
+<span id="cb2-28"><a href="#cb2-28"></a><span class="fu">## Exception Handling</span></span>
+<span id="cb2-29"><a href="#cb2-29"></a></span>
+<span id="cb2-30"><a href="#cb2-30"></a>When an exception occurs, the CPU roughly does the following:</span>
+<span id="cb2-31"><a href="#cb2-31"></a></span>
+<span id="cb2-32"><a href="#cb2-32"></a><span class="ss">1. </span>Push some registers on the stack.</span>
+<span id="cb2-33"><a href="#cb2-33"></a><span class="ss">1. </span>Read the corresponding entry from IDT.     </span>
+<span id="cb2-34"><a href="#cb2-34"></a><span class="ss">1. </span>Check entry or raise a double fault.</span>
+<span id="cb2-35"><a href="#cb2-35"></a><span class="ss">1. </span>Perhaps disable hardware interrupts.</span>
+<span id="cb2-36"><a href="#cb2-36"></a><span class="ss">1. </span>Update the CS (code segment).</span>
+<span id="cb2-37"><a href="#cb2-37"></a><span class="ss">1. </span>Jump to the specified handler function.</span>
+<span id="cb2-38"><a href="#cb2-38"></a></span>
+<span id="cb2-39"><a href="#cb2-39"></a><span class="fu">## Registers</span></span>
+<span id="cb2-40"><a href="#cb2-40"></a></span>
+<span id="cb2-41"><a href="#cb2-41"></a><span class="ss">- </span>We briefly go over some architecture so we can refer back to it.</span>
+<span id="cb2-42"><a href="#cb2-42"></a><span class="ss">    - </span>The code segment.</span>
+<span id="cb2-43"><a href="#cb2-43"></a><span class="ss">    - </span>The stack pointer.</span>
+<span id="cb2-44"><a href="#cb2-44"></a><span class="ss">    - </span>General purpose registers.</span>
+<span id="cb2-45"><a href="#cb2-45"></a><span class="ss">    - </span>And more!</span>
+<span id="cb2-46"><a href="#cb2-46"></a></span>
+<span id="cb2-47"><a href="#cb2-47"></a><span class="fu"># Registers</span></span>
+<span id="cb2-48"><a href="#cb2-48"></a></span>
+<span id="cb2-49"><a href="#cb2-49"></a><span class="fu">## x86 registers</span></span>
+<span id="cb2-50"><a href="#cb2-50"></a></span>
+<span id="cb2-51"><a href="#cb2-51"></a><span class="ss">- </span>We recall the RFLAGS register.</span>
+<span id="cb2-52"><a href="#cb2-52"></a><span class="ss">- </span>There are <span class="co">[</span><span class="ot">many x86 registers</span><span class="co">](https://commons.wikimedia.org/wiki/File:Table_of_x86_Registers_svg.svg)</span>.</span>
+<span id="cb2-53"><a href="#cb2-53"></a></span>
+<span id="cb2-54"><a href="#cb2-54"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb2-55"><a href="#cb2-55"></a></span>
+<span id="cb2-56"><a href="#cb2-56"></a><span class="fu">## Some Examples</span></span>
+<span id="cb2-57"><a href="#cb2-57"></a></span>
+<span id="cb2-58"><a href="#cb2-58"></a><span class="ss">- </span>**ZMM0** is a vector register, and enormous (512 bytes)</span>
+<span id="cb2-59"><a href="#cb2-59"></a><span class="ss">    - </span>It contains half and quarter registers **YMM0** and **XMM0**</span>
+<span id="cb2-60"><a href="#cb2-60"></a></span>
+<span id="cb2-61"><a href="#cb2-61"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb2-62"><a href="#cb2-62"></a></span>
+<span id="cb2-63"><a href="#cb2-63"></a></span>
+<span id="cb2-64"><a href="#cb2-64"></a><span class="fu">## Some Examples</span></span>
+<span id="cb2-65"><a href="#cb2-65"></a></span>
+<span id="cb2-66"><a href="#cb2-66"></a><span class="ss">- </span>**ST(0)** is a combined SIMD/float register as is MM0.</span>
+<span id="cb2-67"><a href="#cb2-67"></a><span class="ss">    - </span>We recall some uproar over using software floats when disabling SIMD.</span>
+<span id="cb2-68"><a href="#cb2-68"></a></span>
+<span id="cb2-69"><a href="#cb2-69"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb2-70"><a href="#cb2-70"></a></span>
+<span id="cb2-71"><a href="#cb2-71"></a><span class="fu">## Some Examples</span></span>
+<span id="cb2-72"><a href="#cb2-72"></a></span>
+<span id="cb2-73"><a href="#cb2-73"></a><span class="ss">- </span>**?AX** are the 8, 16, 32, and 64 bit general purpose "X" registers.</span>
+<span id="cb2-74"><a href="#cb2-74"></a><span class="ss">    - </span>Names change as 8-bit devices had both smaller and fewer registers.    </span>
+<span id="cb2-75"><a href="#cb2-75"></a></span>
+<span id="cb2-76"><a href="#cb2-76"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb2-77"><a href="#cb2-77"></a></span>
+<span id="cb2-78"><a href="#cb2-78"></a><span class="fu">## Some Examples</span></span>
+<span id="cb2-79"><a href="#cb2-79"></a></span>
+<span id="cb2-80"><a href="#cb2-80"></a><span class="ss">- </span>Most ending in "P" are stack or interrupt or debug or etc. pointers.</span>
+<span id="cb2-81"><a href="#cb2-81"></a><span class="ss">- </span>Most ending in "S" are segment or backup segment registers.  </span>
+<span id="cb2-82"><a href="#cb2-82"></a></span>
+<span id="cb2-83"><a href="#cb2-83"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb2-84"><a href="#cb2-84"></a></span>
+<span id="cb2-85"><a href="#cb2-85"></a><span class="fu">## Some Examples</span></span>
+<span id="cb2-86"><a href="#cb2-86"></a></span>
+<span id="cb2-87"><a href="#cb2-87"></a><span class="ss">- </span>"CR" registers are hardware specific control registers.</span>
+<span id="cb2-88"><a href="#cb2-88"></a><span class="ss">- </span>"DR" registers are debug registers. </span>
+<span id="cb2-89"><a href="#cb2-89"></a></span>
+<span id="cb2-90"><a href="#cb2-90"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)"&gt;</span>
+<span id="cb2-91"><a href="#cb2-91"></a></span>
+<span id="cb2-92"><a href="#cb2-92"></a><span class="fu"># Back to work</span></span>
+<span id="cb2-93"><a href="#cb2-93"></a></span>
+<span id="cb2-94"><a href="#cb2-94"></a><span class="fu">## Calling Conventions</span></span>
+<span id="cb2-95"><a href="#cb2-95"></a></span>
+<span id="cb2-96"><a href="#cb2-96"></a><span class="ss">- </span>Return to the level of languages.</span>
+<span id="cb2-97"><a href="#cb2-97"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Calling conventions</span><span class="co">](https://en.wikipedia.org/wiki/Calling_convention)</span> specify the details of a function call.</span>
+<span id="cb2-98"><a href="#cb2-98"></a><span class="ss">    - </span>Where the arguments are, for example.</span>
+<span id="cb2-99"><a href="#cb2-99"></a><span class="ss">    - </span>Whether the function gets a new stack.</span>
+<span id="cb2-100"><a href="#cb2-100"></a><span class="ss">    - </span>What happens when you return.</span>
+<span id="cb2-101"><a href="#cb2-101"></a><span class="ss">- </span>On x86_64 Linux, the following rules apply for C functions (specified in the <span class="co">[</span><span class="ot">System V ABI</span><span class="co">](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf)</span>)</span>
+<span id="cb2-102"><a href="#cb2-102"></a></span>
+<span id="cb2-103"><a href="#cb2-103"></a></span>
+<span id="cb2-104"><a href="#cb2-104"></a><span class="fu">### Preserved/Scratch</span></span>
+<span id="cb2-105"><a href="#cb2-105"></a></span>
+<span id="cb2-106"><a href="#cb2-106"></a><span class="ss">- </span>The calling convention divides the registers into two parts:</span>
+<span id="cb2-107"><a href="#cb2-107"></a><span class="ss">    - </span>_preserved_ registers, and </span>
+<span id="cb2-108"><a href="#cb2-108"></a><span class="ss">    - </span>_scratch_ registers.</span>
+<span id="cb2-109"><a href="#cb2-109"></a>    </span>
+<span id="cb2-110"><a href="#cb2-110"></a><span class="fu">## Preserved Registers</span></span>
+<span id="cb2-111"><a href="#cb2-111"></a></span>
+<span id="cb2-112"><a href="#cb2-112"></a><span class="ss">- </span>The values of _preserved_ registers must remain unchanged across function calls. </span>
+<span id="cb2-113"><a href="#cb2-113"></a><span class="ss">    - </span>Not "at all times", only "across function calls.</span>
+<span id="cb2-114"><a href="#cb2-114"></a><span class="ss">    - </span>You can use them temporarily by popping onto stack and then pushing back to register before returning. </span>
+<span id="cb2-115"><a href="#cb2-115"></a><span class="ss">- </span>Refer to these as _“callee-saved”_</span>
+<span id="cb2-116"><a href="#cb2-116"></a><span class="ss">    - </span>The _"callee"_ is the function that... was called.</span>
+<span id="cb2-117"><a href="#cb2-117"></a>    </span>
+<span id="cb2-118"><a href="#cb2-118"></a><span class="fu">## Scratch Registers</span></span>
+<span id="cb2-119"><a href="#cb2-119"></a></span>
+<span id="cb2-120"><a href="#cb2-120"></a><span class="ss">- </span>A called function is allowed to overwrite _scratch_ registers without restrictions.</span>
+<span id="cb2-121"><a href="#cb2-121"></a><span class="ss">    - </span>If a caller wants to keep a value, it has to push the value to its own (the caller) stack.</span>
+<span id="cb2-122"><a href="#cb2-122"></a><span class="ss">    - </span>The stack will be maintained across function calles.</span>
+<span id="cb2-123"><a href="#cb2-123"></a><span class="ss">- </span>Refer to these as _caller-saved_</span>
+<span id="cb2-124"><a href="#cb2-124"></a></span>
+<span id="cb2-125"><a href="#cb2-125"></a><span class="fu">## Interrupt Calling Convention</span></span>
+<span id="cb2-126"><a href="#cb2-126"></a></span>
+<span id="cb2-127"><a href="#cb2-127"></a><span class="ss">- </span>The first *six* integer arguments are passed in registers **RDI**, **RSI**, **RDX**, **RCX**, **R8**, **R9**</span>
+<span id="cb2-128"><a href="#cb2-128"></a><span class="ss">    - </span>When we say integer we mean 64 bit, as those are 64 bit registers.</span>
+<span id="cb2-129"><a href="#cb2-129"></a><span class="ss">    - </span>Cue my rant about Rust <span class="in">`i32`</span> default.</span>
+<span id="cb2-130"><a href="#cb2-130"></a><span class="ss">- </span>Additional arguments are passed on the stack</span>
+<span id="cb2-131"><a href="#cb2-131"></a><span class="ss">- </span>Results are returned in **RAX** and **RDX**</span>
+<span id="cb2-132"><a href="#cb2-132"></a><span class="ss">    - </span>Not on the stack!</span>
+<span id="cb2-133"><a href="#cb2-133"></a>    </span>
+<span id="cb2-134"><a href="#cb2-134"></a><span class="fu">## Default Calling Convention</span></span>
+<span id="cb2-135"><a href="#cb2-135"></a></span>
+<span id="cb2-136"><a href="#cb2-136"></a><span class="ss">- </span>The <span class="co">[</span><span class="ot">default calling convention</span><span class="co">](https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170)</span> differs slightly.</span>
+<span id="cb2-137"><a href="#cb2-137"></a><span class="ss">    - </span>The x87 register stack is unused. </span>
+<span id="cb2-138"><a href="#cb2-138"></a><span class="ss">    - </span>Integer arguments are passed in registers **RCX**, **RDX**, **R8**, and **R9**.</span>
+<span id="cb2-139"><a href="#cb2-139"></a><span class="ss">        - </span>That is, not **RDI** and **RSI**</span>
+<span id="cb2-140"><a href="#cb2-140"></a><span class="ss">    - </span>*Floating point* arguments are passed in **XMM0L**, **XMM1L**, **XMM2L**, and **XMM3L**.</span>
+<span id="cb2-141"><a href="#cb2-141"></a></span>
+<span id="cb2-142"><a href="#cb2-142"></a><span class="fu">## Rust Calling Convention</span></span>
+<span id="cb2-143"><a href="#cb2-143"></a></span>
+<span id="cb2-144"><a href="#cb2-144"></a><span class="ss">- </span>It doesn't have one.</span>
+<span id="cb2-145"><a href="#cb2-145"></a><span class="ss">- </span><span class="co">[</span><span class="ot">GitHub RFC</span><span class="co">](https://github.com/rust-lang/rfcs/issues/600)</span></span>
+<span id="cb2-146"><a href="#cb2-146"></a><span class="ss">- </span>Oh maybe that's why we have to use <span class="in">`extern "C"`</span> all the time.</span>
+<span id="cb2-147"><a href="#cb2-147"></a><span class="ss">- </span>Rust: Possibly up to half of a language.</span>
+<span id="cb2-148"><a href="#cb2-148"></a></span>
+<span id="cb2-149"><a href="#cb2-149"></a><span class="fu">## C Calling Convention</span></span>
+<span id="cb2-150"><a href="#cb2-150"></a></span>
+<span id="cb2-151"><a href="#cb2-151"></a>| preserved registers                             | scratch registers                                           |</span>
+<span id="cb2-152"><a href="#cb2-152"></a>| ----------------------------------------------- | ----------------------------------------------------------- |</span>
+<span id="cb2-153"><a href="#cb2-153"></a>| <span class="in">`rbp`</span>, <span class="in">`rbx`</span>, <span class="in">`rsp`</span>, <span class="in">`r12`</span>, <span class="in">`r13`</span>, <span class="in">`r14`</span>, <span class="in">`r15`</span> | <span class="in">`rax`</span>, <span class="in">`rcx`</span>, <span class="in">`rdx`</span>, <span class="in">`rsi`</span>, <span class="in">`rdi`</span>, <span class="in">`r8`</span>, <span class="in">`r9`</span>, <span class="in">`r10`</span>, <span class="in">`r11`</span> |</span>
+<span id="cb2-154"><a href="#cb2-154"></a>| _callee-saved_                                  | _caller-saved_ |</span>
+<span id="cb2-155"><a href="#cb2-155"></a></span>
+<span id="cb2-156"><a href="#cb2-156"></a>Compiled C code will necessarily respect this convention (or it isn't C code).</span>
+<span id="cb2-157"><a href="#cb2-157"></a></span>
+<span id="cb2-158"><a href="#cb2-158"></a><span class="fu">## Exceptions</span></span>
+<span id="cb2-159"><a href="#cb2-159"></a></span>
+<span id="cb2-160"><a href="#cb2-160"></a><span class="ss">- </span>In contrast to function calls, exceptions can occur on _any_ instruction. </span>
+<span id="cb2-161"><a href="#cb2-161"></a><span class="ss">- </span>In most cases, we don't even know at compile time if the generated code will cause an exception. </span>
+<span id="cb2-162"><a href="#cb2-162"></a><span class="ss">- </span>For example, the compiler can't know if an instruction causes a stack overflow or a page fault.</span>
+<span id="cb2-163"><a href="#cb2-163"></a></span>
+<span id="cb2-164"><a href="#cb2-164"></a><span class="fu">## Can't Backup</span></span>
+<span id="cb2-165"><a href="#cb2-165"></a></span>
+<span id="cb2-166"><a href="#cb2-166"></a><span class="ss">- </span>Exceptions can't use a calling convention that relies on caller-saved registers for exception handlers. </span>
+<span id="cb2-167"><a href="#cb2-167"></a><span class="ss">- </span>Instead, preserve _all registers_. </span>
+<span id="cb2-168"><a href="#cb2-168"></a><span class="ss">- </span>The <span class="in">`x86-interrupt`</span> calling convention is such a calling convention.</span>
+<span id="cb2-169"><a href="#cb2-169"></a><span class="ss">    - </span>It guarantees that all register values are restored to their original values on function return.</span>
+<span id="cb2-170"><a href="#cb2-170"></a>    </span>
+<span id="cb2-171"><a href="#cb2-171"></a><span class="fu">## Recall</span></span>
+<span id="cb2-172"><a href="#cb2-172"></a></span>
+<span id="cb2-173"><a href="#cb2-173"></a><span class="ss">- </span><span class="in">`HandlerFunc`</span> definition:</span>
+<span id="cb2-174"><a href="#cb2-174"></a></span>
+<span id="cb2-175"><a href="#cb2-175"></a><span class="in">```{.rs}</span></span>
+<span id="cb2-176"><a href="#cb2-176"></a><span class="in">type HandlerFunc = extern "x86-interrupt" fn(_: InterruptStackFrame);</span></span>
+<span id="cb2-177"><a href="#cb2-177"></a><span class="in">```</span></span>
+<span id="cb2-178"><a href="#cb2-178"></a></span>
+<span id="cb2-179"><a href="#cb2-179"></a><span class="ss">- </span>That's a function alright.</span>
+<span id="cb2-180"><a href="#cb2-180"></a><span class="ss">    - </span>A <span class="co">[</span><span class="ot">type alias</span><span class="co">](https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases)</span> for an <span class="in">`extern "x86-interrupt" fn`</span> type</span>
+<span id="cb2-181"><a href="#cb2-181"></a><span class="ss">    - </span>Usually use <span class="in">`extern`</span> for C, here we use it to interface with hardware.</span>
+<span id="cb2-182"><a href="#cb2-182"></a></span>
+<span id="cb2-183"><a href="#cb2-183"></a><span class="fu">## In Practice</span></span>
+<span id="cb2-184"><a href="#cb2-184"></a></span>
+<span id="cb2-185"><a href="#cb2-185"></a><span class="ss">- </span>The compiler only backs up the registers that are overwritten by the function. </span>
+<span id="cb2-186"><a href="#cb2-186"></a><span class="ss">    - </span>In e.g. conditional branches, can "just in time" pop registers to stack immediately before using them.</span>
+<span id="cb2-187"><a href="#cb2-187"></a><span class="ss">    - </span>More overhead but more efficient.</span>
+<span id="cb2-188"><a href="#cb2-188"></a><span class="ss">- </span>This way, very efficient code can be generated for short functions that only use a few registers.</span>
+<span id="cb2-189"><a href="#cb2-189"></a></span>
+<span id="cb2-190"><a href="#cb2-190"></a><span class="fu">## Stack Frames</span></span>
+<span id="cb2-191"><a href="#cb2-191"></a></span>
+<span id="cb2-192"><a href="#cb2-192"></a><span class="ss">- </span>On a normal function call (using the <span class="in">`call`</span> instruction), the CPU pushes the return address before jumping to the target function. </span>
+<span id="cb2-193"><a href="#cb2-193"></a><span class="ss">- </span>On function return (using the <span class="in">`ret`</span> instruction), the CPU pops this return address and jumps to it. </span>
+<span id="cb2-194"><a href="#cb2-194"></a></span>
+<span id="cb2-195"><a href="#cb2-195"></a><span class="fu">## Visually</span></span>
+<span id="cb2-196"><a href="#cb2-196"></a></span>
+<span id="cb2-197"><a href="#cb2-197"></a><span class="ss">- </span>The "stack frame" of a normal function call looks like this:</span>
+<span id="cb2-198"><a href="#cb2-198"></a></span>
+<span id="cb2-199"><a href="#cb2-199"></a>&lt;img src="https://os.phil-opp.com/cpu-exceptions/function-stack-frame.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb2-200"><a href="#cb2-200"></a></span>
+<span id="cb2-201"><a href="#cb2-201"></a><span class="fu">## Interrupt Frames</span></span>
+<span id="cb2-202"><a href="#cb2-202"></a></span>
+<span id="cb2-203"><a href="#cb2-203"></a>For exception and interrupt handlers:</span>
+<span id="cb2-204"><a href="#cb2-204"></a><span class="ss">    - </span>Pushing a return address would not suffice, </span>
+<span id="cb2-205"><a href="#cb2-205"></a><span class="ss">        - </span>Interrupt handlers often run in a different context (stack pointer, CPU flags, etc.). </span>
+<span id="cb2-206"><a href="#cb2-206"></a><span class="ss">    - </span>Providing return values is not ideal.</span>
+<span id="cb2-207"><a href="#cb2-207"></a><span class="ss">        - </span>Whatever code executed during the interrupt is not anticipating alterations to its register state</span>
+<span id="cb2-208"><a href="#cb2-208"></a>        </span>
+<span id="cb2-209"><a href="#cb2-209"></a><span class="fu">## Step 0</span></span>
+<span id="cb2-210"><a href="#cb2-210"></a></span>
+<span id="cb2-211"><a href="#cb2-211"></a><span class="ss">0. </span>Saving the old stack pointer</span>
+<span id="cb2-212"><a href="#cb2-212"></a></span>
+<span id="cb2-213"><a href="#cb2-213"></a>The CPU reads the stack pointer (**RSP**) and stack segment (**SS**) register values to a safe memory location.</span>
+<span id="cb2-214"><a href="#cb2-214"></a>        </span>
+<span id="cb2-215"><a href="#cb2-215"></a><span class="fu">## Step 1</span></span>
+<span id="cb2-216"><a href="#cb2-216"></a></span>
+<span id="cb2-217"><a href="#cb2-217"></a><span class="ss">0. </span>Saving the old stack pointer</span>
+<span id="cb2-218"><a href="#cb2-218"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-219"><a href="#cb2-219"></a></span>
+<span id="cb2-220"><a href="#cb2-220"></a>Some CPU instructions require that the stack pointer be aligned on a 16-byte boundary, so the CPU performs such an alignment right after the interrupt.</span>
+<span id="cb2-221"><a href="#cb2-221"></a></span>
+<span id="cb2-222"><a href="#cb2-222"></a><span class="fu">## Step 2</span></span>
+<span id="cb2-223"><a href="#cb2-223"></a></span>
+<span id="cb2-224"><a href="#cb2-224"></a><span class="ss">0. </span>Saving the old stack pointer</span>
+<span id="cb2-225"><a href="#cb2-225"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-226"><a href="#cb2-226"></a><span class="ss">2. </span>Switching stacks</span>
+<span id="cb2-227"><a href="#cb2-227"></a></span>
+<span id="cb2-228"><a href="#cb2-228"></a>An exception may require a change in privilege level (e.g. user to OS). Conditionally switch to the "_Interrupt Stack Table_" (next lecture).</span>
+<span id="cb2-229"><a href="#cb2-229"></a></span>
+<span id="cb2-230"><a href="#cb2-230"></a><span class="fu">## Step 3</span></span>
+<span id="cb2-231"><a href="#cb2-231"></a></span>
+<span id="cb2-232"><a href="#cb2-232"></a><span class="ss">0. </span>Saving the old stack pointer</span>
+<span id="cb2-233"><a href="#cb2-233"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-234"><a href="#cb2-234"></a><span class="ss">2. </span>Switching stacks</span>
+<span id="cb2-235"><a href="#cb2-235"></a><span class="ss">3. </span>Pushing the old stack pointer</span>
+<span id="cb2-236"><a href="#cb2-236"></a></span>
+<span id="cb2-237"><a href="#cb2-237"></a>The CPU pushes the stack pointer (**RSP**) and stack segment (**SS**) register values from step 0 to the stack to restore the stack pointer on return.</span>
+<span id="cb2-238"><a href="#cb2-238"></a></span>
+<span id="cb2-239"><a href="#cb2-239"></a><span class="fu">## Step 3.1</span></span>
+<span id="cb2-240"><a href="#cb2-240"></a></span>
+<span id="cb2-241"><a href="#cb2-241"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-242"><a href="#cb2-242"></a><span class="ss">2. </span>Switching stacks</span>
+<span id="cb2-243"><a href="#cb2-243"></a><span class="ss">3. </span>Pushing the old stack pointer and the **RFLAGS** register: </span>
+<span id="cb2-244"><a href="#cb2-244"></a></span>
+<span id="cb2-245"><a href="#cb2-245"></a>On interrupt entry, the original **RFLAGS** is probably not appropriate - save it and get a new one.</span>
+<span id="cb2-246"><a href="#cb2-246"></a></span>
+<span id="cb2-247"><a href="#cb2-247"></a><span class="fu">## Step 3.2</span></span>
+<span id="cb2-248"><a href="#cb2-248"></a></span>
+<span id="cb2-249"><a href="#cb2-249"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-250"><a href="#cb2-250"></a><span class="ss">2. </span>Switching stacks</span>
+<span id="cb2-251"><a href="#cb2-251"></a><span class="ss">3. </span>Push in order **RSP**, **SS**, **RFLAGS** and the instruction pointer: </span>
+<span id="cb2-252"><a href="#cb2-252"></a></span>
+<span id="cb2-253"><a href="#cb2-253"></a>On return, it is important to restore not just data (the stack pointer) but also instruction pointer (**RIP** and the code segment **CS**).</span>
+<span id="cb2-254"><a href="#cb2-254"></a></span>
+<span id="cb2-255"><a href="#cb2-255"></a><span class="fu">## Step 3.3</span></span>
+<span id="cb2-256"><a href="#cb2-256"></a></span>
+<span id="cb2-257"><a href="#cb2-257"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-258"><a href="#cb2-258"></a><span class="ss">2. </span>Switching stacks</span>
+<span id="cb2-259"><a href="#cb2-259"></a><span class="ss">3. </span>Push in order **RSP**, **SS**, **RFLAGS**, **RIP**, **CS** and... conditionally an error code. </span>
+<span id="cb2-260"><a href="#cb2-260"></a></span>
+<span id="cb2-261"><a href="#cb2-261"></a>For some specific exceptions, such as page faults, the CPU pushes an error code, which describes the cause of the exception.</span>
+<span id="cb2-262"><a href="#cb2-262"></a></span>
+<span id="cb2-263"><a href="#cb2-263"></a><span class="fu">## Step 4</span></span>
+<span id="cb2-264"><a href="#cb2-264"></a></span>
+<span id="cb2-265"><a href="#cb2-265"></a><span class="ss">1. </span>Aligning the stack pointer</span>
+<span id="cb2-266"><a href="#cb2-266"></a><span class="ss">2. </span>Switching stacks</span>
+<span id="cb2-267"><a href="#cb2-267"></a><span class="ss">3. </span>Push in order **RSP**, **SS**, **RFLAGS**, **RIP**, **CS** etc. </span>
+<span id="cb2-268"><a href="#cb2-268"></a><span class="ss">4. </span>Invoking the interrupt handler</span>
+<span id="cb2-269"><a href="#cb2-269"></a></span>
+<span id="cb2-270"><a href="#cb2-270"></a>The CPU reads the address and the segment descriptor of the interrupt handler function from the corresponding field in the IDT and loads the values into **RIP** and **CS**.</span>
+<span id="cb2-271"><a href="#cb2-271"></a></span>
+<span id="cb2-272"><a href="#cb2-272"></a><span class="fu">## Visually</span></span>
+<span id="cb2-273"><a href="#cb2-273"></a></span>
+<span id="cb2-274"><a href="#cb2-274"></a><span class="ss">- </span>The "interrupt stack frame":</span>
+<span id="cb2-275"><a href="#cb2-275"></a></span>
+<span id="cb2-276"><a href="#cb2-276"></a>&lt;img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb2-277"><a href="#cb2-277"></a></span>
+<span id="cb2-278"><a href="#cb2-278"></a><span class="fu"># Crates for Days</span></span>
+<span id="cb2-279"><a href="#cb2-279"></a></span>
+<span id="cb2-280"><a href="#cb2-280"></a><span class="fu">## Handwaving</span></span>
+<span id="cb2-281"><a href="#cb2-281"></a></span>
+<span id="cb2-282"><a href="#cb2-282"></a><span class="ss">- </span>The <span class="in">`x86-interrupt`</span> calling convention is a powerful abstraction that hides almost all of the messy details of the exception handling process. </span>
+<span id="cb2-283"><a href="#cb2-283"></a><span class="ss">- </span>However, sometimes it's useful to know what's happening behind the curtain. </span>
+<span id="cb2-284"><a href="#cb2-284"></a><span class="ss">- </span>Briefly, what we handwave.</span>
+<span id="cb2-285"><a href="#cb2-285"></a></span>
+<span id="cb2-286"><a href="#cb2-286"></a><span class="fu">## Retrieving the arguments</span></span>
+<span id="cb2-287"><a href="#cb2-287"></a></span>
+<span id="cb2-288"><a href="#cb2-288"></a><span class="ss">- </span>Most calling conventions expect that the arguments are passed in registers</span>
+<span id="cb2-289"><a href="#cb2-289"></a><span class="ss">- </span>This is not possible for exception handlers since we must not overwrite any register values before backing them up on the stack</span>
+<span id="cb2-290"><a href="#cb2-290"></a><span class="ss">- </span>Instead, the <span class="in">`x86-interrupt`</span> calling convention is aware that the arguments already lie on the stack at a specific offset</span>
+<span id="cb2-291"><a href="#cb2-291"></a></span>
+<span id="cb2-292"><a href="#cb2-292"></a><span class="fu">## Returning using `iretq`</span></span>
+<span id="cb2-293"><a href="#cb2-293"></a></span>
+<span id="cb2-294"><a href="#cb2-294"></a><span class="ss">- </span>Since the interrupt stack frame completely differs from stack frames of normal function calls, we can't return from handler functions through the normal <span class="in">`ret`</span> instruction</span>
+<span id="cb2-295"><a href="#cb2-295"></a><span class="ss">- </span>So instead, the <span class="in">`iretq`</span> instruction must be used</span>
+<span id="cb2-296"><a href="#cb2-296"></a><span class="ss">    - </span>You'll never guess what <span class="in">`q`</span> stands for...</span>
+<span id="cb2-297"><a href="#cb2-297"></a><span class="ss">    - </span>Quad word, it's the 64 bit <span class="in">`iret`</span></span>
+<span id="cb2-298"><a href="#cb2-298"></a></span>
+<span id="cb2-299"><a href="#cb2-299"></a></span>
+<span id="cb2-300"><a href="#cb2-300"></a><span class="fu">## Handling the error code</span></span>
+<span id="cb2-301"><a href="#cb2-301"></a></span>
+<span id="cb2-302"><a href="#cb2-302"></a><span class="ss">- </span>Conditional error codes complicate matters:</span>
+<span id="cb2-303"><a href="#cb2-303"></a><span class="ss">    - </span>Conditional arguments.</span>
+<span id="cb2-304"><a href="#cb2-304"></a><span class="ss">    - </span>Stack alignment.</span>
+<span id="cb2-305"><a href="#cb2-305"></a><span class="ss">    - </span>Return pops.</span>
+<span id="cb2-306"><a href="#cb2-306"></a><span class="ss">- </span>So code must use the correct function type for each exception</span>
+<span id="cb2-307"><a href="#cb2-307"></a><span class="ss">- </span>Luckily, the <span class="in">`InterruptDescriptorTable`</span> type does so.</span>
+<span id="cb2-308"><a href="#cb2-308"></a></span>
+<span id="cb2-309"><a href="#cb2-309"></a><span class="fu">## Aligning the stack</span></span>
+<span id="cb2-310"><a href="#cb2-310"></a></span>
+<span id="cb2-311"><a href="#cb2-311"></a><span class="ss">- </span>Some instructions (especially SSE instructions) require a 16-byte stack alignment</span>
+<span id="cb2-312"><a href="#cb2-312"></a><span class="ss">- </span>The CPU ensures this alignment whenever an exception occurs, but for some exceptions it destroys it again later when it pushes an error code</span>
+<span id="cb2-313"><a href="#cb2-313"></a><span class="ss">- </span>The <span class="in">`x86-interrupt`</span> calling convention takes care of this by realigning the stack in this case</span>
+<span id="cb2-314"><a href="#cb2-314"></a></span>
+<span id="cb2-315"><a href="#cb2-315"></a><span class="fu">## Read more</span></span>
+<span id="cb2-316"><a href="#cb2-316"></a></span>
+<span id="cb2-317"><a href="#cb2-317"></a><span class="ss">- </span>There is a "hard mode" version of exception handling.</span>
+<span id="cb2-318"><a href="#cb2-318"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://os.phil-opp.com/edition-1/extra/naked-exceptions/)</span></span>
+<span id="cb2-319"><a href="#cb2-319"></a></span>
+<span id="cb2-320"><a href="#cb2-320"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

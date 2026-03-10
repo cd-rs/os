@@ -1,0 +1,320 @@
+---
+title: The Call
+---
+
+## Announcements
+
+- Special bonus lecture.
+    - Exceptions have too much theory content.
+    - No `71` lab crate required this week.
+    - Only deliverable is `72` on exception handlers.
+
+## Citations
+
+- CPU exceptions are algorithmically interesting but technically tedius.
+- [CPU Exceptions](https://os.phil-opp.com/cpu-exceptions/)
+
+# Recall
+
+## Calling Conventions
+
+- At the end of last lecture we introduced *calling conventions*
+    - Typical compiled code follows one conventions.
+    - Exceptions must follow another that is:
+        - Less restrictive but less efficient
+        - Hardware rather than compiler defined
+        - Mediated by the operating system
+
+## Exception Handling
+
+When an exception occurs, the CPU roughly does the following:
+
+1. Push some registers on the stack.
+1. Read the corresponding entry from IDT.     
+1. Check entry or raise a double fault.
+1. Perhaps disable hardware interrupts.
+1. Update the CS (code segment).
+1. Jump to the specified handler function.
+
+## Registers
+
+- We briefly go over some architecture so we can refer back to it.
+    - The code segment.
+    - The stack pointer.
+    - General purpose registers.
+    - And more!
+
+# Registers
+
+## x86 registers
+
+- We recall the RFLAGS register.
+- There are [many x86 registers](https://commons.wikimedia.org/wiki/File:Table_of_x86_Registers_svg.svg).
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- **ZMM0** is a vector register, and enormous (512 bytes)
+    - It contains half and quarter registers **YMM0** and **XMM0**
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+
+## Some Examples
+
+- **ST(0)** is a combined SIMD/float register as is MM0.
+    - We recall some uproar over using software floats when disabling SIMD.
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- **?AX** are the 8, 16, 32, and 64 bit general purpose "X" registers.
+    - Names change as 8-bit devices had both smaller and fewer registers.    
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- Most ending in "P" are stack or interrupt or debug or etc. pointers.
+- Most ending in "S" are segment or backup segment registers.  
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+## Some Examples
+
+- "CR" registers are hardware specific control registers.
+- "DR" registers are debug registers. 
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/15/Table_of_x86_Registers_svg.svg" style="filter:invert(1)">
+
+# Back to work
+
+## Calling Conventions
+
+- Return to the level of languages.
+- [Calling conventions](https://en.wikipedia.org/wiki/Calling_convention) specify the details of a function call.
+    - Where the arguments are, for example.
+    - Whether the function gets a new stack.
+    - What happens when you return.
+- On x86_64 Linux, the following rules apply for C functions (specified in the [System V ABI](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf))
+
+
+### Preserved/Scratch
+
+- The calling convention divides the registers into two parts:
+    - _preserved_ registers, and 
+    - _scratch_ registers.
+    
+## Preserved Registers
+
+- The values of _preserved_ registers must remain unchanged across function calls. 
+    - Not "at all times", only "across function calls.
+    - You can use them temporarily by popping onto stack and then pushing back to register before returning. 
+- Refer to these as _“callee-saved”_
+    - The _"callee"_ is the function that... was called.
+    
+## Scratch Registers
+
+- A called function is allowed to overwrite _scratch_ registers without restrictions.
+    - If a caller wants to keep a value, it has to push the value to its own (the caller) stack.
+    - The stack will be maintained across function calles.
+- Refer to these as _caller-saved_
+
+## Interrupt Calling Convention
+
+- The first *six* integer arguments are passed in registers **RDI**, **RSI**, **RDX**, **RCX**, **R8**, **R9**
+    - When we say integer we mean 64 bit, as those are 64 bit registers.
+    - Cue my rant about Rust `i32` default.
+- Additional arguments are passed on the stack
+- Results are returned in **RAX** and **RDX**
+    - Not on the stack!
+    
+## Default Calling Convention
+
+- The [default calling convention](https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170) differs slightly.
+    - The x87 register stack is unused. 
+    - Integer arguments are passed in registers **RCX**, **RDX**, **R8**, and **R9**.
+        - That is, not **RDI** and **RSI**
+    - *Floating point* arguments are passed in **XMM0L**, **XMM1L**, **XMM2L**, and **XMM3L**.
+
+## Rust Calling Convention
+
+- It doesn't have one.
+- [GitHub RFC](https://github.com/rust-lang/rfcs/issues/600)
+- Oh maybe that's why we have to use `extern "C"` all the time.
+- Rust: Possibly up to half of a language.
+
+## C Calling Convention
+
+| preserved registers                             | scratch registers                                           |
+| ----------------------------------------------- | ----------------------------------------------------------- |
+| `rbp`, `rbx`, `rsp`, `r12`, `r13`, `r14`, `r15` | `rax`, `rcx`, `rdx`, `rsi`, `rdi`, `r8`, `r9`, `r10`, `r11` |
+| _callee-saved_                                  | _caller-saved_ |
+
+Compiled C code will necessarily respect this convention (or it isn't C code).
+
+## Exceptions
+
+- In contrast to function calls, exceptions can occur on _any_ instruction. 
+- In most cases, we don't even know at compile time if the generated code will cause an exception. 
+- For example, the compiler can't know if an instruction causes a stack overflow or a page fault.
+
+## Can't Backup
+
+- Exceptions can't use a calling convention that relies on caller-saved registers for exception handlers. 
+- Instead, preserve _all registers_. 
+- The `x86-interrupt` calling convention is such a calling convention.
+    - It guarantees that all register values are restored to their original values on function return.
+    
+## Recall
+
+- `HandlerFunc` definition:
+
+```{.rs}
+type HandlerFunc = extern "x86-interrupt" fn(_: InterruptStackFrame);
+```
+
+- That's a function alright.
+    - A [type alias](https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases) for an `extern "x86-interrupt" fn` type
+    - Usually use `extern` for C, here we use it to interface with hardware.
+
+## In Practice
+
+- The compiler only backs up the registers that are overwritten by the function. 
+    - In e.g. conditional branches, can "just in time" pop registers to stack immediately before using them.
+    - More overhead but more efficient.
+- This way, very efficient code can be generated for short functions that only use a few registers.
+
+## Stack Frames
+
+- On a normal function call (using the `call` instruction), the CPU pushes the return address before jumping to the target function. 
+- On function return (using the `ret` instruction), the CPU pops this return address and jumps to it. 
+
+## Visually
+
+- The "stack frame" of a normal function call looks like this:
+
+<img src="https://os.phil-opp.com/cpu-exceptions/function-stack-frame.svg" style="filter:invert(.9)">
+
+## Interrupt Frames
+
+For exception and interrupt handlers:
+    - Pushing a return address would not suffice, 
+        - Interrupt handlers often run in a different context (stack pointer, CPU flags, etc.). 
+    - Providing return values is not ideal.
+        - Whatever code executed during the interrupt is not anticipating alterations to its register state
+        
+## Step 0
+
+0. Saving the old stack pointer
+
+The CPU reads the stack pointer (**RSP**) and stack segment (**SS**) register values to a safe memory location.
+        
+## Step 1
+
+0. Saving the old stack pointer
+1. Aligning the stack pointer
+
+Some CPU instructions require that the stack pointer be aligned on a 16-byte boundary, so the CPU performs such an alignment right after the interrupt.
+
+## Step 2
+
+0. Saving the old stack pointer
+1. Aligning the stack pointer
+2. Switching stacks
+
+An exception may require a change in privilege level (e.g. user to OS). Conditionally switch to the "_Interrupt Stack Table_" (next lecture).
+
+## Step 3
+
+0. Saving the old stack pointer
+1. Aligning the stack pointer
+2. Switching stacks
+3. Pushing the old stack pointer
+
+The CPU pushes the stack pointer (**RSP**) and stack segment (**SS**) register values from step 0 to the stack to restore the stack pointer on return.
+
+## Step 3.1
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Pushing the old stack pointer and the **RFLAGS** register: 
+
+On interrupt entry, the original **RFLAGS** is probably not appropriate - save it and get a new one.
+
+## Step 3.2
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Push in order **RSP**, **SS**, **RFLAGS** and the instruction pointer: 
+
+On return, it is important to restore not just data (the stack pointer) but also instruction pointer (**RIP** and the code segment **CS**).
+
+## Step 3.3
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Push in order **RSP**, **SS**, **RFLAGS**, **RIP**, **CS** and... conditionally an error code. 
+
+For some specific exceptions, such as page faults, the CPU pushes an error code, which describes the cause of the exception.
+
+## Step 4
+
+1. Aligning the stack pointer
+2. Switching stacks
+3. Push in order **RSP**, **SS**, **RFLAGS**, **RIP**, **CS** etc. 
+4. Invoking the interrupt handler
+
+The CPU reads the address and the segment descriptor of the interrupt handler function from the corresponding field in the IDT and loads the values into **RIP** and **CS**.
+
+## Visually
+
+- The "interrupt stack frame":
+
+<img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)">
+
+# Crates for Days
+
+## Handwaving
+
+- The `x86-interrupt` calling convention is a powerful abstraction that hides almost all of the messy details of the exception handling process. 
+- However, sometimes it's useful to know what's happening behind the curtain. 
+- Briefly, what we handwave.
+
+## Retrieving the arguments
+
+- Most calling conventions expect that the arguments are passed in registers
+- This is not possible for exception handlers since we must not overwrite any register values before backing them up on the stack
+- Instead, the `x86-interrupt` calling convention is aware that the arguments already lie on the stack at a specific offset
+
+## Returning using `iretq`
+
+- Since the interrupt stack frame completely differs from stack frames of normal function calls, we can't return from handler functions through the normal `ret` instruction
+- So instead, the `iretq` instruction must be used
+    - You'll never guess what `q` stands for...
+    - Quad word, it's the 64 bit `iret`
+
+
+## Handling the error code
+
+- Conditional error codes complicate matters:
+    - Conditional arguments.
+    - Stack alignment.
+    - Return pops.
+- So code must use the correct function type for each exception
+- Luckily, the `InterruptDescriptorTable` type does so.
+
+## Aligning the stack
+
+- Some instructions (especially SSE instructions) require a 16-byte stack alignment
+- The CPU ensures this alignment whenever an exception occurs, but for some exceptions it destroys it again later when it pushes an error code
+- The `x86-interrupt` calling convention takes care of this by realigning the stack in this case
+
+## Read more
+
+- There is a "hard mode" version of exception handling.
+- [Read more](https://os.phil-opp.com/edition-1/extra/naked-exceptions/)
+
+# Fin
