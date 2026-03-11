@@ -197,29 +197,17 @@ We see that the interrupt stack frame tells us the instruction and stack pointer
 
 ### Adding a Test
 
-Let's create a test that ensures that the above continues to work. First, we update the `_start` function to also call `init`:
+Let's create a test that ensures that the above continues to work. 
 
-```{.rs filename="src/lib.rs"}
-/// Entry point for `cargo test`
-#[cfg(test)]
+```{.rs filename="tests/except.rs"}
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    init();      // new
-    test_main();
-    loop {}
+    // Your code here.
 }
 ```
 
-Remember, this `_start` function is used when running `cargo test --lib`, since Rust tests the `lib.rs` completely independently of the `main.rs`. We need to call `init` here to set up an IDT before running the tests.
+Remember, this `_start` function is used when running `cargo t`, since Rust tests the `tests/except.rs` completely independently of the `main.rs`.
 
-Now we can create a `test_breakpoint_exception` test:
+Your test should invoke the `int3` (as we have shown) to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.
 
-```{.rs}
-fn test_breakpoint_exception() {
-    x86_64::instructions::interrupts::int3();
-}
-```
-
-The test invokes the `int3` function to trigger a breakpoint exception. By checking that the execution continues afterward, we verify that our breakpoint handler is working correctly.
-
-You can try this new test by running `cargo test` (all tests) or `cargo test --lib` (only tests of `lib.rs` and its modules).
+You can try this new test by running `cargo test` (all tests) or `cargo t --test except` to run *only* this test.
