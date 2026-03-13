@@ -1,0 +1,2074 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Double – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./72_handlers.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./80_double.html">Double</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./70_except.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exceptions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./71_calls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Call</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./72_handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handlers</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./80_double.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Double</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#negation" id="toc-negation" class="nav-link" data-scroll-target="#negation">Negation</a></li>
+  <li><a href="#recall" id="toc-recall" class="nav-link" data-scroll-target="#recall">Recall</a>
+  <ul class="collapse">
+  <li><a href="#exceptions" id="toc-exceptions" class="nav-link" data-scroll-target="#exceptions">Exceptions</a></li>
+  <li><a href="#types" id="toc-types" class="nav-link" data-scroll-target="#types">Types</a></li>
+  </ul></li>
+  <li><a href="#double" id="toc-double" class="nav-link" data-scroll-target="#double">Double</a>
+  <ul class="collapse">
+  <li><a href="#what-is-it" id="toc-what-is-it" class="nav-link" data-scroll-target="#what-is-it">What is it?</a></li>
+  <li><a href="#python" id="toc-python" class="nav-link" data-scroll-target="#python">Python</a></li>
+  <li><a href="#behavior" id="toc-behavior" class="nav-link" data-scroll-target="#behavior">Behavior</a></li>
+  <li><a href="#triggering-a-double-fault" id="toc-triggering-a-double-fault" class="nav-link" data-scroll-target="#triggering-a-double-fault">Triggering a Double Fault</a></li>
+  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#result" id="toc-result" class="nav-link" data-scroll-target="#result">Result</a></li>
+  <li><a href="#steps" id="toc-steps" class="nav-link" data-scroll-target="#steps">Steps</a></li>
+  <li><a href="#handle-it" id="toc-handle-it" class="nav-link" data-scroll-target="#handle-it">Handle it</a></li>
+  <li><a href="#throwback" id="toc-throwback" class="nav-link" data-scroll-target="#throwback">Throwback</a></li>
+  </ul></li>
+  <li><a href="#todo" id="toc-todo" class="nav-link" data-scroll-target="#todo">TODO</a>
+  <ul class="collapse">
+  <li><a href="#a-double-fault-handler" id="toc-a-double-fault-handler" class="nav-link" data-scroll-target="#a-double-fault-handler">A Double Fault Handler</a></li>
+  <li><a href="#causes-of-double-faults" id="toc-causes-of-double-faults" class="nav-link" data-scroll-target="#causes-of-double-faults">Causes of Double Faults</a></li>
+  <li><a href="#kernel-stack-overflow" id="toc-kernel-stack-overflow" class="nav-link" data-scroll-target="#kernel-stack-overflow">Kernel Stack Overflow</a></li>
+  <li><a href="#switching-stacks" id="toc-switching-stacks" class="nav-link" data-scroll-target="#switching-stacks">Switching Stacks</a></li>
+  <li><a href="#the-ist-and-tss" id="toc-the-ist-and-tss" class="nav-link" data-scroll-target="#the-ist-and-tss">The IST and TSS</a></li>
+  <li><a href="#creating-a-tss" id="toc-creating-a-tss" class="nav-link" data-scroll-target="#creating-a-tss">Creating a TSS</a></li>
+  <li><a href="#loading-the-tss" id="toc-loading-the-tss" class="nav-link" data-scroll-target="#loading-the-tss">Loading the TSS</a></li>
+  <li><a href="#the-global-descriptor-table" id="toc-the-global-descriptor-table" class="nav-link" data-scroll-target="#the-global-descriptor-table">The Global Descriptor Table</a></li>
+  <li><a href="#creating-a-gdt" id="toc-creating-a-gdt" class="nav-link" data-scroll-target="#creating-a-gdt">Creating a GDT</a></li>
+  <li><a href="#loading-the-gdt" id="toc-loading-the-gdt" class="nav-link" data-scroll-target="#loading-the-gdt">Loading the GDT</a></li>
+  <li><a href="#the-final-steps" id="toc-the-final-steps" class="nav-link" data-scroll-target="#the-final-steps">The Final Steps</a></li>
+  <li><a href="#a-stack-overflow-test" id="toc-a-stack-overflow-test" class="nav-link" data-scroll-target="#a-stack-overflow-test">A Stack Overflow Test</a></li>
+  <li><a href="#implementing-_start" id="toc-implementing-_start" class="nav-link" data-scroll-target="#implementing-_start">Implementing <code>_start</code></a></li>
+  <li><a href="#the-test-idt" id="toc-the-test-idt" class="nav-link" data-scroll-target="#the-test-idt">The Test IDT</a></li>
+  <li><a href="#the-double-fault-handler" id="toc-the-double-fault-handler" class="nav-link" data-scroll-target="#the-double-fault-handler">The Double Fault Handler</a></li>
+  </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="80_double.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Double</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li><strong>Action Items</strong>:
+<ul>
+<li>Testing done.</li>
+<li>First handler assigned, more to come.</li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>CPU exceptions are algorithmically interesting but technically tedious.</li>
+<li><a href="https://os.phil-opp.com/double-fault-exceptions/">Double Faults</a></li>
+</ul>
+</section>
+<section id="negation" class="level2">
+<h2 class="anchored" data-anchor-id="negation">Negation</h2>
+<ul>
+<li>Not to be confused with the <code>double</code> type.</li>
+<li>That is <em>floating point</em> type and <em>has no place</em> in an OS class.</li>
+</ul>
+</section>
+<section id="recall" class="level1">
+<h1>Recall</h1>
+<section id="exceptions" class="level2">
+<h2 class="anchored" data-anchor-id="exceptions">Exceptions</h2>
+<ul>
+<li>CPU exceptions occur in various erroneous situations
+<ul>
+<li>Accessing an invalid memory address</li>
+<li>Dividing by zero</li>
+</ul></li>
+<li>We have to set up an <em>interrupt descriptor table</em>..</li>
+<li>This week, our kernel will be able to catch <a href="https://wiki.osdev.org/Exceptions#Breakpoint">double faults</a>.</li>
+</ul>
+</section>
+<section id="types" class="level2">
+<h2 class="anchored" data-anchor-id="types">Types</h2>
+<p>On x86, there are about 20 different CPU exception types.</p>
+<ul>
+<li><strong>Double Fault</strong>: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs <em>while calling the exception handler</em>, the CPU raises a double fault exception.
+<ul>
+<li>This exception also occurs when there is no handler function registered for an exception.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="double" class="level1">
+<h1>Double</h1>
+<section id="what-is-it" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-it">What is it?</h2>
+<ul>
+<li>A special exception that occurs when the CPU fails to invoke an exception handler.</li>
+<li>For example, a page fault is triggered without a page fault handler registered in the IDT.</li>
+</ul>
+</section>
+<section id="python" class="level2">
+<h2 class="anchored" data-anchor-id="python">Python</h2>
+<ul>
+<li>Perhaps a generalized exception.</li>
+</ul>
+<div id="27f37215" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">try</span>:</span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="cf">except</span>:</span>
+<span id="cb1-4"><a href="#cb1-4"></a>    <span class="co">"Control flow diverts *regardless* of what goes wrong in the `try`"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="behavior" class="level2">
+<h2 class="anchored" data-anchor-id="behavior">Behavior</h2>
+<ul>
+<li>A double fault behaves like a normal exception.</li>
+<li>It has the vector number <code>8</code> and we can define a normal handler function for it in the IDT.</li>
+<li>It is really important to provide a double fault handler, because if a double fault is unhandled, a fatal <em>triple fault</em> occurs.</li>
+<li>Triple faults can’t be caught, and most hardware reacts with a system reset.</li>
+</ul>
+</section>
+<section id="triggering-a-double-fault" class="level2">
+<h2 class="anchored" data-anchor-id="triggering-a-double-fault">Triggering a Double Fault</h2>
+<ul>
+<li>We don’t have a page fault handler, so it will double (and triple) fault.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb2-3"><a href="#cb2-3"></a>    <span class="pp">osirs::</span>init()<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4"></a>    </span>
+<span id="cb2-5"><a href="#cb2-5"></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="op">*</span>(<span class="dv">0xdeadbeef</span> <span class="kw">as</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span>) <span class="op">=</span> <span class="dv">42</span><span class="op">;</span> <span class="op">};</span></span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a>    <span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb2-8"><a href="#cb2-8"></a>    <span class="pp">osirs::</span>qemu_quit(<span class="pp">osirs::</span>QEMU_PASS)<span class="op">;</span></span>
+<span id="cb2-9"><a href="#cb2-9"></a></span>
+<span id="cb2-10"><a href="#cb2-10"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="description" class="level2">
+<h2 class="anchored" data-anchor-id="description">Description</h2>
+<ul>
+<li>We use <code>unsafe</code> to write to a literal.</li>
+<li>This address lacks meaning.
+<ul>
+<li>A virtual (software-visible) address.</li>
+<li>Regard as a key in key-value storage that maps software-visible addresses to hardware addresses (the MMU).</li>
+<li>The key is not present in the data structure.</li>
+</ul></li>
+</ul>
+</section>
+<section id="result" class="level2">
+<h2 class="anchored" data-anchor-id="result">Result</h2>
+<ul>
+<li>So, when we attempt to assign a value based on that key, it explodes.
+<ul>
+<li>The emulated device goes into a reboot loop.</li>
+</ul></li>
+<li>Why?</li>
+</ul>
+</section>
+<section id="steps" class="level2">
+<h2 class="anchored" data-anchor-id="steps">Steps</h2>
+<div class="incremental">
+<ol class="incremental" type="1">
+<li>The CPU tries to write to <code>0xdeadbeef</code>, which causes a page fault.</li>
+<li>The CPU indexes into the IDT for a page fault and no handler function is specified so a double fault occurs.</li>
+<li>The CPU indexes into the IDT for double fault handler and no handler function is specified so a <em>triple</em> fault occurs.</li>
+<li>A triple fault is fatal. QEMU (or hardware) issues a system reset.</li>
+</ol>
+</div>
+</section>
+<section id="handle-it" class="level2">
+<h2 class="anchored" data-anchor-id="handle-it">Handle it</h2>
+<ul>
+<li>To prevent this triple fault, we need to either:
+<ul>
+<li>Provide a handler function for page faults, or</li>
+<li>Provide a double fault handler.</li>
+</ul></li>
+<li>We want to avoid triple faults in <strong>all</strong> cases
+<ul>
+<li>Let’s start with a double fault handler.</li>
+</ul></li>
+</ul>
+</section>
+<section id="throwback" class="level2">
+<h2 class="anchored" data-anchor-id="throwback">Throwback</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="at">#![</span>allow<span class="at">(</span>static_mut_refs<span class="at">)]</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="kw">static</span> <span class="kw">mut</span> IDT<span class="op">:</span> <span class="pp">x86_64::structures::idt::</span>InterruptDescriptorTable <span class="op">=</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>    <span class="pp">x86_64::structures::idt::InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>    <span class="op">}</span></span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="op">}</span></span>
+<span id="cb3-11"><a href="#cb3-11"></a></span>
+<span id="cb3-12"><a href="#cb3-12"></a><span class="co">// Love these `cargo fmt` newlines</span></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> breakpoint_handler(</span>
+<span id="cb3-14"><a href="#cb3-14"></a>    stack_frame<span class="op">:</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame<span class="op">,</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a>) <span class="op">{</span></span>
+<span id="cb3-16"><a href="#cb3-16"></a>    <span class="kw">crate</span><span class="pp">::println!</span>(<span class="st">"EXCEPTION: BREAKPOINT</span><span class="sc">\n</span><span class="st">{:#?}"</span><span class="op">,</span> stack_frame)<span class="op">;</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="todo" class="level1">
+<h1>TODO</h1>
+<section id="a-double-fault-handler" class="level2">
+<h2 class="anchored" data-anchor-id="a-double-fault-handler">A Double Fault Handler</h2>
+<p>A double fault is a normal exception with an error code, so we can specify a handler function similar to our breakpoint handler:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a></span>
+<span id="cb4-3"><a href="#cb4-3"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>        idt<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a>        idt</span>
+<span id="cb4-9"><a href="#cb4-9"></a>    <span class="op">};</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a><span class="op">}</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a></span>
+<span id="cb4-12"><a href="#cb4-12"></a><span class="co">// new</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> double_fault_handler(</span>
+<span id="cb4-14"><a href="#cb4-14"></a>    stack_frame<span class="op">:</span> InterruptStackFrame<span class="op">,</span> _error_code<span class="op">:</span> <span class="dt">u64</span>) <span class="op">-&gt;</span> <span class="op">!</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a><span class="op">{</span></span>
+<span id="cb4-16"><a href="#cb4-16"></a>    <span class="pp">panic!</span>(<span class="st">"EXCEPTION: DOUBLE FAULT</span><span class="sc">\n</span><span class="st">{:#?}"</span><span class="op">,</span> stack_frame)<span class="op">;</span></span>
+<span id="cb4-17"><a href="#cb4-17"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Our handler prints a short error message and dumps the exception stack frame. The error code of the double fault handler is always zero, so there’s no reason to print it. One difference to the breakpoint handler is that the double fault handler is <a href="https://doc.rust-lang.org/stable/rust-by-example/fn/diverging.html"><em>diverging</em></a>. The reason is that the <code>x86_64</code> architecture does not permit returning from a double fault exception.</p>
+<p>When we start our kernel now, we should see that the double fault handler is invoked:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="qemu-catch-double-fault.png" class="img-fluid figure-img"></p>
+<figcaption>QEMU printing <code>EXCEPTION: DOUBLE FAULT</code> and the exception stack frame</figcaption>
+</figure>
+</div>
+<p>It worked! Here is what happened this time:</p>
+<ol type="1">
+<li>The CPU tries to write to <code>0xdeadbeef</code>, which causes a page fault.</li>
+<li>Like before, the CPU looks at the corresponding entry in the IDT and sees that no handler function is defined. Thus, a double fault occurs.</li>
+<li>The CPU jumps to the – now present – double fault handler.</li>
+</ol>
+<p>The triple fault (and the boot-loop) no longer occurs, since the CPU can now call the double fault handler.</p>
+<p>That was quite straightforward! So why do we need a whole post for this topic? Well, we’re now able to catch <em>most</em> double faults, but there are some cases where our current approach doesn’t suffice.</p>
+</section>
+<section id="causes-of-double-faults" class="level2">
+<h2 class="anchored" data-anchor-id="causes-of-double-faults">Causes of Double Faults</h2>
+<p>Before we look at the special cases, we need to know the exact causes of double faults. Above, we used a pretty vague definition:</p>
+<blockquote class="blockquote">
+<p>A double fault is a special exception that occurs when the CPU fails to invoke an exception handler.</p>
+</blockquote>
+<p>What does <em>“fails to invoke”</em> mean exactly? The handler is not present? The handler is <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys.pdf">swapped out</a>? And what happens if a handler causes exceptions itself?</p>
+<p>For example, what happens if:</p>
+<ol type="1">
+<li>a breakpoint exception occurs, but the corresponding handler function is swapped out?</li>
+<li>a page fault occurs, but the page fault handler is swapped out?</li>
+<li>a divide-by-zero handler causes a breakpoint exception, but the breakpoint handler is swapped out?</li>
+<li>our kernel overflows its stack and the <em>guard page</em> is hit?</li>
+</ol>
+<p>Fortunately, the AMD64 manual (<a href="https://www.amd.com/system/files/TechDocs/24593.pdf">PDF</a>) has an exact definition (in Section 8.2.9). According to it, a “double fault exception <em>can</em> occur when a second exception occurs during the handling of a prior (first) exception handler”. The <em>“can”</em> is important: Only very specific combinations of exceptions lead to a double fault. These combinations are:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>First Exception</th>
+<th>Second Exception</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://wiki.osdev.org/Exceptions#Division_Error">Divide-by-zero</a>,<br><a href="https://wiki.osdev.org/Exceptions#Invalid_TSS">Invalid TSS</a>,<br><a href="https://wiki.osdev.org/Exceptions#Segment_Not_Present">Segment Not Present</a>,<br><a href="https://wiki.osdev.org/Exceptions#Stack-Segment_Fault">Stack-Segment Fault</a>,<br><a href="https://wiki.osdev.org/Exceptions#General_Protection_Fault">General Protection Fault</a></td>
+<td><a href="https://wiki.osdev.org/Exceptions#Invalid_TSS">Invalid TSS</a>,<br><a href="https://wiki.osdev.org/Exceptions#Segment_Not_Present">Segment Not Present</a>,<br><a href="https://wiki.osdev.org/Exceptions#Stack-Segment_Fault">Stack-Segment Fault</a>,<br><a href="https://wiki.osdev.org/Exceptions#General_Protection_Fault">General Protection Fault</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://wiki.osdev.org/Exceptions#Page_Fault">Page Fault</a></td>
+<td><a href="https://wiki.osdev.org/Exceptions#Page_Fault">Page Fault</a>,<br><a href="https://wiki.osdev.org/Exceptions#Invalid_TSS">Invalid TSS</a>,<br><a href="https://wiki.osdev.org/Exceptions#Segment_Not_Present">Segment Not Present</a>,<br><a href="https://wiki.osdev.org/Exceptions#Stack-Segment_Fault">Stack-Segment Fault</a>,<br><a href="https://wiki.osdev.org/Exceptions#General_Protection_Fault">General Protection Fault</a></td>
+</tr>
+</tbody>
+</table>
+<p>So, for example, a divide-by-zero fault followed by a page fault is fine (the page fault handler is invoked), but a divide-by-zero fault followed by a general-protection fault leads to a double fault.</p>
+<p>With the help of this table, we can answer the first three of the above questions:</p>
+<ol type="1">
+<li>If a breakpoint exception occurs and the corresponding handler function is swapped out, a <em>page fault</em> occurs and the <em>page fault handler</em> is invoked.</li>
+<li>If a page fault occurs and the page fault handler is swapped out, a <em>double fault</em> occurs and the <em>double fault handler</em> is invoked.</li>
+<li>If a divide-by-zero handler causes a breakpoint exception, the CPU tries to invoke the breakpoint handler. If the breakpoint handler is swapped out, a <em>page fault</em> occurs and the <em>page fault handler</em> is invoked.</li>
+</ol>
+<p>In fact, even the case of an exception without a handler function in the IDT follows this scheme: When the exception occurs, the CPU tries to read the corresponding IDT entry. Since the entry is 0, which is not a valid IDT entry, a <em>general protection fault</em> occurs. We did not define a handler function for the general protection fault either, so another general protection fault occurs. According to the table, this leads to a double fault.</p>
+</section>
+<section id="kernel-stack-overflow" class="level2">
+<h2 class="anchored" data-anchor-id="kernel-stack-overflow">Kernel Stack Overflow</h2>
+<p>Let’s look at the fourth question:</p>
+<blockquote class="blockquote">
+<p>What happens if our kernel overflows its stack and the guard page is hit?</p>
+</blockquote>
+<p>A guard page is a special memory page at the bottom of a stack that makes it possible to detect stack overflows. The page is not mapped to any physical frame, so accessing it causes a page fault instead of silently corrupting other memory. The bootloader sets up a guard page for our kernel stack, so a stack overflow causes a <em>page fault</em>.</p>
+<p>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the <a href="@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-stack-frame">interrupt stack frame</a> onto the stack. However, the current stack pointer still points to the non-present guard page. Thus, a second page fault occurs, which causes a double fault (according to the above table).</p>
+<p>So the CPU tries to call the <em>double fault handler</em> now. However, on a double fault, the CPU tries to push the exception stack frame, too. The stack pointer still points to the guard page, so a <em>third</em> page fault occurs, which causes a <em>triple fault</em> and a system reboot. So our current double fault handler can’t avoid a triple fault in this case.</p>
+<p>Let’s try it ourselves! We can easily provoke a kernel stack overflow by calling a function that recurses endlessly:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="co">// in src/main.rs</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a></span>
+<span id="cb5-3"><a href="#cb5-3"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
+<span id="cb5-6"><a href="#cb5-6"></a></span>
+<span id="cb5-7"><a href="#cb5-7"></a>    <span class="pp">blog_os::</span>init()<span class="op">;</span></span>
+<span id="cb5-8"><a href="#cb5-8"></a></span>
+<span id="cb5-9"><a href="#cb5-9"></a>    <span class="kw">fn</span> stack_overflow() <span class="op">{</span></span>
+<span id="cb5-10"><a href="#cb5-10"></a>        stack_overflow()<span class="op">;</span> <span class="co">// for each recursion, the return address is pushed</span></span>
+<span id="cb5-11"><a href="#cb5-11"></a>    <span class="op">}</span></span>
+<span id="cb5-12"><a href="#cb5-12"></a></span>
+<span id="cb5-13"><a href="#cb5-13"></a>    <span class="co">// trigger a stack overflow</span></span>
+<span id="cb5-14"><a href="#cb5-14"></a>    stack_overflow()<span class="op">;</span></span>
+<span id="cb5-15"><a href="#cb5-15"></a></span>
+<span id="cb5-16"><a href="#cb5-16"></a>    […] <span class="co">// test_main(), println(…), and loop {}</span></span>
+<span id="cb5-17"><a href="#cb5-17"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When we try this code in QEMU, we see that the system enters a bootloop again.</p>
+<p>So how can we avoid this problem? We can’t omit the pushing of the exception stack frame, since the CPU itself does it. So we need to ensure somehow that the stack is always valid when a double fault exception occurs. Fortunately, the x86_64 architecture has a solution to this problem.</p>
+</section>
+<section id="switching-stacks" class="level2">
+<h2 class="anchored" data-anchor-id="switching-stacks">Switching Stacks</h2>
+<p>The x86_64 architecture is able to switch to a predefined, known-good stack when an exception occurs. This switch happens at hardware level, so it can be performed before the CPU pushes the exception stack frame.</p>
+<p>The switching mechanism is implemented as an <em>Interrupt Stack Table</em> (IST). The IST is a table of 7 pointers to known-good stacks. In Rust-like pseudocode:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">struct</span> InterruptStackTable <span class="op">{</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a>    stack_pointers<span class="op">:</span> [<span class="dt">Option</span><span class="op">&lt;</span>StackPointer<span class="op">&gt;;</span> <span class="dv">7</span>]<span class="op">,</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>For each exception handler, we can choose a stack from the IST through the <code>stack_pointers</code> field in the corresponding <a href="@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-descriptor-table">IDT entry</a>. For example, our double fault handler could use the first stack in the IST. Then the CPU automatically switches to this stack whenever a double fault occurs. This switch would happen before anything is pushed, preventing the triple fault.</p>
+</section>
+<section id="the-ist-and-tss" class="level2">
+<h2 class="anchored" data-anchor-id="the-ist-and-tss">The IST and TSS</h2>
+<p>The Interrupt Stack Table (IST) is part of an old legacy structure called <em><a href="https://en.wikipedia.org/wiki/Task_state_segment">Task State Segment</a></em> (TSS). The TSS used to hold various pieces of information (e.g., processor register state) about a task in 32-bit mode and was, for example, used for <a href="https://wiki.osdev.org/Context_Switching#Hardware_Context_Switching">hardware context switching</a>. However, hardware context switching is no longer supported in 64-bit mode and the format of the TSS has changed completely.</p>
+<p>On x86_64, the TSS no longer holds any task-specific information at all. Instead, it holds two stack tables (the IST is one of them). The only common field between the 32-bit and 64-bit TSS is the pointer to the <a href="https://en.wikipedia.org/wiki/Task_state_segment#I.2FO_port_permissions">I/O port permissions bitmap</a>.</p>
+<p>The 64-bit TSS has the following format:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span style="opacity: 0.5">(reserved)</span></td>
+<td><code>u32</code></td>
+</tr>
+<tr class="even">
+<td>Privilege Stack Table</td>
+<td><code>[u64; 3]</code></td>
+</tr>
+<tr class="odd">
+<td><span style="opacity: 0.5">(reserved)</span></td>
+<td><code>u64</code></td>
+</tr>
+<tr class="even">
+<td>Interrupt Stack Table</td>
+<td><code>[u64; 7]</code></td>
+</tr>
+<tr class="odd">
+<td><span style="opacity: 0.5">(reserved)</span></td>
+<td><code>u64</code></td>
+</tr>
+<tr class="even">
+<td><span style="opacity: 0.5">(reserved)</span></td>
+<td><code>u16</code></td>
+</tr>
+<tr class="odd">
+<td>I/O Map Base Address</td>
+<td><code>u16</code></td>
+</tr>
+</tbody>
+</table>
+<p>The <em>Privilege Stack Table</em> is used by the CPU when the privilege level changes. For example, if an exception occurs while the CPU is in user mode (privilege level 3), the CPU normally switches to kernel mode (privilege level 0) before invoking the exception handler. In that case, the CPU would switch to the 0th stack in the Privilege Stack Table (since 0 is the target privilege level). We don’t have any user-mode programs yet, so we will ignore this table for now.</p>
+</section>
+<section id="creating-a-tss" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-tss">Creating a TSS</h2>
+<p>Let’s create a new TSS that contains a separate double fault stack in its interrupt stack table. For that, we need a TSS struct. Fortunately, the <code>x86_64</code> crate already contains a <a href="https://docs.rs/x86_64/0.14.2/x86_64/structures/tss/struct.TaskStateSegment.html"><code>TaskStateSegment</code> struct</a> that we can use.</p>
+<p>We create the TSS in a new <code>gdt</code> module (the name will make sense later):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="kw">pub</span> <span class="kw">mod</span> gdt<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a></span>
+<span id="cb7-5"><a href="#cb7-5"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a></span>
+<span id="cb7-7"><a href="#cb7-7"></a><span class="kw">use</span> <span class="pp">x86_64::</span>VirtAddr<span class="op">;</span></span>
+<span id="cb7-8"><a href="#cb7-8"></a><span class="kw">use</span> <span class="pp">x86_64::structures::tss::</span>TaskStateSegment<span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9"></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
+<span id="cb7-10"><a href="#cb7-10"></a></span>
+<span id="cb7-11"><a href="#cb7-11"></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">u16</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb7-12"><a href="#cb7-12"></a></span>
+<span id="cb7-13"><a href="#cb7-13"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb7-14"><a href="#cb7-14"></a>    <span class="kw">static</span> <span class="kw">ref</span> TSS<span class="op">:</span> TaskStateSegment <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb7-15"><a href="#cb7-15"></a>        <span class="kw">let</span> <span class="kw">mut</span> tss <span class="op">=</span> <span class="pp">TaskStateSegment::</span>new()<span class="op">;</span></span>
+<span id="cb7-16"><a href="#cb7-16"></a>        tss<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">usize</span>] <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb7-17"><a href="#cb7-17"></a>            <span class="kw">const</span> STACK_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">4096</span> <span class="op">*</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb7-18"><a href="#cb7-18"></a>            <span class="kw">static</span> <span class="kw">mut</span> STACK<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span> STACK_SIZE] <span class="op">=</span> [<span class="dv">0</span><span class="op">;</span> STACK_SIZE]<span class="op">;</span></span>
+<span id="cb7-19"><a href="#cb7-19"></a></span>
+<span id="cb7-20"><a href="#cb7-20"></a>            <span class="kw">let</span> stack_start <span class="op">=</span> <span class="pp">VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK)<span class="op">;</span></span>
+<span id="cb7-21"><a href="#cb7-21"></a>            <span class="kw">let</span> stack_end <span class="op">=</span> stack_start <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
+<span id="cb7-22"><a href="#cb7-22"></a>            stack_end</span>
+<span id="cb7-23"><a href="#cb7-23"></a>        <span class="op">};</span></span>
+<span id="cb7-24"><a href="#cb7-24"></a>        tss</span>
+<span id="cb7-25"><a href="#cb7-25"></a>    <span class="op">};</span></span>
+<span id="cb7-26"><a href="#cb7-26"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We use <code>lazy_static</code> because Rust’s const evaluator is not yet powerful enough to do this initialization at compile time. We define that the 0th IST entry is the double fault stack (any other IST index would work too). Then we write the top address of a double fault stack to the 0th entry. We write the top address because stacks on x86 grow downwards, i.e., from high addresses to low addresses.</p>
+<p>We haven’t implemented memory management yet, so we don’t have a proper way to allocate a new stack. Instead, we use a <code>static mut</code> array as stack storage for now. It is important that it is a <code>static mut</code> and not an immutable <code>static</code>, because otherwise the bootloader will map it to a read-only page. We will replace this with a proper stack allocation in a later post.</p>
+<p>Note that this double fault stack has no guard page that protects against stack overflow. This means that we should not do anything stack-intensive in our double fault handler because a stack overflow might corrupt the memory below the stack.</p>
+</section>
+<section id="loading-the-tss" class="level2">
+<h2 class="anchored" data-anchor-id="loading-the-tss">Loading the TSS</h2>
+<p>Now that we’ve created a new TSS, we need a way to tell the CPU that it should use it. Unfortunately, this is a bit cumbersome since the TSS uses the segmentation system (for historical reasons). Instead of loading the table directly, we need to add a new segment descriptor to the <a href="https://web.archive.org/web/20190217233448/https://www.flingos.co.uk/docs/reference/Global-Descriptor-Table/">Global Descriptor Table</a> (GDT). Then we can load our TSS by invoking the <a href="https://www.felixcloutier.com/x86/ltr"><code>ltr</code> instruction</a> with the respective GDT index. (This is the reason why we named our module <code>gdt</code>.)</p>
+</section>
+<section id="the-global-descriptor-table" class="level2">
+<h2 class="anchored" data-anchor-id="the-global-descriptor-table">The Global Descriptor Table</h2>
+<p>The Global Descriptor Table (GDT) is a relic that was used for <a href="https://en.wikipedia.org/wiki/X86_memory_segmentation">memory segmentation</a> before paging became the de facto standard. However, it is still needed in 64-bit mode for various things, such as kernel/user mode configuration or TSS loading.</p>
+<p>The GDT is a structure that contains the <em>segments</em> of the program. It was used on older architectures to isolate programs from each other before paging became the standard. For more information about segmentation, check out the equally named chapter of the free <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/">“Three Easy Pieces” book</a>. While segmentation is no longer supported in 64-bit mode, the GDT still exists. It is mostly used for two things: Switching between kernel space and user space, and loading a TSS structure.</p>
+</section>
+<section id="creating-a-gdt" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-gdt">Creating a GDT</h2>
+<p>Let’s create a static <code>GDT</code> that includes a segment for our <code>TSS</code> static:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a><span class="kw">use</span> <span class="pp">x86_64::structures::gdt::</span><span class="op">{</span>GlobalDescriptorTable<span class="op">,</span> Descriptor<span class="op">};</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="kw">static</span> <span class="kw">ref</span> GDT<span class="op">:</span> GlobalDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>        <span class="kw">let</span> <span class="kw">mut</span> gdt <span class="op">=</span> <span class="pp">GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a>        gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9"></a>        gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb8-10"><a href="#cb8-10"></a>        gdt</span>
+<span id="cb8-11"><a href="#cb8-11"></a>    <span class="op">};</span></span>
+<span id="cb8-12"><a href="#cb8-12"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>As before, we use <code>lazy_static</code> again. We create a new GDT with a code segment and a TSS segment.</p>
+</section>
+<section id="loading-the-gdt" class="level2">
+<h2 class="anchored" data-anchor-id="loading-the-gdt">Loading the GDT</h2>
+<p>To load our GDT, we create a new <code>gdt::init</code> function that we call from our <code>init</code> function:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>    GDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="op">}</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb9-8"><a href="#cb9-8"></a></span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb9-10"><a href="#cb9-10"></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
+<span id="cb9-11"><a href="#cb9-11"></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
+<span id="cb9-12"><a href="#cb9-12"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now our GDT is loaded (since the <code>_start</code> function calls <code>init</code>), but we still see the boot loop on stack overflow.</p>
+</section>
+<section id="the-final-steps" class="level2">
+<h2 class="anchored" data-anchor-id="the-final-steps">The Final Steps</h2>
+<p>The problem is that the GDT segments are not yet active because the segment and TSS registers still contain the values from the old GDT. We also need to modify the double fault IDT entry so that it uses the new stack.</p>
+<p>In summary, we need to do the following:</p>
+<ol type="1">
+<li><strong>Reload code segment register</strong>: We changed our GDT, so we should reload <code>cs</code>, the code segment register. This is required since the old segment selector could now point to a different GDT descriptor (e.g., a TSS descriptor).</li>
+<li><strong>Load the TSS</strong>: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</li>
+<li><strong>Update the IDT entry</strong>: As soon as our TSS is loaded, the CPU has access to a valid interrupt stack table (IST). Then we can tell the CPU that it should use our new double fault stack by modifying our double fault IDT entry.</li>
+</ol>
+<p>For the first two steps, we need access to the <code>code_selector</code> and <code>tss_selector</code> variables in our <code>gdt::init</code> function. We can achieve this by making them part of the static through a new <code>Selectors</code> struct:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a></span>
+<span id="cb10-3"><a href="#cb10-3"></a><span class="kw">use</span> <span class="pp">x86_64::structures::gdt::</span>SegmentSelector<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a></span>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="kw">static</span> <span class="kw">ref</span> GDT<span class="op">:</span> (GlobalDescriptorTable<span class="op">,</span> Selectors) <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a>        <span class="kw">let</span> <span class="kw">mut</span> gdt <span class="op">=</span> <span class="pp">GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb10-8"><a href="#cb10-8"></a>        <span class="kw">let</span> code_selector <span class="op">=</span> gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb10-9"><a href="#cb10-9"></a>        <span class="kw">let</span> tss_selector <span class="op">=</span> gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb10-10"><a href="#cb10-10"></a>        (gdt<span class="op">,</span> Selectors <span class="op">{</span> code_selector<span class="op">,</span> tss_selector <span class="op">}</span>)</span>
+<span id="cb10-11"><a href="#cb10-11"></a>    <span class="op">};</span></span>
+<span id="cb10-12"><a href="#cb10-12"></a><span class="op">}</span></span>
+<span id="cb10-13"><a href="#cb10-13"></a></span>
+<span id="cb10-14"><a href="#cb10-14"></a><span class="kw">struct</span> Selectors <span class="op">{</span></span>
+<span id="cb10-15"><a href="#cb10-15"></a>    code_selector<span class="op">:</span> SegmentSelector<span class="op">,</span></span>
+<span id="cb10-16"><a href="#cb10-16"></a>    tss_selector<span class="op">:</span> SegmentSelector<span class="op">,</span></span>
+<span id="cb10-17"><a href="#cb10-17"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now we can use the selectors to reload the <code>cs</code> register and load our <code>TSS</code>:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::tables::</span>load_tss<span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span><span class="op">{</span>CS<span class="op">,</span> Segment<span class="op">};</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>    </span>
+<span id="cb11-7"><a href="#cb11-7"></a>    GDT<span class="op">.</span><span class="dv">0</span><span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb11-8"><a href="#cb11-8"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb11-9"><a href="#cb11-9"></a>        <span class="pp">CS::</span>set_reg(GDT<span class="op">.</span><span class="dv">1</span><span class="op">.</span>code_selector)<span class="op">;</span></span>
+<span id="cb11-10"><a href="#cb11-10"></a>        load_tss(GDT<span class="op">.</span><span class="dv">1</span><span class="op">.</span>tss_selector)<span class="op">;</span></span>
+<span id="cb11-11"><a href="#cb11-11"></a>    <span class="op">}</span></span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We reload the code segment register using <a href="https://docs.rs/x86_64/0.14.5/x86_64/instructions/segmentation/struct.CS.html#method.set_reg"><code>CS::set_reg</code></a> and load the TSS using <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/tables/fn.load_tss.html"><code>load_tss</code></a>. The functions are marked as <code>unsafe</code>, so we need an <code>unsafe</code> block to invoke them. The reason is that it might be possible to break memory safety by loading invalid selectors.</p>
+<p>Now that we have loaded a valid TSS and interrupt stack table, we can set the stack index for our double fault handler in the IDT:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>gdt<span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4"></a></span>
+<span id="cb12-5"><a href="#cb12-5"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6"></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb12-7"><a href="#cb12-7"></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb12-8"><a href="#cb12-8"></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb12-9"><a href="#cb12-9"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb12-10"><a href="#cb12-10"></a>            idt<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)</span>
+<span id="cb12-11"><a href="#cb12-11"></a>                <span class="op">.</span>set_stack_index(<span class="pp">gdt::</span>DOUBLE_FAULT_IST_INDEX)<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb12-12"><a href="#cb12-12"></a>        <span class="op">}</span></span>
+<span id="cb12-13"><a href="#cb12-13"></a></span>
+<span id="cb12-14"><a href="#cb12-14"></a>        idt</span>
+<span id="cb12-15"><a href="#cb12-15"></a>    <span class="op">};</span></span>
+<span id="cb12-16"><a href="#cb12-16"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>set_stack_index</code> method is unsafe because the caller must ensure that the used index is valid and not already used for another exception.</p>
+<p>That’s it! Now the CPU should switch to the double fault stack whenever a double fault occurs. Thus, we are able to catch <em>all</em> double faults, including kernel stack overflows:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="qemu-double-fault-on-stack-overflow.png" class="img-fluid figure-img"></p>
+<figcaption>QEMU printing <code>EXCEPTION: DOUBLE FAULT</code> and a dump of the exception stack frame</figcaption>
+</figure>
+</div>
+<p>From now on, we should never see a triple fault again! To ensure that we don’t accidentally break the above, we should add a test for this.</p>
+</section>
+<section id="a-stack-overflow-test" class="level2">
+<h2 class="anchored" data-anchor-id="a-stack-overflow-test">A Stack Overflow Test</h2>
+<p>To test our new <code>gdt</code> module and ensure that the double fault handler is correctly called on a stack overflow, we can add an integration test. The idea is to provoke a double fault in the test function and verify that the double fault handler is called.</p>
+<p>Let’s start with a minimal skeleton:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a></span>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb13-7"><a href="#cb13-7"></a></span>
+<span id="cb13-8"><a href="#cb13-8"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb13-9"><a href="#cb13-9"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb13-10"><a href="#cb13-10"></a>    <span class="pp">unimplemented!</span>()<span class="op">;</span></span>
+<span id="cb13-11"><a href="#cb13-11"></a><span class="op">}</span></span>
+<span id="cb13-12"><a href="#cb13-12"></a></span>
+<span id="cb13-13"><a href="#cb13-13"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb13-14"><a href="#cb13-14"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb13-15"><a href="#cb13-15"></a>    <span class="pp">blog_os::</span>test_panic_handler(info)</span>
+<span id="cb13-16"><a href="#cb13-16"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Like our <code>panic_handler</code> test, the test will run <a href="@/edition-2/posts/04-testing/index.md#no-harness-tests">without a test harness</a>. The reason is that we can’t continue execution after a double fault, so more than one test doesn’t make sense. To disable the test harness for the test, we add the following to our <code>Cargo.toml</code>:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="kw">[[test]]</span></span>
+<span id="cb14-4"><a href="#cb14-4"></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"stack_overflow"</span></span>
+<span id="cb14-5"><a href="#cb14-5"></a><span class="dt">harness</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Now <code>cargo test --test stack_overflow</code> should compile successfully. The test fails, of course, since the <code>unimplemented</code> macro panics.</p>
+</section>
+<section id="implementing-_start" class="level2">
+<h2 class="anchored" data-anchor-id="implementing-_start">Implementing <code>_start</code></h2>
+<p>The implementation of the <code>_start</code> function looks like this:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a></span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="kw">use</span> <span class="pp">blog_os::</span>serial_print<span class="op">;</span></span>
+<span id="cb15-4"><a href="#cb15-4"></a></span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb15-7"><a href="#cb15-7"></a>    <span class="pp">serial_print!</span>(<span class="st">"stack_overflow::stack_overflow...</span><span class="sc">\t</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb15-8"><a href="#cb15-8"></a></span>
+<span id="cb15-9"><a href="#cb15-9"></a>    <span class="pp">blog_os::gdt::</span>init()<span class="op">;</span></span>
+<span id="cb15-10"><a href="#cb15-10"></a>    init_test_idt()<span class="op">;</span></span>
+<span id="cb15-11"><a href="#cb15-11"></a></span>
+<span id="cb15-12"><a href="#cb15-12"></a>    <span class="co">// trigger a stack overflow</span></span>
+<span id="cb15-13"><a href="#cb15-13"></a>    stack_overflow()<span class="op">;</span></span>
+<span id="cb15-14"><a href="#cb15-14"></a></span>
+<span id="cb15-15"><a href="#cb15-15"></a>    <span class="pp">panic!</span>(<span class="st">"Execution continued after stack overflow"</span>)<span class="op">;</span></span>
+<span id="cb15-16"><a href="#cb15-16"></a><span class="op">}</span></span>
+<span id="cb15-17"><a href="#cb15-17"></a></span>
+<span id="cb15-18"><a href="#cb15-18"></a><span class="at">#[</span>allow<span class="at">(</span>unconditional_recursion<span class="at">)]</span></span>
+<span id="cb15-19"><a href="#cb15-19"></a><span class="kw">fn</span> stack_overflow() <span class="op">{</span></span>
+<span id="cb15-20"><a href="#cb15-20"></a>    stack_overflow()<span class="op">;</span> <span class="co">// for each recursion, the return address is pushed</span></span>
+<span id="cb15-21"><a href="#cb15-21"></a>    <span class="pp">volatile::Volatile::</span>new(<span class="dv">0</span>)<span class="op">.</span>read()<span class="op">;</span> <span class="co">// prevent tail recursion optimizations</span></span>
+<span id="cb15-22"><a href="#cb15-22"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We call our <code>gdt::init</code> function to initialize a new GDT. Instead of calling our <code>interrupts::init_idt</code> function, we call an <code>init_test_idt</code> function that will be explained in a moment. The reason is that we want to register a custom double fault handler that does an <code>exit_qemu(QemuExitCode::Success)</code> instead of panicking.</p>
+<p>The <code>stack_overflow</code> function is almost identical to the function in our <code>main.rs</code>. The only difference is that at the end of the function, we perform an additional <a href="https://en.wikipedia.org/wiki/Volatile_(computer_programming)">volatile</a> read using the <a href="https://docs.rs/volatile/0.2.6/volatile/struct.Volatile.html"><code>Volatile</code></a> type to prevent a compiler optimization called <a href="https://en.wikipedia.org/wiki/Tail_call"><em>tail call elimination</em></a>. Among other things, this optimization allows the compiler to transform a function whose last statement is a recursive function call into a normal loop. Thus, no additional stack frame is created for the function call, so the stack usage remains constant.</p>
+<p>In our case, however, we want the stack overflow to happen, so we add a dummy volatile read statement at the end of the function, which the compiler is not allowed to remove. Thus, the function is no longer <em>tail recursive</em>, and the transformation into a loop is prevented. We also add the <code>allow(unconditional_recursion)</code> attribute to silence the compiler warning that the function recurses endlessly.</p>
+</section>
+<section id="the-test-idt" class="level2">
+<h2 class="anchored" data-anchor-id="the-test-idt">The Test IDT</h2>
+<p>As noted above, the test needs its own IDT with a custom double fault handler. The implementation looks like this:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb16-2"><a href="#cb16-2"></a></span>
+<span id="cb16-3"><a href="#cb16-3"></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptDescriptorTable<span class="op">;</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a></span>
+<span id="cb16-6"><a href="#cb16-6"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb16-7"><a href="#cb16-7"></a>    <span class="kw">static</span> <span class="kw">ref</span> TEST_IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb16-8"><a href="#cb16-8"></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb16-9"><a href="#cb16-9"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb16-10"><a href="#cb16-10"></a>            idt<span class="op">.</span>double_fault</span>
+<span id="cb16-11"><a href="#cb16-11"></a>                <span class="op">.</span>set_handler_fn(test_double_fault_handler)</span>
+<span id="cb16-12"><a href="#cb16-12"></a>                <span class="op">.</span>set_stack_index(<span class="pp">blog_os::gdt::</span>DOUBLE_FAULT_IST_INDEX)<span class="op">;</span></span>
+<span id="cb16-13"><a href="#cb16-13"></a>        <span class="op">}</span></span>
+<span id="cb16-14"><a href="#cb16-14"></a></span>
+<span id="cb16-15"><a href="#cb16-15"></a>        idt</span>
+<span id="cb16-16"><a href="#cb16-16"></a>    <span class="op">};</span></span>
+<span id="cb16-17"><a href="#cb16-17"></a><span class="op">}</span></span>
+<span id="cb16-18"><a href="#cb16-18"></a></span>
+<span id="cb16-19"><a href="#cb16-19"></a><span class="kw">pub</span> <span class="kw">fn</span> init_test_idt() <span class="op">{</span></span>
+<span id="cb16-20"><a href="#cb16-20"></a>    TEST_IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb16-21"><a href="#cb16-21"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The implementation is very similar to our normal IDT in <code>interrupts.rs</code>. Like in the normal IDT, we set a stack index in the IST for the double fault handler in order to switch to a separate stack. The <code>init_test_idt</code> function loads the IDT on the CPU through the <code>load</code> method.</p>
+</section>
+<section id="the-double-fault-handler" class="level2">
+<h2 class="anchored" data-anchor-id="the-double-fault-handler">The Double Fault Handler</h2>
+<p>The only missing piece is our double fault handler. It looks like this:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a href="#cb17-1"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="kw">use</span> <span class="pp">blog_os::</span><span class="op">{</span>exit_qemu<span class="op">,</span> QemuExitCode<span class="op">,</span> serial_println<span class="op">};</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame<span class="op">;</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a></span>
+<span id="cb17-6"><a href="#cb17-6"></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> test_double_fault_handler(</span>
+<span id="cb17-7"><a href="#cb17-7"></a>    _stack_frame<span class="op">:</span> InterruptStackFrame<span class="op">,</span></span>
+<span id="cb17-8"><a href="#cb17-8"></a>    _error_code<span class="op">:</span> <span class="dt">u64</span><span class="op">,</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a>) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb17-10"><a href="#cb17-10"></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11"></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb17-12"><a href="#cb17-12"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb17-13"><a href="#cb17-13"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When the double fault handler is called, we exit QEMU with a success exit code, which marks the test as passed. Since integration tests are completely separate executables, we need to set the <code>#![feature(abi_x86_interrupt)]</code> attribute again at the top of our test file.</p>
+<p>Now we can run our test through <code>cargo test --test stack_overflow</code> (or <code>cargo test</code> to run all tests). As expected, we see the <code>stack_overflow... [ok]</code> output in the console. Try to comment out the <code>set_stack_index</code> line; it should cause the test to fail.</p>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>Fin</h1>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./72_handlers.html" class="pagination-link" aria-label="Handlers">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Handlers</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb18" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb18-1"><a href="#cb18-1"></a><span class="co">---</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="an">title:</span><span class="co"> Double</span></span>
+<span id="cb18-3"><a href="#cb18-3"></a><span class="co">---</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a></span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a></span>
+<span id="cb18-7"><a href="#cb18-7"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb18-8"><a href="#cb18-8"></a><span class="ss">  - </span>Testing done.</span>
+<span id="cb18-9"><a href="#cb18-9"></a><span class="ss">  - </span>First handler assigned, more to come.</span>
+<span id="cb18-10"><a href="#cb18-10"></a></span>
+<span id="cb18-11"><a href="#cb18-11"></a><span class="fu">## Citations</span></span>
+<span id="cb18-12"><a href="#cb18-12"></a></span>
+<span id="cb18-13"><a href="#cb18-13"></a><span class="ss">- </span>CPU exceptions are algorithmically interesting but technically tedious.</span>
+<span id="cb18-14"><a href="#cb18-14"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Double Faults</span><span class="co">](https://os.phil-opp.com/double-fault-exceptions/)</span></span>
+<span id="cb18-15"><a href="#cb18-15"></a></span>
+<span id="cb18-16"><a href="#cb18-16"></a><span class="fu">## Negation</span></span>
+<span id="cb18-17"><a href="#cb18-17"></a></span>
+<span id="cb18-18"><a href="#cb18-18"></a><span class="ss">- </span>Not to be confused with the <span class="in">`double`</span> type.</span>
+<span id="cb18-19"><a href="#cb18-19"></a><span class="ss">- </span>That is *floating point* type and *has no place* in an OS class.</span>
+<span id="cb18-20"><a href="#cb18-20"></a></span>
+<span id="cb18-21"><a href="#cb18-21"></a><span class="fu"># Recall</span></span>
+<span id="cb18-22"><a href="#cb18-22"></a></span>
+<span id="cb18-23"><a href="#cb18-23"></a><span class="fu">## Exceptions</span></span>
+<span id="cb18-24"><a href="#cb18-24"></a></span>
+<span id="cb18-25"><a href="#cb18-25"></a><span class="ss">- </span>CPU exceptions occur in various erroneous situations</span>
+<span id="cb18-26"><a href="#cb18-26"></a><span class="ss">    - </span>Accessing an invalid memory address</span>
+<span id="cb18-27"><a href="#cb18-27"></a><span class="ss">    - </span>Dividing by zero </span>
+<span id="cb18-28"><a href="#cb18-28"></a><span class="ss">- </span>We have to set up an _interrupt descriptor table_.. </span>
+<span id="cb18-29"><a href="#cb18-29"></a><span class="ss">- </span>This week, our kernel will be able to catch <span class="co">[</span><span class="ot">double faults</span><span class="co">](https://wiki.osdev.org/Exceptions#Breakpoint)</span>.</span>
+<span id="cb18-30"><a href="#cb18-30"></a></span>
+<span id="cb18-31"><a href="#cb18-31"></a><span class="fu">## Types</span></span>
+<span id="cb18-32"><a href="#cb18-32"></a></span>
+<span id="cb18-33"><a href="#cb18-33"></a>On x86, there are about 20 different CPU exception types.</span>
+<span id="cb18-34"><a href="#cb18-34"></a></span>
+<span id="cb18-35"><a href="#cb18-35"></a><span class="ss">- </span>**Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. </span>
+<span id="cb18-36"><a href="#cb18-36"></a><span class="ss">    - </span>This exception also occurs when there is no handler function registered for an exception.</span>
+<span id="cb18-37"><a href="#cb18-37"></a>    </span>
+<span id="cb18-38"><a href="#cb18-38"></a><span class="fu"># Double</span></span>
+<span id="cb18-39"><a href="#cb18-39"></a></span>
+<span id="cb18-40"><a href="#cb18-40"></a><span class="fu">## What is it?</span></span>
+<span id="cb18-41"><a href="#cb18-41"></a></span>
+<span id="cb18-42"><a href="#cb18-42"></a><span class="ss">- </span>A special exception that occurs when the CPU fails to invoke an exception handler. </span>
+<span id="cb18-43"><a href="#cb18-43"></a><span class="ss">- </span>For example, a page fault is triggered without a page fault handler registered in the IDT. </span>
+<span id="cb18-44"><a href="#cb18-44"></a></span>
+<span id="cb18-45"><a href="#cb18-45"></a><span class="fu">## Python</span></span>
+<span id="cb18-46"><a href="#cb18-46"></a></span>
+<span id="cb18-47"><a href="#cb18-47"></a><span class="ss">- </span>Perhaps a generalized exception.</span>
+<span id="cb18-48"><a href="#cb18-48"></a></span>
+<span id="cb18-51"><a href="#cb18-51"></a><span class="in">```{python}</span></span>
+<span id="cb18-52"><a href="#cb18-52"></a><span class="cf">try</span>:</span>
+<span id="cb18-53"><a href="#cb18-53"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
+<span id="cb18-54"><a href="#cb18-54"></a><span class="cf">except</span>:</span>
+<span id="cb18-55"><a href="#cb18-55"></a>    <span class="co">"Control flow diverts *regardless* of what goes wrong in the `try`"</span></span>
+<span id="cb18-56"><a href="#cb18-56"></a><span class="in">```</span></span>
+<span id="cb18-57"><a href="#cb18-57"></a></span>
+<span id="cb18-58"><a href="#cb18-58"></a><span class="fu">## Behavior</span></span>
+<span id="cb18-59"><a href="#cb18-59"></a></span>
+<span id="cb18-60"><a href="#cb18-60"></a><span class="ss">- </span>A double fault behaves like a normal exception. </span>
+<span id="cb18-61"><a href="#cb18-61"></a><span class="ss">- </span>It has the vector number <span class="in">`8`</span> and we can define a normal handler function for it in the IDT. </span>
+<span id="cb18-62"><a href="#cb18-62"></a><span class="ss">- </span>It is really important to provide a double fault handler, because if a double fault is unhandled, a fatal _triple fault_ occurs. </span>
+<span id="cb18-63"><a href="#cb18-63"></a><span class="ss">- </span>Triple faults can't be caught, and most hardware reacts with a system reset.</span>
+<span id="cb18-64"><a href="#cb18-64"></a></span>
+<span id="cb18-65"><a href="#cb18-65"></a><span class="fu">## Triggering a Double Fault</span></span>
+<span id="cb18-66"><a href="#cb18-66"></a></span>
+<span id="cb18-67"><a href="#cb18-67"></a><span class="ss">- </span>We don't have a page fault handler, so it will double (and triple) fault.</span>
+<span id="cb18-68"><a href="#cb18-68"></a></span>
+<span id="cb18-69"><a href="#cb18-69"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb18-70"><a href="#cb18-70"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb18-71"><a href="#cb18-71"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb18-72"><a href="#cb18-72"></a><span class="in">    osirs::init();</span></span>
+<span id="cb18-73"><a href="#cb18-73"></a><span class="in">    </span></span>
+<span id="cb18-74"><a href="#cb18-74"></a><span class="in">    unsafe { *(0xdeadbeef as *mut u8) = 42; };</span></span>
+<span id="cb18-75"><a href="#cb18-75"></a></span>
+<span id="cb18-76"><a href="#cb18-76"></a><span class="in">    #[cfg(test)]</span></span>
+<span id="cb18-77"><a href="#cb18-77"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb18-78"><a href="#cb18-78"></a></span>
+<span id="cb18-79"><a href="#cb18-79"></a><span class="in">    loop {}</span></span>
+<span id="cb18-80"><a href="#cb18-80"></a><span class="in">}</span></span>
+<span id="cb18-81"><a href="#cb18-81"></a><span class="in">```</span></span>
+<span id="cb18-82"><a href="#cb18-82"></a></span>
+<span id="cb18-83"><a href="#cb18-83"></a><span class="fu">## Description</span></span>
+<span id="cb18-84"><a href="#cb18-84"></a></span>
+<span id="cb18-85"><a href="#cb18-85"></a><span class="ss">- </span>We use <span class="in">`unsafe`</span> to write to a literal. </span>
+<span id="cb18-86"><a href="#cb18-86"></a><span class="ss">- </span>This address lacks meaning.</span>
+<span id="cb18-87"><a href="#cb18-87"></a><span class="ss">    - </span>A virtual (software-visible) address.</span>
+<span id="cb18-88"><a href="#cb18-88"></a><span class="ss">    - </span>Regard as a key in key-value storage that maps software-visible addresses to hardware addresses (the MMU).</span>
+<span id="cb18-89"><a href="#cb18-89"></a><span class="ss">    - </span>The key is not present in the data structure.</span>
+<span id="cb18-90"><a href="#cb18-90"></a></span>
+<span id="cb18-91"><a href="#cb18-91"></a><span class="fu">## Result</span></span>
+<span id="cb18-92"><a href="#cb18-92"></a>    </span>
+<span id="cb18-93"><a href="#cb18-93"></a><span class="ss">- </span>So, when we attempt to assign a value based on that key, it explodes.</span>
+<span id="cb18-94"><a href="#cb18-94"></a><span class="ss">    - </span>The emulated device goes into a reboot loop.</span>
+<span id="cb18-95"><a href="#cb18-95"></a><span class="ss">- </span>Why?</span>
+<span id="cb18-96"><a href="#cb18-96"></a></span>
+<span id="cb18-97"><a href="#cb18-97"></a><span class="fu">## Steps </span></span>
+<span id="cb18-98"><a href="#cb18-98"></a></span>
+<span id="cb18-99"><a href="#cb18-99"></a>::: {.incremental}</span>
+<span id="cb18-100"><a href="#cb18-100"></a></span>
+<span id="cb18-101"><a href="#cb18-101"></a><span class="ss">1. </span>The CPU tries to write to <span class="in">`0xdeadbeef`</span>, which causes a page fault.</span>
+<span id="cb18-102"><a href="#cb18-102"></a><span class="ss">2. </span>The CPU indexes into the IDT for a page fault and no handler function is specified so a double fault occurs.</span>
+<span id="cb18-103"><a href="#cb18-103"></a><span class="ss">3. </span>The CPU indexes into the IDT for  double fault handler and no handler function is specified so a *triple* fault occurs.</span>
+<span id="cb18-104"><a href="#cb18-104"></a><span class="ss">4. </span>A triple fault is fatal. QEMU (or hardware) issues a system reset.</span>
+<span id="cb18-105"><a href="#cb18-105"></a></span>
+<span id="cb18-106"><a href="#cb18-106"></a>:::</span>
+<span id="cb18-107"><a href="#cb18-107"></a></span>
+<span id="cb18-108"><a href="#cb18-108"></a><span class="fu">## Handle it</span></span>
+<span id="cb18-109"><a href="#cb18-109"></a></span>
+<span id="cb18-110"><a href="#cb18-110"></a></span>
+<span id="cb18-111"><a href="#cb18-111"></a><span class="ss">- </span>To prevent this triple fault, we need to either:</span>
+<span id="cb18-112"><a href="#cb18-112"></a><span class="ss">    - </span>Provide a handler function for page faults, or </span>
+<span id="cb18-113"><a href="#cb18-113"></a><span class="ss">    - </span>Provide a double fault handler. </span>
+<span id="cb18-114"><a href="#cb18-114"></a><span class="ss">- </span>We want to avoid triple faults in **all** cases</span>
+<span id="cb18-115"><a href="#cb18-115"></a><span class="ss">    - </span>Let's start with a double fault handler.</span>
+<span id="cb18-116"><a href="#cb18-116"></a></span>
+<span id="cb18-117"><a href="#cb18-117"></a><span class="fu">## Throwback</span></span>
+<span id="cb18-118"><a href="#cb18-118"></a></span>
+<span id="cb18-119"><a href="#cb18-119"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb18-120"><a href="#cb18-120"></a><span class="in">#![allow(static_mut_refs)]</span></span>
+<span id="cb18-121"><a href="#cb18-121"></a><span class="in">static mut IDT: x86_64::structures::idt::InterruptDescriptorTable =</span></span>
+<span id="cb18-122"><a href="#cb18-122"></a><span class="in">    x86_64::structures::idt::InterruptDescriptorTable::new();</span></span>
+<span id="cb18-123"><a href="#cb18-123"></a></span>
+<span id="cb18-124"><a href="#cb18-124"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb18-125"><a href="#cb18-125"></a><span class="in">    unsafe {</span></span>
+<span id="cb18-126"><a href="#cb18-126"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb18-127"><a href="#cb18-127"></a><span class="in">        IDT.load();</span></span>
+<span id="cb18-128"><a href="#cb18-128"></a><span class="in">    }</span></span>
+<span id="cb18-129"><a href="#cb18-129"></a><span class="in">}</span></span>
+<span id="cb18-130"><a href="#cb18-130"></a></span>
+<span id="cb18-131"><a href="#cb18-131"></a><span class="in">// Love these `cargo fmt` newlines</span></span>
+<span id="cb18-132"><a href="#cb18-132"></a><span class="in">extern "x86-interrupt" fn breakpoint_handler(</span></span>
+<span id="cb18-133"><a href="#cb18-133"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame,</span></span>
+<span id="cb18-134"><a href="#cb18-134"></a><span class="in">) {</span></span>
+<span id="cb18-135"><a href="#cb18-135"></a><span class="in">    crate::println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);</span></span>
+<span id="cb18-136"><a href="#cb18-136"></a><span class="in">}</span></span>
+<span id="cb18-137"><a href="#cb18-137"></a><span class="in">```</span></span>
+<span id="cb18-138"><a href="#cb18-138"></a></span>
+<span id="cb18-139"><a href="#cb18-139"></a><span class="fu"># TODO</span></span>
+<span id="cb18-140"><a href="#cb18-140"></a></span>
+<span id="cb18-141"><a href="#cb18-141"></a></span>
+<span id="cb18-142"><a href="#cb18-142"></a><span class="fu">## A Double Fault Handler</span></span>
+<span id="cb18-143"><a href="#cb18-143"></a></span>
+<span id="cb18-144"><a href="#cb18-144"></a>A double fault is a normal exception with an error code, so we can specify a handler function similar to our breakpoint handler:</span>
+<span id="cb18-145"><a href="#cb18-145"></a></span>
+<span id="cb18-146"><a href="#cb18-146"></a><span class="in">```rust</span></span>
+<span id="cb18-147"><a href="#cb18-147"></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb18-148"><a href="#cb18-148"></a></span>
+<span id="cb18-149"><a href="#cb18-149"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb18-150"><a href="#cb18-150"></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-151"><a href="#cb18-151"></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb18-152"><a href="#cb18-152"></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb18-153"><a href="#cb18-153"></a>        idt<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb18-154"><a href="#cb18-154"></a>        idt</span>
+<span id="cb18-155"><a href="#cb18-155"></a>    <span class="op">};</span></span>
+<span id="cb18-156"><a href="#cb18-156"></a><span class="op">}</span></span>
+<span id="cb18-157"><a href="#cb18-157"></a></span>
+<span id="cb18-158"><a href="#cb18-158"></a><span class="co">// new</span></span>
+<span id="cb18-159"><a href="#cb18-159"></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> double_fault_handler(</span>
+<span id="cb18-160"><a href="#cb18-160"></a>    stack_frame<span class="op">:</span> InterruptStackFrame<span class="op">,</span> _error_code<span class="op">:</span> <span class="dt">u64</span>) <span class="op">-&gt;</span> <span class="op">!</span></span>
+<span id="cb18-161"><a href="#cb18-161"></a><span class="op">{</span></span>
+<span id="cb18-162"><a href="#cb18-162"></a>    <span class="pp">panic!</span>(<span class="st">"EXCEPTION: DOUBLE FAULT</span><span class="sc">\n</span><span class="st">{:#?}"</span><span class="op">,</span> stack_frame)<span class="op">;</span></span>
+<span id="cb18-163"><a href="#cb18-163"></a><span class="op">}</span></span>
+<span id="cb18-164"><a href="#cb18-164"></a><span class="in">```</span></span>
+<span id="cb18-165"><a href="#cb18-165"></a></span>
+<span id="cb18-166"><a href="#cb18-166"></a>Our handler prints a short error message and dumps the exception stack frame. The error code of the double fault handler is always zero, so there's no reason to print it. One difference to the breakpoint handler is that the double fault handler is <span class="co">[</span><span class="ot">_diverging_</span><span class="co">]</span>. The reason is that the <span class="in">`x86_64`</span> architecture does not permit returning from a double fault exception.</span>
+<span id="cb18-167"><a href="#cb18-167"></a></span>
+<span id="cb18-168"><a href="#cb18-168"></a><span class="ot">[_diverging_]: https://doc.rust-lang.org/stable/rust-by-example/fn/diverging.html</span></span>
+<span id="cb18-169"><a href="#cb18-169"></a></span>
+<span id="cb18-170"><a href="#cb18-170"></a>When we start our kernel now, we should see that the double fault handler is invoked:</span>
+<span id="cb18-171"><a href="#cb18-171"></a></span>
+<span id="cb18-172"><a href="#cb18-172"></a><span class="al">![QEMU printing `EXCEPTION: DOUBLE FAULT` and the exception stack frame](qemu-catch-double-fault.png)</span></span>
+<span id="cb18-173"><a href="#cb18-173"></a></span>
+<span id="cb18-174"><a href="#cb18-174"></a>It worked! Here is what happened this time:</span>
+<span id="cb18-175"><a href="#cb18-175"></a></span>
+<span id="cb18-176"><a href="#cb18-176"></a><span class="ss">1. </span>The CPU tries to write to <span class="in">`0xdeadbeef`</span>, which causes a page fault.</span>
+<span id="cb18-177"><a href="#cb18-177"></a><span class="ss">2. </span>Like before, the CPU looks at the corresponding entry in the IDT and sees that no handler function is defined. Thus, a double fault occurs.</span>
+<span id="cb18-178"><a href="#cb18-178"></a><span class="ss">3. </span>The CPU jumps to the – now present – double fault handler.</span>
+<span id="cb18-179"><a href="#cb18-179"></a></span>
+<span id="cb18-180"><a href="#cb18-180"></a>The triple fault (and the boot-loop) no longer occurs, since the CPU can now call the double fault handler.</span>
+<span id="cb18-181"><a href="#cb18-181"></a></span>
+<span id="cb18-182"><a href="#cb18-182"></a>That was quite straightforward! So why do we need a whole post for this topic? Well, we're now able to catch _most_ double faults, but there are some cases where our current approach doesn't suffice.</span>
+<span id="cb18-183"><a href="#cb18-183"></a></span>
+<span id="cb18-184"><a href="#cb18-184"></a><span class="fu">## Causes of Double Faults</span></span>
+<span id="cb18-185"><a href="#cb18-185"></a></span>
+<span id="cb18-186"><a href="#cb18-186"></a>Before we look at the special cases, we need to know the exact causes of double faults. Above, we used a pretty vague definition:</span>
+<span id="cb18-187"><a href="#cb18-187"></a></span>
+<span id="cb18-188"><a href="#cb18-188"></a><span class="at">&gt; A double fault is a special exception that occurs when the CPU fails to invoke an exception handler.</span></span>
+<span id="cb18-189"><a href="#cb18-189"></a></span>
+<span id="cb18-190"><a href="#cb18-190"></a>What does _“fails to invoke”_ mean exactly? The handler is not present? The handler is <span class="co">[</span><span class="ot">swapped out</span><span class="co">]</span>? And what happens if a handler causes exceptions itself?</span>
+<span id="cb18-191"><a href="#cb18-191"></a></span>
+<span id="cb18-192"><a href="#cb18-192"></a><span class="ot">[swapped out]: http://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys.pdf</span></span>
+<span id="cb18-193"><a href="#cb18-193"></a></span>
+<span id="cb18-194"><a href="#cb18-194"></a>For example, what happens if:</span>
+<span id="cb18-195"><a href="#cb18-195"></a></span>
+<span id="cb18-196"><a href="#cb18-196"></a><span class="ss">1. </span>a breakpoint exception occurs, but the corresponding handler function is swapped out?</span>
+<span id="cb18-197"><a href="#cb18-197"></a><span class="ss">2. </span>a page fault occurs, but the page fault handler is swapped out?</span>
+<span id="cb18-198"><a href="#cb18-198"></a><span class="ss">3. </span>a divide-by-zero handler causes a breakpoint exception, but the breakpoint handler is swapped out?</span>
+<span id="cb18-199"><a href="#cb18-199"></a><span class="ss">4. </span>our kernel overflows its stack and the _guard page_ is hit?</span>
+<span id="cb18-200"><a href="#cb18-200"></a></span>
+<span id="cb18-201"><a href="#cb18-201"></a>Fortunately, the AMD64 manual (<span class="co">[</span><span class="ot">PDF</span><span class="co">][AMD64 manual]</span>) has an exact definition (in Section 8.2.9). According to it, a “double fault exception _can_ occur when a second exception occurs during the handling of a prior (first) exception handler”. The _“can”_ is important: Only very specific combinations of exceptions lead to a double fault. These combinations are:</span>
+<span id="cb18-202"><a href="#cb18-202"></a></span>
+<span id="cb18-203"><a href="#cb18-203"></a>| First Exception                                                                                                       | Second Exception                                                                                                  |</span>
+<span id="cb18-204"><a href="#cb18-204"></a>| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |</span>
+<span id="cb18-205"><a href="#cb18-205"></a>| <span class="co">[</span><span class="ot">Divide-by-zero</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Invalid TSS</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Segment Not Present</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Stack-Segment Fault</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">General Protection Fault</span><span class="co">]</span> | <span class="co">[</span><span class="ot">Invalid TSS</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Segment Not Present</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Stack-Segment Fault</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">General Protection Fault</span><span class="co">]</span>                  |</span>
+<span id="cb18-206"><a href="#cb18-206"></a>| <span class="co">[</span><span class="ot">Page Fault</span><span class="co">]</span>                                                                                                          | <span class="co">[</span><span class="ot">Page Fault</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Invalid TSS</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Segment Not Present</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">Stack-Segment Fault</span><span class="co">]</span>,&lt;br&gt;<span class="co">[</span><span class="ot">General Protection Fault</span><span class="co">]</span> |</span>
+<span id="cb18-207"><a href="#cb18-207"></a></span>
+<span id="cb18-208"><a href="#cb18-208"></a><span class="ot">[Divide-by-zero]: https://wiki.osdev.org/Exceptions#Division_Error</span></span>
+<span id="cb18-209"><a href="#cb18-209"></a><span class="ot">[Invalid TSS]: https://wiki.osdev.org/Exceptions#Invalid_TSS</span></span>
+<span id="cb18-210"><a href="#cb18-210"></a><span class="ot">[Segment Not Present]: https://wiki.osdev.org/Exceptions#Segment_Not_Present</span></span>
+<span id="cb18-211"><a href="#cb18-211"></a><span class="ot">[Stack-Segment Fault]: https://wiki.osdev.org/Exceptions#Stack-Segment_Fault</span></span>
+<span id="cb18-212"><a href="#cb18-212"></a><span class="ot">[General Protection Fault]: https://wiki.osdev.org/Exceptions#General_Protection_Fault</span></span>
+<span id="cb18-213"><a href="#cb18-213"></a><span class="ot">[Page Fault]: https://wiki.osdev.org/Exceptions#Page_Fault</span></span>
+<span id="cb18-214"><a href="#cb18-214"></a></span>
+<span id="cb18-215"><a href="#cb18-215"></a></span>
+<span id="cb18-216"><a href="#cb18-216"></a><span class="ot">[AMD64 manual]: https://www.amd.com/system/files/TechDocs/24593.pdf</span></span>
+<span id="cb18-217"><a href="#cb18-217"></a></span>
+<span id="cb18-218"><a href="#cb18-218"></a>So, for example, a divide-by-zero fault followed by a page fault is fine (the page fault handler is invoked), but a divide-by-zero fault followed by a general-protection fault leads to a double fault.</span>
+<span id="cb18-219"><a href="#cb18-219"></a></span>
+<span id="cb18-220"><a href="#cb18-220"></a>With the help of this table, we can answer the first three of the above questions:</span>
+<span id="cb18-221"><a href="#cb18-221"></a></span>
+<span id="cb18-222"><a href="#cb18-222"></a><span class="ss">1. </span>If a breakpoint exception occurs and the corresponding handler function is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.</span>
+<span id="cb18-223"><a href="#cb18-223"></a><span class="ss">2. </span>If a page fault occurs and the page fault handler is swapped out, a _double fault_ occurs and the _double fault handler_ is invoked.</span>
+<span id="cb18-224"><a href="#cb18-224"></a><span class="ss">3. </span>If a divide-by-zero handler causes a breakpoint exception, the CPU tries to invoke the breakpoint handler. If the breakpoint handler is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.</span>
+<span id="cb18-225"><a href="#cb18-225"></a></span>
+<span id="cb18-226"><a href="#cb18-226"></a>In fact, even the case of an exception without a handler function in the IDT follows this scheme: When the exception occurs, the CPU tries to read the corresponding IDT entry. Since the entry is 0, which is not a valid IDT entry, a _general protection fault_ occurs. We did not define a handler function for the general protection fault either, so another general protection fault occurs. According to the table, this leads to a double fault.</span>
+<span id="cb18-227"><a href="#cb18-227"></a></span>
+<span id="cb18-228"><a href="#cb18-228"></a><span class="fu">## Kernel Stack Overflow</span></span>
+<span id="cb18-229"><a href="#cb18-229"></a></span>
+<span id="cb18-230"><a href="#cb18-230"></a>Let's look at the fourth question:</span>
+<span id="cb18-231"><a href="#cb18-231"></a></span>
+<span id="cb18-232"><a href="#cb18-232"></a><span class="at">&gt; What happens if our kernel overflows its stack and the guard page is hit?</span></span>
+<span id="cb18-233"><a href="#cb18-233"></a></span>
+<span id="cb18-234"><a href="#cb18-234"></a>A guard page is a special memory page at the bottom of a stack that makes it possible to detect stack overflows. The page is not mapped to any physical frame, so accessing it causes a page fault instead of silently corrupting other memory. The bootloader sets up a guard page for our kernel stack, so a stack overflow causes a _page fault_.</span>
+<span id="cb18-235"><a href="#cb18-235"></a></span>
+<span id="cb18-236"><a href="#cb18-236"></a>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the <span class="co">[</span><span class="ot">interrupt stack frame</span><span class="co">]</span> onto the stack. However, the current stack pointer still points to the non-present guard page. Thus, a second page fault occurs, which causes a double fault (according to the above table).</span>
+<span id="cb18-237"><a href="#cb18-237"></a></span>
+<span id="cb18-238"><a href="#cb18-238"></a><span class="ot">[interrupt stack frame]: </span>@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-stack-frame</span>
+<span id="cb18-239"><a href="#cb18-239"></a></span>
+<span id="cb18-240"><a href="#cb18-240"></a>So the CPU tries to call the _double fault handler_ now. However, on a double fault, the CPU tries to push the exception stack frame, too. The stack pointer still points to the guard page, so a _third_ page fault occurs, which causes a _triple fault_ and a system reboot. So our current double fault handler can't avoid a triple fault in this case.</span>
+<span id="cb18-241"><a href="#cb18-241"></a></span>
+<span id="cb18-242"><a href="#cb18-242"></a>Let's try it ourselves! We can easily provoke a kernel stack overflow by calling a function that recurses endlessly:</span>
+<span id="cb18-243"><a href="#cb18-243"></a></span>
+<span id="cb18-244"><a href="#cb18-244"></a><span class="in">```rust</span></span>
+<span id="cb18-245"><a href="#cb18-245"></a><span class="co">// in src/main.rs</span></span>
+<span id="cb18-246"><a href="#cb18-246"></a></span>
+<span id="cb18-247"><a href="#cb18-247"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
+<span id="cb18-248"><a href="#cb18-248"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-249"><a href="#cb18-249"></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
+<span id="cb18-250"><a href="#cb18-250"></a></span>
+<span id="cb18-251"><a href="#cb18-251"></a>    <span class="pp">blog_os::</span>init()<span class="op">;</span></span>
+<span id="cb18-252"><a href="#cb18-252"></a></span>
+<span id="cb18-253"><a href="#cb18-253"></a>    <span class="kw">fn</span> stack_overflow() <span class="op">{</span></span>
+<span id="cb18-254"><a href="#cb18-254"></a>        stack_overflow()<span class="op">;</span> <span class="co">// for each recursion, the return address is pushed</span></span>
+<span id="cb18-255"><a href="#cb18-255"></a>    <span class="op">}</span></span>
+<span id="cb18-256"><a href="#cb18-256"></a></span>
+<span id="cb18-257"><a href="#cb18-257"></a>    <span class="co">// trigger a stack overflow</span></span>
+<span id="cb18-258"><a href="#cb18-258"></a>    stack_overflow()<span class="op">;</span></span>
+<span id="cb18-259"><a href="#cb18-259"></a></span>
+<span id="cb18-260"><a href="#cb18-260"></a>    […] <span class="co">// test_main(), println(…), and loop {}</span></span>
+<span id="cb18-261"><a href="#cb18-261"></a><span class="op">}</span></span>
+<span id="cb18-262"><a href="#cb18-262"></a><span class="in">```</span></span>
+<span id="cb18-263"><a href="#cb18-263"></a></span>
+<span id="cb18-264"><a href="#cb18-264"></a>When we try this code in QEMU, we see that the system enters a bootloop again.</span>
+<span id="cb18-265"><a href="#cb18-265"></a></span>
+<span id="cb18-266"><a href="#cb18-266"></a>So how can we avoid this problem? We can't omit the pushing of the exception stack frame, since the CPU itself does it. So we need to ensure somehow that the stack is always valid when a double fault exception occurs. Fortunately, the x86_64 architecture has a solution to this problem.</span>
+<span id="cb18-267"><a href="#cb18-267"></a></span>
+<span id="cb18-268"><a href="#cb18-268"></a><span class="fu">## Switching Stacks</span></span>
+<span id="cb18-269"><a href="#cb18-269"></a></span>
+<span id="cb18-270"><a href="#cb18-270"></a>The x86_64 architecture is able to switch to a predefined, known-good stack when an exception occurs. This switch happens at hardware level, so it can be performed before the CPU pushes the exception stack frame.</span>
+<span id="cb18-271"><a href="#cb18-271"></a></span>
+<span id="cb18-272"><a href="#cb18-272"></a>The switching mechanism is implemented as an _Interrupt Stack Table_ (IST). The IST is a table of 7 pointers to known-good stacks. In Rust-like pseudocode:</span>
+<span id="cb18-273"><a href="#cb18-273"></a></span>
+<span id="cb18-274"><a href="#cb18-274"></a><span class="in">```rust</span></span>
+<span id="cb18-275"><a href="#cb18-275"></a><span class="kw">struct</span> InterruptStackTable <span class="op">{</span></span>
+<span id="cb18-276"><a href="#cb18-276"></a>    stack_pointers<span class="op">:</span> [<span class="dt">Option</span><span class="op">&lt;</span>StackPointer<span class="op">&gt;;</span> <span class="dv">7</span>]<span class="op">,</span></span>
+<span id="cb18-277"><a href="#cb18-277"></a><span class="op">}</span></span>
+<span id="cb18-278"><a href="#cb18-278"></a><span class="in">```</span></span>
+<span id="cb18-279"><a href="#cb18-279"></a></span>
+<span id="cb18-280"><a href="#cb18-280"></a>For each exception handler, we can choose a stack from the IST through the <span class="in">`stack_pointers`</span> field in the corresponding <span class="co">[</span><span class="ot">IDT entry</span><span class="co">]</span>. For example, our double fault handler could use the first stack in the IST. Then the CPU automatically switches to this stack whenever a double fault occurs. This switch would happen before anything is pushed, preventing the triple fault.</span>
+<span id="cb18-281"><a href="#cb18-281"></a></span>
+<span id="cb18-282"><a href="#cb18-282"></a><span class="ot">[IDT entry]: </span>@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-descriptor-table</span>
+<span id="cb18-283"><a href="#cb18-283"></a></span>
+<span id="cb18-284"><a href="#cb18-284"></a><span class="fu">## The IST and TSS</span></span>
+<span id="cb18-285"><a href="#cb18-285"></a></span>
+<span id="cb18-286"><a href="#cb18-286"></a>The Interrupt Stack Table (IST) is part of an old legacy structure called _[Task State Segment]_ <span class="sc">\(</span>TSS). The TSS used to hold various pieces of information (e.g., processor register state) about a task in 32-bit mode and was, for example, used for <span class="co">[</span><span class="ot">hardware context switching</span><span class="co">]</span>. However, hardware context switching is no longer supported in 64-bit mode and the format of the TSS has changed completely.</span>
+<span id="cb18-287"><a href="#cb18-287"></a></span>
+<span id="cb18-288"><a href="#cb18-288"></a><span class="ot">[Task State Segment]: https://en.wikipedia.org/wiki/Task_state_segment</span></span>
+<span id="cb18-289"><a href="#cb18-289"></a><span class="ot">[hardware context switching]: https://wiki.osdev.org/Context_Switching#Hardware_Context_Switching</span></span>
+<span id="cb18-290"><a href="#cb18-290"></a></span>
+<span id="cb18-291"><a href="#cb18-291"></a>On x86_64, the TSS no longer holds any task-specific information at all. Instead, it holds two stack tables (the IST is one of them). The only common field between the 32-bit and 64-bit TSS is the pointer to the <span class="co">[</span><span class="ot">I/O port permissions bitmap</span><span class="co">]</span>.</span>
+<span id="cb18-292"><a href="#cb18-292"></a></span>
+<span id="cb18-293"><a href="#cb18-293"></a><span class="ot">[I/O port permissions bitmap]: https://en.wikipedia.org/wiki/Task_state_segment#I.2FO_port_permissions</span></span>
+<span id="cb18-294"><a href="#cb18-294"></a></span>
+<span id="cb18-295"><a href="#cb18-295"></a>The 64-bit TSS has the following format:</span>
+<span id="cb18-296"><a href="#cb18-296"></a></span>
+<span id="cb18-297"><a href="#cb18-297"></a>| Field                                        | Type       |</span>
+<span id="cb18-298"><a href="#cb18-298"></a>| -------------------------------------------- | ---------- |</span>
+<span id="cb18-299"><a href="#cb18-299"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u32`</span>      |</span>
+<span id="cb18-300"><a href="#cb18-300"></a>| Privilege Stack Table                        | <span class="in">`[u64; 3]`</span> |</span>
+<span id="cb18-301"><a href="#cb18-301"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u64`</span>      |</span>
+<span id="cb18-302"><a href="#cb18-302"></a>| Interrupt Stack Table                        | <span class="in">`[u64; 7]`</span> |</span>
+<span id="cb18-303"><a href="#cb18-303"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u64`</span>      |</span>
+<span id="cb18-304"><a href="#cb18-304"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u16`</span>      |</span>
+<span id="cb18-305"><a href="#cb18-305"></a>| I/O Map Base Address                         | <span class="in">`u16`</span>      |</span>
+<span id="cb18-306"><a href="#cb18-306"></a></span>
+<span id="cb18-307"><a href="#cb18-307"></a>The _Privilege Stack Table_ is used by the CPU when the privilege level changes. For example, if an exception occurs while the CPU is in user mode (privilege level 3), the CPU normally switches to kernel mode (privilege level 0) before invoking the exception handler. In that case, the CPU would switch to the 0th stack in the Privilege Stack Table (since 0 is the target privilege level). We don't have any user-mode programs yet, so we will ignore this table for now.</span>
+<span id="cb18-308"><a href="#cb18-308"></a></span>
+<span id="cb18-309"><a href="#cb18-309"></a><span class="fu">## Creating a TSS</span></span>
+<span id="cb18-310"><a href="#cb18-310"></a></span>
+<span id="cb18-311"><a href="#cb18-311"></a>Let's create a new TSS that contains a separate double fault stack in its interrupt stack table. For that, we need a TSS struct. Fortunately, the <span class="in">`x86_64`</span> crate already contains a <span class="co">[</span><span class="ot">`TaskStateSegment` struct</span><span class="co">]</span> that we can use.</span>
+<span id="cb18-312"><a href="#cb18-312"></a></span>
+<span id="cb18-313"><a href="#cb18-313"></a><span class="ot">[`TaskStateSegment` struct]: https://docs.rs/x86_64/0.14.2/x86_64/structures/tss/struct.TaskStateSegment.html</span></span>
+<span id="cb18-314"><a href="#cb18-314"></a></span>
+<span id="cb18-315"><a href="#cb18-315"></a>We create the TSS in a new <span class="in">`gdt`</span> module (the name will make sense later):</span>
+<span id="cb18-316"><a href="#cb18-316"></a></span>
+<span id="cb18-317"><a href="#cb18-317"></a><span class="in">```rust</span></span>
+<span id="cb18-318"><a href="#cb18-318"></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb18-319"><a href="#cb18-319"></a></span>
+<span id="cb18-320"><a href="#cb18-320"></a><span class="kw">pub</span> <span class="kw">mod</span> gdt<span class="op">;</span></span>
+<span id="cb18-321"><a href="#cb18-321"></a></span>
+<span id="cb18-322"><a href="#cb18-322"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb18-323"><a href="#cb18-323"></a></span>
+<span id="cb18-324"><a href="#cb18-324"></a><span class="kw">use</span> <span class="pp">x86_64::</span>VirtAddr<span class="op">;</span></span>
+<span id="cb18-325"><a href="#cb18-325"></a><span class="kw">use</span> <span class="pp">x86_64::structures::tss::</span>TaskStateSegment<span class="op">;</span></span>
+<span id="cb18-326"><a href="#cb18-326"></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
+<span id="cb18-327"><a href="#cb18-327"></a></span>
+<span id="cb18-328"><a href="#cb18-328"></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">u16</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb18-329"><a href="#cb18-329"></a></span>
+<span id="cb18-330"><a href="#cb18-330"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb18-331"><a href="#cb18-331"></a>    <span class="kw">static</span> <span class="kw">ref</span> TSS<span class="op">:</span> TaskStateSegment <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-332"><a href="#cb18-332"></a>        <span class="kw">let</span> <span class="kw">mut</span> tss <span class="op">=</span> <span class="pp">TaskStateSegment::</span>new()<span class="op">;</span></span>
+<span id="cb18-333"><a href="#cb18-333"></a>        tss<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">usize</span>] <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-334"><a href="#cb18-334"></a>            <span class="kw">const</span> STACK_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">4096</span> <span class="op">*</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb18-335"><a href="#cb18-335"></a>            <span class="kw">static</span> <span class="kw">mut</span> STACK<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span> STACK_SIZE] <span class="op">=</span> [<span class="dv">0</span><span class="op">;</span> STACK_SIZE]<span class="op">;</span></span>
+<span id="cb18-336"><a href="#cb18-336"></a></span>
+<span id="cb18-337"><a href="#cb18-337"></a>            <span class="kw">let</span> stack_start <span class="op">=</span> <span class="pp">VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK)<span class="op">;</span></span>
+<span id="cb18-338"><a href="#cb18-338"></a>            <span class="kw">let</span> stack_end <span class="op">=</span> stack_start <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
+<span id="cb18-339"><a href="#cb18-339"></a>            stack_end</span>
+<span id="cb18-340"><a href="#cb18-340"></a>        <span class="op">};</span></span>
+<span id="cb18-341"><a href="#cb18-341"></a>        tss</span>
+<span id="cb18-342"><a href="#cb18-342"></a>    <span class="op">};</span></span>
+<span id="cb18-343"><a href="#cb18-343"></a><span class="op">}</span></span>
+<span id="cb18-344"><a href="#cb18-344"></a><span class="in">```</span></span>
+<span id="cb18-345"><a href="#cb18-345"></a></span>
+<span id="cb18-346"><a href="#cb18-346"></a>We use <span class="in">`lazy_static`</span> because Rust's const evaluator is not yet powerful enough to do this initialization at compile time. We define that the 0th IST entry is the double fault stack (any other IST index would work too). Then we write the top address of a double fault stack to the 0th entry. We write the top address because stacks on x86 grow downwards, i.e., from high addresses to low addresses.</span>
+<span id="cb18-347"><a href="#cb18-347"></a></span>
+<span id="cb18-348"><a href="#cb18-348"></a>We haven't implemented memory management yet, so we don't have a proper way to allocate a new stack. Instead, we use a <span class="in">`static mut`</span> array as stack storage for now. It is important that it is a <span class="in">`static mut`</span> and not an immutable <span class="in">`static`</span>, because otherwise the bootloader will map it to a read-only page. We will replace this with a proper stack allocation in a later post.</span>
+<span id="cb18-349"><a href="#cb18-349"></a></span>
+<span id="cb18-350"><a href="#cb18-350"></a>Note that this double fault stack has no guard page that protects against stack overflow. This means that we should not do anything stack-intensive in our double fault handler because a stack overflow might corrupt the memory below the stack.</span>
+<span id="cb18-351"><a href="#cb18-351"></a></span>
+<span id="cb18-352"><a href="#cb18-352"></a><span class="fu">## Loading the TSS</span></span>
+<span id="cb18-353"><a href="#cb18-353"></a></span>
+<span id="cb18-354"><a href="#cb18-354"></a>Now that we've created a new TSS, we need a way to tell the CPU that it should use it. Unfortunately, this is a bit cumbersome since the TSS uses the segmentation system (for historical reasons). Instead of loading the table directly, we need to add a new segment descriptor to the <span class="co">[</span><span class="ot">Global Descriptor Table</span><span class="co">]</span> <span class="sc">\(</span>GDT). Then we can load our TSS by invoking the <span class="co">[</span><span class="ot">`ltr` instruction</span><span class="co">]</span> with the respective GDT index. (This is the reason why we named our module <span class="in">`gdt`</span>.)</span>
+<span id="cb18-355"><a href="#cb18-355"></a></span>
+<span id="cb18-356"><a href="#cb18-356"></a><span class="ot">[Global Descriptor Table]: https://web.archive.org/web/20190217233448/https://www.flingos.co.uk/docs/reference/Global-Descriptor-Table/</span></span>
+<span id="cb18-357"><a href="#cb18-357"></a><span class="ot">[`ltr` instruction]: https://www.felixcloutier.com/x86/ltr</span></span>
+<span id="cb18-358"><a href="#cb18-358"></a></span>
+<span id="cb18-359"><a href="#cb18-359"></a><span class="fu">## The Global Descriptor Table</span></span>
+<span id="cb18-360"><a href="#cb18-360"></a></span>
+<span id="cb18-361"><a href="#cb18-361"></a>The Global Descriptor Table (GDT) is a relic that was used for <span class="co">[</span><span class="ot">memory segmentation</span><span class="co">]</span> before paging became the de facto standard. However, it is still needed in 64-bit mode for various things, such as kernel/user mode configuration or TSS loading.</span>
+<span id="cb18-362"><a href="#cb18-362"></a></span>
+<span id="cb18-363"><a href="#cb18-363"></a><span class="ot">[memory segmentation]: https://en.wikipedia.org/wiki/X86_memory_segmentation</span></span>
+<span id="cb18-364"><a href="#cb18-364"></a></span>
+<span id="cb18-365"><a href="#cb18-365"></a>The GDT is a structure that contains the _segments_ of the program. It was used on older architectures to isolate programs from each other before paging became the standard. For more information about segmentation, check out the equally named chapter of the free <span class="co">[</span><span class="ot">“Three Easy Pieces” book</span><span class="co">]</span>. While segmentation is no longer supported in 64-bit mode, the GDT still exists. It is mostly used for two things: Switching between kernel space and user space, and loading a TSS structure.</span>
+<span id="cb18-366"><a href="#cb18-366"></a></span>
+<span id="cb18-367"><a href="#cb18-367"></a><span class="ot">[“Three Easy Pieces” book]: http://pages.cs.wisc.edu/~remzi/OSTEP/</span></span>
+<span id="cb18-368"><a href="#cb18-368"></a></span>
+<span id="cb18-369"><a href="#cb18-369"></a><span class="fu">## Creating a GDT</span></span>
+<span id="cb18-370"><a href="#cb18-370"></a></span>
+<span id="cb18-371"><a href="#cb18-371"></a>Let's create a static <span class="in">`GDT`</span> that includes a segment for our <span class="in">`TSS`</span> static:</span>
+<span id="cb18-372"><a href="#cb18-372"></a></span>
+<span id="cb18-373"><a href="#cb18-373"></a><span class="in">```rust</span></span>
+<span id="cb18-374"><a href="#cb18-374"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb18-375"><a href="#cb18-375"></a></span>
+<span id="cb18-376"><a href="#cb18-376"></a><span class="kw">use</span> <span class="pp">x86_64::structures::gdt::</span><span class="op">{</span>GlobalDescriptorTable<span class="op">,</span> Descriptor<span class="op">};</span></span>
+<span id="cb18-377"><a href="#cb18-377"></a></span>
+<span id="cb18-378"><a href="#cb18-378"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb18-379"><a href="#cb18-379"></a>    <span class="kw">static</span> <span class="kw">ref</span> GDT<span class="op">:</span> GlobalDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-380"><a href="#cb18-380"></a>        <span class="kw">let</span> <span class="kw">mut</span> gdt <span class="op">=</span> <span class="pp">GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb18-381"><a href="#cb18-381"></a>        gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb18-382"><a href="#cb18-382"></a>        gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb18-383"><a href="#cb18-383"></a>        gdt</span>
+<span id="cb18-384"><a href="#cb18-384"></a>    <span class="op">};</span></span>
+<span id="cb18-385"><a href="#cb18-385"></a><span class="op">}</span></span>
+<span id="cb18-386"><a href="#cb18-386"></a><span class="in">```</span></span>
+<span id="cb18-387"><a href="#cb18-387"></a></span>
+<span id="cb18-388"><a href="#cb18-388"></a>As before, we use <span class="in">`lazy_static`</span> again. We create a new GDT with a code segment and a TSS segment.</span>
+<span id="cb18-389"><a href="#cb18-389"></a></span>
+<span id="cb18-390"><a href="#cb18-390"></a><span class="fu">## Loading the GDT</span></span>
+<span id="cb18-391"><a href="#cb18-391"></a></span>
+<span id="cb18-392"><a href="#cb18-392"></a>To load our GDT, we create a new <span class="in">`gdt::init`</span> function that we call from our <span class="in">`init`</span> function:</span>
+<span id="cb18-393"><a href="#cb18-393"></a></span>
+<span id="cb18-394"><a href="#cb18-394"></a><span class="in">```rust</span></span>
+<span id="cb18-395"><a href="#cb18-395"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb18-396"><a href="#cb18-396"></a></span>
+<span id="cb18-397"><a href="#cb18-397"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb18-398"><a href="#cb18-398"></a>    GDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb18-399"><a href="#cb18-399"></a><span class="op">}</span></span>
+<span id="cb18-400"><a href="#cb18-400"></a></span>
+<span id="cb18-401"><a href="#cb18-401"></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb18-402"><a href="#cb18-402"></a></span>
+<span id="cb18-403"><a href="#cb18-403"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb18-404"><a href="#cb18-404"></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
+<span id="cb18-405"><a href="#cb18-405"></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
+<span id="cb18-406"><a href="#cb18-406"></a><span class="op">}</span></span>
+<span id="cb18-407"><a href="#cb18-407"></a><span class="in">```</span></span>
+<span id="cb18-408"><a href="#cb18-408"></a></span>
+<span id="cb18-409"><a href="#cb18-409"></a>Now our GDT is loaded (since the <span class="in">`_start`</span> function calls <span class="in">`init`</span>), but we still see the boot loop on stack overflow.</span>
+<span id="cb18-410"><a href="#cb18-410"></a></span>
+<span id="cb18-411"><a href="#cb18-411"></a><span class="fu">## The Final Steps</span></span>
+<span id="cb18-412"><a href="#cb18-412"></a></span>
+<span id="cb18-413"><a href="#cb18-413"></a>The problem is that the GDT segments are not yet active because the segment and TSS registers still contain the values from the old GDT. We also need to modify the double fault IDT entry so that it uses the new stack.</span>
+<span id="cb18-414"><a href="#cb18-414"></a></span>
+<span id="cb18-415"><a href="#cb18-415"></a>In summary, we need to do the following:</span>
+<span id="cb18-416"><a href="#cb18-416"></a></span>
+<span id="cb18-417"><a href="#cb18-417"></a><span class="ss">1. </span>**Reload code segment register**: We changed our GDT, so we should reload <span class="in">`cs`</span>, the code segment register. This is required since the old segment selector could now point to a different GDT descriptor (e.g., a TSS descriptor).</span>
+<span id="cb18-418"><a href="#cb18-418"></a><span class="ss">2. </span>**Load the TSS**: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</span>
+<span id="cb18-419"><a href="#cb18-419"></a><span class="ss">3. </span>**Update the IDT entry**: As soon as our TSS is loaded, the CPU has access to a valid interrupt stack table (IST). Then we can tell the CPU that it should use our new double fault stack by modifying our double fault IDT entry.</span>
+<span id="cb18-420"><a href="#cb18-420"></a></span>
+<span id="cb18-421"><a href="#cb18-421"></a>For the first two steps, we need access to the <span class="in">`code_selector`</span> and <span class="in">`tss_selector`</span> variables in our <span class="in">`gdt::init`</span> function. We can achieve this by making them part of the static through a new <span class="in">`Selectors`</span> struct:</span>
+<span id="cb18-422"><a href="#cb18-422"></a></span>
+<span id="cb18-423"><a href="#cb18-423"></a><span class="in">```rust</span></span>
+<span id="cb18-424"><a href="#cb18-424"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb18-425"><a href="#cb18-425"></a></span>
+<span id="cb18-426"><a href="#cb18-426"></a><span class="kw">use</span> <span class="pp">x86_64::structures::gdt::</span>SegmentSelector<span class="op">;</span></span>
+<span id="cb18-427"><a href="#cb18-427"></a></span>
+<span id="cb18-428"><a href="#cb18-428"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb18-429"><a href="#cb18-429"></a>    <span class="kw">static</span> <span class="kw">ref</span> GDT<span class="op">:</span> (GlobalDescriptorTable<span class="op">,</span> Selectors) <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-430"><a href="#cb18-430"></a>        <span class="kw">let</span> <span class="kw">mut</span> gdt <span class="op">=</span> <span class="pp">GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb18-431"><a href="#cb18-431"></a>        <span class="kw">let</span> code_selector <span class="op">=</span> gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb18-432"><a href="#cb18-432"></a>        <span class="kw">let</span> tss_selector <span class="op">=</span> gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb18-433"><a href="#cb18-433"></a>        (gdt<span class="op">,</span> Selectors <span class="op">{</span> code_selector<span class="op">,</span> tss_selector <span class="op">}</span>)</span>
+<span id="cb18-434"><a href="#cb18-434"></a>    <span class="op">};</span></span>
+<span id="cb18-435"><a href="#cb18-435"></a><span class="op">}</span></span>
+<span id="cb18-436"><a href="#cb18-436"></a></span>
+<span id="cb18-437"><a href="#cb18-437"></a><span class="kw">struct</span> Selectors <span class="op">{</span></span>
+<span id="cb18-438"><a href="#cb18-438"></a>    code_selector<span class="op">:</span> SegmentSelector<span class="op">,</span></span>
+<span id="cb18-439"><a href="#cb18-439"></a>    tss_selector<span class="op">:</span> SegmentSelector<span class="op">,</span></span>
+<span id="cb18-440"><a href="#cb18-440"></a><span class="op">}</span></span>
+<span id="cb18-441"><a href="#cb18-441"></a><span class="in">```</span></span>
+<span id="cb18-442"><a href="#cb18-442"></a></span>
+<span id="cb18-443"><a href="#cb18-443"></a>Now we can use the selectors to reload the <span class="in">`cs`</span> register and load our <span class="in">`TSS`</span>:</span>
+<span id="cb18-444"><a href="#cb18-444"></a></span>
+<span id="cb18-445"><a href="#cb18-445"></a><span class="in">```rust</span></span>
+<span id="cb18-446"><a href="#cb18-446"></a><span class="co">// in src/gdt.rs</span></span>
+<span id="cb18-447"><a href="#cb18-447"></a></span>
+<span id="cb18-448"><a href="#cb18-448"></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb18-449"><a href="#cb18-449"></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::tables::</span>load_tss<span class="op">;</span></span>
+<span id="cb18-450"><a href="#cb18-450"></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span><span class="op">{</span>CS<span class="op">,</span> Segment<span class="op">};</span></span>
+<span id="cb18-451"><a href="#cb18-451"></a>    </span>
+<span id="cb18-452"><a href="#cb18-452"></a>    GDT<span class="op">.</span><span class="dv">0</span><span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb18-453"><a href="#cb18-453"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb18-454"><a href="#cb18-454"></a>        <span class="pp">CS::</span>set_reg(GDT<span class="op">.</span><span class="dv">1</span><span class="op">.</span>code_selector)<span class="op">;</span></span>
+<span id="cb18-455"><a href="#cb18-455"></a>        load_tss(GDT<span class="op">.</span><span class="dv">1</span><span class="op">.</span>tss_selector)<span class="op">;</span></span>
+<span id="cb18-456"><a href="#cb18-456"></a>    <span class="op">}</span></span>
+<span id="cb18-457"><a href="#cb18-457"></a><span class="op">}</span></span>
+<span id="cb18-458"><a href="#cb18-458"></a><span class="in">```</span></span>
+<span id="cb18-459"><a href="#cb18-459"></a></span>
+<span id="cb18-460"><a href="#cb18-460"></a>We reload the code segment register using <span class="co">[</span><span class="ot">`CS::set_reg`</span><span class="co">]</span> and load the TSS using <span class="co">[</span><span class="ot">`load_tss`</span><span class="co">]</span>. The functions are marked as <span class="in">`unsafe`</span>, so we need an <span class="in">`unsafe`</span> block to invoke them. The reason is that it might be possible to break memory safety by loading invalid selectors.</span>
+<span id="cb18-461"><a href="#cb18-461"></a></span>
+<span id="cb18-462"><a href="#cb18-462"></a><span class="ot">[`CS::set_reg`]: https://docs.rs/x86_64/0.14.5/x86_64/instructions/segmentation/struct.CS.html#method.set_reg</span></span>
+<span id="cb18-463"><a href="#cb18-463"></a><span class="ot">[`load_tss`]: https://docs.rs/x86_64/0.14.2/x86_64/instructions/tables/fn.load_tss.html</span></span>
+<span id="cb18-464"><a href="#cb18-464"></a></span>
+<span id="cb18-465"><a href="#cb18-465"></a>Now that we have loaded a valid TSS and interrupt stack table, we can set the stack index for our double fault handler in the IDT:</span>
+<span id="cb18-466"><a href="#cb18-466"></a></span>
+<span id="cb18-467"><a href="#cb18-467"></a><span class="in">```rust</span></span>
+<span id="cb18-468"><a href="#cb18-468"></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb18-469"><a href="#cb18-469"></a></span>
+<span id="cb18-470"><a href="#cb18-470"></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>gdt<span class="op">;</span></span>
+<span id="cb18-471"><a href="#cb18-471"></a></span>
+<span id="cb18-472"><a href="#cb18-472"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb18-473"><a href="#cb18-473"></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-474"><a href="#cb18-474"></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb18-475"><a href="#cb18-475"></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb18-476"><a href="#cb18-476"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb18-477"><a href="#cb18-477"></a>            idt<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)</span>
+<span id="cb18-478"><a href="#cb18-478"></a>                <span class="op">.</span>set_stack_index(<span class="pp">gdt::</span>DOUBLE_FAULT_IST_INDEX)<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb18-479"><a href="#cb18-479"></a>        <span class="op">}</span></span>
+<span id="cb18-480"><a href="#cb18-480"></a></span>
+<span id="cb18-481"><a href="#cb18-481"></a>        idt</span>
+<span id="cb18-482"><a href="#cb18-482"></a>    <span class="op">};</span></span>
+<span id="cb18-483"><a href="#cb18-483"></a><span class="op">}</span></span>
+<span id="cb18-484"><a href="#cb18-484"></a><span class="in">```</span></span>
+<span id="cb18-485"><a href="#cb18-485"></a></span>
+<span id="cb18-486"><a href="#cb18-486"></a>The <span class="in">`set_stack_index`</span> method is unsafe because the caller must ensure that the used index is valid and not already used for another exception.</span>
+<span id="cb18-487"><a href="#cb18-487"></a></span>
+<span id="cb18-488"><a href="#cb18-488"></a>That's it! Now the CPU should switch to the double fault stack whenever a double fault occurs. Thus, we are able to catch _all_ double faults, including kernel stack overflows:</span>
+<span id="cb18-489"><a href="#cb18-489"></a></span>
+<span id="cb18-490"><a href="#cb18-490"></a><span class="al">![QEMU printing `EXCEPTION: DOUBLE FAULT` and a dump of the exception stack frame](qemu-double-fault-on-stack-overflow.png)</span></span>
+<span id="cb18-491"><a href="#cb18-491"></a></span>
+<span id="cb18-492"><a href="#cb18-492"></a>From now on, we should never see a triple fault again! To ensure that we don't accidentally break the above, we should add a test for this.</span>
+<span id="cb18-493"><a href="#cb18-493"></a></span>
+<span id="cb18-494"><a href="#cb18-494"></a><span class="fu">## A Stack Overflow Test</span></span>
+<span id="cb18-495"><a href="#cb18-495"></a></span>
+<span id="cb18-496"><a href="#cb18-496"></a>To test our new <span class="in">`gdt`</span> module and ensure that the double fault handler is correctly called on a stack overflow, we can add an integration test. The idea is to provoke a double fault in the test function and verify that the double fault handler is called.</span>
+<span id="cb18-497"><a href="#cb18-497"></a></span>
+<span id="cb18-498"><a href="#cb18-498"></a>Let's start with a minimal skeleton:</span>
+<span id="cb18-499"><a href="#cb18-499"></a></span>
+<span id="cb18-500"><a href="#cb18-500"></a><span class="in">```rust</span></span>
+<span id="cb18-501"><a href="#cb18-501"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb18-502"><a href="#cb18-502"></a></span>
+<span id="cb18-503"><a href="#cb18-503"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb18-504"><a href="#cb18-504"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb18-505"><a href="#cb18-505"></a></span>
+<span id="cb18-506"><a href="#cb18-506"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
+<span id="cb18-507"><a href="#cb18-507"></a></span>
+<span id="cb18-508"><a href="#cb18-508"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb18-509"><a href="#cb18-509"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-510"><a href="#cb18-510"></a>    <span class="pp">unimplemented!</span>()<span class="op">;</span></span>
+<span id="cb18-511"><a href="#cb18-511"></a><span class="op">}</span></span>
+<span id="cb18-512"><a href="#cb18-512"></a></span>
+<span id="cb18-513"><a href="#cb18-513"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb18-514"><a href="#cb18-514"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-515"><a href="#cb18-515"></a>    <span class="pp">blog_os::</span>test_panic_handler(info)</span>
+<span id="cb18-516"><a href="#cb18-516"></a><span class="op">}</span></span>
+<span id="cb18-517"><a href="#cb18-517"></a><span class="in">```</span></span>
+<span id="cb18-518"><a href="#cb18-518"></a></span>
+<span id="cb18-519"><a href="#cb18-519"></a>Like our <span class="in">`panic_handler`</span> test, the test will run <span class="co">[</span><span class="ot">without a test harness</span><span class="co">]</span>. The reason is that we can't continue execution after a double fault, so more than one test doesn't make sense. To disable the test harness for the test, we add the following to our <span class="in">`Cargo.toml`</span>:</span>
+<span id="cb18-520"><a href="#cb18-520"></a></span>
+<span id="cb18-521"><a href="#cb18-521"></a><span class="in">```toml</span></span>
+<span id="cb18-522"><a href="#cb18-522"></a><span class="in"># in Cargo.toml</span></span>
+<span id="cb18-523"><a href="#cb18-523"></a></span>
+<span id="cb18-524"><a href="#cb18-524"></a><span class="in">[[test]]</span></span>
+<span id="cb18-525"><a href="#cb18-525"></a><span class="in">name = "stack_overflow"</span></span>
+<span id="cb18-526"><a href="#cb18-526"></a><span class="in">harness = false</span></span>
+<span id="cb18-527"><a href="#cb18-527"></a><span class="in">```</span></span>
+<span id="cb18-528"><a href="#cb18-528"></a></span>
+<span id="cb18-529"><a href="#cb18-529"></a><span class="ot">[without a test harness]: </span>@/edition-2/posts/04-testing/index.md#no-harness-tests</span>
+<span id="cb18-530"><a href="#cb18-530"></a></span>
+<span id="cb18-531"><a href="#cb18-531"></a>Now <span class="in">`cargo test --test stack_overflow`</span> should compile successfully. The test fails, of course, since the <span class="in">`unimplemented`</span> macro panics.</span>
+<span id="cb18-532"><a href="#cb18-532"></a></span>
+<span id="cb18-533"><a href="#cb18-533"></a><span class="fu">## Implementing `_start`</span></span>
+<span id="cb18-534"><a href="#cb18-534"></a></span>
+<span id="cb18-535"><a href="#cb18-535"></a>The implementation of the <span class="in">`_start`</span> function looks like this:</span>
+<span id="cb18-536"><a href="#cb18-536"></a></span>
+<span id="cb18-537"><a href="#cb18-537"></a><span class="in">```rust</span></span>
+<span id="cb18-538"><a href="#cb18-538"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb18-539"><a href="#cb18-539"></a></span>
+<span id="cb18-540"><a href="#cb18-540"></a><span class="kw">use</span> <span class="pp">blog_os::</span>serial_print<span class="op">;</span></span>
+<span id="cb18-541"><a href="#cb18-541"></a></span>
+<span id="cb18-542"><a href="#cb18-542"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb18-543"><a href="#cb18-543"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-544"><a href="#cb18-544"></a>    <span class="pp">serial_print!</span>(<span class="st">"stack_overflow::stack_overflow...</span><span class="sc">\t</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb18-545"><a href="#cb18-545"></a></span>
+<span id="cb18-546"><a href="#cb18-546"></a>    <span class="pp">blog_os::gdt::</span>init()<span class="op">;</span></span>
+<span id="cb18-547"><a href="#cb18-547"></a>    init_test_idt()<span class="op">;</span></span>
+<span id="cb18-548"><a href="#cb18-548"></a></span>
+<span id="cb18-549"><a href="#cb18-549"></a>    <span class="co">// trigger a stack overflow</span></span>
+<span id="cb18-550"><a href="#cb18-550"></a>    stack_overflow()<span class="op">;</span></span>
+<span id="cb18-551"><a href="#cb18-551"></a></span>
+<span id="cb18-552"><a href="#cb18-552"></a>    <span class="pp">panic!</span>(<span class="st">"Execution continued after stack overflow"</span>)<span class="op">;</span></span>
+<span id="cb18-553"><a href="#cb18-553"></a><span class="op">}</span></span>
+<span id="cb18-554"><a href="#cb18-554"></a></span>
+<span id="cb18-555"><a href="#cb18-555"></a><span class="at">#[</span>allow<span class="at">(</span>unconditional_recursion<span class="at">)]</span></span>
+<span id="cb18-556"><a href="#cb18-556"></a><span class="kw">fn</span> stack_overflow() <span class="op">{</span></span>
+<span id="cb18-557"><a href="#cb18-557"></a>    stack_overflow()<span class="op">;</span> <span class="co">// for each recursion, the return address is pushed</span></span>
+<span id="cb18-558"><a href="#cb18-558"></a>    <span class="pp">volatile::Volatile::</span>new(<span class="dv">0</span>)<span class="op">.</span>read()<span class="op">;</span> <span class="co">// prevent tail recursion optimizations</span></span>
+<span id="cb18-559"><a href="#cb18-559"></a><span class="op">}</span></span>
+<span id="cb18-560"><a href="#cb18-560"></a><span class="in">```</span></span>
+<span id="cb18-561"><a href="#cb18-561"></a></span>
+<span id="cb18-562"><a href="#cb18-562"></a>We call our <span class="in">`gdt::init`</span> function to initialize a new GDT. Instead of calling our <span class="in">`interrupts::init_idt`</span> function, we call an <span class="in">`init_test_idt`</span> function that will be explained in a moment. The reason is that we want to register a custom double fault handler that does an <span class="in">`exit_qemu(QemuExitCode::Success)`</span> instead of panicking.</span>
+<span id="cb18-563"><a href="#cb18-563"></a></span>
+<span id="cb18-564"><a href="#cb18-564"></a>The <span class="in">`stack_overflow`</span> function is almost identical to the function in our <span class="in">`main.rs`</span>. The only difference is that at the end of the function, we perform an additional <span class="co">[</span><span class="ot">volatile</span><span class="co">]</span> read using the <span class="co">[</span><span class="ot">`Volatile`</span><span class="co">]</span> type to prevent a compiler optimization called <span class="co">[</span><span class="ot">_tail call elimination_</span><span class="co">]</span>. Among other things, this optimization allows the compiler to transform a function whose last statement is a recursive function call into a normal loop. Thus, no additional stack frame is created for the function call, so the stack usage remains constant.</span>
+<span id="cb18-565"><a href="#cb18-565"></a></span>
+<span id="cb18-566"><a href="#cb18-566"></a><span class="ot">[volatile]: https://en.wikipedia.org/wiki/Volatile_(computer_programming)</span></span>
+<span id="cb18-567"><a href="#cb18-567"></a><span class="ot">[`Volatile`]: https://docs.rs/volatile/0.2.6/volatile/struct.Volatile.html</span></span>
+<span id="cb18-568"><a href="#cb18-568"></a><span class="ot">[_tail call elimination_]: https://en.wikipedia.org/wiki/Tail_call</span></span>
+<span id="cb18-569"><a href="#cb18-569"></a></span>
+<span id="cb18-570"><a href="#cb18-570"></a>In our case, however, we want the stack overflow to happen, so we add a dummy volatile read statement at the end of the function, which the compiler is not allowed to remove. Thus, the function is no longer _tail recursive_, and the transformation into a loop is prevented. We also add the <span class="in">`allow(unconditional_recursion)`</span> attribute to silence the compiler warning that the function recurses endlessly.</span>
+<span id="cb18-571"><a href="#cb18-571"></a></span>
+<span id="cb18-572"><a href="#cb18-572"></a><span class="fu">## The Test IDT</span></span>
+<span id="cb18-573"><a href="#cb18-573"></a></span>
+<span id="cb18-574"><a href="#cb18-574"></a>As noted above, the test needs its own IDT with a custom double fault handler. The implementation looks like this:</span>
+<span id="cb18-575"><a href="#cb18-575"></a></span>
+<span id="cb18-576"><a href="#cb18-576"></a><span class="in">```rust</span></span>
+<span id="cb18-577"><a href="#cb18-577"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb18-578"><a href="#cb18-578"></a></span>
+<span id="cb18-579"><a href="#cb18-579"></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
+<span id="cb18-580"><a href="#cb18-580"></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptDescriptorTable<span class="op">;</span></span>
+<span id="cb18-581"><a href="#cb18-581"></a></span>
+<span id="cb18-582"><a href="#cb18-582"></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb18-583"><a href="#cb18-583"></a>    <span class="kw">static</span> <span class="kw">ref</span> TEST_IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb18-584"><a href="#cb18-584"></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb18-585"><a href="#cb18-585"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb18-586"><a href="#cb18-586"></a>            idt<span class="op">.</span>double_fault</span>
+<span id="cb18-587"><a href="#cb18-587"></a>                <span class="op">.</span>set_handler_fn(test_double_fault_handler)</span>
+<span id="cb18-588"><a href="#cb18-588"></a>                <span class="op">.</span>set_stack_index(<span class="pp">blog_os::gdt::</span>DOUBLE_FAULT_IST_INDEX)<span class="op">;</span></span>
+<span id="cb18-589"><a href="#cb18-589"></a>        <span class="op">}</span></span>
+<span id="cb18-590"><a href="#cb18-590"></a></span>
+<span id="cb18-591"><a href="#cb18-591"></a>        idt</span>
+<span id="cb18-592"><a href="#cb18-592"></a>    <span class="op">};</span></span>
+<span id="cb18-593"><a href="#cb18-593"></a><span class="op">}</span></span>
+<span id="cb18-594"><a href="#cb18-594"></a></span>
+<span id="cb18-595"><a href="#cb18-595"></a><span class="kw">pub</span> <span class="kw">fn</span> init_test_idt() <span class="op">{</span></span>
+<span id="cb18-596"><a href="#cb18-596"></a>    TEST_IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb18-597"><a href="#cb18-597"></a><span class="op">}</span></span>
+<span id="cb18-598"><a href="#cb18-598"></a><span class="in">```</span></span>
+<span id="cb18-599"><a href="#cb18-599"></a></span>
+<span id="cb18-600"><a href="#cb18-600"></a>The implementation is very similar to our normal IDT in <span class="in">`interrupts.rs`</span>. Like in the normal IDT, we set a stack index in the IST for the double fault handler in order to switch to a separate stack. The <span class="in">`init_test_idt`</span> function loads the IDT on the CPU through the <span class="in">`load`</span> method.</span>
+<span id="cb18-601"><a href="#cb18-601"></a></span>
+<span id="cb18-602"><a href="#cb18-602"></a><span class="fu">## The Double Fault Handler</span></span>
+<span id="cb18-603"><a href="#cb18-603"></a></span>
+<span id="cb18-604"><a href="#cb18-604"></a>The only missing piece is our double fault handler. It looks like this:</span>
+<span id="cb18-605"><a href="#cb18-605"></a></span>
+<span id="cb18-606"><a href="#cb18-606"></a><span class="in">```rust</span></span>
+<span id="cb18-607"><a href="#cb18-607"></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<span id="cb18-608"><a href="#cb18-608"></a></span>
+<span id="cb18-609"><a href="#cb18-609"></a><span class="kw">use</span> <span class="pp">blog_os::</span><span class="op">{</span>exit_qemu<span class="op">,</span> QemuExitCode<span class="op">,</span> serial_println<span class="op">};</span></span>
+<span id="cb18-610"><a href="#cb18-610"></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame<span class="op">;</span></span>
+<span id="cb18-611"><a href="#cb18-611"></a></span>
+<span id="cb18-612"><a href="#cb18-612"></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> test_double_fault_handler(</span>
+<span id="cb18-613"><a href="#cb18-613"></a>    _stack_frame<span class="op">:</span> InterruptStackFrame<span class="op">,</span></span>
+<span id="cb18-614"><a href="#cb18-614"></a>    _error_code<span class="op">:</span> <span class="dt">u64</span><span class="op">,</span></span>
+<span id="cb18-615"><a href="#cb18-615"></a>) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-616"><a href="#cb18-616"></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
+<span id="cb18-617"><a href="#cb18-617"></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
+<span id="cb18-618"><a href="#cb18-618"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
+<span id="cb18-619"><a href="#cb18-619"></a><span class="op">}</span></span>
+<span id="cb18-620"><a href="#cb18-620"></a><span class="in">```</span></span>
+<span id="cb18-621"><a href="#cb18-621"></a></span>
+<span id="cb18-622"><a href="#cb18-622"></a>When the double fault handler is called, we exit QEMU with a success exit code, which marks the test as passed. Since integration tests are completely separate executables, we need to set the <span class="in">`#![feature(abi_x86_interrupt)]`</span> attribute again at the top of our test file.</span>
+<span id="cb18-623"><a href="#cb18-623"></a></span>
+<span id="cb18-624"><a href="#cb18-624"></a>Now we can run our test through <span class="in">`cargo test --test stack_overflow`</span> (or <span class="in">`cargo test`</span> to run all tests). As expected, we see the <span class="in">`stack_overflow... [ok]`</span> output in the console. Try to comment out the <span class="in">`set_stack_index`</span> line; it should cause the test to fail.</span>
+<span id="cb18-625"><a href="#cb18-625"></a></span>
+<span id="cb18-626"><a href="#cb18-626"></a><span class="fu"># Fin</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

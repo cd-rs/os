@@ -40,13 +40,13 @@ format: html
 |0x6|02/23|[Guest](6__guest.md)|Work Session|<!--[Integration](62_integration.qmd)|-->
 |0x7|03/02|[Test](60_test.qmd)|[Serial](61_serial.qmd)|[Integration](62_integration.qmd)|
 |0x8|03/09|[Exceptions](70_except.qmd)|[The Call](71_calls.qmd)|[Handlers](72_handlers.qmd)|
-|0x9|03/16|Faults|
+|0x9|03/16|[Double](80_double.qmd)|
 |0bX|03/23|`None`|`None`|`None`|
 |0xA|03/30|Interrupts|
 |0xB|03/06|Paging|
 |0xC|04/13|Page Tables|[`None`](https://my.willamette.edu/site/ssrd)||
 |0xD|04/20|The Heap|
-|0xE|04/29|Allocators|
+|0xE|04/27|Allocators|
 <!--
 |0xE|04/29|`async`||`None`|
 -->
