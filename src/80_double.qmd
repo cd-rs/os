@@ -35,7 +35,7 @@ On x86, there are about 20 different CPU exception types.
 - **Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. 
     - This exception also occurs when there is no handler function registered for an exception.
     
-# Double
+# Handle It
 
 ## What is it?
 
@@ -134,102 +134,380 @@ extern "x86-interrupt" fn breakpoint_handler(
 }
 ```
 
-# TODO
+## Write a Handler
 
+- For now, just [rip](https://theculturetrip.com/north-america/usa/portland/articles/why-is-portland-called-rip-city) a panic.
+    - "Ah!" - that's what I sound like when I panic.
+- The handler has to diverge because the hardware doesn't allow returns from a double fault.
+    - After all, it's bad. Twice as bad, even.
+    
+## One Example
 
-## A Double Fault Handler
-
-A double fault is a normal exception with an error code, so we can specify a handler function similar to our breakpoint handler:
-
-```rust
-// in src/interrupts.rs
-
-lazy_static! {
-    static ref IDT: InterruptDescriptorTable = {
-        let mut idt = InterruptDescriptorTable::new();
-        idt.breakpoint.set_handler_fn(breakpoint_handler);
-        idt.double_fault.set_handler_fn(double_fault_handler); // new
-        idt
-    };
-}
-
-// new
+- Short and sweet.
+    
+```{.rs filename="src/interrupts.rs"}
 extern "x86-interrupt" fn double_fault_handler(
-    stack_frame: InterruptStackFrame, _error_code: u64) -> !
+    stack_frame: x86_64::structures::idt::InterruptStackFrame, _error_code: u64) -> !
 {
     panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
 }
 ```
 
-Our handler prints a short error message and dumps the exception stack frame. The error code of the double fault handler is always zero, so there's no reason to print it. One difference to the breakpoint handler is that the double fault handler is [_diverging_]. The reason is that the `x86_64` architecture does not permit returning from a double fault exception.
+## Wait a minute
 
-[_diverging_]: https://doc.rust-lang.org/stable/rust-by-example/fn/diverging.html
+- Blog, in its infinite wisdom, claims we can safely ignore the error code because "it's always zero".
+- I'll be the judge of that.
 
-When we start our kernel now, we should see that the double fault handler is invoked:
+```{.rs filename="src/interrupts.rs"}
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: x86_64::structures::idt::InterruptStackFrame, error_code: u64) -> !
+{
+    assert!(error_code == 0);
+    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+}
+```
 
-![QEMU printing `EXCEPTION: DOUBLE FAULT` and the exception stack frame](qemu-catch-double-fault.png)
+## By the way
 
-It worked! Here is what happened this time:
+- This is how it looks with `cargo fmt`
+
+```{.rs filename="src/interrupts.rs"}
+extern "x86-interrupt" fn double_fault_handler(
+    stack_frame: x86_64::structures::idt::InterruptStackFrame,
+    error_code: u64,
+) -> ! {
+    assert!(error_code == 0);
+    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
+}
+```
+
+## I bet that works
+
+- It doesn't, run it.
+- Yet another reboot loop.
+- But we wrote a function!
+    - Friends - did we add it to our IDT?
+   
+## Update Init
+
+- This should do it!
+
+```{.rs filename="src/interrupts.rs"}
+pub fn init_idt() {
+    unsafe {
+        IDT.breakpoint.set_handler_fn(breakpoint_handler);
+        IDT.double_fault.set_handler_fn(double_fault_handler);
+        IDT.load();
+    }
+}
+```
+
+# Test it
+
+## Behind the Curtain
+
+- Typically at this point I would show you what QEMU looks like at this time.
+- I can trivially do that with the screendump->ppm2png->base64->html pipeline.
+- It is much cooler to just dump the error message to console.
+- But how?
+
+## For Serial
+
+- Naturally, we can write to console via the serial port from out test environment.
+- So, let's quickly write a test case for the double-fault handler.
+- It is basically a glorified `should_panic.rs`.
+
+```{.sh}
+cp tests/should_panic.rs tests/double.rs
+```
+
+## What I start with
+
+```{.rs filename="test/double.rs"}
+#![no_std]
+#![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(osirs::_test_runner)]
+
+#[panic_handler]
+fn test_panic(_info: &core::panic::PanicInfo) -> ! {
+    osirs::serial_println!("[Pass]");
+    osirs::qemu_quit(osirs::QEMU_PASS);
+    loop {}
+}
+
+fn bad() {
+    assert!(false);
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn _start() -> ! {
+    osirs::_test_runner(&[&bad]);
+    osirs::qemu_quit(osirs::QEMU_FAIL);
+    loop {}
+}
+```
+
+## Changes
+
+- We want to:
+    - Print the error message via `serial_println!`
+    - Hit a panic from within a double-fault handler.
+- Easy enough, we'll just also `init` and then modify the panic handler.
+    - (We'll change it back once we get the text out.)
+    
+## Change `bad`
+
+- Was:
+
+```{.rs filename="test/should_panic.rs"}
+fn bad() {
+    assert!(false);
+}
+```
+
+- Is now:
+
+```{.rs filename="test/double.rs"}
+fn bad() {
+    unsafe { *(0xdeadbeef as *mut u8) = 42; };
+}
+```
+
+    
+## Change `panic`
+
+- Was:
+
+```{.rs filename="test/should_panic.rs"}
+fn test_panic(info: &core::panic::PanicInfo) -> ! {
+    osirs::serial_println!("[Pass]");
+    osirs::qemu_quit(osirs::QEMU_PASS);
+    loop {}
+}
+```
+
+- Is now:
+
+```{.rs filename="test/double.rs"}
+fn test_panic(info: &core::panic::PanicInfo) -> ! {
+    osirs::serial_println!("{}", info);
+    osirs::serial_println!("[Pass]");
+    osirs::qemu_quit(osirs::QEMU_PASS);
+    loop {}
+}
+```
+
+## Change `_start`
+
+- Was:
+
+```{.rs filename="test/should_panic.rs"}
+pub extern "C" fn _start() -> ! {
+    osirs::_test_runner(&[&bad]);
+    osirs::qemu_quit(osirs::QEMU_FAIL);
+    loop {}
+}
+```
+
+- Is now:
+
+```{.rs filename="test/double.rs"}
+pub extern "C" fn _start() -> ! {
+    osirs::init();
+    osirs::_test_runner(&[&bad]);
+    osirs::qemu_quit(osirs::QEMU_FAIL);
+    loop {}
+}
+```
+
+## The Stack Frame:
+
+- I didn't have to manually type this:
+
+```{.sh}
+InterruptStackFrame {
+    instruction_pointer: VirtAddr(
+        0x203a4c,
+    ),
+    code_segment: 8,
+    cpu_flags: 0x2,
+    stack_pointer: VirtAddr(
+        0x10000201f40,
+    ),
+    stack_segment: 0,
+}
+```
+
+## Clean up
+
+- I kept the test and just reverted the panic handler.
+    - Actually, maybe that variant should be factored to `src/lib.rs`
+    - Software engineering... it's everywhere...
+- (Do this on your own time).
+- (Also stop using the test runner on singleton tests).
+
+# Back to Work
+
+## What happened?
+
+::: {.incremental}
 
 1. The CPU tries to write to `0xdeadbeef`, which causes a page fault.
 2. Like before, the CPU looks at the corresponding entry in the IDT and sees that no handler function is defined. Thus, a double fault occurs.
 3. The CPU jumps to the – now present – double fault handler.
 
-The triple fault (and the boot-loop) no longer occurs, since the CPU can now call the double fault handler.
+:::
 
-That was quite straightforward! So why do we need a whole post for this topic? Well, we're now able to catch _most_ double faults, but there are some cases where our current approach doesn't suffice.
+## Vegan
 
+- Like me, the CPU now abstains from dead beef.
+- The triple fault (and the boot-loop) no longer occurs, since the CPU can now call the double fault handler.
+- Now we're all done!
+    - (We aren't)
+    
+## Complications
+
+- We have now caught *a* (singular, one) double fault.
+    - And a contrived one at that!
+- It so happens there are other things that can also go wrong with computers.
+    - Do any of you remember the infinite recursion implementation that could've been SO COOL if Rust was just normal about it.
+    
 ## Causes of Double Faults
 
-Before we look at the special cases, we need to know the exact causes of double faults. Above, we used a pretty vague definition:
+- Before we look at the special cases, we need to know the exact causes of double faults. 
+- Above, we used a pretty vague definition:
 
 > A double fault is a special exception that occurs when the CPU fails to invoke an exception handler.
 
-What does _“fails to invoke”_ mean exactly? The handler is not present? The handler is [swapped out]? And what happens if a handler causes exceptions itself?
+## Failure
 
-[swapped out]: http://pages.cs.wisc.edu/~remzi/OSTEP/vm-beyondphys.pdf
+- What does _“fails to invoke”_ mean exactly? 
+- The handler is not present? 
+- The handler is swapped out? 
+- And what happens if a handler causes exceptions itself?
 
-For example, what happens if:
+# Aside: Swaps
 
-1. a breakpoint exception occurs, but the corresponding handler function is swapped out?
-2. a page fault occurs, but the page fault handler is swapped out?
-3. a divide-by-zero handler causes a breakpoint exception, but the breakpoint handler is swapped out?
-4. our kernel overflows its stack and the _guard page_ is hit?
+## Swap 1
 
-Fortunately, the AMD64 manual ([PDF][AMD64 manual]) has an exact definition (in Section 8.2.9). According to it, a “double fault exception _can_ occur when a second exception occurs during the handling of a prior (first) exception handler”. The _“can”_ is important: Only very specific combinations of exceptions lead to a double fault. These combinations are:
+> [In the 1960s, swapping was an early memory management technique. An entire program or entire segment would be "swapped out" (or "rolled out") from Random-access memory (RAM) to disk or drum, and another one would be swapped in (or rolled in).](https://en.wikipedia.org/wiki/Memory_paging)
+
+
+## Swap 2
+
+> [A swapped-out program would be current but its execution would be suspended while the RAM was in use by another program; a program with a swapped-out segment could continue running until it needed that segment, at which point it would be suspended until the segment was swapped in.](https://en.wikipedia.org/wiki/Memory_paging)
+
+## Swap 3
+
+> [*Swap space* in Linux is used when the amount of physical memory (RAM) is full. If the system needs more memory resources and the RAM is full, inactive pages in memory are moved to the swap space. While swap space can help machines with a small amount of RAM, it should not be considered a replacement for more RAM.](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-swapspace)
+
+
+## Swap 4
+
+> [Swap space is located on hard drives, which have a slower access time than physical memory. Swap space can be a dedicated swap partition (recommended), a swap file, or a combination of swap partitions and swap files.](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-swapspace)
+
+## Swap 5
+
+- I had to increase my swap space that time I was dumping QEMU traces to text files and filled my harddrive.
+- I don't remember what I did exactly.
+- Here's a [Stack Overflow question](https://askubuntu.com/questions/159783/how-do-i-find-out-if-i-have-a-swap-partition-on-my-hard-drive)
+
+```{.sh}
+$ free -m
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       597Mi        14Gi       6.0Mi       913Mi        14Gi
+Swap:          4.0Gi          0B       4.0Gi
+$ cat /proc/swaps
+Filename                                Type            Size            Used            Priority
+/dev/sdc                                partition       4194304         0               -2
+```
+
+## Swap 6
+
+- This tutorial seems fine.
+- [How to increase the size of your swapfile](https://arcolinux.com/how-to-increase-the-size-of-your-swapfile/)
+- Go to the QUAD center and bother a Linux lifestylist
+
+# Back to Work
+
+## Handling Problems
+
+::: {.incremental}
+
+1. What if a breakpoint exception occurs, but the handler function is swapped out?
+2. What if a page fault occurs, but the handler is swapped out?
+3. What if a divide-by-zero handler causes a breakpoint exception, but the breakpoint handler is swapped out?
+4. What if our kernel overflows its stack and the _guard page_ is hit?
+
+:::
+
+## Read the Docs!
+
+- The [AMD64 manual](https://www.amd.com/system/files/TechDocs/24593.pdf), a real thing that actually exists, is also actually helpful here.
+- Wait that link is broken.
+- We'll trust the blog.
+
+> a double fault exception _can_ occur when a second exception occurs during the handling of a prior (first) exception handler
+
+## Combo {.smaller}
+
 
 | First Exception                                                                                                       | Second Exception                                                                                                  |
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [Divide-by-zero],<br>[Invalid TSS],<br>[Segment Not Present],<br>[Stack-Segment Fault],<br>[General Protection Fault] | [Invalid TSS],<br>[Segment Not Present],<br>[Stack-Segment Fault],<br>[General Protection Fault]                  |
-| [Page Fault]                                                                                                          | [Page Fault],<br>[Invalid TSS],<br>[Segment Not Present],<br>[Stack-Segment Fault],<br>[General Protection Fault] |
-
-[Divide-by-zero]: https://wiki.osdev.org/Exceptions#Division_Error
-[Invalid TSS]: https://wiki.osdev.org/Exceptions#Invalid_TSS
-[Segment Not Present]: https://wiki.osdev.org/Exceptions#Segment_Not_Present
-[Stack-Segment Fault]: https://wiki.osdev.org/Exceptions#Stack-Segment_Fault
-[General Protection Fault]: https://wiki.osdev.org/Exceptions#General_Protection_Fault
-[Page Fault]: https://wiki.osdev.org/Exceptions#Page_Fault
+| Divide-by-zero,<br>Invalid TSS,<br>Segment Not Present,<br>Stack-Segment Fault,<br>General Protection Fault | <br>Invalid TSS,<br>Segment Not Present,<br>Stack-Segment Fault,<br>General Protection Fault                  |
+| Page Fault                                                                                                          | Page Fault,<br>Invalid TSS,<br>Segment Not Present,<br>Stack-Segment Fault,<br>General Protection Fault |
 
 
-[AMD64 manual]: https://www.amd.com/system/files/TechDocs/24593.pdf
+## Examples
 
-So, for example, a divide-by-zero fault followed by a page fault is fine (the page fault handler is invoked), but a divide-by-zero fault followed by a general-protection fault leads to a double fault.
+- A divide-by-zero fault followed by a page fault is fine.
+    - The page fault handler is invoked.
+- A divide-by-zero fault followed by a general-protection fault is not.
+    - Leads to a double fault.
+    - Security hat on: a user-mode program may be attempting privilege escalation.
+    
+## We Now Know 1
 
-With the help of this table, we can answer the first three of the above questions:
+- If a breakpoint exception occurs and the corresponding handler function is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.
+- If a page fault occurs and the page fault handler is swapped out, a _double fault_ occurs and the _double fault handler_ is invoked.
 
-1. If a breakpoint exception occurs and the corresponding handler function is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.
-2. If a page fault occurs and the page fault handler is swapped out, a _double fault_ occurs and the _double fault handler_ is invoked.
-3. If a divide-by-zero handler causes a breakpoint exception, the CPU tries to invoke the breakpoint handler. If the breakpoint handler is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.
+## We Now Know 2
 
-In fact, even the case of an exception without a handler function in the IDT follows this scheme: When the exception occurs, the CPU tries to read the corresponding IDT entry. Since the entry is 0, which is not a valid IDT entry, a _general protection fault_ occurs. We did not define a handler function for the general protection fault either, so another general protection fault occurs. According to the table, this leads to a double fault.
+- If a divide-by-zero handler causes a breakpoint exception, the CPU tries to invoke the breakpoint handler. 
+- If the breakpoint handler is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.
 
-## Kernel Stack Overflow
+## Another case
+
+- An exception without a handler function in the IDT:
+    - CPU derefs the corresponding IDT entry. 
+    - The entry is invalid so a _general protection fault_ occurs. 
+    - We lack a general protection fault handler, so *another* general protection fault occurs. 
+    - This leads to a double fault.
+    
+## Four!
 
 Let's look at the fourth question:
 
 > What happens if our kernel overflows its stack and the guard page is hit?
 
-A guard page is a special memory page at the bottom of a stack that makes it possible to detect stack overflows. The page is not mapped to any physical frame, so accessing it causes a page fault instead of silently corrupting other memory. The bootloader sets up a guard page for our kernel stack, so a stack overflow causes a _page fault_.
+## En Garde!
+
+- A guard page denotes the bottom of a stack to detect stack overflows. 
+- The page is not mapped to *any* physical frame, so accessing page faults. 
+    - It is the idea of memory that doesn't exist.
+    - The Rust `option` would've been great here!
+- The bootloader sets up a guard page so overflow causes a _page fault_.
+
+## Kernel Stack Overflow
+
+- When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the [interrupt stack frame] onto the stack. 
+- However, the current stack pointer still points to the non-present guard page. 
+- Thus, a second page fault occurs, which causes a double fault (according to the above table).
+
+# TODO
+
+## Kernel Stack Overflow
 
 When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the [interrupt stack frame] onto the stack. However, the current stack pointer still points to the non-present guard page. Thus, a second page fault occurs, which causes a double fault (according to the above table).
 
