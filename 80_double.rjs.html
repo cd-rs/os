@@ -1067,55 +1067,115 @@
 <section id="kernel-stack-overflow" class="slide level2">
 <h2>Kernel Stack Overflow</h2>
 <ul>
-<li>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the <a href="@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-stack-frame">interrupt stack frame</a> onto the stack.</li>
+<li>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the [interrupt stack frame] onto the stack.</li>
 <li>However, the current stack pointer still points to the non-present guard page.</li>
 <li>Thus, a second page fault occurs, which causes a double fault (according to the above table).</li>
 </ul>
-</section></section>
-<section>
-<section id="todo" class="title-slide slide level1 center">
-<h1>TODO</h1>
+</section>
+<section id="visually" class="slide level2">
+<h2>Visually</h2>
+<ul>
+<li>The “interrupt stack frame”:</li>
+</ul>
 
+<img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)" class="r-stretch"></section>
+<section id="s-to-3s" class="slide level2">
+<h2>2s to 3s</h2>
+<ul>
+<li>On the second page fault, the CPU tries to call the <em>double fault handler</em> now.</li>
+<li>This would push yet another stack frame, which…</li>
+<li>… still points to the guard page.</li>
+<li>Third page fault, triple fault, reboot loop.</li>
+</ul>
 </section>
-<section id="kernel-stack-overflow-1" class="slide level2">
-<h2>Kernel Stack Overflow</h2>
-<p>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the <a href="@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-stack-frame">interrupt stack frame</a> onto the stack. However, the current stack pointer still points to the non-present guard page. Thus, a second page fault occurs, which causes a double fault (according to the above table).</p>
-<p>So the CPU tries to call the <em>double fault handler</em> now. However, on a double fault, the CPU tries to push the exception stack frame, too. The stack pointer still points to the guard page, so a <em>third</em> page fault occurs, which causes a <em>triple fault</em> and a system reboot. So our current double fault handler can’t avoid a triple fault in this case.</p>
-<p>Let’s try it ourselves! We can easily provoke a kernel stack overflow by calling a function that recurses endlessly:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="co">// in src/main.rs</span></span>
-<span id="cb17-2"><a></a></span>
-<span id="cb17-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span> <span class="co">// don't mangle the name of this function</span></span>
-<span id="cb17-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb17-5"><a></a>    <span class="pp">println!</span>(<span class="st">"Hello World{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
-<span id="cb17-6"><a></a></span>
-<span id="cb17-7"><a></a>    <span class="pp">blog_os::</span>init()<span class="op">;</span></span>
-<span id="cb17-8"><a></a></span>
-<span id="cb17-9"><a></a>    <span class="kw">fn</span> stack_overflow() <span class="op">{</span></span>
-<span id="cb17-10"><a></a>        stack_overflow()<span class="op">;</span> <span class="co">// for each recursion, the return address is pushed</span></span>
-<span id="cb17-11"><a></a>    <span class="op">}</span></span>
-<span id="cb17-12"><a></a></span>
-<span id="cb17-13"><a></a>    <span class="co">// trigger a stack overflow</span></span>
-<span id="cb17-14"><a></a>    stack_overflow()<span class="op">;</span></span>
-<span id="cb17-15"><a></a></span>
-<span id="cb17-16"><a></a>    […] <span class="co">// test_main(), println(…), and loop {}</span></span>
-<span id="cb17-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When we try this code in QEMU, we see that the system enters a bootloop again.</p>
-<p>So how can we avoid this problem? We can’t omit the pushing of the exception stack frame, since the CPU itself does it. So we need to ensure somehow that the stack is always valid when a double fault exception occurs. Fortunately, the x86_64 architecture has a solution to this problem.</p>
+<section id="count-to-three" class="slide level2">
+<h2>Count to Three</h2>
+<ul>
+<li>Easy enough, I just make a new test.</li>
+</ul>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb17-1"><a></a><span class="fu">cp</span> tests/except.rs tests/overflow.rs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Add a function and call from <code>_start</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tests/overflow.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb18" data-filename="tests/overflow.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="at">#[</span>allow<span class="at">(</span>unconditional_recursion<span class="at">)]</span></span>
+<span id="cb18-2"><a></a><span class="kw">fn</span> recurse() <span class="op">{</span></span>
+<span id="cb18-3"><a></a>    recurse()<span class="op">;</span></span>
+<span id="cb18-4"><a></a><span class="op">}</span></span>
+<span id="cb18-5"><a></a></span>
+<span id="cb18-6"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb18-7"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-8"><a></a>    <span class="pp">osirs::</span>init()<span class="op">;</span></span>
+<span id="cb18-9"><a></a>    recurse()<span class="op">;</span></span>
+<span id="cb18-10"><a></a>    <span class="op">...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="switching-stacks" class="slide level2">
-<h2>Switching Stacks</h2>
-<p>The x86_64 architecture is able to switch to a predefined, known-good stack when an exception occurs. This switch happens at hardware level, so it can be performed before the CPU pushes the exception stack frame.</p>
-<p>The switching mechanism is implemented as an <em>Interrupt Stack Table</em> (IST). The IST is a table of 7 pointers to known-good stacks. In Rust-like pseudocode:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="kw">struct</span> InterruptStackTable <span class="op">{</span></span>
-<span id="cb18-2"><a></a>    stack_pointers<span class="op">:</span> [<span class="dt">Option</span><span class="op">&lt;</span>StackPointer<span class="op">&gt;;</span> <span class="dv">7</span>]<span class="op">,</span></span>
-<span id="cb18-3"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>For each exception handler, we can choose a stack from the IST through the <code>stack_pointers</code> field in the corresponding <a href="@/edition-2/posts/05-cpu-exceptions/index.md#the-interrupt-descriptor-table">IDT entry</a>. For example, our double fault handler could use the first stack in the IST. Then the CPU automatically switches to this stack whenever a double fault occurs. This switch would happen before anything is pushed, preventing the triple fault.</p>
+<section id="run-just-this-test" class="slide level2">
+<h2>Run Just This Test</h2>
+<ul>
+<li>I have a lot of tests now, so…</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb19-1"><a></a><span class="ex">cargo</span> t <span class="at">--test</span> overflow</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Good to run all of them though!</li>
+<li>Anyways it will fail somehow (boot loop into time out).</li>
+</ul>
 </section>
-<section id="the-ist-and-tss" class="slide level2">
-<h2>The IST and TSS</h2>
-<p>The Interrupt Stack Table (IST) is part of an old legacy structure called <em><a href="https://en.wikipedia.org/wiki/Task_state_segment">Task State Segment</a></em> (TSS). The TSS used to hold various pieces of information (e.g., processor register state) about a task in 32-bit mode and was, for example, used for <a href="https://wiki.osdev.org/Context_Switching#Hardware_Context_Switching">hardware context switching</a>. However, hardware context switching is no longer supported in 64-bit mode and the format of the TSS has changed completely.</p>
-<p>On x86_64, the TSS no longer holds any task-specific information at all. Instead, it holds two stack tables (the IST is one of them). The only common field between the 32-bit and 64-bit TSS is the pointer to the <a href="https://en.wikipedia.org/wiki/Task_state_segment#I.2FO_port_permissions">I/O port permissions bitmap</a>.</p>
-<p>The 64-bit TSS has the following format:</p>
+<section id="fix" class="slide level2">
+<h2>Fix</h2>
+<ul>
+<li>How can we avoid this problem?
+<ul>
+<li>We can’t omit the pushing of the exception stack frame.
+<ul>
+<li>Done by hardware.</li>
+</ul></li>
+<li>We need to ensure somehow that the stack is always valid when a double fault exception occurs.
+<ul>
+<li>Fortunately, the x86_64 architecture has a solution to this problem.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="switcheroo" class="slide level2">
+<h2>Switcheroo</h2>
+<ul>
+<li>The x86_64 architecture operates multiple stacks.</li>
+<li>Maintained in (effectively) a linear data structure.</li>
+<li><em>Interrupt Stack Table</em> (IST)
+<ul>
+<li>There’s 7.</li>
+</ul></li>
+</ul>
+</section>
+<section id="handle-it-2" class="slide level2">
+<h2>Handle it</h2>
+<ul>
+<li>Each exception handler, can choose a stack from the IST through the <code>stack_pointers</code> field in the corresponding IDT entry.</li>
+<li>For example, our double fault handler could use the first stack in the IST.
+<ul>
+<li>I don’t know if it’s zero or one indexed.</li>
+</ul></li>
+<li>This preempts the push to prevent the triple.</li>
+</ul>
+</section>
+<section id="tss" class="slide level2">
+<h2>TSS</h2>
+<ul>
+<li>We recall other segments: Code (CS), Data (DS), Stack (SS).</li>
+<li>Now, the “Task State Segment”
+<ul>
+<li>Developed for 32-bit “hardware context switching” that was not brought to 64-bit due to complexities/inefficiencies.</li>
+<li>Still around and now used here.</li>
+</ul></li>
+<li>The 64-bit TSS and 32-bit TSS are wildly different and this doesn’t matter.</li>
+</ul>
+</section>
+<section id="the-64-bit" class="slide level2 smaller">
+<h2>The 64-bit</h2>
 <table class="caption-top">
 <thead>
 <tr class="header">
@@ -1154,249 +1214,252 @@
 </tr>
 </tbody>
 </table>
-<p>The <em>Privilege Stack Table</em> is used by the CPU when the privilege level changes. For example, if an exception occurs while the CPU is in user mode (privilege level 3), the CPU normally switches to kernel mode (privilege level 0) before invoking the exception handler. In that case, the CPU would switch to the 0th stack in the Privilege Stack Table (since 0 is the target privilege level). We don’t have any user-mode programs yet, so we will ignore this table for now.</p>
+<ul>
+<li>I/O Map Base Address supports both 32 and 64 bit port-mapped I/O.</li>
+</ul>
+</section>
+<section id="pst" class="slide level2">
+<h2>PST</h2>
+<ul>
+<li>Not a timezone.</li>
+<li><em>Privilege Stack Table</em></li>
+<li>Privilege is bits 12-13 of the code segment, or the code segment “descriptor privilege level.</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a></a>CS[<span class="dv">12</span>:<span class="dv">14</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>We recall all actually existing OSes:</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a></a><span class="cf">assert</span>(CS[<span class="dv">12</span>] <span class="op">==</span> CS[<span class="dv">13</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="usage" class="slide level2">
+<h2>Usage</h2>
+<ul>
+<li>An unprivileged executable divides-by-zero.</li>
+<li>The handler is called.</li>
+<li>The handler most be privileged, it’s part of the OS.</li>
+<li>So it grabs the privileged stack.</li>
+<li>(This is stack 0 since privilege 0 is the most privileged, mostly)</li>
+<li>We ignore for now (we have no software).</li>
+</ul>
 </section>
 <section id="creating-a-tss" class="slide level2">
 <h2>Creating a TSS</h2>
-<p>Let’s create a new TSS that contains a separate double fault stack in its interrupt stack table. For that, we need a TSS struct. Fortunately, the <code>x86_64</code> crate already contains a <a href="https://docs.rs/x86_64/0.14.2/x86_64/structures/tss/struct.TaskStateSegment.html"><code>TaskStateSegment</code> struct</a> that we can use.</p>
-<p>We create the TSS in a new <code>gdt</code> module (the name will make sense later):</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// in src/lib.rs</span></span>
-<span id="cb19-2"><a></a></span>
-<span id="cb19-3"><a></a><span class="kw">pub</span> <span class="kw">mod</span> gdt<span class="op">;</span></span>
-<span id="cb19-4"><a></a></span>
-<span id="cb19-5"><a></a><span class="co">// in src/gdt.rs</span></span>
-<span id="cb19-6"><a></a></span>
-<span id="cb19-7"><a></a><span class="kw">use</span> <span class="pp">x86_64::</span>VirtAddr<span class="op">;</span></span>
-<span id="cb19-8"><a></a><span class="kw">use</span> <span class="pp">x86_64::structures::tss::</span>TaskStateSegment<span class="op">;</span></span>
-<span id="cb19-9"><a></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
-<span id="cb19-10"><a></a></span>
-<span id="cb19-11"><a></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">u16</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb19-12"><a></a></span>
-<span id="cb19-13"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb19-14"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> TSS<span class="op">:</span> TaskStateSegment <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb19-15"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> tss <span class="op">=</span> <span class="pp">TaskStateSegment::</span>new()<span class="op">;</span></span>
-<span id="cb19-16"><a></a>        tss<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">usize</span>] <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb19-17"><a></a>            <span class="kw">const</span> STACK_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">4096</span> <span class="op">*</span> <span class="dv">5</span><span class="op">;</span></span>
-<span id="cb19-18"><a></a>            <span class="kw">static</span> <span class="kw">mut</span> STACK<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span> STACK_SIZE] <span class="op">=</span> [<span class="dv">0</span><span class="op">;</span> STACK_SIZE]<span class="op">;</span></span>
-<span id="cb19-19"><a></a></span>
-<span id="cb19-20"><a></a>            <span class="kw">let</span> stack_start <span class="op">=</span> <span class="pp">VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK)<span class="op">;</span></span>
-<span id="cb19-21"><a></a>            <span class="kw">let</span> stack_end <span class="op">=</span> stack_start <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
-<span id="cb19-22"><a></a>            stack_end</span>
-<span id="cb19-23"><a></a>        <span class="op">};</span></span>
-<span id="cb19-24"><a></a>        tss</span>
-<span id="cb19-25"><a></a>    <span class="op">};</span></span>
-<span id="cb19-26"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We use <code>lazy_static</code> because Rust’s const evaluator is not yet powerful enough to do this initialization at compile time. We define that the 0th IST entry is the double fault stack (any other IST index would work too). Then we write the top address of a double fault stack to the 0th entry. We write the top address because stacks on x86 grow downwards, i.e., from high addresses to low addresses.</p>
-<p>We haven’t implemented memory management yet, so we don’t have a proper way to allocate a new stack. Instead, we use a <code>static mut</code> array as stack storage for now. It is important that it is a <code>static mut</code> and not an immutable <code>static</code>, because otherwise the bootloader will map it to a read-only page. We will replace this with a proper stack allocation in a later post.</p>
-<p>Note that this double fault stack has no guard page that protects against stack overflow. This means that we should not do anything stack-intensive in our double fault handler because a stack overflow might corrupt the memory below the stack.</p>
+<ul>
+<li>Let us create a new TSS that contains a separate double fault stack in its interrupt stack table. For that, we need a TSS struct.</li>
+<li>By “us” we mean the <code>x86_64</code> crate which contains a <a href="https://docs.rs/x86_64/0.14.2/x86_64/structures/tss/struct.TaskStateSegment.html"><code>TaskStateSegment</code> struct</a>.</li>
+<li>We’ll work within <code>src/gdt.rs</code>
+<ul>
+<li>Global Descriptor Table - we’ll add more latter.</li>
+</ul></li>
+</ul>
 </section>
-<section id="loading-the-tss" class="slide level2">
-<h2>Loading the TSS</h2>
-<p>Now that we’ve created a new TSS, we need a way to tell the CPU that it should use it. Unfortunately, this is a bit cumbersome since the TSS uses the segmentation system (for historical reasons). Instead of loading the table directly, we need to add a new segment descriptor to the <a href="https://web.archive.org/web/20190217233448/https://www.flingos.co.uk/docs/reference/Global-Descriptor-Table/">Global Descriptor Table</a> (GDT). Then we can load our TSS by invoking the <a href="https://www.felixcloutier.com/x86/ltr"><code>ltr</code> instruction</a> with the respective GDT index. (This is the reason why we named our module <code>gdt</code>.)</p>
+<section id="first" class="slide level2">
+<h2>First</h2>
+<ul>
+<li>We need to <code>pub mod</code> this in <code>src/lib.rs</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb22" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="kw">pub</span> <span class="kw">mod</span> interrupts<span class="op">;</span></span>
+<span id="cb22-2"><a></a><span class="kw">pub</span> <span class="kw">mod</span> serial<span class="op">;</span></span>
+<span id="cb22-3"><a></a><span class="kw">pub</span> <span class="kw">mod</span> vga<span class="op">;</span></span>
+<span id="cb22-4"><a></a><span class="kw">pub</span> <span class="kw">mod</span> gdt<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Add the initializer for the GDT to the <code>init</code> function too.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb23" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb23-2"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
+<span id="cb23-3"><a></a>    <span class="pp">gdt::</span>init_gdt()<span class="op">;</span></span>
+<span id="cb23-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="the-global-descriptor-table" class="slide level2">
-<h2>The Global Descriptor Table</h2>
-<p>The Global Descriptor Table (GDT) is a relic that was used for <a href="https://en.wikipedia.org/wiki/X86_memory_segmentation">memory segmentation</a> before paging became the de facto standard. However, it is still needed in 64-bit mode for various things, such as kernel/user mode configuration or TSS loading.</p>
-<p>The GDT is a structure that contains the <em>segments</em> of the program. It was used on older architectures to isolate programs from each other before paging became the standard. For more information about segmentation, check out the equally named chapter of the free <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/">“Three Easy Pieces” book</a>. While segmentation is no longer supported in 64-bit mode, the GDT still exists. It is mostly used for two things: Switching between kernel space and user space, and loading a TSS structure.</p>
+<section id="start-on-the-gdt" class="slide level2">
+<h2>Start on the GDT</h2>
+<ul>
+<li>First, let’s make a TSS.</li>
+<li>It will come as a shock to no one that I will use <code>static mut</code> to solve a problem wherein a <em>language-level alias</em> is used for <em>actually existing, persistent, mutable hardware</em>.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb24" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a></a><span class="co">// TSS</span></span>
+<span id="cb24-2"><a></a><span class="kw">const</span> STACK_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">4096</span> <span class="op">*</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb24-3"><a></a><span class="kw">static</span> <span class="kw">mut</span> TSS<span class="op">:</span> <span class="pp">x86_64::structures::tss::</span>TaskStateSegment <span class="op">=</span></span>
+<span id="cb24-4"><a></a>    <span class="pp">x86_64::structures::tss::TaskStateSegment::</span>new()<span class="op">;</span></span>
+<span id="cb24-5"><a></a><span class="kw">static</span> <span class="kw">mut</span> STACK<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span> STACK_SIZE] <span class="op">=</span> [<span class="dv">0</span><span class="op">;</span> STACK_SIZE]<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="creating-a-gdt" class="slide level2">
-<h2>Creating a GDT</h2>
-<p>Let’s create a static <code>GDT</code> that includes a segment for our <code>TSS</code> static:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="co">// in src/gdt.rs</span></span>
-<span id="cb20-2"><a></a></span>
-<span id="cb20-3"><a></a><span class="kw">use</span> <span class="pp">x86_64::structures::gdt::</span><span class="op">{</span>GlobalDescriptorTable<span class="op">,</span> Descriptor<span class="op">};</span></span>
-<span id="cb20-4"><a></a></span>
-<span id="cb20-5"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb20-6"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> GDT<span class="op">:</span> GlobalDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb20-7"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> gdt <span class="op">=</span> <span class="pp">GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
-<span id="cb20-8"><a></a>        gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
-<span id="cb20-9"><a></a>        gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
-<span id="cb20-10"><a></a>        gdt</span>
-<span id="cb20-11"><a></a>    <span class="op">};</span></span>
-<span id="cb20-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>As before, we use <code>lazy_static</code> again. We create a new GDT with a code segment and a TSS segment.</p>
-</section>
-<section id="loading-the-gdt" class="slide level2">
-<h2>Loading the GDT</h2>
-<p>To load our GDT, we create a new <code>gdt::init</code> function that we call from our <code>init</code> function:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="co">// in src/gdt.rs</span></span>
-<span id="cb21-2"><a></a></span>
-<span id="cb21-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
-<span id="cb21-4"><a></a>    GDT<span class="op">.</span>load()<span class="op">;</span></span>
-<span id="cb21-5"><a></a><span class="op">}</span></span>
-<span id="cb21-6"><a></a></span>
-<span id="cb21-7"><a></a><span class="co">// in src/lib.rs</span></span>
-<span id="cb21-8"><a></a></span>
-<span id="cb21-9"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
-<span id="cb21-10"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
-<span id="cb21-11"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
-<span id="cb21-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Now our GDT is loaded (since the <code>_start</code> function calls <code>init</code>), but we still see the boot loop on stack overflow.</p>
-</section>
-<section id="the-final-steps" class="slide level2">
-<h2>The Final Steps</h2>
-<p>The problem is that the GDT segments are not yet active because the segment and TSS registers still contain the values from the old GDT. We also need to modify the double fault IDT entry so that it uses the new stack.</p>
-<p>In summary, we need to do the following:</p>
-<ol type="1">
-<li><strong>Reload code segment register</strong>: We changed our GDT, so we should reload <code>cs</code>, the code segment register. This is required since the old segment selector could now point to a different GDT descriptor (e.g., a TSS descriptor).</li>
-<li><strong>Load the TSS</strong>: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</li>
-<li><strong>Update the IDT entry</strong>: As soon as our TSS is loaded, the CPU has access to a valid interrupt stack table (IST). Then we can tell the CPU that it should use our new double fault stack by modifying our double fault IDT entry.</li>
-</ol>
-<p>For the first two steps, we need access to the <code>code_selector</code> and <code>tss_selector</code> variables in our <code>gdt::init</code> function. We can achieve this by making them part of the static through a new <code>Selectors</code> struct:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="co">// in src/gdt.rs</span></span>
-<span id="cb22-2"><a></a></span>
-<span id="cb22-3"><a></a><span class="kw">use</span> <span class="pp">x86_64::structures::gdt::</span>SegmentSelector<span class="op">;</span></span>
-<span id="cb22-4"><a></a></span>
-<span id="cb22-5"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb22-6"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> GDT<span class="op">:</span> (GlobalDescriptorTable<span class="op">,</span> Selectors) <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb22-7"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> gdt <span class="op">=</span> <span class="pp">GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
-<span id="cb22-8"><a></a>        <span class="kw">let</span> code_selector <span class="op">=</span> gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
-<span id="cb22-9"><a></a>        <span class="kw">let</span> tss_selector <span class="op">=</span> gdt<span class="op">.</span>add_entry(<span class="pp">Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
-<span id="cb22-10"><a></a>        (gdt<span class="op">,</span> Selectors <span class="op">{</span> code_selector<span class="op">,</span> tss_selector <span class="op">}</span>)</span>
-<span id="cb22-11"><a></a>    <span class="op">};</span></span>
-<span id="cb22-12"><a></a><span class="op">}</span></span>
-<span id="cb22-13"><a></a></span>
-<span id="cb22-14"><a></a><span class="kw">struct</span> Selectors <span class="op">{</span></span>
-<span id="cb22-15"><a></a>    code_selector<span class="op">:</span> SegmentSelector<span class="op">,</span></span>
-<span id="cb22-16"><a></a>    tss_selector<span class="op">:</span> SegmentSelector<span class="op">,</span></span>
-<span id="cb22-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Now we can use the selectors to reload the <code>cs</code> register and load our <code>TSS</code>:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a></a><span class="co">// in src/gdt.rs</span></span>
-<span id="cb23-2"><a></a></span>
-<span id="cb23-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
-<span id="cb23-4"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::tables::</span>load_tss<span class="op">;</span></span>
-<span id="cb23-5"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span><span class="op">{</span>CS<span class="op">,</span> Segment<span class="op">};</span></span>
-<span id="cb23-6"><a></a>    </span>
-<span id="cb23-7"><a></a>    GDT<span class="op">.</span><span class="dv">0</span><span class="op">.</span>load()<span class="op">;</span></span>
-<span id="cb23-8"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb23-9"><a></a>        <span class="pp">CS::</span>set_reg(GDT<span class="op">.</span><span class="dv">1</span><span class="op">.</span>code_selector)<span class="op">;</span></span>
-<span id="cb23-10"><a></a>        load_tss(GDT<span class="op">.</span><span class="dv">1</span><span class="op">.</span>tss_selector)<span class="op">;</span></span>
-<span id="cb23-11"><a></a>    <span class="op">}</span></span>
-<span id="cb23-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We reload the code segment register using <a href="https://docs.rs/x86_64/0.14.5/x86_64/instructions/segmentation/struct.CS.html#method.set_reg"><code>CS::set_reg</code></a> and load the TSS using <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/tables/fn.load_tss.html"><code>load_tss</code></a>. The functions are marked as <code>unsafe</code>, so we need an <code>unsafe</code> block to invoke them. The reason is that it might be possible to break memory safety by loading invalid selectors.</p>
-<p>Now that we have loaded a valid TSS and interrupt stack table, we can set the stack index for our double fault handler in the IDT:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb24-2"><a></a></span>
-<span id="cb24-3"><a></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>gdt<span class="op">;</span></span>
-<span id="cb24-4"><a></a></span>
-<span id="cb24-5"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb24-6"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb24-7"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
-<span id="cb24-8"><a></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
-<span id="cb24-9"><a></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb24-10"><a></a>            idt<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)</span>
-<span id="cb24-11"><a></a>                <span class="op">.</span>set_stack_index(<span class="pp">gdt::</span>DOUBLE_FAULT_IST_INDEX)<span class="op">;</span> <span class="co">// new</span></span>
-<span id="cb24-12"><a></a>        <span class="op">}</span></span>
-<span id="cb24-13"><a></a></span>
-<span id="cb24-14"><a></a>        idt</span>
-<span id="cb24-15"><a></a>    <span class="op">};</span></span>
-<span id="cb24-16"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>set_stack_index</code> method is unsafe because the caller must ensure that the used index is valid and not already used for another exception.</p>
-<p>That’s it! Now the CPU should switch to the double fault stack whenever a double fault occurs. Thus, we are able to catch <em>all</em> double faults, including kernel stack overflows:</p>
-
-<img data-src="qemu-double-fault-on-stack-overflow.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU printing <code>EXCEPTION: DOUBLE FAULT</code> and a dump of the exception stack frame</p><p>From now on, we should never see a triple fault again! To ensure that we don’t accidentally break the above, we should add a test for this.</p>
-</section>
-<section id="a-stack-overflow-test" class="slide level2">
-<h2>A Stack Overflow Test</h2>
-<p>To test our new <code>gdt</code> module and ensure that the double fault handler is correctly called on a stack overflow, we can add an integration test. The idea is to provoke a double fault in the test function and verify that the double fault handler is called.</p>
-<p>Let’s start with a minimal skeleton:</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb25-1"><a></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<section id="initialize" class="slide level2">
+<h2>Initialize</h2>
+<ul>
+<li>Not too bad - we set the double fault index to be the stack index plus the stack size.</li>
+<li>We just made an arbitrarily sized (ish) stack in a <code>static mut</code> (which requires <code>unsafe</code>)</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb25" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb25-1"><a></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">u16</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb25-2"><a></a></span>
-<span id="cb25-3"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb25-4"><a></a><span class="at">#![</span>no_main<span class="at">]</span></span>
-<span id="cb25-5"><a></a></span>
-<span id="cb25-6"><a></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb25-7"><a></a></span>
-<span id="cb25-8"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb25-9"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb25-10"><a></a>    <span class="pp">unimplemented!</span>()<span class="op">;</span></span>
-<span id="cb25-11"><a></a><span class="op">}</span></span>
-<span id="cb25-12"><a></a></span>
-<span id="cb25-13"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb25-14"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb25-15"><a></a>    <span class="pp">blog_os::</span>test_panic_handler(info)</span>
-<span id="cb25-16"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Like our <code>panic_handler</code> test, the test will run <a href="@/edition-2/posts/04-testing/index.md#no-harness-tests">without a test harness</a>. The reason is that we can’t continue execution after a double fault, so more than one test doesn’t make sense. To disable the test harness for the test, we add the following to our <code>Cargo.toml</code>:</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb26-1"><a></a><span class="co"># in Cargo.toml</span></span>
-<span id="cb26-2"><a></a></span>
-<span id="cb26-3"><a></a><span class="kw">[[test]]</span></span>
-<span id="cb26-4"><a></a><span class="dt">name</span> <span class="op">=</span> <span class="st">"stack_overflow"</span></span>
-<span id="cb26-5"><a></a><span class="dt">harness</span> <span class="op">=</span> <span class="cn">false</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Now <code>cargo test --test stack_overflow</code> should compile successfully. The test fails, of course, since the <code>unimplemented</code> macro panics.</p>
+<span id="cb25-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_gdt() <span class="op">{</span></span>
+<span id="cb25-4"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb25-5"><a></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">usize</span>] <span class="op">=</span></span>
+<span id="cb25-6"><a></a>            <span class="pp">x86_64::VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK) <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
+<span id="cb25-7"><a></a>    <span class="op">}</span></span>
+<span id="cb25-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="implementing-_start" class="slide level2">
-<h2>Implementing <code>_start</code></h2>
-<p>The implementation of the <code>_start</code> function looks like this:</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb27-1"><a></a><span class="co">// in tests/stack_overflow.rs</span></span>
-<span id="cb27-2"><a></a></span>
-<span id="cb27-3"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span>serial_print<span class="op">;</span></span>
-<span id="cb27-4"><a></a></span>
-<span id="cb27-5"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb27-6"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb27-7"><a></a>    <span class="pp">serial_print!</span>(<span class="st">"stack_overflow::stack_overflow...</span><span class="sc">\t</span><span class="st">"</span>)<span class="op">;</span></span>
-<span id="cb27-8"><a></a></span>
-<span id="cb27-9"><a></a>    <span class="pp">blog_os::gdt::</span>init()<span class="op">;</span></span>
-<span id="cb27-10"><a></a>    init_test_idt()<span class="op">;</span></span>
-<span id="cb27-11"><a></a></span>
-<span id="cb27-12"><a></a>    <span class="co">// trigger a stack overflow</span></span>
-<span id="cb27-13"><a></a>    stack_overflow()<span class="op">;</span></span>
-<span id="cb27-14"><a></a></span>
-<span id="cb27-15"><a></a>    <span class="pp">panic!</span>(<span class="st">"Execution continued after stack overflow"</span>)<span class="op">;</span></span>
-<span id="cb27-16"><a></a><span class="op">}</span></span>
-<span id="cb27-17"><a></a></span>
-<span id="cb27-18"><a></a><span class="at">#[</span>allow<span class="at">(</span>unconditional_recursion<span class="at">)]</span></span>
-<span id="cb27-19"><a></a><span class="kw">fn</span> stack_overflow() <span class="op">{</span></span>
-<span id="cb27-20"><a></a>    stack_overflow()<span class="op">;</span> <span class="co">// for each recursion, the return address is pushed</span></span>
-<span id="cb27-21"><a></a>    <span class="pp">volatile::Volatile::</span>new(<span class="dv">0</span>)<span class="op">.</span>read()<span class="op">;</span> <span class="co">// prevent tail recursion optimizations</span></span>
-<span id="cb27-22"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We call our <code>gdt::init</code> function to initialize a new GDT. Instead of calling our <code>interrupts::init_idt</code> function, we call an <code>init_test_idt</code> function that will be explained in a moment. The reason is that we want to register a custom double fault handler that does an <code>exit_qemu(QemuExitCode::Success)</code> instead of panicking.</p>
-<p>The <code>stack_overflow</code> function is almost identical to the function in our <code>main.rs</code>. The only difference is that at the end of the function, we perform an additional <a href="https://en.wikipedia.org/wiki/Volatile_(computer_programming)">volatile</a> read using the <a href="https://docs.rs/volatile/0.2.6/volatile/struct.Volatile.html"><code>Volatile</code></a> type to prevent a compiler optimization called <a href="https://en.wikipedia.org/wiki/Tail_call"><em>tail call elimination</em></a>. Among other things, this optimization allows the compiler to transform a function whose last statement is a recursive function call into a normal loop. Thus, no additional stack frame is created for the function call, so the stack usage remains constant.</p>
-<p>In our case, however, we want the stack overflow to happen, so we add a dummy volatile read statement at the end of the function, which the compiler is not allowed to remove. Thus, the function is no longer <em>tail recursive</em>, and the transformation into a loop is prevented. We also add the <code>allow(unconditional_recursion)</code> attribute to silence the compiler warning that the function recurses endlessly.</p>
+<section id="i-bet-this-will-work" class="slide level2">
+<h2>I bet this will work</h2>
+<ul>
+<li>It won’t.</li>
+<li>We made a TSS but to tell the CPU that it should use it.</li>
+<li>We need to add a new segment descriptor to the GDT.</li>
+<li>Then we can load our TSS with the respective GDT index.</li>
+</ul>
 </section>
-<section id="the-test-idt" class="slide level2">
-<h2>The Test IDT</h2>
-<p>As noted above, the test needs its own IDT with a custom double fault handler. The implementation looks like this:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a></a><span class="co">// in tests/stack_overflow.rs</span></span>
+<section id="make-a-gdt" class="slide level2">
+<h2>Make a GDT</h2>
+<ul>
+<li>Yes, yes, the same trick.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb26" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a></a><span class="co">// GDT</span></span>
+<span id="cb26-2"><a></a><span class="kw">static</span> <span class="kw">mut</span> GDT<span class="op">:</span> <span class="pp">x86_64::structures::gdt::</span>GlobalDescriptorTable <span class="op">=</span></span>
+<span id="cb26-3"><a></a>    <span class="pp">x86_64::structures::gdt::GlobalDescriptorTable::</span>new()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>The GDT, like the TSS, is a 32-bit holdover but still used to:
+<ul>
+<li>Hold the TSS, obviously, and</li>
+<li>Swap between kernel (privileged) and user (software/unprivileged) modes.</li>
+</ul></li>
+</ul>
+</section>
+<section id="i-bet-this-will" class="slide level2">
+<h2>I bet this will…</h2>
+<ul>
+<li>We further have to add entries to the GDT, naturally.</li>
+<li>I add the <em>kernel code segment</em></li>
+<li>I add the TSS we made.</li>
+<li>I use the crate to do this.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb27" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb27-1"><a></a><span class="co">// Within "init"</span></span>
+<span id="cb27-2"><a></a>GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment()<span class="op">;</span></span>
+<span id="cb27-3"><a></a>GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="now-it-will" class="slide level2">
+<h2>Now it will…</h2>
+<ul>
+<li>Test it, but…</li>
+<li>The GDT segments are “not yet active” because the segment and TSS registers still contain the values from the old GDT.</li>
+<li>We also need to modify the double fault IDT entry so that it uses the new stack.</li>
+</ul>
+</section>
+<section id="so-we" class="slide level2">
+<h2>So we…</h2>
+<ol type="1">
+<li><strong>Reload code segment register</strong>: We changed our GDT, so we should reload <strong>CS</strong>, the code segment register. The old segment selector could now point to an old e.g.&nbsp;TSS.</li>
+<li><strong>Load the TSS</strong>: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</li>
+</ol>
+</section>
+<section id="not-too-bad" class="slide level2">
+<h2>Not too bad…</h2>
+<ul>
+<li>I split this into a few lines.</li>
+<li>Basically, get the kernel <strong>CS</strong>, and <strong>TSS</strong>.</li>
+<li>Turn them into descriptors.</li>
+<li>Either “set” or “load” these descriptors into the GDT.
+<ul>
+<li>Dealing with annoying Rust namespace stuff.</li>
+</ul></li>
+</ul>
+</section>
+<section id="in-code" class="slide level2">
+<h2>In code</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb28" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a></a><span class="co">// Within "init"</span></span>
 <span id="cb28-2"><a></a></span>
-<span id="cb28-3"><a></a><span class="kw">use</span> <span class="pp">lazy_static::</span>lazy_static<span class="op">;</span></span>
-<span id="cb28-4"><a></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptDescriptorTable<span class="op">;</span></span>
-<span id="cb28-5"><a></a></span>
-<span id="cb28-6"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb28-7"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> TEST_IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb28-8"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
-<span id="cb28-9"><a></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb28-10"><a></a>            idt<span class="op">.</span>double_fault</span>
-<span id="cb28-11"><a></a>                <span class="op">.</span>set_handler_fn(test_double_fault_handler)</span>
-<span id="cb28-12"><a></a>                <span class="op">.</span>set_stack_index(<span class="pp">blog_os::gdt::</span>DOUBLE_FAULT_IST_INDEX)<span class="op">;</span></span>
-<span id="cb28-13"><a></a>        <span class="op">}</span></span>
-<span id="cb28-14"><a></a></span>
-<span id="cb28-15"><a></a>        idt</span>
-<span id="cb28-16"><a></a>    <span class="op">};</span></span>
-<span id="cb28-17"><a></a><span class="op">}</span></span>
-<span id="cb28-18"><a></a></span>
-<span id="cb28-19"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_test_idt() <span class="op">{</span></span>
-<span id="cb28-20"><a></a>    TEST_IDT<span class="op">.</span>load()<span class="op">;</span></span>
-<span id="cb28-21"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The implementation is very similar to our normal IDT in <code>interrupts.rs</code>. Like in the normal IDT, we set a stack index in the IST for the double fault handler in order to switch to a separate stack. The <code>init_test_idt</code> function loads the IDT on the CPU through the <code>load</code> method.</p>
+<span id="cb28-3"><a></a><span class="co">// Get the segments as descriptors</span></span>
+<span id="cb28-4"><a></a><span class="kw">let</span> kcs <span class="op">=</span> <span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment()<span class="op">;</span></span>
+<span id="cb28-5"><a></a><span class="kw">let</span> tss <span class="op">=</span> <span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS)<span class="op">;</span></span>
+<span id="cb28-6"><a></a></span>
+<span id="cb28-7"><a></a><span class="co">// Add to GDT</span></span>
+<span id="cb28-8"><a></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(kcs)<span class="op">;</span></span>
+<span id="cb28-9"><a></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(tss)<span class="op">;</span></span>
+<span id="cb28-10"><a></a></span>
+<span id="cb28-11"><a></a><span class="co">// Reload CS</span></span>
+<span id="cb28-12"><a></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
+<span id="cb28-13"><a></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
+<span id="cb28-14"><a></a><span class="co">// Mandate use of this TSS</span></span>
+<span id="cb28-15"><a></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
-<section id="the-double-fault-handler" class="slide level2">
-<h2>The Double Fault Handler</h2>
-<p>The only missing piece is our double fault handler. It looks like this:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb29-1"><a></a><span class="co">// in tests/stack_overflow.rs</span></span>
-<span id="cb29-2"><a></a></span>
-<span id="cb29-3"><a></a><span class="kw">use</span> <span class="pp">blog_os::</span><span class="op">{</span>exit_qemu<span class="op">,</span> QemuExitCode<span class="op">,</span> serial_println<span class="op">};</span></span>
-<span id="cb29-4"><a></a><span class="kw">use</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame<span class="op">;</span></span>
-<span id="cb29-5"><a></a></span>
-<span id="cb29-6"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> test_double_fault_handler(</span>
-<span id="cb29-7"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame<span class="op">,</span></span>
-<span id="cb29-8"><a></a>    _error_code<span class="op">:</span> <span class="dt">u64</span><span class="op">,</span></span>
-<span id="cb29-9"><a></a>) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb29-10"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[ok]"</span>)<span class="op">;</span></span>
-<span id="cb29-11"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span><span class="cn">Success</span>)<span class="op">;</span></span>
-<span id="cb29-12"><a></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb29-13"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When the double fault handler is called, we exit QEMU with a success exit code, which marks the test as passed. Since integration tests are completely separate executables, we need to set the <code>#![feature(abi_x86_interrupt)]</code> attribute again at the top of our test file.</p>
-<p>Now we can run our test through <code>cargo test --test stack_overflow</code> (or <code>cargo test</code> to run all tests). As expected, we see the <code>stack_overflow... [ok]</code> output in the console. Try to comment out the <code>set_stack_index</code> line; it should cause the test to fail.</p>
+<section id="this-worked-for-me" class="slide level2">
+<h2>This “worked” for me</h2>
+<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a></a><span class="ex">$</span> cargo t <span class="at">--test</span> overflow</span>
+<span id="cb29-2"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="bu">test</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.03s</span></span>
+<span id="cb29-3"><a></a>     <span class="ex">Running</span> tests/overflow.rs <span class="er">(</span><span class="ex">target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2</span><span class="kw">)</span></span>
+<span id="cb29-4"><a></a><span class="ex">Building</span> bootloader</span>
+<span id="cb29-5"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile [optimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.03s</span></span>
+<span id="cb29-6"><a></a><span class="ex">Running:</span> <span class="kw">`</span><span class="ex">qemu-system-x86_64</span> <span class="at">-drive</span> format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin <span class="at">-no-reboot</span> <span class="at">-device</span> isa-debug-exit,iobase=0xf4,iosize=0x04 <span class="at">-serial</span> stdio <span class="at">-display</span> none<span class="kw">`</span></span>
+<span id="cb29-7"><a></a><span class="ex">[Fail]</span></span>
+<span id="cb29-8"><a></a></span>
+<span id="cb29-9"><a></a><span class="ex">===</span> PanicInfo ===</span>
+<span id="cb29-10"><a></a><span class="ex">panicked</span> at src/interrupts.rs:25:5:</span>
+<span id="cb29-11"><a></a><span class="ex">EXCEPTION:</span> DOUBLE FAULT</span>
+<span id="cb29-12"><a></a><span class="ex">InterruptStackFrame</span> {</span>
+<span id="cb29-13"><a></a>    <span class="ex">instruction_pointer:</span> VirtAddr<span class="er">(</span></span>
+<span id="cb29-14"><a></a>        <span class="ex">0x205cbb,</span></span>
+<span id="cb29-15"><a></a>    <span class="kw">)</span><span class="ex">,</span></span>
+<span id="cb29-16"><a></a>    <span class="ex">code_segment:</span> 8,</span>
+<span id="cb29-17"><a></a>    <span class="ex">cpu_flags:</span> 0x6,</span>
+<span id="cb29-18"><a></a>    <span class="ex">stack_pointer:</span> VirtAddr<span class="er">(</span></span>
+<span id="cb29-19"><a></a>        <span class="ex">0x10000201f56,</span></span>
+<span id="cb29-20"><a></a>    <span class="kw">)</span><span class="ex">,</span></span>
+<span id="cb29-21"><a></a>    <span class="ex">stack_segment:</span> 0,</span>
+<span id="cb29-22"><a></a><span class="er">}</span></span>
+<span id="cb29-23"><a></a><span class="ex">=================</span></span>
+<span id="cb29-24"><a></a></span>
+<span id="cb29-25"><a></a><span class="ex">error:</span> test failed, to rerun pass <span class="kw">`</span><span class="ex">--test</span> overflow<span class="kw">`</span></span>
+<span id="cb29-26"><a></a></span>
+<span id="cb29-27"><a></a><span class="ex">Caused</span> by:</span>
+<span id="cb29-28"><a></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)</span></span>
+<span id="cb29-29"><a></a><span class="st">note: test exited abnormally; to see the full output pass --no-capture to the harness.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="tying-this-off" class="slide level2">
+<h2>Tying this off</h2>
+<ul>
+<li>This is… incomplete.
+<ul>
+<li>As a <em>test</em>.</li>
+<li>For the OS, it is fine.</li>
+</ul></li>
+<li>You need to still:
+<ul>
+<li>Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.</li>
+<li>Good idea for an assignment.</li>
+</ul></li>
+</ul>
 </section></section>
 <section id="fin" class="title-slide slide level1 center">
 <h1>Fin</h1>
