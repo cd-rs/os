@@ -65,6 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./90_interrupts.html" rel="next">
 <link href="./72_handlers.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -297,6 +298,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="menu-text">Double</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90_interrupts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interrupts</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -489,7 +496,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Perhaps a generalized exception.</li>
 </ul>
-<div id="731a1b12" class="cell" data-execution_count="1">
+<div id="61fbb81f" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">try</span>:</span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="cf">except</span>:</span>
@@ -1431,11 +1438,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb29-9"><a href="#cb29-9"></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(tss)<span class="op">;</span></span>
 <span id="cb29-10"><a href="#cb29-10"></a></span>
 <span id="cb29-11"><a href="#cb29-11"></a><span class="co">// Load GDT and Reload CS</span></span>
-<span id="cb29-12"><a href="#cb29-12"></a>GDT<span class="op">.</span>load()</span>
-<span id="cb29-13"><a href="#cb29-13"></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
-<span id="cb29-14"><a href="#cb29-14"></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
-<span id="cb29-15"><a href="#cb29-15"></a><span class="co">// Mandate use of this TSS</span></span>
-<span id="cb29-16"><a href="#cb29-16"></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb29-12"><a href="#cb29-12"></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
+<span id="cb29-13"><a href="#cb29-13"></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
+<span id="cb29-14"><a href="#cb29-14"></a><span class="co">// Mandate use of this TSS</span></span>
+<span id="cb29-15"><a href="#cb29-15"></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="this-worked-for-me" class="level2">
@@ -1953,6 +1959,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./90_interrupts.html" class="pagination-link" aria-label="Interrupts">
+        <span class="nav-page-text">Interrupts</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb31-1"><a href="#cb31-1"></a><span class="co">---</span></span>
@@ -2701,57 +2710,56 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb31-746"><a href="#cb31-746"></a>let <span class="at">tss =</span> <span class="fu">GDT.add_entry</span>(tss);</span>
 <span id="cb31-747"><a href="#cb31-747"></a></span>
 <span id="cb31-748"><a href="#cb31-748"></a><span class="sc">/</span><span class="er">/</span> Load GDT and Reload CS</span>
-<span id="cb31-749"><a href="#cb31-749"></a><span class="fu">GDT.load</span>()</span>
-<span id="cb31-750"><a href="#cb31-750"></a>use x86_64<span class="sc">::</span>instructions<span class="sc">::</span>segmentation<span class="sc">::</span>Segment;</span>
-<span id="cb31-751"><a href="#cb31-751"></a>x86_64<span class="sc">::</span>instructions<span class="sc">::</span>segmentation<span class="sc">::</span>CS<span class="sc">::</span><span class="fu">set_reg</span>(kcs);</span>
-<span id="cb31-752"><a href="#cb31-752"></a><span class="sc">/</span><span class="er">/</span> Mandate use of this TSS</span>
-<span id="cb31-753"><a href="#cb31-753"></a>x86_64<span class="sc">::</span>instructions<span class="sc">::</span>tables<span class="sc">::</span><span class="fu">load_tss</span>(tss);</span>
-<span id="cb31-754"><a href="#cb31-754"></a><span class="st">```</span></span>
-<span id="cb31-755"><a href="#cb31-755"></a></span>
-<span id="cb31-756"><a href="#cb31-756"></a><span class="at">## This "worked" for me</span></span>
-<span id="cb31-757"><a href="#cb31-757"></a></span>
-<span id="cb31-758"><a href="#cb31-758"></a><span class="st">```</span>{.sh}</span>
-<span id="cb31-759"><a href="#cb31-759"></a><span class="sc">$</span> cargo t <span class="sc">--</span>test overflow</span>
-<span id="cb31-760"><a href="#cb31-760"></a>    Finished <span class="st">`</span><span class="at">test</span><span class="st">`</span> profile [unoptimized <span class="sc">+</span> debuginfo] <span class="fu">target</span>(s) <span class="cf">in</span> <span class="fl">0.03</span>s</span>
-<span id="cb31-761"><a href="#cb31-761"></a>     Running tests<span class="sc">/</span><span class="fu">overflow.rs</span> (target<span class="sc">/</span>x86_64<span class="sc">-</span>osirs<span class="sc">/</span>debug<span class="sc">/</span>deps<span class="sc">/</span>overflow<span class="dv">-60</span>f67220f8d9bad2)</span>
-<span id="cb31-762"><a href="#cb31-762"></a>Building bootloader</span>
-<span id="cb31-763"><a href="#cb31-763"></a>    Finished <span class="st">`</span><span class="at">release</span><span class="st">`</span> profile [optimized <span class="sc">+</span> debuginfo] <span class="fu">target</span>(s) <span class="cf">in</span> <span class="fl">0.03</span>s</span>
-<span id="cb31-764"><a href="#cb31-764"></a>Running<span class="sc">:</span> <span class="st">`</span><span class="at">qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none</span><span class="st">`</span></span>
-<span id="cb31-765"><a href="#cb31-765"></a>[Fail]</span>
-<span id="cb31-766"><a href="#cb31-766"></a></span>
-<span id="cb31-767"><a href="#cb31-767"></a><span class="sc">==</span><span class="er">=</span> PanicInfo <span class="sc">==</span><span class="er">=</span></span>
-<span id="cb31-768"><a href="#cb31-768"></a>panicked at src<span class="sc">/</span>interrupts.rs<span class="sc">:</span><span class="dv">25</span><span class="sc">:</span><span class="dv">5</span><span class="sc">:</span></span>
-<span id="cb31-769"><a href="#cb31-769"></a>EXCEPTION<span class="sc">:</span> DOUBLE FAULT</span>
-<span id="cb31-770"><a href="#cb31-770"></a>InterruptStackFrame {</span>
-<span id="cb31-771"><a href="#cb31-771"></a>    instruction_pointer<span class="sc">:</span> <span class="fu">VirtAddr</span>(</span>
-<span id="cb31-772"><a href="#cb31-772"></a>        <span class="dv">0x205cbb</span>,</span>
-<span id="cb31-773"><a href="#cb31-773"></a>    ),</span>
-<span id="cb31-774"><a href="#cb31-774"></a>    code_segment<span class="sc">:</span> <span class="dv">8</span>,</span>
-<span id="cb31-775"><a href="#cb31-775"></a>    cpu_flags<span class="sc">:</span> <span class="dv">0x6</span>,</span>
-<span id="cb31-776"><a href="#cb31-776"></a>    stack_pointer<span class="sc">:</span> <span class="fu">VirtAddr</span>(</span>
-<span id="cb31-777"><a href="#cb31-777"></a>        <span class="dv">0x10000201f56</span>,</span>
-<span id="cb31-778"><a href="#cb31-778"></a>    ),</span>
-<span id="cb31-779"><a href="#cb31-779"></a>    stack_segment<span class="sc">:</span> <span class="dv">0</span>,</span>
-<span id="cb31-780"><a href="#cb31-780"></a>}</span>
-<span id="cb31-781"><a href="#cb31-781"></a><span class="sc">==</span><span class="er">===============</span></span>
-<span id="cb31-782"><a href="#cb31-782"></a></span>
-<span id="cb31-783"><a href="#cb31-783"></a>error<span class="sc">:</span> test failed, to rerun pass <span class="st">`</span><span class="at">--test overflow</span><span class="st">`</span></span>
-<span id="cb31-784"><a href="#cb31-784"></a></span>
-<span id="cb31-785"><a href="#cb31-785"></a>Caused by<span class="sc">:</span></span>
-<span id="cb31-786"><a href="#cb31-786"></a>  process didn<span class="st">'t exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)</span></span>
-<span id="cb31-787"><a href="#cb31-787"></a><span class="st">note: test exited abnormally; to see the full output pass --no-capture to the harness.</span></span>
-<span id="cb31-788"><a href="#cb31-788"></a><span class="st">```</span></span>
-<span id="cb31-789"><a href="#cb31-789"></a></span>
-<span id="cb31-790"><a href="#cb31-790"></a><span class="st">## Tying this off</span></span>
-<span id="cb31-791"><a href="#cb31-791"></a></span>
-<span id="cb31-792"><a href="#cb31-792"></a><span class="st">- This is... incomplete.</span></span>
-<span id="cb31-793"><a href="#cb31-793"></a><span class="st">    - As a *test*.</span></span>
-<span id="cb31-794"><a href="#cb31-794"></a><span class="st">    - For the OS, it is fine.</span></span>
-<span id="cb31-795"><a href="#cb31-795"></a><span class="st">- You need to still:</span></span>
-<span id="cb31-796"><a href="#cb31-796"></a><span class="st">    - Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.</span></span>
-<span id="cb31-797"><a href="#cb31-797"></a><span class="st">    - Good idea for an assignment.</span></span>
-<span id="cb31-798"><a href="#cb31-798"></a></span>
-<span id="cb31-799"><a href="#cb31-799"></a><span class="st"># Fin</span></span>
+<span id="cb31-749"><a href="#cb31-749"></a>use x86_64<span class="sc">::</span>instructions<span class="sc">::</span>segmentation<span class="sc">::</span>Segment;</span>
+<span id="cb31-750"><a href="#cb31-750"></a>x86_64<span class="sc">::</span>instructions<span class="sc">::</span>segmentation<span class="sc">::</span>CS<span class="sc">::</span><span class="fu">set_reg</span>(kcs);</span>
+<span id="cb31-751"><a href="#cb31-751"></a><span class="sc">/</span><span class="er">/</span> Mandate use of this TSS</span>
+<span id="cb31-752"><a href="#cb31-752"></a>x86_64<span class="sc">::</span>instructions<span class="sc">::</span>tables<span class="sc">::</span><span class="fu">load_tss</span>(tss);</span>
+<span id="cb31-753"><a href="#cb31-753"></a><span class="st">```</span></span>
+<span id="cb31-754"><a href="#cb31-754"></a></span>
+<span id="cb31-755"><a href="#cb31-755"></a><span class="at">## This "worked" for me</span></span>
+<span id="cb31-756"><a href="#cb31-756"></a></span>
+<span id="cb31-757"><a href="#cb31-757"></a><span class="st">```</span>{.sh}</span>
+<span id="cb31-758"><a href="#cb31-758"></a><span class="sc">$</span> cargo t <span class="sc">--</span>test overflow</span>
+<span id="cb31-759"><a href="#cb31-759"></a>    Finished <span class="st">`</span><span class="at">test</span><span class="st">`</span> profile [unoptimized <span class="sc">+</span> debuginfo] <span class="fu">target</span>(s) <span class="cf">in</span> <span class="fl">0.03</span>s</span>
+<span id="cb31-760"><a href="#cb31-760"></a>     Running tests<span class="sc">/</span><span class="fu">overflow.rs</span> (target<span class="sc">/</span>x86_64<span class="sc">-</span>osirs<span class="sc">/</span>debug<span class="sc">/</span>deps<span class="sc">/</span>overflow<span class="dv">-60</span>f67220f8d9bad2)</span>
+<span id="cb31-761"><a href="#cb31-761"></a>Building bootloader</span>
+<span id="cb31-762"><a href="#cb31-762"></a>    Finished <span class="st">`</span><span class="at">release</span><span class="st">`</span> profile [optimized <span class="sc">+</span> debuginfo] <span class="fu">target</span>(s) <span class="cf">in</span> <span class="fl">0.03</span>s</span>
+<span id="cb31-763"><a href="#cb31-763"></a>Running<span class="sc">:</span> <span class="st">`</span><span class="at">qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none</span><span class="st">`</span></span>
+<span id="cb31-764"><a href="#cb31-764"></a>[Fail]</span>
+<span id="cb31-765"><a href="#cb31-765"></a></span>
+<span id="cb31-766"><a href="#cb31-766"></a><span class="sc">==</span><span class="er">=</span> PanicInfo <span class="sc">==</span><span class="er">=</span></span>
+<span id="cb31-767"><a href="#cb31-767"></a>panicked at src<span class="sc">/</span>interrupts.rs<span class="sc">:</span><span class="dv">25</span><span class="sc">:</span><span class="dv">5</span><span class="sc">:</span></span>
+<span id="cb31-768"><a href="#cb31-768"></a>EXCEPTION<span class="sc">:</span> DOUBLE FAULT</span>
+<span id="cb31-769"><a href="#cb31-769"></a>InterruptStackFrame {</span>
+<span id="cb31-770"><a href="#cb31-770"></a>    instruction_pointer<span class="sc">:</span> <span class="fu">VirtAddr</span>(</span>
+<span id="cb31-771"><a href="#cb31-771"></a>        <span class="dv">0x205cbb</span>,</span>
+<span id="cb31-772"><a href="#cb31-772"></a>    ),</span>
+<span id="cb31-773"><a href="#cb31-773"></a>    code_segment<span class="sc">:</span> <span class="dv">8</span>,</span>
+<span id="cb31-774"><a href="#cb31-774"></a>    cpu_flags<span class="sc">:</span> <span class="dv">0x6</span>,</span>
+<span id="cb31-775"><a href="#cb31-775"></a>    stack_pointer<span class="sc">:</span> <span class="fu">VirtAddr</span>(</span>
+<span id="cb31-776"><a href="#cb31-776"></a>        <span class="dv">0x10000201f56</span>,</span>
+<span id="cb31-777"><a href="#cb31-777"></a>    ),</span>
+<span id="cb31-778"><a href="#cb31-778"></a>    stack_segment<span class="sc">:</span> <span class="dv">0</span>,</span>
+<span id="cb31-779"><a href="#cb31-779"></a>}</span>
+<span id="cb31-780"><a href="#cb31-780"></a><span class="sc">==</span><span class="er">===============</span></span>
+<span id="cb31-781"><a href="#cb31-781"></a></span>
+<span id="cb31-782"><a href="#cb31-782"></a>error<span class="sc">:</span> test failed, to rerun pass <span class="st">`</span><span class="at">--test overflow</span><span class="st">`</span></span>
+<span id="cb31-783"><a href="#cb31-783"></a></span>
+<span id="cb31-784"><a href="#cb31-784"></a>Caused by<span class="sc">:</span></span>
+<span id="cb31-785"><a href="#cb31-785"></a>  process didn<span class="st">'t exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)</span></span>
+<span id="cb31-786"><a href="#cb31-786"></a><span class="st">note: test exited abnormally; to see the full output pass --no-capture to the harness.</span></span>
+<span id="cb31-787"><a href="#cb31-787"></a><span class="st">```</span></span>
+<span id="cb31-788"><a href="#cb31-788"></a></span>
+<span id="cb31-789"><a href="#cb31-789"></a><span class="st">## Tying this off</span></span>
+<span id="cb31-790"><a href="#cb31-790"></a></span>
+<span id="cb31-791"><a href="#cb31-791"></a><span class="st">- This is... incomplete.</span></span>
+<span id="cb31-792"><a href="#cb31-792"></a><span class="st">    - As a *test*.</span></span>
+<span id="cb31-793"><a href="#cb31-793"></a><span class="st">    - For the OS, it is fine.</span></span>
+<span id="cb31-794"><a href="#cb31-794"></a><span class="st">- You need to still:</span></span>
+<span id="cb31-795"><a href="#cb31-795"></a><span class="st">    - Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.</span></span>
+<span id="cb31-796"><a href="#cb31-796"></a><span class="st">    - Good idea for an assignment.</span></span>
+<span id="cb31-797"><a href="#cb31-797"></a></span>
+<span id="cb31-798"><a href="#cb31-798"></a><span class="st"># Fin</span></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

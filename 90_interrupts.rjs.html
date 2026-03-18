@@ -1,0 +1,1537 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-html/tabby.min.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.8.25">
+
+  <title>OS in Rust – Interrupts</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+      }
+    pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+    div.sourceCode
+      { color: #f8f8f2;  }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #f8f8f2; } /* Normal */
+    code span.al { color: #f07178; } /* Alert */
+    code span.an { color: #d4d0ab; } /* Annotation */
+    code span.at { color: #00e0e0; } /* Attribute */
+    code span.bn { color: #d4d0ab; } /* BaseN */
+    code span.bu { color: #abe338; } /* BuiltIn */
+    code span.cf { color: #ffa07a; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #abe338; } /* Char */
+    code span.cn { color: #ffd700; } /* Constant */
+    code span.co { color: #f8f8f2; font-style: italic; } /* Comment */
+    code span.cv { color: #ffd700; } /* CommentVar */
+    code span.do { color: #f8f8f2; } /* Documentation */
+    code span.dt { color: #ffa07a; } /* DataType */
+    code span.dv { color: #d4d0ab; } /* DecVal */
+    code span.er { color: #f07178; text-decoration: underline; } /* Error */
+    code span.ex { color: #00e0e0; font-weight: bold; } /* Extension */
+    code span.fl { color: #d4d0ab; } /* Float */
+    code span.fu { color: #ffa07a; } /* Function */
+    code span.im { color: #abe338; } /* Import */
+    code span.in { color: #d4d0ab; } /* Information */
+    code span.kw { color: #ffa07a; font-weight: bold; } /* Keyword */
+    code span.op { color: #ffa07a; } /* Operator */
+    code span.ot { color: #00e0e0; } /* Other */
+    code span.pp { color: #dcc6e0; } /* Preprocessor */
+    code span.re { color: #00e0e0; background-color: #f8f8f2; } /* RegionMarker */
+    code span.sc { color: #abe338; } /* SpecialChar */
+    code span.ss { color: #abe338; } /* SpecialString */
+    code span.st { color: #abe338; } /* String */
+    code span.va { color: #00e0e0; } /* Variable */
+    code span.vs { color: #abe338; } /* VerbatimString */
+    code span.wa { color: #dcc6e0; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-1d86d68c35eb7061f9efcb6a994936f6.css">
+  <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-dark">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Interrupts</h1>
+  <p class="subtitle">OS in Rust</p>
+
+<div class="quarto-title-authors">
+</div>
+
+</section>
+<section id="announcements" class="slide level2">
+<h2>Announcements</h2>
+<ul>
+<li><strong>Action Items</strong>:
+<ul>
+<li>Welcome back.</li>
+<li>You should have a working: - Breakpoint handler.
+<ul>
+<li>Double fault handler.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="slide level2">
+<h2>Citations</h2>
+<ul>
+<li>Hardware interrupts are <em>awesome</em>.
+<ul>
+<li>They open up a wide range of interesting algorithmic ideas.</li>
+</ul></li>
+<li><a href="https://os.phil-opp.com/hardware-interrupts/">Hardware Interrupts</a></li>
+<li>Still tedious though!</li>
+</ul>
+</section>
+<section id="negation" class="slide level2">
+<h2>Negation</h2>
+<ul>
+<li>Not to be confused with software interrupts.</li>
+<li>Basically this is I/O week - the hardware <em>could</em> be a keyboard.</li>
+</ul>
+</section>
+<section id="recall-exceptions" class="slide level2">
+<h2>Recall: Exceptions</h2>
+<ul>
+<li>CPU exceptions occur in various erroneous situations
+<ul>
+<li>Accessing an invalid memory address</li>
+<li>Dividing by zero</li>
+</ul></li>
+<li>We have to set up an <em>interrupt descriptor table</em>..</li>
+<li>This week, our kernel will be able to catch <a href="https://wiki.osdev.org/Exceptions#Breakpoint">double faults</a>.</li>
+</ul>
+</section>
+<section id="recall-types" class="slide level2">
+<h2>Recall: Types</h2>
+<p>On x86, there are about 20 different CPU exception types.</p>
+<ul>
+<li>None of them are hardware interrupts.</li>
+<li>The keyboard and the CPU are not the same thing.</li>
+</ul>
+</section>
+<section>
+<section id="interrupts" class="title-slide slide level1 center">
+<h1>Interrupts</h1>
+
+</section>
+<section id="polling" class="slide level2">
+<h2>Polling</h2>
+<ul>
+<li>Let’s go over what interrupts aren’t.</li>
+<li>I don’t leave my cell phone on, pretty much ever.
+<ul>
+<li>It is usually silent, dead battery, and I don’t know where it is.</li>
+<li>If someone texts me, then I will get the text when I voluntarily check my phone.</li>
+</ul></li>
+<li>This is called <em>polling</em>.</li>
+</ul>
+</section>
+<section id="definition" class="slide level2">
+<h2>Definition</h2>
+<blockquote>
+<p><a href="https://en.wikipedia.org/wiki/Polling_(computer_science)">Polling is the process where the computer or controlling device waits for an external device to check for its readiness or state, often with low-level hardware. For example, when a printer is connected via a parallel port, the computer waits until the printer has received the next character. These processes can be as minute as only reading one bit.</a></p>
+</blockquote>
+</section>
+<section id="interrupts-1" class="slide level2">
+<h2>Interrupts</h2>
+<ul>
+<li>Imagine you have a cell phone that you keep with you, charged, and with some sort of way of notifying you that it has received a message.</li>
+<li>Then, whenever it receives a message, it <em>interrupts</em> whatever you are doing.</li>
+<li>In that way it is like other “hardware” interrupts, like stubbing your toe, the lights turning off, or a lamborghini crashing into the classroom.</li>
+</ul>
+</section>
+<section id="usage" class="slide level2">
+<h2>Usage</h2>
+<ul>
+<li>Interrupts provide a way to notify the CPU from attached hardware devices.</li>
+<li>So instead of letting the kernel periodically check the keyboard for new characters (<em>polling</em>)…</li>
+<li>…the keyboard can notify the kernel of each keypress.</li>
+<li>This is much more efficient because the kernel only needs to act when something happened.</li>
+</ul>
+</section>
+<section id="trade-offs" class="slide level2">
+<h2>Trade-offs</h2>
+<p>For interrupts (vs.&nbsp;polling).</p>
+<table class="caption-top">
+<thead>
+<tr class="header">
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fast Response</td>
+<td>Can be distruptive</td>
+</tr>
+<tr class="even">
+<td>Less overall compute</td>
+<td>More overall complexity</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="overview" class="slide level2">
+<h2>Overview</h2>
+<ul>
+<li>A <em>interrupt controller</em> aggregates the interrupts:</li>
+</ul>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class=""><p></p>
+<div>
+<svg width="960" height="480" viewbox="0.00 0.00 314.11 152.00" xmlns="http://www.w3.org/2000/svg" xlink="http://www.w3.org/1999/xlink" style="; max-width: none; max-height: none; display: block; margin: auto auto auto auto">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 148)">
+<title>G</title>
+<!-- Timer -->
+<g id="node1" class="node">
+<title>Timer</title>
+<text text-anchor="middle" x="53.28" y="-121.8" font-family="Times,serif" font-size="14.00" fill="white">Timer</text>
+</g>
+<!-- IC -->
+<g id="node4" class="node">
+<title>IC</title>
+<polygon fill="none" stroke="white" points="215.88,-92.6 142.79,-92.6 142.79,-51.4 215.88,-51.4 215.88,-92.6"></polygon>
+<text text-anchor="middle" x="179.33" y="-76.2" font-family="Times,serif" font-size="14.00" fill="white">Interrupt</text>
+<text text-anchor="middle" x="179.33" y="-59.4" font-family="Times,serif" font-size="14.00" fill="white">Controller</text>
+</g>
+<!-- Timer&#45;&gt;IC -->
+<g id="edge1" class="edge">
+<title>Timer-&gt;IC</title>
+<path fill="none" stroke="white" d="M80.29,-114.68C95.51,-108.05 115.17,-99.49 132.88,-91.78"></path>
+<polygon fill="white" stroke="white" points="134.71,-94.81 142.48,-87.61 131.92,-88.39 134.71,-94.81"></polygon>
+</g>
+<!-- Keyboard -->
+<g id="node2" class="node">
+<title>Keyboard</title>
+<text text-anchor="middle" x="53.28" y="-67.8" font-family="Times,serif" font-size="14.00" fill="white">Keyboard</text>
+</g>
+<!-- Keyboard&#45;&gt;IC -->
+<g id="edge2" class="edge">
+<title>Keyboard-&gt;IC</title>
+<path fill="none" stroke="white" d="M89.17,-72C102.55,-72 118.02,-72 132.29,-72"></path>
+<polygon fill="white" stroke="white" points="132.42,-75.5 142.42,-72 132.42,-68.5 132.42,-75.5"></polygon>
+</g>
+<!-- Hardware -->
+<g id="node3" class="node">
+<title>Hardware</title>
+<text text-anchor="middle" x="53.28" y="-13.8" font-family="Times,serif" font-size="14.00" fill="white">Other Hardware</text>
+</g>
+<!-- Hardware&#45;&gt;IC -->
+<g id="edge3" class="edge">
+<title>Hardware-&gt;IC</title>
+<path fill="none" stroke="white" d="M95.93,-36.13C107.82,-41.31 120.83,-46.97 132.93,-52.23"></path>
+<polygon fill="white" stroke="white" points="131.83,-55.57 142.39,-56.36 134.62,-49.16 131.83,-55.57"></polygon>
+</g>
+<!-- CPU -->
+<g id="node5" class="node">
+<title>CPU</title>
+<polygon fill="none" stroke="white" points="306.11,-90 252.11,-90 252.11,-54 306.11,-54 306.11,-90"></polygon>
+<text text-anchor="middle" x="279.11" y="-67.8" font-family="Times,serif" font-size="14.00" fill="white">CPU</text>
+</g>
+<!-- IC&#45;&gt;CPU -->
+<g id="edge4" class="edge">
+<title>IC-&gt;CPU</title>
+<path fill="none" stroke="white" d="M215.91,-72C224.37,-72 233.41,-72 241.9,-72"></path>
+<polygon fill="white" stroke="white" points="241.91,-75.5 251.91,-72 241.91,-68.5 241.91,-75.5"></polygon>
+</g>
+</g>
+</svg>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+</section>
+<section id="pic" class="slide level2">
+<h2>PIC</h2>
+<ul>
+<li>Enter the <em>Programmable Interrupt Controller</em> (PIC)</li>
+<li>Most interrupt controllers are programmable, which means they support different priority levels for interrupts.</li>
+<li>For example, this allows to give timer interrupts a higher priority than keyboard interrupts to ensure accurate timekeeping.</li>
+</ul>
+</section>
+<section id="asynchronous" class="slide level2">
+<h2>Asynchronous</h2>
+<ul>
+<li>Unlike exceptions, hardware interrupts occur <em>asynchronously</em>.</li>
+<li>This means they are <em>completely</em> independent from the executed code.
+<ul>
+<li>Can occur at any time, including, for example <em>between</em> lines of code.</li>
+</ul></li>
+<li>Thus, we suddenly have a form of concurrency in our kernel with all the potential concurrency-related bugs.</li>
+</ul>
+</section>
+<section id="blog-claims" class="slide level2">
+<h2>Blog claims:</h2>
+<ul>
+<li>Rust’s strict ownership model helps us here…
+<ul>
+<li>“Here” being with respect to interrupts.</li>
+</ul></li>
+<li>…because it forbids mutable global state.
+<ul>
+<li>Oh that’s a strong claim.</li>
+</ul></li>
+<li><em>Deadlocks</em> are still possible.
+<ul>
+<li>When two entities reserve part of what they need and get stuck.</li>
+</ul></li>
+</ul>
+</section>
+<section id="the-8259-pic" class="slide level2">
+<h2>The 8259 PIC</h2>
+<ul>
+<li>The <a href="https://en.wikipedia.org/wiki/Intel_8259">Intel 8259</a> is a programmable interrupt controller (PIC) introduced in 1976.</li>
+<li>It has long been replaced by the newer <a href="https://en.wikipedia.org/wiki/Intel_APIC_Architecture">APIC</a>, but its interface is still supported on current systems for backwards compatibility reasons.</li>
+<li>The 8259 PIC is significantly easier to set up than the APIC, so we will use it to introduce ourselves to interrupts.</li>
+</ul>
+</section>
+<section id="history" class="slide level2">
+<h2>History</h2>
+<ul>
+<li>The 8259 has eight interrupt lines and several lines for communicating with the CPU.</li>
+<li>The typical systems back then were equipped with <strong>two</strong> instances of the 8259 PIC:
+<ul>
+<li>one primary and,</li>
+<li>one secondary PIC, connected to <em>one</em> of the interrupt lines of the primary.</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually" class="slide level2">
+<h2>Visually</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb1-1"><a></a>                     ____________                          ____________</span>
+<span id="cb1-2"><a></a>Real Time Clock --&gt; |            |   Timer -------------&gt; |            |</span>
+<span id="cb1-3"><a></a>ACPI -------------&gt; |            |   Keyboard-----------&gt; |            |      _____</span>
+<span id="cb1-4"><a></a>Available --------&gt; | Secondary  |----------------------&gt; | Primary    |     |     |</span>
+<span id="cb1-5"><a></a>Available --------&gt; | Interrupt  |   Serial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |</span>
+<span id="cb1-6"><a></a>Mouse ------------&gt; | Controller |   Serial Port 1 -----&gt; | Controller |     |_____|</span>
+<span id="cb1-7"><a></a>Co-Processor -----&gt; |            |   Parallel Port 2/3 -&gt; |            |</span>
+<span id="cb1-8"><a></a>Primary ATA ------&gt; |            |   Floppy disk -------&gt; |            |</span>
+<span id="cb1-9"><a></a>Secondary ATA ----&gt; |____________|   Parallel Port 1----&gt; |____________|</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<ul>
+<li>We see that most of the 15 lines have a fixed mapping.</li>
+<li>E.g., (zero indexed) line 4 of the secondary PIC is assigned to the mouse.</li>
+</ul>
+</section>
+<section id="configuration" class="slide level2">
+<h2>Configuration</h2>
+<ul>
+<li>Each controller can be configured through two I/O ports
+<ul>
+<li>So, port-mapped</li>
+<li>By configured we mean “programmed”</li>
+<li>One “command” port and one “data” port.</li>
+</ul></li>
+<li>For the primary controller, these ports are <code>0x20</code> (command) and <code>0x21</code> (data).</li>
+<li>For the secondary controller, they are <code>0xa0</code> (command) and <code>0xa1</code> (data).</li>
+</ul>
+</section>
+<section id="collisions" class="slide level2">
+<h2>Collisions</h2>
+<ul>
+<li>Remember this:
+<ul>
+<li>On x86, there are about 20 different CPU exception types.
+<ul>
+<li>None of them are hardware interrupts.</li>
+<li>The keyboard and the CPU are not the same thing.</li>
+</ul></li>
+</ul></li>
+<li>We have a collision in our key-value association.</li>
+</ul>
+</section>
+<section id="defaults" class="slide level2">
+<h2>Defaults</h2>
+<ul>
+<li>The default configuration of the PICs sends interrupt vector numbers in the range of 0–15 to the CPU.</li>
+<li>These numbers are already occupied by (the first <code>0x20</code>) CPU exceptions.</li>
+<li>For example, number 8 corresponds to a <em>double fault</em> in the CPU and <em>Serial Port 1</em> in the PIC.</li>
+<li>We need to <strong>re</strong>map the PIC interrupts to different numbers.</li>
+</ul>
+</section>
+<section id="conventions" class="slide level2">
+<h2>Conventions</h2>
+<ul>
+<li>The actual remap range doesn’t matter.
+<ul>
+<li>It’s programmable, after all.</li>
+<li>But it must not overlap with the exceptions.</li>
+</ul></li>
+<li>Typically the range of 32–47 is chosen, because these are the first free numbers after the 32 exception slots.</li>
+</ul>
+</section>
+<section id="cheating" class="slide level2">
+<h2>Cheating</h2>
+<ul>
+<li>There’s <a href="https://docs.rs/crate/pic8259/0.10.1/source/src/lib.rs">a crate</a> for this.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pic8259/0.10.1/source/src/lib.rs</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="pic8259/0.10.1/source/src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb2-2"><a></a><span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb2-3"><a></a></span>
+<span id="cb2-4"><a></a><span class="kw">const</span> CMD_INIT<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0x11</span><span class="op">;</span></span>
+<span id="cb2-5"><a></a><span class="kw">const</span> CMD_END_OF_INTERRUPT<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0x20</span><span class="op">;</span></span>
+<span id="cb2-6"><a></a><span class="kw">const</span> MODE_8086<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0x01</span><span class="op">;</span></span>
+<span id="cb2-7"><a></a></span>
+<span id="cb2-8"><a></a><span class="kw">struct</span> Pic <span class="op">{</span></span>
+<span id="cb2-9"><a></a>    offset<span class="op">:</span> <span class="dt">u8</span><span class="op">,</span></span>
+<span id="cb2-10"><a></a>    command<span class="op">:</span> Port<span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;,</span></span>
+<span id="cb2-11"><a></a>    data<span class="op">:</span> Port<span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;,</span></span>
+<span id="cb2-12"><a></a><span class="op">}</span></span>
+<span id="cb2-13"><a></a></span>
+<span id="cb2-14"><a></a><span class="kw">impl</span> Pic <span class="op">{</span></span>
+<span id="cb2-15"><a></a>    <span class="kw">fn</span> handles_interrupt(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> interupt_id<span class="op">:</span> <span class="dt">u8</span>) <span class="op">-&gt;</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb2-16"><a></a>        <span class="kw">self</span><span class="op">.</span>offset <span class="op">&lt;=</span> interupt_id <span class="op">&amp;&amp;</span> interupt_id <span class="op">&lt;</span> <span class="kw">self</span><span class="op">.</span>offset <span class="op">+</span> <span class="dv">8</span></span>
+<span id="cb2-17"><a></a>    <span class="op">}</span></span>
+<span id="cb2-18"><a></a></span>
+<span id="cb2-19"><a></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> end_of_interrupt(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb2-20"><a></a>        <span class="kw">self</span><span class="op">.</span>command<span class="op">.</span>write(CMD_END_OF_INTERRUPT)<span class="op">;</span></span>
+<span id="cb2-21"><a></a>    <span class="op">}</span></span>
+<span id="cb2-22"><a></a></span>
+<span id="cb2-23"><a></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> read_mask(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">u8</span> <span class="op">{</span></span>
+<span id="cb2-24"><a></a>        <span class="kw">self</span><span class="op">.</span>data<span class="op">.</span>read()</span>
+<span id="cb2-25"><a></a>    <span class="op">}</span></span>
+<span id="cb2-26"><a></a></span>
+<span id="cb2-27"><a></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> write_mask(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> mask<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
+<span id="cb2-28"><a></a>        <span class="kw">self</span><span class="op">.</span>data<span class="op">.</span>write(mask)</span>
+<span id="cb2-29"><a></a>    <span class="op">}</span></span>
+<span id="cb2-30"><a></a><span class="op">}</span></span>
+<span id="cb2-31"><a></a></span>
+<span id="cb2-32"><a></a><span class="kw">pub</span> <span class="kw">struct</span> ChainedPics <span class="op">{</span></span>
+<span id="cb2-33"><a></a>    pics<span class="op">:</span> [Pic<span class="op">;</span> <span class="dv">2</span>]<span class="op">,</span></span>
+<span id="cb2-34"><a></a><span class="op">}</span></span>
+<span id="cb2-35"><a></a></span>
+<span id="cb2-36"><a></a><span class="kw">impl</span> ChainedPics <span class="op">{</span></span>
+<span id="cb2-37"><a></a>    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> new(offset1<span class="op">:</span> <span class="dt">u8</span><span class="op">,</span> offset2<span class="op">:</span> <span class="dt">u8</span>) <span class="op">-&gt;</span> ChainedPics <span class="op">{</span></span>
+<span id="cb2-38"><a></a>        ChainedPics <span class="op">{</span></span>
+<span id="cb2-39"><a></a>            pics<span class="op">:</span> [</span>
+<span id="cb2-40"><a></a>                Pic <span class="op">{</span></span>
+<span id="cb2-41"><a></a>                    offset<span class="op">:</span> offset1<span class="op">,</span></span>
+<span id="cb2-42"><a></a>                    command<span class="op">:</span> <span class="pp">Port::</span>new(<span class="dv">0x20</span>)<span class="op">,</span></span>
+<span id="cb2-43"><a></a>                    data<span class="op">:</span> <span class="pp">Port::</span>new(<span class="dv">0x21</span>)<span class="op">,</span></span>
+<span id="cb2-44"><a></a>                <span class="op">},</span></span>
+<span id="cb2-45"><a></a>                Pic <span class="op">{</span></span>
+<span id="cb2-46"><a></a>                    offset<span class="op">:</span> offset2<span class="op">,</span></span>
+<span id="cb2-47"><a></a>                    command<span class="op">:</span> <span class="pp">Port::</span>new(<span class="dv">0xA0</span>)<span class="op">,</span></span>
+<span id="cb2-48"><a></a>                    data<span class="op">:</span> <span class="pp">Port::</span>new(<span class="dv">0xA1</span>)<span class="op">,</span></span>
+<span id="cb2-49"><a></a>                <span class="op">},</span></span>
+<span id="cb2-50"><a></a>            ]<span class="op">,</span></span>
+<span id="cb2-51"><a></a>        <span class="op">}</span></span>
+<span id="cb2-52"><a></a>    <span class="op">}</span></span>
+<span id="cb2-53"><a></a></span>
+<span id="cb2-54"><a></a>    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> initialize(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb2-55"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> wait_port<span class="op">:</span> Port<span class="op">&lt;</span><span class="dt">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x80</span>)<span class="op">;</span></span>
+<span id="cb2-56"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> wait <span class="op">=</span> <span class="op">||</span> wait_port<span class="op">.</span>write(<span class="dv">0</span>)<span class="op">;</span></span>
+<span id="cb2-57"><a></a></span>
+<span id="cb2-58"><a></a>        <span class="kw">let</span> saved_masks <span class="op">=</span> <span class="kw">self</span><span class="op">.</span>read_masks()<span class="op">;</span></span>
+<span id="cb2-59"><a></a></span>
+<span id="cb2-60"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>command<span class="op">.</span>write(CMD_INIT)<span class="op">;</span></span>
+<span id="cb2-61"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-62"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>command<span class="op">.</span>write(CMD_INIT)<span class="op">;</span></span>
+<span id="cb2-63"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-64"><a></a></span>
+<span id="cb2-65"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>data<span class="op">.</span>write(<span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>offset)<span class="op">;</span></span>
+<span id="cb2-66"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-67"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>data<span class="op">.</span>write(<span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>offset)<span class="op">;</span></span>
+<span id="cb2-68"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-69"><a></a></span>
+<span id="cb2-70"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>data<span class="op">.</span>write(<span class="dv">4</span>)<span class="op">;</span></span>
+<span id="cb2-71"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-72"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>data<span class="op">.</span>write(<span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb2-73"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-74"><a></a></span>
+<span id="cb2-75"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>data<span class="op">.</span>write(MODE_8086)<span class="op">;</span></span>
+<span id="cb2-76"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-77"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>data<span class="op">.</span>write(MODE_8086)<span class="op">;</span></span>
+<span id="cb2-78"><a></a>        wait()<span class="op">;</span></span>
+<span id="cb2-79"><a></a></span>
+<span id="cb2-80"><a></a>        <span class="kw">self</span><span class="op">.</span>write_masks(saved_masks[<span class="dv">0</span>]<span class="op">,</span> saved_masks[<span class="dv">1</span>])</span>
+<span id="cb2-81"><a></a>    <span class="op">}</span></span>
+<span id="cb2-82"><a></a></span>
+<span id="cb2-83"><a></a>    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> read_masks(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">-&gt;</span> [<span class="dt">u8</span><span class="op">;</span> <span class="dv">2</span>] <span class="op">{</span></span>
+<span id="cb2-84"><a></a>        [<span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>read_mask()<span class="op">,</span> <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>read_mask()]</span>
+<span id="cb2-85"><a></a>    <span class="op">}</span></span>
+<span id="cb2-86"><a></a></span>
+<span id="cb2-87"><a></a>    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> write_masks(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> mask1<span class="op">:</span> <span class="dt">u8</span><span class="op">,</span> mask2<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
+<span id="cb2-88"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>write_mask(mask1)<span class="op">;</span></span>
+<span id="cb2-89"><a></a>        <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>write_mask(mask2)<span class="op">;</span></span>
+<span id="cb2-90"><a></a>    <span class="op">}</span></span>
+<span id="cb2-91"><a></a></span>
+<span id="cb2-92"><a></a>    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> disable(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span>) <span class="op">{</span></span>
+<span id="cb2-93"><a></a>        <span class="kw">self</span><span class="op">.</span>write_masks(<span class="dt">u8</span><span class="pp">::</span><span class="cn">MAX</span><span class="op">,</span> <span class="dt">u8</span><span class="pp">::</span><span class="cn">MAX</span>)</span>
+<span id="cb2-94"><a></a>    <span class="op">}</span></span>
+<span id="cb2-95"><a></a></span>
+<span id="cb2-96"><a></a>    <span class="kw">pub</span> <span class="kw">fn</span> handles_interrupt(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> interrupt_id<span class="op">:</span> <span class="dt">u8</span>) <span class="op">-&gt;</span> <span class="dt">bool</span> <span class="op">{</span></span>
+<span id="cb2-97"><a></a>        <span class="kw">self</span><span class="op">.</span>pics<span class="op">.</span>iter()<span class="op">.</span>any(<span class="op">|</span>p<span class="op">|</span> p<span class="op">.</span>handles_interrupt(interrupt_id))</span>
+<span id="cb2-98"><a></a>    <span class="op">}</span></span>
+<span id="cb2-99"><a></a></span>
+<span id="cb2-100"><a></a>    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> notify_end_of_interrupt(<span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">self</span><span class="op">,</span> interrupt_id<span class="op">:</span> <span class="dt">u8</span>) <span class="op">{</span></span>
+<span id="cb2-101"><a></a>        <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>handles_interrupt(interrupt_id) <span class="op">{</span></span>
+<span id="cb2-102"><a></a>            <span class="cf">if</span> <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>handles_interrupt(interrupt_id) <span class="op">{</span></span>
+<span id="cb2-103"><a></a>                <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">1</span>]<span class="op">.</span>end_of_interrupt()<span class="op">;</span></span>
+<span id="cb2-104"><a></a>            <span class="op">}</span></span>
+<span id="cb2-105"><a></a>            <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>end_of_interrupt()<span class="op">;</span></span>
+<span id="cb2-106"><a></a>        <span class="op">}</span></span>
+<span id="cb2-107"><a></a>    <span class="op">}</span></span>
+<span id="cb2-108"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section></section>
+<section>
+<section id="todo" class="title-slide slide level1 center">
+<h1>TODO</h1>
+<p>The configuration happens by writing special values to the command and data ports of the PICs. Fortunately, there is already a crate called <a href="https://docs.rs/pic8259/0.10.1/pic8259/"><code>pic8259</code></a>, so we don’t need to write the initialization sequence ourselves. However, if you are interested in how it works, check out <a href="https://docs.rs/crate/pic8259/0.10.1/source/src/lib.rs">its source code</a>. It’s fairly small and well documented.</p>
+<p>To add the crate as a dependency, we add the following to our project:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb3-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb3-2"><a></a></span>
+<span id="cb3-3"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb3-4"><a></a><span class="dt">pic8259</span> <span class="op">=</span> <span class="st">"0.10.1"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The main abstraction provided by the crate is the <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html"><code>ChainedPics</code></a> struct that represents the primary/secondary PIC layout we saw above. It is designed to be used in the following way:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb4-2"><a></a></span>
+<span id="cb4-3"><a></a><span class="kw">use</span> <span class="pp">pic8259::</span>ChainedPics<span class="op">;</span></span>
+<span id="cb4-4"><a></a><span class="kw">use</span> spin<span class="op">;</span></span>
+<span id="cb4-5"><a></a></span>
+<span id="cb4-6"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_1_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
+<span id="cb4-7"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_2_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> PIC_1_OFFSET <span class="op">+</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb4-8"><a></a></span>
+<span id="cb4-9"><a></a><span class="kw">pub</span> <span class="kw">static</span> PICS<span class="op">:</span> <span class="pp">spin::</span>Mutex<span class="op">&lt;</span>ChainedPics<span class="op">&gt;</span> <span class="op">=</span></span>
+<span id="cb4-10"><a></a>    <span class="pp">spin::Mutex::</span>new(<span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">ChainedPics::</span>new(PIC_1_OFFSET<span class="op">,</span> PIC_2_OFFSET) <span class="op">}</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>As noted above, we’re setting the offsets for the PICs to the range 32–47. By wrapping the <code>ChainedPics</code> struct in a <code>Mutex</code>, we can get safe mutable access (through the <a href="https://docs.rs/spin/0.5.2/spin/struct.Mutex.html#method.lock"><code>lock</code> method</a>), which we need in the next step. The <code>ChainedPics::new</code> function is unsafe because wrong offsets could cause undefined behavior.</p>
+<p>We can now initialize the 8259 PIC in our <code>init</code> function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb5-4"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
+<span id="cb5-5"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
+<span id="cb5-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">interrupts::</span>PICS<span class="op">.</span>lock()<span class="op">.</span>initialize() <span class="op">};</span> <span class="co">// new</span></span>
+<span id="cb5-7"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We use the <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html#method.initialize"><code>initialize</code></a> function to perform the PIC initialization. Like the <code>ChainedPics::new</code> function, this function is also unsafe because it can cause undefined behavior if the PIC is misconfigured.</p>
+<p>If all goes well, we should continue to see the “It did not crash” message when executing <code>cargo run</code>.</p>
+</section>
+<section id="enabling-interrupts" class="slide level2">
+<h2>Enabling Interrupts</h2>
+<p>Until now, nothing happened because interrupts are still disabled in the CPU configuration. This means that the CPU does not listen to the interrupt controller at all, so no interrupts can reach the CPU. Let’s change that:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb6-2"><a></a></span>
+<span id="cb6-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
+<span id="cb6-4"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
+<span id="cb6-5"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
+<span id="cb6-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">interrupts::</span>PICS<span class="op">.</span>lock()<span class="op">.</span>initialize() <span class="op">};</span></span>
+<span id="cb6-7"><a></a>    <span class="pp">x86_64::instructions::interrupts::</span>enable()<span class="op">;</span>     <span class="co">// new</span></span>
+<span id="cb6-8"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>interrupts::enable</code> function of the <code>x86_64</code> crate executes the special <code>sti</code> instruction (“set interrupts”) to enable external interrupts. When we try <code>cargo run</code> now, we see that a double fault occurs:</p>
+
+<img data-src="qemu-hardware-timer-double-fault.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU printing <code>EXCEPTION: DOUBLE FAULT</code> because of hardware timer</p><p>The reason for this double fault is that the hardware timer (the <a href="https://en.wikipedia.org/wiki/Intel_8253">Intel 8253</a>, to be exact) is enabled by default, so we start receiving timer interrupts as soon as we enable interrupts. Since we didn’t define a handler function for it yet, our double fault handler is invoked.</p>
+</section>
+<section id="handling-timer-interrupts" class="slide level2">
+<h2>Handling Timer Interrupts</h2>
+<p>As we see from the graphic <a href="#/the-8259-pic">above</a>, the timer uses line 0 of the primary PIC. This means that it arrives at the CPU as interrupt 32 (0 + offset 32). Instead of hardcoding index 32, we store it in an <code>InterruptIndex</code> enum:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb7-2"><a></a></span>
+<span id="cb7-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
+<span id="cb7-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
+<span id="cb7-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
+<span id="cb7-6"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
+<span id="cb7-7"><a></a><span class="op">}</span></span>
+<span id="cb7-8"><a></a></span>
+<span id="cb7-9"><a></a><span class="kw">impl</span> InterruptIndex <span class="op">{</span></span>
+<span id="cb7-10"><a></a>    <span class="kw">fn</span> as_u8(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">u8</span> <span class="op">{</span></span>
+<span id="cb7-11"><a></a>        <span class="kw">self</span> <span class="kw">as</span> <span class="dt">u8</span></span>
+<span id="cb7-12"><a></a>    <span class="op">}</span></span>
+<span id="cb7-13"><a></a></span>
+<span id="cb7-14"><a></a>    <span class="kw">fn</span> as_usize(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">usize</span> <span class="op">{</span></span>
+<span id="cb7-15"><a></a>        <span class="dt">usize</span><span class="pp">::</span>from(<span class="kw">self</span><span class="op">.</span>as_u8())</span>
+<span id="cb7-16"><a></a>    <span class="op">}</span></span>
+<span id="cb7-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The enum is a <a href="https://doc.rust-lang.org/reference/items/enumerations.html#custom-discriminant-values-for-fieldless-enumerations">C-like enum</a> so that we can directly specify the index for each variant. The <code>repr(u8)</code> attribute specifies that each variant is represented as a <code>u8</code>. We will add more variants for other interrupts in the future.</p>
+<p>Now we can add a handler function for the timer interrupt:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb8-2"><a></a></span>
+<span id="cb8-3"><a></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>print<span class="op">;</span></span>
+<span id="cb8-4"><a></a></span>
+<span id="cb8-5"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb8-6"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb8-7"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb8-8"><a></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb8-9"><a></a>        […]</span>
+<span id="cb8-10"><a></a>        idt[<span class="pp">InterruptIndex::</span>Timer<span class="op">.</span>as_usize()]</span>
+<span id="cb8-11"><a></a>            <span class="op">.</span>set_handler_fn(timer_interrupt_handler)<span class="op">;</span> <span class="co">// new</span></span>
+<span id="cb8-12"><a></a></span>
+<span id="cb8-13"><a></a>        idt</span>
+<span id="cb8-14"><a></a>    <span class="op">};</span></span>
+<span id="cb8-15"><a></a><span class="op">}</span></span>
+<span id="cb8-16"><a></a></span>
+<span id="cb8-17"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_interrupt_handler(</span>
+<span id="cb8-18"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb8-19"><a></a><span class="op">{</span></span>
+<span id="cb8-20"><a></a>    <span class="pp">print!</span>(<span class="st">"."</span>)<span class="op">;</span></span>
+<span id="cb8-21"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Our <code>timer_interrupt_handler</code> has the same signature as our exception handlers, because the CPU reacts identically to exceptions and external interrupts (the only difference is that some exceptions push an error code). The <a href="https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html"><code>InterruptDescriptorTable</code></a> struct implements the <a href="https://doc.rust-lang.org/core/ops/trait.IndexMut.html"><code>IndexMut</code></a> trait, so we can access individual entries through array indexing syntax.</p>
+<p>In our timer interrupt handler, we print a dot to the screen. As the timer interrupt happens periodically, we would expect to see a dot appearing on each timer tick. However, when we run it, we see that only a single dot is printed:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="qemu-single-dot-printed.png"></p>
+<figcaption>QEMU printing only a single dot for hardware timer</figcaption>
+</figure>
+</div>
+<h3 id="end-of-interrupt">End of Interrupt</h3>
+<p>The reason is that the PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler. This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt. So the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.</p>
+<p>To send the EOI, we use our static <code>PICS</code> struct again:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb9-2"><a></a></span>
+<span id="cb9-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_interrupt_handler(</span>
+<span id="cb9-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb9-5"><a></a><span class="op">{</span></span>
+<span id="cb9-6"><a></a>    <span class="pp">print!</span>(<span class="st">"."</span>)<span class="op">;</span></span>
+<span id="cb9-7"><a></a></span>
+<span id="cb9-8"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb9-9"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb9-10"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Timer<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb9-11"><a></a>    <span class="op">}</span></span>
+<span id="cb9-12"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>notify_end_of_interrupt</code> figures out whether the primary or secondary PIC sent the interrupt and then uses the <code>command</code> and <code>data</code> ports to send an EOI signal to the respective controllers. If the secondary PIC sent the interrupt, both PICs need to be notified because the secondary PIC is connected to an input line of the primary PIC.</p>
+<p>We need to be careful to use the correct interrupt vector number, otherwise we could accidentally delete an important unsent interrupt or cause our system to hang. This is the reason that the function is unsafe.</p>
+<p>When we now execute <code>cargo run</code> we see dots periodically appearing on the screen:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="qemu-hardware-timer-dots.gif"></p>
+<figcaption>QEMU printing consecutive dots showing the hardware timer</figcaption>
+</figure>
+</div>
+<h3 id="configuring-the-timer">Configuring the Timer</h3>
+<p>The hardware timer that we use is called the <em>Programmable Interval Timer</em>, or PIT, for short. Like the name says, it is possible to configure the interval between two interrupts. We won’t go into details here because we will switch to the <a href="https://wiki.osdev.org/APIC_timer">APIC timer</a> soon, but the OSDev wiki has an extensive article about the <a href="https://wiki.osdev.org/Programmable_Interval_Timer">configuring the PIT</a>.</p>
+</section>
+<section id="deadlocks" class="slide level2">
+<h2>Deadlocks</h2>
+<p>We now have a form of concurrency in our kernel: The timer interrupts occur asynchronously, so they can interrupt our <code>_start</code> function at any time. Fortunately, Rust’s ownership system prevents many types of concurrency-related bugs at compile time. One notable exception is deadlocks. Deadlocks occur if a thread tries to acquire a lock that will never become free. Thus, the thread hangs indefinitely.</p>
+<p>We can already provoke a deadlock in our kernel. Remember, our <code>println</code> macro calls the <code>vga_buffer::_print</code> function, which <a href="@/edition-2/posts/03-vga-text-buffer/index.md#spinlocks">locks a global <code>WRITER</code></a> using a spinlock:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb10-2"><a></a></span>
+<span id="cb10-3"><a></a>[…]</span>
+<span id="cb10-4"><a></a></span>
+<span id="cb10-5"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
+<span id="cb10-6"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
+<span id="cb10-7"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
+<span id="cb10-8"><a></a>    WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb10-9"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It locks the <code>WRITER</code>, calls <code>write_fmt</code> on it, and implicitly unlocks it at the end of the function. Now imagine that an interrupt occurs while the <code>WRITER</code> is locked and the interrupt handler tries to print something too:</p>
+<table class="caption-top">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 28%">
+<col style="width: 61%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Timestep</th>
+<th>_start</th>
+<th>interrupt_handler</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>calls <code>println!</code></td>
+<td>&nbsp;</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td><code>print</code> locks <code>WRITER</code></td>
+<td>&nbsp;</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td></td>
+<td><strong>interrupt occurs</strong>, handler begins to run</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td></td>
+<td>calls <code>println!</code></td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td></td>
+<td><code>print</code> tries to lock <code>WRITER</code> (already locked)</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td></td>
+<td><code>print</code> tries to lock <code>WRITER</code> (already locked)</td>
+</tr>
+<tr class="odd">
+<td>…</td>
+<td></td>
+<td>…</td>
+</tr>
+<tr class="even">
+<td><em>never</em></td>
+<td><em>unlock <code>WRITER</code></em></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The <code>WRITER</code> is locked, so the interrupt handler waits until it becomes free. But this never happens, because the <code>_start</code> function only continues to run after the interrupt handler returns. Thus, the entire system hangs.</p>
+<h3 id="provoking-a-deadlock">Provoking a Deadlock</h3>
+<p>We can easily provoke such a deadlock in our kernel by printing something in the loop at the end of our <code>_start</code> function:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb11-2"><a></a></span>
+<span id="cb11-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb11-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb11-5"><a></a>    […]</span>
+<span id="cb11-6"><a></a>    <span class="cf">loop</span> <span class="op">{</span></span>
+<span id="cb11-7"><a></a>        <span class="kw">use</span> <span class="pp">blog_os::</span>print<span class="op">;</span></span>
+<span id="cb11-8"><a></a>        <span class="pp">print!</span>(<span class="st">"-"</span>)<span class="op">;</span>        <span class="co">// new</span></span>
+<span id="cb11-9"><a></a>    <span class="op">}</span></span>
+<span id="cb11-10"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When we run it in QEMU, we get an output of the form:</p>
+
+<img data-src="./qemu-deadlock.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU output with many rows of hyphens and no dots</p><p>We see that only a limited number of hyphens are printed until the first timer interrupt occurs. Then the system hangs because the timer interrupt handler deadlocks when it tries to print a dot. This is the reason that we see no dots in the above output.</p>
+<p>The actual number of hyphens varies between runs because the timer interrupt occurs asynchronously. This non-determinism is what makes concurrency-related bugs so difficult to debug.</p>
+<h3 id="fixing-the-deadlock">Fixing the Deadlock</h3>
+<p>To avoid this deadlock, we can disable interrupts as long as the <code>Mutex</code> is locked:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb12-2"><a></a></span>
+<span id="cb12-3"><a></a><span class="co">/// Prints the given formatted string to the VGA text buffer</span></span>
+<span id="cb12-4"><a></a><span class="co">/// through the global `WRITER` instance.</span></span>
+<span id="cb12-5"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
+<span id="cb12-6"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
+<span id="cb12-7"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
+<span id="cb12-8"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::</span>interrupts<span class="op">;</span>   <span class="co">// new</span></span>
+<span id="cb12-9"><a></a></span>
+<span id="cb12-10"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span>     <span class="co">// new</span></span>
+<span id="cb12-11"><a></a>        WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb12-12"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb12-13"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/interrupts/fn.without_interrupts.html"><code>without_interrupts</code></a> function takes a <a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closure</a> and executes it in an interrupt-free environment. We use it to ensure that no interrupt can occur as long as the <code>Mutex</code> is locked. When we run our kernel now, we see that it keeps running without hanging. (We still don’t notice any dots, but this is because they’re scrolling by too fast. Try to slow down the printing, e.g., by putting a <code>for _ in 0..10000 {}</code> inside the loop.)</p>
+<p>We can apply the same change to our serial printing function to ensure that no deadlocks occur with it either:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a></a><span class="co">// in src/serial.rs</span></span>
+<span id="cb13-2"><a></a></span>
+<span id="cb13-3"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
+<span id="cb13-4"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">::core::fmt::</span>Arguments) <span class="op">{</span></span>
+<span id="cb13-5"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
+<span id="cb13-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::</span>interrupts<span class="op">;</span>       <span class="co">// new</span></span>
+<span id="cb13-7"><a></a></span>
+<span id="cb13-8"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span>         <span class="co">// new</span></span>
+<span id="cb13-9"><a></a>        SERIAL1</span>
+<span id="cb13-10"><a></a>            <span class="op">.</span>lock()</span>
+<span id="cb13-11"><a></a>            <span class="op">.</span>write_fmt(args)</span>
+<span id="cb13-12"><a></a>            <span class="op">.</span>expect(<span class="st">"Printing to serial failed"</span>)<span class="op">;</span></span>
+<span id="cb13-13"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb13-14"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Note that disabling interrupts shouldn’t be a general solution. The problem is that it increases the worst-case interrupt latency, i.e., the time until the system reacts to an interrupt. Therefore, interrupts should only be disabled for a very short time.</p>
+</section>
+<section id="fixing-a-race-condition" class="slide level2">
+<h2>Fixing a Race Condition</h2>
+<p>If you run <code>cargo test</code>, you might see the <code>test_println_output</code> test failing:</p>
+<pre><code>&gt; cargo test --lib
+[…]
+Running 4 tests
+test_breakpoint_exception...[ok]
+test_println... [ok]
+test_println_many... [ok]
+test_println_output... [failed]
+
+Error: panicked at 'assertion failed: `(left == right)`
+  left: `'.'`,
+ right: `'S'`', src/vga_buffer.rs:205:9</code></pre>
+<p>The reason is a <em>race condition</em> between the test and our timer handler. Remember, the test looks like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb15-2"><a></a></span>
+<span id="cb15-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb15-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
+<span id="cb15-5"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Some test string that fits on a single line"</span><span class="op">;</span></span>
+<span id="cb15-6"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> s)<span class="op">;</span></span>
+<span id="cb15-7"><a></a>    <span class="cf">for</span> (i<span class="op">,</span> c) <span class="kw">in</span> s<span class="op">.</span>chars()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb15-8"><a></a>        <span class="kw">let</span> screen_char <span class="op">=</span> WRITER<span class="op">.</span>lock()<span class="op">.</span>buffer<span class="op">.</span>chars[BUFFER_HEIGHT <span class="op">-</span> <span class="dv">2</span>][i]<span class="op">.</span>read()<span class="op">;</span></span>
+<span id="cb15-9"><a></a>        <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
+<span id="cb15-10"><a></a>    <span class="op">}</span></span>
+<span id="cb15-11"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The test prints a string to the VGA buffer and then checks the output by manually iterating over the <code>buffer_chars</code> array. The race condition occurs because the timer interrupt handler might run between the <code>println</code> and the reading of the screen characters. Note that this isn’t a dangerous <em>data race</em>, which Rust completely prevents at compile time. See the <a href="https://doc.rust-lang.org/nomicon/races.html"><em>Rustonomicon</em></a> for details.</p>
+<p>To fix this, we need to keep the <code>WRITER</code> locked for the complete duration of the test, so that the timer handler can’t write a <code>.</code> to the screen in between. The fixed test looks like this:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<span id="cb16-2"><a></a></span>
+<span id="cb16-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
+<span id="cb16-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
+<span id="cb16-5"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
+<span id="cb16-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::</span>interrupts<span class="op">;</span></span>
+<span id="cb16-7"><a></a></span>
+<span id="cb16-8"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Some test string that fits on a single line"</span><span class="op">;</span></span>
+<span id="cb16-9"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span></span>
+<span id="cb16-10"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> writer <span class="op">=</span> WRITER<span class="op">.</span>lock()<span class="op">;</span></span>
+<span id="cb16-11"><a></a>        <span class="pp">writeln!</span>(writer<span class="op">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">{}"</span><span class="op">,</span> s)<span class="op">.</span>expect(<span class="st">"writeln failed"</span>)<span class="op">;</span></span>
+<span id="cb16-12"><a></a>        <span class="cf">for</span> (i<span class="op">,</span> c) <span class="kw">in</span> s<span class="op">.</span>chars()<span class="op">.</span>enumerate() <span class="op">{</span></span>
+<span id="cb16-13"><a></a>            <span class="kw">let</span> screen_char <span class="op">=</span> writer<span class="op">.</span>buffer<span class="op">.</span>chars[BUFFER_HEIGHT <span class="op">-</span> <span class="dv">2</span>][i]<span class="op">.</span>read()<span class="op">;</span></span>
+<span id="cb16-14"><a></a>            <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
+<span id="cb16-15"><a></a>        <span class="op">}</span></span>
+<span id="cb16-16"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
+<span id="cb16-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We performed the following changes:</p>
+<ul>
+<li>We keep the writer locked for the complete test by using the <code>lock()</code> method explicitly. Instead of <code>println</code>, we use the <a href="https://doc.rust-lang.org/core/macro.writeln.html"><code>writeln</code></a> macro that allows printing to an already locked writer.</li>
+<li>To avoid another deadlock, we disable interrupts for the test’s duration. Otherwise, the test might get interrupted while the writer is still locked.</li>
+<li>Since the timer interrupt handler can still run before the test, we print an additional newline <code>\n</code> before printing the string <code>s</code>. This way, we avoid test failure when the timer handler has already printed some <code>.</code> characters to the current line.</li>
+</ul>
+<p>With the above changes, <code>cargo test</code> now deterministically succeeds again.</p>
+<p>This was a very harmless race condition that only caused a test failure. As you can imagine, other race conditions can be much more difficult to debug due to their non-deterministic nature. Luckily, Rust prevents us from data races, which are the most serious class of race conditions since they can cause all kinds of undefined behavior, including system crashes and silent memory corruptions.</p>
+</section>
+<section id="the-hlt-instruction" class="slide level2">
+<h2>The <code>hlt</code> Instruction</h2>
+<p>Until now, we used a simple empty loop statement at the end of our <code>_start</code> and <code>panic</code> functions. This causes the CPU to spin endlessly, and thus works as expected. But it is also very inefficient, because the CPU continues to run at full speed even though there’s no work to do. You can see this problem in your task manager when you run your kernel: The QEMU process needs close to 100% CPU the whole time.</p>
+<p>What we really want to do is to halt the CPU until the next interrupt arrives. This allows the CPU to enter a sleep state in which it consumes much less energy. The <a href="https://en.wikipedia.org/wiki/HLT_(x86_instruction)"><code>hlt</code> instruction</a> does exactly that. Let’s use this instruction to create an energy-efficient endless loop:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb17-2"><a></a></span>
+<span id="cb17-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> hlt_loop() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb17-4"><a></a>    <span class="cf">loop</span> <span class="op">{</span></span>
+<span id="cb17-5"><a></a>        <span class="pp">x86_64::instructions::</span>hlt()<span class="op">;</span></span>
+<span id="cb17-6"><a></a>    <span class="op">}</span></span>
+<span id="cb17-7"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The <code>instructions::hlt</code> function is just a <a href="https://github.com/rust-osdev/x86_64/blob/5e8e218381c5205f5777cb50da3ecac5d7e3b1ab/src/instructions/mod.rs#L16-L22">thin wrapper</a> around the assembly instruction. It is safe because there’s no way it can compromise memory safety.</p>
+<p>We can now use this <code>hlt_loop</code> instead of the endless loops in our <code>_start</code> and <code>panic</code> functions:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="co">// in src/main.rs</span></span>
+<span id="cb18-2"><a></a></span>
+<span id="cb18-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb18-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-5"><a></a>    […]</span>
+<span id="cb18-6"><a></a></span>
+<span id="cb18-7"><a></a>    <span class="pp">println!</span>(<span class="st">"It did not crash!"</span>)<span class="op">;</span></span>
+<span id="cb18-8"><a></a>    <span class="pp">blog_os::</span>hlt_loop()<span class="op">;</span>            <span class="co">// new</span></span>
+<span id="cb18-9"><a></a><span class="op">}</span></span>
+<span id="cb18-10"><a></a></span>
+<span id="cb18-11"><a></a></span>
+<span id="cb18-12"><a></a><span class="at">#[</span>cfg<span class="at">(</span>not<span class="at">(</span>test<span class="at">))]</span></span>
+<span id="cb18-13"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb18-14"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-15"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb18-16"><a></a>    <span class="pp">blog_os::</span>hlt_loop()<span class="op">;</span>            <span class="co">// new</span></span>
+<span id="cb18-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Let’s update our <code>lib.rs</code> as well:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<span id="cb19-2"><a></a></span>
+<span id="cb19-3"><a></a><span class="co">/// Entry point for `cargo test`</span></span>
+<span id="cb19-4"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
+<span id="cb19-5"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb19-6"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb19-7"><a></a>    init()<span class="op">;</span></span>
+<span id="cb19-8"><a></a>    test_main()<span class="op">;</span></span>
+<span id="cb19-9"><a></a>    hlt_loop()<span class="op">;</span>         <span class="co">// new</span></span>
+<span id="cb19-10"><a></a><span class="op">}</span></span>
+<span id="cb19-11"><a></a></span>
+<span id="cb19-12"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_panic_handler(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb19-13"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[failed]</span><span class="sc">\n</span><span class="st">"</span>)<span class="op">;</span></span>
+<span id="cb19-14"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Error: {}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> info)<span class="op">;</span></span>
+<span id="cb19-15"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
+<span id="cb19-16"><a></a>    hlt_loop()<span class="op">;</span>         <span class="co">// new</span></span>
+<span id="cb19-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>When we run our kernel now in QEMU, we see a much lower CPU usage.</p>
+</section>
+<section id="keyboard-input" class="slide level2">
+<h2>Keyboard Input</h2>
+<p>Now that we are able to handle interrupts from external devices, we are finally able to add support for keyboard input. This will allow us to interact with our kernel for the first time.</p>
+
+<p>Like the hardware timer, the keyboard controller is already enabled by default. So when you press a key, the keyboard controller sends an interrupt to the PIC, which forwards it to the CPU. The CPU looks for a handler function in the IDT, but the corresponding entry is empty. Therefore, a double fault occurs.</p>
+<p>So let’s add a handler function for the keyboard interrupt. It’s quite similar to how we defined the handler for the timer interrupt; it just uses a different interrupt number:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb20-2"><a></a></span>
+<span id="cb20-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
+<span id="cb20-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
+<span id="cb20-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
+<span id="cb20-6"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
+<span id="cb20-7"><a></a>    Keyboard<span class="op">,</span> <span class="co">// new</span></span>
+<span id="cb20-8"><a></a><span class="op">}</span></span>
+<span id="cb20-9"><a></a></span>
+<span id="cb20-10"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb20-11"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb20-12"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb20-13"><a></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb20-14"><a></a>        […]</span>
+<span id="cb20-15"><a></a>        <span class="co">// new</span></span>
+<span id="cb20-16"><a></a>        idt[<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_usize()]</span>
+<span id="cb20-17"><a></a>            <span class="op">.</span>set_handler_fn(keyboard_interrupt_handler)<span class="op">;</span></span>
+<span id="cb20-18"><a></a></span>
+<span id="cb20-19"><a></a>        idt</span>
+<span id="cb20-20"><a></a>    <span class="op">};</span></span>
+<span id="cb20-21"><a></a><span class="op">}</span></span>
+<span id="cb20-22"><a></a></span>
+<span id="cb20-23"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb20-24"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb20-25"><a></a><span class="op">{</span></span>
+<span id="cb20-26"><a></a>    <span class="pp">print!</span>(<span class="st">"k"</span>)<span class="op">;</span></span>
+<span id="cb20-27"><a></a></span>
+<span id="cb20-28"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb20-29"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb20-30"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb20-31"><a></a>    <span class="op">}</span></span>
+<span id="cb20-32"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>As we see from the graphic <a href="#/the-8259-pic">above</a>, the keyboard uses line 1 of the primary PIC. This means that it arrives at the CPU as interrupt 33 (1 + offset 32). We add this index as a new <code>Keyboard</code> variant to the <code>InterruptIndex</code> enum. We don’t need to specify the value explicitly, since it defaults to the previous value plus one, which is also 33. In the interrupt handler, we print a <code>k</code> and send the end of interrupt signal to the interrupt controller.</p>
+<p>We now see that a <code>k</code> appears on the screen when we press a key. However, this only works for the first key we press. Even if we continue to press keys, no more <code>k</code>s appear on the screen. This is because the keyboard controller won’t send another interrupt until we have read the so-called <em>scancode</em> of the pressed key.</p>
+<h3 id="reading-the-scancodes">Reading the Scancodes</h3>
+<p>To find out <em>which</em> key was pressed, we need to query the keyboard controller. We do this by reading from the data port of the PS/2 controller, which is the <a href="@/edition-2/posts/04-testing/index.md#i-o-ports">I/O port</a> with the number <code>0x60</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb21-2"><a></a></span>
+<span id="cb21-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb21-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb21-5"><a></a><span class="op">{</span></span>
+<span id="cb21-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb21-7"><a></a></span>
+<span id="cb21-8"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
+<span id="cb21-9"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
+<span id="cb21-10"><a></a>    <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> scancode)<span class="op">;</span></span>
+<span id="cb21-11"><a></a></span>
+<span id="cb21-12"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb21-13"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb21-14"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb21-15"><a></a>    <span class="op">}</span></span>
+<span id="cb21-16"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We use the <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/port/struct.Port.html"><code>Port</code></a> type of the <code>x86_64</code> crate to read a byte from the keyboard’s data port. This byte is called the <a href="https://en.wikipedia.org/wiki/Scancode"><em>scancode</em></a> and it represents the key press/release. We don’t do anything with the scancode yet, other than print it to the screen:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="qemu-printing-scancodes.gif"></p>
+<figcaption>QEMU printing scancodes to the screen when keys are pressed</figcaption>
+</figure>
+</div>
+<p>The above image shows me slowly typing “123”. We see that adjacent keys have adjacent scancodes and that pressing a key causes a different scancode than releasing it. But how do we translate the scancodes to the actual key actions exactly?</p>
+<h3 id="interpreting-the-scancodes">Interpreting the Scancodes</h3>
+<p>There are three different standards for the mapping between scancodes and keys, the so-called <em>scancode sets</em>. All three go back to the keyboards of early IBM computers: the <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT">IBM XT</a>, the <a href="https://en.wikipedia.org/wiki/IBM_3270_PC">IBM 3270 PC</a>, and the <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer/AT">IBM AT</a>. Later computers fortunately did not continue the trend of defining new scancode sets, but rather emulated the existing sets and extended them. Today, most keyboards can be configured to emulate any of the three sets.</p>
+<p>By default, PS/2 keyboards emulate scancode set 1 (“XT”). In this set, the lower 7 bits of a scancode byte define the key, and the most significant bit defines whether it’s a press (“0”) or a release (“1”). Keys that were not present on the original <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT">IBM XT</a> keyboard, such as the enter key on the keypad, generate two scancodes in succession: a <code>0xe0</code> escape byte and then a byte representing the key. For a list of all set 1 scancodes and their corresponding keys, check out the <a href="https://wiki.osdev.org/Keyboard#Scan_Code_Set_1">OSDev Wiki</a>.</p>
+<p>To translate the scancodes to keys, we can use a <code>match</code> statement:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb22-2"><a></a></span>
+<span id="cb22-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb22-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb22-5"><a></a><span class="op">{</span></span>
+<span id="cb22-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb22-7"><a></a></span>
+<span id="cb22-8"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
+<span id="cb22-9"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
+<span id="cb22-10"><a></a></span>
+<span id="cb22-11"><a></a>    <span class="co">// new</span></span>
+<span id="cb22-12"><a></a>    <span class="kw">let</span> key <span class="op">=</span> <span class="cf">match</span> scancode <span class="op">{</span></span>
+<span id="cb22-13"><a></a>        <span class="dv">0x02</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'1'</span>)<span class="op">,</span></span>
+<span id="cb22-14"><a></a>        <span class="dv">0x03</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'2'</span>)<span class="op">,</span></span>
+<span id="cb22-15"><a></a>        <span class="dv">0x04</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'3'</span>)<span class="op">,</span></span>
+<span id="cb22-16"><a></a>        <span class="dv">0x05</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'4'</span>)<span class="op">,</span></span>
+<span id="cb22-17"><a></a>        <span class="dv">0x06</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'5'</span>)<span class="op">,</span></span>
+<span id="cb22-18"><a></a>        <span class="dv">0x07</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'6'</span>)<span class="op">,</span></span>
+<span id="cb22-19"><a></a>        <span class="dv">0x08</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'7'</span>)<span class="op">,</span></span>
+<span id="cb22-20"><a></a>        <span class="dv">0x09</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'8'</span>)<span class="op">,</span></span>
+<span id="cb22-21"><a></a>        <span class="dv">0x0a</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'9'</span>)<span class="op">,</span></span>
+<span id="cb22-22"><a></a>        <span class="dv">0x0b</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'0'</span>)<span class="op">,</span></span>
+<span id="cb22-23"><a></a>        _ <span class="op">=&gt;</span> <span class="cn">None</span><span class="op">,</span></span>
+<span id="cb22-24"><a></a>    <span class="op">};</span></span>
+<span id="cb22-25"><a></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(key) <span class="op">=</span> key <span class="op">{</span></span>
+<span id="cb22-26"><a></a>        <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> key)<span class="op">;</span></span>
+<span id="cb22-27"><a></a>    <span class="op">}</span></span>
+<span id="cb22-28"><a></a></span>
+<span id="cb22-29"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb22-30"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb22-31"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb22-32"><a></a>    <span class="op">}</span></span>
+<span id="cb22-33"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The above code translates keypresses of the number keys 0-9 and ignores all other keys. It uses a <a href="https://doc.rust-lang.org/book/ch06-02-match.html">match</a> statement to assign a character or <code>None</code> to each scancode. It then uses <a href="https://doc.rust-lang.org/book/ch19-01-all-the-places-for-patterns.html#conditional-if-let-expressions"><code>if let</code></a> to destructure the optional <code>key</code>. By using the same variable name <code>key</code> in the pattern, we <a href="https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html#shadowing">shadow</a> the previous declaration, which is a common pattern for destructuring <code>Option</code> types in Rust.</p>
+<p>Now we can write numbers:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="qemu-printing-numbers.gif"></p>
+<figcaption>QEMU printing numbers to the screen</figcaption>
+</figure>
+</div>
+<p>Translating the other keys works in the same way. Fortunately, there is a crate named <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/"><code>pc-keyboard</code></a> for translating scancodes of scancode sets 1 and 2, so we don’t have to implement this ourselves. To use the crate, we add it to our <code>Cargo.toml</code> and import it in our <code>lib.rs</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb23-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb23-2"><a></a></span>
+<span id="cb23-3"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb23-4"><a></a><span class="dt">pc-keyboard</span> <span class="op">=</span> <span class="st">"0.7.0"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now we can use this crate to rewrite our <code>keyboard_interrupt_handler</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a></a><span class="co">// in/src/interrupts.rs</span></span>
+<span id="cb24-2"><a></a></span>
+<span id="cb24-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb24-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb24-5"><a></a><span class="op">{</span></span>
+<span id="cb24-6"><a></a>    <span class="kw">use</span> <span class="pp">pc_keyboard::</span><span class="op">{</span>layouts<span class="op">,</span> DecodedKey<span class="op">,</span> HandleControl<span class="op">,</span> Keyboard<span class="op">,</span> ScancodeSet1<span class="op">};</span></span>
+<span id="cb24-7"><a></a>    <span class="kw">use</span> <span class="pp">spin::</span>Mutex<span class="op">;</span></span>
+<span id="cb24-8"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb24-9"><a></a></span>
+<span id="cb24-10"><a></a>    <span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb24-11"><a></a>        <span class="kw">static</span> <span class="kw">ref</span> KEYBOARD<span class="op">:</span> Mutex<span class="op">&lt;</span>Keyboard<span class="op">&lt;</span><span class="pp">layouts::</span>Us104Key<span class="op">,</span> ScancodeSet1<span class="op">&gt;&gt;</span> <span class="op">=</span></span>
+<span id="cb24-12"><a></a>            <span class="pp">Mutex::</span>new(<span class="pp">Keyboard::</span>new(<span class="pp">ScancodeSet1::</span>new()<span class="op">,</span></span>
+<span id="cb24-13"><a></a>                <span class="pp">layouts::</span>Us104Key<span class="op">,</span> <span class="pp">HandleControl::</span>Ignore)</span>
+<span id="cb24-14"><a></a>            )<span class="op">;</span></span>
+<span id="cb24-15"><a></a>    <span class="op">}</span></span>
+<span id="cb24-16"><a></a></span>
+<span id="cb24-17"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> keyboard <span class="op">=</span> KEYBOARD<span class="op">.</span>lock()<span class="op">;</span></span>
+<span id="cb24-18"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
+<span id="cb24-19"><a></a></span>
+<span id="cb24-20"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
+<span id="cb24-21"><a></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Ok</span>(<span class="cn">Some</span>(key_event)) <span class="op">=</span> keyboard<span class="op">.</span>add_byte(scancode) <span class="op">{</span></span>
+<span id="cb24-22"><a></a>        <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(key) <span class="op">=</span> keyboard<span class="op">.</span>process_keyevent(key_event) <span class="op">{</span></span>
+<span id="cb24-23"><a></a>            <span class="cf">match</span> key <span class="op">{</span></span>
+<span id="cb24-24"><a></a>                <span class="pp">DecodedKey::</span>Unicode(character) <span class="op">=&gt;</span> <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> character)<span class="op">,</span></span>
+<span id="cb24-25"><a></a>                <span class="pp">DecodedKey::</span>RawKey(key) <span class="op">=&gt;</span> <span class="pp">print!</span>(<span class="st">"{:?}"</span><span class="op">,</span> key)<span class="op">,</span></span>
+<span id="cb24-26"><a></a>            <span class="op">}</span></span>
+<span id="cb24-27"><a></a>        <span class="op">}</span></span>
+<span id="cb24-28"><a></a>    <span class="op">}</span></span>
+<span id="cb24-29"><a></a></span>
+<span id="cb24-30"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb24-31"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb24-32"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb24-33"><a></a>    <span class="op">}</span></span>
+<span id="cb24-34"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We use the <code>lazy_static</code> macro to create a static <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html"><code>Keyboard</code></a> object protected by a Mutex. We initialize the <code>Keyboard</code> with a US keyboard layout and the scancode set 1. The <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/enum.HandleControl.html"><code>HandleControl</code></a> parameter allows to map <code>ctrl+[a-z]</code> to the Unicode characters <code>U+0001</code> through <code>U+001A</code>. We don’t want to do that, so we use the <code>Ignore</code> option to handle the <code>ctrl</code> like normal keys.</p>
+<p>On each interrupt, we lock the Mutex, read the scancode from the keyboard controller, and pass it to the <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html#method.add_byte"><code>add_byte</code></a> method, which translates the scancode into an <code>Option&lt;KeyEvent&gt;</code>. The <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.KeyEvent.html"><code>KeyEvent</code></a> contains the key which caused the event and whether it was a press or release event.</p>
+<p>To interpret this key event, we pass it to the <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html#method.process_keyevent"><code>process_keyevent</code></a> method, which translates the key event to a character, if possible. For example, it translates a press event of the <code>A</code> key to either a lowercase <code>a</code> character or an uppercase <code>A</code> character, depending on whether the shift key was pressed.</p>
+<p>With this modified interrupt handler, we can now write text:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="qemu-typing.gif"></p>
+<figcaption>Typing “Hello World” in QEMU</figcaption>
+</figure>
+</div>
+<h3 id="configuring-the-keyboard">Configuring the Keyboard</h3>
+<p>It’s possible to configure some aspects of a PS/2 keyboard, for example, which scancode set it should use. We won’t cover it here because this post is already long enough, but the OSDev Wiki has an overview of possible <a href="https://wiki.osdev.org/PS/2_Keyboard#Commands">configuration commands</a>.</p>
+<aside><div>
+<p>Note that we only describe how to handle <a href="https://en.wikipedia.org/wiki/PS/2_port">PS/2</a> keyboards here, not USB keyboards. However, the mainboard emulates USB keyboards as PS/2 devices to support older software, so we can safely ignore USB keyboards until we have USB support in our kernel.</p>
+</div></aside></section>
+<section id="summary" class="slide level2">
+<h2>Summary</h2>
+<p>This post explained how to enable and handle external interrupts. We learned about the 8259 PIC and its primary/secondary layout, the remapping of the interrupt numbers, and the “end of interrupt” signal. We implemented handlers for the hardware timer and the keyboard and learned about the <code>hlt</code> instruction, which halts the CPU until the next interrupt.</p>
+<p>Now we are able to interact with our kernel and have some fundamental building blocks for creating a small shell or simple games.</p>
+</section>
+<section id="whats-next" class="slide level2">
+<h2>What’s next?</h2>
+<p>Timer interrupts are essential for an operating system because they provide a way to periodically interrupt the running process and let the kernel regain control. The kernel can then switch to a different process and create the illusion of multiple processes running in parallel.</p>
+<p>But before we can create processes or threads, we need a way to allocate memory for them. The next posts will explore memory management to provide this fundamental building block.</p>
+
+
+</section></section>
+    </div>
+  <div class="quarto-auto-generated-content" style="display: none;">
+<div class="footer footer-default">
+<p><a href="index.html">Home</a></p>
+</div>
+</div></div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="site_libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="site_libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="site_libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="site_libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="site_libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="site_libs/revealjs/plugin/search/search.js"></script>
+  <script src="site_libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="site_libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'jumpToSlide': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.toggleScrollView(event)\"><kbd>r</kbd> Scroll View Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"5\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: 'c/t',
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    <script id="quarto-html-after-body" type="application/javascript">
+      window.document.addEventListener("DOMContentLoaded", function (event) {
+        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+        tabsets.forEach(function(tabset) {
+          const tabby = new Tabby('#' + tabset.id);
+        });
+        const isCodeAnnotation = (el) => {
+          for (const clz of el.classList) {
+            if (clz.startsWith('code-annotation-')) {                     
+              return true;
+            }
+          }
+          return false;
+        }
+        const onCopySuccess = function(e) {
+          // button target
+          const button = e.trigger;
+          // don't keep focus
+          button.blur();
+          // flash "checked"
+          button.classList.add('code-copy-button-checked');
+          var currentTitle = button.getAttribute("title");
+          button.setAttribute("title", "Copied!");
+          let tooltip;
+          if (window.bootstrap) {
+            button.setAttribute("data-bs-toggle", "tooltip");
+            button.setAttribute("data-bs-placement", "left");
+            button.setAttribute("data-bs-title", "Copied!");
+            tooltip = new bootstrap.Tooltip(button, 
+              { trigger: "manual", 
+                customClass: "code-copy-button-tooltip",
+                offset: [0, -8]});
+            tooltip.show();    
+          }
+          setTimeout(function() {
+            if (tooltip) {
+              tooltip.hide();
+              button.removeAttribute("data-bs-title");
+              button.removeAttribute("data-bs-toggle");
+              button.removeAttribute("data-bs-placement");
+            }
+            button.setAttribute("title", currentTitle);
+            button.classList.remove('code-copy-button-checked');
+          }, 1000);
+          // clear code selection
+          e.clearSelection();
+        }
+        const getTextToCopy = function(trigger) {
+          const outerScaffold = trigger.parentElement.cloneNode(true);
+          const codeEl = outerScaffold.querySelector('code');
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+          text: getTextToCopy
+        });
+        clipboard.on('success', onCopySuccess);
+        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+            text: getTextToCopy,
+            container: window.document.getElementById('quarto-embedded-source-code-modal')
+          });
+          clipboardModal.on('success', onCopySuccess);
+        }
+          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+          var mailtoRegex = new RegExp(/^mailto:/);
+            var filterRegex = new RegExp('/' + window.location.host + '/');
+          var isInternal = (href) => {
+              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+          }
+          // Inspect non-navigation links and adorn them if external
+         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+          for (var i=0; i<links.length; i++) {
+            const link = links[i];
+            if (!isInternal(link.href)) {
+              // undo the damage that might have been done by quarto-nav.js in the case of
+              // links that we want to consider external
+              if (link.dataset.originalHref !== undefined) {
+                link.href = link.dataset.originalHref;
+              }
+            }
+          }
+        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+          const config = {
+            allowHTML: true,
+            maxWidth: 500,
+            delay: 100,
+            arrow: false,
+            appendTo: function(el) {
+                return el.closest('section.slide') || el.parentElement;
+            },
+            interactive: true,
+            interactiveBorder: 10,
+            theme: 'light-border',
+            placement: 'bottom-start',
+          };
+          if (contentFn) {
+            config.content = contentFn;
+          }
+          if (onTriggerFn) {
+            config.onTrigger = onTriggerFn;
+          }
+          if (onUntriggerFn) {
+            config.onUntrigger = onUntriggerFn;
+          }
+            config['offset'] = [0,0];
+            config['maxWidth'] = 700;
+          window.tippy(el, config); 
+        }
+        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+        for (var i=0; i<noterefs.length; i++) {
+          const ref = noterefs[i];
+          tippyHover(ref, function() {
+            // use id or data attribute instead here
+            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+            try { href = new URL(href).hash; } catch {}
+            const id = href.replace(/^#\/?/, "");
+            const note = window.document.getElementById(id);
+            if (note) {
+              return note.innerHTML;
+            } else {
+              return "";
+            }
+          });
+        }
+        const findCites = (el) => {
+          const parentEl = el.parentElement;
+          if (parentEl) {
+            const cites = parentEl.dataset.cites;
+            if (cites) {
+              return {
+                el,
+                cites: cites.split(' ')
+              };
+            } else {
+              return findCites(el.parentElement)
+            }
+          } else {
+            return undefined;
+          }
+        };
+        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+        for (var i=0; i<bibliorefs.length; i++) {
+          const ref = bibliorefs[i];
+          const citeInfo = findCites(ref);
+          if (citeInfo) {
+            tippyHover(citeInfo.el, function() {
+              var popup = window.document.createElement('div');
+              citeInfo.cites.forEach(function(cite) {
+                var citeDiv = window.document.createElement('div');
+                citeDiv.classList.add('hanging-indent');
+                citeDiv.classList.add('csl-entry');
+                var biblioDiv = window.document.getElementById('ref-' + cite);
+                if (biblioDiv) {
+                  citeDiv.innerHTML = biblioDiv.innerHTML;
+                }
+                popup.appendChild(citeDiv);
+              });
+              return popup.innerHTML;
+            });
+          }
+        }
+      });
+      </script>
+    
+
+</body></html>
