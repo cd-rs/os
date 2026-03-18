@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.30">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -21,8 +21,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -64,17 +65,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./70_except.html" rel="next">
+<link href="./62_librs.html" rel="next">
 <link href="./61_serial.html" rel="prev">
-<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-40a160e28a8c0a8ad2fc184c8ba4238c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -106,7 +109,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-sidebar floating">
+<body class="nav-sidebar floating quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -129,9 +132,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
-    <div class="sidebar-title mb-0 py-0">
-      <a href="./">OS in Rust</a> 
-    </div>
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
@@ -268,6 +270,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./62_librs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./70_except.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Exceptions</span></a>
   </div>
@@ -391,9 +399,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>These do not have to all be, and probably should not be, all in one test.</p>
 <p>Hint:</p>
 <details>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a>    <span class="co">// Set the first character in the first 3 lines to the line number</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a>    <span class="co">// Set the first character in the first 3 lines to the line number</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="pp">osirs::println!</span>(<span class="st">"{:081x}"</span><span class="op">,</span><span class="dv">1</span>)<span class="op">;</span></span>
-<span id="cb1-3"><a href="#cb1-3"></a>    <span class="pp">osirs::println!</span>(<span class="st">"{:x}"</span><span class="op">,</span><span class="dv">2</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3"></a>    <span class="pp">osirs::println!</span>(<span class="st">"{:x}"</span><span class="op">,</span><span class="dv">2</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </section>
 <section id="assessment" class="level2">
@@ -446,13 +454,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-with-filename-file">
 <pre><strong>src/lib.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb2" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
 <span id="cb2-3"><a href="#cb2-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
 <span id="cb2-4"><a href="#cb2-4"></a><span class="at">#![</span>test_runner<span class="at">(</span>_test_runner<span class="at">)]</span></span>
 <span id="cb2-5"><a href="#cb2-5"></a></span>
 <span id="cb2-6"><a href="#cb2-6"></a><span class="kw">pub</span> <span class="kw">mod</span> vga<span class="op">;</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">pub</span> <span class="kw">mod</span> serial<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-7"><a href="#cb2-7"></a><span class="kw">pub</span> <span class="kw">mod</span> serial<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>I expect you will need the following header in <code>src/main.rs</code></li>
@@ -461,12 +469,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-with-filename-file">
 <pre><strong>src/main.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb3" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
 <span id="cb3-2"><a href="#cb3-2"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
 <span id="cb3-3"><a href="#cb3-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
 <span id="cb3-4"><a href="#cb3-4"></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">osirs::</span>_test_runner<span class="at">)]</span></span>
 <span id="cb3-5"><a href="#cb3-5"></a></span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">mod</span> vga<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-6"><a href="#cb3-6"></a><span class="kw">mod</span> vga<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>Give some thought to the difference in test_runner specification therein.</li>
@@ -513,7 +521,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-with-filename-file">
 <pre><strong>tests/should_panic.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb4" data-filename="tests/should_panic.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="tests/should_panic.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
 <span id="cb4-4"><a href="#cb4-4"></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">osirs::</span>_test_runner<span class="at">)]</span></span>
@@ -534,7 +542,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-19"><a href="#cb4-19"></a>    <span class="pp">osirs::</span>_test_runner(<span class="op">&amp;</span>[<span class="op">&amp;</span>bad])<span class="op">;</span></span>
 <span id="cb4-20"><a href="#cb4-20"></a>    <span class="pp">osirs::</span>qemu_quit(<span class="pp">osirs::</span>QEMU_FAIL)<span class="op">;</span></span>
 <span id="cb4-21"><a href="#cb4-21"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb4-22"><a href="#cb4-22"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-22"><a href="#cb4-22"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <ul>
 <li>It also is just as reasonable to put all your <code>println</code> tests in <code>tests/println.rs</code>.
@@ -553,7 +561,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>Mine looks like this, you can expand it’s just big.</p>
 <details>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb5-1"><a href="#cb5-1"></a>    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb5-1"><a href="#cb5-1"></a>    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s</span>
 <span id="cb5-2"><a href="#cb5-2"></a>     Running unittests src/lib.rs (target/x86_64-osirs/debug/deps/osirs-97fff0361887fe8d)</span>
 <span id="cb5-3"><a href="#cb5-3"></a>Building bootloader</span>
 <span id="cb5-4"><a href="#cb5-4"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
@@ -580,7 +588,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-25"><a href="#cb5-25"></a></span>
 <span id="cb5-26"><a href="#cb5-26"></a>running 0 tests</span>
 <span id="cb5-27"><a href="#cb5-27"></a></span>
-<span id="cb5-28"><a href="#cb5-28"></a>test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-28"><a href="#cb5-28"></a>test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <p>It will be easy to tell if you your <code>tests/println.rs</code> doesn’t test for things that <code>println</code> isn’t supposed to do (this is a double negative). Simply test <em>my</em> <code>src/vga.rs</code>.</p>
 <details>
@@ -588,7 +596,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-with-filename-file">
 <pre><strong>src/vga.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb6" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">static</span> <span class="kw">mut</span> LATEST<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-filename="src/vga.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">static</span> <span class="kw">mut</span> LATEST<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a><span class="kw">const</span> MMIO<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0xb8000</span><span class="op">;</span></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="kw">const</span> COLOR<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0xF</span><span class="op">;</span></span>
 <span id="cb6-4"><a href="#cb6-4"></a></span>
@@ -667,7 +675,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-77"><a href="#cb6-77"></a><span class="pp">macro_rules!</span> println <span class="op">{</span></span>
 <span id="cb6-78"><a href="#cb6-78"></a>    () <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>))<span class="op">;</span></span>
 <span id="cb6-79"><a href="#cb6-79"></a>    (<span class="op">$</span>(<span class="op">$</span>arg<span class="op">:</span>tt)<span class="op">*</span>) <span class="op">=&gt;</span> (<span class="op">$</span><span class="pp">crate::print!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> <span class="pp">format_args!</span>(<span class="op">$</span>(<span class="op">$</span>arg)<span class="op">*</span>)))<span class="op">;</span></span>
-<span id="cb6-80"><a href="#cb6-80"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-80"><a href="#cb6-80"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </details>
 <p>It does exactly what I think <code>println</code> should do. After all, I wrote it, and with the benefit of <code>unsafe</code> I actually got to write what I wanted instead of what <code>rustc</code> wanted me to write. <em>This is called “writing code” and <code>cargo</code> is trying to make it illegal.</em></p>
@@ -680,290 +688,294 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
       }
+      return false;
     }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
       }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    // For code content inside modals, clipBoardJS needs to be initialized with a container option
-    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
     });
-    clipboardModal.on('success', onCopySuccess);
-  }
-  const viewSource = window.document.getElementById('quarto-view-source') ||
-                     window.document.getElementById('quarto-code-tools-source');
-  if (viewSource) {
-    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-    viewSource.addEventListener("click", function(e) {
-      if (sourceUrl) {
-        // rstudio viewer pane
-        if (/\bcapabilities=\b/.test(window.location)) {
-          window.open(sourceUrl);
-        } else {
-          window.location.href = sourceUrl;
-        }
-      } else {
-        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-        modal.show();
-      }
-      return false;
-    });
-  }
-  function toggleCodeHandler(show) {
-    return function(e) {
-      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-      for (let i=0; i<detailsSrc.length; i++) {
-        const details = detailsSrc[i].parentElement;
-        if (show) {
-          details.open = true;
-        } else {
-          details.removeAttribute("open");
-        }
-      }
-      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-      const fromCls = show ? "hidden" : "unhidden";
-      const toCls = show ? "unhidden" : "hidden";
-      for (let i=0; i<cellCodeDivs.length; i++) {
-        const codeDiv = cellCodeDivs[i];
-        if (codeDiv.classList.contains(fromCls)) {
-          codeDiv.classList.remove(fromCls);
-          codeDiv.classList.add(toCls);
-        } 
-      }
-      return false;
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
     }
-  }
-  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-  if (hideAllCode) {
-    hideAllCode.addEventListener("click", toggleCodeHandler(false));
-  }
-  const showAllCode = window.document.getElementById("quarto-show-all-code");
-  if (showAllCode) {
-    showAllCode.addEventListener("click", toggleCodeHandler(true));
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
-    };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
+    const viewSource = window.document.getElementById('quarto-view-source') ||
+                       window.document.getElementById('quarto-code-tools-source');
+    if (viewSource) {
+      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+      viewSource.addEventListener("click", function(e) {
+        if (sourceUrl) {
+          // rstudio viewer pane
+          if (/\bcapabilities=\b/.test(window.location)) {
+            window.open(sourceUrl);
           } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+            window.location.href = sourceUrl;
+          }
+        } else {
+          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+          modal.show();
+        }
+        return false;
+      });
+    }
+    function toggleCodeHandler(show) {
+      return function(e) {
+        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+        for (let i=0; i<detailsSrc.length; i++) {
+          const details = detailsSrc[i].parentElement;
+          if (show) {
+            details.open = true;
+          } else {
+            details.removeAttribute("open");
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+        const fromCls = show ? "hidden" : "unhidden";
+        const toCls = show ? "unhidden" : "hidden";
+        for (let i=0; i<cellCodeDivs.length; i++) {
+          const codeDiv = cellCodeDivs[i];
+          if (codeDiv.classList.contains(fromCls)) {
+            codeDiv.classList.remove(fromCls);
+            codeDiv.classList.add(toCls);
+          } 
         }
-        return container.innerHTML
+        return false;
+      }
+    }
+    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+    if (hideAllCode) {
+      hideAllCode.addEventListener("click", toggleCodeHandler(false));
+    }
+    const showAllCode = window.document.getElementById("quarto-show-all-code");
+    if (showAllCode) {
+      showAllCode.addEventListener("click", toggleCodeHandler(true));
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -971,185 +983,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script>
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./61_serial.html" class="pagination-link" aria-label="Serial">
@@ -1157,12 +1145,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./70_except.html" class="pagination-link" aria-label="Exceptions">
-        <span class="nav-page-text">Exceptions</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./62_librs.html" class="pagination-link" aria-label="Serial">
+        <span class="nav-page-text">Serial</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">---</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">---</span></span>
 <span id="cb7-2"><a href="#cb7-2"></a><span class="an">title:</span><span class="co"> Integration</span></span>
 <span id="cb7-3"><a href="#cb7-3"></a><span class="an">format:</span><span class="co"> html</span></span>
 <span id="cb7-4"><a href="#cb7-4"></a><span class="co">---</span></span>
@@ -1204,15 +1192,15 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-40"><a href="#cb7-40"></a></span>
 <span id="cb7-41"><a href="#cb7-41"></a>Hint:</span>
 <span id="cb7-42"><a href="#cb7-42"></a></span>
-<span id="cb7-43"><a href="#cb7-43"></a>&lt;details&gt;</span>
+<span id="cb7-43"><a href="#cb7-43"></a><span class="dt">&lt;</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 <span id="cb7-44"><a href="#cb7-44"></a></span>
 <span id="cb7-45"><a href="#cb7-45"></a><span class="in">```{.rs}</span></span>
-<span id="cb7-46"><a href="#cb7-46"></a><span class="in">    // Set the first character in the first 3 lines to the line number</span></span>
-<span id="cb7-47"><a href="#cb7-47"></a><span class="in">    osirs::println!("{:081x}",1);</span></span>
-<span id="cb7-48"><a href="#cb7-48"></a><span class="in">    osirs::println!("{:x}",2);</span></span>
+<span id="cb7-46"><a href="#cb7-46"></a>    <span class="sc">/</span><span class="er">/</span> Set the first character <span class="cf">in</span> the first <span class="dv">3</span> lines to the line number</span>
+<span id="cb7-47"><a href="#cb7-47"></a>    osirs<span class="sc">::</span>println<span class="sc">!</span>(<span class="st">"{:081x}"</span>,<span class="dv">1</span>);</span>
+<span id="cb7-48"><a href="#cb7-48"></a>    osirs<span class="sc">::</span>println<span class="sc">!</span>(<span class="st">"{:x}"</span>,<span class="dv">2</span>);</span>
 <span id="cb7-49"><a href="#cb7-49"></a><span class="in">```</span></span>
 <span id="cb7-50"><a href="#cb7-50"></a></span>
-<span id="cb7-51"><a href="#cb7-51"></a>&lt;/details&gt;</span>
+<span id="cb7-51"><a href="#cb7-51"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 <span id="cb7-52"><a href="#cb7-52"></a></span>
 <span id="cb7-53"><a href="#cb7-53"></a><span class="fu">## Assessment</span></span>
 <span id="cb7-54"><a href="#cb7-54"></a></span>
@@ -1253,22 +1241,22 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-89"><a href="#cb7-89"></a><span class="ss">    - </span>I'm not linking them here for a reason. They are worse than useless.</span>
 <span id="cb7-90"><a href="#cb7-90"></a><span class="ss">- </span>I expect you will need the following header in your <span class="in">`src/lib.rs`</span></span>
 <span id="cb7-91"><a href="#cb7-91"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
-<span id="cb7-92"><a href="#cb7-92"></a><span class="in">#![no_main]</span></span>
-<span id="cb7-93"><a href="#cb7-93"></a><span class="in">#![no_std]</span></span>
-<span id="cb7-94"><a href="#cb7-94"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
-<span id="cb7-95"><a href="#cb7-95"></a><span class="in">#![test_runner(_test_runner)]</span></span>
+<span id="cb7-92"><a href="#cb7-92"></a><span class="co">#![no_main]</span></span>
+<span id="cb7-93"><a href="#cb7-93"></a><span class="co">#![no_std]</span></span>
+<span id="cb7-94"><a href="#cb7-94"></a><span class="co">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb7-95"><a href="#cb7-95"></a><span class="co">#![test_runner(_test_runner)]</span></span>
 <span id="cb7-96"><a href="#cb7-96"></a></span>
-<span id="cb7-97"><a href="#cb7-97"></a><span class="in">pub mod vga;</span></span>
-<span id="cb7-98"><a href="#cb7-98"></a><span class="in">pub mod serial;</span></span>
+<span id="cb7-97"><a href="#cb7-97"></a>pub mod vga;</span>
+<span id="cb7-98"><a href="#cb7-98"></a>pub mod serial;</span>
 <span id="cb7-99"><a href="#cb7-99"></a><span class="in">```</span></span>
 <span id="cb7-100"><a href="#cb7-100"></a><span class="ss">- </span>I expect you will need the following header in <span class="in">`src/main.rs`</span></span>
 <span id="cb7-101"><a href="#cb7-101"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb7-102"><a href="#cb7-102"></a><span class="in">#![no_main]</span></span>
-<span id="cb7-103"><a href="#cb7-103"></a><span class="in">#![no_std]</span></span>
-<span id="cb7-104"><a href="#cb7-104"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
-<span id="cb7-105"><a href="#cb7-105"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
+<span id="cb7-102"><a href="#cb7-102"></a><span class="co">#![no_main]</span></span>
+<span id="cb7-103"><a href="#cb7-103"></a><span class="co">#![no_std]</span></span>
+<span id="cb7-104"><a href="#cb7-104"></a><span class="co">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb7-105"><a href="#cb7-105"></a><span class="co">#![test_runner(osirs::_test_runner)]</span></span>
 <span id="cb7-106"><a href="#cb7-106"></a></span>
-<span id="cb7-107"><a href="#cb7-107"></a><span class="in">mod vga;</span></span>
+<span id="cb7-107"><a href="#cb7-107"></a>mod vga;</span>
 <span id="cb7-108"><a href="#cb7-108"></a><span class="in">```</span></span>
 <span id="cb7-109"><a href="#cb7-109"></a><span class="ss">- </span>Give some thought to the difference in test_runner specification therein.</span>
 <span id="cb7-110"><a href="#cb7-110"></a><span class="ss">- </span>When you encounter errors from Cargo, try different permutations of </span>
@@ -1300,28 +1288,28 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-136"><a href="#cb7-136"></a><span class="ss">- </span>This one is free.</span>
 <span id="cb7-137"><a href="#cb7-137"></a></span>
 <span id="cb7-138"><a href="#cb7-138"></a><span class="in">```{.rs filename="tests/should_panic.rs"}</span></span>
-<span id="cb7-139"><a href="#cb7-139"></a><span class="in">#![no_std]</span></span>
-<span id="cb7-140"><a href="#cb7-140"></a><span class="in">#![no_main]</span></span>
-<span id="cb7-141"><a href="#cb7-141"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
-<span id="cb7-142"><a href="#cb7-142"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
+<span id="cb7-139"><a href="#cb7-139"></a><span class="co">#![no_std]</span></span>
+<span id="cb7-140"><a href="#cb7-140"></a><span class="co">#![no_main]</span></span>
+<span id="cb7-141"><a href="#cb7-141"></a><span class="co">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb7-142"><a href="#cb7-142"></a><span class="co">#![test_runner(osirs::_test_runner)]</span></span>
 <span id="cb7-143"><a href="#cb7-143"></a></span>
-<span id="cb7-144"><a href="#cb7-144"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb7-145"><a href="#cb7-145"></a><span class="in">fn test_panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb7-146"><a href="#cb7-146"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
-<span id="cb7-147"><a href="#cb7-147"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
-<span id="cb7-148"><a href="#cb7-148"></a><span class="in">    loop {}</span></span>
-<span id="cb7-149"><a href="#cb7-149"></a><span class="in">}</span></span>
+<span id="cb7-144"><a href="#cb7-144"></a><span class="co">#[panic_handler]</span></span>
+<span id="cb7-145"><a href="#cb7-145"></a>fn <span class="fu">test_panic</span>(_info<span class="sc">:</span> <span class="er">&amp;</span>core<span class="sc">::</span>panic<span class="sc">::</span>PanicInfo) <span class="ot">-&gt;</span> <span class="sc">!</span> {</span>
+<span id="cb7-146"><a href="#cb7-146"></a>    osirs<span class="sc">::</span>serial_println<span class="sc">!</span>(<span class="st">"[Pass]"</span>);</span>
+<span id="cb7-147"><a href="#cb7-147"></a>    osirs<span class="sc">::</span><span class="fu">qemu_quit</span>(osirs<span class="sc">::</span>QEMU_PASS);</span>
+<span id="cb7-148"><a href="#cb7-148"></a>    loop {}</span>
+<span id="cb7-149"><a href="#cb7-149"></a>}</span>
 <span id="cb7-150"><a href="#cb7-150"></a></span>
-<span id="cb7-151"><a href="#cb7-151"></a><span class="in">fn bad() {</span></span>
-<span id="cb7-152"><a href="#cb7-152"></a><span class="in">    assert!(false);</span></span>
-<span id="cb7-153"><a href="#cb7-153"></a><span class="in">}</span></span>
+<span id="cb7-151"><a href="#cb7-151"></a>fn <span class="fu">bad</span>() {</span>
+<span id="cb7-152"><a href="#cb7-152"></a>    assert<span class="sc">!</span>(false);</span>
+<span id="cb7-153"><a href="#cb7-153"></a>}</span>
 <span id="cb7-154"><a href="#cb7-154"></a></span>
-<span id="cb7-155"><a href="#cb7-155"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb7-156"><a href="#cb7-156"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb7-157"><a href="#cb7-157"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
-<span id="cb7-158"><a href="#cb7-158"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
-<span id="cb7-159"><a href="#cb7-159"></a><span class="in">    loop {}</span></span>
-<span id="cb7-160"><a href="#cb7-160"></a><span class="in">}</span></span>
+<span id="cb7-155"><a href="#cb7-155"></a><span class="co">#[unsafe(no_mangle)]</span></span>
+<span id="cb7-156"><a href="#cb7-156"></a>pub extern <span class="st">"C"</span> fn <span class="fu">_start</span>() <span class="ot">-&gt;</span> <span class="sc">!</span> {</span>
+<span id="cb7-157"><a href="#cb7-157"></a>    osirs<span class="sc">::</span><span class="fu">_test_runner</span>(<span class="sc">&amp;</span>[<span class="sc">&amp;</span>bad]);</span>
+<span id="cb7-158"><a href="#cb7-158"></a>    osirs<span class="sc">::</span><span class="fu">qemu_quit</span>(osirs<span class="sc">::</span>QEMU_FAIL);</span>
+<span id="cb7-159"><a href="#cb7-159"></a>    loop {}</span>
+<span id="cb7-160"><a href="#cb7-160"></a>}</span>
 <span id="cb7-161"><a href="#cb7-161"></a><span class="in">```</span></span>
 <span id="cb7-162"><a href="#cb7-162"></a><span class="ss">- </span>It also is just as reasonable to put all your <span class="in">`println`</span> tests in <span class="in">`tests/println.rs`</span>.</span>
 <span id="cb7-163"><a href="#cb7-163"></a><span class="ss">    - </span>Do this.</span>
@@ -1335,131 +1323,131 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 <span id="cb7-171"><a href="#cb7-171"></a></span>
 <span id="cb7-172"><a href="#cb7-172"></a>Mine looks like this, you can expand it's just big.</span>
 <span id="cb7-173"><a href="#cb7-173"></a></span>
-<span id="cb7-174"><a href="#cb7-174"></a>&lt;details&gt;</span>
+<span id="cb7-174"><a href="#cb7-174"></a><span class="dt">&lt;</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 <span id="cb7-175"><a href="#cb7-175"></a></span>
 <span id="cb7-176"><a href="#cb7-176"></a><span class="in">```{.email}</span></span>
-<span id="cb7-177"><a href="#cb7-177"></a><span class="in">    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s</span></span>
-<span id="cb7-178"><a href="#cb7-178"></a><span class="in">     Running unittests src/lib.rs (target/x86_64-osirs/debug/deps/osirs-97fff0361887fe8d)</span></span>
-<span id="cb7-179"><a href="#cb7-179"></a><span class="in">Building bootloader</span></span>
-<span id="cb7-180"><a href="#cb7-180"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
-<span id="cb7-181"><a href="#cb7-181"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span></span>
-<span id="cb7-182"><a href="#cb7-182"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-97fff0361887fe8d.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
-<span id="cb7-183"><a href="#cb7-183"></a><span class="in">     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-66b57a63df3ec3d9)</span></span>
-<span id="cb7-184"><a href="#cb7-184"></a><span class="in">Building bootloader</span></span>
-<span id="cb7-185"><a href="#cb7-185"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
-<span id="cb7-186"><a href="#cb7-186"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span></span>
-<span id="cb7-187"><a href="#cb7-187"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-66b57a63df3ec3d9.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
-<span id="cb7-188"><a href="#cb7-188"></a><span class="in">     Running tests/println.rs (target/x86_64-osirs/debug/deps/println-d4ca6644f20d51b2)</span></span>
-<span id="cb7-189"><a href="#cb7-189"></a><span class="in">Building bootloader</span></span>
-<span id="cb7-190"><a href="#cb7-190"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
-<span id="cb7-191"><a href="#cb7-191"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span></span>
-<span id="cb7-192"><a href="#cb7-192"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-println-d4ca6644f20d51b2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
-<span id="cb7-193"><a href="#cb7-193"></a><span class="in">Initiating test 0x00... [Pass]</span></span>
-<span id="cb7-194"><a href="#cb7-194"></a><span class="in">     Running tests/should_panic.rs (target/x86_64-osirs/debug/deps/should_panic-2397b9ee1ac15e67)</span></span>
-<span id="cb7-195"><a href="#cb7-195"></a><span class="in">Building bootloader</span></span>
-<span id="cb7-196"><a href="#cb7-196"></a><span class="in">   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span></span>
-<span id="cb7-197"><a href="#cb7-197"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.58s</span></span>
-<span id="cb7-198"><a href="#cb7-198"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-should_panic-2397b9ee1ac15e67.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
-<span id="cb7-199"><a href="#cb7-199"></a><span class="in">Initiating test 0x00... [Pass]</span></span>
-<span id="cb7-200"><a href="#cb7-200"></a><span class="in">   Doc-tests osirs</span></span>
+<span id="cb7-177"><a href="#cb7-177"></a>    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.06s</span>
+<span id="cb7-178"><a href="#cb7-178"></a>     Running unittests src/lib.rs (target/x86_64-osirs/debug/deps/osirs-97fff0361887fe8d)</span>
+<span id="cb7-179"><a href="#cb7-179"></a>Building bootloader</span>
+<span id="cb7-180"><a href="#cb7-180"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb7-181"><a href="#cb7-181"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span>
+<span id="cb7-182"><a href="#cb7-182"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-97fff0361887fe8d.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb7-183"><a href="#cb7-183"></a>     Running unittests src/main.rs (target/x86_64-osirs/debug/deps/osirs-66b57a63df3ec3d9)</span>
+<span id="cb7-184"><a href="#cb7-184"></a>Building bootloader</span>
+<span id="cb7-185"><a href="#cb7-185"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb7-186"><a href="#cb7-186"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span>
+<span id="cb7-187"><a href="#cb7-187"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-osirs-66b57a63df3ec3d9.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb7-188"><a href="#cb7-188"></a>     Running tests/println.rs (target/x86_64-osirs/debug/deps/println-d4ca6644f20d51b2)</span>
+<span id="cb7-189"><a href="#cb7-189"></a>Building bootloader</span>
+<span id="cb7-190"><a href="#cb7-190"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb7-191"><a href="#cb7-191"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.60s</span>
+<span id="cb7-192"><a href="#cb7-192"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-println-d4ca6644f20d51b2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb7-193"><a href="#cb7-193"></a>Initiating test 0x00... [Pass]</span>
+<span id="cb7-194"><a href="#cb7-194"></a>     Running tests/should_panic.rs (target/x86_64-osirs/debug/deps/should_panic-2397b9ee1ac15e67)</span>
+<span id="cb7-195"><a href="#cb7-195"></a>Building bootloader</span>
+<span id="cb7-196"><a href="#cb7-196"></a>   Compiling bootloader v0.9.34 (/home/user/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bootloader-0.9.34)</span>
+<span id="cb7-197"><a href="#cb7-197"></a>    Finished `release` profile [optimized + debuginfo] target(s) in 0.58s</span>
+<span id="cb7-198"><a href="#cb7-198"></a><span class="fu">Running: </span>`qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-should_panic-2397b9ee1ac15e67.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span>
+<span id="cb7-199"><a href="#cb7-199"></a>Initiating test 0x00... [Pass]</span>
+<span id="cb7-200"><a href="#cb7-200"></a>   Doc-tests osirs</span>
 <span id="cb7-201"><a href="#cb7-201"></a></span>
-<span id="cb7-202"><a href="#cb7-202"></a><span class="in">running 0 tests</span></span>
+<span id="cb7-202"><a href="#cb7-202"></a>running 0 tests</span>
 <span id="cb7-203"><a href="#cb7-203"></a></span>
-<span id="cb7-204"><a href="#cb7-204"></a><span class="in">test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</span></span>
+<span id="cb7-204"><a href="#cb7-204"></a>test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s</span>
 <span id="cb7-205"><a href="#cb7-205"></a><span class="in">```</span></span>
 <span id="cb7-206"><a href="#cb7-206"></a></span>
-<span id="cb7-207"><a href="#cb7-207"></a>&lt;/details&gt;</span>
+<span id="cb7-207"><a href="#cb7-207"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 <span id="cb7-208"><a href="#cb7-208"></a></span>
 <span id="cb7-209"><a href="#cb7-209"></a>It will be easy to tell if you your <span class="in">`tests/println.rs`</span> doesn't test for things that <span class="in">`println`</span> isn't supposed to do (this is a double negative). Simply test *my* <span class="in">`src/vga.rs`</span>.</span>
 <span id="cb7-210"><a href="#cb7-210"></a></span>
-<span id="cb7-211"><a href="#cb7-211"></a>&lt;details&gt;</span>
+<span id="cb7-211"><a href="#cb7-211"></a><span class="dt">&lt;</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 <span id="cb7-212"><a href="#cb7-212"></a></span>
 <span id="cb7-213"><a href="#cb7-213"></a><span class="in">```{.rs filename="src/vga.rs"}</span></span>
-<span id="cb7-214"><a href="#cb7-214"></a><span class="in">static mut LATEST: usize = 0;</span></span>
-<span id="cb7-215"><a href="#cb7-215"></a><span class="in">const MMIO: usize = 0xb8000;</span></span>
-<span id="cb7-216"><a href="#cb7-216"></a><span class="in">const COLOR: u8 = 0xF;</span></span>
+<span id="cb7-214"><a href="#cb7-214"></a>static mut LATEST<span class="sc">:</span> usize <span class="ot">=</span> <span class="dv">0</span>;</span>
+<span id="cb7-215"><a href="#cb7-215"></a>const MMIO<span class="sc">:</span> usize <span class="ot">=</span> <span class="dv">0xb8000</span>;</span>
+<span id="cb7-216"><a href="#cb7-216"></a>const COLOR<span class="sc">:</span> u8 <span class="ot">=</span> <span class="dv">0xF</span>;</span>
 <span id="cb7-217"><a href="#cb7-217"></a></span>
-<span id="cb7-218"><a href="#cb7-218"></a><span class="in">fn char_to_vga(a: u8) {</span></span>
-<span id="cb7-219"><a href="#cb7-219"></a><span class="in">    unsafe {</span></span>
-<span id="cb7-220"><a href="#cb7-220"></a><span class="in">        let rel: *mut u8 = (MMIO + LATEST * 2) as *mut u8;</span></span>
-<span id="cb7-221"><a href="#cb7-221"></a><span class="in">        *rel = a;</span></span>
-<span id="cb7-222"><a href="#cb7-222"></a><span class="in">        *((rel as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb7-223"><a href="#cb7-223"></a><span class="in">        LATEST = LATEST + 1;</span></span>
-<span id="cb7-224"><a href="#cb7-224"></a><span class="in">    }</span></span>
-<span id="cb7-225"><a href="#cb7-225"></a><span class="in">    return;</span></span>
-<span id="cb7-226"><a href="#cb7-226"></a><span class="in">}</span></span>
+<span id="cb7-218"><a href="#cb7-218"></a>fn <span class="fu">char_to_vga</span>(a<span class="sc">:</span> u8) {</span>
+<span id="cb7-219"><a href="#cb7-219"></a>    unsafe {</span>
+<span id="cb7-220"><a href="#cb7-220"></a>        let rel<span class="sc">:</span> <span class="er">*</span>mut u8 <span class="ot">=</span> (MMIO <span class="sc">+</span> LATEST <span class="sc">*</span> <span class="dv">2</span>) as <span class="sc">*</span>mut u8;</span>
+<span id="cb7-221"><a href="#cb7-221"></a>        <span class="sc">*</span>rel <span class="ot">=</span> a;</span>
+<span id="cb7-222"><a href="#cb7-222"></a>        <span class="sc">*</span>((rel as usize <span class="sc">+</span> <span class="dv">1</span>) as <span class="sc">*</span>mut u8) <span class="ot">=</span> COLOR;</span>
+<span id="cb7-223"><a href="#cb7-223"></a>        LATEST <span class="ot">=</span> LATEST <span class="sc">+</span> <span class="dv">1</span>;</span>
+<span id="cb7-224"><a href="#cb7-224"></a>    }</span>
+<span id="cb7-225"><a href="#cb7-225"></a>    return;</span>
+<span id="cb7-226"><a href="#cb7-226"></a>}</span>
 <span id="cb7-227"><a href="#cb7-227"></a></span>
-<span id="cb7-228"><a href="#cb7-228"></a><span class="in">const ROWS: usize = 80;</span></span>
-<span id="cb7-229"><a href="#cb7-229"></a><span class="in">const COLS: usize = 25;</span></span>
-<span id="cb7-230"><a href="#cb7-230"></a><span class="in">const MAX: usize = ROWS * COLS;</span></span>
-<span id="cb7-231"><a href="#cb7-231"></a><span class="in">const SPACE: u8 = 32;</span></span>
-<span id="cb7-232"><a href="#cb7-232"></a><span class="in">const ENTER: u8 = 10;</span></span>
+<span id="cb7-228"><a href="#cb7-228"></a>const ROWS<span class="sc">:</span> usize <span class="ot">=</span> <span class="dv">80</span>;</span>
+<span id="cb7-229"><a href="#cb7-229"></a>const COLS<span class="sc">:</span> usize <span class="ot">=</span> <span class="dv">25</span>;</span>
+<span id="cb7-230"><a href="#cb7-230"></a>const MAX<span class="sc">:</span> usize <span class="ot">=</span> ROWS <span class="sc">*</span> COLS;</span>
+<span id="cb7-231"><a href="#cb7-231"></a>const SPACE<span class="sc">:</span> u8 <span class="ot">=</span> <span class="dv">32</span>;</span>
+<span id="cb7-232"><a href="#cb7-232"></a>const ENTER<span class="sc">:</span> u8 <span class="ot">=</span> <span class="dv">10</span>;</span>
 <span id="cb7-233"><a href="#cb7-233"></a></span>
-<span id="cb7-234"><a href="#cb7-234"></a><span class="in">fn scroll() {</span></span>
-<span id="cb7-235"><a href="#cb7-235"></a><span class="in">    unsafe {</span></span>
-<span id="cb7-236"><a href="#cb7-236"></a><span class="in">        for i in ROWS..=MAX {</span></span>
-<span id="cb7-237"><a href="#cb7-237"></a><span class="in">            let src: *mut u8 = (MMIO  + i * 2) as *mut u8;</span></span>
-<span id="cb7-238"><a href="#cb7-238"></a><span class="in">            let dst: *mut u8 = (MMIO + (i - ROWS) * 2) as *mut u8;</span></span>
-<span id="cb7-239"><a href="#cb7-239"></a><span class="in">            *dst = *src;</span></span>
-<span id="cb7-240"><a href="#cb7-240"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb7-241"><a href="#cb7-241"></a><span class="in">        }</span></span>
-<span id="cb7-242"><a href="#cb7-242"></a><span class="in">        for i in 1..=ROWS {</span></span>
-<span id="cb7-243"><a href="#cb7-243"></a><span class="in">            let dst: *mut u8 = (MMIO + (MAX + i - ROWS) * 2) as *mut u8;</span></span>
-<span id="cb7-244"><a href="#cb7-244"></a><span class="in">            *dst = SPACE;</span></span>
-<span id="cb7-245"><a href="#cb7-245"></a><span class="in">            *((dst as usize + 1) as *mut u8) = COLOR;</span></span>
-<span id="cb7-246"><a href="#cb7-246"></a><span class="in">        }</span></span>
-<span id="cb7-247"><a href="#cb7-247"></a><span class="in">        LATEST = LATEST - ROWS;</span></span>
-<span id="cb7-248"><a href="#cb7-248"></a><span class="in">    }</span></span>
-<span id="cb7-249"><a href="#cb7-249"></a><span class="in">    return;</span></span>
-<span id="cb7-250"><a href="#cb7-250"></a><span class="in">}</span></span>
+<span id="cb7-234"><a href="#cb7-234"></a>fn <span class="fu">scroll</span>() {</span>
+<span id="cb7-235"><a href="#cb7-235"></a>    unsafe {</span>
+<span id="cb7-236"><a href="#cb7-236"></a>        <span class="cf">for</span> i <span class="cf">in</span> ROWS..<span class="ot">=</span>MAX {</span>
+<span id="cb7-237"><a href="#cb7-237"></a>            let src<span class="sc">:</span> <span class="er">*</span>mut u8 <span class="ot">=</span> (MMIO  <span class="sc">+</span> i <span class="sc">*</span> <span class="dv">2</span>) as <span class="sc">*</span>mut u8;</span>
+<span id="cb7-238"><a href="#cb7-238"></a>            let dst<span class="sc">:</span> <span class="er">*</span>mut u8 <span class="ot">=</span> (MMIO <span class="sc">+</span> (i <span class="sc">-</span> ROWS) <span class="sc">*</span> <span class="dv">2</span>) as <span class="sc">*</span>mut u8;</span>
+<span id="cb7-239"><a href="#cb7-239"></a>            <span class="sc">*</span>dst <span class="ot">=</span> <span class="er">*</span>src;</span>
+<span id="cb7-240"><a href="#cb7-240"></a>            <span class="sc">*</span>((dst as usize <span class="sc">+</span> <span class="dv">1</span>) as <span class="sc">*</span>mut u8) <span class="ot">=</span> COLOR;</span>
+<span id="cb7-241"><a href="#cb7-241"></a>        }</span>
+<span id="cb7-242"><a href="#cb7-242"></a>        <span class="cf">for</span> i <span class="cf">in</span> <span class="dv">1</span>..<span class="ot">=</span>ROWS {</span>
+<span id="cb7-243"><a href="#cb7-243"></a>            let dst<span class="sc">:</span> <span class="er">*</span>mut u8 <span class="ot">=</span> (MMIO <span class="sc">+</span> (MAX <span class="sc">+</span> i <span class="sc">-</span> ROWS) <span class="sc">*</span> <span class="dv">2</span>) as <span class="sc">*</span>mut u8;</span>
+<span id="cb7-244"><a href="#cb7-244"></a>            <span class="sc">*</span>dst <span class="ot">=</span> SPACE;</span>
+<span id="cb7-245"><a href="#cb7-245"></a>            <span class="sc">*</span>((dst as usize <span class="sc">+</span> <span class="dv">1</span>) as <span class="sc">*</span>mut u8) <span class="ot">=</span> COLOR;</span>
+<span id="cb7-246"><a href="#cb7-246"></a>        }</span>
+<span id="cb7-247"><a href="#cb7-247"></a>        LATEST <span class="ot">=</span> LATEST <span class="sc">-</span> ROWS;</span>
+<span id="cb7-248"><a href="#cb7-248"></a>    }</span>
+<span id="cb7-249"><a href="#cb7-249"></a>    return;</span>
+<span id="cb7-250"><a href="#cb7-250"></a>}</span>
 <span id="cb7-251"><a href="#cb7-251"></a></span>
-<span id="cb7-252"><a href="#cb7-252"></a><span class="in">fn str_to_vga(s: &amp;str) {</span></span>
-<span id="cb7-253"><a href="#cb7-253"></a><span class="in">    let v = s.as_bytes();</span></span>
-<span id="cb7-254"><a href="#cb7-254"></a><span class="in">    unsafe {</span></span>
-<span id="cb7-255"><a href="#cb7-255"></a><span class="in">        for i in 0..v.len() {</span></span>
-<span id="cb7-256"><a href="#cb7-256"></a><span class="in">            if LATEST &gt; MAX {</span></span>
-<span id="cb7-257"><a href="#cb7-257"></a><span class="in">                scroll();</span></span>
-<span id="cb7-258"><a href="#cb7-258"></a><span class="in">            }</span></span>
-<span id="cb7-259"><a href="#cb7-259"></a><span class="in">            match v[i] {</span></span>
-<span id="cb7-260"><a href="#cb7-260"></a><span class="in">                ENTER =&gt; LATEST = ((LATEST / ROWS) + 1) * ROWS, // newline</span></span>
-<span id="cb7-261"><a href="#cb7-261"></a><span class="in">                _ =&gt; char_to_vga(v[i]),</span></span>
-<span id="cb7-262"><a href="#cb7-262"></a><span class="in">            }</span></span>
-<span id="cb7-263"><a href="#cb7-263"></a><span class="in">        }</span></span>
-<span id="cb7-264"><a href="#cb7-264"></a><span class="in">    }</span></span>
-<span id="cb7-265"><a href="#cb7-265"></a><span class="in">    return;</span></span>
-<span id="cb7-266"><a href="#cb7-266"></a><span class="in">}</span></span>
+<span id="cb7-252"><a href="#cb7-252"></a>fn <span class="fu">str_to_vga</span>(s<span class="sc">:</span> <span class="er">&amp;</span>str) {</span>
+<span id="cb7-253"><a href="#cb7-253"></a>    let v <span class="ot">=</span> <span class="fu">s.as_bytes</span>();</span>
+<span id="cb7-254"><a href="#cb7-254"></a>    unsafe {</span>
+<span id="cb7-255"><a href="#cb7-255"></a>        <span class="cf">for</span> i <span class="cf">in</span> <span class="dv">0</span><span class="fu">..v.len</span>() {</span>
+<span id="cb7-256"><a href="#cb7-256"></a>            <span class="cf">if</span> LATEST <span class="sc">&gt;</span> MAX {</span>
+<span id="cb7-257"><a href="#cb7-257"></a>                <span class="fu">scroll</span>();</span>
+<span id="cb7-258"><a href="#cb7-258"></a>            }</span>
+<span id="cb7-259"><a href="#cb7-259"></a>            match v[i] {</span>
+<span id="cb7-260"><a href="#cb7-260"></a>                ENTER <span class="sc">=&gt;</span> LATEST <span class="ot">=</span> ((LATEST <span class="sc">/</span> ROWS) <span class="sc">+</span> <span class="dv">1</span>) <span class="sc">*</span> ROWS, <span class="sc">/</span><span class="er">/</span> newline</span>
+<span id="cb7-261"><a href="#cb7-261"></a>                _ <span class="sc">=&gt;</span> <span class="fu">char_to_vga</span>(v[i]),</span>
+<span id="cb7-262"><a href="#cb7-262"></a>            }</span>
+<span id="cb7-263"><a href="#cb7-263"></a>        }</span>
+<span id="cb7-264"><a href="#cb7-264"></a>    }</span>
+<span id="cb7-265"><a href="#cb7-265"></a>    return;</span>
+<span id="cb7-266"><a href="#cb7-266"></a>}</span>
 <span id="cb7-267"><a href="#cb7-267"></a></span>
-<span id="cb7-268"><a href="#cb7-268"></a><span class="in">pub struct Dummy {}</span></span>
+<span id="cb7-268"><a href="#cb7-268"></a>pub struct Dummy {}</span>
 <span id="cb7-269"><a href="#cb7-269"></a></span>
-<span id="cb7-270"><a href="#cb7-270"></a><span class="in">impl core::fmt::Write for Dummy {</span></span>
-<span id="cb7-271"><a href="#cb7-271"></a><span class="in">    fn write_str(&amp;mut self, s: &amp;str) -&gt; core::fmt::Result {</span></span>
-<span id="cb7-272"><a href="#cb7-272"></a><span class="in">        str_to_vga(s);</span></span>
-<span id="cb7-273"><a href="#cb7-273"></a><span class="in">        return core::result::Result::Ok(());</span></span>
-<span id="cb7-274"><a href="#cb7-274"></a><span class="in">    }</span></span>
-<span id="cb7-275"><a href="#cb7-275"></a><span class="in">}</span></span>
+<span id="cb7-270"><a href="#cb7-270"></a>impl core<span class="sc">::</span>fmt<span class="sc">::</span>Write <span class="cf">for</span> Dummy {</span>
+<span id="cb7-271"><a href="#cb7-271"></a>    fn <span class="fu">write_str</span>(<span class="sc">&amp;</span>mut self, s<span class="sc">:</span> <span class="er">&amp;</span>str) <span class="ot">-&gt;</span> core<span class="sc">::</span>fmt<span class="sc">::</span>Result {</span>
+<span id="cb7-272"><a href="#cb7-272"></a>        <span class="fu">str_to_vga</span>(s);</span>
+<span id="cb7-273"><a href="#cb7-273"></a>        return core<span class="sc">::</span>result<span class="sc">::</span>Result<span class="sc">::</span><span class="fu">Ok</span>(());</span>
+<span id="cb7-274"><a href="#cb7-274"></a>    }</span>
+<span id="cb7-275"><a href="#cb7-275"></a>}</span>
 <span id="cb7-276"><a href="#cb7-276"></a></span>
-<span id="cb7-277"><a href="#cb7-277"></a><span class="in">pub fn _print(args: core::fmt::Arguments) {</span></span>
-<span id="cb7-278"><a href="#cb7-278"></a><span class="in">    use core::fmt::Write;</span></span>
-<span id="cb7-279"><a href="#cb7-279"></a><span class="in">    let mut d = Dummy {};</span></span>
-<span id="cb7-280"><a href="#cb7-280"></a><span class="in">    d.write_fmt(args).unwrap();</span></span>
-<span id="cb7-281"><a href="#cb7-281"></a><span class="in">    return;</span></span>
-<span id="cb7-282"><a href="#cb7-282"></a><span class="in">}</span></span>
+<span id="cb7-277"><a href="#cb7-277"></a>pub fn <span class="fu">_print</span>(args<span class="sc">:</span> core<span class="sc">::</span>fmt<span class="sc">::</span>Arguments) {</span>
+<span id="cb7-278"><a href="#cb7-278"></a>    use core<span class="sc">::</span>fmt<span class="sc">::</span>Write;</span>
+<span id="cb7-279"><a href="#cb7-279"></a>    let mut d <span class="ot">=</span> Dummy {};</span>
+<span id="cb7-280"><a href="#cb7-280"></a>    <span class="fu">d.write_fmt</span>(args)<span class="fu">.unwrap</span>();</span>
+<span id="cb7-281"><a href="#cb7-281"></a>    return;</span>
+<span id="cb7-282"><a href="#cb7-282"></a>}</span>
 <span id="cb7-283"><a href="#cb7-283"></a></span>
-<span id="cb7-284"><a href="#cb7-284"></a><span class="in">#[macro_export]</span></span>
-<span id="cb7-285"><a href="#cb7-285"></a><span class="in">macro_rules! print {</span></span>
-<span id="cb7-286"><a href="#cb7-286"></a><span class="in">    ($($arg:tt)*) =&gt; ($crate::vga::_print(format_args!($($arg)*)));</span></span>
-<span id="cb7-287"><a href="#cb7-287"></a><span class="in">}</span></span>
+<span id="cb7-284"><a href="#cb7-284"></a><span class="co">#[macro_export]</span></span>
+<span id="cb7-285"><a href="#cb7-285"></a>macro_rules<span class="sc">!</span> print {</span>
+<span id="cb7-286"><a href="#cb7-286"></a>    (<span class="sc">$</span>(<span class="sc">$</span>arg<span class="sc">:</span>tt)<span class="sc">*</span>) <span class="sc">=&gt;</span> (<span class="sc">$</span>crate<span class="sc">::</span>vga<span class="sc">::</span><span class="fu">_print</span>(format_args<span class="sc">!</span>(<span class="sc">$</span>(<span class="sc">$</span>arg)<span class="sc">*</span>)));</span>
+<span id="cb7-287"><a href="#cb7-287"></a>}</span>
 <span id="cb7-288"><a href="#cb7-288"></a></span>
-<span id="cb7-289"><a href="#cb7-289"></a><span class="in">#[macro_export]</span></span>
-<span id="cb7-290"><a href="#cb7-290"></a><span class="in">macro_rules! println {</span></span>
-<span id="cb7-291"><a href="#cb7-291"></a><span class="in">    () =&gt; ($crate::print!("\n"));</span></span>
-<span id="cb7-292"><a href="#cb7-292"></a><span class="in">    ($($arg:tt)*) =&gt; ($crate::print!("{}\n", format_args!($($arg)*)));</span></span>
-<span id="cb7-293"><a href="#cb7-293"></a><span class="in">}</span></span>
+<span id="cb7-289"><a href="#cb7-289"></a><span class="co">#[macro_export]</span></span>
+<span id="cb7-290"><a href="#cb7-290"></a>macro_rules<span class="sc">!</span> println {</span>
+<span id="cb7-291"><a href="#cb7-291"></a>    () <span class="sc">=&gt;</span> (<span class="sc">$</span>crate<span class="sc">::</span>print<span class="sc">!</span>(<span class="st">"</span><span class="sc">\n</span><span class="st">"</span>));</span>
+<span id="cb7-292"><a href="#cb7-292"></a>    (<span class="sc">$</span>(<span class="sc">$</span>arg<span class="sc">:</span>tt)<span class="sc">*</span>) <span class="sc">=&gt;</span> (<span class="sc">$</span>crate<span class="sc">::</span>print<span class="sc">!</span>(<span class="st">"{}</span><span class="sc">\n</span><span class="st">"</span>, format_args<span class="sc">!</span>(<span class="sc">$</span>(<span class="sc">$</span>arg)<span class="sc">*</span>)));</span>
+<span id="cb7-293"><a href="#cb7-293"></a>}</span>
 <span id="cb7-294"><a href="#cb7-294"></a><span class="in">```</span></span>
 <span id="cb7-295"><a href="#cb7-295"></a></span>
-<span id="cb7-296"><a href="#cb7-296"></a>&lt;/details&gt;</span>
+<span id="cb7-296"><a href="#cb7-296"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span>
 <span id="cb7-297"><a href="#cb7-297"></a></span>
-<span id="cb7-298"><a href="#cb7-298"></a>It does exactly what I think <span class="in">`println`</span> should do. After all, I wrote it, and with the benefit of <span class="in">`unsafe`</span> I actually got to write what I wanted instead of what <span class="in">`rustc`</span> wanted me to write. *This is called "writing code" and `cargo` is trying to make it illegal.*</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<span id="cb7-298"><a href="#cb7-298"></a>It does exactly what I think <span class="in">`println`</span> should do. After all, I wrote it, and with the benefit of <span class="in">`unsafe`</span> I actually got to write what I wanted instead of what <span class="in">`rustc`</span> wanted me to write. *This is called "writing code" and `cargo` is trying to make it illegal.*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
