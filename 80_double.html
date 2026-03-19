@@ -400,7 +400,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#now-it-will" id="toc-now-it-will" class="nav-link" data-scroll-target="#now-it-will">Now it will…</a></li>
   <li><a href="#so-we" id="toc-so-we" class="nav-link" data-scroll-target="#so-we">So we…</a></li>
   <li><a href="#not-too-bad" id="toc-not-too-bad" class="nav-link" data-scroll-target="#not-too-bad">Not too bad…</a></li>
-  <li><a href="#in-code" id="toc-in-code" class="nav-link" data-scroll-target="#in-code">In code</a></li>
+  <li><a href="#update-segments" id="toc-update-segments" class="nav-link" data-scroll-target="#update-segments">Update Segments</a></li>
+  <li><a href="#full-file" id="toc-full-file" class="nav-link" data-scroll-target="#full-file">Full File</a></li>
+  <li><a href="#insufficient" id="toc-insufficient" class="nav-link" data-scroll-target="#insufficient">Insufficient</a></li>
+  <li><a href="#handle-it-3" id="toc-handle-it-3" class="nav-link" data-scroll-target="#handle-it-3">Handle it</a></li>
+  <li><a href="#update" id="toc-update" class="nav-link" data-scroll-target="#update">Update</a></li>
   <li><a href="#this-worked-for-me" id="toc-this-worked-for-me" class="nav-link" data-scroll-target="#this-worked-for-me">This “worked” for me</a></li>
   <li><a href="#tying-this-off" id="toc-tying-this-off" class="nav-link" data-scroll-target="#tying-this-off">Tying this off</a></li>
   </ul></li>
@@ -494,7 +498,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ul>
 <li>Perhaps a generalized exception.</li>
 </ul>
-<div id="f6b2be41" class="cell" data-execution_count="1">
+<div id="18129dd4" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="cf">try</span>:</span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="cf">except</span>:</span>
@@ -1335,11 +1339,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-with-filename-file">
 <pre><strong>src/gdt.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb26" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">u16</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<div class="sourceCode" id="cb26" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb26-2"><a href="#cb26-2"></a></span>
 <span id="cb26-3"><a href="#cb26-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init_gdt() <span class="op">{</span></span>
 <span id="cb26-4"><a href="#cb26-4"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb26-5"><a href="#cb26-5"></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">usize</span>] <span class="op">=</span></span>
+<span id="cb26-5"><a href="#cb26-5"></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] <span class="op">=</span></span>
 <span id="cb26-6"><a href="#cb26-6"></a>            <span class="pp">x86_64::VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK) <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
 <span id="cb26-7"><a href="#cb26-7"></a>    <span class="op">}</span></span>
 <span id="cb26-8"><a href="#cb26-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1388,8 +1392,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><strong>src/gdt.rs</strong></pre>
 </div>
 <div class="sourceCode" id="cb28" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a href="#cb28-1"></a><span class="co">// Within "init"</span></span>
-<span id="cb28-2"><a href="#cb28-2"></a>GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment()<span class="op">;</span></span>
-<span id="cb28-3"><a href="#cb28-3"></a>GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-2"><a href="#cb28-2"></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="now-it-will" class="level2">
@@ -1405,74 +1409,149 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol type="1">
 <li><strong>Reload code segment register</strong>: We changed our GDT, so we should reload <strong>CS</strong>, the code segment register. The old segment selector could now point to an old e.g.&nbsp;TSS.</li>
 <li><strong>Load the TSS</strong>: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</li>
+<li>** Update the handler**: Our double fault handler must know to use the novel stack we have created.</li>
 </ol>
 </section>
 <section id="not-too-bad" class="level2">
 <h2 class="anchored" data-anchor-id="not-too-bad">Not too bad…</h2>
 <ul>
-<li>I split this into a few lines.</li>
-<li>Basically, get the kernel <strong>CS</strong>, and <strong>TSS</strong>.</li>
-<li>Turn them into descriptors.</li>
-<li>Either “set” or “load” these descriptors into the GDT.
-<ul>
-<li>Dealing with annoying Rust namespace stuff.</li>
-</ul></li>
+<li>Load the GDT.</li>
 </ul>
-</section>
-<section id="in-code" class="level2">
-<h2 class="anchored" data-anchor-id="in-code">In code</h2>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>src/gdt.rs</strong></pre>
 </div>
 <div class="sourceCode" id="cb29" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb29-1"><a href="#cb29-1"></a><span class="co">// Within "init"</span></span>
-<span id="cb29-2"><a href="#cb29-2"></a></span>
-<span id="cb29-3"><a href="#cb29-3"></a><span class="co">// Get the segments as descriptors</span></span>
-<span id="cb29-4"><a href="#cb29-4"></a><span class="kw">let</span> kcs <span class="op">=</span> <span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment()<span class="op">;</span></span>
-<span id="cb29-5"><a href="#cb29-5"></a><span class="kw">let</span> tss <span class="op">=</span> <span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS)<span class="op">;</span></span>
-<span id="cb29-6"><a href="#cb29-6"></a></span>
-<span id="cb29-7"><a href="#cb29-7"></a><span class="co">// Add to GDT</span></span>
-<span id="cb29-8"><a href="#cb29-8"></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(kcs)<span class="op">;</span></span>
-<span id="cb29-9"><a href="#cb29-9"></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(tss)<span class="op">;</span></span>
-<span id="cb29-10"><a href="#cb29-10"></a></span>
-<span id="cb29-11"><a href="#cb29-11"></a><span class="co">// Load GDT and Reload CS</span></span>
-<span id="cb29-12"><a href="#cb29-12"></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
-<span id="cb29-13"><a href="#cb29-13"></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
-<span id="cb29-14"><a href="#cb29-14"></a><span class="co">// Mandate use of this TSS</span></span>
-<span id="cb29-15"><a href="#cb29-15"></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb29-4"><a href="#cb29-4"></a><span class="co">// This is new.</span></span>
+<span id="cb29-5"><a href="#cb29-5"></a>GDT<span class="op">.</span>load()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="update-segments" class="level2">
+<h2 class="anchored" data-anchor-id="update-segments">Update Segments</h2>
+<ul>
+<li>Basically, we got the kernel <strong>CS</strong>, and <strong>TSS</strong>.</li>
+<li>We turned them into descriptors.</li>
+<li>Either “set” or “load” these descriptors into the GDT.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb30" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb30-1"><a href="#cb30-1"></a><span class="co">// Within "init"</span></span>
+<span id="cb30-2"><a href="#cb30-2"></a>GDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb30-3"><a href="#cb30-3"></a><span class="co">// I love Rust namespaces!</span></span>
+<span id="cb30-4"><a href="#cb30-4"></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
+<span id="cb30-5"><a href="#cb30-5"></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
+<span id="cb30-6"><a href="#cb30-6"></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="full-file" class="level2">
+<h2 class="anchored" data-anchor-id="full-file">Full File</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb31" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb31-1"><a href="#cb31-1"></a><span class="at">#![</span>allow<span class="at">(</span>static_mut_refs<span class="at">)]</span></span>
+<span id="cb31-2"><a href="#cb31-2"></a></span>
+<span id="cb31-3"><a href="#cb31-3"></a><span class="co">// GDT</span></span>
+<span id="cb31-4"><a href="#cb31-4"></a><span class="kw">static</span> <span class="kw">mut</span> GDT<span class="op">:</span> <span class="pp">x86_64::structures::gdt::</span>GlobalDescriptorTable <span class="op">=</span></span>
+<span id="cb31-5"><a href="#cb31-5"></a>    <span class="pp">x86_64::structures::gdt::GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb31-6"><a href="#cb31-6"></a></span>
+<span id="cb31-7"><a href="#cb31-7"></a><span class="co">// TSS</span></span>
+<span id="cb31-8"><a href="#cb31-8"></a><span class="kw">const</span> STACK_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">4096</span> <span class="op">*</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb31-9"><a href="#cb31-9"></a><span class="kw">static</span> <span class="kw">mut</span> TSS<span class="op">:</span> <span class="pp">x86_64::structures::tss::</span>TaskStateSegment <span class="op">=</span></span>
+<span id="cb31-10"><a href="#cb31-10"></a>    <span class="pp">x86_64::structures::tss::TaskStateSegment::</span>new()<span class="op">;</span></span>
+<span id="cb31-11"><a href="#cb31-11"></a><span class="kw">static</span> <span class="kw">mut</span> STACK<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span> STACK_SIZE] <span class="op">=</span> [<span class="dv">0</span><span class="op">;</span> STACK_SIZE]<span class="op">;</span></span>
+<span id="cb31-12"><a href="#cb31-12"></a></span>
+<span id="cb31-13"><a href="#cb31-13"></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb31-14"><a href="#cb31-14"></a></span>
+<span id="cb31-15"><a href="#cb31-15"></a><span class="kw">pub</span> <span class="kw">fn</span> init_gdt() <span class="op">{</span></span>
+<span id="cb31-16"><a href="#cb31-16"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb31-17"><a href="#cb31-17"></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] <span class="op">=</span></span>
+<span id="cb31-18"><a href="#cb31-18"></a>            <span class="pp">x86_64::VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK) <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
+<span id="cb31-19"><a href="#cb31-19"></a>        <span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb31-20"><a href="#cb31-20"></a>        <span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb31-21"><a href="#cb31-21"></a>        GDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb31-22"><a href="#cb31-22"></a>        <span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
+<span id="cb31-23"><a href="#cb31-23"></a>        <span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
+<span id="cb31-24"><a href="#cb31-24"></a>        <span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span>
+<span id="cb31-25"><a href="#cb31-25"></a>    <span class="op">}</span></span>
+<span id="cb31-26"><a href="#cb31-26"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="insufficient" class="level2">
+<h2 class="anchored" data-anchor-id="insufficient">Insufficient</h2>
+<ul>
+<li>I still triple fault on this.</li>
+<li>Why?
+<ul>
+<li>We added a stack.</li>
+<li>We added it’s location to the GDT.</li>
+<li>We added a double fault handler, but</li>
+<li><em>We did not direct the double fault handler to change stacks</em>.</li>
+</ul></li>
+<li>We return to the handler (<strong>NOT</strong> the GDT) to update it…</li>
+</ul>
+</section>
+<section id="handle-it-3" class="level2">
+<h2 class="anchored" data-anchor-id="handle-it-3">Handle it</h2>
+<ul>
+<li>You probably have:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb32" data-filename="src/interrupt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb32-1"><a href="#cb32-1"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb32-2"><a href="#cb32-2"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb32-3"><a href="#cb32-3"></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb32-4"><a href="#cb32-4"></a>        IDT<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)<span class="op">;</span></span>
+<span id="cb32-5"><a href="#cb32-5"></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb32-6"><a href="#cb32-6"></a>    <span class="op">}</span></span>
+<span id="cb32-7"><a href="#cb32-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="update" class="level2">
+<h2 class="anchored" data-anchor-id="update">Update</h2>
+<ul>
+<li>Update to change a <em>stack index</em></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb33" data-filename="src/interrupt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb33-1"><a href="#cb33-1"></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb33-2"><a href="#cb33-2"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb33-3"><a href="#cb33-3"></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb33-4"><a href="#cb33-4"></a>        <span class="co">// This is from `cargo fmt`...</span></span>
+<span id="cb33-5"><a href="#cb33-5"></a>        IDT<span class="op">.</span>double_fault</span>
+<span id="cb33-6"><a href="#cb33-6"></a>            <span class="op">.</span>set_handler_fn(double_fault_handler)</span>
+<span id="cb33-7"><a href="#cb33-7"></a>            <span class="op">.</span>set_stack_index(<span class="kw">crate</span><span class="pp">::gdt::</span>DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">u16</span>)<span class="op">;</span></span>
+<span id="cb33-8"><a href="#cb33-8"></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb33-9"><a href="#cb33-9"></a>    <span class="op">}</span></span>
+<span id="cb33-10"><a href="#cb33-10"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="this-worked-for-me" class="level2">
 <h2 class="anchored" data-anchor-id="this-worked-for-me">This “worked” for me</h2>
-<div class="sourceCode" id="cb30"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1"></a><span class="ex">$</span> cargo t <span class="at">--test</span> overflow</span>
-<span id="cb30-2"><a href="#cb30-2"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="bu">test</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.03s</span></span>
-<span id="cb30-3"><a href="#cb30-3"></a>     <span class="ex">Running</span> tests/overflow.rs <span class="er">(</span><span class="ex">target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2</span><span class="kw">)</span></span>
-<span id="cb30-4"><a href="#cb30-4"></a><span class="ex">Building</span> bootloader</span>
-<span id="cb30-5"><a href="#cb30-5"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile [optimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.03s</span></span>
-<span id="cb30-6"><a href="#cb30-6"></a><span class="ex">Running:</span> <span class="kw">`</span><span class="ex">qemu-system-x86_64</span> <span class="at">-drive</span> format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin <span class="at">-no-reboot</span> <span class="at">-device</span> isa-debug-exit,iobase=0xf4,iosize=0x04 <span class="at">-serial</span> stdio <span class="at">-display</span> none<span class="kw">`</span></span>
-<span id="cb30-7"><a href="#cb30-7"></a><span class="ex">[Fail]</span></span>
-<span id="cb30-8"><a href="#cb30-8"></a></span>
-<span id="cb30-9"><a href="#cb30-9"></a><span class="ex">===</span> PanicInfo ===</span>
-<span id="cb30-10"><a href="#cb30-10"></a><span class="ex">panicked</span> at src/interrupts.rs:25:5:</span>
-<span id="cb30-11"><a href="#cb30-11"></a><span class="ex">EXCEPTION:</span> DOUBLE FAULT</span>
-<span id="cb30-12"><a href="#cb30-12"></a><span class="ex">InterruptStackFrame</span> {</span>
-<span id="cb30-13"><a href="#cb30-13"></a>    <span class="ex">instruction_pointer:</span> VirtAddr<span class="er">(</span></span>
-<span id="cb30-14"><a href="#cb30-14"></a>        <span class="ex">0x205cbb,</span></span>
-<span id="cb30-15"><a href="#cb30-15"></a>    <span class="kw">)</span><span class="ex">,</span></span>
-<span id="cb30-16"><a href="#cb30-16"></a>    <span class="ex">code_segment:</span> 8,</span>
-<span id="cb30-17"><a href="#cb30-17"></a>    <span class="ex">cpu_flags:</span> 0x6,</span>
-<span id="cb30-18"><a href="#cb30-18"></a>    <span class="ex">stack_pointer:</span> VirtAddr<span class="er">(</span></span>
-<span id="cb30-19"><a href="#cb30-19"></a>        <span class="ex">0x10000201f56,</span></span>
-<span id="cb30-20"><a href="#cb30-20"></a>    <span class="kw">)</span><span class="ex">,</span></span>
-<span id="cb30-21"><a href="#cb30-21"></a>    <span class="ex">stack_segment:</span> 0,</span>
-<span id="cb30-22"><a href="#cb30-22"></a><span class="er">}</span></span>
-<span id="cb30-23"><a href="#cb30-23"></a><span class="ex">=================</span></span>
-<span id="cb30-24"><a href="#cb30-24"></a></span>
-<span id="cb30-25"><a href="#cb30-25"></a><span class="ex">error:</span> test failed, to rerun pass <span class="kw">`</span><span class="ex">--test</span> overflow<span class="kw">`</span></span>
-<span id="cb30-26"><a href="#cb30-26"></a></span>
-<span id="cb30-27"><a href="#cb30-27"></a><span class="ex">Caused</span> by:</span>
-<span id="cb30-28"><a href="#cb30-28"></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)</span></span>
-<span id="cb30-29"><a href="#cb30-29"></a><span class="st">note: test exited abnormally; to see the full output pass --no-capture to the harness.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Prefer panic to boot loop.</li>
+</ul>
+<div class="sourceCode" id="cb34"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1"></a><span class="ex">panicked</span> at src/interrupts.rs:25:5:</span>
+<span id="cb34-2"><a href="#cb34-2"></a><span class="ex">EXCEPTION:</span> DOUBLE FAULT</span>
+<span id="cb34-3"><a href="#cb34-3"></a><span class="ex">InterruptStackFrame</span> {</span>
+<span id="cb34-4"><a href="#cb34-4"></a>    <span class="ex">instruction_pointer:</span> VirtAddr<span class="er">(</span></span>
+<span id="cb34-5"><a href="#cb34-5"></a>        <span class="ex">0x205cbb,</span></span>
+<span id="cb34-6"><a href="#cb34-6"></a>    <span class="kw">)</span><span class="ex">,</span></span>
+<span id="cb34-7"><a href="#cb34-7"></a>    <span class="ex">code_segment:</span> 8,</span>
+<span id="cb34-8"><a href="#cb34-8"></a>    <span class="ex">cpu_flags:</span> 0x6,</span>
+<span id="cb34-9"><a href="#cb34-9"></a>    <span class="ex">stack_pointer:</span> VirtAddr<span class="er">(</span></span>
+<span id="cb34-10"><a href="#cb34-10"></a>        <span class="ex">0x10000201f56,</span></span>
+<span id="cb34-11"><a href="#cb34-11"></a>    <span class="kw">)</span><span class="ex">,</span></span>
+<span id="cb34-12"><a href="#cb34-12"></a>    <span class="ex">stack_segment:</span> 0,</span>
+<span id="cb34-13"><a href="#cb34-13"></a><span class="er">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="tying-this-off" class="level2">
 <h2 class="anchored" data-anchor-id="tying-this-off">Tying this off</h2>
@@ -1484,8 +1563,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul></li>
 <li>You need to still:
 <ul>
-<li>Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.</li>
-<li>Good idea for an assignment.</li>
+<li>Create a test case</li>
+<li>Modify various handlers</li>
+<li>Exit successfully when double, rather than triple, faulting.</li>
+<li>Would’ve been this weeks HW.</li>
 </ul></li>
 </ul>
 </section>
@@ -1982,802 +2063,862 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb31" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb31-1"><a href="#cb31-1"></a><span class="co">---</span></span>
-<span id="cb31-2"><a href="#cb31-2"></a><span class="an">title:</span><span class="co"> Double</span></span>
-<span id="cb31-3"><a href="#cb31-3"></a><span class="co">---</span></span>
-<span id="cb31-4"><a href="#cb31-4"></a></span>
-<span id="cb31-5"><a href="#cb31-5"></a><span class="fu">## Announcements</span></span>
-<span id="cb31-6"><a href="#cb31-6"></a></span>
-<span id="cb31-7"><a href="#cb31-7"></a><span class="ss">- </span>**Action Items**:</span>
-<span id="cb31-8"><a href="#cb31-8"></a><span class="ss">  - </span>Testing done.</span>
-<span id="cb31-9"><a href="#cb31-9"></a><span class="ss">  - </span>First handler assigned, more to come.</span>
-<span id="cb31-10"><a href="#cb31-10"></a></span>
-<span id="cb31-11"><a href="#cb31-11"></a><span class="fu">## Citations</span></span>
-<span id="cb31-12"><a href="#cb31-12"></a></span>
-<span id="cb31-13"><a href="#cb31-13"></a><span class="ss">- </span>CPU exceptions are algorithmically interesting but technically tedious.</span>
-<span id="cb31-14"><a href="#cb31-14"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Double Faults</span><span class="co">](https://os.phil-opp.com/double-fault-exceptions/)</span></span>
-<span id="cb31-15"><a href="#cb31-15"></a></span>
-<span id="cb31-16"><a href="#cb31-16"></a><span class="fu">## Negation</span></span>
-<span id="cb31-17"><a href="#cb31-17"></a></span>
-<span id="cb31-18"><a href="#cb31-18"></a><span class="ss">- </span>Not to be confused with the <span class="in">`double`</span> type.</span>
-<span id="cb31-19"><a href="#cb31-19"></a><span class="ss">- </span>That is *floating point* type and *has no place* in an OS class.</span>
-<span id="cb31-20"><a href="#cb31-20"></a></span>
-<span id="cb31-21"><a href="#cb31-21"></a><span class="fu"># Recall</span></span>
-<span id="cb31-22"><a href="#cb31-22"></a></span>
-<span id="cb31-23"><a href="#cb31-23"></a><span class="fu">## Exceptions</span></span>
-<span id="cb31-24"><a href="#cb31-24"></a></span>
-<span id="cb31-25"><a href="#cb31-25"></a><span class="ss">- </span>CPU exceptions occur in various erroneous situations</span>
-<span id="cb31-26"><a href="#cb31-26"></a><span class="ss">    - </span>Accessing an invalid memory address</span>
-<span id="cb31-27"><a href="#cb31-27"></a><span class="ss">    - </span>Dividing by zero </span>
-<span id="cb31-28"><a href="#cb31-28"></a><span class="ss">- </span>We have to set up an _interrupt descriptor table_.. </span>
-<span id="cb31-29"><a href="#cb31-29"></a><span class="ss">- </span>This week, our kernel will be able to catch <span class="co">[</span><span class="ot">double faults</span><span class="co">](https://wiki.osdev.org/Exceptions#Breakpoint)</span>.</span>
-<span id="cb31-30"><a href="#cb31-30"></a></span>
-<span id="cb31-31"><a href="#cb31-31"></a><span class="fu">## Types</span></span>
-<span id="cb31-32"><a href="#cb31-32"></a></span>
-<span id="cb31-33"><a href="#cb31-33"></a>On x86, there are about 20 different CPU exception types.</span>
-<span id="cb31-34"><a href="#cb31-34"></a></span>
-<span id="cb31-35"><a href="#cb31-35"></a><span class="ss">- </span>**Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. </span>
-<span id="cb31-36"><a href="#cb31-36"></a><span class="ss">    - </span>This exception also occurs when there is no handler function registered for an exception.</span>
-<span id="cb31-37"><a href="#cb31-37"></a>    </span>
-<span id="cb31-38"><a href="#cb31-38"></a><span class="fu"># Handle It</span></span>
-<span id="cb31-39"><a href="#cb31-39"></a></span>
-<span id="cb31-40"><a href="#cb31-40"></a><span class="fu">## What is it?</span></span>
-<span id="cb31-41"><a href="#cb31-41"></a></span>
-<span id="cb31-42"><a href="#cb31-42"></a><span class="ss">- </span>A special exception that occurs when the CPU fails to invoke an exception handler. </span>
-<span id="cb31-43"><a href="#cb31-43"></a><span class="ss">- </span>For example, a page fault is triggered without a page fault handler registered in the IDT. </span>
-<span id="cb31-44"><a href="#cb31-44"></a></span>
-<span id="cb31-45"><a href="#cb31-45"></a><span class="fu">## Python</span></span>
-<span id="cb31-46"><a href="#cb31-46"></a></span>
-<span id="cb31-47"><a href="#cb31-47"></a><span class="ss">- </span>Perhaps a generalized exception.</span>
-<span id="cb31-48"><a href="#cb31-48"></a></span>
-<span id="cb31-51"><a href="#cb31-51"></a><span class="in">```{python}</span></span>
-<span id="cb31-52"><a href="#cb31-52"></a><span class="cf">try</span>:</span>
-<span id="cb31-53"><a href="#cb31-53"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
-<span id="cb31-54"><a href="#cb31-54"></a><span class="cf">except</span>:</span>
-<span id="cb31-55"><a href="#cb31-55"></a>    <span class="co">"Control flow diverts *regardless* of what goes wrong in the `try`"</span></span>
-<span id="cb31-56"><a href="#cb31-56"></a><span class="in">```</span></span>
-<span id="cb31-57"><a href="#cb31-57"></a></span>
-<span id="cb31-58"><a href="#cb31-58"></a><span class="fu">## Behavior</span></span>
-<span id="cb31-59"><a href="#cb31-59"></a></span>
-<span id="cb31-60"><a href="#cb31-60"></a><span class="ss">- </span>A double fault behaves like a normal exception. </span>
-<span id="cb31-61"><a href="#cb31-61"></a><span class="ss">- </span>It has the vector number <span class="in">`8`</span> and we can define a normal handler function for it in the IDT. </span>
-<span id="cb31-62"><a href="#cb31-62"></a><span class="ss">- </span>It is really important to provide a double fault handler, because if a double fault is unhandled, a fatal _triple fault_ occurs. </span>
-<span id="cb31-63"><a href="#cb31-63"></a><span class="ss">- </span>Triple faults can't be caught, and most hardware reacts with a system reset.</span>
-<span id="cb31-64"><a href="#cb31-64"></a></span>
-<span id="cb31-65"><a href="#cb31-65"></a><span class="fu">## Triggering a Double Fault</span></span>
-<span id="cb31-66"><a href="#cb31-66"></a></span>
-<span id="cb31-67"><a href="#cb31-67"></a><span class="ss">- </span>We don't have a page fault handler, so it will double (and triple) fault.</span>
-<span id="cb31-68"><a href="#cb31-68"></a></span>
-<span id="cb31-69"><a href="#cb31-69"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb31-70"><a href="#cb31-70"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb31-71"><a href="#cb31-71"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb31-72"><a href="#cb31-72"></a><span class="in">    osirs::init();</span></span>
-<span id="cb31-73"><a href="#cb31-73"></a><span class="in">    </span></span>
-<span id="cb31-74"><a href="#cb31-74"></a><span class="in">    unsafe { *(0xdeadbeef as *mut u8) = 42; };</span></span>
-<span id="cb31-75"><a href="#cb31-75"></a></span>
-<span id="cb31-76"><a href="#cb31-76"></a><span class="in">    #[cfg(test)]</span></span>
-<span id="cb31-77"><a href="#cb31-77"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
-<span id="cb31-78"><a href="#cb31-78"></a></span>
-<span id="cb31-79"><a href="#cb31-79"></a><span class="in">    loop {}</span></span>
-<span id="cb31-80"><a href="#cb31-80"></a><span class="in">}</span></span>
-<span id="cb31-81"><a href="#cb31-81"></a><span class="in">```</span></span>
-<span id="cb31-82"><a href="#cb31-82"></a></span>
-<span id="cb31-83"><a href="#cb31-83"></a><span class="fu">## Description</span></span>
-<span id="cb31-84"><a href="#cb31-84"></a></span>
-<span id="cb31-85"><a href="#cb31-85"></a><span class="ss">- </span>We use <span class="in">`unsafe`</span> to write to a literal. </span>
-<span id="cb31-86"><a href="#cb31-86"></a><span class="ss">- </span>This address lacks meaning.</span>
-<span id="cb31-87"><a href="#cb31-87"></a><span class="ss">    - </span>A virtual (software-visible) address.</span>
-<span id="cb31-88"><a href="#cb31-88"></a><span class="ss">    - </span>Regard as a key in key-value storage that maps software-visible addresses to hardware addresses (the MMU).</span>
-<span id="cb31-89"><a href="#cb31-89"></a><span class="ss">    - </span>The key is not present in the data structure.</span>
-<span id="cb31-90"><a href="#cb31-90"></a></span>
-<span id="cb31-91"><a href="#cb31-91"></a><span class="fu">## Result</span></span>
-<span id="cb31-92"><a href="#cb31-92"></a>    </span>
-<span id="cb31-93"><a href="#cb31-93"></a><span class="ss">- </span>So, when we attempt to assign a value based on that key, it explodes.</span>
-<span id="cb31-94"><a href="#cb31-94"></a><span class="ss">    - </span>The emulated device goes into a reboot loop.</span>
-<span id="cb31-95"><a href="#cb31-95"></a><span class="ss">- </span>Why?</span>
-<span id="cb31-96"><a href="#cb31-96"></a></span>
-<span id="cb31-97"><a href="#cb31-97"></a><span class="fu">## Steps </span></span>
-<span id="cb31-98"><a href="#cb31-98"></a></span>
-<span id="cb31-99"><a href="#cb31-99"></a>::: {.incremental}</span>
-<span id="cb31-100"><a href="#cb31-100"></a></span>
-<span id="cb31-101"><a href="#cb31-101"></a><span class="ss">1. </span>The CPU tries to write to <span class="in">`0xdeadbeef`</span>, which causes a page fault.</span>
-<span id="cb31-102"><a href="#cb31-102"></a><span class="ss">2. </span>The CPU indexes into the IDT for a page fault and no handler function is specified so a double fault occurs.</span>
-<span id="cb31-103"><a href="#cb31-103"></a><span class="ss">3. </span>The CPU indexes into the IDT for  double fault handler and no handler function is specified so a *triple* fault occurs.</span>
-<span id="cb31-104"><a href="#cb31-104"></a><span class="ss">4. </span>A triple fault is fatal. QEMU (or hardware) issues a system reset.</span>
-<span id="cb31-105"><a href="#cb31-105"></a></span>
-<span id="cb31-106"><a href="#cb31-106"></a>:::</span>
-<span id="cb31-107"><a href="#cb31-107"></a></span>
-<span id="cb31-108"><a href="#cb31-108"></a><span class="fu">## Handle it</span></span>
-<span id="cb31-109"><a href="#cb31-109"></a></span>
-<span id="cb31-110"><a href="#cb31-110"></a></span>
-<span id="cb31-111"><a href="#cb31-111"></a><span class="ss">- </span>To prevent this triple fault, we need to either:</span>
-<span id="cb31-112"><a href="#cb31-112"></a><span class="ss">    - </span>Provide a handler function for page faults, or </span>
-<span id="cb31-113"><a href="#cb31-113"></a><span class="ss">    - </span>Provide a double fault handler. </span>
-<span id="cb31-114"><a href="#cb31-114"></a><span class="ss">- </span>We want to avoid triple faults in **all** cases</span>
-<span id="cb31-115"><a href="#cb31-115"></a><span class="ss">    - </span>Let's start with a double fault handler.</span>
-<span id="cb31-116"><a href="#cb31-116"></a></span>
-<span id="cb31-117"><a href="#cb31-117"></a><span class="fu">## Throwback</span></span>
-<span id="cb31-118"><a href="#cb31-118"></a></span>
-<span id="cb31-119"><a href="#cb31-119"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
-<span id="cb31-120"><a href="#cb31-120"></a><span class="in">#![allow(static_mut_refs)]</span></span>
-<span id="cb31-121"><a href="#cb31-121"></a><span class="in">static mut IDT: x86_64::structures::idt::InterruptDescriptorTable =</span></span>
-<span id="cb31-122"><a href="#cb31-122"></a><span class="in">    x86_64::structures::idt::InterruptDescriptorTable::new();</span></span>
-<span id="cb31-123"><a href="#cb31-123"></a></span>
-<span id="cb31-124"><a href="#cb31-124"></a><span class="in">pub fn init_idt() {</span></span>
-<span id="cb31-125"><a href="#cb31-125"></a><span class="in">    unsafe {</span></span>
-<span id="cb31-126"><a href="#cb31-126"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
-<span id="cb31-127"><a href="#cb31-127"></a><span class="in">        IDT.load();</span></span>
-<span id="cb31-128"><a href="#cb31-128"></a><span class="in">    }</span></span>
-<span id="cb31-129"><a href="#cb31-129"></a><span class="in">}</span></span>
-<span id="cb31-130"><a href="#cb31-130"></a></span>
-<span id="cb31-131"><a href="#cb31-131"></a><span class="in">// Love these `cargo fmt` newlines</span></span>
-<span id="cb31-132"><a href="#cb31-132"></a><span class="in">extern "x86-interrupt" fn breakpoint_handler(</span></span>
-<span id="cb31-133"><a href="#cb31-133"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame,</span></span>
-<span id="cb31-134"><a href="#cb31-134"></a><span class="in">) {</span></span>
-<span id="cb31-135"><a href="#cb31-135"></a><span class="in">    crate::println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);</span></span>
-<span id="cb31-136"><a href="#cb31-136"></a><span class="in">}</span></span>
-<span id="cb31-137"><a href="#cb31-137"></a><span class="in">```</span></span>
-<span id="cb31-138"><a href="#cb31-138"></a></span>
-<span id="cb31-139"><a href="#cb31-139"></a><span class="fu">## Write a Handler</span></span>
-<span id="cb31-140"><a href="#cb31-140"></a></span>
-<span id="cb31-141"><a href="#cb31-141"></a><span class="ss">- </span>For now, just <span class="co">[</span><span class="ot">rip</span><span class="co">](https://theculturetrip.com/north-america/usa/portland/articles/why-is-portland-called-rip-city)</span> a panic.</span>
-<span id="cb31-142"><a href="#cb31-142"></a><span class="ss">    - </span>"Ah!" - that's what I sound like when I panic.</span>
-<span id="cb31-143"><a href="#cb31-143"></a><span class="ss">- </span>The handler has to diverge because the hardware doesn't allow returns from a double fault.</span>
-<span id="cb31-144"><a href="#cb31-144"></a><span class="ss">    - </span>After all, it's bad. Twice as bad, even.</span>
-<span id="cb31-145"><a href="#cb31-145"></a>    </span>
-<span id="cb31-146"><a href="#cb31-146"></a><span class="fu">## One Example</span></span>
-<span id="cb31-147"><a href="#cb31-147"></a></span>
-<span id="cb31-148"><a href="#cb31-148"></a><span class="ss">- </span>Short and sweet.</span>
-<span id="cb31-149"><a href="#cb31-149"></a>    </span>
-<span id="cb31-150"><a href="#cb31-150"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
-<span id="cb31-151"><a href="#cb31-151"></a><span class="in">extern "x86-interrupt" fn double_fault_handler(</span></span>
-<span id="cb31-152"><a href="#cb31-152"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame, _error_code: u64) -&gt; !</span></span>
-<span id="cb31-153"><a href="#cb31-153"></a><span class="in">{</span></span>
-<span id="cb31-154"><a href="#cb31-154"></a><span class="in">    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);</span></span>
-<span id="cb31-155"><a href="#cb31-155"></a><span class="in">}</span></span>
-<span id="cb31-156"><a href="#cb31-156"></a><span class="in">```</span></span>
-<span id="cb31-157"><a href="#cb31-157"></a></span>
-<span id="cb31-158"><a href="#cb31-158"></a><span class="fu">## Wait a minute</span></span>
-<span id="cb31-159"><a href="#cb31-159"></a></span>
-<span id="cb31-160"><a href="#cb31-160"></a><span class="ss">- </span>Blog, in its infinite wisdom, claims we can safely ignore the error code because "it's always zero".</span>
-<span id="cb31-161"><a href="#cb31-161"></a><span class="ss">- </span>I'll be the judge of that.</span>
-<span id="cb31-162"><a href="#cb31-162"></a></span>
-<span id="cb31-163"><a href="#cb31-163"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
-<span id="cb31-164"><a href="#cb31-164"></a><span class="in">extern "x86-interrupt" fn double_fault_handler(</span></span>
-<span id="cb31-165"><a href="#cb31-165"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame, error_code: u64) -&gt; !</span></span>
-<span id="cb31-166"><a href="#cb31-166"></a><span class="in">{</span></span>
-<span id="cb31-167"><a href="#cb31-167"></a><span class="in">    assert!(error_code == 0);</span></span>
-<span id="cb31-168"><a href="#cb31-168"></a><span class="in">    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);</span></span>
-<span id="cb31-169"><a href="#cb31-169"></a><span class="in">}</span></span>
-<span id="cb31-170"><a href="#cb31-170"></a><span class="in">```</span></span>
-<span id="cb31-171"><a href="#cb31-171"></a></span>
-<span id="cb31-172"><a href="#cb31-172"></a><span class="fu">## By the way</span></span>
-<span id="cb31-173"><a href="#cb31-173"></a></span>
-<span id="cb31-174"><a href="#cb31-174"></a><span class="ss">- </span>This is how it looks with <span class="in">`cargo fmt`</span></span>
-<span id="cb31-175"><a href="#cb31-175"></a></span>
-<span id="cb31-176"><a href="#cb31-176"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
-<span id="cb31-177"><a href="#cb31-177"></a><span class="in">extern "x86-interrupt" fn double_fault_handler(</span></span>
-<span id="cb31-178"><a href="#cb31-178"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame,</span></span>
-<span id="cb31-179"><a href="#cb31-179"></a><span class="in">    error_code: u64,</span></span>
-<span id="cb31-180"><a href="#cb31-180"></a><span class="in">) -&gt; ! {</span></span>
-<span id="cb31-181"><a href="#cb31-181"></a><span class="in">    assert!(error_code == 0);</span></span>
-<span id="cb31-182"><a href="#cb31-182"></a><span class="in">    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);</span></span>
-<span id="cb31-183"><a href="#cb31-183"></a><span class="in">}</span></span>
-<span id="cb31-184"><a href="#cb31-184"></a><span class="in">```</span></span>
-<span id="cb31-185"><a href="#cb31-185"></a></span>
-<span id="cb31-186"><a href="#cb31-186"></a><span class="fu">## I bet that works</span></span>
-<span id="cb31-187"><a href="#cb31-187"></a></span>
-<span id="cb31-188"><a href="#cb31-188"></a><span class="ss">- </span>It doesn't, run it.</span>
-<span id="cb31-189"><a href="#cb31-189"></a><span class="ss">- </span>Yet another reboot loop.</span>
-<span id="cb31-190"><a href="#cb31-190"></a><span class="ss">- </span>But we wrote a function!</span>
-<span id="cb31-191"><a href="#cb31-191"></a><span class="ss">    - </span>Friends - did we add it to our IDT?</span>
-<span id="cb31-192"><a href="#cb31-192"></a>   </span>
-<span id="cb31-193"><a href="#cb31-193"></a><span class="fu">## Update Init</span></span>
-<span id="cb31-194"><a href="#cb31-194"></a></span>
-<span id="cb31-195"><a href="#cb31-195"></a><span class="ss">- </span>This should do it!</span>
-<span id="cb31-196"><a href="#cb31-196"></a></span>
-<span id="cb31-197"><a href="#cb31-197"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
-<span id="cb31-198"><a href="#cb31-198"></a><span class="in">pub fn init_idt() {</span></span>
-<span id="cb31-199"><a href="#cb31-199"></a><span class="in">    unsafe {</span></span>
-<span id="cb31-200"><a href="#cb31-200"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
-<span id="cb31-201"><a href="#cb31-201"></a><span class="in">        IDT.double_fault.set_handler_fn(double_fault_handler);</span></span>
-<span id="cb31-202"><a href="#cb31-202"></a><span class="in">        IDT.load();</span></span>
-<span id="cb31-203"><a href="#cb31-203"></a><span class="in">    }</span></span>
-<span id="cb31-204"><a href="#cb31-204"></a><span class="in">}</span></span>
-<span id="cb31-205"><a href="#cb31-205"></a><span class="in">```</span></span>
-<span id="cb31-206"><a href="#cb31-206"></a></span>
-<span id="cb31-207"><a href="#cb31-207"></a><span class="fu"># Test it</span></span>
-<span id="cb31-208"><a href="#cb31-208"></a></span>
-<span id="cb31-209"><a href="#cb31-209"></a><span class="fu">## Behind the Curtain</span></span>
-<span id="cb31-210"><a href="#cb31-210"></a></span>
-<span id="cb31-211"><a href="#cb31-211"></a><span class="ss">- </span>Typically at this point I would show you what QEMU looks like at this time.</span>
-<span id="cb31-212"><a href="#cb31-212"></a><span class="ss">- </span>I can trivially do that with the screendump-&gt;ppm2png-&gt;base64-&gt;html pipeline.</span>
-<span id="cb31-213"><a href="#cb31-213"></a><span class="ss">- </span>It is much cooler to just dump the error message to console.</span>
-<span id="cb31-214"><a href="#cb31-214"></a><span class="ss">- </span>But how?</span>
-<span id="cb31-215"><a href="#cb31-215"></a></span>
-<span id="cb31-216"><a href="#cb31-216"></a><span class="fu">## For Serial</span></span>
-<span id="cb31-217"><a href="#cb31-217"></a></span>
-<span id="cb31-218"><a href="#cb31-218"></a><span class="ss">- </span>Naturally, we can write to console via the serial port from out test environment.</span>
-<span id="cb31-219"><a href="#cb31-219"></a><span class="ss">- </span>So, let's quickly write a test case for the double-fault handler.</span>
-<span id="cb31-220"><a href="#cb31-220"></a><span class="ss">- </span>It is basically a glorified <span class="in">`should_panic.rs`</span>.</span>
-<span id="cb31-221"><a href="#cb31-221"></a></span>
-<span id="cb31-222"><a href="#cb31-222"></a><span class="in">```{.sh}</span></span>
-<span id="cb31-223"><a href="#cb31-223"></a><span class="in">cp tests/should_panic.rs tests/double.rs</span></span>
-<span id="cb31-224"><a href="#cb31-224"></a><span class="in">```</span></span>
-<span id="cb31-225"><a href="#cb31-225"></a></span>
-<span id="cb31-226"><a href="#cb31-226"></a><span class="fu">## What I start with</span></span>
-<span id="cb31-227"><a href="#cb31-227"></a></span>
-<span id="cb31-228"><a href="#cb31-228"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
-<span id="cb31-229"><a href="#cb31-229"></a><span class="in">#![no_std]</span></span>
-<span id="cb31-230"><a href="#cb31-230"></a><span class="in">#![no_main]</span></span>
-<span id="cb31-231"><a href="#cb31-231"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
-<span id="cb31-232"><a href="#cb31-232"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
-<span id="cb31-233"><a href="#cb31-233"></a></span>
-<span id="cb31-234"><a href="#cb31-234"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb31-235"><a href="#cb31-235"></a><span class="in">fn test_panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb31-236"><a href="#cb31-236"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
-<span id="cb31-237"><a href="#cb31-237"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
-<span id="cb31-238"><a href="#cb31-238"></a><span class="in">    loop {}</span></span>
-<span id="cb31-239"><a href="#cb31-239"></a><span class="in">}</span></span>
-<span id="cb31-240"><a href="#cb31-240"></a></span>
-<span id="cb31-241"><a href="#cb31-241"></a><span class="in">fn bad() {</span></span>
-<span id="cb31-242"><a href="#cb31-242"></a><span class="in">    assert!(false);</span></span>
-<span id="cb31-243"><a href="#cb31-243"></a><span class="in">}</span></span>
-<span id="cb31-244"><a href="#cb31-244"></a></span>
-<span id="cb31-245"><a href="#cb31-245"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb31-246"><a href="#cb31-246"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb31-247"><a href="#cb31-247"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
-<span id="cb31-248"><a href="#cb31-248"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
-<span id="cb31-249"><a href="#cb31-249"></a><span class="in">    loop {}</span></span>
-<span id="cb31-250"><a href="#cb31-250"></a><span class="in">}</span></span>
-<span id="cb31-251"><a href="#cb31-251"></a><span class="in">```</span></span>
-<span id="cb31-252"><a href="#cb31-252"></a></span>
-<span id="cb31-253"><a href="#cb31-253"></a><span class="fu">## Changes</span></span>
-<span id="cb31-254"><a href="#cb31-254"></a></span>
-<span id="cb31-255"><a href="#cb31-255"></a><span class="ss">- </span>We want to:</span>
-<span id="cb31-256"><a href="#cb31-256"></a><span class="ss">    - </span>Print the error message via <span class="in">`serial_println!`</span></span>
-<span id="cb31-257"><a href="#cb31-257"></a><span class="ss">    - </span>Hit a panic from within a double-fault handler.</span>
-<span id="cb31-258"><a href="#cb31-258"></a><span class="ss">- </span>Easy enough, we'll just also <span class="in">`init`</span> and then modify the panic handler.</span>
-<span id="cb31-259"><a href="#cb31-259"></a><span class="ss">    - </span>(We'll change it back once we get the text out.)</span>
-<span id="cb31-260"><a href="#cb31-260"></a>    </span>
-<span id="cb31-261"><a href="#cb31-261"></a><span class="fu">## Change `bad`</span></span>
-<span id="cb31-262"><a href="#cb31-262"></a></span>
-<span id="cb31-263"><a href="#cb31-263"></a><span class="ss">- </span>Was:</span>
-<span id="cb31-264"><a href="#cb31-264"></a></span>
-<span id="cb31-265"><a href="#cb31-265"></a><span class="in">```{.rs filename="test/should_panic.rs"}</span></span>
-<span id="cb31-266"><a href="#cb31-266"></a><span class="in">fn bad() {</span></span>
-<span id="cb31-267"><a href="#cb31-267"></a><span class="in">    assert!(false);</span></span>
-<span id="cb31-268"><a href="#cb31-268"></a><span class="in">}</span></span>
-<span id="cb31-269"><a href="#cb31-269"></a><span class="in">```</span></span>
-<span id="cb31-270"><a href="#cb31-270"></a></span>
-<span id="cb31-271"><a href="#cb31-271"></a><span class="ss">- </span>Is now:</span>
-<span id="cb31-272"><a href="#cb31-272"></a></span>
-<span id="cb31-273"><a href="#cb31-273"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
-<span id="cb31-274"><a href="#cb31-274"></a><span class="in">fn bad() {</span></span>
-<span id="cb31-275"><a href="#cb31-275"></a><span class="in">    unsafe { *(0xdeadbeef as *mut u8) = 42; };</span></span>
-<span id="cb31-276"><a href="#cb31-276"></a><span class="in">}</span></span>
-<span id="cb31-277"><a href="#cb31-277"></a><span class="in">```</span></span>
-<span id="cb31-278"><a href="#cb31-278"></a></span>
-<span id="cb31-279"><a href="#cb31-279"></a><span class="in">    </span></span>
-<span id="cb31-280"><a href="#cb31-280"></a><span class="fu">## Change `panic`</span></span>
-<span id="cb31-281"><a href="#cb31-281"></a></span>
-<span id="cb31-282"><a href="#cb31-282"></a><span class="ss">- </span>Was:</span>
-<span id="cb31-283"><a href="#cb31-283"></a></span>
-<span id="cb31-284"><a href="#cb31-284"></a><span class="in">```{.rs filename="test/should_panic.rs"}</span></span>
-<span id="cb31-285"><a href="#cb31-285"></a><span class="in">fn test_panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb31-286"><a href="#cb31-286"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
-<span id="cb31-287"><a href="#cb31-287"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
-<span id="cb31-288"><a href="#cb31-288"></a><span class="in">    loop {}</span></span>
-<span id="cb31-289"><a href="#cb31-289"></a><span class="in">}</span></span>
-<span id="cb31-290"><a href="#cb31-290"></a><span class="in">```</span></span>
-<span id="cb31-291"><a href="#cb31-291"></a></span>
-<span id="cb31-292"><a href="#cb31-292"></a><span class="ss">- </span>Is now:</span>
-<span id="cb31-293"><a href="#cb31-293"></a></span>
-<span id="cb31-294"><a href="#cb31-294"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
-<span id="cb31-295"><a href="#cb31-295"></a><span class="in">fn test_panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
-<span id="cb31-296"><a href="#cb31-296"></a><span class="in">    osirs::serial_println!("{}", info);</span></span>
-<span id="cb31-297"><a href="#cb31-297"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
-<span id="cb31-298"><a href="#cb31-298"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
-<span id="cb31-299"><a href="#cb31-299"></a><span class="in">    loop {}</span></span>
-<span id="cb31-300"><a href="#cb31-300"></a><span class="in">}</span></span>
-<span id="cb31-301"><a href="#cb31-301"></a><span class="in">```</span></span>
-<span id="cb31-302"><a href="#cb31-302"></a></span>
-<span id="cb31-303"><a href="#cb31-303"></a><span class="fu">## Change `_start`</span></span>
-<span id="cb31-304"><a href="#cb31-304"></a></span>
-<span id="cb31-305"><a href="#cb31-305"></a><span class="ss">- </span>Was:</span>
-<span id="cb31-306"><a href="#cb31-306"></a></span>
-<span id="cb31-307"><a href="#cb31-307"></a><span class="in">```{.rs filename="test/should_panic.rs"}</span></span>
-<span id="cb31-308"><a href="#cb31-308"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb31-309"><a href="#cb31-309"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
-<span id="cb31-310"><a href="#cb31-310"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
-<span id="cb31-311"><a href="#cb31-311"></a><span class="in">    loop {}</span></span>
-<span id="cb31-312"><a href="#cb31-312"></a><span class="in">}</span></span>
-<span id="cb31-313"><a href="#cb31-313"></a><span class="in">```</span></span>
-<span id="cb31-314"><a href="#cb31-314"></a></span>
-<span id="cb31-315"><a href="#cb31-315"></a><span class="ss">- </span>Is now:</span>
-<span id="cb31-316"><a href="#cb31-316"></a></span>
-<span id="cb31-317"><a href="#cb31-317"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
-<span id="cb31-318"><a href="#cb31-318"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb31-319"><a href="#cb31-319"></a><span class="in">    osirs::init();</span></span>
-<span id="cb31-320"><a href="#cb31-320"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
-<span id="cb31-321"><a href="#cb31-321"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
-<span id="cb31-322"><a href="#cb31-322"></a><span class="in">    loop {}</span></span>
-<span id="cb31-323"><a href="#cb31-323"></a><span class="in">}</span></span>
-<span id="cb31-324"><a href="#cb31-324"></a><span class="in">```</span></span>
-<span id="cb31-325"><a href="#cb31-325"></a></span>
-<span id="cb31-326"><a href="#cb31-326"></a><span class="fu">## The Stack Frame:</span></span>
-<span id="cb31-327"><a href="#cb31-327"></a></span>
-<span id="cb31-328"><a href="#cb31-328"></a><span class="ss">- </span>I didn't have to manually type this:</span>
-<span id="cb31-329"><a href="#cb31-329"></a></span>
-<span id="cb31-330"><a href="#cb31-330"></a><span class="in">```{.sh}</span></span>
-<span id="cb31-331"><a href="#cb31-331"></a><span class="in">InterruptStackFrame {</span></span>
-<span id="cb31-332"><a href="#cb31-332"></a><span class="in">    instruction_pointer: VirtAddr(</span></span>
-<span id="cb31-333"><a href="#cb31-333"></a><span class="in">        0x203a4c,</span></span>
-<span id="cb31-334"><a href="#cb31-334"></a><span class="in">    ),</span></span>
-<span id="cb31-335"><a href="#cb31-335"></a><span class="in">    code_segment: 8,</span></span>
-<span id="cb31-336"><a href="#cb31-336"></a><span class="in">    cpu_flags: 0x2,</span></span>
-<span id="cb31-337"><a href="#cb31-337"></a><span class="in">    stack_pointer: VirtAddr(</span></span>
-<span id="cb31-338"><a href="#cb31-338"></a><span class="in">        0x10000201f40,</span></span>
-<span id="cb31-339"><a href="#cb31-339"></a><span class="in">    ),</span></span>
-<span id="cb31-340"><a href="#cb31-340"></a><span class="in">    stack_segment: 0,</span></span>
-<span id="cb31-341"><a href="#cb31-341"></a><span class="in">}</span></span>
-<span id="cb31-342"><a href="#cb31-342"></a><span class="in">```</span></span>
-<span id="cb31-343"><a href="#cb31-343"></a></span>
-<span id="cb31-344"><a href="#cb31-344"></a><span class="fu">## Clean up</span></span>
-<span id="cb31-345"><a href="#cb31-345"></a></span>
-<span id="cb31-346"><a href="#cb31-346"></a><span class="ss">- </span>I kept the test and just reverted the panic handler.</span>
-<span id="cb31-347"><a href="#cb31-347"></a><span class="ss">    - </span>Actually, maybe that variant should be factored to <span class="in">`src/lib.rs`</span></span>
-<span id="cb31-348"><a href="#cb31-348"></a><span class="ss">    - </span>Software engineering... it's everywhere...</span>
-<span id="cb31-349"><a href="#cb31-349"></a><span class="ss">- </span>(Do this on your own time).</span>
-<span id="cb31-350"><a href="#cb31-350"></a><span class="ss">- </span>(Also stop using the test runner on singleton tests).</span>
-<span id="cb31-351"><a href="#cb31-351"></a></span>
-<span id="cb31-352"><a href="#cb31-352"></a><span class="fu"># Back to Work</span></span>
-<span id="cb31-353"><a href="#cb31-353"></a></span>
-<span id="cb31-354"><a href="#cb31-354"></a><span class="fu">## What happened?</span></span>
-<span id="cb31-355"><a href="#cb31-355"></a></span>
-<span id="cb31-356"><a href="#cb31-356"></a>::: {.incremental}</span>
-<span id="cb31-357"><a href="#cb31-357"></a></span>
-<span id="cb31-358"><a href="#cb31-358"></a><span class="ss">1. </span>The CPU tries to write to <span class="in">`0xdeadbeef`</span>, which causes a page fault.</span>
-<span id="cb31-359"><a href="#cb31-359"></a><span class="ss">2. </span>Like before, the CPU looks at the corresponding entry in the IDT and sees that no handler function is defined. Thus, a double fault occurs.</span>
-<span id="cb31-360"><a href="#cb31-360"></a><span class="ss">3. </span>The CPU jumps to the – now present – double fault handler.</span>
-<span id="cb31-361"><a href="#cb31-361"></a></span>
-<span id="cb31-362"><a href="#cb31-362"></a>:::</span>
-<span id="cb31-363"><a href="#cb31-363"></a></span>
-<span id="cb31-364"><a href="#cb31-364"></a><span class="fu">## Vegan</span></span>
-<span id="cb31-365"><a href="#cb31-365"></a></span>
-<span id="cb31-366"><a href="#cb31-366"></a><span class="ss">- </span>Like me, the CPU now abstains from dead beef.</span>
-<span id="cb31-367"><a href="#cb31-367"></a><span class="ss">- </span>The triple fault (and the boot-loop) no longer occurs, since the CPU can now call the double fault handler.</span>
-<span id="cb31-368"><a href="#cb31-368"></a><span class="ss">- </span>Now we're all done!</span>
-<span id="cb31-369"><a href="#cb31-369"></a><span class="ss">    - </span>(We aren't)</span>
-<span id="cb31-370"><a href="#cb31-370"></a>    </span>
-<span id="cb31-371"><a href="#cb31-371"></a><span class="fu">## Complications</span></span>
-<span id="cb31-372"><a href="#cb31-372"></a></span>
-<span id="cb31-373"><a href="#cb31-373"></a><span class="ss">- </span>We have now caught *a* (singular, one) double fault.</span>
-<span id="cb31-374"><a href="#cb31-374"></a><span class="ss">    - </span>And a contrived one at that!</span>
-<span id="cb31-375"><a href="#cb31-375"></a><span class="ss">- </span>It so happens there are other things that can also go wrong with computers.</span>
-<span id="cb31-376"><a href="#cb31-376"></a><span class="ss">    - </span>Do any of you remember the infinite recursion implementation that could've been SO COOL if Rust was just normal about it.</span>
-<span id="cb31-377"><a href="#cb31-377"></a>    </span>
-<span id="cb31-378"><a href="#cb31-378"></a><span class="fu">## Causes of Double Faults</span></span>
-<span id="cb31-379"><a href="#cb31-379"></a></span>
-<span id="cb31-380"><a href="#cb31-380"></a><span class="ss">- </span>Before we look at the special cases, we need to know the exact causes of double faults. </span>
-<span id="cb31-381"><a href="#cb31-381"></a><span class="ss">- </span>Above, we used a pretty vague definition:</span>
-<span id="cb31-382"><a href="#cb31-382"></a></span>
-<span id="cb31-383"><a href="#cb31-383"></a><span class="at">&gt; A double fault is a special exception that occurs when the CPU fails to invoke an exception handler.</span></span>
-<span id="cb31-384"><a href="#cb31-384"></a></span>
-<span id="cb31-385"><a href="#cb31-385"></a><span class="fu">## Failure</span></span>
-<span id="cb31-386"><a href="#cb31-386"></a></span>
-<span id="cb31-387"><a href="#cb31-387"></a><span class="ss">- </span>What does _“fails to invoke”_ mean exactly? </span>
-<span id="cb31-388"><a href="#cb31-388"></a><span class="ss">- </span>The handler is not present? </span>
-<span id="cb31-389"><a href="#cb31-389"></a><span class="ss">- </span>The handler is swapped out? </span>
-<span id="cb31-390"><a href="#cb31-390"></a><span class="ss">- </span>And what happens if a handler causes exceptions itself?</span>
-<span id="cb31-391"><a href="#cb31-391"></a></span>
-<span id="cb31-392"><a href="#cb31-392"></a><span class="fu"># Aside: Swaps</span></span>
-<span id="cb31-393"><a href="#cb31-393"></a></span>
-<span id="cb31-394"><a href="#cb31-394"></a><span class="fu">## Swap 1</span></span>
-<span id="cb31-395"><a href="#cb31-395"></a></span>
-<span id="cb31-396"><a href="#cb31-396"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In the 1960s, swapping was an early memory management technique. An entire program or entire segment would be "swapped out" (or "rolled out") from Random-access memory (RAM) to disk or drum, and another one would be swapped in (or rolled in).</span><span class="co">](https://en.wikipedia.org/wiki/Memory_paging)</span></span>
-<span id="cb31-397"><a href="#cb31-397"></a></span>
-<span id="cb31-398"><a href="#cb31-398"></a></span>
-<span id="cb31-399"><a href="#cb31-399"></a><span class="fu">## Swap 2</span></span>
-<span id="cb31-400"><a href="#cb31-400"></a></span>
-<span id="cb31-401"><a href="#cb31-401"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">A swapped-out program would be current but its execution would be suspended while the RAM was in use by another program; a program with a swapped-out segment could continue running until it needed that segment, at which point it would be suspended until the segment was swapped in.</span><span class="co">](https://en.wikipedia.org/wiki/Memory_paging)</span></span>
-<span id="cb31-402"><a href="#cb31-402"></a></span>
-<span id="cb31-403"><a href="#cb31-403"></a><span class="fu">## Swap 3</span></span>
-<span id="cb31-404"><a href="#cb31-404"></a></span>
-<span id="cb31-405"><a href="#cb31-405"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">*Swap space* in Linux is used when the amount of physical memory (RAM) is full. If the system needs more memory resources and the RAM is full, inactive pages in memory are moved to the swap space. While swap space can help machines with a small amount of RAM, it should not be considered a replacement for more RAM.</span><span class="co">](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-swapspace)</span></span>
-<span id="cb31-406"><a href="#cb31-406"></a></span>
-<span id="cb31-407"><a href="#cb31-407"></a></span>
-<span id="cb31-408"><a href="#cb31-408"></a><span class="fu">## Swap 4</span></span>
-<span id="cb31-409"><a href="#cb31-409"></a></span>
-<span id="cb31-410"><a href="#cb31-410"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">Swap space is located on hard drives, which have a slower access time than physical memory. Swap space can be a dedicated swap partition (recommended), a swap file, or a combination of swap partitions and swap files.</span><span class="co">](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-swapspace)</span></span>
-<span id="cb31-411"><a href="#cb31-411"></a></span>
-<span id="cb31-412"><a href="#cb31-412"></a><span class="fu">## Swap 5</span></span>
-<span id="cb31-413"><a href="#cb31-413"></a></span>
-<span id="cb31-414"><a href="#cb31-414"></a><span class="ss">- </span>I had to increase my swap space that time I was dumping QEMU traces to text files and filled my harddrive.</span>
-<span id="cb31-415"><a href="#cb31-415"></a><span class="ss">- </span>I don't remember what I did exactly.</span>
-<span id="cb31-416"><a href="#cb31-416"></a><span class="ss">- </span>Here's a <span class="co">[</span><span class="ot">Stack Overflow question</span><span class="co">](https://askubuntu.com/questions/159783/how-do-i-find-out-if-i-have-a-swap-partition-on-my-hard-drive)</span></span>
-<span id="cb31-417"><a href="#cb31-417"></a></span>
-<span id="cb31-418"><a href="#cb31-418"></a><span class="in">```{.sh}</span></span>
-<span id="cb31-419"><a href="#cb31-419"></a><span class="in">$ free -m</span></span>
-<span id="cb31-420"><a href="#cb31-420"></a><span class="in">               total        used        free      shared  buff/cache   available</span></span>
-<span id="cb31-421"><a href="#cb31-421"></a><span class="in">Mem:            15Gi       597Mi        14Gi       6.0Mi       913Mi        14Gi</span></span>
-<span id="cb31-422"><a href="#cb31-422"></a><span class="in">Swap:          4.0Gi          0B       4.0Gi</span></span>
-<span id="cb31-423"><a href="#cb31-423"></a><span class="in">$ cat /proc/swaps</span></span>
-<span id="cb31-424"><a href="#cb31-424"></a><span class="in">Filename                                Type            Size            Used            Priority</span></span>
-<span id="cb31-425"><a href="#cb31-425"></a><span class="in">/dev/sdc                                partition       4194304         0               -2</span></span>
-<span id="cb31-426"><a href="#cb31-426"></a><span class="in">```</span></span>
-<span id="cb31-427"><a href="#cb31-427"></a></span>
-<span id="cb31-428"><a href="#cb31-428"></a><span class="fu">## Swap 6</span></span>
-<span id="cb31-429"><a href="#cb31-429"></a></span>
-<span id="cb31-430"><a href="#cb31-430"></a><span class="ss">- </span>This tutorial seems fine.</span>
-<span id="cb31-431"><a href="#cb31-431"></a><span class="ss">- </span><span class="co">[</span><span class="ot">How to increase the size of your swapfile</span><span class="co">](https://arcolinux.com/how-to-increase-the-size-of-your-swapfile/)</span></span>
-<span id="cb31-432"><a href="#cb31-432"></a><span class="ss">- </span>Go to the QUAD center and bother a Linux lifestylist</span>
-<span id="cb31-433"><a href="#cb31-433"></a></span>
-<span id="cb31-434"><a href="#cb31-434"></a><span class="fu"># Back to Work</span></span>
-<span id="cb31-435"><a href="#cb31-435"></a></span>
-<span id="cb31-436"><a href="#cb31-436"></a><span class="fu">## Handling Problems</span></span>
-<span id="cb31-437"><a href="#cb31-437"></a></span>
-<span id="cb31-438"><a href="#cb31-438"></a>::: {.incremental}</span>
-<span id="cb31-439"><a href="#cb31-439"></a></span>
-<span id="cb31-440"><a href="#cb31-440"></a><span class="ss">1. </span>What if a breakpoint exception occurs, but the handler function is swapped out?</span>
-<span id="cb31-441"><a href="#cb31-441"></a><span class="ss">2. </span>What if a page fault occurs, but the handler is swapped out?</span>
-<span id="cb31-442"><a href="#cb31-442"></a><span class="ss">3. </span>What if a divide-by-zero handler causes a breakpoint exception, but the breakpoint handler is swapped out?</span>
-<span id="cb31-443"><a href="#cb31-443"></a><span class="ss">4. </span>What if our kernel overflows its stack and the _guard page_ is hit?</span>
-<span id="cb31-444"><a href="#cb31-444"></a></span>
-<span id="cb31-445"><a href="#cb31-445"></a>:::</span>
-<span id="cb31-446"><a href="#cb31-446"></a></span>
-<span id="cb31-447"><a href="#cb31-447"></a><span class="fu">## Read the Docs!</span></span>
-<span id="cb31-448"><a href="#cb31-448"></a></span>
-<span id="cb31-449"><a href="#cb31-449"></a><span class="ss">- </span>The <span class="co">[</span><span class="ot">AMD64 manual</span><span class="co">](https://www.amd.com/system/files/TechDocs/24593.pdf)</span>, a real thing that actually exists, is also actually helpful here.</span>
-<span id="cb31-450"><a href="#cb31-450"></a><span class="ss">- </span>Wait that link is broken.</span>
-<span id="cb31-451"><a href="#cb31-451"></a><span class="ss">- </span>We'll trust the blog.</span>
-<span id="cb31-452"><a href="#cb31-452"></a></span>
-<span id="cb31-453"><a href="#cb31-453"></a><span class="at">&gt; a double fault exception _can_ occur when a second exception occurs during the handling of a prior (first) exception handler</span></span>
-<span id="cb31-454"><a href="#cb31-454"></a></span>
-<span id="cb31-455"><a href="#cb31-455"></a><span class="fu">## Combo {.smaller}</span></span>
-<span id="cb31-456"><a href="#cb31-456"></a></span>
-<span id="cb31-457"><a href="#cb31-457"></a></span>
-<span id="cb31-458"><a href="#cb31-458"></a>| First Exception                                                                                                       | Second Exception                                                                                                  |</span>
-<span id="cb31-459"><a href="#cb31-459"></a>| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |</span>
-<span id="cb31-460"><a href="#cb31-460"></a>| Divide-by-zero,&lt;br&gt;Invalid TSS,&lt;br&gt;Segment Not Present,&lt;br&gt;Stack-Segment Fault,&lt;br&gt;General Protection Fault | &lt;br&gt;Invalid TSS,&lt;br&gt;Segment Not Present,&lt;br&gt;Stack-Segment Fault,&lt;br&gt;General Protection Fault                  |</span>
-<span id="cb31-461"><a href="#cb31-461"></a>| Page Fault                                                                                                          | Page Fault,&lt;br&gt;Invalid TSS,&lt;br&gt;Segment Not Present,&lt;br&gt;Stack-Segment Fault,&lt;br&gt;General Protection Fault |</span>
-<span id="cb31-462"><a href="#cb31-462"></a></span>
-<span id="cb31-463"><a href="#cb31-463"></a></span>
-<span id="cb31-464"><a href="#cb31-464"></a><span class="fu">## Examples</span></span>
-<span id="cb31-465"><a href="#cb31-465"></a></span>
-<span id="cb31-466"><a href="#cb31-466"></a><span class="ss">- </span>A divide-by-zero fault followed by a page fault is fine.</span>
-<span id="cb31-467"><a href="#cb31-467"></a><span class="ss">    - </span>The page fault handler is invoked.</span>
-<span id="cb31-468"><a href="#cb31-468"></a><span class="ss">- </span>A divide-by-zero fault followed by a general-protection fault is not.</span>
-<span id="cb31-469"><a href="#cb31-469"></a><span class="ss">    - </span>Leads to a double fault.</span>
-<span id="cb31-470"><a href="#cb31-470"></a><span class="ss">    - </span>Security hat on: a user-mode program may be attempting privilege escalation.</span>
-<span id="cb31-471"><a href="#cb31-471"></a>    </span>
-<span id="cb31-472"><a href="#cb31-472"></a><span class="fu">## We Now Know 1</span></span>
-<span id="cb31-473"><a href="#cb31-473"></a></span>
-<span id="cb31-474"><a href="#cb31-474"></a><span class="ss">- </span>If a breakpoint exception occurs and the corresponding handler function is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.</span>
-<span id="cb31-475"><a href="#cb31-475"></a><span class="ss">- </span>If a page fault occurs and the page fault handler is swapped out, a _double fault_ occurs and the _double fault handler_ is invoked.</span>
-<span id="cb31-476"><a href="#cb31-476"></a></span>
-<span id="cb31-477"><a href="#cb31-477"></a><span class="fu">## We Now Know 2</span></span>
-<span id="cb31-478"><a href="#cb31-478"></a></span>
-<span id="cb31-479"><a href="#cb31-479"></a><span class="ss">- </span>If a divide-by-zero handler causes a breakpoint exception, the CPU tries to invoke the breakpoint handler. </span>
-<span id="cb31-480"><a href="#cb31-480"></a><span class="ss">- </span>If the breakpoint handler is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.</span>
-<span id="cb31-481"><a href="#cb31-481"></a></span>
-<span id="cb31-482"><a href="#cb31-482"></a><span class="fu">## Another case</span></span>
-<span id="cb31-483"><a href="#cb31-483"></a></span>
-<span id="cb31-484"><a href="#cb31-484"></a><span class="ss">- </span>An exception without a handler function in the IDT:</span>
-<span id="cb31-485"><a href="#cb31-485"></a><span class="ss">    - </span>CPU derefs the corresponding IDT entry. </span>
-<span id="cb31-486"><a href="#cb31-486"></a><span class="ss">    - </span>The entry is invalid so a _general protection fault_ occurs. </span>
-<span id="cb31-487"><a href="#cb31-487"></a><span class="ss">    - </span>We lack a general protection fault handler, so *another* general protection fault occurs. </span>
-<span id="cb31-488"><a href="#cb31-488"></a><span class="ss">    - </span>This leads to a double fault.</span>
-<span id="cb31-489"><a href="#cb31-489"></a>    </span>
-<span id="cb31-490"><a href="#cb31-490"></a><span class="fu">## Four!</span></span>
-<span id="cb31-491"><a href="#cb31-491"></a></span>
-<span id="cb31-492"><a href="#cb31-492"></a>Let's look at the fourth question:</span>
-<span id="cb31-493"><a href="#cb31-493"></a></span>
-<span id="cb31-494"><a href="#cb31-494"></a><span class="at">&gt; What happens if our kernel overflows its stack and the guard page is hit?</span></span>
-<span id="cb31-495"><a href="#cb31-495"></a></span>
-<span id="cb31-496"><a href="#cb31-496"></a><span class="fu">## En Garde!</span></span>
-<span id="cb31-497"><a href="#cb31-497"></a></span>
-<span id="cb31-498"><a href="#cb31-498"></a><span class="ss">- </span>A guard page denotes the bottom of a stack to detect stack overflows. </span>
-<span id="cb31-499"><a href="#cb31-499"></a><span class="ss">- </span>The page is not mapped to *any* physical frame, so accessing page faults. </span>
-<span id="cb31-500"><a href="#cb31-500"></a><span class="ss">    - </span>It is the idea of memory that doesn't exist.</span>
-<span id="cb31-501"><a href="#cb31-501"></a><span class="ss">    - </span>The Rust <span class="in">`option`</span> would've been great here!</span>
-<span id="cb31-502"><a href="#cb31-502"></a><span class="ss">- </span>The bootloader sets up a guard page so overflow causes a _page fault_.</span>
-<span id="cb31-503"><a href="#cb31-503"></a></span>
-<span id="cb31-504"><a href="#cb31-504"></a><span class="fu">## Kernel Stack Overflow</span></span>
-<span id="cb31-505"><a href="#cb31-505"></a></span>
-<span id="cb31-506"><a href="#cb31-506"></a><span class="ss">- </span>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the <span class="co">[</span><span class="ot">interrupt stack frame</span><span class="co">]</span> onto the stack. </span>
-<span id="cb31-507"><a href="#cb31-507"></a><span class="ss">- </span>However, the current stack pointer still points to the non-present guard page. </span>
-<span id="cb31-508"><a href="#cb31-508"></a><span class="ss">- </span>Thus, a second page fault occurs, which causes a double fault (according to the above table).</span>
-<span id="cb31-509"><a href="#cb31-509"></a></span>
-<span id="cb31-510"><a href="#cb31-510"></a><span class="fu">## Visually</span></span>
-<span id="cb31-511"><a href="#cb31-511"></a></span>
-<span id="cb31-512"><a href="#cb31-512"></a><span class="ss">- </span>The "interrupt stack frame":</span>
-<span id="cb31-513"><a href="#cb31-513"></a></span>
-<span id="cb31-514"><a href="#cb31-514"></a>&lt;img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)"&gt;</span>
-<span id="cb31-515"><a href="#cb31-515"></a></span>
-<span id="cb31-516"><a href="#cb31-516"></a><span class="fu">## 2s to 3s</span></span>
-<span id="cb31-517"><a href="#cb31-517"></a></span>
-<span id="cb31-518"><a href="#cb31-518"></a><span class="ss">- </span>On the second page fault, the CPU tries to call the _double fault handler_ now.</span>
-<span id="cb31-519"><a href="#cb31-519"></a><span class="ss">- </span>This would push yet another stack frame, which...</span>
-<span id="cb31-520"><a href="#cb31-520"></a><span class="ss">- </span>... still points to the guard page.</span>
-<span id="cb31-521"><a href="#cb31-521"></a><span class="ss">- </span>Third page fault, triple fault, reboot loop.</span>
-<span id="cb31-522"><a href="#cb31-522"></a></span>
-<span id="cb31-523"><a href="#cb31-523"></a><span class="fu">## Count to Three</span></span>
-<span id="cb31-524"><a href="#cb31-524"></a></span>
-<span id="cb31-525"><a href="#cb31-525"></a><span class="ss">- </span>Easy enough, I just make a new test.</span>
-<span id="cb31-526"><a href="#cb31-526"></a></span>
-<span id="cb31-527"><a href="#cb31-527"></a><span class="in">```{.sh}</span></span>
-<span id="cb31-528"><a href="#cb31-528"></a><span class="in">cp tests/except.rs tests/overflow.rs</span></span>
-<span id="cb31-529"><a href="#cb31-529"></a><span class="in">```</span></span>
-<span id="cb31-530"><a href="#cb31-530"></a></span>
-<span id="cb31-531"><a href="#cb31-531"></a><span class="ss">- </span>Add a function and call from <span class="in">`_start`</span></span>
-<span id="cb31-532"><a href="#cb31-532"></a></span>
-<span id="cb31-533"><a href="#cb31-533"></a><span class="in">```{.rs filename="tests/overflow.rs"}</span></span>
-<span id="cb31-534"><a href="#cb31-534"></a><span class="in">#[allow(unconditional_recursion)]</span></span>
-<span id="cb31-535"><a href="#cb31-535"></a><span class="in">fn recurse() {</span></span>
-<span id="cb31-536"><a href="#cb31-536"></a><span class="in">    recurse();</span></span>
-<span id="cb31-537"><a href="#cb31-537"></a><span class="in">}</span></span>
-<span id="cb31-538"><a href="#cb31-538"></a></span>
-<span id="cb31-539"><a href="#cb31-539"></a><span class="in">#[unsafe(no_mangle)]</span></span>
-<span id="cb31-540"><a href="#cb31-540"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb31-541"><a href="#cb31-541"></a><span class="in">    osirs::init();</span></span>
-<span id="cb31-542"><a href="#cb31-542"></a><span class="in">    recurse();</span></span>
-<span id="cb31-543"><a href="#cb31-543"></a><span class="in">    ...</span></span>
-<span id="cb31-544"><a href="#cb31-544"></a><span class="in">```</span></span>
-<span id="cb31-545"><a href="#cb31-545"></a></span>
-<span id="cb31-546"><a href="#cb31-546"></a><span class="fu">## Run Just This Test</span></span>
-<span id="cb31-547"><a href="#cb31-547"></a></span>
-<span id="cb31-548"><a href="#cb31-548"></a><span class="ss">- </span>I have a lot of tests now, so...</span>
-<span id="cb31-549"><a href="#cb31-549"></a></span>
-<span id="cb31-550"><a href="#cb31-550"></a><span class="in">```{.sh}</span></span>
-<span id="cb31-551"><a href="#cb31-551"></a><span class="in">cargo t --test overflow</span></span>
-<span id="cb31-552"><a href="#cb31-552"></a><span class="in">```</span></span>
-<span id="cb31-553"><a href="#cb31-553"></a></span>
-<span id="cb31-554"><a href="#cb31-554"></a><span class="ss">- </span>Good to run all of them though!</span>
-<span id="cb31-555"><a href="#cb31-555"></a><span class="ss">- </span>Anyways it will fail somehow (boot loop into time out).</span>
-<span id="cb31-556"><a href="#cb31-556"></a></span>
-<span id="cb31-557"><a href="#cb31-557"></a><span class="fu">## Fix</span></span>
-<span id="cb31-558"><a href="#cb31-558"></a></span>
-<span id="cb31-559"><a href="#cb31-559"></a><span class="ss">- </span>How can we avoid this problem? </span>
-<span id="cb31-560"><a href="#cb31-560"></a><span class="ss">    - </span>We can't omit the pushing of the exception stack frame.</span>
-<span id="cb31-561"><a href="#cb31-561"></a><span class="ss">        - </span>Done by hardware.</span>
-<span id="cb31-562"><a href="#cb31-562"></a><span class="ss">    - </span>We need to ensure somehow that the stack is always valid when a double fault exception occurs. </span>
-<span id="cb31-563"><a href="#cb31-563"></a><span class="ss">        - </span>Fortunately, the x86_64 architecture has a solution to this problem.</span>
-<span id="cb31-564"><a href="#cb31-564"></a></span>
-<span id="cb31-565"><a href="#cb31-565"></a><span class="fu">## Switcheroo</span></span>
-<span id="cb31-566"><a href="#cb31-566"></a></span>
-<span id="cb31-567"><a href="#cb31-567"></a><span class="ss">- </span>The x86_64 architecture operates multiple stacks.</span>
-<span id="cb31-568"><a href="#cb31-568"></a><span class="ss">- </span>Maintained in (effectively) a linear data structure.</span>
-<span id="cb31-569"><a href="#cb31-569"></a><span class="ss">- </span>_Interrupt Stack Table_ (IST)</span>
-<span id="cb31-570"><a href="#cb31-570"></a><span class="ss">    - </span>There's 7.</span>
-<span id="cb31-571"><a href="#cb31-571"></a>    </span>
-<span id="cb31-572"><a href="#cb31-572"></a><span class="fu">## Handle it</span></span>
-<span id="cb31-573"><a href="#cb31-573"></a></span>
-<span id="cb31-574"><a href="#cb31-574"></a><span class="ss">- </span>Each exception handler, can choose a stack from the IST through the <span class="in">`stack_pointers`</span> field in the corresponding IDT entry. </span>
-<span id="cb31-575"><a href="#cb31-575"></a><span class="ss">- </span>For example, our double fault handler could use the first stack in the IST. </span>
-<span id="cb31-576"><a href="#cb31-576"></a><span class="ss">    - </span>I don't know if it's zero or one indexed.</span>
-<span id="cb31-577"><a href="#cb31-577"></a><span class="ss">- </span>This preempts the push to prevent the triple.</span>
-<span id="cb31-578"><a href="#cb31-578"></a></span>
-<span id="cb31-579"><a href="#cb31-579"></a><span class="fu">## TSS</span></span>
-<span id="cb31-580"><a href="#cb31-580"></a></span>
-<span id="cb31-581"><a href="#cb31-581"></a><span class="ss">- </span>We recall other segments: Code (CS), Data (DS), Stack (SS).</span>
-<span id="cb31-582"><a href="#cb31-582"></a><span class="ss">- </span>Now, the "Task State Segment"</span>
-<span id="cb31-583"><a href="#cb31-583"></a><span class="ss">    - </span>Developed for 32-bit "hardware context switching" that was not brought to 64-bit due to complexities/inefficiencies.</span>
-<span id="cb31-584"><a href="#cb31-584"></a><span class="ss">    - </span>Still around and now used here.</span>
-<span id="cb31-585"><a href="#cb31-585"></a><span class="ss">- </span>The 64-bit TSS and 32-bit TSS are wildly different and this doesn't matter.</span>
-<span id="cb31-586"><a href="#cb31-586"></a></span>
-<span id="cb31-587"><a href="#cb31-587"></a><span class="fu">## The 64-bit {.smaller}</span></span>
-<span id="cb31-588"><a href="#cb31-588"></a></span>
-<span id="cb31-589"><a href="#cb31-589"></a></span>
-<span id="cb31-590"><a href="#cb31-590"></a>| Field                                        | Type       |</span>
-<span id="cb31-591"><a href="#cb31-591"></a>| -------------------------------------------- | ---------- |</span>
-<span id="cb31-592"><a href="#cb31-592"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u32`</span>      |</span>
-<span id="cb31-593"><a href="#cb31-593"></a>| Privilege Stack Table                        | <span class="in">`[u64; 3]`</span> |</span>
-<span id="cb31-594"><a href="#cb31-594"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u64`</span>      |</span>
-<span id="cb31-595"><a href="#cb31-595"></a>| Interrupt Stack Table                        | <span class="in">`[u64; 7]`</span> |</span>
-<span id="cb31-596"><a href="#cb31-596"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u64`</span>      |</span>
-<span id="cb31-597"><a href="#cb31-597"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u16`</span>      |</span>
-<span id="cb31-598"><a href="#cb31-598"></a>| I/O Map Base Address                         | <span class="in">`u16`</span>      |</span>
-<span id="cb31-599"><a href="#cb31-599"></a></span>
-<span id="cb31-600"><a href="#cb31-600"></a></span>
-<span id="cb31-601"><a href="#cb31-601"></a><span class="ss">- </span>I/O Map Base Address supports both 32 and 64 bit port-mapped I/O.</span>
-<span id="cb31-602"><a href="#cb31-602"></a></span>
-<span id="cb31-603"><a href="#cb31-603"></a><span class="fu">## PST</span></span>
-<span id="cb31-604"><a href="#cb31-604"></a></span>
-<span id="cb31-605"><a href="#cb31-605"></a><span class="ss">- </span>Not a timezone.</span>
-<span id="cb31-606"><a href="#cb31-606"></a><span class="ss">- </span>*Privilege Stack Table*</span>
-<span id="cb31-607"><a href="#cb31-607"></a><span class="ss">- </span>Privilege is bits 12-13 of the code segment, or the code segment "descriptor privilege level.</span>
-<span id="cb31-608"><a href="#cb31-608"></a><span class="in">```{.py}</span></span>
-<span id="cb31-609"><a href="#cb31-609"></a><span class="in">CS[12:14]</span></span>
-<span id="cb31-610"><a href="#cb31-610"></a><span class="in">```</span></span>
-<span id="cb31-611"><a href="#cb31-611"></a><span class="ss">- </span>We recall all actually existing OSes:</span>
-<span id="cb31-612"><a href="#cb31-612"></a><span class="in">```{.py}</span></span>
-<span id="cb31-613"><a href="#cb31-613"></a><span class="in">assert(CS[12] == CS[13])</span></span>
-<span id="cb31-614"><a href="#cb31-614"></a><span class="in">```</span></span>
-<span id="cb31-615"><a href="#cb31-615"></a></span>
-<span id="cb31-616"><a href="#cb31-616"></a><span class="fu">## Usage</span></span>
-<span id="cb31-617"><a href="#cb31-617"></a></span>
-<span id="cb31-618"><a href="#cb31-618"></a><span class="ss">- </span>An unprivileged executable divides-by-zero.</span>
-<span id="cb31-619"><a href="#cb31-619"></a><span class="ss">- </span>The handler is called.</span>
-<span id="cb31-620"><a href="#cb31-620"></a><span class="ss">- </span>The handler most be privileged, it's part of the OS.</span>
-<span id="cb31-621"><a href="#cb31-621"></a><span class="ss">- </span>So it grabs the privileged stack.</span>
-<span id="cb31-622"><a href="#cb31-622"></a><span class="ss">- </span>(This is stack 0 since privilege 0 is the most privileged, mostly)</span>
-<span id="cb31-623"><a href="#cb31-623"></a><span class="ss">- </span>We ignore for now (we have no software).</span>
-<span id="cb31-624"><a href="#cb31-624"></a></span>
-<span id="cb31-625"><a href="#cb31-625"></a></span>
-<span id="cb31-626"><a href="#cb31-626"></a><span class="fu">## Creating a TSS</span></span>
-<span id="cb31-627"><a href="#cb31-627"></a></span>
-<span id="cb31-628"><a href="#cb31-628"></a><span class="ss">- </span>Let us create a new TSS that contains a separate double fault stack in its interrupt stack table. For that, we need a TSS struct. </span>
-<span id="cb31-629"><a href="#cb31-629"></a><span class="ss">- </span>By "us" we mean the <span class="in">`x86_64`</span> crate which contains a <span class="co">[</span><span class="ot">`TaskStateSegment` struct</span><span class="co">](https://docs.rs/x86_64/0.14.2/x86_64/structures/tss/struct.TaskStateSegment.html)</span>.</span>
-<span id="cb31-630"><a href="#cb31-630"></a><span class="ss">- </span>We'll work within <span class="in">`src/gdt.rs`</span></span>
-<span id="cb31-631"><a href="#cb31-631"></a><span class="ss">    - </span>Global Descriptor Table - we'll add more latter.</span>
-<span id="cb31-632"><a href="#cb31-632"></a></span>
-<span id="cb31-633"><a href="#cb31-633"></a><span class="fu">## First</span></span>
-<span id="cb31-634"><a href="#cb31-634"></a></span>
-<span id="cb31-635"><a href="#cb31-635"></a><span class="ss">- </span>We need to <span class="in">`pub mod`</span> this in <span class="in">`src/lib.rs`</span></span>
-<span id="cb31-636"><a href="#cb31-636"></a></span>
-<span id="cb31-637"><a href="#cb31-637"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
-<span id="cb31-638"><a href="#cb31-638"></a><span class="in">pub mod interrupts;</span></span>
-<span id="cb31-639"><a href="#cb31-639"></a><span class="in">pub mod serial;</span></span>
-<span id="cb31-640"><a href="#cb31-640"></a><span class="in">pub mod vga;</span></span>
-<span id="cb31-641"><a href="#cb31-641"></a><span class="in">pub mod gdt;</span></span>
-<span id="cb31-642"><a href="#cb31-642"></a><span class="in">```</span></span>
-<span id="cb31-643"><a href="#cb31-643"></a></span>
-<span id="cb31-644"><a href="#cb31-644"></a><span class="ss">- </span>Add the initializer for the GDT to the <span class="in">`init`</span> function too.</span>
-<span id="cb31-645"><a href="#cb31-645"></a></span>
-<span id="cb31-646"><a href="#cb31-646"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
-<span id="cb31-647"><a href="#cb31-647"></a><span class="in">pub fn init() {</span></span>
-<span id="cb31-648"><a href="#cb31-648"></a><span class="in">    interrupts::init_idt();</span></span>
-<span id="cb31-649"><a href="#cb31-649"></a><span class="in">    gdt::init_gdt();</span></span>
-<span id="cb31-650"><a href="#cb31-650"></a><span class="in">}</span></span>
-<span id="cb31-651"><a href="#cb31-651"></a><span class="in">```</span></span>
-<span id="cb31-652"><a href="#cb31-652"></a></span>
-<span id="cb31-653"><a href="#cb31-653"></a><span class="fu">## Start on the GDT</span></span>
-<span id="cb31-654"><a href="#cb31-654"></a></span>
-<span id="cb31-655"><a href="#cb31-655"></a><span class="ss">- </span>First, let's make a TSS.</span>
-<span id="cb31-656"><a href="#cb31-656"></a><span class="ss">- </span>It will come as a shock to no one that I will use <span class="in">`static mut`</span> to solve a problem wherein a *language-level alias* is used for *actually existing, persistent, mutable hardware*.</span>
-<span id="cb31-657"><a href="#cb31-657"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
-<span id="cb31-658"><a href="#cb31-658"></a><span class="in">// TSS</span></span>
-<span id="cb31-659"><a href="#cb31-659"></a><span class="in">const STACK_SIZE: usize = 4096 * 5;</span></span>
-<span id="cb31-660"><a href="#cb31-660"></a><span class="in">static mut TSS: x86_64::structures::tss::TaskStateSegment =</span></span>
-<span id="cb31-661"><a href="#cb31-661"></a><span class="in">    x86_64::structures::tss::TaskStateSegment::new();</span></span>
-<span id="cb31-662"><a href="#cb31-662"></a><span class="in">static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];</span></span>
-<span id="cb31-663"><a href="#cb31-663"></a><span class="in">```</span></span>
-<span id="cb31-664"><a href="#cb31-664"></a></span>
-<span id="cb31-665"><a href="#cb31-665"></a><span class="fu">## Initialize</span></span>
-<span id="cb31-666"><a href="#cb31-666"></a></span>
-<span id="cb31-667"><a href="#cb31-667"></a><span class="ss">- </span>Not too bad - we set the double fault index to be the stack index plus the stack size.</span>
-<span id="cb31-668"><a href="#cb31-668"></a><span class="ss">- </span>We just made an arbitrarily sized (ish) stack in a <span class="in">`static mut`</span> (which requires <span class="in">`unsafe`</span>)</span>
-<span id="cb31-669"><a href="#cb31-669"></a></span>
-<span id="cb31-670"><a href="#cb31-670"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
-<span id="cb31-671"><a href="#cb31-671"></a><span class="in">pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;</span></span>
-<span id="cb31-672"><a href="#cb31-672"></a></span>
-<span id="cb31-673"><a href="#cb31-673"></a><span class="in">pub fn init_gdt() {</span></span>
-<span id="cb31-674"><a href="#cb31-674"></a><span class="in">    unsafe {</span></span>
-<span id="cb31-675"><a href="#cb31-675"></a><span class="in">        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] =</span></span>
-<span id="cb31-676"><a href="#cb31-676"></a><span class="in">            x86_64::VirtAddr::from_ptr(&amp;raw const STACK) + STACK_SIZE;</span></span>
-<span id="cb31-677"><a href="#cb31-677"></a><span class="in">    }</span></span>
-<span id="cb31-678"><a href="#cb31-678"></a><span class="in">}</span></span>
-<span id="cb31-679"><a href="#cb31-679"></a><span class="in">```</span></span>
-<span id="cb31-680"><a href="#cb31-680"></a></span>
-<span id="cb31-681"><a href="#cb31-681"></a><span class="fu">## I bet this will work</span></span>
-<span id="cb31-682"><a href="#cb31-682"></a></span>
-<span id="cb31-683"><a href="#cb31-683"></a><span class="ss">- </span>It won't.</span>
-<span id="cb31-684"><a href="#cb31-684"></a><span class="ss">- </span>We made a TSS but to tell the CPU that it should use it. </span>
-<span id="cb31-685"><a href="#cb31-685"></a><span class="ss">- </span>We need to add a new segment descriptor to the GDT. </span>
-<span id="cb31-686"><a href="#cb31-686"></a><span class="ss">- </span>Then we can load our TSS with the respective GDT index.</span>
-<span id="cb31-687"><a href="#cb31-687"></a></span>
-<span id="cb31-688"><a href="#cb31-688"></a><span class="fu">## Make a GDT</span></span>
-<span id="cb31-689"><a href="#cb31-689"></a></span>
-<span id="cb31-690"><a href="#cb31-690"></a><span class="ss">- </span>Yes, yes, the same trick.</span>
-<span id="cb31-691"><a href="#cb31-691"></a></span>
-<span id="cb31-692"><a href="#cb31-692"></a></span>
-<span id="cb31-693"><a href="#cb31-693"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
-<span id="cb31-694"><a href="#cb31-694"></a><span class="in">// GDT</span></span>
-<span id="cb31-695"><a href="#cb31-695"></a><span class="in">static mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =</span></span>
-<span id="cb31-696"><a href="#cb31-696"></a><span class="in">    x86_64::structures::gdt::GlobalDescriptorTable::new();</span></span>
-<span id="cb31-697"><a href="#cb31-697"></a><span class="in">```</span></span>
-<span id="cb31-698"><a href="#cb31-698"></a></span>
-<span id="cb31-699"><a href="#cb31-699"></a><span class="ss">- </span>The GDT, like the TSS, is a 32-bit holdover but still used to:</span>
-<span id="cb31-700"><a href="#cb31-700"></a><span class="ss">    - </span>Hold the TSS, obviously, and</span>
-<span id="cb31-701"><a href="#cb31-701"></a><span class="ss">    - </span>Swap between kernel (privileged) and user (software/unprivileged) modes.</span>
-<span id="cb31-702"><a href="#cb31-702"></a>    </span>
-<span id="cb31-703"><a href="#cb31-703"></a><span class="fu">## I bet this will...</span></span>
-<span id="cb31-704"><a href="#cb31-704"></a></span>
-<span id="cb31-705"><a href="#cb31-705"></a><span class="ss">- </span>We further have to add entries to the GDT, naturally.</span>
-<span id="cb31-706"><a href="#cb31-706"></a><span class="ss">- </span>I add the *kernel code segment*</span>
-<span id="cb31-707"><a href="#cb31-707"></a><span class="ss">- </span>I add the TSS we made.</span>
-<span id="cb31-708"><a href="#cb31-708"></a><span class="ss">- </span>I use the crate to do this.</span>
-<span id="cb31-709"><a href="#cb31-709"></a></span>
-<span id="cb31-710"><a href="#cb31-710"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
-<span id="cb31-711"><a href="#cb31-711"></a><span class="in">// Within "init"</span></span>
-<span id="cb31-712"><a href="#cb31-712"></a><span class="in">GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment();</span></span>
-<span id="cb31-713"><a href="#cb31-713"></a><span class="in">GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&amp;TSS));</span></span>
-<span id="cb31-714"><a href="#cb31-714"></a><span class="in">```</span></span>
-<span id="cb31-715"><a href="#cb31-715"></a></span>
-<span id="cb31-716"><a href="#cb31-716"></a><span class="fu">## Now it will...</span></span>
-<span id="cb31-717"><a href="#cb31-717"></a></span>
-<span id="cb31-718"><a href="#cb31-718"></a><span class="ss">- </span>Test it, but...</span>
-<span id="cb31-719"><a href="#cb31-719"></a><span class="ss">- </span>The GDT segments are "not yet active" because the segment and TSS registers still contain the values from the old GDT. </span>
-<span id="cb31-720"><a href="#cb31-720"></a><span class="ss">- </span>We also need to modify the double fault IDT entry so that it uses the new stack.</span>
-<span id="cb31-721"><a href="#cb31-721"></a></span>
-<span id="cb31-722"><a href="#cb31-722"></a><span class="fu">## So we...</span></span>
-<span id="cb31-723"><a href="#cb31-723"></a></span>
-<span id="cb31-724"><a href="#cb31-724"></a><span class="ss">1. </span>**Reload code segment register**: We changed our GDT, so we should reload **CS**, the code segment register. The old segment selector could now point to an old e.g. TSS.</span>
-<span id="cb31-725"><a href="#cb31-725"></a><span class="ss">2. </span>**Load the TSS**: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</span>
-<span id="cb31-726"><a href="#cb31-726"></a></span>
-<span id="cb31-727"><a href="#cb31-727"></a><span class="fu">## Not too bad...</span></span>
-<span id="cb31-728"><a href="#cb31-728"></a></span>
-<span id="cb31-729"><a href="#cb31-729"></a><span class="ss">- </span>I split this into a few lines.</span>
-<span id="cb31-730"><a href="#cb31-730"></a><span class="ss">- </span>Basically, get the kernel **CS**, and **TSS**.</span>
-<span id="cb31-731"><a href="#cb31-731"></a><span class="ss">- </span>Turn them into descriptors.</span>
-<span id="cb31-732"><a href="#cb31-732"></a><span class="ss">- </span>Either "set" or "load" these descriptors into the GDT.</span>
-<span id="cb31-733"><a href="#cb31-733"></a><span class="ss">    - </span>Dealing with annoying Rust namespace stuff.</span>
-<span id="cb31-734"><a href="#cb31-734"></a></span>
-<span id="cb31-735"><a href="#cb31-735"></a><span class="fu">## In code</span></span>
-<span id="cb31-736"><a href="#cb31-736"></a></span>
-<span id="cb31-737"><a href="#cb31-737"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
-<span id="cb31-738"><a href="#cb31-738"></a><span class="in">// Within "init"</span></span>
-<span id="cb31-739"><a href="#cb31-739"></a></span>
-<span id="cb31-740"><a href="#cb31-740"></a><span class="in">// Get the segments as descriptors</span></span>
-<span id="cb31-741"><a href="#cb31-741"></a><span class="in">let kcs = x86_64::structures::gdt::Descriptor::kernel_code_segment();</span></span>
-<span id="cb31-742"><a href="#cb31-742"></a><span class="in">let tss = x86_64::structures::gdt::Descriptor::tss_segment(&amp;TSS);</span></span>
-<span id="cb31-743"><a href="#cb31-743"></a></span>
-<span id="cb31-744"><a href="#cb31-744"></a><span class="in">// Add to GDT</span></span>
-<span id="cb31-745"><a href="#cb31-745"></a><span class="in">let kcs = GDT.add_entry(kcs);</span></span>
-<span id="cb31-746"><a href="#cb31-746"></a><span class="in">let tss = GDT.add_entry(tss);</span></span>
-<span id="cb31-747"><a href="#cb31-747"></a></span>
-<span id="cb31-748"><a href="#cb31-748"></a><span class="in">// Load GDT and Reload CS</span></span>
-<span id="cb31-749"><a href="#cb31-749"></a><span class="in">use x86_64::instructions::segmentation::Segment;</span></span>
-<span id="cb31-750"><a href="#cb31-750"></a><span class="in">x86_64::instructions::segmentation::CS::set_reg(kcs);</span></span>
-<span id="cb31-751"><a href="#cb31-751"></a><span class="in">// Mandate use of this TSS</span></span>
-<span id="cb31-752"><a href="#cb31-752"></a><span class="in">x86_64::instructions::tables::load_tss(tss);</span></span>
-<span id="cb31-753"><a href="#cb31-753"></a><span class="in">```</span></span>
-<span id="cb31-754"><a href="#cb31-754"></a></span>
-<span id="cb31-755"><a href="#cb31-755"></a><span class="fu">## This "worked" for me</span></span>
-<span id="cb31-756"><a href="#cb31-756"></a></span>
-<span id="cb31-757"><a href="#cb31-757"></a><span class="in">```{.sh}</span></span>
-<span id="cb31-758"><a href="#cb31-758"></a><span class="in">$ cargo t --test overflow</span></span>
-<span id="cb31-759"><a href="#cb31-759"></a><span class="in">    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s</span></span>
-<span id="cb31-760"><a href="#cb31-760"></a><span class="in">     Running tests/overflow.rs (target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2)</span></span>
-<span id="cb31-761"><a href="#cb31-761"></a><span class="in">Building bootloader</span></span>
-<span id="cb31-762"><a href="#cb31-762"></a><span class="in">    Finished `release` profile [optimized + debuginfo] target(s) in 0.03s</span></span>
-<span id="cb31-763"><a href="#cb31-763"></a><span class="in">Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`</span></span>
-<span id="cb31-764"><a href="#cb31-764"></a><span class="in">[Fail]</span></span>
-<span id="cb31-765"><a href="#cb31-765"></a></span>
-<span id="cb31-766"><a href="#cb31-766"></a><span class="in">=== PanicInfo ===</span></span>
-<span id="cb31-767"><a href="#cb31-767"></a><span class="in">panicked at src/interrupts.rs:25:5:</span></span>
-<span id="cb31-768"><a href="#cb31-768"></a><span class="in">EXCEPTION: DOUBLE FAULT</span></span>
-<span id="cb31-769"><a href="#cb31-769"></a><span class="in">InterruptStackFrame {</span></span>
-<span id="cb31-770"><a href="#cb31-770"></a><span class="in">    instruction_pointer: VirtAddr(</span></span>
-<span id="cb31-771"><a href="#cb31-771"></a><span class="in">        0x205cbb,</span></span>
-<span id="cb31-772"><a href="#cb31-772"></a><span class="in">    ),</span></span>
-<span id="cb31-773"><a href="#cb31-773"></a><span class="in">    code_segment: 8,</span></span>
-<span id="cb31-774"><a href="#cb31-774"></a><span class="in">    cpu_flags: 0x6,</span></span>
-<span id="cb31-775"><a href="#cb31-775"></a><span class="in">    stack_pointer: VirtAddr(</span></span>
-<span id="cb31-776"><a href="#cb31-776"></a><span class="in">        0x10000201f56,</span></span>
-<span id="cb31-777"><a href="#cb31-777"></a><span class="in">    ),</span></span>
-<span id="cb31-778"><a href="#cb31-778"></a><span class="in">    stack_segment: 0,</span></span>
-<span id="cb31-779"><a href="#cb31-779"></a><span class="in">}</span></span>
-<span id="cb31-780"><a href="#cb31-780"></a><span class="in">=================</span></span>
-<span id="cb31-781"><a href="#cb31-781"></a></span>
-<span id="cb31-782"><a href="#cb31-782"></a><span class="in">error: test failed, to rerun pass `--test overflow`</span></span>
-<span id="cb31-783"><a href="#cb31-783"></a></span>
-<span id="cb31-784"><a href="#cb31-784"></a><span class="in">Caused by:</span></span>
-<span id="cb31-785"><a href="#cb31-785"></a><span class="in">  process didn't exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)</span></span>
-<span id="cb31-786"><a href="#cb31-786"></a><span class="in">note: test exited abnormally; to see the full output pass --no-capture to the harness.</span></span>
-<span id="cb31-787"><a href="#cb31-787"></a><span class="in">```</span></span>
-<span id="cb31-788"><a href="#cb31-788"></a></span>
-<span id="cb31-789"><a href="#cb31-789"></a><span class="fu">## Tying this off</span></span>
-<span id="cb31-790"><a href="#cb31-790"></a></span>
-<span id="cb31-791"><a href="#cb31-791"></a><span class="ss">- </span>This is... incomplete.</span>
-<span id="cb31-792"><a href="#cb31-792"></a><span class="ss">    - </span>As a *test*.</span>
-<span id="cb31-793"><a href="#cb31-793"></a><span class="ss">    - </span>For the OS, it is fine.</span>
-<span id="cb31-794"><a href="#cb31-794"></a><span class="ss">- </span>You need to still:</span>
-<span id="cb31-795"><a href="#cb31-795"></a><span class="ss">    - </span>Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.</span>
-<span id="cb31-796"><a href="#cb31-796"></a><span class="ss">    - </span>Good idea for an assignment.</span>
-<span id="cb31-797"><a href="#cb31-797"></a></span>
-<span id="cb31-798"><a href="#cb31-798"></a><span class="fu"># Fin</span></span>
+<div class="sourceCode" id="cb35" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb35-1"><a href="#cb35-1"></a><span class="co">---</span></span>
+<span id="cb35-2"><a href="#cb35-2"></a><span class="an">title:</span><span class="co"> Double</span></span>
+<span id="cb35-3"><a href="#cb35-3"></a><span class="co">---</span></span>
+<span id="cb35-4"><a href="#cb35-4"></a></span>
+<span id="cb35-5"><a href="#cb35-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb35-6"><a href="#cb35-6"></a></span>
+<span id="cb35-7"><a href="#cb35-7"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb35-8"><a href="#cb35-8"></a><span class="ss">  - </span>Testing done.</span>
+<span id="cb35-9"><a href="#cb35-9"></a><span class="ss">  - </span>First handler assigned, more to come.</span>
+<span id="cb35-10"><a href="#cb35-10"></a></span>
+<span id="cb35-11"><a href="#cb35-11"></a><span class="fu">## Citations</span></span>
+<span id="cb35-12"><a href="#cb35-12"></a></span>
+<span id="cb35-13"><a href="#cb35-13"></a><span class="ss">- </span>CPU exceptions are algorithmically interesting but technically tedious.</span>
+<span id="cb35-14"><a href="#cb35-14"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Double Faults</span><span class="co">](https://os.phil-opp.com/double-fault-exceptions/)</span></span>
+<span id="cb35-15"><a href="#cb35-15"></a></span>
+<span id="cb35-16"><a href="#cb35-16"></a><span class="fu">## Negation</span></span>
+<span id="cb35-17"><a href="#cb35-17"></a></span>
+<span id="cb35-18"><a href="#cb35-18"></a><span class="ss">- </span>Not to be confused with the <span class="in">`double`</span> type.</span>
+<span id="cb35-19"><a href="#cb35-19"></a><span class="ss">- </span>That is *floating point* type and *has no place* in an OS class.</span>
+<span id="cb35-20"><a href="#cb35-20"></a></span>
+<span id="cb35-21"><a href="#cb35-21"></a><span class="fu"># Recall</span></span>
+<span id="cb35-22"><a href="#cb35-22"></a></span>
+<span id="cb35-23"><a href="#cb35-23"></a><span class="fu">## Exceptions</span></span>
+<span id="cb35-24"><a href="#cb35-24"></a></span>
+<span id="cb35-25"><a href="#cb35-25"></a><span class="ss">- </span>CPU exceptions occur in various erroneous situations</span>
+<span id="cb35-26"><a href="#cb35-26"></a><span class="ss">    - </span>Accessing an invalid memory address</span>
+<span id="cb35-27"><a href="#cb35-27"></a><span class="ss">    - </span>Dividing by zero </span>
+<span id="cb35-28"><a href="#cb35-28"></a><span class="ss">- </span>We have to set up an _interrupt descriptor table_.. </span>
+<span id="cb35-29"><a href="#cb35-29"></a><span class="ss">- </span>This week, our kernel will be able to catch <span class="co">[</span><span class="ot">double faults</span><span class="co">](https://wiki.osdev.org/Exceptions#Breakpoint)</span>.</span>
+<span id="cb35-30"><a href="#cb35-30"></a></span>
+<span id="cb35-31"><a href="#cb35-31"></a><span class="fu">## Types</span></span>
+<span id="cb35-32"><a href="#cb35-32"></a></span>
+<span id="cb35-33"><a href="#cb35-33"></a>On x86, there are about 20 different CPU exception types.</span>
+<span id="cb35-34"><a href="#cb35-34"></a></span>
+<span id="cb35-35"><a href="#cb35-35"></a><span class="ss">- </span>**Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. </span>
+<span id="cb35-36"><a href="#cb35-36"></a><span class="ss">    - </span>This exception also occurs when there is no handler function registered for an exception.</span>
+<span id="cb35-37"><a href="#cb35-37"></a>    </span>
+<span id="cb35-38"><a href="#cb35-38"></a><span class="fu"># Handle It</span></span>
+<span id="cb35-39"><a href="#cb35-39"></a></span>
+<span id="cb35-40"><a href="#cb35-40"></a><span class="fu">## What is it?</span></span>
+<span id="cb35-41"><a href="#cb35-41"></a></span>
+<span id="cb35-42"><a href="#cb35-42"></a><span class="ss">- </span>A special exception that occurs when the CPU fails to invoke an exception handler. </span>
+<span id="cb35-43"><a href="#cb35-43"></a><span class="ss">- </span>For example, a page fault is triggered without a page fault handler registered in the IDT. </span>
+<span id="cb35-44"><a href="#cb35-44"></a></span>
+<span id="cb35-45"><a href="#cb35-45"></a><span class="fu">## Python</span></span>
+<span id="cb35-46"><a href="#cb35-46"></a></span>
+<span id="cb35-47"><a href="#cb35-47"></a><span class="ss">- </span>Perhaps a generalized exception.</span>
+<span id="cb35-48"><a href="#cb35-48"></a></span>
+<span id="cb35-51"><a href="#cb35-51"></a><span class="in">```{python}</span></span>
+<span id="cb35-52"><a href="#cb35-52"></a><span class="cf">try</span>:</span>
+<span id="cb35-53"><a href="#cb35-53"></a>    <span class="dv">1</span><span class="op">/</span><span class="dv">0</span></span>
+<span id="cb35-54"><a href="#cb35-54"></a><span class="cf">except</span>:</span>
+<span id="cb35-55"><a href="#cb35-55"></a>    <span class="co">"Control flow diverts *regardless* of what goes wrong in the `try`"</span></span>
+<span id="cb35-56"><a href="#cb35-56"></a><span class="in">```</span></span>
+<span id="cb35-57"><a href="#cb35-57"></a></span>
+<span id="cb35-58"><a href="#cb35-58"></a><span class="fu">## Behavior</span></span>
+<span id="cb35-59"><a href="#cb35-59"></a></span>
+<span id="cb35-60"><a href="#cb35-60"></a><span class="ss">- </span>A double fault behaves like a normal exception. </span>
+<span id="cb35-61"><a href="#cb35-61"></a><span class="ss">- </span>It has the vector number <span class="in">`8`</span> and we can define a normal handler function for it in the IDT. </span>
+<span id="cb35-62"><a href="#cb35-62"></a><span class="ss">- </span>It is really important to provide a double fault handler, because if a double fault is unhandled, a fatal _triple fault_ occurs. </span>
+<span id="cb35-63"><a href="#cb35-63"></a><span class="ss">- </span>Triple faults can't be caught, and most hardware reacts with a system reset.</span>
+<span id="cb35-64"><a href="#cb35-64"></a></span>
+<span id="cb35-65"><a href="#cb35-65"></a><span class="fu">## Triggering a Double Fault</span></span>
+<span id="cb35-66"><a href="#cb35-66"></a></span>
+<span id="cb35-67"><a href="#cb35-67"></a><span class="ss">- </span>We don't have a page fault handler, so it will double (and triple) fault.</span>
+<span id="cb35-68"><a href="#cb35-68"></a></span>
+<span id="cb35-69"><a href="#cb35-69"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb35-70"><a href="#cb35-70"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb35-71"><a href="#cb35-71"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb35-72"><a href="#cb35-72"></a><span class="in">    osirs::init();</span></span>
+<span id="cb35-73"><a href="#cb35-73"></a><span class="in">    </span></span>
+<span id="cb35-74"><a href="#cb35-74"></a><span class="in">    unsafe { *(0xdeadbeef as *mut u8) = 42; };</span></span>
+<span id="cb35-75"><a href="#cb35-75"></a></span>
+<span id="cb35-76"><a href="#cb35-76"></a><span class="in">    #[cfg(test)]</span></span>
+<span id="cb35-77"><a href="#cb35-77"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb35-78"><a href="#cb35-78"></a></span>
+<span id="cb35-79"><a href="#cb35-79"></a><span class="in">    loop {}</span></span>
+<span id="cb35-80"><a href="#cb35-80"></a><span class="in">}</span></span>
+<span id="cb35-81"><a href="#cb35-81"></a><span class="in">```</span></span>
+<span id="cb35-82"><a href="#cb35-82"></a></span>
+<span id="cb35-83"><a href="#cb35-83"></a><span class="fu">## Description</span></span>
+<span id="cb35-84"><a href="#cb35-84"></a></span>
+<span id="cb35-85"><a href="#cb35-85"></a><span class="ss">- </span>We use <span class="in">`unsafe`</span> to write to a literal. </span>
+<span id="cb35-86"><a href="#cb35-86"></a><span class="ss">- </span>This address lacks meaning.</span>
+<span id="cb35-87"><a href="#cb35-87"></a><span class="ss">    - </span>A virtual (software-visible) address.</span>
+<span id="cb35-88"><a href="#cb35-88"></a><span class="ss">    - </span>Regard as a key in key-value storage that maps software-visible addresses to hardware addresses (the MMU).</span>
+<span id="cb35-89"><a href="#cb35-89"></a><span class="ss">    - </span>The key is not present in the data structure.</span>
+<span id="cb35-90"><a href="#cb35-90"></a></span>
+<span id="cb35-91"><a href="#cb35-91"></a><span class="fu">## Result</span></span>
+<span id="cb35-92"><a href="#cb35-92"></a>    </span>
+<span id="cb35-93"><a href="#cb35-93"></a><span class="ss">- </span>So, when we attempt to assign a value based on that key, it explodes.</span>
+<span id="cb35-94"><a href="#cb35-94"></a><span class="ss">    - </span>The emulated device goes into a reboot loop.</span>
+<span id="cb35-95"><a href="#cb35-95"></a><span class="ss">- </span>Why?</span>
+<span id="cb35-96"><a href="#cb35-96"></a></span>
+<span id="cb35-97"><a href="#cb35-97"></a><span class="fu">## Steps </span></span>
+<span id="cb35-98"><a href="#cb35-98"></a></span>
+<span id="cb35-99"><a href="#cb35-99"></a>::: {.incremental}</span>
+<span id="cb35-100"><a href="#cb35-100"></a></span>
+<span id="cb35-101"><a href="#cb35-101"></a><span class="ss">1. </span>The CPU tries to write to <span class="in">`0xdeadbeef`</span>, which causes a page fault.</span>
+<span id="cb35-102"><a href="#cb35-102"></a><span class="ss">2. </span>The CPU indexes into the IDT for a page fault and no handler function is specified so a double fault occurs.</span>
+<span id="cb35-103"><a href="#cb35-103"></a><span class="ss">3. </span>The CPU indexes into the IDT for  double fault handler and no handler function is specified so a *triple* fault occurs.</span>
+<span id="cb35-104"><a href="#cb35-104"></a><span class="ss">4. </span>A triple fault is fatal. QEMU (or hardware) issues a system reset.</span>
+<span id="cb35-105"><a href="#cb35-105"></a></span>
+<span id="cb35-106"><a href="#cb35-106"></a>:::</span>
+<span id="cb35-107"><a href="#cb35-107"></a></span>
+<span id="cb35-108"><a href="#cb35-108"></a><span class="fu">## Handle it</span></span>
+<span id="cb35-109"><a href="#cb35-109"></a></span>
+<span id="cb35-110"><a href="#cb35-110"></a></span>
+<span id="cb35-111"><a href="#cb35-111"></a><span class="ss">- </span>To prevent this triple fault, we need to either:</span>
+<span id="cb35-112"><a href="#cb35-112"></a><span class="ss">    - </span>Provide a handler function for page faults, or </span>
+<span id="cb35-113"><a href="#cb35-113"></a><span class="ss">    - </span>Provide a double fault handler. </span>
+<span id="cb35-114"><a href="#cb35-114"></a><span class="ss">- </span>We want to avoid triple faults in **all** cases</span>
+<span id="cb35-115"><a href="#cb35-115"></a><span class="ss">    - </span>Let's start with a double fault handler.</span>
+<span id="cb35-116"><a href="#cb35-116"></a></span>
+<span id="cb35-117"><a href="#cb35-117"></a><span class="fu">## Throwback</span></span>
+<span id="cb35-118"><a href="#cb35-118"></a></span>
+<span id="cb35-119"><a href="#cb35-119"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb35-120"><a href="#cb35-120"></a><span class="in">#![allow(static_mut_refs)]</span></span>
+<span id="cb35-121"><a href="#cb35-121"></a><span class="in">static mut IDT: x86_64::structures::idt::InterruptDescriptorTable =</span></span>
+<span id="cb35-122"><a href="#cb35-122"></a><span class="in">    x86_64::structures::idt::InterruptDescriptorTable::new();</span></span>
+<span id="cb35-123"><a href="#cb35-123"></a></span>
+<span id="cb35-124"><a href="#cb35-124"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb35-125"><a href="#cb35-125"></a><span class="in">    unsafe {</span></span>
+<span id="cb35-126"><a href="#cb35-126"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb35-127"><a href="#cb35-127"></a><span class="in">        IDT.load();</span></span>
+<span id="cb35-128"><a href="#cb35-128"></a><span class="in">    }</span></span>
+<span id="cb35-129"><a href="#cb35-129"></a><span class="in">}</span></span>
+<span id="cb35-130"><a href="#cb35-130"></a></span>
+<span id="cb35-131"><a href="#cb35-131"></a><span class="in">// Love these `cargo fmt` newlines</span></span>
+<span id="cb35-132"><a href="#cb35-132"></a><span class="in">extern "x86-interrupt" fn breakpoint_handler(</span></span>
+<span id="cb35-133"><a href="#cb35-133"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame,</span></span>
+<span id="cb35-134"><a href="#cb35-134"></a><span class="in">) {</span></span>
+<span id="cb35-135"><a href="#cb35-135"></a><span class="in">    crate::println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);</span></span>
+<span id="cb35-136"><a href="#cb35-136"></a><span class="in">}</span></span>
+<span id="cb35-137"><a href="#cb35-137"></a><span class="in">```</span></span>
+<span id="cb35-138"><a href="#cb35-138"></a></span>
+<span id="cb35-139"><a href="#cb35-139"></a><span class="fu">## Write a Handler</span></span>
+<span id="cb35-140"><a href="#cb35-140"></a></span>
+<span id="cb35-141"><a href="#cb35-141"></a><span class="ss">- </span>For now, just <span class="co">[</span><span class="ot">rip</span><span class="co">](https://theculturetrip.com/north-america/usa/portland/articles/why-is-portland-called-rip-city)</span> a panic.</span>
+<span id="cb35-142"><a href="#cb35-142"></a><span class="ss">    - </span>"Ah!" - that's what I sound like when I panic.</span>
+<span id="cb35-143"><a href="#cb35-143"></a><span class="ss">- </span>The handler has to diverge because the hardware doesn't allow returns from a double fault.</span>
+<span id="cb35-144"><a href="#cb35-144"></a><span class="ss">    - </span>After all, it's bad. Twice as bad, even.</span>
+<span id="cb35-145"><a href="#cb35-145"></a>    </span>
+<span id="cb35-146"><a href="#cb35-146"></a><span class="fu">## One Example</span></span>
+<span id="cb35-147"><a href="#cb35-147"></a></span>
+<span id="cb35-148"><a href="#cb35-148"></a><span class="ss">- </span>Short and sweet.</span>
+<span id="cb35-149"><a href="#cb35-149"></a>    </span>
+<span id="cb35-150"><a href="#cb35-150"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb35-151"><a href="#cb35-151"></a><span class="in">extern "x86-interrupt" fn double_fault_handler(</span></span>
+<span id="cb35-152"><a href="#cb35-152"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame, _error_code: u64) -&gt; !</span></span>
+<span id="cb35-153"><a href="#cb35-153"></a><span class="in">{</span></span>
+<span id="cb35-154"><a href="#cb35-154"></a><span class="in">    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);</span></span>
+<span id="cb35-155"><a href="#cb35-155"></a><span class="in">}</span></span>
+<span id="cb35-156"><a href="#cb35-156"></a><span class="in">```</span></span>
+<span id="cb35-157"><a href="#cb35-157"></a></span>
+<span id="cb35-158"><a href="#cb35-158"></a><span class="fu">## Wait a minute</span></span>
+<span id="cb35-159"><a href="#cb35-159"></a></span>
+<span id="cb35-160"><a href="#cb35-160"></a><span class="ss">- </span>Blog, in its infinite wisdom, claims we can safely ignore the error code because "it's always zero".</span>
+<span id="cb35-161"><a href="#cb35-161"></a><span class="ss">- </span>I'll be the judge of that.</span>
+<span id="cb35-162"><a href="#cb35-162"></a></span>
+<span id="cb35-163"><a href="#cb35-163"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb35-164"><a href="#cb35-164"></a><span class="in">extern "x86-interrupt" fn double_fault_handler(</span></span>
+<span id="cb35-165"><a href="#cb35-165"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame, error_code: u64) -&gt; !</span></span>
+<span id="cb35-166"><a href="#cb35-166"></a><span class="in">{</span></span>
+<span id="cb35-167"><a href="#cb35-167"></a><span class="in">    assert!(error_code == 0);</span></span>
+<span id="cb35-168"><a href="#cb35-168"></a><span class="in">    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);</span></span>
+<span id="cb35-169"><a href="#cb35-169"></a><span class="in">}</span></span>
+<span id="cb35-170"><a href="#cb35-170"></a><span class="in">```</span></span>
+<span id="cb35-171"><a href="#cb35-171"></a></span>
+<span id="cb35-172"><a href="#cb35-172"></a><span class="fu">## By the way</span></span>
+<span id="cb35-173"><a href="#cb35-173"></a></span>
+<span id="cb35-174"><a href="#cb35-174"></a><span class="ss">- </span>This is how it looks with <span class="in">`cargo fmt`</span></span>
+<span id="cb35-175"><a href="#cb35-175"></a></span>
+<span id="cb35-176"><a href="#cb35-176"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb35-177"><a href="#cb35-177"></a><span class="in">extern "x86-interrupt" fn double_fault_handler(</span></span>
+<span id="cb35-178"><a href="#cb35-178"></a><span class="in">    stack_frame: x86_64::structures::idt::InterruptStackFrame,</span></span>
+<span id="cb35-179"><a href="#cb35-179"></a><span class="in">    error_code: u64,</span></span>
+<span id="cb35-180"><a href="#cb35-180"></a><span class="in">) -&gt; ! {</span></span>
+<span id="cb35-181"><a href="#cb35-181"></a><span class="in">    assert!(error_code == 0);</span></span>
+<span id="cb35-182"><a href="#cb35-182"></a><span class="in">    panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);</span></span>
+<span id="cb35-183"><a href="#cb35-183"></a><span class="in">}</span></span>
+<span id="cb35-184"><a href="#cb35-184"></a><span class="in">```</span></span>
+<span id="cb35-185"><a href="#cb35-185"></a></span>
+<span id="cb35-186"><a href="#cb35-186"></a><span class="fu">## I bet that works</span></span>
+<span id="cb35-187"><a href="#cb35-187"></a></span>
+<span id="cb35-188"><a href="#cb35-188"></a><span class="ss">- </span>It doesn't, run it.</span>
+<span id="cb35-189"><a href="#cb35-189"></a><span class="ss">- </span>Yet another reboot loop.</span>
+<span id="cb35-190"><a href="#cb35-190"></a><span class="ss">- </span>But we wrote a function!</span>
+<span id="cb35-191"><a href="#cb35-191"></a><span class="ss">    - </span>Friends - did we add it to our IDT?</span>
+<span id="cb35-192"><a href="#cb35-192"></a>   </span>
+<span id="cb35-193"><a href="#cb35-193"></a><span class="fu">## Update Init</span></span>
+<span id="cb35-194"><a href="#cb35-194"></a></span>
+<span id="cb35-195"><a href="#cb35-195"></a><span class="ss">- </span>This should do it!</span>
+<span id="cb35-196"><a href="#cb35-196"></a></span>
+<span id="cb35-197"><a href="#cb35-197"></a><span class="in">```{.rs filename="src/interrupts.rs"}</span></span>
+<span id="cb35-198"><a href="#cb35-198"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb35-199"><a href="#cb35-199"></a><span class="in">    unsafe {</span></span>
+<span id="cb35-200"><a href="#cb35-200"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb35-201"><a href="#cb35-201"></a><span class="in">        IDT.double_fault.set_handler_fn(double_fault_handler);</span></span>
+<span id="cb35-202"><a href="#cb35-202"></a><span class="in">        IDT.load();</span></span>
+<span id="cb35-203"><a href="#cb35-203"></a><span class="in">    }</span></span>
+<span id="cb35-204"><a href="#cb35-204"></a><span class="in">}</span></span>
+<span id="cb35-205"><a href="#cb35-205"></a><span class="in">```</span></span>
+<span id="cb35-206"><a href="#cb35-206"></a></span>
+<span id="cb35-207"><a href="#cb35-207"></a><span class="fu"># Test it</span></span>
+<span id="cb35-208"><a href="#cb35-208"></a></span>
+<span id="cb35-209"><a href="#cb35-209"></a><span class="fu">## Behind the Curtain</span></span>
+<span id="cb35-210"><a href="#cb35-210"></a></span>
+<span id="cb35-211"><a href="#cb35-211"></a><span class="ss">- </span>Typically at this point I would show you what QEMU looks like at this time.</span>
+<span id="cb35-212"><a href="#cb35-212"></a><span class="ss">- </span>I can trivially do that with the screendump-&gt;ppm2png-&gt;base64-&gt;html pipeline.</span>
+<span id="cb35-213"><a href="#cb35-213"></a><span class="ss">- </span>It is much cooler to just dump the error message to console.</span>
+<span id="cb35-214"><a href="#cb35-214"></a><span class="ss">- </span>But how?</span>
+<span id="cb35-215"><a href="#cb35-215"></a></span>
+<span id="cb35-216"><a href="#cb35-216"></a><span class="fu">## For Serial</span></span>
+<span id="cb35-217"><a href="#cb35-217"></a></span>
+<span id="cb35-218"><a href="#cb35-218"></a><span class="ss">- </span>Naturally, we can write to console via the serial port from out test environment.</span>
+<span id="cb35-219"><a href="#cb35-219"></a><span class="ss">- </span>So, let's quickly write a test case for the double-fault handler.</span>
+<span id="cb35-220"><a href="#cb35-220"></a><span class="ss">- </span>It is basically a glorified <span class="in">`should_panic.rs`</span>.</span>
+<span id="cb35-221"><a href="#cb35-221"></a></span>
+<span id="cb35-222"><a href="#cb35-222"></a><span class="in">```{.sh}</span></span>
+<span id="cb35-223"><a href="#cb35-223"></a><span class="in">cp tests/should_panic.rs tests/double.rs</span></span>
+<span id="cb35-224"><a href="#cb35-224"></a><span class="in">```</span></span>
+<span id="cb35-225"><a href="#cb35-225"></a></span>
+<span id="cb35-226"><a href="#cb35-226"></a><span class="fu">## What I start with</span></span>
+<span id="cb35-227"><a href="#cb35-227"></a></span>
+<span id="cb35-228"><a href="#cb35-228"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
+<span id="cb35-229"><a href="#cb35-229"></a><span class="in">#![no_std]</span></span>
+<span id="cb35-230"><a href="#cb35-230"></a><span class="in">#![no_main]</span></span>
+<span id="cb35-231"><a href="#cb35-231"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb35-232"><a href="#cb35-232"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
+<span id="cb35-233"><a href="#cb35-233"></a></span>
+<span id="cb35-234"><a href="#cb35-234"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb35-235"><a href="#cb35-235"></a><span class="in">fn test_panic(_info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb35-236"><a href="#cb35-236"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
+<span id="cb35-237"><a href="#cb35-237"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb35-238"><a href="#cb35-238"></a><span class="in">    loop {}</span></span>
+<span id="cb35-239"><a href="#cb35-239"></a><span class="in">}</span></span>
+<span id="cb35-240"><a href="#cb35-240"></a></span>
+<span id="cb35-241"><a href="#cb35-241"></a><span class="in">fn bad() {</span></span>
+<span id="cb35-242"><a href="#cb35-242"></a><span class="in">    assert!(false);</span></span>
+<span id="cb35-243"><a href="#cb35-243"></a><span class="in">}</span></span>
+<span id="cb35-244"><a href="#cb35-244"></a></span>
+<span id="cb35-245"><a href="#cb35-245"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb35-246"><a href="#cb35-246"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb35-247"><a href="#cb35-247"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
+<span id="cb35-248"><a href="#cb35-248"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
+<span id="cb35-249"><a href="#cb35-249"></a><span class="in">    loop {}</span></span>
+<span id="cb35-250"><a href="#cb35-250"></a><span class="in">}</span></span>
+<span id="cb35-251"><a href="#cb35-251"></a><span class="in">```</span></span>
+<span id="cb35-252"><a href="#cb35-252"></a></span>
+<span id="cb35-253"><a href="#cb35-253"></a><span class="fu">## Changes</span></span>
+<span id="cb35-254"><a href="#cb35-254"></a></span>
+<span id="cb35-255"><a href="#cb35-255"></a><span class="ss">- </span>We want to:</span>
+<span id="cb35-256"><a href="#cb35-256"></a><span class="ss">    - </span>Print the error message via <span class="in">`serial_println!`</span></span>
+<span id="cb35-257"><a href="#cb35-257"></a><span class="ss">    - </span>Hit a panic from within a double-fault handler.</span>
+<span id="cb35-258"><a href="#cb35-258"></a><span class="ss">- </span>Easy enough, we'll just also <span class="in">`init`</span> and then modify the panic handler.</span>
+<span id="cb35-259"><a href="#cb35-259"></a><span class="ss">    - </span>(We'll change it back once we get the text out.)</span>
+<span id="cb35-260"><a href="#cb35-260"></a>    </span>
+<span id="cb35-261"><a href="#cb35-261"></a><span class="fu">## Change `bad`</span></span>
+<span id="cb35-262"><a href="#cb35-262"></a></span>
+<span id="cb35-263"><a href="#cb35-263"></a><span class="ss">- </span>Was:</span>
+<span id="cb35-264"><a href="#cb35-264"></a></span>
+<span id="cb35-265"><a href="#cb35-265"></a><span class="in">```{.rs filename="test/should_panic.rs"}</span></span>
+<span id="cb35-266"><a href="#cb35-266"></a><span class="in">fn bad() {</span></span>
+<span id="cb35-267"><a href="#cb35-267"></a><span class="in">    assert!(false);</span></span>
+<span id="cb35-268"><a href="#cb35-268"></a><span class="in">}</span></span>
+<span id="cb35-269"><a href="#cb35-269"></a><span class="in">```</span></span>
+<span id="cb35-270"><a href="#cb35-270"></a></span>
+<span id="cb35-271"><a href="#cb35-271"></a><span class="ss">- </span>Is now:</span>
+<span id="cb35-272"><a href="#cb35-272"></a></span>
+<span id="cb35-273"><a href="#cb35-273"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
+<span id="cb35-274"><a href="#cb35-274"></a><span class="in">fn bad() {</span></span>
+<span id="cb35-275"><a href="#cb35-275"></a><span class="in">    unsafe { *(0xdeadbeef as *mut u8) = 42; };</span></span>
+<span id="cb35-276"><a href="#cb35-276"></a><span class="in">}</span></span>
+<span id="cb35-277"><a href="#cb35-277"></a><span class="in">```</span></span>
+<span id="cb35-278"><a href="#cb35-278"></a></span>
+<span id="cb35-279"><a href="#cb35-279"></a><span class="in">    </span></span>
+<span id="cb35-280"><a href="#cb35-280"></a><span class="fu">## Change `panic`</span></span>
+<span id="cb35-281"><a href="#cb35-281"></a></span>
+<span id="cb35-282"><a href="#cb35-282"></a><span class="ss">- </span>Was:</span>
+<span id="cb35-283"><a href="#cb35-283"></a></span>
+<span id="cb35-284"><a href="#cb35-284"></a><span class="in">```{.rs filename="test/should_panic.rs"}</span></span>
+<span id="cb35-285"><a href="#cb35-285"></a><span class="in">fn test_panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb35-286"><a href="#cb35-286"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
+<span id="cb35-287"><a href="#cb35-287"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb35-288"><a href="#cb35-288"></a><span class="in">    loop {}</span></span>
+<span id="cb35-289"><a href="#cb35-289"></a><span class="in">}</span></span>
+<span id="cb35-290"><a href="#cb35-290"></a><span class="in">```</span></span>
+<span id="cb35-291"><a href="#cb35-291"></a></span>
+<span id="cb35-292"><a href="#cb35-292"></a><span class="ss">- </span>Is now:</span>
+<span id="cb35-293"><a href="#cb35-293"></a></span>
+<span id="cb35-294"><a href="#cb35-294"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
+<span id="cb35-295"><a href="#cb35-295"></a><span class="in">fn test_panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb35-296"><a href="#cb35-296"></a><span class="in">    osirs::serial_println!("{}", info);</span></span>
+<span id="cb35-297"><a href="#cb35-297"></a><span class="in">    osirs::serial_println!("[Pass]");</span></span>
+<span id="cb35-298"><a href="#cb35-298"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb35-299"><a href="#cb35-299"></a><span class="in">    loop {}</span></span>
+<span id="cb35-300"><a href="#cb35-300"></a><span class="in">}</span></span>
+<span id="cb35-301"><a href="#cb35-301"></a><span class="in">```</span></span>
+<span id="cb35-302"><a href="#cb35-302"></a></span>
+<span id="cb35-303"><a href="#cb35-303"></a><span class="fu">## Change `_start`</span></span>
+<span id="cb35-304"><a href="#cb35-304"></a></span>
+<span id="cb35-305"><a href="#cb35-305"></a><span class="ss">- </span>Was:</span>
+<span id="cb35-306"><a href="#cb35-306"></a></span>
+<span id="cb35-307"><a href="#cb35-307"></a><span class="in">```{.rs filename="test/should_panic.rs"}</span></span>
+<span id="cb35-308"><a href="#cb35-308"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb35-309"><a href="#cb35-309"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
+<span id="cb35-310"><a href="#cb35-310"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
+<span id="cb35-311"><a href="#cb35-311"></a><span class="in">    loop {}</span></span>
+<span id="cb35-312"><a href="#cb35-312"></a><span class="in">}</span></span>
+<span id="cb35-313"><a href="#cb35-313"></a><span class="in">```</span></span>
+<span id="cb35-314"><a href="#cb35-314"></a></span>
+<span id="cb35-315"><a href="#cb35-315"></a><span class="ss">- </span>Is now:</span>
+<span id="cb35-316"><a href="#cb35-316"></a></span>
+<span id="cb35-317"><a href="#cb35-317"></a><span class="in">```{.rs filename="test/double.rs"}</span></span>
+<span id="cb35-318"><a href="#cb35-318"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb35-319"><a href="#cb35-319"></a><span class="in">    osirs::init();</span></span>
+<span id="cb35-320"><a href="#cb35-320"></a><span class="in">    osirs::_test_runner(&amp;[&amp;bad]);</span></span>
+<span id="cb35-321"><a href="#cb35-321"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_FAIL);</span></span>
+<span id="cb35-322"><a href="#cb35-322"></a><span class="in">    loop {}</span></span>
+<span id="cb35-323"><a href="#cb35-323"></a><span class="in">}</span></span>
+<span id="cb35-324"><a href="#cb35-324"></a><span class="in">```</span></span>
+<span id="cb35-325"><a href="#cb35-325"></a></span>
+<span id="cb35-326"><a href="#cb35-326"></a><span class="fu">## The Stack Frame:</span></span>
+<span id="cb35-327"><a href="#cb35-327"></a></span>
+<span id="cb35-328"><a href="#cb35-328"></a><span class="ss">- </span>I didn't have to manually type this:</span>
+<span id="cb35-329"><a href="#cb35-329"></a></span>
+<span id="cb35-330"><a href="#cb35-330"></a><span class="in">```{.sh}</span></span>
+<span id="cb35-331"><a href="#cb35-331"></a><span class="in">InterruptStackFrame {</span></span>
+<span id="cb35-332"><a href="#cb35-332"></a><span class="in">    instruction_pointer: VirtAddr(</span></span>
+<span id="cb35-333"><a href="#cb35-333"></a><span class="in">        0x203a4c,</span></span>
+<span id="cb35-334"><a href="#cb35-334"></a><span class="in">    ),</span></span>
+<span id="cb35-335"><a href="#cb35-335"></a><span class="in">    code_segment: 8,</span></span>
+<span id="cb35-336"><a href="#cb35-336"></a><span class="in">    cpu_flags: 0x2,</span></span>
+<span id="cb35-337"><a href="#cb35-337"></a><span class="in">    stack_pointer: VirtAddr(</span></span>
+<span id="cb35-338"><a href="#cb35-338"></a><span class="in">        0x10000201f40,</span></span>
+<span id="cb35-339"><a href="#cb35-339"></a><span class="in">    ),</span></span>
+<span id="cb35-340"><a href="#cb35-340"></a><span class="in">    stack_segment: 0,</span></span>
+<span id="cb35-341"><a href="#cb35-341"></a><span class="in">}</span></span>
+<span id="cb35-342"><a href="#cb35-342"></a><span class="in">```</span></span>
+<span id="cb35-343"><a href="#cb35-343"></a></span>
+<span id="cb35-344"><a href="#cb35-344"></a><span class="fu">## Clean up</span></span>
+<span id="cb35-345"><a href="#cb35-345"></a></span>
+<span id="cb35-346"><a href="#cb35-346"></a><span class="ss">- </span>I kept the test and just reverted the panic handler.</span>
+<span id="cb35-347"><a href="#cb35-347"></a><span class="ss">    - </span>Actually, maybe that variant should be factored to <span class="in">`src/lib.rs`</span></span>
+<span id="cb35-348"><a href="#cb35-348"></a><span class="ss">    - </span>Software engineering... it's everywhere...</span>
+<span id="cb35-349"><a href="#cb35-349"></a><span class="ss">- </span>(Do this on your own time).</span>
+<span id="cb35-350"><a href="#cb35-350"></a><span class="ss">- </span>(Also stop using the test runner on singleton tests).</span>
+<span id="cb35-351"><a href="#cb35-351"></a></span>
+<span id="cb35-352"><a href="#cb35-352"></a><span class="fu"># Back to Work</span></span>
+<span id="cb35-353"><a href="#cb35-353"></a></span>
+<span id="cb35-354"><a href="#cb35-354"></a><span class="fu">## What happened?</span></span>
+<span id="cb35-355"><a href="#cb35-355"></a></span>
+<span id="cb35-356"><a href="#cb35-356"></a>::: {.incremental}</span>
+<span id="cb35-357"><a href="#cb35-357"></a></span>
+<span id="cb35-358"><a href="#cb35-358"></a><span class="ss">1. </span>The CPU tries to write to <span class="in">`0xdeadbeef`</span>, which causes a page fault.</span>
+<span id="cb35-359"><a href="#cb35-359"></a><span class="ss">2. </span>Like before, the CPU looks at the corresponding entry in the IDT and sees that no handler function is defined. Thus, a double fault occurs.</span>
+<span id="cb35-360"><a href="#cb35-360"></a><span class="ss">3. </span>The CPU jumps to the – now present – double fault handler.</span>
+<span id="cb35-361"><a href="#cb35-361"></a></span>
+<span id="cb35-362"><a href="#cb35-362"></a>:::</span>
+<span id="cb35-363"><a href="#cb35-363"></a></span>
+<span id="cb35-364"><a href="#cb35-364"></a><span class="fu">## Vegan</span></span>
+<span id="cb35-365"><a href="#cb35-365"></a></span>
+<span id="cb35-366"><a href="#cb35-366"></a><span class="ss">- </span>Like me, the CPU now abstains from dead beef.</span>
+<span id="cb35-367"><a href="#cb35-367"></a><span class="ss">- </span>The triple fault (and the boot-loop) no longer occurs, since the CPU can now call the double fault handler.</span>
+<span id="cb35-368"><a href="#cb35-368"></a><span class="ss">- </span>Now we're all done!</span>
+<span id="cb35-369"><a href="#cb35-369"></a><span class="ss">    - </span>(We aren't)</span>
+<span id="cb35-370"><a href="#cb35-370"></a>    </span>
+<span id="cb35-371"><a href="#cb35-371"></a><span class="fu">## Complications</span></span>
+<span id="cb35-372"><a href="#cb35-372"></a></span>
+<span id="cb35-373"><a href="#cb35-373"></a><span class="ss">- </span>We have now caught *a* (singular, one) double fault.</span>
+<span id="cb35-374"><a href="#cb35-374"></a><span class="ss">    - </span>And a contrived one at that!</span>
+<span id="cb35-375"><a href="#cb35-375"></a><span class="ss">- </span>It so happens there are other things that can also go wrong with computers.</span>
+<span id="cb35-376"><a href="#cb35-376"></a><span class="ss">    - </span>Do any of you remember the infinite recursion implementation that could've been SO COOL if Rust was just normal about it.</span>
+<span id="cb35-377"><a href="#cb35-377"></a>    </span>
+<span id="cb35-378"><a href="#cb35-378"></a><span class="fu">## Causes of Double Faults</span></span>
+<span id="cb35-379"><a href="#cb35-379"></a></span>
+<span id="cb35-380"><a href="#cb35-380"></a><span class="ss">- </span>Before we look at the special cases, we need to know the exact causes of double faults. </span>
+<span id="cb35-381"><a href="#cb35-381"></a><span class="ss">- </span>Above, we used a pretty vague definition:</span>
+<span id="cb35-382"><a href="#cb35-382"></a></span>
+<span id="cb35-383"><a href="#cb35-383"></a><span class="at">&gt; A double fault is a special exception that occurs when the CPU fails to invoke an exception handler.</span></span>
+<span id="cb35-384"><a href="#cb35-384"></a></span>
+<span id="cb35-385"><a href="#cb35-385"></a><span class="fu">## Failure</span></span>
+<span id="cb35-386"><a href="#cb35-386"></a></span>
+<span id="cb35-387"><a href="#cb35-387"></a><span class="ss">- </span>What does _“fails to invoke”_ mean exactly? </span>
+<span id="cb35-388"><a href="#cb35-388"></a><span class="ss">- </span>The handler is not present? </span>
+<span id="cb35-389"><a href="#cb35-389"></a><span class="ss">- </span>The handler is swapped out? </span>
+<span id="cb35-390"><a href="#cb35-390"></a><span class="ss">- </span>And what happens if a handler causes exceptions itself?</span>
+<span id="cb35-391"><a href="#cb35-391"></a></span>
+<span id="cb35-392"><a href="#cb35-392"></a><span class="fu"># Aside: Swaps</span></span>
+<span id="cb35-393"><a href="#cb35-393"></a></span>
+<span id="cb35-394"><a href="#cb35-394"></a><span class="fu">## Swap 1</span></span>
+<span id="cb35-395"><a href="#cb35-395"></a></span>
+<span id="cb35-396"><a href="#cb35-396"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In the 1960s, swapping was an early memory management technique. An entire program or entire segment would be "swapped out" (or "rolled out") from Random-access memory (RAM) to disk or drum, and another one would be swapped in (or rolled in).</span><span class="co">](https://en.wikipedia.org/wiki/Memory_paging)</span></span>
+<span id="cb35-397"><a href="#cb35-397"></a></span>
+<span id="cb35-398"><a href="#cb35-398"></a></span>
+<span id="cb35-399"><a href="#cb35-399"></a><span class="fu">## Swap 2</span></span>
+<span id="cb35-400"><a href="#cb35-400"></a></span>
+<span id="cb35-401"><a href="#cb35-401"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">A swapped-out program would be current but its execution would be suspended while the RAM was in use by another program; a program with a swapped-out segment could continue running until it needed that segment, at which point it would be suspended until the segment was swapped in.</span><span class="co">](https://en.wikipedia.org/wiki/Memory_paging)</span></span>
+<span id="cb35-402"><a href="#cb35-402"></a></span>
+<span id="cb35-403"><a href="#cb35-403"></a><span class="fu">## Swap 3</span></span>
+<span id="cb35-404"><a href="#cb35-404"></a></span>
+<span id="cb35-405"><a href="#cb35-405"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">*Swap space* in Linux is used when the amount of physical memory (RAM) is full. If the system needs more memory resources and the RAM is full, inactive pages in memory are moved to the swap space. While swap space can help machines with a small amount of RAM, it should not be considered a replacement for more RAM.</span><span class="co">](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-swapspace)</span></span>
+<span id="cb35-406"><a href="#cb35-406"></a></span>
+<span id="cb35-407"><a href="#cb35-407"></a></span>
+<span id="cb35-408"><a href="#cb35-408"></a><span class="fu">## Swap 4</span></span>
+<span id="cb35-409"><a href="#cb35-409"></a></span>
+<span id="cb35-410"><a href="#cb35-410"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">Swap space is located on hard drives, which have a slower access time than physical memory. Swap space can be a dedicated swap partition (recommended), a swap file, or a combination of swap partitions and swap files.</span><span class="co">](https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/storage_administration_guide/ch-swapspace)</span></span>
+<span id="cb35-411"><a href="#cb35-411"></a></span>
+<span id="cb35-412"><a href="#cb35-412"></a><span class="fu">## Swap 5</span></span>
+<span id="cb35-413"><a href="#cb35-413"></a></span>
+<span id="cb35-414"><a href="#cb35-414"></a><span class="ss">- </span>I had to increase my swap space that time I was dumping QEMU traces to text files and filled my harddrive.</span>
+<span id="cb35-415"><a href="#cb35-415"></a><span class="ss">- </span>I don't remember what I did exactly.</span>
+<span id="cb35-416"><a href="#cb35-416"></a><span class="ss">- </span>Here's a <span class="co">[</span><span class="ot">Stack Overflow question</span><span class="co">](https://askubuntu.com/questions/159783/how-do-i-find-out-if-i-have-a-swap-partition-on-my-hard-drive)</span></span>
+<span id="cb35-417"><a href="#cb35-417"></a></span>
+<span id="cb35-418"><a href="#cb35-418"></a><span class="in">```{.sh}</span></span>
+<span id="cb35-419"><a href="#cb35-419"></a><span class="in">$ free -m</span></span>
+<span id="cb35-420"><a href="#cb35-420"></a><span class="in">               total        used        free      shared  buff/cache   available</span></span>
+<span id="cb35-421"><a href="#cb35-421"></a><span class="in">Mem:            15Gi       597Mi        14Gi       6.0Mi       913Mi        14Gi</span></span>
+<span id="cb35-422"><a href="#cb35-422"></a><span class="in">Swap:          4.0Gi          0B       4.0Gi</span></span>
+<span id="cb35-423"><a href="#cb35-423"></a><span class="in">$ cat /proc/swaps</span></span>
+<span id="cb35-424"><a href="#cb35-424"></a><span class="in">Filename                                Type            Size            Used            Priority</span></span>
+<span id="cb35-425"><a href="#cb35-425"></a><span class="in">/dev/sdc                                partition       4194304         0               -2</span></span>
+<span id="cb35-426"><a href="#cb35-426"></a><span class="in">```</span></span>
+<span id="cb35-427"><a href="#cb35-427"></a></span>
+<span id="cb35-428"><a href="#cb35-428"></a><span class="fu">## Swap 6</span></span>
+<span id="cb35-429"><a href="#cb35-429"></a></span>
+<span id="cb35-430"><a href="#cb35-430"></a><span class="ss">- </span>This tutorial seems fine.</span>
+<span id="cb35-431"><a href="#cb35-431"></a><span class="ss">- </span><span class="co">[</span><span class="ot">How to increase the size of your swapfile</span><span class="co">](https://arcolinux.com/how-to-increase-the-size-of-your-swapfile/)</span></span>
+<span id="cb35-432"><a href="#cb35-432"></a><span class="ss">- </span>Go to the QUAD center and bother a Linux lifestylist</span>
+<span id="cb35-433"><a href="#cb35-433"></a></span>
+<span id="cb35-434"><a href="#cb35-434"></a><span class="fu"># Back to Work</span></span>
+<span id="cb35-435"><a href="#cb35-435"></a></span>
+<span id="cb35-436"><a href="#cb35-436"></a><span class="fu">## Handling Problems</span></span>
+<span id="cb35-437"><a href="#cb35-437"></a></span>
+<span id="cb35-438"><a href="#cb35-438"></a>::: {.incremental}</span>
+<span id="cb35-439"><a href="#cb35-439"></a></span>
+<span id="cb35-440"><a href="#cb35-440"></a><span class="ss">1. </span>What if a breakpoint exception occurs, but the handler function is swapped out?</span>
+<span id="cb35-441"><a href="#cb35-441"></a><span class="ss">2. </span>What if a page fault occurs, but the handler is swapped out?</span>
+<span id="cb35-442"><a href="#cb35-442"></a><span class="ss">3. </span>What if a divide-by-zero handler causes a breakpoint exception, but the breakpoint handler is swapped out?</span>
+<span id="cb35-443"><a href="#cb35-443"></a><span class="ss">4. </span>What if our kernel overflows its stack and the _guard page_ is hit?</span>
+<span id="cb35-444"><a href="#cb35-444"></a></span>
+<span id="cb35-445"><a href="#cb35-445"></a>:::</span>
+<span id="cb35-446"><a href="#cb35-446"></a></span>
+<span id="cb35-447"><a href="#cb35-447"></a><span class="fu">## Read the Docs!</span></span>
+<span id="cb35-448"><a href="#cb35-448"></a></span>
+<span id="cb35-449"><a href="#cb35-449"></a><span class="ss">- </span>The <span class="co">[</span><span class="ot">AMD64 manual</span><span class="co">](https://www.amd.com/system/files/TechDocs/24593.pdf)</span>, a real thing that actually exists, is also actually helpful here.</span>
+<span id="cb35-450"><a href="#cb35-450"></a><span class="ss">- </span>Wait that link is broken.</span>
+<span id="cb35-451"><a href="#cb35-451"></a><span class="ss">- </span>We'll trust the blog.</span>
+<span id="cb35-452"><a href="#cb35-452"></a></span>
+<span id="cb35-453"><a href="#cb35-453"></a><span class="at">&gt; a double fault exception _can_ occur when a second exception occurs during the handling of a prior (first) exception handler</span></span>
+<span id="cb35-454"><a href="#cb35-454"></a></span>
+<span id="cb35-455"><a href="#cb35-455"></a><span class="fu">## Combo {.smaller}</span></span>
+<span id="cb35-456"><a href="#cb35-456"></a></span>
+<span id="cb35-457"><a href="#cb35-457"></a></span>
+<span id="cb35-458"><a href="#cb35-458"></a>| First Exception                                                                                                       | Second Exception                                                                                                  |</span>
+<span id="cb35-459"><a href="#cb35-459"></a>| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |</span>
+<span id="cb35-460"><a href="#cb35-460"></a>| Divide-by-zero,&lt;br&gt;Invalid TSS,&lt;br&gt;Segment Not Present,&lt;br&gt;Stack-Segment Fault,&lt;br&gt;General Protection Fault | &lt;br&gt;Invalid TSS,&lt;br&gt;Segment Not Present,&lt;br&gt;Stack-Segment Fault,&lt;br&gt;General Protection Fault                  |</span>
+<span id="cb35-461"><a href="#cb35-461"></a>| Page Fault                                                                                                          | Page Fault,&lt;br&gt;Invalid TSS,&lt;br&gt;Segment Not Present,&lt;br&gt;Stack-Segment Fault,&lt;br&gt;General Protection Fault |</span>
+<span id="cb35-462"><a href="#cb35-462"></a></span>
+<span id="cb35-463"><a href="#cb35-463"></a></span>
+<span id="cb35-464"><a href="#cb35-464"></a><span class="fu">## Examples</span></span>
+<span id="cb35-465"><a href="#cb35-465"></a></span>
+<span id="cb35-466"><a href="#cb35-466"></a><span class="ss">- </span>A divide-by-zero fault followed by a page fault is fine.</span>
+<span id="cb35-467"><a href="#cb35-467"></a><span class="ss">    - </span>The page fault handler is invoked.</span>
+<span id="cb35-468"><a href="#cb35-468"></a><span class="ss">- </span>A divide-by-zero fault followed by a general-protection fault is not.</span>
+<span id="cb35-469"><a href="#cb35-469"></a><span class="ss">    - </span>Leads to a double fault.</span>
+<span id="cb35-470"><a href="#cb35-470"></a><span class="ss">    - </span>Security hat on: a user-mode program may be attempting privilege escalation.</span>
+<span id="cb35-471"><a href="#cb35-471"></a>    </span>
+<span id="cb35-472"><a href="#cb35-472"></a><span class="fu">## We Now Know 1</span></span>
+<span id="cb35-473"><a href="#cb35-473"></a></span>
+<span id="cb35-474"><a href="#cb35-474"></a><span class="ss">- </span>If a breakpoint exception occurs and the corresponding handler function is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.</span>
+<span id="cb35-475"><a href="#cb35-475"></a><span class="ss">- </span>If a page fault occurs and the page fault handler is swapped out, a _double fault_ occurs and the _double fault handler_ is invoked.</span>
+<span id="cb35-476"><a href="#cb35-476"></a></span>
+<span id="cb35-477"><a href="#cb35-477"></a><span class="fu">## We Now Know 2</span></span>
+<span id="cb35-478"><a href="#cb35-478"></a></span>
+<span id="cb35-479"><a href="#cb35-479"></a><span class="ss">- </span>If a divide-by-zero handler causes a breakpoint exception, the CPU tries to invoke the breakpoint handler. </span>
+<span id="cb35-480"><a href="#cb35-480"></a><span class="ss">- </span>If the breakpoint handler is swapped out, a _page fault_ occurs and the _page fault handler_ is invoked.</span>
+<span id="cb35-481"><a href="#cb35-481"></a></span>
+<span id="cb35-482"><a href="#cb35-482"></a><span class="fu">## Another case</span></span>
+<span id="cb35-483"><a href="#cb35-483"></a></span>
+<span id="cb35-484"><a href="#cb35-484"></a><span class="ss">- </span>An exception without a handler function in the IDT:</span>
+<span id="cb35-485"><a href="#cb35-485"></a><span class="ss">    - </span>CPU derefs the corresponding IDT entry. </span>
+<span id="cb35-486"><a href="#cb35-486"></a><span class="ss">    - </span>The entry is invalid so a _general protection fault_ occurs. </span>
+<span id="cb35-487"><a href="#cb35-487"></a><span class="ss">    - </span>We lack a general protection fault handler, so *another* general protection fault occurs. </span>
+<span id="cb35-488"><a href="#cb35-488"></a><span class="ss">    - </span>This leads to a double fault.</span>
+<span id="cb35-489"><a href="#cb35-489"></a>    </span>
+<span id="cb35-490"><a href="#cb35-490"></a><span class="fu">## Four!</span></span>
+<span id="cb35-491"><a href="#cb35-491"></a></span>
+<span id="cb35-492"><a href="#cb35-492"></a>Let's look at the fourth question:</span>
+<span id="cb35-493"><a href="#cb35-493"></a></span>
+<span id="cb35-494"><a href="#cb35-494"></a><span class="at">&gt; What happens if our kernel overflows its stack and the guard page is hit?</span></span>
+<span id="cb35-495"><a href="#cb35-495"></a></span>
+<span id="cb35-496"><a href="#cb35-496"></a><span class="fu">## En Garde!</span></span>
+<span id="cb35-497"><a href="#cb35-497"></a></span>
+<span id="cb35-498"><a href="#cb35-498"></a><span class="ss">- </span>A guard page denotes the bottom of a stack to detect stack overflows. </span>
+<span id="cb35-499"><a href="#cb35-499"></a><span class="ss">- </span>The page is not mapped to *any* physical frame, so accessing page faults. </span>
+<span id="cb35-500"><a href="#cb35-500"></a><span class="ss">    - </span>It is the idea of memory that doesn't exist.</span>
+<span id="cb35-501"><a href="#cb35-501"></a><span class="ss">    - </span>The Rust <span class="in">`option`</span> would've been great here!</span>
+<span id="cb35-502"><a href="#cb35-502"></a><span class="ss">- </span>The bootloader sets up a guard page so overflow causes a _page fault_.</span>
+<span id="cb35-503"><a href="#cb35-503"></a></span>
+<span id="cb35-504"><a href="#cb35-504"></a><span class="fu">## Kernel Stack Overflow</span></span>
+<span id="cb35-505"><a href="#cb35-505"></a></span>
+<span id="cb35-506"><a href="#cb35-506"></a><span class="ss">- </span>When a page fault occurs, the CPU looks up the page fault handler in the IDT and tries to push the <span class="co">[</span><span class="ot">interrupt stack frame</span><span class="co">]</span> onto the stack. </span>
+<span id="cb35-507"><a href="#cb35-507"></a><span class="ss">- </span>However, the current stack pointer still points to the non-present guard page. </span>
+<span id="cb35-508"><a href="#cb35-508"></a><span class="ss">- </span>Thus, a second page fault occurs, which causes a double fault (according to the above table).</span>
+<span id="cb35-509"><a href="#cb35-509"></a></span>
+<span id="cb35-510"><a href="#cb35-510"></a><span class="fu">## Visually</span></span>
+<span id="cb35-511"><a href="#cb35-511"></a></span>
+<span id="cb35-512"><a href="#cb35-512"></a><span class="ss">- </span>The "interrupt stack frame":</span>
+<span id="cb35-513"><a href="#cb35-513"></a></span>
+<span id="cb35-514"><a href="#cb35-514"></a>&lt;img src="https://os.phil-opp.com/cpu-exceptions/exception-stack-frame.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb35-515"><a href="#cb35-515"></a></span>
+<span id="cb35-516"><a href="#cb35-516"></a><span class="fu">## 2s to 3s</span></span>
+<span id="cb35-517"><a href="#cb35-517"></a></span>
+<span id="cb35-518"><a href="#cb35-518"></a><span class="ss">- </span>On the second page fault, the CPU tries to call the _double fault handler_ now.</span>
+<span id="cb35-519"><a href="#cb35-519"></a><span class="ss">- </span>This would push yet another stack frame, which...</span>
+<span id="cb35-520"><a href="#cb35-520"></a><span class="ss">- </span>... still points to the guard page.</span>
+<span id="cb35-521"><a href="#cb35-521"></a><span class="ss">- </span>Third page fault, triple fault, reboot loop.</span>
+<span id="cb35-522"><a href="#cb35-522"></a></span>
+<span id="cb35-523"><a href="#cb35-523"></a><span class="fu">## Count to Three</span></span>
+<span id="cb35-524"><a href="#cb35-524"></a></span>
+<span id="cb35-525"><a href="#cb35-525"></a><span class="ss">- </span>Easy enough, I just make a new test.</span>
+<span id="cb35-526"><a href="#cb35-526"></a></span>
+<span id="cb35-527"><a href="#cb35-527"></a><span class="in">```{.sh}</span></span>
+<span id="cb35-528"><a href="#cb35-528"></a><span class="in">cp tests/except.rs tests/overflow.rs</span></span>
+<span id="cb35-529"><a href="#cb35-529"></a><span class="in">```</span></span>
+<span id="cb35-530"><a href="#cb35-530"></a></span>
+<span id="cb35-531"><a href="#cb35-531"></a><span class="ss">- </span>Add a function and call from <span class="in">`_start`</span></span>
+<span id="cb35-532"><a href="#cb35-532"></a></span>
+<span id="cb35-533"><a href="#cb35-533"></a><span class="in">```{.rs filename="tests/overflow.rs"}</span></span>
+<span id="cb35-534"><a href="#cb35-534"></a><span class="in">#[allow(unconditional_recursion)]</span></span>
+<span id="cb35-535"><a href="#cb35-535"></a><span class="in">fn recurse() {</span></span>
+<span id="cb35-536"><a href="#cb35-536"></a><span class="in">    recurse();</span></span>
+<span id="cb35-537"><a href="#cb35-537"></a><span class="in">}</span></span>
+<span id="cb35-538"><a href="#cb35-538"></a></span>
+<span id="cb35-539"><a href="#cb35-539"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb35-540"><a href="#cb35-540"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb35-541"><a href="#cb35-541"></a><span class="in">    osirs::init();</span></span>
+<span id="cb35-542"><a href="#cb35-542"></a><span class="in">    recurse();</span></span>
+<span id="cb35-543"><a href="#cb35-543"></a><span class="in">    ...</span></span>
+<span id="cb35-544"><a href="#cb35-544"></a><span class="in">```</span></span>
+<span id="cb35-545"><a href="#cb35-545"></a></span>
+<span id="cb35-546"><a href="#cb35-546"></a><span class="fu">## Run Just This Test</span></span>
+<span id="cb35-547"><a href="#cb35-547"></a></span>
+<span id="cb35-548"><a href="#cb35-548"></a><span class="ss">- </span>I have a lot of tests now, so...</span>
+<span id="cb35-549"><a href="#cb35-549"></a></span>
+<span id="cb35-550"><a href="#cb35-550"></a><span class="in">```{.sh}</span></span>
+<span id="cb35-551"><a href="#cb35-551"></a><span class="in">cargo t --test overflow</span></span>
+<span id="cb35-552"><a href="#cb35-552"></a><span class="in">```</span></span>
+<span id="cb35-553"><a href="#cb35-553"></a></span>
+<span id="cb35-554"><a href="#cb35-554"></a><span class="ss">- </span>Good to run all of them though!</span>
+<span id="cb35-555"><a href="#cb35-555"></a><span class="ss">- </span>Anyways it will fail somehow (boot loop into time out).</span>
+<span id="cb35-556"><a href="#cb35-556"></a></span>
+<span id="cb35-557"><a href="#cb35-557"></a><span class="fu">## Fix</span></span>
+<span id="cb35-558"><a href="#cb35-558"></a></span>
+<span id="cb35-559"><a href="#cb35-559"></a><span class="ss">- </span>How can we avoid this problem? </span>
+<span id="cb35-560"><a href="#cb35-560"></a><span class="ss">    - </span>We can't omit the pushing of the exception stack frame.</span>
+<span id="cb35-561"><a href="#cb35-561"></a><span class="ss">        - </span>Done by hardware.</span>
+<span id="cb35-562"><a href="#cb35-562"></a><span class="ss">    - </span>We need to ensure somehow that the stack is always valid when a double fault exception occurs. </span>
+<span id="cb35-563"><a href="#cb35-563"></a><span class="ss">        - </span>Fortunately, the x86_64 architecture has a solution to this problem.</span>
+<span id="cb35-564"><a href="#cb35-564"></a></span>
+<span id="cb35-565"><a href="#cb35-565"></a><span class="fu">## Switcheroo</span></span>
+<span id="cb35-566"><a href="#cb35-566"></a></span>
+<span id="cb35-567"><a href="#cb35-567"></a><span class="ss">- </span>The x86_64 architecture operates multiple stacks.</span>
+<span id="cb35-568"><a href="#cb35-568"></a><span class="ss">- </span>Maintained in (effectively) a linear data structure.</span>
+<span id="cb35-569"><a href="#cb35-569"></a><span class="ss">- </span>_Interrupt Stack Table_ (IST)</span>
+<span id="cb35-570"><a href="#cb35-570"></a><span class="ss">    - </span>There's 7.</span>
+<span id="cb35-571"><a href="#cb35-571"></a>    </span>
+<span id="cb35-572"><a href="#cb35-572"></a><span class="fu">## Handle it</span></span>
+<span id="cb35-573"><a href="#cb35-573"></a></span>
+<span id="cb35-574"><a href="#cb35-574"></a><span class="ss">- </span>Each exception handler, can choose a stack from the IST through the <span class="in">`stack_pointers`</span> field in the corresponding IDT entry. </span>
+<span id="cb35-575"><a href="#cb35-575"></a><span class="ss">- </span>For example, our double fault handler could use the first stack in the IST. </span>
+<span id="cb35-576"><a href="#cb35-576"></a><span class="ss">    - </span>I don't know if it's zero or one indexed.</span>
+<span id="cb35-577"><a href="#cb35-577"></a><span class="ss">- </span>This preempts the push to prevent the triple.</span>
+<span id="cb35-578"><a href="#cb35-578"></a></span>
+<span id="cb35-579"><a href="#cb35-579"></a><span class="fu">## TSS</span></span>
+<span id="cb35-580"><a href="#cb35-580"></a></span>
+<span id="cb35-581"><a href="#cb35-581"></a><span class="ss">- </span>We recall other segments: Code (CS), Data (DS), Stack (SS).</span>
+<span id="cb35-582"><a href="#cb35-582"></a><span class="ss">- </span>Now, the "Task State Segment"</span>
+<span id="cb35-583"><a href="#cb35-583"></a><span class="ss">    - </span>Developed for 32-bit "hardware context switching" that was not brought to 64-bit due to complexities/inefficiencies.</span>
+<span id="cb35-584"><a href="#cb35-584"></a><span class="ss">    - </span>Still around and now used here.</span>
+<span id="cb35-585"><a href="#cb35-585"></a><span class="ss">- </span>The 64-bit TSS and 32-bit TSS are wildly different and this doesn't matter.</span>
+<span id="cb35-586"><a href="#cb35-586"></a></span>
+<span id="cb35-587"><a href="#cb35-587"></a><span class="fu">## The 64-bit {.smaller}</span></span>
+<span id="cb35-588"><a href="#cb35-588"></a></span>
+<span id="cb35-589"><a href="#cb35-589"></a></span>
+<span id="cb35-590"><a href="#cb35-590"></a>| Field                                        | Type       |</span>
+<span id="cb35-591"><a href="#cb35-591"></a>| -------------------------------------------- | ---------- |</span>
+<span id="cb35-592"><a href="#cb35-592"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u32`</span>      |</span>
+<span id="cb35-593"><a href="#cb35-593"></a>| Privilege Stack Table                        | <span class="in">`[u64; 3]`</span> |</span>
+<span id="cb35-594"><a href="#cb35-594"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u64`</span>      |</span>
+<span id="cb35-595"><a href="#cb35-595"></a>| Interrupt Stack Table                        | <span class="in">`[u64; 7]`</span> |</span>
+<span id="cb35-596"><a href="#cb35-596"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u64`</span>      |</span>
+<span id="cb35-597"><a href="#cb35-597"></a>| &lt;span style="opacity: 0.5"&gt;(reserved)&lt;/span&gt; | <span class="in">`u16`</span>      |</span>
+<span id="cb35-598"><a href="#cb35-598"></a>| I/O Map Base Address                         | <span class="in">`u16`</span>      |</span>
+<span id="cb35-599"><a href="#cb35-599"></a></span>
+<span id="cb35-600"><a href="#cb35-600"></a></span>
+<span id="cb35-601"><a href="#cb35-601"></a><span class="ss">- </span>I/O Map Base Address supports both 32 and 64 bit port-mapped I/O.</span>
+<span id="cb35-602"><a href="#cb35-602"></a></span>
+<span id="cb35-603"><a href="#cb35-603"></a><span class="fu">## PST</span></span>
+<span id="cb35-604"><a href="#cb35-604"></a></span>
+<span id="cb35-605"><a href="#cb35-605"></a><span class="ss">- </span>Not a timezone.</span>
+<span id="cb35-606"><a href="#cb35-606"></a><span class="ss">- </span>*Privilege Stack Table*</span>
+<span id="cb35-607"><a href="#cb35-607"></a><span class="ss">- </span>Privilege is bits 12-13 of the code segment, or the code segment "descriptor privilege level.</span>
+<span id="cb35-608"><a href="#cb35-608"></a><span class="in">```{.py}</span></span>
+<span id="cb35-609"><a href="#cb35-609"></a><span class="in">CS[12:14]</span></span>
+<span id="cb35-610"><a href="#cb35-610"></a><span class="in">```</span></span>
+<span id="cb35-611"><a href="#cb35-611"></a><span class="ss">- </span>We recall all actually existing OSes:</span>
+<span id="cb35-612"><a href="#cb35-612"></a><span class="in">```{.py}</span></span>
+<span id="cb35-613"><a href="#cb35-613"></a><span class="in">assert(CS[12] == CS[13])</span></span>
+<span id="cb35-614"><a href="#cb35-614"></a><span class="in">```</span></span>
+<span id="cb35-615"><a href="#cb35-615"></a></span>
+<span id="cb35-616"><a href="#cb35-616"></a><span class="fu">## Usage</span></span>
+<span id="cb35-617"><a href="#cb35-617"></a></span>
+<span id="cb35-618"><a href="#cb35-618"></a><span class="ss">- </span>An unprivileged executable divides-by-zero.</span>
+<span id="cb35-619"><a href="#cb35-619"></a><span class="ss">- </span>The handler is called.</span>
+<span id="cb35-620"><a href="#cb35-620"></a><span class="ss">- </span>The handler most be privileged, it's part of the OS.</span>
+<span id="cb35-621"><a href="#cb35-621"></a><span class="ss">- </span>So it grabs the privileged stack.</span>
+<span id="cb35-622"><a href="#cb35-622"></a><span class="ss">- </span>(This is stack 0 since privilege 0 is the most privileged, mostly)</span>
+<span id="cb35-623"><a href="#cb35-623"></a><span class="ss">- </span>We ignore for now (we have no software).</span>
+<span id="cb35-624"><a href="#cb35-624"></a></span>
+<span id="cb35-625"><a href="#cb35-625"></a></span>
+<span id="cb35-626"><a href="#cb35-626"></a><span class="fu">## Creating a TSS</span></span>
+<span id="cb35-627"><a href="#cb35-627"></a></span>
+<span id="cb35-628"><a href="#cb35-628"></a><span class="ss">- </span>Let us create a new TSS that contains a separate double fault stack in its interrupt stack table. For that, we need a TSS struct. </span>
+<span id="cb35-629"><a href="#cb35-629"></a><span class="ss">- </span>By "us" we mean the <span class="in">`x86_64`</span> crate which contains a <span class="co">[</span><span class="ot">`TaskStateSegment` struct</span><span class="co">](https://docs.rs/x86_64/0.14.2/x86_64/structures/tss/struct.TaskStateSegment.html)</span>.</span>
+<span id="cb35-630"><a href="#cb35-630"></a><span class="ss">- </span>We'll work within <span class="in">`src/gdt.rs`</span></span>
+<span id="cb35-631"><a href="#cb35-631"></a><span class="ss">    - </span>Global Descriptor Table - we'll add more latter.</span>
+<span id="cb35-632"><a href="#cb35-632"></a></span>
+<span id="cb35-633"><a href="#cb35-633"></a><span class="fu">## First</span></span>
+<span id="cb35-634"><a href="#cb35-634"></a></span>
+<span id="cb35-635"><a href="#cb35-635"></a><span class="ss">- </span>We need to <span class="in">`pub mod`</span> this in <span class="in">`src/lib.rs`</span></span>
+<span id="cb35-636"><a href="#cb35-636"></a></span>
+<span id="cb35-637"><a href="#cb35-637"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb35-638"><a href="#cb35-638"></a><span class="in">pub mod interrupts;</span></span>
+<span id="cb35-639"><a href="#cb35-639"></a><span class="in">pub mod serial;</span></span>
+<span id="cb35-640"><a href="#cb35-640"></a><span class="in">pub mod vga;</span></span>
+<span id="cb35-641"><a href="#cb35-641"></a><span class="in">pub mod gdt;</span></span>
+<span id="cb35-642"><a href="#cb35-642"></a><span class="in">```</span></span>
+<span id="cb35-643"><a href="#cb35-643"></a></span>
+<span id="cb35-644"><a href="#cb35-644"></a><span class="ss">- </span>Add the initializer for the GDT to the <span class="in">`init`</span> function too.</span>
+<span id="cb35-645"><a href="#cb35-645"></a></span>
+<span id="cb35-646"><a href="#cb35-646"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb35-647"><a href="#cb35-647"></a><span class="in">pub fn init() {</span></span>
+<span id="cb35-648"><a href="#cb35-648"></a><span class="in">    interrupts::init_idt();</span></span>
+<span id="cb35-649"><a href="#cb35-649"></a><span class="in">    gdt::init_gdt();</span></span>
+<span id="cb35-650"><a href="#cb35-650"></a><span class="in">}</span></span>
+<span id="cb35-651"><a href="#cb35-651"></a><span class="in">```</span></span>
+<span id="cb35-652"><a href="#cb35-652"></a></span>
+<span id="cb35-653"><a href="#cb35-653"></a><span class="fu">## Start on the GDT</span></span>
+<span id="cb35-654"><a href="#cb35-654"></a></span>
+<span id="cb35-655"><a href="#cb35-655"></a><span class="ss">- </span>First, let's make a TSS.</span>
+<span id="cb35-656"><a href="#cb35-656"></a><span class="ss">- </span>It will come as a shock to no one that I will use <span class="in">`static mut`</span> to solve a problem wherein a *language-level alias* is used for *actually existing, persistent, mutable hardware*.</span>
+<span id="cb35-657"><a href="#cb35-657"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-658"><a href="#cb35-658"></a><span class="in">// TSS</span></span>
+<span id="cb35-659"><a href="#cb35-659"></a><span class="in">const STACK_SIZE: usize = 4096 * 5;</span></span>
+<span id="cb35-660"><a href="#cb35-660"></a><span class="in">static mut TSS: x86_64::structures::tss::TaskStateSegment =</span></span>
+<span id="cb35-661"><a href="#cb35-661"></a><span class="in">    x86_64::structures::tss::TaskStateSegment::new();</span></span>
+<span id="cb35-662"><a href="#cb35-662"></a><span class="in">static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];</span></span>
+<span id="cb35-663"><a href="#cb35-663"></a><span class="in">```</span></span>
+<span id="cb35-664"><a href="#cb35-664"></a></span>
+<span id="cb35-665"><a href="#cb35-665"></a><span class="fu">## Initialize</span></span>
+<span id="cb35-666"><a href="#cb35-666"></a></span>
+<span id="cb35-667"><a href="#cb35-667"></a><span class="ss">- </span>Not too bad - we set the double fault index to be the stack index plus the stack size.</span>
+<span id="cb35-668"><a href="#cb35-668"></a><span class="ss">- </span>We just made an arbitrarily sized (ish) stack in a <span class="in">`static mut`</span> (which requires <span class="in">`unsafe`</span>)</span>
+<span id="cb35-669"><a href="#cb35-669"></a></span>
+<span id="cb35-670"><a href="#cb35-670"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-671"><a href="#cb35-671"></a><span class="in">pub const DOUBLE_FAULT_IST_INDEX: usize = 0;</span></span>
+<span id="cb35-672"><a href="#cb35-672"></a></span>
+<span id="cb35-673"><a href="#cb35-673"></a><span class="in">pub fn init_gdt() {</span></span>
+<span id="cb35-674"><a href="#cb35-674"></a><span class="in">    unsafe {</span></span>
+<span id="cb35-675"><a href="#cb35-675"></a><span class="in">        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =</span></span>
+<span id="cb35-676"><a href="#cb35-676"></a><span class="in">            x86_64::VirtAddr::from_ptr(&amp;raw const STACK) + STACK_SIZE;</span></span>
+<span id="cb35-677"><a href="#cb35-677"></a><span class="in">    }</span></span>
+<span id="cb35-678"><a href="#cb35-678"></a><span class="in">}</span></span>
+<span id="cb35-679"><a href="#cb35-679"></a><span class="in">```</span></span>
+<span id="cb35-680"><a href="#cb35-680"></a></span>
+<span id="cb35-681"><a href="#cb35-681"></a><span class="fu">## I bet this will work</span></span>
+<span id="cb35-682"><a href="#cb35-682"></a></span>
+<span id="cb35-683"><a href="#cb35-683"></a><span class="ss">- </span>It won't.</span>
+<span id="cb35-684"><a href="#cb35-684"></a><span class="ss">- </span>We made a TSS but to tell the CPU that it should use it. </span>
+<span id="cb35-685"><a href="#cb35-685"></a><span class="ss">- </span>We need to add a new segment descriptor to the GDT. </span>
+<span id="cb35-686"><a href="#cb35-686"></a><span class="ss">- </span>Then we can load our TSS with the respective GDT index.</span>
+<span id="cb35-687"><a href="#cb35-687"></a></span>
+<span id="cb35-688"><a href="#cb35-688"></a><span class="fu">## Make a GDT</span></span>
+<span id="cb35-689"><a href="#cb35-689"></a></span>
+<span id="cb35-690"><a href="#cb35-690"></a><span class="ss">- </span>Yes, yes, the same trick.</span>
+<span id="cb35-691"><a href="#cb35-691"></a></span>
+<span id="cb35-692"><a href="#cb35-692"></a></span>
+<span id="cb35-693"><a href="#cb35-693"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-694"><a href="#cb35-694"></a><span class="in">// GDT</span></span>
+<span id="cb35-695"><a href="#cb35-695"></a><span class="in">static mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =</span></span>
+<span id="cb35-696"><a href="#cb35-696"></a><span class="in">    x86_64::structures::gdt::GlobalDescriptorTable::new();</span></span>
+<span id="cb35-697"><a href="#cb35-697"></a><span class="in">```</span></span>
+<span id="cb35-698"><a href="#cb35-698"></a></span>
+<span id="cb35-699"><a href="#cb35-699"></a><span class="ss">- </span>The GDT, like the TSS, is a 32-bit holdover but still used to:</span>
+<span id="cb35-700"><a href="#cb35-700"></a><span class="ss">    - </span>Hold the TSS, obviously, and</span>
+<span id="cb35-701"><a href="#cb35-701"></a><span class="ss">    - </span>Swap between kernel (privileged) and user (software/unprivileged) modes.</span>
+<span id="cb35-702"><a href="#cb35-702"></a>    </span>
+<span id="cb35-703"><a href="#cb35-703"></a><span class="fu">## I bet this will...</span></span>
+<span id="cb35-704"><a href="#cb35-704"></a></span>
+<span id="cb35-705"><a href="#cb35-705"></a><span class="ss">- </span>We further have to add entries to the GDT, naturally.</span>
+<span id="cb35-706"><a href="#cb35-706"></a><span class="ss">- </span>I add the *kernel code segment*</span>
+<span id="cb35-707"><a href="#cb35-707"></a><span class="ss">- </span>I add the TSS we made.</span>
+<span id="cb35-708"><a href="#cb35-708"></a><span class="ss">- </span>I use the crate to do this.</span>
+<span id="cb35-709"><a href="#cb35-709"></a></span>
+<span id="cb35-710"><a href="#cb35-710"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-711"><a href="#cb35-711"></a><span class="in">// Within "init"</span></span>
+<span id="cb35-712"><a href="#cb35-712"></a><span class="in">let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());</span></span>
+<span id="cb35-713"><a href="#cb35-713"></a><span class="in">let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&amp;TSS));</span></span>
+<span id="cb35-714"><a href="#cb35-714"></a><span class="in">```</span></span>
+<span id="cb35-715"><a href="#cb35-715"></a></span>
+<span id="cb35-716"><a href="#cb35-716"></a><span class="fu">## Now it will...</span></span>
+<span id="cb35-717"><a href="#cb35-717"></a></span>
+<span id="cb35-718"><a href="#cb35-718"></a><span class="ss">- </span>Test it, but...</span>
+<span id="cb35-719"><a href="#cb35-719"></a><span class="ss">- </span>The GDT segments are "not yet active" because the segment and TSS registers still contain the values from the old GDT. </span>
+<span id="cb35-720"><a href="#cb35-720"></a><span class="ss">- </span>We also need to modify the double fault IDT entry so that it uses the new stack.</span>
+<span id="cb35-721"><a href="#cb35-721"></a></span>
+<span id="cb35-722"><a href="#cb35-722"></a><span class="fu">## So we...</span></span>
+<span id="cb35-723"><a href="#cb35-723"></a></span>
+<span id="cb35-724"><a href="#cb35-724"></a><span class="ss">1. </span>**Reload code segment register**: We changed our GDT, so we should reload **CS**, the code segment register. The old segment selector could now point to an old e.g. TSS.</span>
+<span id="cb35-725"><a href="#cb35-725"></a><span class="ss">2. </span>**Load the TSS**: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</span>
+<span id="cb35-726"><a href="#cb35-726"></a><span class="ss">3. </span>** Update the handler**: Our double fault handler must know to use the novel stack we have created.</span>
+<span id="cb35-727"><a href="#cb35-727"></a></span>
+<span id="cb35-728"><a href="#cb35-728"></a><span class="fu">## Not too bad...</span></span>
+<span id="cb35-729"><a href="#cb35-729"></a></span>
+<span id="cb35-730"><a href="#cb35-730"></a><span class="ss">- </span>Load the GDT.</span>
+<span id="cb35-731"><a href="#cb35-731"></a></span>
+<span id="cb35-732"><a href="#cb35-732"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-733"><a href="#cb35-733"></a><span class="in">// Within "init"</span></span>
+<span id="cb35-734"><a href="#cb35-734"></a><span class="in">let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());</span></span>
+<span id="cb35-735"><a href="#cb35-735"></a><span class="in">let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&amp;TSS));</span></span>
+<span id="cb35-736"><a href="#cb35-736"></a><span class="in">// This is new.</span></span>
+<span id="cb35-737"><a href="#cb35-737"></a><span class="in">GDT.load();</span></span>
+<span id="cb35-738"><a href="#cb35-738"></a><span class="in">```</span></span>
+<span id="cb35-739"><a href="#cb35-739"></a></span>
+<span id="cb35-740"><a href="#cb35-740"></a><span class="fu">## Update Segments</span></span>
+<span id="cb35-741"><a href="#cb35-741"></a></span>
+<span id="cb35-742"><a href="#cb35-742"></a><span class="ss">- </span>Basically, we got the kernel **CS**, and **TSS**.</span>
+<span id="cb35-743"><a href="#cb35-743"></a><span class="ss">- </span>We turned them into descriptors.</span>
+<span id="cb35-744"><a href="#cb35-744"></a><span class="ss">- </span>Either "set" or "load" these descriptors into the GDT.</span>
+<span id="cb35-745"><a href="#cb35-745"></a></span>
+<span id="cb35-746"><a href="#cb35-746"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-747"><a href="#cb35-747"></a><span class="in">// Within "init"</span></span>
+<span id="cb35-748"><a href="#cb35-748"></a><span class="in">GDT.load();</span></span>
+<span id="cb35-749"><a href="#cb35-749"></a><span class="in">// I love Rust namespaces!</span></span>
+<span id="cb35-750"><a href="#cb35-750"></a><span class="in">use x86_64::instructions::segmentation::Segment;</span></span>
+<span id="cb35-751"><a href="#cb35-751"></a><span class="in">x86_64::instructions::segmentation::CS::set_reg(kcs);</span></span>
+<span id="cb35-752"><a href="#cb35-752"></a><span class="in">x86_64::instructions::tables::load_tss(tss);</span></span>
+<span id="cb35-753"><a href="#cb35-753"></a><span class="in">```</span></span>
+<span id="cb35-754"><a href="#cb35-754"></a></span>
+<span id="cb35-755"><a href="#cb35-755"></a><span class="fu">## Full File</span></span>
+<span id="cb35-756"><a href="#cb35-756"></a></span>
+<span id="cb35-757"><a href="#cb35-757"></a><span class="in">```{.rs filename="src/gdt.rs"}</span></span>
+<span id="cb35-758"><a href="#cb35-758"></a><span class="in">#![allow(static_mut_refs)]</span></span>
+<span id="cb35-759"><a href="#cb35-759"></a></span>
+<span id="cb35-760"><a href="#cb35-760"></a><span class="in">// GDT</span></span>
+<span id="cb35-761"><a href="#cb35-761"></a><span class="in">static mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =</span></span>
+<span id="cb35-762"><a href="#cb35-762"></a><span class="in">    x86_64::structures::gdt::GlobalDescriptorTable::new();</span></span>
+<span id="cb35-763"><a href="#cb35-763"></a></span>
+<span id="cb35-764"><a href="#cb35-764"></a><span class="in">// TSS</span></span>
+<span id="cb35-765"><a href="#cb35-765"></a><span class="in">const STACK_SIZE: usize = 4096 * 5;</span></span>
+<span id="cb35-766"><a href="#cb35-766"></a><span class="in">static mut TSS: x86_64::structures::tss::TaskStateSegment =</span></span>
+<span id="cb35-767"><a href="#cb35-767"></a><span class="in">    x86_64::structures::tss::TaskStateSegment::new();</span></span>
+<span id="cb35-768"><a href="#cb35-768"></a><span class="in">static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];</span></span>
+<span id="cb35-769"><a href="#cb35-769"></a></span>
+<span id="cb35-770"><a href="#cb35-770"></a><span class="in">pub const DOUBLE_FAULT_IST_INDEX: usize = 0;</span></span>
+<span id="cb35-771"><a href="#cb35-771"></a></span>
+<span id="cb35-772"><a href="#cb35-772"></a><span class="in">pub fn init_gdt() {</span></span>
+<span id="cb35-773"><a href="#cb35-773"></a><span class="in">    unsafe {</span></span>
+<span id="cb35-774"><a href="#cb35-774"></a><span class="in">        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =</span></span>
+<span id="cb35-775"><a href="#cb35-775"></a><span class="in">            x86_64::VirtAddr::from_ptr(&amp;raw const STACK) + STACK_SIZE;</span></span>
+<span id="cb35-776"><a href="#cb35-776"></a><span class="in">        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());</span></span>
+<span id="cb35-777"><a href="#cb35-777"></a><span class="in">        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&amp;TSS));</span></span>
+<span id="cb35-778"><a href="#cb35-778"></a><span class="in">        GDT.load();</span></span>
+<span id="cb35-779"><a href="#cb35-779"></a><span class="in">        use x86_64::instructions::segmentation::Segment;</span></span>
+<span id="cb35-780"><a href="#cb35-780"></a><span class="in">        x86_64::instructions::segmentation::CS::set_reg(kcs);</span></span>
+<span id="cb35-781"><a href="#cb35-781"></a><span class="in">        x86_64::instructions::tables::load_tss(tss);</span></span>
+<span id="cb35-782"><a href="#cb35-782"></a><span class="in">    }</span></span>
+<span id="cb35-783"><a href="#cb35-783"></a><span class="in">}</span></span>
+<span id="cb35-784"><a href="#cb35-784"></a><span class="in">```</span></span>
+<span id="cb35-785"><a href="#cb35-785"></a></span>
+<span id="cb35-786"><a href="#cb35-786"></a><span class="fu">## Insufficient</span></span>
+<span id="cb35-787"><a href="#cb35-787"></a></span>
+<span id="cb35-788"><a href="#cb35-788"></a><span class="ss">- </span>I still triple fault on this.</span>
+<span id="cb35-789"><a href="#cb35-789"></a><span class="ss">- </span>Why?</span>
+<span id="cb35-790"><a href="#cb35-790"></a><span class="ss">    - </span>We added a stack.</span>
+<span id="cb35-791"><a href="#cb35-791"></a><span class="ss">    - </span>We added it's location to the GDT.</span>
+<span id="cb35-792"><a href="#cb35-792"></a><span class="ss">    - </span>We added a double fault handler, but</span>
+<span id="cb35-793"><a href="#cb35-793"></a><span class="ss">    - </span>*We did not direct the double fault handler to change stacks*.</span>
+<span id="cb35-794"><a href="#cb35-794"></a><span class="ss">- </span>We return to the handler (**NOT** the GDT) to update it...</span>
+<span id="cb35-795"><a href="#cb35-795"></a></span>
+<span id="cb35-796"><a href="#cb35-796"></a><span class="fu">## Handle it</span></span>
+<span id="cb35-797"><a href="#cb35-797"></a></span>
+<span id="cb35-798"><a href="#cb35-798"></a><span class="ss">- </span>You probably have:</span>
+<span id="cb35-799"><a href="#cb35-799"></a></span>
+<span id="cb35-800"><a href="#cb35-800"></a><span class="in">```{.rs filename="src/interrupt.rs"}</span></span>
+<span id="cb35-801"><a href="#cb35-801"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb35-802"><a href="#cb35-802"></a><span class="in">    unsafe {</span></span>
+<span id="cb35-803"><a href="#cb35-803"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb35-804"><a href="#cb35-804"></a><span class="in">        IDT.double_fault.set_handler_fn(double_fault_handler);</span></span>
+<span id="cb35-805"><a href="#cb35-805"></a><span class="in">        IDT.load();</span></span>
+<span id="cb35-806"><a href="#cb35-806"></a><span class="in">    }</span></span>
+<span id="cb35-807"><a href="#cb35-807"></a><span class="in">}</span></span>
+<span id="cb35-808"><a href="#cb35-808"></a><span class="in">```</span></span>
+<span id="cb35-809"><a href="#cb35-809"></a></span>
+<span id="cb35-810"><a href="#cb35-810"></a><span class="fu">## Update</span></span>
+<span id="cb35-811"><a href="#cb35-811"></a></span>
+<span id="cb35-812"><a href="#cb35-812"></a><span class="ss">- </span>Update to change a *stack index*</span>
+<span id="cb35-813"><a href="#cb35-813"></a></span>
+<span id="cb35-814"><a href="#cb35-814"></a><span class="in">```{.rs filename="src/interrupt.rs"}</span></span>
+<span id="cb35-815"><a href="#cb35-815"></a><span class="in">pub fn init_idt() {</span></span>
+<span id="cb35-816"><a href="#cb35-816"></a><span class="in">    unsafe {</span></span>
+<span id="cb35-817"><a href="#cb35-817"></a><span class="in">        IDT.breakpoint.set_handler_fn(breakpoint_handler);</span></span>
+<span id="cb35-818"><a href="#cb35-818"></a><span class="in">        // This is from `cargo fmt`...</span></span>
+<span id="cb35-819"><a href="#cb35-819"></a><span class="in">        IDT.double_fault</span></span>
+<span id="cb35-820"><a href="#cb35-820"></a><span class="in">            .set_handler_fn(double_fault_handler)</span></span>
+<span id="cb35-821"><a href="#cb35-821"></a><span class="in">            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);</span></span>
+<span id="cb35-822"><a href="#cb35-822"></a><span class="in">        IDT.load();</span></span>
+<span id="cb35-823"><a href="#cb35-823"></a><span class="in">    }</span></span>
+<span id="cb35-824"><a href="#cb35-824"></a><span class="in">}</span></span>
+<span id="cb35-825"><a href="#cb35-825"></a><span class="in">```</span></span>
+<span id="cb35-826"><a href="#cb35-826"></a></span>
+<span id="cb35-827"><a href="#cb35-827"></a><span class="fu">## This "worked" for me</span></span>
+<span id="cb35-828"><a href="#cb35-828"></a></span>
+<span id="cb35-829"><a href="#cb35-829"></a><span class="ss">- </span>Prefer panic to boot loop.</span>
+<span id="cb35-830"><a href="#cb35-830"></a></span>
+<span id="cb35-831"><a href="#cb35-831"></a><span class="in">```{.sh}</span></span>
+<span id="cb35-832"><a href="#cb35-832"></a><span class="in">panicked at src/interrupts.rs:25:5:</span></span>
+<span id="cb35-833"><a href="#cb35-833"></a><span class="in">EXCEPTION: DOUBLE FAULT</span></span>
+<span id="cb35-834"><a href="#cb35-834"></a><span class="in">InterruptStackFrame {</span></span>
+<span id="cb35-835"><a href="#cb35-835"></a><span class="in">    instruction_pointer: VirtAddr(</span></span>
+<span id="cb35-836"><a href="#cb35-836"></a><span class="in">        0x205cbb,</span></span>
+<span id="cb35-837"><a href="#cb35-837"></a><span class="in">    ),</span></span>
+<span id="cb35-838"><a href="#cb35-838"></a><span class="in">    code_segment: 8,</span></span>
+<span id="cb35-839"><a href="#cb35-839"></a><span class="in">    cpu_flags: 0x6,</span></span>
+<span id="cb35-840"><a href="#cb35-840"></a><span class="in">    stack_pointer: VirtAddr(</span></span>
+<span id="cb35-841"><a href="#cb35-841"></a><span class="in">        0x10000201f56,</span></span>
+<span id="cb35-842"><a href="#cb35-842"></a><span class="in">    ),</span></span>
+<span id="cb35-843"><a href="#cb35-843"></a><span class="in">    stack_segment: 0,</span></span>
+<span id="cb35-844"><a href="#cb35-844"></a><span class="in">}</span></span>
+<span id="cb35-845"><a href="#cb35-845"></a><span class="in">```</span></span>
+<span id="cb35-846"><a href="#cb35-846"></a></span>
+<span id="cb35-847"><a href="#cb35-847"></a><span class="fu">## Tying this off</span></span>
+<span id="cb35-848"><a href="#cb35-848"></a></span>
+<span id="cb35-849"><a href="#cb35-849"></a><span class="ss">- </span>This is... incomplete.</span>
+<span id="cb35-850"><a href="#cb35-850"></a><span class="ss">    - </span>As a *test*.</span>
+<span id="cb35-851"><a href="#cb35-851"></a><span class="ss">    - </span>For the OS, it is fine.</span>
+<span id="cb35-852"><a href="#cb35-852"></a><span class="ss">- </span>You need to still:</span>
+<span id="cb35-853"><a href="#cb35-853"></a><span class="ss">    - </span>Create a test case</span>
+<span id="cb35-854"><a href="#cb35-854"></a><span class="ss">    - </span>Modify various handlers</span>
+<span id="cb35-855"><a href="#cb35-855"></a><span class="ss">    - </span>Exit successfully when double, rather than triple, faulting.</span>
+<span id="cb35-856"><a href="#cb35-856"></a><span class="ss">    - </span>Would've been this weeks HW.</span>
+<span id="cb35-857"><a href="#cb35-857"></a></span>
+<span id="cb35-858"><a href="#cb35-858"></a><span class="fu"># Fin</span></span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

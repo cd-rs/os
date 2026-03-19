@@ -666,11 +666,11 @@ static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
 - We just made an arbitrarily sized (ish) stack in a `static mut` (which requires `unsafe`)
 
 ```{.rs filename="src/gdt.rs"}
-pub const DOUBLE_FAULT_IST_INDEX: u16 = 0;
+pub const DOUBLE_FAULT_IST_INDEX: usize = 0;
 
 pub fn init_gdt() {
     unsafe {
-        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] =
+        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =
             x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;
     }
 }
@@ -707,8 +707,8 @@ static mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =
 
 ```{.rs filename="src/gdt.rs"}
 // Within "init"
-GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment();
-GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));
+let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());
+let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));
 ```
 
 ## Now it will...
@@ -721,47 +721,112 @@ GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));
 
 1. **Reload code segment register**: We changed our GDT, so we should reload **CS**, the code segment register. The old segment selector could now point to an old e.g. TSS.
 2. **Load the TSS**: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.
+3. ** Update the handler**: Our double fault handler must know to use the novel stack we have created.
 
 ## Not too bad...
 
-- I split this into a few lines.
-- Basically, get the kernel **CS**, and **TSS**.
-- Turn them into descriptors.
-- Either "set" or "load" these descriptors into the GDT.
-    - Dealing with annoying Rust namespace stuff.
-
-## In code
+- Load the GDT.
 
 ```{.rs filename="src/gdt.rs"}
 // Within "init"
+let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());
+let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));
+// This is new.
+GDT.load();
+```
 
-// Get the segments as descriptors
-let kcs = x86_64::structures::gdt::Descriptor::kernel_code_segment();
-let tss = x86_64::structures::gdt::Descriptor::tss_segment(&TSS);
+## Update Segments
 
-// Add to GDT
-let kcs = GDT.add_entry(kcs);
-let tss = GDT.add_entry(tss);
+- Basically, we got the kernel **CS**, and **TSS**.
+- We turned them into descriptors.
+- Either "set" or "load" these descriptors into the GDT.
 
-// Load GDT and Reload CS
+```{.rs filename="src/gdt.rs"}
+// Within "init"
+GDT.load();
+// I love Rust namespaces!
 use x86_64::instructions::segmentation::Segment;
 x86_64::instructions::segmentation::CS::set_reg(kcs);
-// Mandate use of this TSS
 x86_64::instructions::tables::load_tss(tss);
+```
+
+## Full File
+
+```{.rs filename="src/gdt.rs"}
+#![allow(static_mut_refs)]
+
+// GDT
+static mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =
+    x86_64::structures::gdt::GlobalDescriptorTable::new();
+
+// TSS
+const STACK_SIZE: usize = 4096 * 5;
+static mut TSS: x86_64::structures::tss::TaskStateSegment =
+    x86_64::structures::tss::TaskStateSegment::new();
+static mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];
+
+pub const DOUBLE_FAULT_IST_INDEX: usize = 0;
+
+pub fn init_gdt() {
+    unsafe {
+        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =
+            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;
+        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());
+        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));
+        GDT.load();
+        use x86_64::instructions::segmentation::Segment;
+        x86_64::instructions::segmentation::CS::set_reg(kcs);
+        x86_64::instructions::tables::load_tss(tss);
+    }
+}
+```
+
+## Insufficient
+
+- I still triple fault on this.
+- Why?
+    - We added a stack.
+    - We added it's location to the GDT.
+    - We added a double fault handler, but
+    - *We did not direct the double fault handler to change stacks*.
+- We return to the handler (**NOT** the GDT) to update it...
+
+## Handle it
+
+- You probably have:
+
+```{.rs filename="src/interrupt.rs"}
+pub fn init_idt() {
+    unsafe {
+        IDT.breakpoint.set_handler_fn(breakpoint_handler);
+        IDT.double_fault.set_handler_fn(double_fault_handler);
+        IDT.load();
+    }
+}
+```
+
+## Update
+
+- Update to change a *stack index*
+
+```{.rs filename="src/interrupt.rs"}
+pub fn init_idt() {
+    unsafe {
+        IDT.breakpoint.set_handler_fn(breakpoint_handler);
+        // This is from `cargo fmt`...
+        IDT.double_fault
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);
+        IDT.load();
+    }
+}
 ```
 
 ## This "worked" for me
 
-```{.sh}
-$ cargo t --test overflow
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
-     Running tests/overflow.rs (target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2)
-Building bootloader
-    Finished `release` profile [optimized + debuginfo] target(s) in 0.03s
-Running: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`
-[Fail]
+- Prefer panic to boot loop.
 
-=== PanicInfo ===
+```{.sh}
 panicked at src/interrupts.rs:25:5:
 EXCEPTION: DOUBLE FAULT
 InterruptStackFrame {
@@ -775,13 +840,6 @@ InterruptStackFrame {
     ),
     stack_segment: 0,
 }
-=================
-
-error: test failed, to rerun pass `--test overflow`
-
-Caused by:
-  process didn't exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)
-note: test exited abnormally; to see the full output pass --no-capture to the harness.
 ```
 
 ## Tying this off
@@ -790,7 +848,9 @@ note: test exited abnormally; to see the full output pass --no-capture to the ha
     - As a *test*.
     - For the OS, it is fine.
 - You need to still:
-    - Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.
-    - Good idea for an assignment.
+    - Create a test case
+    - Modify various handlers
+    - Exit successfully when double, rather than triple, faulting.
+    - Would've been this weeks HW.
 
 # Fin

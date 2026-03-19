@@ -661,7 +661,7 @@
     "href": "80_double.html#initialize",
     "title": "Double",
     "section": "Initialize",
-    "text": "Initialize\n\nNot too bad - we set the double fault index to be the stack index plus the stack size.\nWe just made an arbitrarily sized (ish) stack in a static mut (which requires unsafe)\n\n\n\nsrc/gdt.rs\n\npub const DOUBLE_FAULT_IST_INDEX: u16 = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n    }\n}",
+    "text": "Initialize\n\nNot too bad - we set the double fault index to be the stack index plus the stack size.\nWe just made an arbitrarily sized (ish) stack in a static mut (which requires unsafe)\n\n\n\nsrc/gdt.rs\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n    }\n}",
     "crumbs": [
       "Double"
     ]
@@ -691,7 +691,7 @@
     "href": "80_double.html#i-bet-this-will",
     "title": "Double",
     "section": "I bet this will…",
-    "text": "I bet this will…\n\nWe further have to add entries to the GDT, naturally.\nI add the kernel code segment\nI add the TSS we made.\nI use the crate to do this.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment();\nGDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));",
+    "text": "I bet this will…\n\nWe further have to add entries to the GDT, naturally.\nI add the kernel code segment\nI add the TSS we made.\nI use the crate to do this.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nlet kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\nlet tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));",
     "crumbs": [
       "Double"
     ]
@@ -711,7 +711,7 @@
     "href": "80_double.html#so-we",
     "title": "Double",
     "section": "So we…",
-    "text": "So we…\n\nReload code segment register: We changed our GDT, so we should reload CS, the code segment register. The old segment selector could now point to an old e.g. TSS.\nLoad the TSS: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.",
+    "text": "So we…\n\nReload code segment register: We changed our GDT, so we should reload CS, the code segment register. The old segment selector could now point to an old e.g. TSS.\nLoad the TSS: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.\n** Update the handler**: Our double fault handler must know to use the novel stack we have created.",
     "crumbs": [
       "Double"
     ]
@@ -721,7 +721,7 @@
     "href": "80_double.html#not-too-bad",
     "title": "Double",
     "section": "Not too bad…",
-    "text": "Not too bad…\n\nI split this into a few lines.\nBasically, get the kernel CS, and TSS.\nTurn them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\nDealing with annoying Rust namespace stuff.",
+    "text": "Not too bad…\n\nLoad the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nlet kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\nlet tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n// This is new.\nGDT.load();",
     "crumbs": [
       "Double"
     ]
@@ -741,7 +741,7 @@
     "href": "80_double.html#this-worked-for-me",
     "title": "Double",
     "section": "This “worked” for me",
-    "text": "This “worked” for me\n$ cargo t --test overflow\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s\n     Running tests/overflow.rs (target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2)\nBuilding bootloader\n    Finished `release` profile [optimized + debuginfo] target(s) in 0.03s\nRunning: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`\n[Fail]\n\n=== PanicInfo ===\npanicked at src/interrupts.rs:25:5:\nEXCEPTION: DOUBLE FAULT\nInterruptStackFrame {\n    instruction_pointer: VirtAddr(\n        0x205cbb,\n    ),\n    code_segment: 8,\n    cpu_flags: 0x6,\n    stack_pointer: VirtAddr(\n        0x10000201f56,\n    ),\n    stack_segment: 0,\n}\n=================\n\nerror: test failed, to rerun pass `--test overflow`\n\nCaused by:\n  process didn't exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)\nnote: test exited abnormally; to see the full output pass --no-capture to the harness.",
+    "text": "This “worked” for me\n\nPrefer panic to boot loop.\n\npanicked at src/interrupts.rs:25:5:\nEXCEPTION: DOUBLE FAULT\nInterruptStackFrame {\n    instruction_pointer: VirtAddr(\n        0x205cbb,\n    ),\n    code_segment: 8,\n    cpu_flags: 0x6,\n    stack_pointer: VirtAddr(\n        0x10000201f56,\n    ),\n    stack_segment: 0,\n}",
     "crumbs": [
       "Double"
     ]
@@ -751,7 +751,7 @@
     "href": "80_double.html#tying-this-off",
     "title": "Double",
     "section": "Tying this off",
-    "text": "Tying this off\n\nThis is… incomplete.\n\nAs a test.\nFor the OS, it is fine.\n\nYou need to still:\n\nModify various handlers to exit successfully when double, rather than triple, faulting under a test framework.\nGood idea for an assignment.",
+    "text": "Tying this off\n\nThis is… incomplete.\n\nAs a test.\nFor the OS, it is fine.\n\nYou need to still:\n\nCreate a test case\nModify various handlers\nExit successfully when double, rather than triple, faulting.\nWould’ve been this weeks HW.",
     "crumbs": [
       "Double"
     ]
@@ -1209,7 +1209,7 @@
     "href": "80_double.rjs.html#initialize",
     "title": "Double",
     "section": "Initialize",
-    "text": "Initialize\n\nNot too bad - we set the double fault index to be the stack index plus the stack size.\nWe just made an arbitrarily sized (ish) stack in a static mut (which requires unsafe)\n\n\n\nsrc/gdt.rs\n\npub const DOUBLE_FAULT_IST_INDEX: u16 = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX as usize] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n    }\n}"
+    "text": "Initialize\n\nNot too bad - we set the double fault index to be the stack index plus the stack size.\nWe just made an arbitrarily sized (ish) stack in a static mut (which requires unsafe)\n\n\n\nsrc/gdt.rs\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n    }\n}"
   },
   {
     "objectID": "80_double.rjs.html#i-bet-this-will-work",
@@ -1230,7 +1230,7 @@
     "href": "80_double.rjs.html#i-bet-this-will",
     "title": "Double",
     "section": "I bet this will…",
-    "text": "I bet this will…\n\nWe further have to add entries to the GDT, naturally.\nI add the kernel code segment\nI add the TSS we made.\nI use the crate to do this.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment();\nGDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));"
+    "text": "I bet this will…\n\nWe further have to add entries to the GDT, naturally.\nI add the kernel code segment\nI add the TSS we made.\nI use the crate to do this.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nlet kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\nlet tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));"
   },
   {
     "objectID": "80_double.rjs.html#now-it-will",
@@ -1244,14 +1244,14 @@
     "href": "80_double.rjs.html#so-we",
     "title": "Double",
     "section": "So we…",
-    "text": "So we…\n\nReload code segment register: We changed our GDT, so we should reload CS, the code segment register. The old segment selector could now point to an old e.g. TSS.\nLoad the TSS: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS."
+    "text": "So we…\n\nReload code segment register: We changed our GDT, so we should reload CS, the code segment register. The old segment selector could now point to an old e.g. TSS.\nLoad the TSS: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.\n** Update the handler**: Our double fault handler must know to use the novel stack we have created."
   },
   {
     "objectID": "80_double.rjs.html#not-too-bad",
     "href": "80_double.rjs.html#not-too-bad",
     "title": "Double",
     "section": "Not too bad…",
-    "text": "Not too bad…\n\nI split this into a few lines.\nBasically, get the kernel CS, and TSS.\nTurn them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\nDealing with annoying Rust namespace stuff."
+    "text": "Not too bad…\n\nLoad the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nlet kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\nlet tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n// This is new.\nGDT.load();"
   },
   {
     "objectID": "80_double.rjs.html#in-code",
@@ -1265,14 +1265,14 @@
     "href": "80_double.rjs.html#this-worked-for-me",
     "title": "Double",
     "section": "This “worked” for me",
-    "text": "This “worked” for me\n$ cargo t --test overflow\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s\n     Running tests/overflow.rs (target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2)\nBuilding bootloader\n    Finished `release` profile [optimized + debuginfo] target(s) in 0.03s\nRunning: `qemu-system-x86_64 -drive format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin -no-reboot -device isa-debug-exit,iobase=0xf4,iosize=0x04 -serial stdio -display none`\n[Fail]\n\n=== PanicInfo ===\npanicked at src/interrupts.rs:25:5:\nEXCEPTION: DOUBLE FAULT\nInterruptStackFrame {\n    instruction_pointer: VirtAddr(\n        0x205cbb,\n    ),\n    code_segment: 8,\n    cpu_flags: 0x6,\n    stack_pointer: VirtAddr(\n        0x10000201f56,\n    ),\n    stack_segment: 0,\n}\n=================\n\nerror: test failed, to rerun pass `--test overflow`\n\nCaused by:\n  process didn't exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)\nnote: test exited abnormally; to see the full output pass --no-capture to the harness."
+    "text": "This “worked” for me\n\nPrefer panic to boot loop.\n\npanicked at src/interrupts.rs:25:5:\nEXCEPTION: DOUBLE FAULT\nInterruptStackFrame {\n    instruction_pointer: VirtAddr(\n        0x205cbb,\n    ),\n    code_segment: 8,\n    cpu_flags: 0x6,\n    stack_pointer: VirtAddr(\n        0x10000201f56,\n    ),\n    stack_segment: 0,\n}"
   },
   {
     "objectID": "80_double.rjs.html#tying-this-off",
     "href": "80_double.rjs.html#tying-this-off",
     "title": "Double",
     "section": "Tying this off",
-    "text": "Tying this off\n\nThis is… incomplete.\n\nAs a test.\nFor the OS, it is fine.\n\nYou need to still:\n\nModify various handlers to exit successfully when double, rather than triple, faulting under a test framework.\nGood idea for an assignment."
+    "text": "Tying this off\n\nThis is… incomplete.\n\nAs a test.\nFor the OS, it is fine.\n\nYou need to still:\n\nCreate a test case\nModify various handlers\nExit successfully when double, rather than triple, faulting.\nWould’ve been this weeks HW."
   },
   {
     "objectID": "71_calls.html",
@@ -12525,5 +12525,90 @@
     "crumbs": [
       "Interrupts"
     ]
+  },
+  {
+    "objectID": "80_double.html#update-segments",
+    "href": "80_double.html#update-segments",
+    "title": "Double",
+    "section": "Update Segments",
+    "text": "Update Segments\n\nBasically, we got the kernel CS, and TSS.\nWe turned them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.load();\n// I love Rust namespaces!\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\nx86_64::instructions::tables::load_tss(tss);",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#full-file",
+    "href": "80_double.html#full-file",
+    "title": "Double",
+    "section": "Full File",
+    "text": "Full File\n\n\nsrc/gdt.rs\n\n#![allow(static_mut_refs)]\n\n// GDT\nstatic mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =\n    x86_64::structures::gdt::GlobalDescriptorTable::new();\n\n// TSS\nconst STACK_SIZE: usize = 4096 * 5;\nstatic mut TSS: x86_64::structures::tss::TaskStateSegment =\n    x86_64::structures::tss::TaskStateSegment::new();\nstatic mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\n        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n        GDT.load();\n        use x86_64::instructions::segmentation::Segment;\n        x86_64::instructions::segmentation::CS::set_reg(kcs);\n        x86_64::instructions::tables::load_tss(tss);\n    }\n}",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#insufficient",
+    "href": "80_double.html#insufficient",
+    "title": "Double",
+    "section": "Insufficient",
+    "text": "Insufficient\n\nI still triple fault on this.\nWhy?\n\nWe added a stack.\nWe added it’s location to the GDT.\nWe added a double fault handler, but\nWe did not direct the double fault handler to change stacks.\n\nWe return to the handler (NOT the GDT) to update it…",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#handle-it-3",
+    "href": "80_double.html#handle-it-3",
+    "title": "Double",
+    "section": "Handle it",
+    "text": "Handle it\n\nYou probably have:\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault.set_handler_fn(double_fault_handler);\n        IDT.load();\n    }\n}",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#update",
+    "href": "80_double.html#update",
+    "title": "Double",
+    "section": "Update",
+    "text": "Update\n\nUpdate to change a stack index\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        // This is from `cargo fmt`...\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n    }\n}",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.rjs.html#update-segments",
+    "href": "80_double.rjs.html#update-segments",
+    "title": "Double",
+    "section": "Update Segments",
+    "text": "Update Segments\n\nBasically, we got the kernel CS, and TSS.\nWe turned them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.load();\n// I love Rust namespaces!\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\nx86_64::instructions::tables::load_tss(tss);"
+  },
+  {
+    "objectID": "80_double.rjs.html#full-file",
+    "href": "80_double.rjs.html#full-file",
+    "title": "Double",
+    "section": "Full File",
+    "text": "Full File\n\n\nsrc/gdt.rs\n\n#![allow(static_mut_refs)]\n\n// GDT\nstatic mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =\n    x86_64::structures::gdt::GlobalDescriptorTable::new();\n\n// TSS\nconst STACK_SIZE: usize = 4096 * 5;\nstatic mut TSS: x86_64::structures::tss::TaskStateSegment =\n    x86_64::structures::tss::TaskStateSegment::new();\nstatic mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\n        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n        GDT.load();\n        use x86_64::instructions::segmentation::Segment;\n        x86_64::instructions::segmentation::CS::set_reg(kcs);\n        x86_64::instructions::tables::load_tss(tss);\n    }\n}"
+  },
+  {
+    "objectID": "80_double.rjs.html#insufficient",
+    "href": "80_double.rjs.html#insufficient",
+    "title": "Double",
+    "section": "Insufficient",
+    "text": "Insufficient\n\nI still triple fault on this.\nWhy?\n\nWe added a stack.\nWe added it’s location to the GDT.\nWe added a double fault handler, but\nWe did not direct the double fault handler to change stacks.\n\nWe return to the handler (NOT the GDT) to update it…"
+  },
+  {
+    "objectID": "80_double.rjs.html#handle-it-3",
+    "href": "80_double.rjs.html#handle-it-3",
+    "title": "Double",
+    "section": "Handle it",
+    "text": "Handle it\n\nYou probably have:\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault.set_handler_fn(double_fault_handler);\n        IDT.load();\n    }\n}"
+  },
+  {
+    "objectID": "80_double.rjs.html#update",
+    "href": "80_double.rjs.html#update",
+    "title": "Double",
+    "section": "Update",
+    "text": "Update\n\nUpdate to change a stack index\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        // This is from `cargo fmt`...\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n    }\n}"
   }
 ]

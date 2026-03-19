@@ -1307,11 +1307,11 @@
 <div class="code-with-filename-file">
 <pre><strong>src/gdt.rs</strong></pre>
 </div>
-<div class="sourceCode" id="cb25" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb25-1"><a></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">u16</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<div class="sourceCode" id="cb25" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb25-1"><a></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb25-2"><a></a></span>
 <span id="cb25-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_gdt() <span class="op">{</span></span>
 <span id="cb25-4"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb25-5"><a></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">usize</span>] <span class="op">=</span></span>
+<span id="cb25-5"><a></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] <span class="op">=</span></span>
 <span id="cb25-6"><a></a>            <span class="pp">x86_64::VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK) <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
 <span id="cb25-7"><a></a>    <span class="op">}</span></span>
 <span id="cb25-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1360,8 +1360,8 @@
 <pre><strong>src/gdt.rs</strong></pre>
 </div>
 <div class="sourceCode" id="cb27" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb27-1"><a></a><span class="co">// Within "init"</span></span>
-<span id="cb27-2"><a></a>GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment()<span class="op">;</span></span>
-<span id="cb27-3"><a></a>GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb27-2"><a></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb27-3"><a></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="now-it-will" class="slide level2">
@@ -1377,74 +1377,149 @@
 <ol type="1">
 <li><strong>Reload code segment register</strong>: We changed our GDT, so we should reload <strong>CS</strong>, the code segment register. The old segment selector could now point to an old e.g.&nbsp;TSS.</li>
 <li><strong>Load the TSS</strong>: We loaded a GDT that contains a TSS selector, but we still need to tell the CPU that it should use that TSS.</li>
+<li>** Update the handler**: Our double fault handler must know to use the novel stack we have created.</li>
 </ol>
 </section>
 <section id="not-too-bad" class="slide level2">
 <h2>Not too bad…</h2>
 <ul>
-<li>I split this into a few lines.</li>
-<li>Basically, get the kernel <strong>CS</strong>, and <strong>TSS</strong>.</li>
-<li>Turn them into descriptors.</li>
-<li>Either “set” or “load” these descriptors into the GDT.
-<ul>
-<li>Dealing with annoying Rust namespace stuff.</li>
-</ul></li>
+<li>Load the GDT.</li>
 </ul>
-</section>
-<section id="in-code" class="slide level2">
-<h2>In code</h2>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>src/gdt.rs</strong></pre>
 </div>
 <div class="sourceCode" id="cb28" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a></a><span class="co">// Within "init"</span></span>
-<span id="cb28-2"><a></a></span>
-<span id="cb28-3"><a></a><span class="co">// Get the segments as descriptors</span></span>
-<span id="cb28-4"><a></a><span class="kw">let</span> kcs <span class="op">=</span> <span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment()<span class="op">;</span></span>
-<span id="cb28-5"><a></a><span class="kw">let</span> tss <span class="op">=</span> <span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS)<span class="op">;</span></span>
-<span id="cb28-6"><a></a></span>
-<span id="cb28-7"><a></a><span class="co">// Add to GDT</span></span>
-<span id="cb28-8"><a></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(kcs)<span class="op">;</span></span>
-<span id="cb28-9"><a></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(tss)<span class="op">;</span></span>
-<span id="cb28-10"><a></a></span>
-<span id="cb28-11"><a></a><span class="co">// Load GDT and Reload CS</span></span>
-<span id="cb28-12"><a></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
-<span id="cb28-13"><a></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
-<span id="cb28-14"><a></a><span class="co">// Mandate use of this TSS</span></span>
-<span id="cb28-15"><a></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb28-2"><a></a><span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb28-3"><a></a><span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb28-4"><a></a><span class="co">// This is new.</span></span>
+<span id="cb28-5"><a></a>GDT<span class="op">.</span>load()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="update-segments" class="slide level2">
+<h2>Update Segments</h2>
+<ul>
+<li>Basically, we got the kernel <strong>CS</strong>, and <strong>TSS</strong>.</li>
+<li>We turned them into descriptors.</li>
+<li>Either “set” or “load” these descriptors into the GDT.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb29" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb29-1"><a></a><span class="co">// Within "init"</span></span>
+<span id="cb29-2"><a></a>GDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb29-3"><a></a><span class="co">// I love Rust namespaces!</span></span>
+<span id="cb29-4"><a></a><span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
+<span id="cb29-5"><a></a><span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
+<span id="cb29-6"><a></a><span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="full-file" class="slide level2">
+<h2>Full File</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/gdt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb30" data-filename="src/gdt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb30-1"><a></a><span class="at">#![</span>allow<span class="at">(</span>static_mut_refs<span class="at">)]</span></span>
+<span id="cb30-2"><a></a></span>
+<span id="cb30-3"><a></a><span class="co">// GDT</span></span>
+<span id="cb30-4"><a></a><span class="kw">static</span> <span class="kw">mut</span> GDT<span class="op">:</span> <span class="pp">x86_64::structures::gdt::</span>GlobalDescriptorTable <span class="op">=</span></span>
+<span id="cb30-5"><a></a>    <span class="pp">x86_64::structures::gdt::GlobalDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb30-6"><a></a></span>
+<span id="cb30-7"><a></a><span class="co">// TSS</span></span>
+<span id="cb30-8"><a></a><span class="kw">const</span> STACK_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">4096</span> <span class="op">*</span> <span class="dv">5</span><span class="op">;</span></span>
+<span id="cb30-9"><a></a><span class="kw">static</span> <span class="kw">mut</span> TSS<span class="op">:</span> <span class="pp">x86_64::structures::tss::</span>TaskStateSegment <span class="op">=</span></span>
+<span id="cb30-10"><a></a>    <span class="pp">x86_64::structures::tss::TaskStateSegment::</span>new()<span class="op">;</span></span>
+<span id="cb30-11"><a></a><span class="kw">static</span> <span class="kw">mut</span> STACK<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span> STACK_SIZE] <span class="op">=</span> [<span class="dv">0</span><span class="op">;</span> STACK_SIZE]<span class="op">;</span></span>
+<span id="cb30-12"><a></a></span>
+<span id="cb30-13"><a></a><span class="kw">pub</span> <span class="kw">const</span> DOUBLE_FAULT_IST_INDEX<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb30-14"><a></a></span>
+<span id="cb30-15"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_gdt() <span class="op">{</span></span>
+<span id="cb30-16"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb30-17"><a></a>        TSS<span class="op">.</span>interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] <span class="op">=</span></span>
+<span id="cb30-18"><a></a>            <span class="pp">x86_64::VirtAddr::</span>from_ptr(<span class="op">&amp;</span>raw <span class="kw">const</span> STACK) <span class="op">+</span> STACK_SIZE<span class="op">;</span></span>
+<span id="cb30-19"><a></a>        <span class="kw">let</span> kcs <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>kernel_code_segment())<span class="op">;</span></span>
+<span id="cb30-20"><a></a>        <span class="kw">let</span> tss <span class="op">=</span> GDT<span class="op">.</span>add_entry(<span class="pp">x86_64::structures::gdt::Descriptor::</span>tss_segment(<span class="op">&amp;</span>TSS))<span class="op">;</span></span>
+<span id="cb30-21"><a></a>        GDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb30-22"><a></a>        <span class="kw">use</span> <span class="pp">x86_64::instructions::segmentation::</span>Segment<span class="op">;</span></span>
+<span id="cb30-23"><a></a>        <span class="pp">x86_64::instructions::segmentation::CS::</span>set_reg(kcs)<span class="op">;</span></span>
+<span id="cb30-24"><a></a>        <span class="pp">x86_64::instructions::tables::</span>load_tss(tss)<span class="op">;</span></span>
+<span id="cb30-25"><a></a>    <span class="op">}</span></span>
+<span id="cb30-26"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="insufficient" class="slide level2">
+<h2>Insufficient</h2>
+<ul>
+<li>I still triple fault on this.</li>
+<li>Why?
+<ul>
+<li>We added a stack.</li>
+<li>We added it’s location to the GDT.</li>
+<li>We added a double fault handler, but</li>
+<li><em>We did not direct the double fault handler to change stacks</em>.</li>
+</ul></li>
+<li>We return to the handler (<strong>NOT</strong> the GDT) to update it…</li>
+</ul>
+</section>
+<section id="handle-it-3" class="slide level2">
+<h2>Handle it</h2>
+<ul>
+<li>You probably have:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb31" data-filename="src/interrupt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb31-1"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb31-2"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb31-3"><a></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb31-4"><a></a>        IDT<span class="op">.</span>double_fault<span class="op">.</span>set_handler_fn(double_fault_handler)<span class="op">;</span></span>
+<span id="cb31-5"><a></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb31-6"><a></a>    <span class="op">}</span></span>
+<span id="cb31-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="update" class="slide level2">
+<h2>Update</h2>
+<ul>
+<li>Update to change a <em>stack index</em></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupt.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb32" data-filename="src/interrupt.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb32-1"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb32-2"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb32-3"><a></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb32-4"><a></a>        <span class="co">// This is from `cargo fmt`...</span></span>
+<span id="cb32-5"><a></a>        IDT<span class="op">.</span>double_fault</span>
+<span id="cb32-6"><a></a>            <span class="op">.</span>set_handler_fn(double_fault_handler)</span>
+<span id="cb32-7"><a></a>            <span class="op">.</span>set_stack_index(<span class="kw">crate</span><span class="pp">::gdt::</span>DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">u16</span>)<span class="op">;</span></span>
+<span id="cb32-8"><a></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb32-9"><a></a>    <span class="op">}</span></span>
+<span id="cb32-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="this-worked-for-me" class="slide level2">
 <h2>This “worked” for me</h2>
-<div class="sourceCode" id="cb29"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb29-1"><a></a><span class="ex">$</span> cargo t <span class="at">--test</span> overflow</span>
-<span id="cb29-2"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="bu">test</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.03s</span></span>
-<span id="cb29-3"><a></a>     <span class="ex">Running</span> tests/overflow.rs <span class="er">(</span><span class="ex">target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2</span><span class="kw">)</span></span>
-<span id="cb29-4"><a></a><span class="ex">Building</span> bootloader</span>
-<span id="cb29-5"><a></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile [optimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.03s</span></span>
-<span id="cb29-6"><a></a><span class="ex">Running:</span> <span class="kw">`</span><span class="ex">qemu-system-x86_64</span> <span class="at">-drive</span> format=raw,file=/home/user/tmp/work/target/x86_64-osirs/debug/deps/bootimage-overflow-60f67220f8d9bad2.bin <span class="at">-no-reboot</span> <span class="at">-device</span> isa-debug-exit,iobase=0xf4,iosize=0x04 <span class="at">-serial</span> stdio <span class="at">-display</span> none<span class="kw">`</span></span>
-<span id="cb29-7"><a></a><span class="ex">[Fail]</span></span>
-<span id="cb29-8"><a></a></span>
-<span id="cb29-9"><a></a><span class="ex">===</span> PanicInfo ===</span>
-<span id="cb29-10"><a></a><span class="ex">panicked</span> at src/interrupts.rs:25:5:</span>
-<span id="cb29-11"><a></a><span class="ex">EXCEPTION:</span> DOUBLE FAULT</span>
-<span id="cb29-12"><a></a><span class="ex">InterruptStackFrame</span> {</span>
-<span id="cb29-13"><a></a>    <span class="ex">instruction_pointer:</span> VirtAddr<span class="er">(</span></span>
-<span id="cb29-14"><a></a>        <span class="ex">0x205cbb,</span></span>
-<span id="cb29-15"><a></a>    <span class="kw">)</span><span class="ex">,</span></span>
-<span id="cb29-16"><a></a>    <span class="ex">code_segment:</span> 8,</span>
-<span id="cb29-17"><a></a>    <span class="ex">cpu_flags:</span> 0x6,</span>
-<span id="cb29-18"><a></a>    <span class="ex">stack_pointer:</span> VirtAddr<span class="er">(</span></span>
-<span id="cb29-19"><a></a>        <span class="ex">0x10000201f56,</span></span>
-<span id="cb29-20"><a></a>    <span class="kw">)</span><span class="ex">,</span></span>
-<span id="cb29-21"><a></a>    <span class="ex">stack_segment:</span> 0,</span>
-<span id="cb29-22"><a></a><span class="er">}</span></span>
-<span id="cb29-23"><a></a><span class="ex">=================</span></span>
-<span id="cb29-24"><a></a></span>
-<span id="cb29-25"><a></a><span class="ex">error:</span> test failed, to rerun pass <span class="kw">`</span><span class="ex">--test</span> overflow<span class="kw">`</span></span>
-<span id="cb29-26"><a></a></span>
-<span id="cb29-27"><a></a><span class="ex">Caused</span> by:</span>
-<span id="cb29-28"><a></a>  <span class="ex">process</span> didn<span class="st">'t exit successfully: `bootimage runner /home/user/tmp/work/target/x86_64-osirs/debug/deps/overflow-60f67220f8d9bad2` (exit status: 31)</span></span>
-<span id="cb29-29"><a></a><span class="st">note: test exited abnormally; to see the full output pass --no-capture to the harness.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>Prefer panic to boot loop.</li>
+</ul>
+<div class="sourceCode" id="cb33"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb33-1"><a></a><span class="ex">panicked</span> at src/interrupts.rs:25:5:</span>
+<span id="cb33-2"><a></a><span class="ex">EXCEPTION:</span> DOUBLE FAULT</span>
+<span id="cb33-3"><a></a><span class="ex">InterruptStackFrame</span> {</span>
+<span id="cb33-4"><a></a>    <span class="ex">instruction_pointer:</span> VirtAddr<span class="er">(</span></span>
+<span id="cb33-5"><a></a>        <span class="ex">0x205cbb,</span></span>
+<span id="cb33-6"><a></a>    <span class="kw">)</span><span class="ex">,</span></span>
+<span id="cb33-7"><a></a>    <span class="ex">code_segment:</span> 8,</span>
+<span id="cb33-8"><a></a>    <span class="ex">cpu_flags:</span> 0x6,</span>
+<span id="cb33-9"><a></a>    <span class="ex">stack_pointer:</span> VirtAddr<span class="er">(</span></span>
+<span id="cb33-10"><a></a>        <span class="ex">0x10000201f56,</span></span>
+<span id="cb33-11"><a></a>    <span class="kw">)</span><span class="ex">,</span></span>
+<span id="cb33-12"><a></a>    <span class="ex">stack_segment:</span> 0,</span>
+<span id="cb33-13"><a></a><span class="er">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="tying-this-off" class="slide level2">
 <h2>Tying this off</h2>
@@ -1456,8 +1531,10 @@
 </ul></li>
 <li>You need to still:
 <ul>
-<li>Modify various handlers to exit successfully when double, rather than triple, faulting under a test framework.</li>
-<li>Good idea for an assignment.</li>
+<li>Create a test case</li>
+<li>Modify various handlers</li>
+<li>Exit successfully when double, rather than triple, faulting.</li>
+<li>Would’ve been this weeks HW.</li>
 </ul></li>
 </ul>
 </section></section>
