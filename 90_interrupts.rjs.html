@@ -6,8 +6,8 @@
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
 <link href="site_libs/quarto-html/light-border.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.8.25">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.6.30">
 
   <title>OS in Rust – Interrupts</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -28,9 +28,8 @@
       vertical-align: middle;
     }
     /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -41,7 +40,7 @@
     }
     @media print {
     pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
     }
     pre.numberSource code
       { counter-reset: source-line 0; }
@@ -63,7 +62,7 @@
     pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
     }
     code span { color: #f8f8f2; } /* Normal */
-    code span.al { color: #f07178; } /* Alert */
+    code span.al { color: #f07178; background-color: #2a0f15; font-weight: bold; } /* Alert */
     code span.an { color: #d4d0ab; } /* Annotation */
     code span.at { color: #00e0e0; } /* Attribute */
     code span.bn { color: #d4d0ab; } /* BaseN */
@@ -94,11 +93,209 @@
     code span.vs { color: #abe338; } /* VerbatimString */
     code span.wa { color: #dcc6e0; } /* Warning */
   </style>
-  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-1d86d68c35eb7061f9efcb6a994936f6.css">
+  <link rel="stylesheet" href="site_libs/revealjs/dist/theme/quarto-0f071606cd187ea9c4f27a73aca9ddf7.css">
   <link href="site_libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
   <link href="site_libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
   <link href="site_libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
   <link href="site_libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    padding-bottom: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
   <style type="text/css">
     .reveal div.sourceCode {
       margin: 0;
@@ -442,7 +639,7 @@
 </section>
 <section id="visually" class="slide level2">
 <h2>Visually</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb1-1"><a></a>                     ____________                          ____________</span>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb1-1"><a></a>                     ____________                          ____________</span>
 <span id="cb1-2"><a></a>Real Time Clock --&gt; |            |   Timer -------------&gt; |            |</span>
 <span id="cb1-3"><a></a>ACPI -------------&gt; |            |   Keyboard-----------&gt; |            |      _____</span>
 <span id="cb1-4"><a></a>Available --------&gt; | Secondary  |----------------------&gt; | Primary    |     |     |</span>
@@ -450,7 +647,7 @@
 <span id="cb1-6"><a></a>Mouse ------------&gt; | Controller |   Serial Port 1 -----&gt; | Controller |     |_____|</span>
 <span id="cb1-7"><a></a>Co-Processor -----&gt; |            |   Parallel Port 2/3 -&gt; |            |</span>
 <span id="cb1-8"><a></a>Primary ATA ------&gt; |            |   Floppy disk -------&gt; |            |</span>
-<span id="cb1-9"><a></a>Secondary ATA ----&gt; |____________|   Parallel Port 1----&gt; |____________|</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-9"><a></a>Secondary ATA ----&gt; |____________|   Parallel Port 1----&gt; |____________|</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>We see that most of the 15 lines have a fixed mapping.</li>
 <li>E.g., (zero indexed) line 4 of the secondary PIC is assigned to the mouse.</li>
@@ -512,7 +709,7 @@
 <div class="code-with-filename-file">
 <pre><strong>pic8259/0.10.1/source/src/lib.rs</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="pic8259/0.10.1/source/src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<div class="sourceCode" id="cb2" data-filename="pic8259/0.10.1/source/src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a></a><span class="at">#![</span>no_std<span class="at">]</span></span>
 <span id="cb2-2"><a></a><span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
 <span id="cb2-3"><a></a></span>
 <span id="cb2-4"><a></a><span class="kw">const</span> CMD_INIT<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0x11</span><span class="op">;</span></span>
@@ -619,7 +816,7 @@
 <span id="cb2-105"><a></a>            <span class="kw">self</span><span class="op">.</span>pics[<span class="dv">0</span>]<span class="op">.</span>end_of_interrupt()<span class="op">;</span></span>
 <span id="cb2-106"><a></a>        <span class="op">}</span></span>
 <span id="cb2-107"><a></a>    <span class="op">}</span></span>
-<span id="cb2-108"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-108"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section></section>
 <section>
@@ -627,12 +824,12 @@
 <h1>TODO</h1>
 <p>The configuration happens by writing special values to the command and data ports of the PICs. Fortunately, there is already a crate called <a href="https://docs.rs/pic8259/0.10.1/pic8259/"><code>pic8259</code></a>, so we don’t need to write the initialization sequence ourselves. However, if you are interested in how it works, check out <a href="https://docs.rs/crate/pic8259/0.10.1/source/src/lib.rs">its source code</a>. It’s fairly small and well documented.</p>
 <p>To add the crate as a dependency, we add the following to our project:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb3-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb3-1"><a></a><span class="co"># in Cargo.toml</span></span>
 <span id="cb3-2"><a></a></span>
 <span id="cb3-3"><a></a><span class="kw">[dependencies]</span></span>
-<span id="cb3-4"><a></a><span class="dt">pic8259</span> <span class="op">=</span> <span class="st">"0.10.1"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-4"><a></a><span class="dt">pic8259</span> <span class="op">=</span> <span class="st">"0.10.1"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The main abstraction provided by the crate is the <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html"><code>ChainedPics</code></a> struct that represents the primary/secondary PIC layout we saw above. It is designed to be used in the following way:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb4-2"><a></a></span>
 <span id="cb4-3"><a></a><span class="kw">use</span> <span class="pp">pic8259::</span>ChainedPics<span class="op">;</span></span>
 <span id="cb4-4"><a></a><span class="kw">use</span> spin<span class="op">;</span></span>
@@ -641,30 +838,30 @@
 <span id="cb4-7"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_2_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> PIC_1_OFFSET <span class="op">+</span> <span class="dv">8</span><span class="op">;</span></span>
 <span id="cb4-8"><a></a></span>
 <span id="cb4-9"><a></a><span class="kw">pub</span> <span class="kw">static</span> PICS<span class="op">:</span> <span class="pp">spin::</span>Mutex<span class="op">&lt;</span>ChainedPics<span class="op">&gt;</span> <span class="op">=</span></span>
-<span id="cb4-10"><a></a>    <span class="pp">spin::Mutex::</span>new(<span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">ChainedPics::</span>new(PIC_1_OFFSET<span class="op">,</span> PIC_2_OFFSET) <span class="op">}</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-10"><a></a>    <span class="pp">spin::Mutex::</span>new(<span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">ChainedPics::</span>new(PIC_1_OFFSET<span class="op">,</span> PIC_2_OFFSET) <span class="op">}</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>As noted above, we’re setting the offsets for the PICs to the range 32–47. By wrapping the <code>ChainedPics</code> struct in a <code>Mutex</code>, we can get safe mutable access (through the <a href="https://docs.rs/spin/0.5.2/spin/struct.Mutex.html#method.lock"><code>lock</code> method</a>), which we need in the next step. The <code>ChainedPics::new</code> function is unsafe because wrong offsets could cause undefined behavior.</p>
 <p>We can now initialize the 8259 PIC in our <code>init</code> function:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="co">// in src/lib.rs</span></span>
 <span id="cb5-2"><a></a></span>
 <span id="cb5-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
 <span id="cb5-4"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
 <span id="cb5-5"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
 <span id="cb5-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">interrupts::</span>PICS<span class="op">.</span>lock()<span class="op">.</span>initialize() <span class="op">};</span> <span class="co">// new</span></span>
-<span id="cb5-7"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We use the <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html#method.initialize"><code>initialize</code></a> function to perform the PIC initialization. Like the <code>ChainedPics::new</code> function, this function is also unsafe because it can cause undefined behavior if the PIC is misconfigured.</p>
 <p>If all goes well, we should continue to see the “It did not crash” message when executing <code>cargo run</code>.</p>
 </section>
 <section id="enabling-interrupts" class="slide level2">
 <h2>Enabling Interrupts</h2>
 <p>Until now, nothing happened because interrupts are still disabled in the CPU configuration. This means that the CPU does not listen to the interrupt controller at all, so no interrupts can reach the CPU. Let’s change that:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="co">// in src/lib.rs</span></span>
 <span id="cb6-2"><a></a></span>
 <span id="cb6-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
 <span id="cb6-4"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
 <span id="cb6-5"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
 <span id="cb6-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">interrupts::</span>PICS<span class="op">.</span>lock()<span class="op">.</span>initialize() <span class="op">};</span></span>
 <span id="cb6-7"><a></a>    <span class="pp">x86_64::instructions::interrupts::</span>enable()<span class="op">;</span>     <span class="co">// new</span></span>
-<span id="cb6-8"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>interrupts::enable</code> function of the <code>x86_64</code> crate executes the special <code>sti</code> instruction (“set interrupts”) to enable external interrupts. When we try <code>cargo run</code> now, we see that a double fault occurs:</p>
 
 <img data-src="qemu-hardware-timer-double-fault.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU printing <code>EXCEPTION: DOUBLE FAULT</code> because of hardware timer</p><p>The reason for this double fault is that the hardware timer (the <a href="https://en.wikipedia.org/wiki/Intel_8253">Intel 8253</a>, to be exact) is enabled by default, so we start receiving timer interrupts as soon as we enable interrupts. Since we didn’t define a handler function for it yet, our double fault handler is invoked.</p>
@@ -672,7 +869,7 @@
 <section id="handling-timer-interrupts" class="slide level2">
 <h2>Handling Timer Interrupts</h2>
 <p>As we see from the graphic <a href="#/the-8259-pic">above</a>, the timer uses line 0 of the primary PIC. This means that it arrives at the CPU as interrupt 32 (0 + offset 32). Instead of hardcoding index 32, we store it in an <code>InterruptIndex</code> enum:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb7-2"><a></a></span>
 <span id="cb7-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
 <span id="cb7-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
@@ -688,10 +885,10 @@
 <span id="cb7-14"><a></a>    <span class="kw">fn</span> as_usize(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">usize</span> <span class="op">{</span></span>
 <span id="cb7-15"><a></a>        <span class="dt">usize</span><span class="pp">::</span>from(<span class="kw">self</span><span class="op">.</span>as_u8())</span>
 <span id="cb7-16"><a></a>    <span class="op">}</span></span>
-<span id="cb7-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb7-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The enum is a <a href="https://doc.rust-lang.org/reference/items/enumerations.html#custom-discriminant-values-for-fieldless-enumerations">C-like enum</a> so that we can directly specify the index for each variant. The <code>repr(u8)</code> attribute specifies that each variant is represented as a <code>u8</code>. We will add more variants for other interrupts in the future.</p>
 <p>Now we can add a handler function for the timer interrupt:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb8-2"><a></a></span>
 <span id="cb8-3"><a></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>print<span class="op">;</span></span>
 <span id="cb8-4"><a></a></span>
@@ -711,7 +908,7 @@
 <span id="cb8-18"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
 <span id="cb8-19"><a></a><span class="op">{</span></span>
 <span id="cb8-20"><a></a>    <span class="pp">print!</span>(<span class="st">"."</span>)<span class="op">;</span></span>
-<span id="cb8-21"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-21"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Our <code>timer_interrupt_handler</code> has the same signature as our exception handlers, because the CPU reacts identically to exceptions and external interrupts (the only difference is that some exceptions push an error code). The <a href="https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html"><code>InterruptDescriptorTable</code></a> struct implements the <a href="https://doc.rust-lang.org/core/ops/trait.IndexMut.html"><code>IndexMut</code></a> trait, so we can access individual entries through array indexing syntax.</p>
 <p>In our timer interrupt handler, we print a dot to the screen. As the timer interrupt happens periodically, we would expect to see a dot appearing on each timer tick. However, when we run it, we see that only a single dot is printed:</p>
 <div class="quarto-figure quarto-figure-center">
@@ -723,7 +920,7 @@
 <h3 id="end-of-interrupt">End of Interrupt</h3>
 <p>The reason is that the PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler. This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt. So the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.</p>
 <p>To send the EOI, we use our static <code>PICS</code> struct again:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb9-2"><a></a></span>
 <span id="cb9-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_interrupt_handler(</span>
 <span id="cb9-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
@@ -734,7 +931,7 @@
 <span id="cb9-9"><a></a>        PICS<span class="op">.</span>lock()</span>
 <span id="cb9-10"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Timer<span class="op">.</span>as_u8())<span class="op">;</span></span>
 <span id="cb9-11"><a></a>    <span class="op">}</span></span>
-<span id="cb9-12"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb9-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>notify_end_of_interrupt</code> figures out whether the primary or secondary PIC sent the interrupt and then uses the <code>command</code> and <code>data</code> ports to send an EOI signal to the respective controllers. If the secondary PIC sent the interrupt, both PICs need to be notified because the secondary PIC is connected to an input line of the primary PIC.</p>
 <p>We need to be careful to use the correct interrupt vector number, otherwise we could accidentally delete an important unsent interrupt or cause our system to hang. This is the reason that the function is unsafe.</p>
 <p>When we now execute <code>cargo run</code> we see dots periodically appearing on the screen:</p>
@@ -751,7 +948,7 @@
 <h2>Deadlocks</h2>
 <p>We now have a form of concurrency in our kernel: The timer interrupts occur asynchronously, so they can interrupt our <code>_start</code> function at any time. Fortunately, Rust’s ownership system prevents many types of concurrency-related bugs at compile time. One notable exception is deadlocks. Deadlocks occur if a thread tries to acquire a lock that will never become free. Thus, the thread hangs indefinitely.</p>
 <p>We can already provoke a deadlock in our kernel. Remember, our <code>println</code> macro calls the <code>vga_buffer::_print</code> function, which <a href="@/edition-2/posts/03-vga-text-buffer/index.md#spinlocks">locks a global <code>WRITER</code></a> using a spinlock:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
 <span id="cb10-2"><a></a></span>
 <span id="cb10-3"><a></a>[…]</span>
 <span id="cb10-4"><a></a></span>
@@ -759,7 +956,7 @@
 <span id="cb10-6"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
 <span id="cb10-7"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
 <span id="cb10-8"><a></a>    WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
-<span id="cb10-9"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-9"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>It locks the <code>WRITER</code>, calls <code>write_fmt</code> on it, and implicitly unlocks it at the end of the function. Now imagine that an interrupt occurs while the <code>WRITER</code> is locked and the interrupt handler tries to print something too:</p>
 <table class="caption-top">
 <colgroup>
@@ -820,7 +1017,7 @@
 <p>The <code>WRITER</code> is locked, so the interrupt handler waits until it becomes free. But this never happens, because the <code>_start</code> function only continues to run after the interrupt handler returns. Thus, the entire system hangs.</p>
 <h3 id="provoking-a-deadlock">Provoking a Deadlock</h3>
 <p>We can easily provoke such a deadlock in our kernel by printing something in the loop at the end of our <code>_start</code> function:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a></a><span class="co">// in src/main.rs</span></span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a></a><span class="co">// in src/main.rs</span></span>
 <span id="cb11-2"><a></a></span>
 <span id="cb11-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
 <span id="cb11-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
@@ -829,14 +1026,14 @@
 <span id="cb11-7"><a></a>        <span class="kw">use</span> <span class="pp">blog_os::</span>print<span class="op">;</span></span>
 <span id="cb11-8"><a></a>        <span class="pp">print!</span>(<span class="st">"-"</span>)<span class="op">;</span>        <span class="co">// new</span></span>
 <span id="cb11-9"><a></a>    <span class="op">}</span></span>
-<span id="cb11-10"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>When we run it in QEMU, we get an output of the form:</p>
 
 <img data-src="./qemu-deadlock.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU output with many rows of hyphens and no dots</p><p>We see that only a limited number of hyphens are printed until the first timer interrupt occurs. Then the system hangs because the timer interrupt handler deadlocks when it tries to print a dot. This is the reason that we see no dots in the above output.</p>
 <p>The actual number of hyphens varies between runs because the timer interrupt occurs asynchronously. This non-determinism is what makes concurrency-related bugs so difficult to debug.</p>
 <h3 id="fixing-the-deadlock">Fixing the Deadlock</h3>
 <p>To avoid this deadlock, we can disable interrupts as long as the <code>Mutex</code> is locked:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
 <span id="cb12-2"><a></a></span>
 <span id="cb12-3"><a></a><span class="co">/// Prints the given formatted string to the VGA text buffer</span></span>
 <span id="cb12-4"><a></a><span class="co">/// through the global `WRITER` instance.</span></span>
@@ -848,10 +1045,10 @@
 <span id="cb12-10"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span>     <span class="co">// new</span></span>
 <span id="cb12-11"><a></a>        WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
 <span id="cb12-12"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
-<span id="cb12-13"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-13"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/interrupts/fn.without_interrupts.html"><code>without_interrupts</code></a> function takes a <a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closure</a> and executes it in an interrupt-free environment. We use it to ensure that no interrupt can occur as long as the <code>Mutex</code> is locked. When we run our kernel now, we see that it keeps running without hanging. (We still don’t notice any dots, but this is because they’re scrolling by too fast. Try to slow down the printing, e.g., by putting a <code>for _ in 0..10000 {}</code> inside the loop.)</p>
 <p>We can apply the same change to our serial printing function to ensure that no deadlocks occur with it either:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a></a><span class="co">// in src/serial.rs</span></span>
+<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a></a><span class="co">// in src/serial.rs</span></span>
 <span id="cb13-2"><a></a></span>
 <span id="cb13-3"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
 <span id="cb13-4"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">::core::fmt::</span>Arguments) <span class="op">{</span></span>
@@ -864,7 +1061,7 @@
 <span id="cb13-11"><a></a>            <span class="op">.</span>write_fmt(args)</span>
 <span id="cb13-12"><a></a>            <span class="op">.</span>expect(<span class="st">"Printing to serial failed"</span>)<span class="op">;</span></span>
 <span id="cb13-13"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
-<span id="cb13-14"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-14"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Note that disabling interrupts shouldn’t be a general solution. The problem is that it increases the worst-case interrupt latency, i.e., the time until the system reacts to an interrupt. Therefore, interrupts should only be disabled for a very short time.</p>
 </section>
 <section id="fixing-a-race-condition" class="slide level2">
@@ -882,7 +1079,7 @@ Error: panicked at 'assertion failed: `(left == right)`
   left: `'.'`,
  right: `'S'`', src/vga_buffer.rs:205:9</code></pre>
 <p>The reason is a <em>race condition</em> between the test and our timer handler. Remember, the test looks like this:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
 <span id="cb15-2"><a></a></span>
 <span id="cb15-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
 <span id="cb15-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
@@ -892,10 +1089,10 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb15-8"><a></a>        <span class="kw">let</span> screen_char <span class="op">=</span> WRITER<span class="op">.</span>lock()<span class="op">.</span>buffer<span class="op">.</span>chars[BUFFER_HEIGHT <span class="op">-</span> <span class="dv">2</span>][i]<span class="op">.</span>read()<span class="op">;</span></span>
 <span id="cb15-9"><a></a>        <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
 <span id="cb15-10"><a></a>    <span class="op">}</span></span>
-<span id="cb15-11"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-11"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The test prints a string to the VGA buffer and then checks the output by manually iterating over the <code>buffer_chars</code> array. The race condition occurs because the timer interrupt handler might run between the <code>println</code> and the reading of the screen characters. Note that this isn’t a dangerous <em>data race</em>, which Rust completely prevents at compile time. See the <a href="https://doc.rust-lang.org/nomicon/races.html"><em>Rustonomicon</em></a> for details.</p>
 <p>To fix this, we need to keep the <code>WRITER</code> locked for the complete duration of the test, so that the timer handler can’t write a <code>.</code> to the screen in between. The fixed test looks like this:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
 <span id="cb16-2"><a></a></span>
 <span id="cb16-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
 <span id="cb16-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
@@ -911,7 +1108,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb16-14"><a></a>            <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
 <span id="cb16-15"><a></a>        <span class="op">}</span></span>
 <span id="cb16-16"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
-<span id="cb16-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb16-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We performed the following changes:</p>
 <ul>
 <li>We keep the writer locked for the complete test by using the <code>lock()</code> method explicitly. Instead of <code>println</code>, we use the <a href="https://doc.rust-lang.org/core/macro.writeln.html"><code>writeln</code></a> macro that allows printing to an already locked writer.</li>
@@ -925,16 +1122,16 @@ Error: panicked at 'assertion failed: `(left == right)`
 <h2>The <code>hlt</code> Instruction</h2>
 <p>Until now, we used a simple empty loop statement at the end of our <code>_start</code> and <code>panic</code> functions. This causes the CPU to spin endlessly, and thus works as expected. But it is also very inefficient, because the CPU continues to run at full speed even though there’s no work to do. You can see this problem in your task manager when you run your kernel: The QEMU process needs close to 100% CPU the whole time.</p>
 <p>What we really want to do is to halt the CPU until the next interrupt arrives. This allows the CPU to enter a sleep state in which it consumes much less energy. The <a href="https://en.wikipedia.org/wiki/HLT_(x86_instruction)"><code>hlt</code> instruction</a> does exactly that. Let’s use this instruction to create an energy-efficient endless loop:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="co">// in src/lib.rs</span></span>
 <span id="cb17-2"><a></a></span>
 <span id="cb17-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> hlt_loop() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
 <span id="cb17-4"><a></a>    <span class="cf">loop</span> <span class="op">{</span></span>
 <span id="cb17-5"><a></a>        <span class="pp">x86_64::instructions::</span>hlt()<span class="op">;</span></span>
 <span id="cb17-6"><a></a>    <span class="op">}</span></span>
-<span id="cb17-7"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb17-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The <code>instructions::hlt</code> function is just a <a href="https://github.com/rust-osdev/x86_64/blob/5e8e218381c5205f5777cb50da3ecac5d7e3b1ab/src/instructions/mod.rs#L16-L22">thin wrapper</a> around the assembly instruction. It is safe because there’s no way it can compromise memory safety.</p>
 <p>We can now use this <code>hlt_loop</code> instead of the endless loops in our <code>_start</code> and <code>panic</code> functions:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="co">// in src/main.rs</span></span>
+<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="co">// in src/main.rs</span></span>
 <span id="cb18-2"><a></a></span>
 <span id="cb18-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
 <span id="cb18-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
@@ -950,9 +1147,9 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb18-14"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
 <span id="cb18-15"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
 <span id="cb18-16"><a></a>    <span class="pp">blog_os::</span>hlt_loop()<span class="op">;</span>            <span class="co">// new</span></span>
-<span id="cb18-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Let’s update our <code>lib.rs</code> as well:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// in src/lib.rs</span></span>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// in src/lib.rs</span></span>
 <span id="cb19-2"><a></a></span>
 <span id="cb19-3"><a></a><span class="co">/// Entry point for `cargo test`</span></span>
 <span id="cb19-4"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
@@ -968,7 +1165,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb19-14"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Error: {}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> info)<span class="op">;</span></span>
 <span id="cb19-15"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
 <span id="cb19-16"><a></a>    hlt_loop()<span class="op">;</span>         <span class="co">// new</span></span>
-<span id="cb19-17"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb19-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>When we run our kernel now in QEMU, we see a much lower CPU usage.</p>
 </section>
 <section id="keyboard-input" class="slide level2">
@@ -977,7 +1174,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 
 <p>Like the hardware timer, the keyboard controller is already enabled by default. So when you press a key, the keyboard controller sends an interrupt to the PIC, which forwards it to the CPU. The CPU looks for a handler function in the IDT, but the corresponding entry is empty. Therefore, a double fault occurs.</p>
 <p>So let’s add a handler function for the keyboard interrupt. It’s quite similar to how we defined the handler for the timer interrupt; it just uses a different interrupt number:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb20-2"><a></a></span>
 <span id="cb20-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
 <span id="cb20-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
@@ -1008,12 +1205,12 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb20-29"><a></a>        PICS<span class="op">.</span>lock()</span>
 <span id="cb20-30"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
 <span id="cb20-31"><a></a>    <span class="op">}</span></span>
-<span id="cb20-32"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb20-32"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>As we see from the graphic <a href="#/the-8259-pic">above</a>, the keyboard uses line 1 of the primary PIC. This means that it arrives at the CPU as interrupt 33 (1 + offset 32). We add this index as a new <code>Keyboard</code> variant to the <code>InterruptIndex</code> enum. We don’t need to specify the value explicitly, since it defaults to the previous value plus one, which is also 33. In the interrupt handler, we print a <code>k</code> and send the end of interrupt signal to the interrupt controller.</p>
 <p>We now see that a <code>k</code> appears on the screen when we press a key. However, this only works for the first key we press. Even if we continue to press keys, no more <code>k</code>s appear on the screen. This is because the keyboard controller won’t send another interrupt until we have read the so-called <em>scancode</em> of the pressed key.</p>
 <h3 id="reading-the-scancodes">Reading the Scancodes</h3>
 <p>To find out <em>which</em> key was pressed, we need to query the keyboard controller. We do this by reading from the data port of the PS/2 controller, which is the <a href="@/edition-2/posts/04-testing/index.md#i-o-ports">I/O port</a> with the number <code>0x60</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb21-2"><a></a></span>
 <span id="cb21-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
 <span id="cb21-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
@@ -1028,7 +1225,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb21-13"><a></a>        PICS<span class="op">.</span>lock()</span>
 <span id="cb21-14"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
 <span id="cb21-15"><a></a>    <span class="op">}</span></span>
-<span id="cb21-16"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb21-16"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We use the <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/port/struct.Port.html"><code>Port</code></a> type of the <code>x86_64</code> crate to read a byte from the keyboard’s data port. This byte is called the <a href="https://en.wikipedia.org/wiki/Scancode"><em>scancode</em></a> and it represents the key press/release. We don’t do anything with the scancode yet, other than print it to the screen:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -1041,7 +1238,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 <p>There are three different standards for the mapping between scancodes and keys, the so-called <em>scancode sets</em>. All three go back to the keyboards of early IBM computers: the <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT">IBM XT</a>, the <a href="https://en.wikipedia.org/wiki/IBM_3270_PC">IBM 3270 PC</a>, and the <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer/AT">IBM AT</a>. Later computers fortunately did not continue the trend of defining new scancode sets, but rather emulated the existing sets and extended them. Today, most keyboards can be configured to emulate any of the three sets.</p>
 <p>By default, PS/2 keyboards emulate scancode set 1 (“XT”). In this set, the lower 7 bits of a scancode byte define the key, and the most significant bit defines whether it’s a press (“0”) or a release (“1”). Keys that were not present on the original <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT">IBM XT</a> keyboard, such as the enter key on the keypad, generate two scancodes in succession: a <code>0xe0</code> escape byte and then a byte representing the key. For a list of all set 1 scancodes and their corresponding keys, check out the <a href="https://wiki.osdev.org/Keyboard#Scan_Code_Set_1">OSDev Wiki</a>.</p>
 <p>To translate the scancodes to keys, we can use a <code>match</code> statement:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
 <span id="cb22-2"><a></a></span>
 <span id="cb22-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
 <span id="cb22-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
@@ -1073,7 +1270,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb22-30"><a></a>        PICS<span class="op">.</span>lock()</span>
 <span id="cb22-31"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
 <span id="cb22-32"><a></a>    <span class="op">}</span></span>
-<span id="cb22-33"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb22-33"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The above code translates keypresses of the number keys 0-9 and ignores all other keys. It uses a <a href="https://doc.rust-lang.org/book/ch06-02-match.html">match</a> statement to assign a character or <code>None</code> to each scancode. It then uses <a href="https://doc.rust-lang.org/book/ch19-01-all-the-places-for-patterns.html#conditional-if-let-expressions"><code>if let</code></a> to destructure the optional <code>key</code>. By using the same variable name <code>key</code> in the pattern, we <a href="https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html#shadowing">shadow</a> the previous declaration, which is a common pattern for destructuring <code>Option</code> types in Rust.</p>
 <p>Now we can write numbers:</p>
 <div class="quarto-figure quarto-figure-center">
@@ -1083,12 +1280,12 @@ Error: panicked at 'assertion failed: `(left == right)`
 </figure>
 </div>
 <p>Translating the other keys works in the same way. Fortunately, there is a crate named <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/"><code>pc-keyboard</code></a> for translating scancodes of scancode sets 1 and 2, so we don’t have to implement this ourselves. To use the crate, we add it to our <code>Cargo.toml</code> and import it in our <code>lib.rs</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb23-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb23-1"><a></a><span class="co"># in Cargo.toml</span></span>
 <span id="cb23-2"><a></a></span>
 <span id="cb23-3"><a></a><span class="kw">[dependencies]</span></span>
-<span id="cb23-4"><a></a><span class="dt">pc-keyboard</span> <span class="op">=</span> <span class="st">"0.7.0"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb23-4"><a></a><span class="dt">pc-keyboard</span> <span class="op">=</span> <span class="st">"0.7.0"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Now we can use this crate to rewrite our <code>keyboard_interrupt_handler</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a></a><span class="co">// in/src/interrupts.rs</span></span>
+<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a></a><span class="co">// in/src/interrupts.rs</span></span>
 <span id="cb24-2"><a></a></span>
 <span id="cb24-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
 <span id="cb24-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
@@ -1121,7 +1318,7 @@ Error: panicked at 'assertion failed: `(left == right)`
 <span id="cb24-31"><a></a>        PICS<span class="op">.</span>lock()</span>
 <span id="cb24-32"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
 <span id="cb24-33"><a></a>    <span class="op">}</span></span>
-<span id="cb24-34"><a></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb24-34"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We use the <code>lazy_static</code> macro to create a static <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html"><code>Keyboard</code></a> object protected by a Mutex. We initialize the <code>Keyboard</code> with a US keyboard layout and the scancode set 1. The <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/enum.HandleControl.html"><code>HandleControl</code></a> parameter allows to map <code>ctrl+[a-z]</code> to the Unicode characters <code>U+0001</code> through <code>U+001A</code>. We don’t want to do that, so we use the <code>Ignore</code> option to handle the <code>ctrl</code> like normal keys.</p>
 <p>On each interrupt, we lock the Mutex, read the scancode from the keyboard controller, and pass it to the <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html#method.add_byte"><code>add_byte</code></a> method, which translates the scancode into an <code>Option&lt;KeyEvent&gt;</code>. The <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.KeyEvent.html"><code>KeyEvent</code></a> contains the key which caused the event and whether it was a press or release event.</p>
 <p>To interpret this key event, we pass it to the <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html#method.process_keyevent"><code>process_keyevent</code></a> method, which translates the key event to a character, if possible. For example, it translates a press event of the <code>A</code> key to either a lowercase <code>a</code> character or an uppercase <code>A</code> character, depending on whether the shift key was pressed.</p>
@@ -1338,7 +1535,7 @@ Error: panicked at 'assertion failed: `(left == right)`
         margin: 0.1,
 
         math: {
-          mathjax: 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js',
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js',
           config: 'TeX-AMS_HTML-full',
           tex2jax: {
             inlineMath: [['\\(','\\)']],
@@ -1365,173 +1562,192 @@ Error: panicked at 'assertion failed: `(left == right)`
       });
     </script>
     <script id="quarto-html-after-body" type="application/javascript">
-      window.document.addEventListener("DOMContentLoaded", function (event) {
-        const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
-        tabsets.forEach(function(tabset) {
-          const tabby = new Tabby('#' + tabset.id);
-        });
-        const isCodeAnnotation = (el) => {
-          for (const clz of el.classList) {
-            if (clz.startsWith('code-annotation-')) {                     
-              return true;
-            }
-          }
-          return false;
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
         }
-        const onCopySuccess = function(e) {
-          // button target
-          const button = e.trigger;
-          // don't keep focus
-          button.blur();
-          // flash "checked"
-          button.classList.add('code-copy-button-checked');
-          var currentTitle = button.getAttribute("title");
-          button.setAttribute("title", "Copied!");
-          let tooltip;
-          if (window.bootstrap) {
-            button.setAttribute("data-bs-toggle", "tooltip");
-            button.setAttribute("data-bs-placement", "left");
-            button.setAttribute("data-bs-title", "Copied!");
-            tooltip = new bootstrap.Tooltip(button, 
-              { trigger: "manual", 
-                customClass: "code-copy-button-tooltip",
-                offset: [0, -8]});
-            tooltip.show();    
-          }
-          setTimeout(function() {
-            if (tooltip) {
-              tooltip.hide();
-              button.removeAttribute("data-bs-title");
-              button.removeAttribute("data-bs-toggle");
-              button.removeAttribute("data-bs-placement");
-            }
-            button.setAttribute("title", currentTitle);
-            button.classList.remove('code-copy-button-checked');
-          }, 1000);
-          // clear code selection
-          e.clearSelection();
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
         }
-        const getTextToCopy = function(trigger) {
-          const outerScaffold = trigger.parentElement.cloneNode(true);
-          const codeEl = outerScaffold.querySelector('code');
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const onCopySuccess = function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      }
+      const getTextToCopy = function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
           for (const childEl of codeEl.children) {
             if (isCodeAnnotation(childEl)) {
               childEl.remove();
             }
           }
           return codeEl.innerText;
-        }
-        const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-          text: getTextToCopy
-        });
-        clipboard.on('success', onCopySuccess);
-        if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-          const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-            text: getTextToCopy,
-            container: window.document.getElementById('quarto-embedded-source-code-modal')
-          });
-          clipboardModal.on('success', onCopySuccess);
-        }
-          var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-          var mailtoRegex = new RegExp(/^mailto:/);
-            var filterRegex = new RegExp('/' + window.location.host + '/');
-          var isInternal = (href) => {
-              return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-          }
-          // Inspect non-navigation links and adorn them if external
-         var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-          for (var i=0; i<links.length; i++) {
-            const link = links[i];
-            if (!isInternal(link.href)) {
-              // undo the damage that might have been done by quarto-nav.js in the case of
-              // links that we want to consider external
-              if (link.dataset.originalHref !== undefined) {
-                link.href = link.dataset.originalHref;
-              }
-            }
-          }
-        function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-          const config = {
-            allowHTML: true,
-            maxWidth: 500,
-            delay: 100,
-            arrow: false,
-            appendTo: function(el) {
-                return el.closest('section.slide') || el.parentElement;
-            },
-            interactive: true,
-            interactiveBorder: 10,
-            theme: 'light-border',
-            placement: 'bottom-start',
-          };
-          if (contentFn) {
-            config.content = contentFn;
-          }
-          if (onTriggerFn) {
-            config.onTrigger = onTriggerFn;
-          }
-          if (onUntriggerFn) {
-            config.onUntrigger = onUntriggerFn;
-          }
-            config['offset'] = [0,0];
-            config['maxWidth'] = 700;
-          window.tippy(el, config); 
-        }
-        const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-        for (var i=0; i<noterefs.length; i++) {
-          const ref = noterefs[i];
-          tippyHover(ref, function() {
-            // use id or data attribute instead here
-            let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-            try { href = new URL(href).hash; } catch {}
-            const id = href.replace(/^#\/?/, "");
-            const note = window.document.getElementById(id);
-            if (note) {
-              return note.innerHTML;
-            } else {
-              return "";
-            }
-          });
-        }
-        const findCites = (el) => {
-          const parentEl = el.parentElement;
-          if (parentEl) {
-            const cites = parentEl.dataset.cites;
-            if (cites) {
-              return {
-                el,
-                cites: cites.split(' ')
-              };
-            } else {
-              return findCites(el.parentElement)
-            }
-          } else {
-            return undefined;
-          }
-        };
-        var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-        for (var i=0; i<bibliorefs.length; i++) {
-          const ref = bibliorefs[i];
-          const citeInfo = findCites(ref);
-          if (citeInfo) {
-            tippyHover(citeInfo.el, function() {
-              var popup = window.document.createElement('div');
-              citeInfo.cites.forEach(function(cite) {
-                var citeDiv = window.document.createElement('div');
-                citeDiv.classList.add('hanging-indent');
-                citeDiv.classList.add('csl-entry');
-                var biblioDiv = window.document.getElementById('ref-' + cite);
-                if (biblioDiv) {
-                  citeDiv.innerHTML = biblioDiv.innerHTML;
-                }
-                popup.appendChild(citeDiv);
-              });
-              return popup.innerHTML;
-            });
-          }
-        }
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+        text: getTextToCopy
       });
-      </script>
+      clipboard.on('success', onCopySuccess);
+      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+        // For code content inside modals, clipBoardJS needs to be initialized with a container option
+        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+          text: getTextToCopy,
+          container: window.document.getElementById('quarto-embedded-source-code-modal')
+        });
+        clipboardModal.on('success', onCopySuccess);
+      }
+        var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+        var mailtoRegex = new RegExp(/^mailto:/);
+          var filterRegex = new RegExp('/' + window.location.host + '/');
+        var isInternal = (href) => {
+            return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+        }
+        // Inspect non-navigation links and adorn them if external
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+        for (var i=0; i<links.length; i++) {
+          const link = links[i];
+          if (!isInternal(link.href)) {
+            // undo the damage that might have been done by quarto-nav.js in the case of
+            // links that we want to consider external
+            if (link.dataset.originalHref !== undefined) {
+              link.href = link.dataset.originalHref;
+            }
+          }
+        }
+      function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+        const config = {
+          allowHTML: true,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start',
+        };
+        if (contentFn) {
+          config.content = contentFn;
+        }
+        if (onTriggerFn) {
+          config.onTrigger = onTriggerFn;
+        }
+        if (onUntriggerFn) {
+          config.onUntrigger = onUntriggerFn;
+        }
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note) {
+            return note.innerHTML;
+          } else {
+            return "";
+          }
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
     
 
 </body></html>
