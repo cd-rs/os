@@ -402,8 +402,9 @@
 <li><strong>Action Items</strong>:
 <ul>
 <li>Welcome back.</li>
-<li>You should have a working: - Breakpoint handler.
+<li>You should have a working:
 <ul>
+<li>Breakpoint handler.</li>
 <li>Double fault handler.</li>
 </ul></li>
 </ul></li>
@@ -683,10 +684,10 @@
 <section id="defaults" class="slide level2">
 <h2>Defaults</h2>
 <ul>
-<li>The default configuration of the PICs sends interrupt vector numbers in the range of 0–15 to the CPU.</li>
-<li>These numbers are already occupied by (the first <code>0x20</code>) CPU exceptions.</li>
-<li>For example, number 8 corresponds to a <em>double fault</em> in the CPU and <em>Serial Port 1</em> in the PIC.</li>
-<li>We need to <strong>re</strong>map the PIC interrupts to different numbers.</li>
+<li>By default PICs send interrupt vector numbers in the range of 0–15 to the CPU.</li>
+<li>These numbers collide with (the first <code>0x20</code>) CPU exceptions.</li>
+<li>E.g., 8 corresponds to a <em>double fault</em> in the CPU and <em>Serial Port 1</em> in the PIC.</li>
+<li><strong>Re</strong>map the PIC interrupts to different numbers.</li>
 </ul>
 </section>
 <section id="conventions" class="slide level2">
@@ -818,355 +819,409 @@
 <span id="cb2-107"><a></a>    <span class="op">}</span></span>
 <span id="cb2-108"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="lets-cheat" class="slide level2">
+<h2>Let’s Cheat</h2>
+<ul>
+<li>We’ve added crates before.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Cargo.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="Cargo.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb3-1"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb3-2"><a></a><span class="dt">pic8259</span> <span class="op">=</span> <span class="st">"0.10.1"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Read more: <a href="https://docs.rs/pic8259/0.10.1/pic8259/"><code>pic8259</code></a></li>
+<li>My <code>Cargo.toml</code> is growing quite large.</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a></a><span class="ex">$</span> wc Cargo.toml</span>
+<span id="cb4-2"><a></a> <span class="ex">20</span>  44 381 Cargo.toml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="how-i-did-it" class="slide level2">
+<h2>How I did it</h2>
+<ul>
+<li>I just appended to the end of <code>src/interrupts.rs</code></li>
+<li>I use “<code>ChainedPics</code>”, the main thing the crate provides.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="co">// PIC</span></span>
+<span id="cb5-2"><a></a></span>
+<span id="cb5-3"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_1_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
+<span id="cb5-4"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_2_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> PIC_1_OFFSET <span class="op">+</span> <span class="dv">8</span><span class="op">;</span></span>
+<span id="cb5-5"><a></a></span>
+<span id="cb5-6"><a></a><span class="kw">pub</span> <span class="kw">static</span> <span class="kw">mut</span> PICS<span class="op">:</span> <span class="pp">pic8259::</span>ChainedPics <span class="op">=</span></span>
+<span id="cb5-7"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">pic8259::ChainedPics::</span>new(PIC_1_OFFSET<span class="op">,</span> PIC_2_OFFSET) <span class="op">};</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="an-aside" class="slide level2">
+<h2>An Aside</h2>
+<ul>
+<li>Up until now, I have taken the liberty of not implementing an <em>mutex</em> in our OS.
+<ul>
+<li>Stands for “MUTual EXclusion”</li>
+<li>Used to prevent different… things (threads)… from modifying the same shared state at the same time.</li>
+<li>This can lead to program inconsistencies… but not in our case <em>yet</em>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="on-the-mutex" class="slide level2">
+<h2>On the Mutex</h2>
+<ul>
+<li>Up until now, it hasn’t mattered - all our code executed serially (one thing at a time) and linearly (in a defined order).</li>
+<li><em>We are now about to enter the “Cool Zone”</em>
+<ul>
+<li>But I still won’t mutex yet until we see a better way to do it.</li>
+</ul></li>
+</ul>
+</section>
+<section id="back-at-it" class="slide level2">
+<h2>Back at it</h2>
+<ul>
+<li>We also <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html#method.initialize">initialize</a> our PIC.</li>
+<li>I did in <code>interrupts::init_idt()</code></li>
+<li>Some double fault handler stuff too…</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb6-2"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb6-3"><a></a>        IDT<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb6-4"><a></a>        IDT<span class="op">.</span>double_fault</span>
+<span id="cb6-5"><a></a>            <span class="op">.</span>set_handler_fn(double_fault_handler)</span>
+<span id="cb6-6"><a></a>            <span class="op">.</span>set_stack_index(<span class="kw">crate</span><span class="pp">::gdt::</span>DOUBLE_FAULT_IST_INDEX <span class="kw">as</span> <span class="dt">u16</span>)<span class="op">;</span></span>
+<span id="cb6-7"><a></a>        IDT<span class="op">.</span>load()<span class="op">;</span></span>
+<span id="cb6-8"><a></a>        PICS<span class="op">.</span>initialize()<span class="op">;</span></span>
+<span id="cb6-9"><a></a>    <span class="op">}</span></span>
+<span id="cb6-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="enabling-interrupts" class="slide level2">
+<h2>Enabling Interrupts</h2>
+<ul>
+<li>Until now, interrupts were disabled in the CPU configuration.</li>
+<li>So no interrupts can reach the CPU.</li>
+<li>Let’s change that…</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init_idt() <span class="op">{</span></span>
+<span id="cb7-2"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb7-3"><a></a>        <span class="co">// Snip</span></span>
+<span id="cb7-4"><a></a>        PICS<span class="op">.</span>initialize()<span class="op">;</span></span>
+<span id="cb7-5"><a></a>        <span class="pp">x86_64::instructions::interrupts::</span>enable()<span class="op">;</span></span>
+<span id="cb7-6"><a></a>    <span class="op">}</span></span>
+<span id="cb7-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="i-bet-that-works" class="slide level2">
+<h2>I bet that works!</h2>
+<ul>
+<li>It double faults.
+<ul>
+<li>This is good!</li>
+<li>We’ve changed something.</li>
+<li>The first step to changing something we want to change!</li>
+</ul></li>
+</ul>
+</section>
+<section id="why" class="slide level2">
+<h2>Why?</h2>
+<ul>
+<li>The hardware timer (the <a href="https://en.wikipedia.org/wiki/Intel_8253">Intel 8253</a>, to be exact) is enabled by default.</li>
+<li>So we start receiving timer interrupts as soon as we enable interrupts.</li>
+<li>Since we didn’t define a handler function for it yet, our double fault handler is invoked.</li>
+<li>Absolute geniuses will notice that we can now do things using timers, though.</li>
+</ul>
+</section>
+<section id="remember-this" class="slide level2">
+<h2>Remember this?</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb8-1"><a></a>                     ____________                          ____________</span>
+<span id="cb8-2"><a></a>Real Time Clock --&gt; |            |   Timer -------------&gt; |            |</span>
+<span id="cb8-3"><a></a>ACPI -------------&gt; |            |   Keyboard-----------&gt; |            |      _____</span>
+<span id="cb8-4"><a></a>Available --------&gt; | Secondary  |----------------------&gt; | Primary    |     |     |</span>
+<span id="cb8-5"><a></a>Available --------&gt; | Interrupt  |   Serial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |</span>
+<span id="cb8-6"><a></a>Mouse ------------&gt; | Controller |   Serial Port 1 -----&gt; | Controller |     |_____|</span>
+<span id="cb8-7"><a></a>Co-Processor -----&gt; |            |   Parallel Port 2/3 -&gt; |            |</span>
+<span id="cb8-8"><a></a>Primary ATA ------&gt; |            |   Floppy disk -------&gt; |            |</span>
+<span id="cb8-9"><a></a>Secondary ATA ----&gt; |____________|   Parallel Port 1----&gt; |____________|</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="how-about-this-part" class="slide level2">
+<h2>How about this part?</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb9-1"><a></a>                      ____________ </span>
+<span id="cb9-2"><a></a>Timer -------------&gt; |            |</span>
+<span id="cb9-3"><a></a>Keyboard-----------&gt; |            |      _____</span>
+<span id="cb9-4"><a></a>-------------------&gt; | Primary    |     |     |</span>
+<span id="cb9-5"><a></a>Serial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |</span>
+<span id="cb9-6"><a></a>Serial Port 1 -----&gt; | Controller |     |_____|</span>
+<span id="cb9-7"><a></a>Parallel Port 2/3 -&gt; |            |</span>
+<span id="cb9-8"><a></a>Floppy disk -------&gt; |            |</span>
+<span id="cb9-9"><a></a>Parallel Port 1----&gt; |____________|</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>That’s a timer on line <code>0</code> of the primary PIC.</li>
+<li>We offset by… it doesn’t matter, it was a <code>pub const</code></li>
+</ul>
+</section>
+<section id="an-aside-1" class="slide level2">
+<h2>An Aside</h2>
+<ul>
+<li>We can use an <code>enum</code> to specify the index of a given hardware interrupt in the PIC.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
+<span id="cb10-2"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
+<span id="cb10-3"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>This explodes, for a reason I complain about often.</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a></a><span class="va">error</span><span class="op">[</span>E0308<span class="op">]</span><span class="ex">:</span> mismatched types</span>
+<span id="cb11-2"><a></a>  <span class="ex">--</span><span class="op">&gt;</span> src/interrupts.rs:51:13</span>
+<span id="cb11-3"><a></a>   <span class="kw">|</span></span>
+<span id="cb11-4"><a></a><span class="ex">51</span> <span class="kw">|</span>     <span class="ex">Timer</span> = PIC_1_OFFSET,</span>
+<span id="cb11-5"><a></a>   <span class="kw">|</span>             <span class="ex">^^^^^^^^^^^^</span> expected <span class="kw">`</span><span class="ex">isize</span><span class="kw">`</span>, found <span class="kw">`</span><span class="ex">u8</span><span class="kw">`</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="set-repr" class="slide level2">
+<h2>Set <code>repr</code></h2>
+<ul>
+<li>We can just tell Rust to use <code>u8</code> because doing so would’ve been a sensible default.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb12" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
+<span id="cb12-2"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
+<span id="cb12-3"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
+<span id="cb12-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Rust: It’s good.</li>
+<li>This does not at all encourage me to just not use <code>enum</code> and use magic numbers, at all.</li>
+</ul>
+</section>
+<section id="write-a-handler" class="slide level2">
+<h2>Write a handler</h2>
+<ul>
+<li>I just used the breakpoint handler, but changed the print.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb13" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_handler (</span>
+<span id="cb13-2"><a></a>    stack_frame<span class="op">:</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame<span class="op">,</span></span>
+<span id="cb13-3"><a></a>) <span class="op">{</span></span>
+<span id="cb13-4"><a></a>    <span class="kw">crate</span><span class="pp">::println!</span>(<span class="st">"INTERRUPT: TIMER</span><span class="sc">\n</span><span class="st">{:#?}"</span><span class="op">,</span> stack_frame)<span class="op">;</span></span>
+<span id="cb13-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="set-the-handler" class="slide level2">
+<h2>Set the handler</h2>
+<ul>
+<li>Nothing too fancy setting this within the IDT, just have to get the index right.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb14" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb14-1"><a></a>IDT[<span class="pp">InterruptIndex::</span>Timer <span class="kw">as</span> <span class="dt">usize</span>]<span class="op">.</span>set_handler_fn(timer_handler)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Make sure you include this line <em>prior</em> to loading the IDT.
+<ul>
+<li>Don’t ask why I made this note!</li>
+</ul></li>
+</ul>
+</section>
+<section id="what-do-we-expect" class="slide level2">
+<h2>What do we expect</h2>
+<ul>
+<li>In theory, the timer should go off every so often.</li>
+<li>We already know it seems to go off instantly, so probably <em>quite</em> often.</li>
+<li>So we should see a few errors messages pop up right away… right?</li>
+</ul>
+</section>
+<section id="wrong" class="slide level2">
+<h2>Wrong!</h2>
+<ul>
+<li>The PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler.</li>
+<li>This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt.</li>
+<li>So the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.</li>
+</ul>
+</section>
+<section id="easy-fix" class="slide level2">
+<h2>Easy fix</h2>
+<ul>
+<li>We simply update our PIC with the handy, built-in <code>.notify_end_of_interrupt</code>.
+<ul>
+<li>Rust crate creators: Thank you for writing our OS.</li>
+<li>(We are still learning how OSes work, mind you!)</li>
+</ul></li>
+</ul>
+</section>
+<section id="code-it-up" class="slide level2">
+<h2>Code it up</h2>
+<ul>
+<li>I have no idea why <code>cargo fmt</code> but the arguments back on one line.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb15" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_handler(stack_frame<span class="op">:</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame) <span class="op">{</span></span>
+<span id="cb15-2"><a></a>    <span class="kw">crate</span><span class="pp">::println!</span>(<span class="st">"INTERRUPT: TIMER</span><span class="sc">\n</span><span class="st">{:#?}"</span><span class="op">,</span> stack_frame)<span class="op">;</span></span>
+<span id="cb15-3"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> PICS<span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Timer <span class="kw">as</span> <span class="dt">u8</span>) <span class="op">};</span></span>
+<span id="cb15-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>I think of this as <em>very</em> close to being a “hardware level function return”</li>
+</ul>
+</section>
+<section id="whats-happening" class="slide level2">
+<h2>What’s Happening?</h2>
+<ul>
+<li>If you try it out, you will now get many timer interrupts.</li>
+<li>The <code>notify_end_of_interrupt</code>:
+<ul>
+<li>Figures out whether the primary or secondary PIC sent the interrupt, then</li>
+<li>Uses the <code>command</code> and <code>data</code> ports to</li>
+<li>Send an EOI signal to the respective controllers.</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
+<section id="a-race" class="title-slide slide level1 center">
+<h1>A Race</h1>
+
+</section>
+<section id="fast-2-furious" class="slide level2">
+<h2>2 Fast 2 Furious</h2>
+<ul>
+<li>We are now able to run multiple functions, or contexts, simultaneously.
+<ul>
+<li>We run whatever code is in <code>_start</code>, and…</li>
+<li>We run whatever code is in the timer handler.</li>
+</ul></li>
+<li>An obviously fun thing to do is print infinitely in both places.
+<ul>
+<li>We are already doing that with the timer, basically…</li>
+</ul></li>
+</ul>
+</section>
+<section id="infinite-worlds" class="slide level2">
+<h2>Infinite Worlds</h2>
+<ul>
+<li>It suffices to move our “Hello, world!” into the infinite loop for the purposes of this exercise.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb16" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb16-2"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb16-3"><a></a>    <span class="pp">osirs::</span>init()<span class="op">;</span></span>
+<span id="cb16-4"><a></a>    <span class="cf">loop</span> <span class="op">{</span> <span class="pp">println!</span>(<span class="st">"Hello, world{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb16-5"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Run your OS quickly. What do you see?</li>
+</ul>
+</section>
+<section id="handwaving" class="slide level2">
+<h2>Handwaving</h2>
+<ul>
+<li>Aw, they’re sharing!</li>
+<li>I am going to handwave concurrency into what I hope to be a future networks class.</li>
+<li>It’s a very interesting cloud topic, and in generally we won’t mind it too much here.</li>
+<li>All we have to do at this time is establish a perhaps more reasonable timer handler.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/interrupts.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb17" data-filename="src/interrupts.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_handler(stack_frame<span class="op">:</span> <span class="pp">x86_64::structures::idt::</span>InterruptStackFrame) <span class="op">{</span></span>
+<span id="cb17-2"><a></a>    <span class="co">// crate::println!("INTERRUPT: TIMER\n{:#?}", stack_frame);</span></span>
+<span id="cb17-3"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> PICS<span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Timer <span class="kw">as</span> <span class="dt">u8</span>) <span class="op">};</span></span>
+<span id="cb17-4"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section></section>
+<section>
+<section id="benefits" class="title-slide slide level1 center">
+<h1>Benefits</h1>
+
+</section>
+<section id="timing-considerations" class="slide level2">
+<h2>Timing Considerations</h2>
+<ul>
+<li>But there are some quick performance gains to be had here…</li>
+<li>Until now, our <code>loop {}</code>’s gobbled up all available resources.
+<ul>
+<li>CPU time</li>
+<li>CPU energy</li>
+<li>Hydroelectric power</li>
+</ul></li>
+<li>With multiple infinities around, we should be more considerate.</li>
+</ul>
+</section>
+<section id="halt" class="slide level2">
+<h2>Halt!</h2>
+<ul>
+<li>With <code>loop {}</code> the CPU continues to run at full speed even though there’s no work to do.</li>
+<li>What we really want to do is to halt the CPU until the next interrupt arrives.</li>
+<li>This allows the CPU to enter a sleep state in which it consumes much less energy.</li>
+<li>There is a hardware level “halt” command that does exactly that!</li>
+<li><a href="https://en.wikipedia.org/wiki/HLT_(x86_instruction)">Read more on <code>HLT</code></a></li>
+</ul>
+</section>
+<section id="try-it" class="slide level2">
+<h2>Try it</h2>
+<ul>
+<li>Let’s use this instruction to create an energy-efficient endless loop:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb18" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="kw">pub</span> <span class="kw">fn</span> halt() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb18-2"><a></a>    <span class="cf">loop</span> <span class="op">{</span> <span class="pp">x86_64::instructions::</span>hlt()<span class="op">;</span> <span class="op">}</span></span>
+<span id="cb18-3"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>This is helpfully diverging, so add to:
+<ul>
+<li><code>_start</code> and <code>panic</code> in <code>src/main.rs</code></li>
+<li>Not needed when testing. (Why?)</li>
+</ul></li>
+</ul>
+</section></section>
+<section>
+<section id="fin" class="title-slide slide level1 center">
+<h1>Fin</h1>
+
+</section>
+<section id="okay" class="slide level2">
+<h2>Okay…</h2>
+<ul>
+<li>I think we are out of time here.</li>
+<li>Coming up next in <em>OS in Rust</em>: Keyboard interrupts!</li>
+</ul>
 </section></section>
 <section>
 <section id="todo" class="title-slide slide level1 center">
 <h1>TODO</h1>
-<p>The configuration happens by writing special values to the command and data ports of the PICs. Fortunately, there is already a crate called <a href="https://docs.rs/pic8259/0.10.1/pic8259/"><code>pic8259</code></a>, so we don’t need to write the initialization sequence ourselves. However, if you are interested in how it works, check out <a href="https://docs.rs/crate/pic8259/0.10.1/source/src/lib.rs">its source code</a>. It’s fairly small and well documented.</p>
-<p>To add the crate as a dependency, we add the following to our project:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb3-1"><a></a><span class="co"># in Cargo.toml</span></span>
-<span id="cb3-2"><a></a></span>
-<span id="cb3-3"><a></a><span class="kw">[dependencies]</span></span>
-<span id="cb3-4"><a></a><span class="dt">pic8259</span> <span class="op">=</span> <span class="st">"0.10.1"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The main abstraction provided by the crate is the <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html"><code>ChainedPics</code></a> struct that represents the primary/secondary PIC layout we saw above. It is designed to be used in the following way:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb4-2"><a></a></span>
-<span id="cb4-3"><a></a><span class="kw">use</span> <span class="pp">pic8259::</span>ChainedPics<span class="op">;</span></span>
-<span id="cb4-4"><a></a><span class="kw">use</span> spin<span class="op">;</span></span>
-<span id="cb4-5"><a></a></span>
-<span id="cb4-6"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_1_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">32</span><span class="op">;</span></span>
-<span id="cb4-7"><a></a><span class="kw">pub</span> <span class="kw">const</span> PIC_2_OFFSET<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> PIC_1_OFFSET <span class="op">+</span> <span class="dv">8</span><span class="op">;</span></span>
-<span id="cb4-8"><a></a></span>
-<span id="cb4-9"><a></a><span class="kw">pub</span> <span class="kw">static</span> PICS<span class="op">:</span> <span class="pp">spin::</span>Mutex<span class="op">&lt;</span>ChainedPics<span class="op">&gt;</span> <span class="op">=</span></span>
-<span id="cb4-10"><a></a>    <span class="pp">spin::Mutex::</span>new(<span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">ChainedPics::</span>new(PIC_1_OFFSET<span class="op">,</span> PIC_2_OFFSET) <span class="op">}</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>As noted above, we’re setting the offsets for the PICs to the range 32–47. By wrapping the <code>ChainedPics</code> struct in a <code>Mutex</code>, we can get safe mutable access (through the <a href="https://docs.rs/spin/0.5.2/spin/struct.Mutex.html#method.lock"><code>lock</code> method</a>), which we need in the next step. The <code>ChainedPics::new</code> function is unsafe because wrong offsets could cause undefined behavior.</p>
-<p>We can now initialize the 8259 PIC in our <code>init</code> function:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a></a><span class="co">// in src/lib.rs</span></span>
-<span id="cb5-2"><a></a></span>
-<span id="cb5-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
-<span id="cb5-4"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
-<span id="cb5-5"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
-<span id="cb5-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">interrupts::</span>PICS<span class="op">.</span>lock()<span class="op">.</span>initialize() <span class="op">};</span> <span class="co">// new</span></span>
-<span id="cb5-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We use the <a href="https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html#method.initialize"><code>initialize</code></a> function to perform the PIC initialization. Like the <code>ChainedPics::new</code> function, this function is also unsafe because it can cause undefined behavior if the PIC is misconfigured.</p>
-<p>If all goes well, we should continue to see the “It did not crash” message when executing <code>cargo run</code>.</p>
-</section>
-<section id="enabling-interrupts" class="slide level2">
-<h2>Enabling Interrupts</h2>
-<p>Until now, nothing happened because interrupts are still disabled in the CPU configuration. This means that the CPU does not listen to the interrupt controller at all, so no interrupts can reach the CPU. Let’s change that:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a></a><span class="co">// in src/lib.rs</span></span>
-<span id="cb6-2"><a></a></span>
-<span id="cb6-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> init() <span class="op">{</span></span>
-<span id="cb6-4"><a></a>    <span class="pp">gdt::</span>init()<span class="op">;</span></span>
-<span id="cb6-5"><a></a>    <span class="pp">interrupts::</span>init_idt()<span class="op">;</span></span>
-<span id="cb6-6"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">interrupts::</span>PICS<span class="op">.</span>lock()<span class="op">.</span>initialize() <span class="op">};</span></span>
-<span id="cb6-7"><a></a>    <span class="pp">x86_64::instructions::interrupts::</span>enable()<span class="op">;</span>     <span class="co">// new</span></span>
-<span id="cb6-8"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>interrupts::enable</code> function of the <code>x86_64</code> crate executes the special <code>sti</code> instruction (“set interrupts”) to enable external interrupts. When we try <code>cargo run</code> now, we see that a double fault occurs:</p>
 
-<img data-src="qemu-hardware-timer-double-fault.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU printing <code>EXCEPTION: DOUBLE FAULT</code> because of hardware timer</p><p>The reason for this double fault is that the hardware timer (the <a href="https://en.wikipedia.org/wiki/Intel_8253">Intel 8253</a>, to be exact) is enabled by default, so we start receiving timer interrupts as soon as we enable interrupts. Since we didn’t define a handler function for it yet, our double fault handler is invoked.</p>
-</section>
-<section id="handling-timer-interrupts" class="slide level2">
-<h2>Handling Timer Interrupts</h2>
-<p>As we see from the graphic <a href="#/the-8259-pic">above</a>, the timer uses line 0 of the primary PIC. This means that it arrives at the CPU as interrupt 32 (0 + offset 32). Instead of hardcoding index 32, we store it in an <code>InterruptIndex</code> enum:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb7-2"><a></a></span>
-<span id="cb7-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
-<span id="cb7-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
-<span id="cb7-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
-<span id="cb7-6"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
-<span id="cb7-7"><a></a><span class="op">}</span></span>
-<span id="cb7-8"><a></a></span>
-<span id="cb7-9"><a></a><span class="kw">impl</span> InterruptIndex <span class="op">{</span></span>
-<span id="cb7-10"><a></a>    <span class="kw">fn</span> as_u8(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">u8</span> <span class="op">{</span></span>
-<span id="cb7-11"><a></a>        <span class="kw">self</span> <span class="kw">as</span> <span class="dt">u8</span></span>
-<span id="cb7-12"><a></a>    <span class="op">}</span></span>
-<span id="cb7-13"><a></a></span>
-<span id="cb7-14"><a></a>    <span class="kw">fn</span> as_usize(<span class="kw">self</span>) <span class="op">-&gt;</span> <span class="dt">usize</span> <span class="op">{</span></span>
-<span id="cb7-15"><a></a>        <span class="dt">usize</span><span class="pp">::</span>from(<span class="kw">self</span><span class="op">.</span>as_u8())</span>
-<span id="cb7-16"><a></a>    <span class="op">}</span></span>
-<span id="cb7-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The enum is a <a href="https://doc.rust-lang.org/reference/items/enumerations.html#custom-discriminant-values-for-fieldless-enumerations">C-like enum</a> so that we can directly specify the index for each variant. The <code>repr(u8)</code> attribute specifies that each variant is represented as a <code>u8</code>. We will add more variants for other interrupts in the future.</p>
-<p>Now we can add a handler function for the timer interrupt:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb8-2"><a></a></span>
-<span id="cb8-3"><a></a><span class="kw">use</span> <span class="kw">crate</span><span class="pp">::</span>print<span class="op">;</span></span>
-<span id="cb8-4"><a></a></span>
-<span id="cb8-5"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb8-6"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb8-7"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
-<span id="cb8-8"><a></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
-<span id="cb8-9"><a></a>        […]</span>
-<span id="cb8-10"><a></a>        idt[<span class="pp">InterruptIndex::</span>Timer<span class="op">.</span>as_usize()]</span>
-<span id="cb8-11"><a></a>            <span class="op">.</span>set_handler_fn(timer_interrupt_handler)<span class="op">;</span> <span class="co">// new</span></span>
-<span id="cb8-12"><a></a></span>
-<span id="cb8-13"><a></a>        idt</span>
-<span id="cb8-14"><a></a>    <span class="op">};</span></span>
-<span id="cb8-15"><a></a><span class="op">}</span></span>
-<span id="cb8-16"><a></a></span>
-<span id="cb8-17"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_interrupt_handler(</span>
-<span id="cb8-18"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
-<span id="cb8-19"><a></a><span class="op">{</span></span>
-<span id="cb8-20"><a></a>    <span class="pp">print!</span>(<span class="st">"."</span>)<span class="op">;</span></span>
-<span id="cb8-21"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Our <code>timer_interrupt_handler</code> has the same signature as our exception handlers, because the CPU reacts identically to exceptions and external interrupts (the only difference is that some exceptions push an error code). The <a href="https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html"><code>InterruptDescriptorTable</code></a> struct implements the <a href="https://doc.rust-lang.org/core/ops/trait.IndexMut.html"><code>IndexMut</code></a> trait, so we can access individual entries through array indexing syntax.</p>
-<p>In our timer interrupt handler, we print a dot to the screen. As the timer interrupt happens periodically, we would expect to see a dot appearing on each timer tick. However, when we run it, we see that only a single dot is printed:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="qemu-single-dot-printed.png"></p>
-<figcaption>QEMU printing only a single dot for hardware timer</figcaption>
-</figure>
-</div>
-<h3 id="end-of-interrupt">End of Interrupt</h3>
-<p>The reason is that the PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler. This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt. So the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.</p>
-<p>To send the EOI, we use our static <code>PICS</code> struct again:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb9-2"><a></a></span>
-<span id="cb9-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> timer_interrupt_handler(</span>
-<span id="cb9-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
-<span id="cb9-5"><a></a><span class="op">{</span></span>
-<span id="cb9-6"><a></a>    <span class="pp">print!</span>(<span class="st">"."</span>)<span class="op">;</span></span>
-<span id="cb9-7"><a></a></span>
-<span id="cb9-8"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb9-9"><a></a>        PICS<span class="op">.</span>lock()</span>
-<span id="cb9-10"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Timer<span class="op">.</span>as_u8())<span class="op">;</span></span>
-<span id="cb9-11"><a></a>    <span class="op">}</span></span>
-<span id="cb9-12"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>notify_end_of_interrupt</code> figures out whether the primary or secondary PIC sent the interrupt and then uses the <code>command</code> and <code>data</code> ports to send an EOI signal to the respective controllers. If the secondary PIC sent the interrupt, both PICs need to be notified because the secondary PIC is connected to an input line of the primary PIC.</p>
-<p>We need to be careful to use the correct interrupt vector number, otherwise we could accidentally delete an important unsent interrupt or cause our system to hang. This is the reason that the function is unsafe.</p>
-<p>When we now execute <code>cargo run</code> we see dots periodically appearing on the screen:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="qemu-hardware-timer-dots.gif"></p>
-<figcaption>QEMU printing consecutive dots showing the hardware timer</figcaption>
-</figure>
-</div>
-<h3 id="configuring-the-timer">Configuring the Timer</h3>
-<p>The hardware timer that we use is called the <em>Programmable Interval Timer</em>, or PIT, for short. Like the name says, it is possible to configure the interval between two interrupts. We won’t go into details here because we will switch to the <a href="https://wiki.osdev.org/APIC_timer">APIC timer</a> soon, but the OSDev wiki has an extensive article about the <a href="https://wiki.osdev.org/Programmable_Interval_Timer">configuring the PIT</a>.</p>
-</section>
-<section id="deadlocks" class="slide level2">
-<h2>Deadlocks</h2>
-<p>We now have a form of concurrency in our kernel: The timer interrupts occur asynchronously, so they can interrupt our <code>_start</code> function at any time. Fortunately, Rust’s ownership system prevents many types of concurrency-related bugs at compile time. One notable exception is deadlocks. Deadlocks occur if a thread tries to acquire a lock that will never become free. Thus, the thread hangs indefinitely.</p>
-<p>We can already provoke a deadlock in our kernel. Remember, our <code>println</code> macro calls the <code>vga_buffer::_print</code> function, which <a href="@/edition-2/posts/03-vga-text-buffer/index.md#spinlocks">locks a global <code>WRITER</code></a> using a spinlock:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
-<span id="cb10-2"><a></a></span>
-<span id="cb10-3"><a></a>[…]</span>
-<span id="cb10-4"><a></a></span>
-<span id="cb10-5"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
-<span id="cb10-6"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
-<span id="cb10-7"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb10-8"><a></a>    WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
-<span id="cb10-9"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>It locks the <code>WRITER</code>, calls <code>write_fmt</code> on it, and implicitly unlocks it at the end of the function. Now imagine that an interrupt occurs while the <code>WRITER</code> is locked and the interrupt handler tries to print something too:</p>
-<table class="caption-top">
-<colgroup>
-<col style="width: 10%">
-<col style="width: 28%">
-<col style="width: 61%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Timestep</th>
-<th>_start</th>
-<th>interrupt_handler</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>0</td>
-<td>calls <code>println!</code></td>
-<td>&nbsp;</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td><code>print</code> locks <code>WRITER</code></td>
-<td>&nbsp;</td>
-</tr>
-<tr class="odd">
-<td>2</td>
-<td></td>
-<td><strong>interrupt occurs</strong>, handler begins to run</td>
-</tr>
-<tr class="even">
-<td>3</td>
-<td></td>
-<td>calls <code>println!</code></td>
-</tr>
-<tr class="odd">
-<td>4</td>
-<td></td>
-<td><code>print</code> tries to lock <code>WRITER</code> (already locked)</td>
-</tr>
-<tr class="even">
-<td>5</td>
-<td></td>
-<td><code>print</code> tries to lock <code>WRITER</code> (already locked)</td>
-</tr>
-<tr class="odd">
-<td>…</td>
-<td></td>
-<td>…</td>
-</tr>
-<tr class="even">
-<td><em>never</em></td>
-<td><em>unlock <code>WRITER</code></em></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<p>The <code>WRITER</code> is locked, so the interrupt handler waits until it becomes free. But this never happens, because the <code>_start</code> function only continues to run after the interrupt handler returns. Thus, the entire system hangs.</p>
-<h3 id="provoking-a-deadlock">Provoking a Deadlock</h3>
-<p>We can easily provoke such a deadlock in our kernel by printing something in the loop at the end of our <code>_start</code> function:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb11-1"><a></a><span class="co">// in src/main.rs</span></span>
-<span id="cb11-2"><a></a></span>
-<span id="cb11-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb11-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb11-5"><a></a>    […]</span>
-<span id="cb11-6"><a></a>    <span class="cf">loop</span> <span class="op">{</span></span>
-<span id="cb11-7"><a></a>        <span class="kw">use</span> <span class="pp">blog_os::</span>print<span class="op">;</span></span>
-<span id="cb11-8"><a></a>        <span class="pp">print!</span>(<span class="st">"-"</span>)<span class="op">;</span>        <span class="co">// new</span></span>
-<span id="cb11-9"><a></a>    <span class="op">}</span></span>
-<span id="cb11-10"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When we run it in QEMU, we get an output of the form:</p>
-
-<img data-src="./qemu-deadlock.png" class="r-stretch quarto-figure-center"><p class="caption">QEMU output with many rows of hyphens and no dots</p><p>We see that only a limited number of hyphens are printed until the first timer interrupt occurs. Then the system hangs because the timer interrupt handler deadlocks when it tries to print a dot. This is the reason that we see no dots in the above output.</p>
-<p>The actual number of hyphens varies between runs because the timer interrupt occurs asynchronously. This non-determinism is what makes concurrency-related bugs so difficult to debug.</p>
-<h3 id="fixing-the-deadlock">Fixing the Deadlock</h3>
-<p>To avoid this deadlock, we can disable interrupts as long as the <code>Mutex</code> is locked:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
-<span id="cb12-2"><a></a></span>
-<span id="cb12-3"><a></a><span class="co">/// Prints the given formatted string to the VGA text buffer</span></span>
-<span id="cb12-4"><a></a><span class="co">/// through the global `WRITER` instance.</span></span>
-<span id="cb12-5"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
-<span id="cb12-6"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">fmt::</span>Arguments) <span class="op">{</span></span>
-<span id="cb12-7"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb12-8"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::</span>interrupts<span class="op">;</span>   <span class="co">// new</span></span>
-<span id="cb12-9"><a></a></span>
-<span id="cb12-10"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span>     <span class="co">// new</span></span>
-<span id="cb12-11"><a></a>        WRITER<span class="op">.</span>lock()<span class="op">.</span>write_fmt(args)<span class="op">.</span>unwrap()<span class="op">;</span></span>
-<span id="cb12-12"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
-<span id="cb12-13"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/interrupts/fn.without_interrupts.html"><code>without_interrupts</code></a> function takes a <a href="https://doc.rust-lang.org/book/ch13-01-closures.html">closure</a> and executes it in an interrupt-free environment. We use it to ensure that no interrupt can occur as long as the <code>Mutex</code> is locked. When we run our kernel now, we see that it keeps running without hanging. (We still don’t notice any dots, but this is because they’re scrolling by too fast. Try to slow down the printing, e.g., by putting a <code>for _ in 0..10000 {}</code> inside the loop.)</p>
-<p>We can apply the same change to our serial printing function to ensure that no deadlocks occur with it either:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a></a><span class="co">// in src/serial.rs</span></span>
-<span id="cb13-2"><a></a></span>
-<span id="cb13-3"><a></a><span class="at">#[</span>doc<span class="at">(</span>hidden<span class="at">)]</span></span>
-<span id="cb13-4"><a></a><span class="kw">pub</span> <span class="kw">fn</span> _print(args<span class="op">:</span> <span class="pp">::core::fmt::</span>Arguments) <span class="op">{</span></span>
-<span id="cb13-5"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb13-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::</span>interrupts<span class="op">;</span>       <span class="co">// new</span></span>
-<span id="cb13-7"><a></a></span>
-<span id="cb13-8"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span>         <span class="co">// new</span></span>
-<span id="cb13-9"><a></a>        SERIAL1</span>
-<span id="cb13-10"><a></a>            <span class="op">.</span>lock()</span>
-<span id="cb13-11"><a></a>            <span class="op">.</span>write_fmt(args)</span>
-<span id="cb13-12"><a></a>            <span class="op">.</span>expect(<span class="st">"Printing to serial failed"</span>)<span class="op">;</span></span>
-<span id="cb13-13"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
-<span id="cb13-14"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Note that disabling interrupts shouldn’t be a general solution. The problem is that it increases the worst-case interrupt latency, i.e., the time until the system reacts to an interrupt. Therefore, interrupts should only be disabled for a very short time.</p>
-</section>
-<section id="fixing-a-race-condition" class="slide level2">
-<h2>Fixing a Race Condition</h2>
-<p>If you run <code>cargo test</code>, you might see the <code>test_println_output</code> test failing:</p>
-<pre><code>&gt; cargo test --lib
-[…]
-Running 4 tests
-test_breakpoint_exception...[ok]
-test_println... [ok]
-test_println_many... [ok]
-test_println_output... [failed]
-
-Error: panicked at 'assertion failed: `(left == right)`
-  left: `'.'`,
- right: `'S'`', src/vga_buffer.rs:205:9</code></pre>
-<p>The reason is a <em>race condition</em> between the test and our timer handler. Remember, the test looks like this:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
-<span id="cb15-2"><a></a></span>
-<span id="cb15-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
-<span id="cb15-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
-<span id="cb15-5"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Some test string that fits on a single line"</span><span class="op">;</span></span>
-<span id="cb15-6"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> s)<span class="op">;</span></span>
-<span id="cb15-7"><a></a>    <span class="cf">for</span> (i<span class="op">,</span> c) <span class="kw">in</span> s<span class="op">.</span>chars()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb15-8"><a></a>        <span class="kw">let</span> screen_char <span class="op">=</span> WRITER<span class="op">.</span>lock()<span class="op">.</span>buffer<span class="op">.</span>chars[BUFFER_HEIGHT <span class="op">-</span> <span class="dv">2</span>][i]<span class="op">.</span>read()<span class="op">;</span></span>
-<span id="cb15-9"><a></a>        <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
-<span id="cb15-10"><a></a>    <span class="op">}</span></span>
-<span id="cb15-11"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The test prints a string to the VGA buffer and then checks the output by manually iterating over the <code>buffer_chars</code> array. The race condition occurs because the timer interrupt handler might run between the <code>println</code> and the reading of the screen characters. Note that this isn’t a dangerous <em>data race</em>, which Rust completely prevents at compile time. See the <a href="https://doc.rust-lang.org/nomicon/races.html"><em>Rustonomicon</em></a> for details.</p>
-<p>To fix this, we need to keep the <code>WRITER</code> locked for the complete duration of the test, so that the timer handler can’t write a <code>.</code> to the screen in between. The fixed test looks like this:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb16-1"><a></a><span class="co">// in src/vga_buffer.rs</span></span>
-<span id="cb16-2"><a></a></span>
-<span id="cb16-3"><a></a><span class="at">#[</span>test_case<span class="at">]</span></span>
-<span id="cb16-4"><a></a><span class="kw">fn</span> test_println_output() <span class="op">{</span></span>
-<span id="cb16-5"><a></a>    <span class="kw">use</span> <span class="pp">core::fmt::</span><span class="bu">Write</span><span class="op">;</span></span>
-<span id="cb16-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::</span>interrupts<span class="op">;</span></span>
-<span id="cb16-7"><a></a></span>
-<span id="cb16-8"><a></a>    <span class="kw">let</span> s <span class="op">=</span> <span class="st">"Some test string that fits on a single line"</span><span class="op">;</span></span>
-<span id="cb16-9"><a></a>    <span class="pp">interrupts::</span>without_interrupts(<span class="op">||</span> <span class="op">{</span></span>
-<span id="cb16-10"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> writer <span class="op">=</span> WRITER<span class="op">.</span>lock()<span class="op">;</span></span>
-<span id="cb16-11"><a></a>        <span class="pp">writeln!</span>(writer<span class="op">,</span> <span class="st">"</span><span class="sc">\n</span><span class="st">{}"</span><span class="op">,</span> s)<span class="op">.</span>expect(<span class="st">"writeln failed"</span>)<span class="op">;</span></span>
-<span id="cb16-12"><a></a>        <span class="cf">for</span> (i<span class="op">,</span> c) <span class="kw">in</span> s<span class="op">.</span>chars()<span class="op">.</span>enumerate() <span class="op">{</span></span>
-<span id="cb16-13"><a></a>            <span class="kw">let</span> screen_char <span class="op">=</span> writer<span class="op">.</span>buffer<span class="op">.</span>chars[BUFFER_HEIGHT <span class="op">-</span> <span class="dv">2</span>][i]<span class="op">.</span>read()<span class="op">;</span></span>
-<span id="cb16-14"><a></a>            <span class="pp">assert_eq!</span>(<span class="dt">char</span><span class="pp">::</span>from(screen_char<span class="op">.</span>ascii_character)<span class="op">,</span> c)<span class="op">;</span></span>
-<span id="cb16-15"><a></a>        <span class="op">}</span></span>
-<span id="cb16-16"><a></a>    <span class="op">}</span>)<span class="op">;</span></span>
-<span id="cb16-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We performed the following changes:</p>
-<ul>
-<li>We keep the writer locked for the complete test by using the <code>lock()</code> method explicitly. Instead of <code>println</code>, we use the <a href="https://doc.rust-lang.org/core/macro.writeln.html"><code>writeln</code></a> macro that allows printing to an already locked writer.</li>
-<li>To avoid another deadlock, we disable interrupts for the test’s duration. Otherwise, the test might get interrupted while the writer is still locked.</li>
-<li>Since the timer interrupt handler can still run before the test, we print an additional newline <code>\n</code> before printing the string <code>s</code>. This way, we avoid test failure when the timer handler has already printed some <code>.</code> characters to the current line.</li>
-</ul>
-<p>With the above changes, <code>cargo test</code> now deterministically succeeds again.</p>
-<p>This was a very harmless race condition that only caused a test failure. As you can imagine, other race conditions can be much more difficult to debug due to their non-deterministic nature. Luckily, Rust prevents us from data races, which are the most serious class of race conditions since they can cause all kinds of undefined behavior, including system crashes and silent memory corruptions.</p>
-</section>
-<section id="the-hlt-instruction" class="slide level2">
-<h2>The <code>hlt</code> Instruction</h2>
-<p>Until now, we used a simple empty loop statement at the end of our <code>_start</code> and <code>panic</code> functions. This causes the CPU to spin endlessly, and thus works as expected. But it is also very inefficient, because the CPU continues to run at full speed even though there’s no work to do. You can see this problem in your task manager when you run your kernel: The QEMU process needs close to 100% CPU the whole time.</p>
-<p>What we really want to do is to halt the CPU until the next interrupt arrives. This allows the CPU to enter a sleep state in which it consumes much less energy. The <a href="https://en.wikipedia.org/wiki/HLT_(x86_instruction)"><code>hlt</code> instruction</a> does exactly that. Let’s use this instruction to create an energy-efficient endless loop:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb17-1"><a></a><span class="co">// in src/lib.rs</span></span>
-<span id="cb17-2"><a></a></span>
-<span id="cb17-3"><a></a><span class="kw">pub</span> <span class="kw">fn</span> hlt_loop() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb17-4"><a></a>    <span class="cf">loop</span> <span class="op">{</span></span>
-<span id="cb17-5"><a></a>        <span class="pp">x86_64::instructions::</span>hlt()<span class="op">;</span></span>
-<span id="cb17-6"><a></a>    <span class="op">}</span></span>
-<span id="cb17-7"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>The <code>instructions::hlt</code> function is just a <a href="https://github.com/rust-osdev/x86_64/blob/5e8e218381c5205f5777cb50da3ecac5d7e3b1ab/src/instructions/mod.rs#L16-L22">thin wrapper</a> around the assembly instruction. It is safe because there’s no way it can compromise memory safety.</p>
-<p>We can now use this <code>hlt_loop</code> instead of the endless loops in our <code>_start</code> and <code>panic</code> functions:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb18-1"><a></a><span class="co">// in src/main.rs</span></span>
-<span id="cb18-2"><a></a></span>
-<span id="cb18-3"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb18-4"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb18-5"><a></a>    […]</span>
-<span id="cb18-6"><a></a></span>
-<span id="cb18-7"><a></a>    <span class="pp">println!</span>(<span class="st">"It did not crash!"</span>)<span class="op">;</span></span>
-<span id="cb18-8"><a></a>    <span class="pp">blog_os::</span>hlt_loop()<span class="op">;</span>            <span class="co">// new</span></span>
-<span id="cb18-9"><a></a><span class="op">}</span></span>
-<span id="cb18-10"><a></a></span>
-<span id="cb18-11"><a></a></span>
-<span id="cb18-12"><a></a><span class="at">#[</span>cfg<span class="at">(</span>not<span class="at">(</span>test<span class="at">))]</span></span>
-<span id="cb18-13"><a></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb18-14"><a></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb18-15"><a></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> info)<span class="op">;</span></span>
-<span id="cb18-16"><a></a>    <span class="pp">blog_os::</span>hlt_loop()<span class="op">;</span>            <span class="co">// new</span></span>
-<span id="cb18-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Let’s update our <code>lib.rs</code> as well:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// in src/lib.rs</span></span>
-<span id="cb19-2"><a></a></span>
-<span id="cb19-3"><a></a><span class="co">/// Entry point for `cargo test`</span></span>
-<span id="cb19-4"><a></a><span class="at">#[</span>cfg<span class="at">(</span>test<span class="at">)]</span></span>
-<span id="cb19-5"><a></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
-<span id="cb19-6"><a></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb19-7"><a></a>    init()<span class="op">;</span></span>
-<span id="cb19-8"><a></a>    test_main()<span class="op">;</span></span>
-<span id="cb19-9"><a></a>    hlt_loop()<span class="op">;</span>         <span class="co">// new</span></span>
-<span id="cb19-10"><a></a><span class="op">}</span></span>
-<span id="cb19-11"><a></a></span>
-<span id="cb19-12"><a></a><span class="kw">pub</span> <span class="kw">fn</span> test_panic_handler(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb19-13"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"[failed]</span><span class="sc">\n</span><span class="st">"</span>)<span class="op">;</span></span>
-<span id="cb19-14"><a></a>    <span class="pp">serial_println!</span>(<span class="st">"Error: {}</span><span class="sc">\n</span><span class="st">"</span><span class="op">,</span> info)<span class="op">;</span></span>
-<span id="cb19-15"><a></a>    exit_qemu(<span class="pp">QemuExitCode::</span>Failed)<span class="op">;</span></span>
-<span id="cb19-16"><a></a>    hlt_loop()<span class="op">;</span>         <span class="co">// new</span></span>
-<span id="cb19-17"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>When we run our kernel now in QEMU, we see a much lower CPU usage.</p>
 </section>
 <section id="keyboard-input" class="slide level2">
 <h2>Keyboard Input</h2>
@@ -1174,58 +1229,58 @@ Error: panicked at 'assertion failed: `(left == right)`
 
 <p>Like the hardware timer, the keyboard controller is already enabled by default. So when you press a key, the keyboard controller sends an interrupt to the PIC, which forwards it to the CPU. The CPU looks for a handler function in the IDT, but the corresponding entry is empty. Therefore, a double fault occurs.</p>
 <p>So let’s add a handler function for the keyboard interrupt. It’s quite similar to how we defined the handler for the timer interrupt; it just uses a different interrupt number:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb20-2"><a></a></span>
-<span id="cb20-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
-<span id="cb20-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
-<span id="cb20-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
-<span id="cb20-6"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
-<span id="cb20-7"><a></a>    Keyboard<span class="op">,</span> <span class="co">// new</span></span>
-<span id="cb20-8"><a></a><span class="op">}</span></span>
-<span id="cb20-9"><a></a></span>
-<span id="cb20-10"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb20-11"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
-<span id="cb20-12"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
-<span id="cb20-13"><a></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
-<span id="cb20-14"><a></a>        […]</span>
-<span id="cb20-15"><a></a>        <span class="co">// new</span></span>
-<span id="cb20-16"><a></a>        idt[<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_usize()]</span>
-<span id="cb20-17"><a></a>            <span class="op">.</span>set_handler_fn(keyboard_interrupt_handler)<span class="op">;</span></span>
-<span id="cb20-18"><a></a></span>
-<span id="cb20-19"><a></a>        idt</span>
-<span id="cb20-20"><a></a>    <span class="op">};</span></span>
-<span id="cb20-21"><a></a><span class="op">}</span></span>
-<span id="cb20-22"><a></a></span>
-<span id="cb20-23"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
-<span id="cb20-24"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
-<span id="cb20-25"><a></a><span class="op">{</span></span>
-<span id="cb20-26"><a></a>    <span class="pp">print!</span>(<span class="st">"k"</span>)<span class="op">;</span></span>
-<span id="cb20-27"><a></a></span>
-<span id="cb20-28"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb20-29"><a></a>        PICS<span class="op">.</span>lock()</span>
-<span id="cb20-30"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
-<span id="cb20-31"><a></a>    <span class="op">}</span></span>
-<span id="cb20-32"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb19-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb19-2"><a></a></span>
+<span id="cb19-3"><a></a><span class="at">#[</span>derive<span class="at">(</span><span class="bu">Debug</span><span class="op">,</span> <span class="bu">Clone</span><span class="op">,</span> <span class="bu">Copy</span><span class="at">)]</span></span>
+<span id="cb19-4"><a></a><span class="at">#[</span>repr<span class="at">(</span><span class="dt">u8</span><span class="at">)]</span></span>
+<span id="cb19-5"><a></a><span class="kw">pub</span> <span class="kw">enum</span> InterruptIndex <span class="op">{</span></span>
+<span id="cb19-6"><a></a>    Timer <span class="op">=</span> PIC_1_OFFSET<span class="op">,</span></span>
+<span id="cb19-7"><a></a>    Keyboard<span class="op">,</span> <span class="co">// new</span></span>
+<span id="cb19-8"><a></a><span class="op">}</span></span>
+<span id="cb19-9"><a></a></span>
+<span id="cb19-10"><a></a><span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb19-11"><a></a>    <span class="kw">static</span> <span class="kw">ref</span> IDT<span class="op">:</span> InterruptDescriptorTable <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb19-12"><a></a>        <span class="kw">let</span> <span class="kw">mut</span> idt <span class="op">=</span> <span class="pp">InterruptDescriptorTable::</span>new()<span class="op">;</span></span>
+<span id="cb19-13"><a></a>        idt<span class="op">.</span>breakpoint<span class="op">.</span>set_handler_fn(breakpoint_handler)<span class="op">;</span></span>
+<span id="cb19-14"><a></a>        […]</span>
+<span id="cb19-15"><a></a>        <span class="co">// new</span></span>
+<span id="cb19-16"><a></a>        idt[<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_usize()]</span>
+<span id="cb19-17"><a></a>            <span class="op">.</span>set_handler_fn(keyboard_interrupt_handler)<span class="op">;</span></span>
+<span id="cb19-18"><a></a></span>
+<span id="cb19-19"><a></a>        idt</span>
+<span id="cb19-20"><a></a>    <span class="op">};</span></span>
+<span id="cb19-21"><a></a><span class="op">}</span></span>
+<span id="cb19-22"><a></a></span>
+<span id="cb19-23"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb19-24"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb19-25"><a></a><span class="op">{</span></span>
+<span id="cb19-26"><a></a>    <span class="pp">print!</span>(<span class="st">"k"</span>)<span class="op">;</span></span>
+<span id="cb19-27"><a></a></span>
+<span id="cb19-28"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb19-29"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb19-30"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb19-31"><a></a>    <span class="op">}</span></span>
+<span id="cb19-32"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>As we see from the graphic <a href="#/the-8259-pic">above</a>, the keyboard uses line 1 of the primary PIC. This means that it arrives at the CPU as interrupt 33 (1 + offset 32). We add this index as a new <code>Keyboard</code> variant to the <code>InterruptIndex</code> enum. We don’t need to specify the value explicitly, since it defaults to the previous value plus one, which is also 33. In the interrupt handler, we print a <code>k</code> and send the end of interrupt signal to the interrupt controller.</p>
 <p>We now see that a <code>k</code> appears on the screen when we press a key. However, this only works for the first key we press. Even if we continue to press keys, no more <code>k</code>s appear on the screen. This is because the keyboard controller won’t send another interrupt until we have read the so-called <em>scancode</em> of the pressed key.</p>
 <h3 id="reading-the-scancodes">Reading the Scancodes</h3>
 <p>To find out <em>which</em> key was pressed, we need to query the keyboard controller. We do this by reading from the data port of the PS/2 controller, which is the <a href="@/edition-2/posts/04-testing/index.md#i-o-ports">I/O port</a> with the number <code>0x60</code>:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb21-2"><a></a></span>
-<span id="cb21-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
-<span id="cb21-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
-<span id="cb21-5"><a></a><span class="op">{</span></span>
-<span id="cb21-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
-<span id="cb21-7"><a></a></span>
-<span id="cb21-8"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
-<span id="cb21-9"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
-<span id="cb21-10"><a></a>    <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> scancode)<span class="op">;</span></span>
-<span id="cb21-11"><a></a></span>
-<span id="cb21-12"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb21-13"><a></a>        PICS<span class="op">.</span>lock()</span>
-<span id="cb21-14"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
-<span id="cb21-15"><a></a>    <span class="op">}</span></span>
-<span id="cb21-16"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb20-2"><a></a></span>
+<span id="cb20-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb20-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb20-5"><a></a><span class="op">{</span></span>
+<span id="cb20-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb20-7"><a></a></span>
+<span id="cb20-8"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
+<span id="cb20-9"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
+<span id="cb20-10"><a></a>    <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> scancode)<span class="op">;</span></span>
+<span id="cb20-11"><a></a></span>
+<span id="cb20-12"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb20-13"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb20-14"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb20-15"><a></a>    <span class="op">}</span></span>
+<span id="cb20-16"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We use the <a href="https://docs.rs/x86_64/0.14.2/x86_64/instructions/port/struct.Port.html"><code>Port</code></a> type of the <code>x86_64</code> crate to read a byte from the keyboard’s data port. This byte is called the <a href="https://en.wikipedia.org/wiki/Scancode"><em>scancode</em></a> and it represents the key press/release. We don’t do anything with the scancode yet, other than print it to the screen:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure>
@@ -1238,39 +1293,39 @@ Error: panicked at 'assertion failed: `(left == right)`
 <p>There are three different standards for the mapping between scancodes and keys, the so-called <em>scancode sets</em>. All three go back to the keyboards of early IBM computers: the <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT">IBM XT</a>, the <a href="https://en.wikipedia.org/wiki/IBM_3270_PC">IBM 3270 PC</a>, and the <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer/AT">IBM AT</a>. Later computers fortunately did not continue the trend of defining new scancode sets, but rather emulated the existing sets and extended them. Today, most keyboards can be configured to emulate any of the three sets.</p>
 <p>By default, PS/2 keyboards emulate scancode set 1 (“XT”). In this set, the lower 7 bits of a scancode byte define the key, and the most significant bit defines whether it’s a press (“0”) or a release (“1”). Keys that were not present on the original <a href="https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT">IBM XT</a> keyboard, such as the enter key on the keypad, generate two scancodes in succession: a <code>0xe0</code> escape byte and then a byte representing the key. For a list of all set 1 scancodes and their corresponding keys, check out the <a href="https://wiki.osdev.org/Keyboard#Scan_Code_Set_1">OSDev Wiki</a>.</p>
 <p>To translate the scancodes to keys, we can use a <code>match</code> statement:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
-<span id="cb22-2"><a></a></span>
-<span id="cb22-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
-<span id="cb22-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
-<span id="cb22-5"><a></a><span class="op">{</span></span>
-<span id="cb22-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
-<span id="cb22-7"><a></a></span>
-<span id="cb22-8"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
-<span id="cb22-9"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
-<span id="cb22-10"><a></a></span>
-<span id="cb22-11"><a></a>    <span class="co">// new</span></span>
-<span id="cb22-12"><a></a>    <span class="kw">let</span> key <span class="op">=</span> <span class="cf">match</span> scancode <span class="op">{</span></span>
-<span id="cb22-13"><a></a>        <span class="dv">0x02</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'1'</span>)<span class="op">,</span></span>
-<span id="cb22-14"><a></a>        <span class="dv">0x03</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'2'</span>)<span class="op">,</span></span>
-<span id="cb22-15"><a></a>        <span class="dv">0x04</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'3'</span>)<span class="op">,</span></span>
-<span id="cb22-16"><a></a>        <span class="dv">0x05</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'4'</span>)<span class="op">,</span></span>
-<span id="cb22-17"><a></a>        <span class="dv">0x06</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'5'</span>)<span class="op">,</span></span>
-<span id="cb22-18"><a></a>        <span class="dv">0x07</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'6'</span>)<span class="op">,</span></span>
-<span id="cb22-19"><a></a>        <span class="dv">0x08</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'7'</span>)<span class="op">,</span></span>
-<span id="cb22-20"><a></a>        <span class="dv">0x09</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'8'</span>)<span class="op">,</span></span>
-<span id="cb22-21"><a></a>        <span class="dv">0x0a</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'9'</span>)<span class="op">,</span></span>
-<span id="cb22-22"><a></a>        <span class="dv">0x0b</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'0'</span>)<span class="op">,</span></span>
-<span id="cb22-23"><a></a>        _ <span class="op">=&gt;</span> <span class="cn">None</span><span class="op">,</span></span>
-<span id="cb22-24"><a></a>    <span class="op">};</span></span>
-<span id="cb22-25"><a></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(key) <span class="op">=</span> key <span class="op">{</span></span>
-<span id="cb22-26"><a></a>        <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> key)<span class="op">;</span></span>
-<span id="cb22-27"><a></a>    <span class="op">}</span></span>
-<span id="cb22-28"><a></a></span>
-<span id="cb22-29"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb22-30"><a></a>        PICS<span class="op">.</span>lock()</span>
-<span id="cb22-31"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
-<span id="cb22-32"><a></a>    <span class="op">}</span></span>
-<span id="cb22-33"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a></a><span class="co">// in src/interrupts.rs</span></span>
+<span id="cb21-2"><a></a></span>
+<span id="cb21-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb21-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb21-5"><a></a><span class="op">{</span></span>
+<span id="cb21-6"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb21-7"><a></a></span>
+<span id="cb21-8"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
+<span id="cb21-9"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
+<span id="cb21-10"><a></a></span>
+<span id="cb21-11"><a></a>    <span class="co">// new</span></span>
+<span id="cb21-12"><a></a>    <span class="kw">let</span> key <span class="op">=</span> <span class="cf">match</span> scancode <span class="op">{</span></span>
+<span id="cb21-13"><a></a>        <span class="dv">0x02</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'1'</span>)<span class="op">,</span></span>
+<span id="cb21-14"><a></a>        <span class="dv">0x03</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'2'</span>)<span class="op">,</span></span>
+<span id="cb21-15"><a></a>        <span class="dv">0x04</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'3'</span>)<span class="op">,</span></span>
+<span id="cb21-16"><a></a>        <span class="dv">0x05</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'4'</span>)<span class="op">,</span></span>
+<span id="cb21-17"><a></a>        <span class="dv">0x06</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'5'</span>)<span class="op">,</span></span>
+<span id="cb21-18"><a></a>        <span class="dv">0x07</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'6'</span>)<span class="op">,</span></span>
+<span id="cb21-19"><a></a>        <span class="dv">0x08</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'7'</span>)<span class="op">,</span></span>
+<span id="cb21-20"><a></a>        <span class="dv">0x09</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'8'</span>)<span class="op">,</span></span>
+<span id="cb21-21"><a></a>        <span class="dv">0x0a</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'9'</span>)<span class="op">,</span></span>
+<span id="cb21-22"><a></a>        <span class="dv">0x0b</span> <span class="op">=&gt;</span> <span class="cn">Some</span>(<span class="ch">'0'</span>)<span class="op">,</span></span>
+<span id="cb21-23"><a></a>        _ <span class="op">=&gt;</span> <span class="cn">None</span><span class="op">,</span></span>
+<span id="cb21-24"><a></a>    <span class="op">};</span></span>
+<span id="cb21-25"><a></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(key) <span class="op">=</span> key <span class="op">{</span></span>
+<span id="cb21-26"><a></a>        <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> key)<span class="op">;</span></span>
+<span id="cb21-27"><a></a>    <span class="op">}</span></span>
+<span id="cb21-28"><a></a></span>
+<span id="cb21-29"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb21-30"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb21-31"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb21-32"><a></a>    <span class="op">}</span></span>
+<span id="cb21-33"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>The above code translates keypresses of the number keys 0-9 and ignores all other keys. It uses a <a href="https://doc.rust-lang.org/book/ch06-02-match.html">match</a> statement to assign a character or <code>None</code> to each scancode. It then uses <a href="https://doc.rust-lang.org/book/ch19-01-all-the-places-for-patterns.html#conditional-if-let-expressions"><code>if let</code></a> to destructure the optional <code>key</code>. By using the same variable name <code>key</code> in the pattern, we <a href="https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html#shadowing">shadow</a> the previous declaration, which is a common pattern for destructuring <code>Option</code> types in Rust.</p>
 <p>Now we can write numbers:</p>
 <div class="quarto-figure quarto-figure-center">
@@ -1280,45 +1335,45 @@ Error: panicked at 'assertion failed: `(left == right)`
 </figure>
 </div>
 <p>Translating the other keys works in the same way. Fortunately, there is a crate named <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/"><code>pc-keyboard</code></a> for translating scancodes of scancode sets 1 and 2, so we don’t have to implement this ourselves. To use the crate, we add it to our <code>Cargo.toml</code> and import it in our <code>lib.rs</code>:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb23-1"><a></a><span class="co"># in Cargo.toml</span></span>
-<span id="cb23-2"><a></a></span>
-<span id="cb23-3"><a></a><span class="kw">[dependencies]</span></span>
-<span id="cb23-4"><a></a><span class="dt">pc-keyboard</span> <span class="op">=</span> <span class="st">"0.7.0"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb22-1"><a></a><span class="co"># in Cargo.toml</span></span>
+<span id="cb22-2"><a></a></span>
+<span id="cb22-3"><a></a><span class="kw">[dependencies]</span></span>
+<span id="cb22-4"><a></a><span class="dt">pc-keyboard</span> <span class="op">=</span> <span class="st">"0.7.0"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Now we can use this crate to rewrite our <code>keyboard_interrupt_handler</code>:</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a></a><span class="co">// in/src/interrupts.rs</span></span>
-<span id="cb24-2"><a></a></span>
-<span id="cb24-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
-<span id="cb24-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
-<span id="cb24-5"><a></a><span class="op">{</span></span>
-<span id="cb24-6"><a></a>    <span class="kw">use</span> <span class="pp">pc_keyboard::</span><span class="op">{</span>layouts<span class="op">,</span> DecodedKey<span class="op">,</span> HandleControl<span class="op">,</span> Keyboard<span class="op">,</span> ScancodeSet1<span class="op">};</span></span>
-<span id="cb24-7"><a></a>    <span class="kw">use</span> <span class="pp">spin::</span>Mutex<span class="op">;</span></span>
-<span id="cb24-8"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
-<span id="cb24-9"><a></a></span>
-<span id="cb24-10"><a></a>    <span class="pp">lazy_static!</span> <span class="op">{</span></span>
-<span id="cb24-11"><a></a>        <span class="kw">static</span> <span class="kw">ref</span> KEYBOARD<span class="op">:</span> Mutex<span class="op">&lt;</span>Keyboard<span class="op">&lt;</span><span class="pp">layouts::</span>Us104Key<span class="op">,</span> ScancodeSet1<span class="op">&gt;&gt;</span> <span class="op">=</span></span>
-<span id="cb24-12"><a></a>            <span class="pp">Mutex::</span>new(<span class="pp">Keyboard::</span>new(<span class="pp">ScancodeSet1::</span>new()<span class="op">,</span></span>
-<span id="cb24-13"><a></a>                <span class="pp">layouts::</span>Us104Key<span class="op">,</span> <span class="pp">HandleControl::</span>Ignore)</span>
-<span id="cb24-14"><a></a>            )<span class="op">;</span></span>
-<span id="cb24-15"><a></a>    <span class="op">}</span></span>
-<span id="cb24-16"><a></a></span>
-<span id="cb24-17"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> keyboard <span class="op">=</span> KEYBOARD<span class="op">.</span>lock()<span class="op">;</span></span>
-<span id="cb24-18"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
-<span id="cb24-19"><a></a></span>
-<span id="cb24-20"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
-<span id="cb24-21"><a></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Ok</span>(<span class="cn">Some</span>(key_event)) <span class="op">=</span> keyboard<span class="op">.</span>add_byte(scancode) <span class="op">{</span></span>
-<span id="cb24-22"><a></a>        <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(key) <span class="op">=</span> keyboard<span class="op">.</span>process_keyevent(key_event) <span class="op">{</span></span>
-<span id="cb24-23"><a></a>            <span class="cf">match</span> key <span class="op">{</span></span>
-<span id="cb24-24"><a></a>                <span class="pp">DecodedKey::</span>Unicode(character) <span class="op">=&gt;</span> <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> character)<span class="op">,</span></span>
-<span id="cb24-25"><a></a>                <span class="pp">DecodedKey::</span>RawKey(key) <span class="op">=&gt;</span> <span class="pp">print!</span>(<span class="st">"{:?}"</span><span class="op">,</span> key)<span class="op">,</span></span>
-<span id="cb24-26"><a></a>            <span class="op">}</span></span>
-<span id="cb24-27"><a></a>        <span class="op">}</span></span>
-<span id="cb24-28"><a></a>    <span class="op">}</span></span>
-<span id="cb24-29"><a></a></span>
-<span id="cb24-30"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb24-31"><a></a>        PICS<span class="op">.</span>lock()</span>
-<span id="cb24-32"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
-<span id="cb24-33"><a></a>    <span class="op">}</span></span>
-<span id="cb24-34"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode numberSource rust number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a></a><span class="co">// in/src/interrupts.rs</span></span>
+<span id="cb23-2"><a></a></span>
+<span id="cb23-3"><a></a><span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span> keyboard_interrupt_handler(</span>
+<span id="cb23-4"><a></a>    _stack_frame<span class="op">:</span> InterruptStackFrame)</span>
+<span id="cb23-5"><a></a><span class="op">{</span></span>
+<span id="cb23-6"><a></a>    <span class="kw">use</span> <span class="pp">pc_keyboard::</span><span class="op">{</span>layouts<span class="op">,</span> DecodedKey<span class="op">,</span> HandleControl<span class="op">,</span> Keyboard<span class="op">,</span> ScancodeSet1<span class="op">};</span></span>
+<span id="cb23-7"><a></a>    <span class="kw">use</span> <span class="pp">spin::</span>Mutex<span class="op">;</span></span>
+<span id="cb23-8"><a></a>    <span class="kw">use</span> <span class="pp">x86_64::instructions::port::</span>Port<span class="op">;</span></span>
+<span id="cb23-9"><a></a></span>
+<span id="cb23-10"><a></a>    <span class="pp">lazy_static!</span> <span class="op">{</span></span>
+<span id="cb23-11"><a></a>        <span class="kw">static</span> <span class="kw">ref</span> KEYBOARD<span class="op">:</span> Mutex<span class="op">&lt;</span>Keyboard<span class="op">&lt;</span><span class="pp">layouts::</span>Us104Key<span class="op">,</span> ScancodeSet1<span class="op">&gt;&gt;</span> <span class="op">=</span></span>
+<span id="cb23-12"><a></a>            <span class="pp">Mutex::</span>new(<span class="pp">Keyboard::</span>new(<span class="pp">ScancodeSet1::</span>new()<span class="op">,</span></span>
+<span id="cb23-13"><a></a>                <span class="pp">layouts::</span>Us104Key<span class="op">,</span> <span class="pp">HandleControl::</span>Ignore)</span>
+<span id="cb23-14"><a></a>            )<span class="op">;</span></span>
+<span id="cb23-15"><a></a>    <span class="op">}</span></span>
+<span id="cb23-16"><a></a></span>
+<span id="cb23-17"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> keyboard <span class="op">=</span> KEYBOARD<span class="op">.</span>lock()<span class="op">;</span></span>
+<span id="cb23-18"><a></a>    <span class="kw">let</span> <span class="kw">mut</span> port <span class="op">=</span> <span class="pp">Port::</span>new(<span class="dv">0x60</span>)<span class="op">;</span></span>
+<span id="cb23-19"><a></a></span>
+<span id="cb23-20"><a></a>    <span class="kw">let</span> scancode<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> port<span class="op">.</span>read() <span class="op">};</span></span>
+<span id="cb23-21"><a></a>    <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Ok</span>(<span class="cn">Some</span>(key_event)) <span class="op">=</span> keyboard<span class="op">.</span>add_byte(scancode) <span class="op">{</span></span>
+<span id="cb23-22"><a></a>        <span class="cf">if</span> <span class="kw">let</span> <span class="cn">Some</span>(key) <span class="op">=</span> keyboard<span class="op">.</span>process_keyevent(key_event) <span class="op">{</span></span>
+<span id="cb23-23"><a></a>            <span class="cf">match</span> key <span class="op">{</span></span>
+<span id="cb23-24"><a></a>                <span class="pp">DecodedKey::</span>Unicode(character) <span class="op">=&gt;</span> <span class="pp">print!</span>(<span class="st">"{}"</span><span class="op">,</span> character)<span class="op">,</span></span>
+<span id="cb23-25"><a></a>                <span class="pp">DecodedKey::</span>RawKey(key) <span class="op">=&gt;</span> <span class="pp">print!</span>(<span class="st">"{:?}"</span><span class="op">,</span> key)<span class="op">,</span></span>
+<span id="cb23-26"><a></a>            <span class="op">}</span></span>
+<span id="cb23-27"><a></a>        <span class="op">}</span></span>
+<span id="cb23-28"><a></a>    <span class="op">}</span></span>
+<span id="cb23-29"><a></a></span>
+<span id="cb23-30"><a></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb23-31"><a></a>        PICS<span class="op">.</span>lock()</span>
+<span id="cb23-32"><a></a>            <span class="op">.</span>notify_end_of_interrupt(<span class="pp">InterruptIndex::</span>Keyboard<span class="op">.</span>as_u8())<span class="op">;</span></span>
+<span id="cb23-33"><a></a>    <span class="op">}</span></span>
+<span id="cb23-34"><a></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>We use the <code>lazy_static</code> macro to create a static <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html"><code>Keyboard</code></a> object protected by a Mutex. We initialize the <code>Keyboard</code> with a US keyboard layout and the scancode set 1. The <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/enum.HandleControl.html"><code>HandleControl</code></a> parameter allows to map <code>ctrl+[a-z]</code> to the Unicode characters <code>U+0001</code> through <code>U+001A</code>. We don’t want to do that, so we use the <code>Ignore</code> option to handle the <code>ctrl</code> like normal keys.</p>
 <p>On each interrupt, we lock the Mutex, read the scancode from the keyboard controller, and pass it to the <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html#method.add_byte"><code>add_byte</code></a> method, which translates the scancode into an <code>Option&lt;KeyEvent&gt;</code>. The <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.KeyEvent.html"><code>KeyEvent</code></a> contains the key which caused the event and whether it was a press or release event.</p>
 <p>To interpret this key event, we pass it to the <a href="https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/struct.Keyboard.html#method.process_keyevent"><code>process_keyevent</code></a> method, which translates the key event to a character, if possible. For example, it translates a press event of the <code>A</code> key to either a lowercase <code>a</code> character or an uppercase <code>A</code> character, depending on whether the shift key was pressed.</p>

@@ -1,0 +1,124 @@
+---
+title: Keyboard
+format: html
+---
+
+# Your Task
+
+- We are working with hardware.
+- It would be nice to be able to type.
+- We introduce the keyboard interrupt.
+
+## Keyboard Input
+
+Now that we are able to handle interrupts from external devices, we are finally able to add support for keyboard input. This will allow us to interact with our kernel for the first time.
+
+### PS/2
+
+Note that we only describe how to handle [PS/2](https://en.wikipedia.org/wiki/PS/2_port) keyboards here, not USB keyboards. However, the mainboard emulates USB keyboards as PS/2 devices to support older software, so we can safely ignore USB keyboards until we have USB support in our kernel.
+
+<a title="Jud McCranie, CC BY-SA 4.0 &lt;https://creativecommons.org/licenses/by-sa/4.0&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:PS2_keyboard_and_mouse_jacks.jpg"><img width="960" alt="PS2 keyboard and mouse jacks" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/PS2_keyboard_and_mouse_jacks.jpg/960px-PS2_keyboard_and_mouse_jacks.jpg"></a>
+
+## Test It
+
+You probably have run your OS since setting up the PIC. You may have noticed you get double faults in curious circumstances. This can be done reproducibly:
+
+1. Start your kernel.
+2. Foreground the QEMU window.
+3. Make *any* key input.
+
+This will trigger an immediate double fault. And you probably know why.
+
+### Like Timers
+
+Like the hardware timer, the keyboard controller is already enabled by default. So when you press a key, the keyboard controller sends an interrupt to the PIC, which forwards it to the CPU. The CPU looks for a handler function in the IDT, but the corresponding entry is empty. Therefore, a double fault occurs.
+
+Add a handler function for the keyboard interrupt. It's quite similar to how we defined the handler for the timer interrupt; it just uses a different interrupt number:
+
+```{.email}
+                      ____________ 
+Timer -------------> |            |
+Keyboard-----------> |            |      _____
+-------------------> | Primary    |     |     |
+Serial Port 2 -----> | Interrupt  |---> | CPU |
+Serial Port 1 -----> | Controller |     |_____|
+Parallel Port 2/3 -> |            |
+Floppy disk -------> |            |
+Parallel Port 1----> |____________|
+```
+
+For now, it is sufficient to print anything, but you probably do want to print something!
+
+However, this only works for the first key we press. Even if we continue to press keys, the handler does not fire again. This is because the keyboard controller won't send another interrupt until we have read the so-called _scancode_ of the pressed key.
+
+- [*scancode*](https://en.wikipedia.org/wiki/Scancode)
+
+### Reading the Scancodes
+
+To find out _which_ key was pressed, we need to query the keyboard controller. We do this by reading from the data port of the PS/2 controller, which is the I/O port with the number `0x60`. Remember port-mapped I/O!
+
+```{.rs}
+let scancode: u8 = x86_64::instructions::port::Port::new(0x60).read();
+```
+
+### Interpreting the Scancodes
+
+There are three different standards for the mapping between scancodes and keys, the so-called _scancode sets_. All three go back to the keyboards of early IBM computers: the [IBM XT], the [IBM 3270 PC], and the [IBM AT]. 
+
+- [IBM XT](https://en.wikipedia.org/wiki/IBM_Personal_Computer_XT)
+- [IBM 3270 PC](https://en.wikipedia.org/wiki/IBM_3270_PC)
+- [IBM AT](https://en.wikipedia.org/wiki/IBM_Personal_Computer/AT)
+
+Later computers fortunately did not continue the trend of defining new scancode sets, but rather emulated the existing sets and extended them. Today, most keyboards can be configured to emulate any of the three sets.
+
+By default, PS/2 keyboards emulate scancode set 1 ("XT"). In this set, the lower 7 bits of a scancode byte define the key, and the most significant bit defines whether it's a press ("0") or a release ("1"). Keys that were not present on the original IBM XT keyboard, such as the enter key on the keypad, generate two scancodes in succession: a `0xe0` escape byte and then a byte representing the key. For a list of all set 1 scancodes and their corresponding keys, check out the [OSDev Wiki](https://wiki.osdev.org/Keyboard#Scan_Code_Set_1)
+
+To translate the scancodes to keys, you can can use a `match` statement. For example, try to get get the number keys printing. 
+
+- *If you perceive this as trivial or uninteresting, you are welcome to skip this stage*
+- *Otherwise you may learn something, probably about `match`!*
+
+If you love using crates, which some people do, there is a crate named `pc-keyboard` for translating scancodes of scancode sets 1 and 2, so we don't have to implement this ourselves. To use the crate, add it to our `Cargo.toml` and use it from your handler.
+
+[`pc-keyboard`]: https://docs.rs/pc-keyboard/0.7.0/pc_keyboard/
+
+```{.toml filename="Cargo.toml"}
+[dependencies]
+pc-keyboard = "0.7.0"
+```
+
+This code should get you far enough along to do your own thing:
+
+```{.rs}
+let scancode: u8 = x86_64::instructions::port::Port::new(0x60).read();
+let mut kb = pc_keyboard::Keyboard::new(
+    pc_keyboard::ScancodeSet1::new(),
+    pc_keyboard::layouts::Us104Key,
+    pc_keyboard::HandleControl::Ignore,
+);
+crate::println!("{:?}", kb.add_byte(scancode));
+```
+
+Take on faith the defaults and parameters are sensible, or test it yourself, or write you own `match` statement.
+
+Nominally the `Keyboard` can use its `.process_keyevent` method to detect whether shift is pressed and change case accordingly. Presumably you'd want to use a `static mut` to do this. Capitalization is left as an exercise to the interested student (I did not support it in my kernel).
+
+I got type out the following pretty quickly, which is relatively close to I/O handling.
+
+```{.sh}
+HHEELLOOSpacebarSpacebarWWOORRLLDD
+```
+
+Don't need much more work there.
+
+# Your Task
+
+- [ ] Be able to type `HELLO WORLD` and have (that precise) text display on screen in your kernel.
+
+You will probably need to do some matching or use the crate, somehow. If you really want to get it working, try for `Hello, world!`.
+
+::: {.callout-note title="Advanced Students"}
+
+Advanced students will implement a modal text editor.
+
+:::

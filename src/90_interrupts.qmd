@@ -7,7 +7,7 @@ title: Interrupts
 - **Action Items**:
   - Welcome back.
   - You should have a working:
-    	- Breakpoint handler.
+    - Breakpoint handler.
 	- Double fault handler.
 
 ## Citations
@@ -181,10 +181,10 @@ Secondary ATA ----> |____________|   Parallel Port 1----> |____________|
 
 ## Defaults
 
-- The default configuration of the PICs sends interrupt vector numbers in the range of 0–15 to the CPU. 
-- These numbers are already occupied by (the first `0x20`) CPU exceptions. 
-- For example, number 8 corresponds to a *double fault* in the CPU and *Serial Port 1* in the PIC.
-- We need to **re**map the PIC interrupts to different numbers. 
+- By default PICs send interrupt vector numbers in the range of 0–15 to the CPU. 
+- These numbers collide with (the first `0x20`) CPU exceptions. 
+- E.g., 8 corresponds to a *double fault* in the CPU and *Serial Port 1* in the PIC.
+- **Re**map the PIC interrupts to different numbers. 
 
 ## Conventions
 
@@ -308,431 +308,307 @@ impl ChainedPics {
 }
 ```
 
+## Let's Cheat
 
-# TODO
+- We've added crates before.
 
-The configuration happens by writing special values to the command and data ports of the PICs. Fortunately, there is already a crate called [`pic8259`], so we don't need to write the initialization sequence ourselves. However, if you are interested in how it works, check out [its source code][pic crate source]. It's fairly small and well documented.
-
-[pic crate source]: https://docs.rs/crate/pic8259/0.10.1/source/src/lib.rs
-
-To add the crate as a dependency, we add the following to our project:
-
-[`pic8259`]: https://docs.rs/pic8259/0.10.1/pic8259/
-
-```toml
-# in Cargo.toml
-
+```{.toml filename="Cargo.toml"}
 [dependencies]
 pic8259 = "0.10.1"
 ```
 
-The main abstraction provided by the crate is the [`ChainedPics`] struct that represents the primary/secondary PIC layout we saw above. It is designed to be used in the following way:
+- Read more: [`pic8259`](https://docs.rs/pic8259/0.10.1/pic8259/)
+- My `Cargo.toml` is growing quite large.
 
-[`ChainedPics`]: https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html
+```{.sh}
+$ wc Cargo.toml
+ 20  44 381 Cargo.toml
+```
 
-```rust
-// in src/interrupts.rs
+## How I did it
 
-use pic8259::ChainedPics;
-use spin;
+- I just appended to the end of `src/interrupts.rs`
+- I use "`ChainedPics`", the main thing the crate provides.
+
+```{.rs filename="src/interrupts.rs"}
+// PIC
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
 
-pub static PICS: spin::Mutex<ChainedPics> =
-    spin::Mutex::new(unsafe { ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) });
+pub static mut PICS: pic8259::ChainedPics =
+    unsafe { pic8259::ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) };
 ```
 
-As noted above, we're setting the offsets for the PICs to the range 32–47. By wrapping the `ChainedPics` struct in a `Mutex`, we can get safe mutable access (through the [`lock` method][spin mutex lock]), which we need in the next step. The `ChainedPics::new` function is unsafe because wrong offsets could cause undefined behavior.
+## An Aside
 
-[spin mutex lock]: https://docs.rs/spin/0.5.2/spin/struct.Mutex.html#method.lock
+- Up until now, I have taken the liberty of not implementing an *mutex* in our OS.
+    - Stands for "MUTual EXclusion"
+    - Used to prevent different... things (threads)... from modifying the same shared state at the same time.
+    - This can lead to program inconsistencies... but not in our case *yet*.
+    
+## On the Mutex
+    
+- Up until now, it hasn't mattered - all our code executed serially (one thing at a time) and linearly (in a defined order).
+- *We are now about to enter the "Cool Zone"*
+    - But I still won't mutex yet until we see a better way to do it.
 
-We can now initialize the 8259 PIC in our `init` function:
+## Back at it
 
-```rust
-// in src/lib.rs
+- We also [initialize](https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html#method.initialize) our PIC.
+- I did in `interrupts::init_idt()`
+- Some double fault handler stuff too...
 
-pub fn init() {
-    gdt::init();
-    interrupts::init_idt();
-    unsafe { interrupts::PICS.lock().initialize() }; // new
+```{.rs filename="src/interrupts.rs"}
+pub fn init_idt() {
+    unsafe {
+        IDT.breakpoint.set_handler_fn(breakpoint_handler);
+        IDT.double_fault
+            .set_handler_fn(double_fault_handler)
+            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);
+        IDT.load();
+        PICS.initialize();
+    }
 }
 ```
 
-We use the [`initialize`] function to perform the PIC initialization. Like the `ChainedPics::new` function, this function is also unsafe because it can cause undefined behavior if the PIC is misconfigured.
-
-[`initialize`]: https://docs.rs/pic8259/0.10.1/pic8259/struct.ChainedPics.html#method.initialize
-
-If all goes well, we should continue to see the "It did not crash" message when executing `cargo run`.
 
 ## Enabling Interrupts
 
-Until now, nothing happened because interrupts are still disabled in the CPU configuration. This means that the CPU does not listen to the interrupt controller at all, so no interrupts can reach the CPU. Let's change that:
+- Until now, interrupts were disabled in the CPU configuration. 
+- So no interrupts can reach the CPU. 
+- Let's change that...
 
-```rust
-// in src/lib.rs
-
-pub fn init() {
-    gdt::init();
-    interrupts::init_idt();
-    unsafe { interrupts::PICS.lock().initialize() };
-    x86_64::instructions::interrupts::enable();     // new
+```{.rs filename="src/interrupts.rs"}
+pub fn init_idt() {
+    unsafe {
+        // Snip
+        PICS.initialize();
+        x86_64::instructions::interrupts::enable();
+    }
 }
 ```
 
-The `interrupts::enable` function of the `x86_64` crate executes the special `sti` instruction (“set interrupts”) to enable external interrupts. When we try `cargo run` now, we see that a double fault occurs:
+## I bet that works!
 
-![QEMU printing `EXCEPTION: DOUBLE FAULT` because of hardware timer](qemu-hardware-timer-double-fault.png)
+- It double faults.
+    - This is good!
+    - We've changed something.
+    - The first step to changing something we want to change!
+    
+## Why?
 
-The reason for this double fault is that the hardware timer (the [Intel 8253], to be exact) is enabled by default, so we start receiving timer interrupts as soon as we enable interrupts. Since we didn't define a handler function for it yet, our double fault handler is invoked.
+- The hardware timer (the [Intel 8253](https://en.wikipedia.org/wiki/Intel_8253), to be exact) is enabled by default.
+- So we start receiving timer interrupts as soon as we enable interrupts. 
+- Since we didn't define a handler function for it yet, our double fault handler is invoked.
+- Absolute geniuses will notice that we can now do things using timers, though.
 
-[Intel 8253]: https://en.wikipedia.org/wiki/Intel_8253
+## Remember this?
 
-## Handling Timer Interrupts
+```{.email}
+                     ____________                          ____________
+Real Time Clock --> |            |   Timer -------------> |            |
+ACPI -------------> |            |   Keyboard-----------> |            |      _____
+Available --------> | Secondary  |----------------------> | Primary    |     |     |
+Available --------> | Interrupt  |   Serial Port 2 -----> | Interrupt  |---> | CPU |
+Mouse ------------> | Controller |   Serial Port 1 -----> | Controller |     |_____|
+Co-Processor -----> |            |   Parallel Port 2/3 -> |            |
+Primary ATA ------> |            |   Floppy disk -------> |            |
+Secondary ATA ----> |____________|   Parallel Port 1----> |____________|
+```
 
-As we see from the graphic [above](#the-8259-pic), the timer uses line 0 of the primary PIC. This means that it arrives at the CPU as interrupt 32 (0 + offset 32). Instead of hardcoding index 32, we store it in an `InterruptIndex` enum:
+## How about this part?
 
-```rust
-// in src/interrupts.rs
+```{.email}
+                      ____________ 
+Timer -------------> |            |
+Keyboard-----------> |            |      _____
+-------------------> | Primary    |     |     |
+Serial Port 2 -----> | Interrupt  |---> | CPU |
+Serial Port 1 -----> | Controller |     |_____|
+Parallel Port 2/3 -> |            |
+Floppy disk -------> |            |
+Parallel Port 1----> |____________|
+```
 
-#[derive(Debug, Clone, Copy)]
+- That's a timer on line `0` of the primary PIC.
+- We offset by... it doesn't matter, it was a `pub const`
+
+## An Aside
+
+- We can use an `enum` to specify the index of a given hardware interrupt in the PIC.
+
+```{.rs filename="src/interrupts.rs"}
+pub enum InterruptIndex {
+    Timer = PIC_1_OFFSET,
+}
+```
+
+- This explodes, for a reason I complain about often.
+
+```{.sh}
+error[E0308]: mismatched types
+  --> src/interrupts.rs:51:13
+   |
+51 |     Timer = PIC_1_OFFSET,
+   |             ^^^^^^^^^^^^ expected `isize`, found `u8`
+```
+
+## Set `repr`
+
+- We can just tell Rust to use `u8` because doing so would've been a sensible default.
+
+```{.rs filename="src/interrupts.rs"}
 #[repr(u8)]
 pub enum InterruptIndex {
     Timer = PIC_1_OFFSET,
 }
+```
 
-impl InterruptIndex {
-    fn as_u8(self) -> u8 {
-        self as u8
-    }
+- Rust: It's good.
+- This does not at all encourage me to just not use `enum` and use magic numbers, at all.
 
-    fn as_usize(self) -> usize {
-        usize::from(self.as_u8())
-    }
+## Write a handler
+
+- I just used the breakpoint handler, but changed the print.
+
+```{.rs filename="src/interrupts.rs"}
+extern "x86-interrupt" fn timer_handler (
+    stack_frame: x86_64::structures::idt::InterruptStackFrame,
+) {
+    crate::println!("INTERRUPT: TIMER\n{:#?}", stack_frame);
 }
 ```
 
-The enum is a [C-like enum] so that we can directly specify the index for each variant. The `repr(u8)` attribute specifies that each variant is represented as a `u8`. We will add more variants for other interrupts in the future.
+## Set the handler
 
-[C-like enum]: https://doc.rust-lang.org/reference/items/enumerations.html#custom-discriminant-values-for-fieldless-enumerations
+- Nothing too fancy setting this within the IDT, just have to get the index right.
 
-Now we can add a handler function for the timer interrupt:
+```{.rs filename="src/interrupts.rs"}
+IDT[InterruptIndex::Timer as usize].set_handler_fn(timer_handler);
+```
 
-```rust
-// in src/interrupts.rs
+- Make sure you include this line *prior* to loading the IDT.
+    - Don't ask why I made this note!
+    
+## What do we expect
 
-use crate::print;
+- In theory, the timer should go off every so often.
+- We already know it seems to go off instantly, so probably *quite* often.
+- So we should see a few errors messages pop up right away... right?
 
-lazy_static! {
-    static ref IDT: InterruptDescriptorTable = {
-        let mut idt = InterruptDescriptorTable::new();
-        idt.breakpoint.set_handler_fn(breakpoint_handler);
-        […]
-        idt[InterruptIndex::Timer.as_usize()]
-            .set_handler_fn(timer_interrupt_handler); // new
+## Wrong!
 
-        idt
-    };
-}
+- The PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler.
+- This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt.
+- So the PIC thinks we're still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.
 
-extern "x86-interrupt" fn timer_interrupt_handler(
-    _stack_frame: InterruptStackFrame)
-{
-    print!(".");
+## Easy fix
+
+- We simply update our PIC with the handy, built-in `.notify_end_of_interrupt`.
+    - Rust crate creators: Thank you for writing our OS.
+    - (We are still learning how OSes work, mind you!)
+    
+## Code it up
+    
+- I have no idea why `cargo fmt` but the arguments back on one line.
+
+```{.rs filename="src/interrupts.rs"}
+extern "x86-interrupt" fn timer_handler(stack_frame: x86_64::structures::idt::InterruptStackFrame) {
+    crate::println!("INTERRUPT: TIMER\n{:#?}", stack_frame);
+    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };
 }
 ```
 
-Our `timer_interrupt_handler` has the same signature as our exception handlers, because the CPU reacts identically to exceptions and external interrupts (the only difference is that some exceptions push an error code). The [`InterruptDescriptorTable`] struct implements the [`IndexMut`] trait, so we can access individual entries through array indexing syntax.
+- I think of this as *very* close to being a "hardware level function return"
 
-[`InterruptDescriptorTable`]: https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html
-[`IndexMut`]: https://doc.rust-lang.org/core/ops/trait.IndexMut.html
+## What's Happening?
 
-In our timer interrupt handler, we print a dot to the screen. As the timer interrupt happens periodically, we would expect to see a dot appearing on each timer tick. However, when we run it, we see that only a single dot is printed:
+- If you try it out, you will now get many timer interrupts.
+- The `notify_end_of_interrupt`:
+    - Figures out whether the primary or secondary PIC sent the interrupt, then
+    - Uses the `command` and `data` ports to 
+    - Send an EOI signal to the respective controllers.
+    
+# A Race
 
-![QEMU printing only a single dot for hardware timer](qemu-single-dot-printed.png)
+## 2 Fast 2 Furious
 
-### End of Interrupt
+- We are now able to run multiple functions, or contexts, simultaneously.
+    - We run whatever code is in `_start`, and...
+    - We run whatever code is in the timer handler.
+- An obviously fun thing to do is print infinitely in both places.
+    - We are already doing that with the timer, basically...
+    
+## Infinite Worlds
 
-The reason is that the PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler. This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt. So the PIC thinks we're still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.
+- It suffices to move our "Hello, world!" into the infinite loop for the purposes of this exercise.
 
-To send the EOI, we use our static `PICS` struct again:
-
-```rust
-// in src/interrupts.rs
-
-extern "x86-interrupt" fn timer_interrupt_handler(
-    _stack_frame: InterruptStackFrame)
-{
-    print!(".");
-
-    unsafe {
-        PICS.lock()
-            .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
-    }
-}
-```
-
-The `notify_end_of_interrupt` figures out whether the primary or secondary PIC sent the interrupt and then uses the `command` and `data` ports to send an EOI signal to the respective controllers. If the secondary PIC sent the interrupt, both PICs need to be notified because the secondary PIC is connected to an input line of the primary PIC.
-
-We need to be careful to use the correct interrupt vector number, otherwise we could accidentally delete an important unsent interrupt or cause our system to hang. This is the reason that the function is unsafe.
-
-When we now execute `cargo run` we see dots periodically appearing on the screen:
-
-![QEMU printing consecutive dots showing the hardware timer](qemu-hardware-timer-dots.gif)
-
-### Configuring the Timer
-
-The hardware timer that we use is called the _Programmable Interval Timer_, or PIT, for short. Like the name says, it is possible to configure the interval between two interrupts. We won't go into details here because we will switch to the [APIC timer] soon, but the OSDev wiki has an extensive article about the [configuring the PIT].
-
-[APIC timer]: https://wiki.osdev.org/APIC_timer
-[configuring the PIT]: https://wiki.osdev.org/Programmable_Interval_Timer
-
-## Deadlocks
-
-We now have a form of concurrency in our kernel: The timer interrupts occur asynchronously, so they can interrupt our `_start` function at any time. Fortunately, Rust's ownership system prevents many types of concurrency-related bugs at compile time. One notable exception is deadlocks. Deadlocks occur if a thread tries to acquire a lock that will never become free. Thus, the thread hangs indefinitely.
-
-We can already provoke a deadlock in our kernel. Remember, our `println` macro calls the `vga_buffer::_print` function, which [locks a global `WRITER`][vga spinlock] using a spinlock:
-
-[vga spinlock]: @/edition-2/posts/03-vga-text-buffer/index.md#spinlocks
-
-```rust
-// in src/vga_buffer.rs
-
-[…]
-
-#[doc(hidden)]
-pub fn _print(args: fmt::Arguments) {
-    use core::fmt::Write;
-    WRITER.lock().write_fmt(args).unwrap();
-}
-```
-
-It locks the `WRITER`, calls `write_fmt` on it, and implicitly unlocks it at the end of the function. Now imagine that an interrupt occurs while the `WRITER` is locked and the interrupt handler tries to print something too:
-
-| Timestep | _start                 | interrupt_handler                               |
-| -------- | ---------------------- | ----------------------------------------------- |
-| 0        | calls `println!`       | &nbsp;                                          |
-| 1        | `print` locks `WRITER` | &nbsp;                                          |
-| 2        |                        | **interrupt occurs**, handler begins to run     |
-| 3        |                        | calls `println!`                                |
-| 4        |                        | `print` tries to lock `WRITER` (already locked) |
-| 5        |                        | `print` tries to lock `WRITER` (already locked) |
-| …        |                        | …                                               |
-| _never_  | _unlock `WRITER`_      |
-
-The `WRITER` is locked, so the interrupt handler waits until it becomes free. But this never happens, because the `_start` function only continues to run after the interrupt handler returns. Thus, the entire system hangs.
-
-### Provoking a Deadlock
-
-We can easily provoke such a deadlock in our kernel by printing something in the loop at the end of our `_start` function:
-
-```rust
-// in src/main.rs
-
+```{.rs filename="src/main.rs"}
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    […]
-    loop {
-        use blog_os::print;
-        print!("-");        // new
-    }
+    osirs::init();
+    loop { println!("Hello, world{}", "!"); }
 }
 ```
 
-When we run it in QEMU, we get an output of the form:
+- Run your OS quickly. What do you see?
 
-![QEMU output with many rows of hyphens and no dots](./qemu-deadlock.png)
+## Handwaving
 
-We see that only a limited number of hyphens are printed until the first timer interrupt occurs. Then the system hangs because the timer interrupt handler deadlocks when it tries to print a dot. This is the reason that we see no dots in the above output.
+- Aw, they're sharing!
+- I am going to handwave concurrency into what I hope to be a future networks class.
+- It's a very interesting cloud topic, and in generally we won't mind it too much here.
+- All we have to do at this time is establish a perhaps more reasonable timer handler.
 
-The actual number of hyphens varies between runs because the timer interrupt occurs asynchronously. This non-determinism is what makes concurrency-related bugs so difficult to debug.
-
-### Fixing the Deadlock
-
-To avoid this deadlock, we can disable interrupts as long as the `Mutex` is locked:
-
-```rust
-// in src/vga_buffer.rs
-
-/// Prints the given formatted string to the VGA text buffer
-/// through the global `WRITER` instance.
-#[doc(hidden)]
-pub fn _print(args: fmt::Arguments) {
-    use core::fmt::Write;
-    use x86_64::instructions::interrupts;   // new
-
-    interrupts::without_interrupts(|| {     // new
-        WRITER.lock().write_fmt(args).unwrap();
-    });
+```{.rs filename="src/interrupts.rs"}
+extern "x86-interrupt" fn timer_handler(stack_frame: x86_64::structures::idt::InterruptStackFrame) {
+    // crate::println!("INTERRUPT: TIMER\n{:#?}", stack_frame);
+    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };
 }
 ```
 
-The [`without_interrupts`] function takes a [closure] and executes it in an interrupt-free environment. We use it to ensure that no interrupt can occur as long as the `Mutex` is locked. When we run our kernel now, we see that it keeps running without hanging. (We still don't notice any dots, but this is because they're scrolling by too fast. Try to slow down the printing, e.g., by putting a `for _ in 0..10000 {}` inside the loop.)
+# Benefits
 
-[`without_interrupts`]: https://docs.rs/x86_64/0.14.2/x86_64/instructions/interrupts/fn.without_interrupts.html
-[closure]: https://doc.rust-lang.org/book/ch13-01-closures.html
+## Timing Considerations 
 
-We can apply the same change to our serial printing function to ensure that no deadlocks occur with it either:
+- But there are some quick performance gains to be had here...
+- Until now, our `loop {}`'s gobbled up all available resources.
+    - CPU time
+    - CPU energy
+    - Hydroelectric power
+- With multiple infinities around, we should be more considerate.
 
-```rust
-// in src/serial.rs
+## Halt!
 
-#[doc(hidden)]
-pub fn _print(args: ::core::fmt::Arguments) {
-    use core::fmt::Write;
-    use x86_64::instructions::interrupts;       // new
+- With `loop {}` the CPU continues to run at full speed even though there's no work to do.
+- What we really want to do is to halt the CPU until the next interrupt arrives. 
+- This allows the CPU to enter a sleep state in which it consumes much less energy.
+- There is a hardware level "halt" command that does exactly that! 
+- [Read more on `HLT`](https://en.wikipedia.org/wiki/HLT_(x86_instruction))
 
-    interrupts::without_interrupts(|| {         // new
-        SERIAL1
-            .lock()
-            .write_fmt(args)
-            .expect("Printing to serial failed");
-    });
+## Try it
+
+- Let's use this instruction to create an energy-efficient endless loop:
+
+```{.rs filename="src/lib.rs"}
+pub fn halt() -> ! {
+    loop { x86_64::instructions::hlt(); }
 }
 ```
 
-Note that disabling interrupts shouldn't be a general solution. The problem is that it increases the worst-case interrupt latency, i.e., the time until the system reacts to an interrupt. Therefore, interrupts should only be disabled for a very short time.
+- This is helpfully diverging, so add to:
+    - `_start` and `panic` in `src/main.rs`
+    - Not needed when testing. (Why?)
+    
+# Fin
 
-## Fixing a Race Condition
+## Okay...
 
-If you run `cargo test`, you might see the `test_println_output` test failing:
+- I think we are out of time here.
+- Coming up next in *OS in Rust*: Keyboard interrupts!
 
-```
-> cargo test --lib
-[…]
-Running 4 tests
-test_breakpoint_exception...[ok]
-test_println... [ok]
-test_println_many... [ok]
-test_println_output... [failed]
-
-Error: panicked at 'assertion failed: `(left == right)`
-  left: `'.'`,
- right: `'S'`', src/vga_buffer.rs:205:9
-```
-
-The reason is a _race condition_ between the test and our timer handler. Remember, the test looks like this:
-
-```rust
-// in src/vga_buffer.rs
-
-#[test_case]
-fn test_println_output() {
-    let s = "Some test string that fits on a single line";
-    println!("{}", s);
-    for (i, c) in s.chars().enumerate() {
-        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-        assert_eq!(char::from(screen_char.ascii_character), c);
-    }
-}
-```
-
-The test prints a string to the VGA buffer and then checks the output by manually iterating over the `buffer_chars` array. The race condition occurs because the timer interrupt handler might run between the `println` and the reading of the screen characters. Note that this isn't a dangerous _data race_, which Rust completely prevents at compile time. See the [_Rustonomicon_][nomicon-races] for details.
-
-[nomicon-races]: https://doc.rust-lang.org/nomicon/races.html
-
-To fix this, we need to keep the `WRITER` locked for the complete duration of the test, so that the timer handler can't write a `.` to the screen in between. The fixed test looks like this:
-
-```rust
-// in src/vga_buffer.rs
-
-#[test_case]
-fn test_println_output() {
-    use core::fmt::Write;
-    use x86_64::instructions::interrupts;
-
-    let s = "Some test string that fits on a single line";
-    interrupts::without_interrupts(|| {
-        let mut writer = WRITER.lock();
-        writeln!(writer, "\n{}", s).expect("writeln failed");
-        for (i, c) in s.chars().enumerate() {
-            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
-            assert_eq!(char::from(screen_char.ascii_character), c);
-        }
-    });
-}
-```
-
-We performed the following changes:
-
-- We keep the writer locked for the complete test by using the `lock()` method explicitly. Instead of `println`, we use the [`writeln`] macro that allows printing to an already locked writer.
-- To avoid another deadlock, we disable interrupts for the test's duration. Otherwise, the test might get interrupted while the writer is still locked.
-- Since the timer interrupt handler can still run before the test, we print an additional newline `\n` before printing the string `s`. This way, we avoid test failure when the timer handler has already printed some `.` characters to the current line.
-
-[`writeln`]: https://doc.rust-lang.org/core/macro.writeln.html
-
-With the above changes, `cargo test` now deterministically succeeds again.
-
-This was a very harmless race condition that only caused a test failure. As you can imagine, other race conditions can be much more difficult to debug due to their non-deterministic nature. Luckily, Rust prevents us from data races, which are the most serious class of race conditions since they can cause all kinds of undefined behavior, including system crashes and silent memory corruptions.
-
-## The `hlt` Instruction
-
-Until now, we used a simple empty loop statement at the end of our `_start` and `panic` functions. This causes the CPU to spin endlessly, and thus works as expected. But it is also very inefficient, because the CPU continues to run at full speed even though there's no work to do. You can see this problem in your task manager when you run your kernel: The QEMU process needs close to 100% CPU the whole time.
-
-What we really want to do is to halt the CPU until the next interrupt arrives. This allows the CPU to enter a sleep state in which it consumes much less energy. The [`hlt` instruction] does exactly that. Let's use this instruction to create an energy-efficient endless loop:
-
-[`hlt` instruction]: https://en.wikipedia.org/wiki/HLT_(x86_instruction)
-
-```rust
-// in src/lib.rs
-
-pub fn hlt_loop() -> ! {
-    loop {
-        x86_64::instructions::hlt();
-    }
-}
-```
-
-The `instructions::hlt` function is just a [thin wrapper] around the assembly instruction. It is safe because there's no way it can compromise memory safety.
-
-[thin wrapper]: https://github.com/rust-osdev/x86_64/blob/5e8e218381c5205f5777cb50da3ecac5d7e3b1ab/src/instructions/mod.rs#L16-L22
-
-We can now use this `hlt_loop` instead of the endless loops in our `_start` and `panic` functions:
-
-```rust
-// in src/main.rs
-
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    […]
-
-    println!("It did not crash!");
-    blog_os::hlt_loop();            // new
-}
-
-
-#[cfg(not(test))]
-#[panic_handler]
-fn panic(info: &PanicInfo) -> ! {
-    println!("{}", info);
-    blog_os::hlt_loop();            // new
-}
-
-```
-
-Let's update our `lib.rs` as well:
-
-```rust
-// in src/lib.rs
-
-/// Entry point for `cargo test`
-#[cfg(test)]
-#[unsafe(no_mangle)]
-pub extern "C" fn _start() -> ! {
-    init();
-    test_main();
-    hlt_loop();         // new
-}
-
-pub fn test_panic_handler(info: &PanicInfo) -> ! {
-    serial_println!("[failed]\n");
-    serial_println!("Error: {}\n", info);
-    exit_qemu(QemuExitCode::Failed);
-    hlt_loop();         // new
-}
-```
-
-When we run our kernel now in QEMU, we see a much lower CPU usage.
+# TODO
 
 ## Keyboard Input
 

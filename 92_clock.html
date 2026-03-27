@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Transmute – OS in Rust</title>
+<title>Clock – OS in Rust</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,8 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./22_malloc.html" rel="next">
-<link href="./20_os.html" rel="prev">
+<link href="./91_keyboard.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -115,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./21_xmute.html">Transmute</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./92_clock.html">Clock</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -178,7 +177,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link active">
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Transmute</span></a>
   </div>
 </li>
@@ -310,7 +309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./92_clock.html" class="sidebar-item-text sidebar-link">
+  <a href="./92_clock.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Clock</span></a>
   </div>
 </li>
@@ -324,23 +323,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
-  <li><a href="#homework" id="toc-homework" class="nav-link" data-scroll-target="#homework">Homework</a></li>
+  <li><a href="#your-task" id="toc-your-task" class="nav-link active" data-scroll-target="#your-task">Your Task</a></li>
   <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
-  <li><a href="#exercise" id="toc-exercise" class="nav-link" data-scroll-target="#exercise">Exercise</a>
-  <ul class="collapse">
-  <li><a href="#crate" id="toc-crate" class="nav-link" data-scroll-target="#crate">Crate</a></li>
-  <li><a href="#hello-world" id="toc-hello-world" class="nav-link" data-scroll-target="#hello-world">“Hello world!”</a>
-  <ul class="collapse">
-  <li><a href="#i-love-python" id="toc-i-love-python" class="nav-link" data-scroll-target="#i-love-python">I love Python</a></li>
-  <li><a href="#transmute" id="toc-transmute" class="nav-link" data-scroll-target="#transmute">Transmute</a></li>
-  <li><a href="#raw-pointers" id="toc-raw-pointers" class="nav-link" data-scroll-target="#raw-pointers">Raw Pointers</a></li>
-  <li><a href="#numeric-values" id="toc-numeric-values" class="nav-link" data-scroll-target="#numeric-values">Numeric Values</a></li>
-  <li><a href="#endianness" id="toc-endianness" class="nav-link" data-scroll-target="#endianness">Endianness</a></li>
-  <li><a href="#numeric-address" id="toc-numeric-address" class="nav-link" data-scroll-target="#numeric-address">Numeric Address</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
+  <li><a href="#aside" id="toc-aside" class="nav-link" data-scroll-target="#aside">Aside</a></li>
   </ul>
 </nav>
     </div>
@@ -349,7 +334,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Transmute</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Clock</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
 <p class="subtitle lead">OS in Rust</p>
 </div>
 
@@ -367,162 +352,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="announcements" class="level2">
-<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<section id="your-task" class="level2">
+<h2 class="anchored" data-anchor-id="your-task">Your Task</h2>
 <ul>
-<li>Lab Day
+<li>Implement a clock.
 <ul>
-<li>Play with memory</li>
-<li>Use <code>unsafe</code></li>
+<li>Somehow track ticks from the timer.</li>
+<li>Set the initial time from the keyboard.</li>
 </ul></li>
-</ul>
-</section>
-<section id="homework" class="level2">
-<h2 class="anchored" data-anchor-id="homework">Homework</h2>
+<li>Provide hours, minute, seconds.
 <ul>
-<li><code>malloc</code> is this lab just more complete
-<ul>
-<li>Cool, good, fun.</li>
-</ul></li>
-<li>Due Friday, 06 Feb.&nbsp;at 1440 ET.
-<ul>
-<li>And also covered in section.</li>
+<li>Don’t worry about overly testing, put test at least seconds.</li>
+<li>You don’t have to get the clock ticks exact, approximate is fine.</li>
 </ul></li>
 </ul>
 </section>
 <section id="requirements" class="level2">
 <h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
-<ul class="task-list">
-<li><label><input type="checkbox">Change the interpretation of numeric <em>values</em> with transmute on values</label></li>
-<li><label><input type="checkbox">Change the interpretation of <em>memory</em> with transmute on references.</label></li>
-<li><label><input type="checkbox">Write a “Hello world!” program that uses no string or character data.</label></li>
-</ul>
-</section>
-<section id="exercise" class="level1">
-<h1>Exercise</h1>
-<section id="crate" class="level2">
-<h2 class="anchored" data-anchor-id="crate">Crate</h2>
 <ul>
-<li>To complete the lab today, create a crate named <code>helloworld</code> in a folder named <code>21</code> in your <code>371os</code> repository.</li>
-</ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource bash number-lines code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1"></a><span class="ex">cargo</span> new 21 <span class="at">--name</span> hello_world <span class="at">--vcs</span> none</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="hello-world" class="level2">
-<h2 class="anchored" data-anchor-id="hello-world">“Hello world!”</h2>
+<li>On boot, display a prompt requesting current time.</li>
+<li>Accept 6 decimal digits of a well-formatted time.
 <ul>
-<li>Implement “Hello world!” using this crate.</li>
-<li>Use <code>i32</code> to store the “Hello world” data.</li>
-<li>While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and <code>i32</code> literals.</li>
-</ul>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> wc src/main.rs <span class="co"># 2 lines main, 2 lines unsafe, 1 line code</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>  <span class="ex">5</span>  15 174 src/main.rs</span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> grep world src/main.rs <span class="co"># no plaintext in file</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a><span class="ex">calvin@calvin:~/tmp/helloworld$</span> cargo r <span class="at">--release</span></span>
-<span id="cb2-5"><a href="#cb2-5"></a>   <span class="ex">Compiling</span> helloworld v0.1.0 <span class="er">(</span><span class="ex">/home/calvin/tmp/oneone</span><span class="kw">)</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">release</span><span class="kw">`</span> profile <span class="pp">[</span><span class="ss">optimized</span><span class="pp">]</span> target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.14s</span></span>
-<span id="cb2-7"><a href="#cb2-7"></a>     <span class="ex">Running</span> <span class="kw">`</span><span class="ex">target/release/helloworld</span><span class="kw">`</span></span>
-<span id="cb2-8"><a href="#cb2-8"></a><span class="ex">Hello</span> world!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="i-love-python" class="level3">
-<h3 class="anchored" data-anchor-id="i-love-python">I love Python</h3>
-<ul>
-<li>The following may be useful here, to the interested student.</li>
-</ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1"></a><span class="ex">python3</span> <span class="at">-c</span> <span class="st">'[print(ord(a)) for a in "Hello world!"]'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li>This is probably insufficient for your purposes and will require some hacking.</li>
-</ul>
-</section>
-<section id="transmute" class="level3">
-<h3 class="anchored" data-anchor-id="transmute">Transmute</h3>
-<ul>
-<li>Since it is more idiomatic to use code other people have written in Rust…
-<ul>
-<li>I have an opinion on this.</li>
+<li>Delineate however you like - just include it in the prompt.</li>
+<li>I used <code>SpaceBar</code> to separate hours, minutes, seconds and also terminate.</li>
 </ul></li>
-<li>…while it is possible to conduct this exercise using only raw pointers and casts…
+<li>Once the 6 decimal digits are input, clear the screen and display a single line of
 <ul>
-<li>(in the voice of Palpatine) “Do it!”</li>
+<li>Six decimal digits.</li>
+<li>You can format it or whatever, up to you.</li>
+<li>Even use colors I guess.</li>
 </ul></li>
-<li>…it is my professional responsibility to recommend you use <code>transmute</code>.</li>
-</ul>
-<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">pub</span> <span class="kw">const</span> <span class="kw">unsafe</span> <span class="kw">fn</span> transmute<span class="op">&lt;</span>Src<span class="op">,</span> Dst<span class="op">&gt;</span>(src<span class="op">:</span> Src) <span class="op">-&gt;</span> Dst</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li><a href="https://doc.rust-lang.org/std/mem/fn.transmute.html">Read more</a></li>
+<li>It should start at the input time and increase (roughly) every one second.</li>
 </ul>
 </section>
-<section id="raw-pointers" class="level3">
-<h3 class="anchored" data-anchor-id="raw-pointers">Raw Pointers</h3>
+<section id="aside" class="level2">
+<h2 class="anchored" data-anchor-id="aside">Aside</h2>
 <ul>
-<li>Also can use raw pointers here.</li>
-<li>Will get in the way of a single-line solution but that is okay - you should do you!</li>
-</ul>
-</section>
-<section id="numeric-values" class="level3">
-<h3 class="anchored" data-anchor-id="numeric-values">Numeric Values</h3>
-<ul>
-<li>One obvious way to use <code>transmute</code> is to change one type of data into another, without altering the underlying numeric values that exist in memory.</li>
-<li>For example, we can convert an array of <code>u8</code>s to an <code>i32</code>.</li>
-</ul>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb5-2"><a href="#cb5-2"></a>    <span class="kw">let</span> bytes<span class="op">:</span> [<span class="dt">u8</span><span class="op">;</span><span class="dv">4</span>] <span class="op">=</span> [<span class="dv">0x12</span><span class="op">,</span><span class="dv">0x34</span><span class="op">,</span><span class="dv">0x56</span><span class="op">,</span><span class="dv">0x78</span>]<span class="op">;</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a>    <span class="kw">let</span> num<span class="op">:</span> <span class="dt">i32</span> <span class="op">=</span> <span class="pp">std::mem::</span>transmute(bytes)<span class="op">;</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a>    <span class="pp">println!</span>(<span class="st">"{:x}"</span><span class="op">,</span> num)<span class="op">;</span></span>
-<span id="cb5-5"><a href="#cb5-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li>I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what <code>rustc</code> wanted, so I didn’t worry about it.</li>
-</ul>
-</section>
-<section id="endianness" class="level3">
-<h3 class="anchored" data-anchor-id="endianness">Endianness</h3>
-<ul>
-<li>The warning refers to the topic of <em>endianness</em>.
-<ul>
-<li>Big deal in C, kinda not in Rust actually.
-<ul>
-<li>Precisely because of that warning basically.</li>
-<li>This lab was very involved. <a href="https://cd-public.github.io/courses/old/c89s25/qmd/endian.html">Endian</a></li>
-</ul></li>
-</ul></li>
-<li><a href="https://en.wikipedia.org/wiki/Endianness">Read more</a></li>
-</ul>
-<blockquote class="blockquote">
-<p>In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness.</p>
-</blockquote>
-<ul>
-<li>Regard an <code>i32</code> as a word and a <code>u8</code> as a bit.</li>
-<li>Take note of the endianness revealed by the prior code.</li>
-</ul>
-</section>
-<section id="numeric-address" class="level3">
-<h3 class="anchored" data-anchor-id="numeric-address">Numeric Address</h3>
-<ul>
-<li>One possibly more advanced use of transmute is upon numeric addresses
-<ul>
-<li>The <em>key</em>, the numeric value of the address, stays the same.</li>
-<li>The value, the numeric value in the memory location decribed by the address, stays the same.</li>
-<li>The interpretation - how Rust understands the value at that location - changes.</li>
-</ul></li>
-</ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a>    <span class="kw">let</span> nats<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">u32</span>] <span class="op">=</span> <span class="op">&amp;</span>[<span class="dv">0x3F800000</span>]<span class="op">;</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a>    <span class="kw">let</span> nums<span class="op">:</span> <span class="op">&amp;</span>[<span class="dt">f32</span>] <span class="op">=</span> <span class="pp">std::mem::</span>transmute(nats)<span class="op">;</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> nums[<span class="dv">0</span>])<span class="op">;</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li><a href="./11_unsafe.html#\unions">Recall the meaning of 0x3F8000000</a></li>
-<li>I usually do this on arrays but I guess I’m not sure why.
-<ul>
-<li>Try things out.</li>
-<li>Vectors are definitely banned though, that is way too high level.</li>
-</ul></li>
-</ul>
-</section>
-</section>
-</section>
-<section id="fin" class="level1">
-<h1>Fin</h1>
-<ul>
-<li>To be continued in the homework.</li>
+<li>I think you’ll want to fork your OS for this, so when you make a new crate and copy things over, you’ll probably want to do any improvements to your OS first, or at least keep anything you learn in mind going into next week.</li>
 </ul>
 
 
@@ -1004,146 +870,42 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./20_os.html" class="pagination-link" aria-label="OS">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">OS</span>
+      <a href="./91_keyboard.html" class="pagination-link" aria-label="Keyboard">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Keyboard</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./22_malloc.html" class="pagination-link" aria-label="malloc">
-        <span class="nav-page-text">malloc</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb7" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">---</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="an">title:</span><span class="co"> Transmute </span></span>
-<span id="cb7-3"><a href="#cb7-3"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb7-4"><a href="#cb7-4"></a><span class="co">---</span></span>
-<span id="cb7-5"><a href="#cb7-5"></a></span>
-<span id="cb7-6"><a href="#cb7-6"></a><span class="fu">## Announcements</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a></span>
-<span id="cb7-8"><a href="#cb7-8"></a><span class="ss">- </span>Lab Day</span>
-<span id="cb7-9"><a href="#cb7-9"></a><span class="ss">    - </span>Play with memory</span>
-<span id="cb7-10"><a href="#cb7-10"></a><span class="ss">    - </span>Use <span class="in">`unsafe`</span></span>
-<span id="cb7-11"><a href="#cb7-11"></a></span>
-<span id="cb7-12"><a href="#cb7-12"></a><span class="fu">## Homework</span></span>
-<span id="cb7-13"><a href="#cb7-13"></a></span>
-<span id="cb7-14"><a href="#cb7-14"></a><span class="ss">- </span><span class="in">`malloc`</span> is this lab just more complete </span>
-<span id="cb7-15"><a href="#cb7-15"></a><span class="ss">  - </span>Cool, good, fun.</span>
-<span id="cb7-16"><a href="#cb7-16"></a><span class="ss">- </span>Due Friday, 06 Feb. at 1440 ET.</span>
-<span id="cb7-17"><a href="#cb7-17"></a><span class="ss">  - </span>And also covered in section. </span>
-<span id="cb7-18"><a href="#cb7-18"></a></span>
-<span id="cb7-19"><a href="#cb7-19"></a><span class="fu">## Requirements</span></span>
-<span id="cb7-20"><a href="#cb7-20"></a></span>
-<span id="cb7-21"><a href="#cb7-21"></a><span class="ss">- </span><span class="va">[ ]</span> Change the interpretation of numeric *values* with transmute on values</span>
-<span id="cb7-22"><a href="#cb7-22"></a><span class="ss">- </span><span class="va">[ ]</span> Change the interpretation of *memory* with transmute on references.</span>
-<span id="cb7-23"><a href="#cb7-23"></a><span class="ss">- </span><span class="va">[ ]</span> Write a "Hello world!" program that uses no string or character data.</span>
-<span id="cb7-24"><a href="#cb7-24"></a></span>
-<span id="cb7-25"><a href="#cb7-25"></a><span class="fu"># Exercise</span></span>
-<span id="cb7-26"><a href="#cb7-26"></a></span>
-<span id="cb7-27"><a href="#cb7-27"></a><span class="fu">## Crate</span></span>
-<span id="cb7-28"><a href="#cb7-28"></a></span>
-<span id="cb7-29"><a href="#cb7-29"></a><span class="ss">- </span>To complete the lab today, create a crate named <span class="in">`helloworld`</span> in a folder named <span class="in">`21`</span> in your <span class="in">`371os`</span> repository.</span>
-<span id="cb7-30"><a href="#cb7-30"></a><span class="in">```{.bash}</span></span>
-<span id="cb7-31"><a href="#cb7-31"></a><span class="in">cargo new 21 --name hello_world --vcs none</span></span>
-<span id="cb7-32"><a href="#cb7-32"></a><span class="in">```</span></span>
-<span id="cb7-33"><a href="#cb7-33"></a></span>
-<span id="cb7-34"><a href="#cb7-34"></a><span class="fu">## "Hello world!" </span></span>
-<span id="cb7-35"><a href="#cb7-35"></a></span>
-<span id="cb7-36"><a href="#cb7-36"></a><span class="ss">- </span>Implement "Hello world!" using this crate.</span>
-<span id="cb7-37"><a href="#cb7-37"></a><span class="ss">- </span>Use <span class="in">`i32`</span> to store the "Hello world" data.</span>
-<span id="cb7-38"><a href="#cb7-38"></a><span class="ss">- </span>While you do not have to develop it this way, the code could be a single line within an unsafe block containing only built-in function calls/declarations and <span class="in">`i32`</span> literals.</span>
-<span id="cb7-39"><a href="#cb7-39"></a></span>
-<span id="cb7-40"><a href="#cb7-40"></a><span class="in">```{.sh}</span></span>
-<span id="cb7-41"><a href="#cb7-41"></a><span class="in">calvin@calvin:~/tmp/helloworld$ wc src/main.rs # 2 lines main, 2 lines unsafe, 1 line code</span></span>
-<span id="cb7-42"><a href="#cb7-42"></a><span class="in">  5  15 174 src/main.rs</span></span>
-<span id="cb7-43"><a href="#cb7-43"></a><span class="in">calvin@calvin:~/tmp/helloworld$ grep world src/main.rs # no plaintext in file</span></span>
-<span id="cb7-44"><a href="#cb7-44"></a><span class="in">calvin@calvin:~/tmp/helloworld$ cargo r --release</span></span>
-<span id="cb7-45"><a href="#cb7-45"></a><span class="in">   Compiling helloworld v0.1.0 (/home/calvin/tmp/oneone)</span></span>
-<span id="cb7-46"><a href="#cb7-46"></a><span class="in">    Finished `release` profile [optimized] target(s) in 0.14s</span></span>
-<span id="cb7-47"><a href="#cb7-47"></a><span class="in">     Running `target/release/helloworld`</span></span>
-<span id="cb7-48"><a href="#cb7-48"></a><span class="in">Hello world!</span></span>
-<span id="cb7-49"><a href="#cb7-49"></a><span class="in">```</span></span>
-<span id="cb7-50"><a href="#cb7-50"></a></span>
-<span id="cb7-51"><a href="#cb7-51"></a><span class="fu">### I love Python</span></span>
-<span id="cb7-52"><a href="#cb7-52"></a></span>
-<span id="cb7-53"><a href="#cb7-53"></a><span class="ss">- </span>The following may be useful here, to the interested student.</span>
-<span id="cb7-54"><a href="#cb7-54"></a></span>
-<span id="cb7-55"><a href="#cb7-55"></a><span class="in">```{.sh}</span></span>
-<span id="cb7-56"><a href="#cb7-56"></a><span class="in">python3 -c '[print(ord(a)) for a in "Hello world!"]'</span></span>
-<span id="cb7-57"><a href="#cb7-57"></a><span class="in">```</span></span>
-<span id="cb7-58"><a href="#cb7-58"></a></span>
-<span id="cb7-59"><a href="#cb7-59"></a><span class="ss">- </span>This is probably insufficient for your purposes and will require some hacking.</span>
-<span id="cb7-60"><a href="#cb7-60"></a></span>
-<span id="cb7-61"><a href="#cb7-61"></a><span class="fu">### Transmute</span></span>
-<span id="cb7-62"><a href="#cb7-62"></a></span>
-<span id="cb7-63"><a href="#cb7-63"></a><span class="ss">- </span>Since it is more idiomatic to use code other people have written in Rust...</span>
-<span id="cb7-64"><a href="#cb7-64"></a><span class="ss">    - </span>I have an opinion on this.</span>
-<span id="cb7-65"><a href="#cb7-65"></a><span class="ss">- </span>...while it is possible to conduct this exercise using only raw pointers and casts...</span>
-<span id="cb7-66"><a href="#cb7-66"></a><span class="ss">    - </span>(in the voice of Palpatine) "Do it!"</span>
-<span id="cb7-67"><a href="#cb7-67"></a><span class="ss">- </span>...it is my professional responsibility to recommend you use <span class="in">`transmute`</span>.</span>
-<span id="cb7-68"><a href="#cb7-68"></a></span>
-<span id="cb7-69"><a href="#cb7-69"></a><span class="in">```{.rs}</span></span>
-<span id="cb7-70"><a href="#cb7-70"></a><span class="in">pub const unsafe fn transmute&lt;Src, Dst&gt;(src: Src) -&gt; Dst</span></span>
-<span id="cb7-71"><a href="#cb7-71"></a><span class="in">```</span></span>
-<span id="cb7-72"><a href="#cb7-72"></a></span>
-<span id="cb7-73"><a href="#cb7-73"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://doc.rust-lang.org/std/mem/fn.transmute.html)</span></span>
-<span id="cb7-74"><a href="#cb7-74"></a></span>
-<span id="cb7-75"><a href="#cb7-75"></a><span class="fu">### Raw Pointers</span></span>
-<span id="cb7-76"><a href="#cb7-76"></a></span>
-<span id="cb7-77"><a href="#cb7-77"></a><span class="ss">- </span>Also can use raw pointers here.</span>
-<span id="cb7-78"><a href="#cb7-78"></a><span class="ss">- </span>Will get in the way of a single-line solution but that is okay - you should do you!</span>
-<span id="cb7-79"><a href="#cb7-79"></a></span>
-<span id="cb7-80"><a href="#cb7-80"></a><span class="fu">### Numeric Values</span></span>
-<span id="cb7-81"><a href="#cb7-81"></a></span>
-<span id="cb7-82"><a href="#cb7-82"></a><span class="ss">- </span>One obvious way to use <span class="in">`transmute`</span> is to change one type of data into another, without altering the underlying numeric values that exist in memory.</span>
-<span id="cb7-83"><a href="#cb7-83"></a><span class="ss">- </span>For example, we can convert an array of <span class="in">`u8`</span>s to an <span class="in">`i32`</span>.</span>
-<span id="cb7-84"><a href="#cb7-84"></a></span>
-<span id="cb7-85"><a href="#cb7-85"></a><span class="in">```{.rs}</span></span>
-<span id="cb7-86"><a href="#cb7-86"></a><span class="in">unsafe {</span></span>
-<span id="cb7-87"><a href="#cb7-87"></a><span class="in">    let bytes: [u8;4] = [0x12,0x34,0x56,0x78];</span></span>
-<span id="cb7-88"><a href="#cb7-88"></a><span class="in">    let num: i32 = std::mem::transmute(bytes);</span></span>
-<span id="cb7-89"><a href="#cb7-89"></a><span class="in">    println!("{:x}", num);</span></span>
-<span id="cb7-90"><a href="#cb7-90"></a><span class="in">}</span></span>
-<span id="cb7-91"><a href="#cb7-91"></a><span class="in">```</span></span>
-<span id="cb7-92"><a href="#cb7-92"></a></span>
-<span id="cb7-93"><a href="#cb7-93"></a><span class="ss">- </span>I drew a warning when doing this, but it turns out I was doing what I wanted and did not wnat to do what <span class="in">`rustc`</span> wanted, so I didn't worry about it. </span>
-<span id="cb7-94"><a href="#cb7-94"></a></span>
-<span id="cb7-95"><a href="#cb7-95"></a><span class="fu">### Endianness</span></span>
-<span id="cb7-96"><a href="#cb7-96"></a></span>
-<span id="cb7-97"><a href="#cb7-97"></a><span class="ss">- </span>The warning refers to the topic of *endianness*.</span>
-<span id="cb7-98"><a href="#cb7-98"></a><span class="ss">    - </span>Big deal in C, kinda not in Rust actually.</span>
-<span id="cb7-99"><a href="#cb7-99"></a><span class="ss">        - </span>Precisely because of that warning basically.</span>
-<span id="cb7-100"><a href="#cb7-100"></a><span class="ss">        - </span>This lab was very involved.  <span class="co">[</span><span class="ot">Endian</span><span class="co">](https://cd-public.github.io/courses/old/c89s25/qmd/endian.html)</span></span>
-<span id="cb7-101"><a href="#cb7-101"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/Endianness)</span></span>
-<span id="cb7-102"><a href="#cb7-102"></a></span>
-<span id="cb7-103"><a href="#cb7-103"></a><span class="at">&gt; In computing, endianness is the order in which bytes within a word data type are transmitted over a data communication medium or addressed in computer memory, counting only byte significance compared to earliness. </span></span>
-<span id="cb7-104"><a href="#cb7-104"></a></span>
-<span id="cb7-105"><a href="#cb7-105"></a><span class="ss">- </span>Regard an <span class="in">`i32`</span> as a word and a <span class="in">`u8`</span> as a bit.</span>
-<span id="cb7-106"><a href="#cb7-106"></a><span class="ss">- </span>Take note of the endianness revealed by the prior code.</span>
-<span id="cb7-107"><a href="#cb7-107"></a></span>
-<span id="cb7-108"><a href="#cb7-108"></a><span class="fu">### Numeric Address</span></span>
-<span id="cb7-109"><a href="#cb7-109"></a></span>
-<span id="cb7-110"><a href="#cb7-110"></a><span class="ss">- </span>One possibly more advanced use of transmute is upon numeric addresses</span>
-<span id="cb7-111"><a href="#cb7-111"></a><span class="ss">    - </span>The *key*, the numeric value of the address, stays the same.</span>
-<span id="cb7-112"><a href="#cb7-112"></a><span class="ss">    - </span>The value, the numeric value in the memory location decribed by the address, stays the same.</span>
-<span id="cb7-113"><a href="#cb7-113"></a><span class="ss">    - </span>The interpretation - how Rust understands the value at that location - changes.</span>
-<span id="cb7-114"><a href="#cb7-114"></a></span>
-<span id="cb7-115"><a href="#cb7-115"></a><span class="in">```{.rs}</span></span>
-<span id="cb7-116"><a href="#cb7-116"></a><span class="in">unsafe {</span></span>
-<span id="cb7-117"><a href="#cb7-117"></a><span class="in">    let nats: &amp;[u32] = &amp;[0x3F800000];</span></span>
-<span id="cb7-118"><a href="#cb7-118"></a><span class="in">    let nums: &amp;[f32] = std::mem::transmute(nats);</span></span>
-<span id="cb7-119"><a href="#cb7-119"></a><span class="in">    println!("{}", nums[0]);</span></span>
-<span id="cb7-120"><a href="#cb7-120"></a><span class="in">}</span></span>
-<span id="cb7-121"><a href="#cb7-121"></a><span class="in">```</span></span>
-<span id="cb7-122"><a href="#cb7-122"></a></span>
-<span id="cb7-123"><a href="#cb7-123"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Recall the meaning of 0x3F8000000</span><span class="co">](11_unsafe.qmd#/unions)</span></span>
-<span id="cb7-124"><a href="#cb7-124"></a><span class="ss">- </span>I usually do this on arrays but I guess I'm not sure why.</span>
-<span id="cb7-125"><a href="#cb7-125"></a><span class="ss">    - </span>Try things out.</span>
-<span id="cb7-126"><a href="#cb7-126"></a><span class="ss">    - </span>Vectors are definitely banned though, that is way too high level.</span>
-<span id="cb7-127"><a href="#cb7-127"></a></span>
-<span id="cb7-128"><a href="#cb7-128"></a><span class="fu"># Fin</span></span>
-<span id="cb7-129"><a href="#cb7-129"></a></span>
-<span id="cb7-130"><a href="#cb7-130"></a><span class="ss">- </span>To be continued in the homework.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1"></a><span class="co">---</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="an">title:</span><span class="co"> Clock</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="co">---</span></span>
+<span id="cb1-5"><a href="#cb1-5"></a></span>
+<span id="cb1-6"><a href="#cb1-6"></a><span class="fu">## Your Task</span></span>
+<span id="cb1-7"><a href="#cb1-7"></a></span>
+<span id="cb1-8"><a href="#cb1-8"></a><span class="ss">- </span>Implement a clock.</span>
+<span id="cb1-9"><a href="#cb1-9"></a><span class="ss">    - </span>Somehow track ticks from the timer.</span>
+<span id="cb1-10"><a href="#cb1-10"></a><span class="ss">    - </span>Set the initial time from the keyboard.</span>
+<span id="cb1-11"><a href="#cb1-11"></a><span class="ss">- </span>Provide hours, minute, seconds.</span>
+<span id="cb1-12"><a href="#cb1-12"></a><span class="ss">    - </span>Don't worry about overly testing, put test at least seconds.</span>
+<span id="cb1-13"><a href="#cb1-13"></a><span class="ss">    - </span>You don't have to get the clock ticks exact, approximate is fine.</span>
+<span id="cb1-14"><a href="#cb1-14"></a>    </span>
+<span id="cb1-15"><a href="#cb1-15"></a><span class="fu">## Requirements</span></span>
+<span id="cb1-16"><a href="#cb1-16"></a></span>
+<span id="cb1-17"><a href="#cb1-17"></a><span class="ss">- </span>On boot, display a prompt requesting current time.</span>
+<span id="cb1-18"><a href="#cb1-18"></a><span class="ss">- </span>Accept 6 decimal digits of a well-formatted time.</span>
+<span id="cb1-19"><a href="#cb1-19"></a><span class="ss">    - </span>Delineate however you like - just include it in the prompt.</span>
+<span id="cb1-20"><a href="#cb1-20"></a><span class="ss">    - </span>I used <span class="in">`SpaceBar`</span> to separate hours, minutes, seconds and also terminate.</span>
+<span id="cb1-21"><a href="#cb1-21"></a><span class="ss">- </span>Once the 6 decimal digits are input, clear the screen and display a single line of</span>
+<span id="cb1-22"><a href="#cb1-22"></a><span class="ss">    - </span>Six decimal digits.</span>
+<span id="cb1-23"><a href="#cb1-23"></a><span class="ss">    - </span>You can format it or whatever, up to you.</span>
+<span id="cb1-24"><a href="#cb1-24"></a><span class="ss">    - </span>Even use colors I guess.</span>
+<span id="cb1-25"><a href="#cb1-25"></a><span class="ss">- </span>It should start at the input time and increase (roughly) every one second.</span>
+<span id="cb1-26"><a href="#cb1-26"></a></span>
+<span id="cb1-27"><a href="#cb1-27"></a><span class="fu">## Aside</span></span>
+<span id="cb1-28"><a href="#cb1-28"></a></span>
+<span id="cb1-29"><a href="#cb1-29"></a><span class="ss">- </span>I think you'll want to fork your OS for this, so when you make a new crate and copy things over, you'll probably want to do any improvements to your OS first, or at least keep anything you learn in mind going into next week.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

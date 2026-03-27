@@ -7,6 +7,36 @@
     "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\nwc\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nTransmute\nmalloc\n\n\n0x3\n02/02\nBare Metal\nLinker\nRISC-V\n\n\n0x4\n02/09\nKernel\nBoot\nHello\n\n\n0x5\n02/16\nText\nFormat\nGraphics\n\n\n0x6\n02/23\nGuest\nWork Session\n\n\n\n0x7\n03/02\nTest\nSerial\nIntegration\n\n\n0x8\n03/09\nExceptions\nThe Call\nHandlers\n\n\n0x9\n03/16\nDouble\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nInterrupts\n\n\n\n\n0xB\n03/06\nPaging\n\n\n\n\n0xC\n04/13\nPage Tables\nNone\n\n\n\n0xD\n04/20\nThe Heap\n\n\n\n\n0xE\n04/27\nAllocators\n\n\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
   },
   {
+    "objectID": "91_keyboard.html",
+    "href": "91_keyboard.html",
+    "title": "Keyboard",
+    "section": "",
+    "text": "We are working with hardware.\nIt would be nice to be able to type.\nWe introduce the keyboard interrupt.\n\n\n\nNow that we are able to handle interrupts from external devices, we are finally able to add support for keyboard input. This will allow us to interact with our kernel for the first time.\n\n\nNote that we only describe how to handle PS/2 keyboards here, not USB keyboards. However, the mainboard emulates USB keyboards as PS/2 devices to support older software, so we can safely ignore USB keyboards until we have USB support in our kernel.\n\n\n\n\n\nYou probably have run your OS since setting up the PIC. You may have noticed you get double faults in curious circumstances. This can be done reproducibly:\n\nStart your kernel.\nForeground the QEMU window.\nMake any key input.\n\nThis will trigger an immediate double fault. And you probably know why.\n\n\nLike the hardware timer, the keyboard controller is already enabled by default. So when you press a key, the keyboard controller sends an interrupt to the PIC, which forwards it to the CPU. The CPU looks for a handler function in the IDT, but the corresponding entry is empty. Therefore, a double fault occurs.\nAdd a handler function for the keyboard interrupt. It’s quite similar to how we defined the handler for the timer interrupt; it just uses a different interrupt number:\n                      ____________ \nTimer -------------&gt; |            |\nKeyboard-----------&gt; |            |      _____\n-------------------&gt; | Primary    |     |     |\nSerial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |\nSerial Port 1 -----&gt; | Controller |     |_____|\nParallel Port 2/3 -&gt; |            |\nFloppy disk -------&gt; |            |\nParallel Port 1----&gt; |____________|\nFor now, it is sufficient to print anything, but you probably do want to print something!\nHowever, this only works for the first key we press. Even if we continue to press keys, the handler does not fire again. This is because the keyboard controller won’t send another interrupt until we have read the so-called scancode of the pressed key.\n\nscancode\n\n\n\n\nTo find out which key was pressed, we need to query the keyboard controller. We do this by reading from the data port of the PS/2 controller, which is the I/O port with the number 0x60. Remember port-mapped I/O!\nlet scancode: u8 = x86_64::instructions::port::Port::new(0x60).read();\n\n\n\nThere are three different standards for the mapping between scancodes and keys, the so-called scancode sets. All three go back to the keyboards of early IBM computers: the [IBM XT], the [IBM 3270 PC], and the [IBM AT].\n\nIBM XT\nIBM 3270 PC\nIBM AT\n\nLater computers fortunately did not continue the trend of defining new scancode sets, but rather emulated the existing sets and extended them. Today, most keyboards can be configured to emulate any of the three sets.\nBy default, PS/2 keyboards emulate scancode set 1 (“XT”). In this set, the lower 7 bits of a scancode byte define the key, and the most significant bit defines whether it’s a press (“0”) or a release (“1”). Keys that were not present on the original IBM XT keyboard, such as the enter key on the keypad, generate two scancodes in succession: a 0xe0 escape byte and then a byte representing the key. For a list of all set 1 scancodes and their corresponding keys, check out the OSDev Wiki\nTo translate the scancodes to keys, you can can use a match statement. For example, try to get get the number keys printing.\n\nIf you perceive this as trivial or uninteresting, you are welcome to skip this stage\nOtherwise you may learn something, probably about match!\n\nIf you love using crates, which some people do, there is a crate named pc-keyboard for translating scancodes of scancode sets 1 and 2, so we don’t have to implement this ourselves. To use the crate, add it to our Cargo.toml and use it from your handler.\n\n\nCargo.toml\n\n[dependencies]\npc-keyboard = \"0.7.0\"\n\nThis code should get you far enough along to do your own thing:\nlet scancode: u8 = x86_64::instructions::port::Port::new(0x60).read();\nlet mut kb = pc_keyboard::Keyboard::new(\n    pc_keyboard::ScancodeSet1::new(),\n    pc_keyboard::layouts::Us104Key,\n    pc_keyboard::HandleControl::Ignore,\n);\ncrate::println!(\"{:?}\", kb.add_byte(scancode));\nTake on faith the defaults and parameters are sensible, or test it yourself, or write you own match statement.\nNominally the Keyboard can use its .process_keyevent method to detect whether shift is pressed and change case accordingly. Presumably you’d want to use a static mut to do this. Capitalization is left as an exercise to the interested student (I did not support it in my kernel).\nI got type out the following pretty quickly, which is relatively close to I/O handling.\nHHEELLOOSpacebarSpacebarWWOORRLLDD\nDon’t need much more work there.",
+    "crumbs": [
+      "Keyboard"
+    ]
+  },
+  {
+    "objectID": "91_keyboard.html#keyboard-input",
+    "href": "91_keyboard.html#keyboard-input",
+    "title": "Keyboard",
+    "section": "",
+    "text": "Now that we are able to handle interrupts from external devices, we are finally able to add support for keyboard input. This will allow us to interact with our kernel for the first time.\n\n\nNote that we only describe how to handle PS/2 keyboards here, not USB keyboards. However, the mainboard emulates USB keyboards as PS/2 devices to support older software, so we can safely ignore USB keyboards until we have USB support in our kernel.",
+    "crumbs": [
+      "Keyboard"
+    ]
+  },
+  {
+    "objectID": "91_keyboard.html#test-it",
+    "href": "91_keyboard.html#test-it",
+    "title": "Keyboard",
+    "section": "",
+    "text": "You probably have run your OS since setting up the PIC. You may have noticed you get double faults in curious circumstances. This can be done reproducibly:\n\nStart your kernel.\nForeground the QEMU window.\nMake any key input.\n\nThis will trigger an immediate double fault. And you probably know why.\n\n\nLike the hardware timer, the keyboard controller is already enabled by default. So when you press a key, the keyboard controller sends an interrupt to the PIC, which forwards it to the CPU. The CPU looks for a handler function in the IDT, but the corresponding entry is empty. Therefore, a double fault occurs.\nAdd a handler function for the keyboard interrupt. It’s quite similar to how we defined the handler for the timer interrupt; it just uses a different interrupt number:\n                      ____________ \nTimer -------------&gt; |            |\nKeyboard-----------&gt; |            |      _____\n-------------------&gt; | Primary    |     |     |\nSerial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |\nSerial Port 1 -----&gt; | Controller |     |_____|\nParallel Port 2/3 -&gt; |            |\nFloppy disk -------&gt; |            |\nParallel Port 1----&gt; |____________|\nFor now, it is sufficient to print anything, but you probably do want to print something!\nHowever, this only works for the first key we press. Even if we continue to press keys, the handler does not fire again. This is because the keyboard controller won’t send another interrupt until we have read the so-called scancode of the pressed key.\n\nscancode\n\n\n\n\nTo find out which key was pressed, we need to query the keyboard controller. We do this by reading from the data port of the PS/2 controller, which is the I/O port with the number 0x60. Remember port-mapped I/O!\nlet scancode: u8 = x86_64::instructions::port::Port::new(0x60).read();\n\n\n\nThere are three different standards for the mapping between scancodes and keys, the so-called scancode sets. All three go back to the keyboards of early IBM computers: the [IBM XT], the [IBM 3270 PC], and the [IBM AT].\n\nIBM XT\nIBM 3270 PC\nIBM AT\n\nLater computers fortunately did not continue the trend of defining new scancode sets, but rather emulated the existing sets and extended them. Today, most keyboards can be configured to emulate any of the three sets.\nBy default, PS/2 keyboards emulate scancode set 1 (“XT”). In this set, the lower 7 bits of a scancode byte define the key, and the most significant bit defines whether it’s a press (“0”) or a release (“1”). Keys that were not present on the original IBM XT keyboard, such as the enter key on the keypad, generate two scancodes in succession: a 0xe0 escape byte and then a byte representing the key. For a list of all set 1 scancodes and their corresponding keys, check out the OSDev Wiki\nTo translate the scancodes to keys, you can can use a match statement. For example, try to get get the number keys printing.\n\nIf you perceive this as trivial or uninteresting, you are welcome to skip this stage\nOtherwise you may learn something, probably about match!\n\nIf you love using crates, which some people do, there is a crate named pc-keyboard for translating scancodes of scancode sets 1 and 2, so we don’t have to implement this ourselves. To use the crate, add it to our Cargo.toml and use it from your handler.\n\n\nCargo.toml\n\n[dependencies]\npc-keyboard = \"0.7.0\"\n\nThis code should get you far enough along to do your own thing:\nlet scancode: u8 = x86_64::instructions::port::Port::new(0x60).read();\nlet mut kb = pc_keyboard::Keyboard::new(\n    pc_keyboard::ScancodeSet1::new(),\n    pc_keyboard::layouts::Us104Key,\n    pc_keyboard::HandleControl::Ignore,\n);\ncrate::println!(\"{:?}\", kb.add_byte(scancode));\nTake on faith the defaults and parameters are sensible, or test it yourself, or write you own match statement.\nNominally the Keyboard can use its .process_keyevent method to detect whether shift is pressed and change case accordingly. Presumably you’d want to use a static mut to do this. Capitalization is left as an exercise to the interested student (I did not support it in my kernel).\nI got type out the following pretty quickly, which is relatively close to I/O handling.\nHHEELLOOSpacebarSpacebarWWOORRLLDD\nDon’t need much more work there.",
+    "crumbs": [
+      "Keyboard"
+    ]
+  },
+  {
     "objectID": "80_double.html",
     "href": "80_double.html",
     "title": "Double",
@@ -727,11 +757,51 @@
     ]
   },
   {
-    "objectID": "80_double.html#in-code",
-    "href": "80_double.html#in-code",
+    "objectID": "80_double.html#update-segments",
+    "href": "80_double.html#update-segments",
     "title": "Double",
-    "section": "In code",
-    "text": "In code\n\n\nsrc/gdt.rs\n\n// Within \"init\"\n\n// Get the segments as descriptors\nlet kcs = x86_64::structures::gdt::Descriptor::kernel_code_segment();\nlet tss = x86_64::structures::gdt::Descriptor::tss_segment(&TSS);\n\n// Add to GDT\nlet kcs = GDT.add_entry(kcs);\nlet tss = GDT.add_entry(tss);\n\n// Load GDT and Reload CS\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\n// Mandate use of this TSS\nx86_64::instructions::tables::load_tss(tss);",
+    "section": "Update Segments",
+    "text": "Update Segments\n\nBasically, we got the kernel CS, and TSS.\nWe turned them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.load();\n// I love Rust namespaces!\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\nx86_64::instructions::tables::load_tss(tss);",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#full-file",
+    "href": "80_double.html#full-file",
+    "title": "Double",
+    "section": "Full File",
+    "text": "Full File\n\n\nsrc/gdt.rs\n\n#![allow(static_mut_refs)]\n\n// GDT\nstatic mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =\n    x86_64::structures::gdt::GlobalDescriptorTable::new();\n\n// TSS\nconst STACK_SIZE: usize = 4096 * 5;\nstatic mut TSS: x86_64::structures::tss::TaskStateSegment =\n    x86_64::structures::tss::TaskStateSegment::new();\nstatic mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\n        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n        GDT.load();\n        use x86_64::instructions::segmentation::Segment;\n        x86_64::instructions::segmentation::CS::set_reg(kcs);\n        x86_64::instructions::tables::load_tss(tss);\n    }\n}",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#insufficient",
+    "href": "80_double.html#insufficient",
+    "title": "Double",
+    "section": "Insufficient",
+    "text": "Insufficient\n\nI still triple fault on this.\nWhy?\n\nWe added a stack.\nWe added it’s location to the GDT.\nWe added a double fault handler, but\nWe did not direct the double fault handler to change stacks.\n\nWe return to the handler (NOT the GDT) to update it…",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#handle-it-3",
+    "href": "80_double.html#handle-it-3",
+    "title": "Double",
+    "section": "Handle it",
+    "text": "Handle it\n\nYou probably have:\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault.set_handler_fn(double_fault_handler);\n        IDT.load();\n    }\n}",
+    "crumbs": [
+      "Double"
+    ]
+  },
+  {
+    "objectID": "80_double.html#update",
+    "href": "80_double.html#update",
+    "title": "Double",
+    "section": "Update",
+    "text": "Update\n\nUpdate to change a stack index\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        // This is from `cargo fmt`...\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n    }\n}",
     "crumbs": [
       "Double"
     ]
@@ -1254,11 +1324,39 @@
     "text": "Not too bad…\n\nLoad the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nlet kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\nlet tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n// This is new.\nGDT.load();"
   },
   {
-    "objectID": "80_double.rjs.html#in-code",
-    "href": "80_double.rjs.html#in-code",
+    "objectID": "80_double.rjs.html#update-segments",
+    "href": "80_double.rjs.html#update-segments",
     "title": "Double",
-    "section": "In code",
-    "text": "In code\n\n\nsrc/gdt.rs\n\n// Within \"init\"\n\n// Get the segments as descriptors\nlet kcs = x86_64::structures::gdt::Descriptor::kernel_code_segment();\nlet tss = x86_64::structures::gdt::Descriptor::tss_segment(&TSS);\n\n// Add to GDT\nlet kcs = GDT.add_entry(kcs);\nlet tss = GDT.add_entry(tss);\n\n// Load GDT and Reload CS\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\n// Mandate use of this TSS\nx86_64::instructions::tables::load_tss(tss);"
+    "section": "Update Segments",
+    "text": "Update Segments\n\nBasically, we got the kernel CS, and TSS.\nWe turned them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.load();\n// I love Rust namespaces!\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\nx86_64::instructions::tables::load_tss(tss);"
+  },
+  {
+    "objectID": "80_double.rjs.html#full-file",
+    "href": "80_double.rjs.html#full-file",
+    "title": "Double",
+    "section": "Full File",
+    "text": "Full File\n\n\nsrc/gdt.rs\n\n#![allow(static_mut_refs)]\n\n// GDT\nstatic mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =\n    x86_64::structures::gdt::GlobalDescriptorTable::new();\n\n// TSS\nconst STACK_SIZE: usize = 4096 * 5;\nstatic mut TSS: x86_64::structures::tss::TaskStateSegment =\n    x86_64::structures::tss::TaskStateSegment::new();\nstatic mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\n        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n        GDT.load();\n        use x86_64::instructions::segmentation::Segment;\n        x86_64::instructions::segmentation::CS::set_reg(kcs);\n        x86_64::instructions::tables::load_tss(tss);\n    }\n}"
+  },
+  {
+    "objectID": "80_double.rjs.html#insufficient",
+    "href": "80_double.rjs.html#insufficient",
+    "title": "Double",
+    "section": "Insufficient",
+    "text": "Insufficient\n\nI still triple fault on this.\nWhy?\n\nWe added a stack.\nWe added it’s location to the GDT.\nWe added a double fault handler, but\nWe did not direct the double fault handler to change stacks.\n\nWe return to the handler (NOT the GDT) to update it…"
+  },
+  {
+    "objectID": "80_double.rjs.html#handle-it-3",
+    "href": "80_double.rjs.html#handle-it-3",
+    "title": "Double",
+    "section": "Handle it",
+    "text": "Handle it\n\nYou probably have:\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault.set_handler_fn(double_fault_handler);\n        IDT.load();\n    }\n}"
+  },
+  {
+    "objectID": "80_double.rjs.html#update",
+    "href": "80_double.rjs.html#update",
+    "title": "Double",
+    "section": "Update",
+    "text": "Update\n\nUpdate to change a stack index\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        // This is from `cargo fmt`...\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n    }\n}"
   },
   {
     "objectID": "80_double.rjs.html#this-worked-for-me",
@@ -12011,7 +12109,7 @@
     "href": "90_interrupts.rjs.html#announcements",
     "title": "Interrupts",
     "section": "Announcements",
-    "text": "Announcements\n\nAction Items:\n\nWelcome back.\nYou should have a working: - Breakpoint handler.\n\nDouble fault handler."
+    "text": "Announcements\n\nAction Items:\n\nWelcome back.\nYou should have a working:\n\nBreakpoint handler.\nDouble fault handler."
   },
   {
     "objectID": "90_interrupts.rjs.html#citations",
@@ -12144,7 +12242,7 @@
     "href": "90_interrupts.rjs.html#defaults",
     "title": "Interrupts",
     "section": "Defaults",
-    "text": "Defaults\n\nThe default configuration of the PICs sends interrupt vector numbers in the range of 0–15 to the CPU.\nThese numbers are already occupied by (the first 0x20) CPU exceptions.\nFor example, number 8 corresponds to a double fault in the CPU and Serial Port 1 in the PIC.\nWe need to remap the PIC interrupts to different numbers."
+    "text": "Defaults\n\nBy default PICs send interrupt vector numbers in the range of 0–15 to the CPU.\nThese numbers collide with (the first 0x20) CPU exceptions.\nE.g., 8 corresponds to a double fault in the CPU and Serial Port 1 in the PIC.\nRemap the PIC interrupts to different numbers."
   },
   {
     "objectID": "90_interrupts.rjs.html#conventions",
@@ -12161,39 +12259,186 @@
     "text": "Cheating\n\nThere’s a crate for this.\n\n\n\npic8259/0.10.1/source/src/lib.rs\n\n#![no_std]\nuse x86_64::instructions::port::Port;\n\nconst CMD_INIT: u8 = 0x11;\nconst CMD_END_OF_INTERRUPT: u8 = 0x20;\nconst MODE_8086: u8 = 0x01;\n\nstruct Pic {\n    offset: u8,\n    command: Port&lt;u8&gt;,\n    data: Port&lt;u8&gt;,\n}\n\nimpl Pic {\n    fn handles_interrupt(&self, interupt_id: u8) -&gt; bool {\n        self.offset &lt;= interupt_id && interupt_id &lt; self.offset + 8\n    }\n\n    unsafe fn end_of_interrupt(&mut self) {\n        self.command.write(CMD_END_OF_INTERRUPT);\n    }\n\n    unsafe fn read_mask(&mut self) -&gt; u8 {\n        self.data.read()\n    }\n\n    unsafe fn write_mask(&mut self, mask: u8) {\n        self.data.write(mask)\n    }\n}\n\npub struct ChainedPics {\n    pics: [Pic; 2],\n}\n\nimpl ChainedPics {\n    pub const unsafe fn new(offset1: u8, offset2: u8) -&gt; ChainedPics {\n        ChainedPics {\n            pics: [\n                Pic {\n                    offset: offset1,\n                    command: Port::new(0x20),\n                    data: Port::new(0x21),\n                },\n                Pic {\n                    offset: offset2,\n                    command: Port::new(0xA0),\n                    data: Port::new(0xA1),\n                },\n            ],\n        }\n    }\n\n    pub unsafe fn initialize(&mut self) {\n        let mut wait_port: Port&lt;u8&gt; = Port::new(0x80);\n        let mut wait = || wait_port.write(0);\n\n        let saved_masks = self.read_masks();\n\n        self.pics[0].command.write(CMD_INIT);\n        wait();\n        self.pics[1].command.write(CMD_INIT);\n        wait();\n\n        self.pics[0].data.write(self.pics[0].offset);\n        wait();\n        self.pics[1].data.write(self.pics[1].offset);\n        wait();\n\n        self.pics[0].data.write(4);\n        wait();\n        self.pics[1].data.write(2);\n        wait();\n\n        self.pics[0].data.write(MODE_8086);\n        wait();\n        self.pics[1].data.write(MODE_8086);\n        wait();\n\n        self.write_masks(saved_masks[0], saved_masks[1])\n    }\n\n    pub unsafe fn read_masks(&mut self) -&gt; [u8; 2] {\n        [self.pics[0].read_mask(), self.pics[1].read_mask()]\n    }\n\n    pub unsafe fn write_masks(&mut self, mask1: u8, mask2: u8) {\n        self.pics[0].write_mask(mask1);\n        self.pics[1].write_mask(mask2);\n    }\n\n    pub unsafe fn disable(&mut self) {\n        self.write_masks(u8::MAX, u8::MAX)\n    }\n\n    pub fn handles_interrupt(&self, interrupt_id: u8) -&gt; bool {\n        self.pics.iter().any(|p| p.handles_interrupt(interrupt_id))\n    }\n\n    pub unsafe fn notify_end_of_interrupt(&mut self, interrupt_id: u8) {\n        if self.handles_interrupt(interrupt_id) {\n            if self.pics[1].handles_interrupt(interrupt_id) {\n                self.pics[1].end_of_interrupt();\n            }\n            self.pics[0].end_of_interrupt();\n        }\n    }\n}"
   },
   {
+    "objectID": "90_interrupts.rjs.html#lets-cheat",
+    "href": "90_interrupts.rjs.html#lets-cheat",
+    "title": "Interrupts",
+    "section": "Let’s Cheat",
+    "text": "Let’s Cheat\n\nWe’ve added crates before.\n\n\n\nCargo.toml\n\n[dependencies]\npic8259 = \"0.10.1\"\n\n\nRead more: pic8259\nMy Cargo.toml is growing quite large.\n\n$ wc Cargo.toml\n 20  44 381 Cargo.toml"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#how-i-did-it",
+    "href": "90_interrupts.rjs.html#how-i-did-it",
+    "title": "Interrupts",
+    "section": "How I did it",
+    "text": "How I did it\n\nI just appended to the end of src/interrupts.rs\nI use “ChainedPics”, the main thing the crate provides.\n\n\n\nsrc/interrupts.rs\n\n// PIC\n\npub const PIC_1_OFFSET: u8 = 32;\npub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;\n\npub static mut PICS: pic8259::ChainedPics =\n    unsafe { pic8259::ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) };"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#an-aside",
+    "href": "90_interrupts.rjs.html#an-aside",
+    "title": "Interrupts",
+    "section": "An Aside",
+    "text": "An Aside\n\nUp until now, I have taken the liberty of not implementing an mutex in our OS.\n\nStands for “MUTual EXclusion”\nUsed to prevent different… things (threads)… from modifying the same shared state at the same time.\nThis can lead to program inconsistencies… but not in our case yet."
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#on-the-mutex",
+    "href": "90_interrupts.rjs.html#on-the-mutex",
+    "title": "Interrupts",
+    "section": "On the Mutex",
+    "text": "On the Mutex\n\nUp until now, it hasn’t mattered - all our code executed serially (one thing at a time) and linearly (in a defined order).\nWe are now about to enter the “Cool Zone”\n\nBut I still won’t mutex yet until we see a better way to do it."
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#back-at-it",
+    "href": "90_interrupts.rjs.html#back-at-it",
+    "title": "Interrupts",
+    "section": "Back at it",
+    "text": "Back at it\n\nWe also initialize our PIC.\nI did in interrupts::init_idt()\nSome double fault handler stuff too…\n\n\n\nsrc/interrupts.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n        PICS.initialize();\n    }\n}"
+  },
+  {
     "objectID": "90_interrupts.rjs.html#enabling-interrupts",
     "href": "90_interrupts.rjs.html#enabling-interrupts",
     "title": "Interrupts",
     "section": "Enabling Interrupts",
-    "text": "Enabling Interrupts\nUntil now, nothing happened because interrupts are still disabled in the CPU configuration. This means that the CPU does not listen to the interrupt controller at all, so no interrupts can reach the CPU. Let’s change that:\n// in src/lib.rs\n\npub fn init() {\n    gdt::init();\n    interrupts::init_idt();\n    unsafe { interrupts::PICS.lock().initialize() };\n    x86_64::instructions::interrupts::enable();     // new\n}\nThe interrupts::enable function of the x86_64 crate executes the special sti instruction (“set interrupts”) to enable external interrupts. When we try cargo run now, we see that a double fault occurs:\n\nQEMU printing EXCEPTION: DOUBLE FAULT because of hardware timerThe reason for this double fault is that the hardware timer (the Intel 8253, to be exact) is enabled by default, so we start receiving timer interrupts as soon as we enable interrupts. Since we didn’t define a handler function for it yet, our double fault handler is invoked."
+    "text": "Enabling Interrupts\n\nUntil now, interrupts were disabled in the CPU configuration.\nSo no interrupts can reach the CPU.\nLet’s change that…\n\n\n\nsrc/interrupts.rs\n\npub fn init_idt() {\n    unsafe {\n        // Snip\n        PICS.initialize();\n        x86_64::instructions::interrupts::enable();\n    }\n}"
   },
   {
-    "objectID": "90_interrupts.rjs.html#handling-timer-interrupts",
-    "href": "90_interrupts.rjs.html#handling-timer-interrupts",
+    "objectID": "90_interrupts.rjs.html#i-bet-that-works",
+    "href": "90_interrupts.rjs.html#i-bet-that-works",
     "title": "Interrupts",
-    "section": "Handling Timer Interrupts",
-    "text": "Handling Timer Interrupts\nAs we see from the graphic above, the timer uses line 0 of the primary PIC. This means that it arrives at the CPU as interrupt 32 (0 + offset 32). Instead of hardcoding index 32, we store it in an InterruptIndex enum:\n// in src/interrupts.rs\n\n#[derive(Debug, Clone, Copy)]\n#[repr(u8)]\npub enum InterruptIndex {\n    Timer = PIC_1_OFFSET,\n}\n\nimpl InterruptIndex {\n    fn as_u8(self) -&gt; u8 {\n        self as u8\n    }\n\n    fn as_usize(self) -&gt; usize {\n        usize::from(self.as_u8())\n    }\n}\nThe enum is a C-like enum so that we can directly specify the index for each variant. The repr(u8) attribute specifies that each variant is represented as a u8. We will add more variants for other interrupts in the future.\nNow we can add a handler function for the timer interrupt:\n// in src/interrupts.rs\n\nuse crate::print;\n\nlazy_static! {\n    static ref IDT: InterruptDescriptorTable = {\n        let mut idt = InterruptDescriptorTable::new();\n        idt.breakpoint.set_handler_fn(breakpoint_handler);\n        […]\n        idt[InterruptIndex::Timer.as_usize()]\n            .set_handler_fn(timer_interrupt_handler); // new\n\n        idt\n    };\n}\n\nextern \"x86-interrupt\" fn timer_interrupt_handler(\n    _stack_frame: InterruptStackFrame)\n{\n    print!(\".\");\n}\nOur timer_interrupt_handler has the same signature as our exception handlers, because the CPU reacts identically to exceptions and external interrupts (the only difference is that some exceptions push an error code). The InterruptDescriptorTable struct implements the IndexMut trait, so we can access individual entries through array indexing syntax.\nIn our timer interrupt handler, we print a dot to the screen. As the timer interrupt happens periodically, we would expect to see a dot appearing on each timer tick. However, when we run it, we see that only a single dot is printed:\n\n\n\nQEMU printing only a single dot for hardware timer\n\n\nEnd of Interrupt\nThe reason is that the PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler. This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt. So the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.\nTo send the EOI, we use our static PICS struct again:\n// in src/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_interrupt_handler(\n    _stack_frame: InterruptStackFrame)\n{\n    print!(\".\");\n\n    unsafe {\n        PICS.lock()\n            .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());\n    }\n}\nThe notify_end_of_interrupt figures out whether the primary or secondary PIC sent the interrupt and then uses the command and data ports to send an EOI signal to the respective controllers. If the secondary PIC sent the interrupt, both PICs need to be notified because the secondary PIC is connected to an input line of the primary PIC.\nWe need to be careful to use the correct interrupt vector number, otherwise we could accidentally delete an important unsent interrupt or cause our system to hang. This is the reason that the function is unsafe.\nWhen we now execute cargo run we see dots periodically appearing on the screen:\n\n\n\nQEMU printing consecutive dots showing the hardware timer\n\n\nConfiguring the Timer\nThe hardware timer that we use is called the Programmable Interval Timer, or PIT, for short. Like the name says, it is possible to configure the interval between two interrupts. We won’t go into details here because we will switch to the APIC timer soon, but the OSDev wiki has an extensive article about the configuring the PIT."
+    "section": "I bet that works!",
+    "text": "I bet that works!\n\nIt double faults.\n\nThis is good!\nWe’ve changed something.\nThe first step to changing something we want to change!"
   },
   {
-    "objectID": "90_interrupts.rjs.html#deadlocks",
-    "href": "90_interrupts.rjs.html#deadlocks",
+    "objectID": "90_interrupts.rjs.html#why",
+    "href": "90_interrupts.rjs.html#why",
     "title": "Interrupts",
-    "section": "Deadlocks",
-    "text": "Deadlocks\nWe now have a form of concurrency in our kernel: The timer interrupts occur asynchronously, so they can interrupt our _start function at any time. Fortunately, Rust’s ownership system prevents many types of concurrency-related bugs at compile time. One notable exception is deadlocks. Deadlocks occur if a thread tries to acquire a lock that will never become free. Thus, the thread hangs indefinitely.\nWe can already provoke a deadlock in our kernel. Remember, our println macro calls the vga_buffer::_print function, which locks a global WRITER using a spinlock:\n// in src/vga_buffer.rs\n\n[…]\n\n#[doc(hidden)]\npub fn _print(args: fmt::Arguments) {\n    use core::fmt::Write;\n    WRITER.lock().write_fmt(args).unwrap();\n}\nIt locks the WRITER, calls write_fmt on it, and implicitly unlocks it at the end of the function. Now imagine that an interrupt occurs while the WRITER is locked and the interrupt handler tries to print something too:\n\n\n\n\n\n\n\n\nTimestep\n_start\ninterrupt_handler\n\n\n\n\n0\ncalls println!\n \n\n\n1\nprint locks WRITER\n \n\n\n2\n\ninterrupt occurs, handler begins to run\n\n\n3\n\ncalls println!\n\n\n4\n\nprint tries to lock WRITER (already locked)\n\n\n5\n\nprint tries to lock WRITER (already locked)\n\n\n…\n\n…\n\n\nnever\nunlock WRITER\n\n\n\n\nThe WRITER is locked, so the interrupt handler waits until it becomes free. But this never happens, because the _start function only continues to run after the interrupt handler returns. Thus, the entire system hangs.\nProvoking a Deadlock\nWe can easily provoke such a deadlock in our kernel by printing something in the loop at the end of our _start function:\n// in src/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    […]\n    loop {\n        use blog_os::print;\n        print!(\"-\");        // new\n    }\n}\nWhen we run it in QEMU, we get an output of the form:\n\nQEMU output with many rows of hyphens and no dotsWe see that only a limited number of hyphens are printed until the first timer interrupt occurs. Then the system hangs because the timer interrupt handler deadlocks when it tries to print a dot. This is the reason that we see no dots in the above output.\nThe actual number of hyphens varies between runs because the timer interrupt occurs asynchronously. This non-determinism is what makes concurrency-related bugs so difficult to debug.\nFixing the Deadlock\nTo avoid this deadlock, we can disable interrupts as long as the Mutex is locked:\n// in src/vga_buffer.rs\n\n/// Prints the given formatted string to the VGA text buffer\n/// through the global `WRITER` instance.\n#[doc(hidden)]\npub fn _print(args: fmt::Arguments) {\n    use core::fmt::Write;\n    use x86_64::instructions::interrupts;   // new\n\n    interrupts::without_interrupts(|| {     // new\n        WRITER.lock().write_fmt(args).unwrap();\n    });\n}\nThe without_interrupts function takes a closure and executes it in an interrupt-free environment. We use it to ensure that no interrupt can occur as long as the Mutex is locked. When we run our kernel now, we see that it keeps running without hanging. (We still don’t notice any dots, but this is because they’re scrolling by too fast. Try to slow down the printing, e.g., by putting a for _ in 0..10000 {} inside the loop.)\nWe can apply the same change to our serial printing function to ensure that no deadlocks occur with it either:\n// in src/serial.rs\n\n#[doc(hidden)]\npub fn _print(args: ::core::fmt::Arguments) {\n    use core::fmt::Write;\n    use x86_64::instructions::interrupts;       // new\n\n    interrupts::without_interrupts(|| {         // new\n        SERIAL1\n            .lock()\n            .write_fmt(args)\n            .expect(\"Printing to serial failed\");\n    });\n}\nNote that disabling interrupts shouldn’t be a general solution. The problem is that it increases the worst-case interrupt latency, i.e., the time until the system reacts to an interrupt. Therefore, interrupts should only be disabled for a very short time."
+    "section": "Why?",
+    "text": "Why?\n\nThe hardware timer (the Intel 8253, to be exact) is enabled by default.\nSo we start receiving timer interrupts as soon as we enable interrupts.\nSince we didn’t define a handler function for it yet, our double fault handler is invoked.\nAbsolute geniuses will notice that we can now do things using timers, though."
   },
   {
-    "objectID": "90_interrupts.rjs.html#fixing-a-race-condition",
-    "href": "90_interrupts.rjs.html#fixing-a-race-condition",
+    "objectID": "90_interrupts.rjs.html#remember-this",
+    "href": "90_interrupts.rjs.html#remember-this",
     "title": "Interrupts",
-    "section": "Fixing a Race Condition",
-    "text": "Fixing a Race Condition\nIf you run cargo test, you might see the test_println_output test failing:\n&gt; cargo test --lib\n[…]\nRunning 4 tests\ntest_breakpoint_exception...[ok]\ntest_println... [ok]\ntest_println_many... [ok]\ntest_println_output... [failed]\n\nError: panicked at 'assertion failed: `(left == right)`\n  left: `'.'`,\n right: `'S'`', src/vga_buffer.rs:205:9\nThe reason is a race condition between the test and our timer handler. Remember, the test looks like this:\n// in src/vga_buffer.rs\n\n#[test_case]\nfn test_println_output() {\n    let s = \"Some test string that fits on a single line\";\n    println!(\"{}\", s);\n    for (i, c) in s.chars().enumerate() {\n        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();\n        assert_eq!(char::from(screen_char.ascii_character), c);\n    }\n}\nThe test prints a string to the VGA buffer and then checks the output by manually iterating over the buffer_chars array. The race condition occurs because the timer interrupt handler might run between the println and the reading of the screen characters. Note that this isn’t a dangerous data race, which Rust completely prevents at compile time. See the Rustonomicon for details.\nTo fix this, we need to keep the WRITER locked for the complete duration of the test, so that the timer handler can’t write a . to the screen in between. The fixed test looks like this:\n// in src/vga_buffer.rs\n\n#[test_case]\nfn test_println_output() {\n    use core::fmt::Write;\n    use x86_64::instructions::interrupts;\n\n    let s = \"Some test string that fits on a single line\";\n    interrupts::without_interrupts(|| {\n        let mut writer = WRITER.lock();\n        writeln!(writer, \"\\n{}\", s).expect(\"writeln failed\");\n        for (i, c) in s.chars().enumerate() {\n            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();\n            assert_eq!(char::from(screen_char.ascii_character), c);\n        }\n    });\n}\nWe performed the following changes:\n\nWe keep the writer locked for the complete test by using the lock() method explicitly. Instead of println, we use the writeln macro that allows printing to an already locked writer.\nTo avoid another deadlock, we disable interrupts for the test’s duration. Otherwise, the test might get interrupted while the writer is still locked.\nSince the timer interrupt handler can still run before the test, we print an additional newline \\n before printing the string s. This way, we avoid test failure when the timer handler has already printed some . characters to the current line.\n\nWith the above changes, cargo test now deterministically succeeds again.\nThis was a very harmless race condition that only caused a test failure. As you can imagine, other race conditions can be much more difficult to debug due to their non-deterministic nature. Luckily, Rust prevents us from data races, which are the most serious class of race conditions since they can cause all kinds of undefined behavior, including system crashes and silent memory corruptions."
+    "section": "Remember this?",
+    "text": "Remember this?\n                     ____________                          ____________\nReal Time Clock --&gt; |            |   Timer -------------&gt; |            |\nACPI -------------&gt; |            |   Keyboard-----------&gt; |            |      _____\nAvailable --------&gt; | Secondary  |----------------------&gt; | Primary    |     |     |\nAvailable --------&gt; | Interrupt  |   Serial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |\nMouse ------------&gt; | Controller |   Serial Port 1 -----&gt; | Controller |     |_____|\nCo-Processor -----&gt; |            |   Parallel Port 2/3 -&gt; |            |\nPrimary ATA ------&gt; |            |   Floppy disk -------&gt; |            |\nSecondary ATA ----&gt; |____________|   Parallel Port 1----&gt; |____________|"
   },
   {
-    "objectID": "90_interrupts.rjs.html#the-hlt-instruction",
-    "href": "90_interrupts.rjs.html#the-hlt-instruction",
+    "objectID": "90_interrupts.rjs.html#how-about-this-part",
+    "href": "90_interrupts.rjs.html#how-about-this-part",
     "title": "Interrupts",
-    "section": "The hlt Instruction",
-    "text": "The hlt Instruction\nUntil now, we used a simple empty loop statement at the end of our _start and panic functions. This causes the CPU to spin endlessly, and thus works as expected. But it is also very inefficient, because the CPU continues to run at full speed even though there’s no work to do. You can see this problem in your task manager when you run your kernel: The QEMU process needs close to 100% CPU the whole time.\nWhat we really want to do is to halt the CPU until the next interrupt arrives. This allows the CPU to enter a sleep state in which it consumes much less energy. The hlt instruction does exactly that. Let’s use this instruction to create an energy-efficient endless loop:\n// in src/lib.rs\n\npub fn hlt_loop() -&gt; ! {\n    loop {\n        x86_64::instructions::hlt();\n    }\n}\nThe instructions::hlt function is just a thin wrapper around the assembly instruction. It is safe because there’s no way it can compromise memory safety.\nWe can now use this hlt_loop instead of the endless loops in our _start and panic functions:\n// in src/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    […]\n\n    println!(\"It did not crash!\");\n    blog_os::hlt_loop();            // new\n}\n\n\n#[cfg(not(test))]\n#[panic_handler]\nfn panic(info: &PanicInfo) -&gt; ! {\n    println!(\"{}\", info);\n    blog_os::hlt_loop();            // new\n}\nLet’s update our lib.rs as well:\n// in src/lib.rs\n\n/// Entry point for `cargo test`\n#[cfg(test)]\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    init();\n    test_main();\n    hlt_loop();         // new\n}\n\npub fn test_panic_handler(info: &PanicInfo) -&gt; ! {\n    serial_println!(\"[failed]\\n\");\n    serial_println!(\"Error: {}\\n\", info);\n    exit_qemu(QemuExitCode::Failed);\n    hlt_loop();         // new\n}\nWhen we run our kernel now in QEMU, we see a much lower CPU usage."
+    "section": "How about this part?",
+    "text": "How about this part?\n                      ____________ \nTimer -------------&gt; |            |\nKeyboard-----------&gt; |            |      _____\n-------------------&gt; | Primary    |     |     |\nSerial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |\nSerial Port 1 -----&gt; | Controller |     |_____|\nParallel Port 2/3 -&gt; |            |\nFloppy disk -------&gt; |            |\nParallel Port 1----&gt; |____________|\n\nThat’s a timer on line 0 of the primary PIC.\nWe offset by… it doesn’t matter, it was a pub const"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#an-aside-1",
+    "href": "90_interrupts.rjs.html#an-aside-1",
+    "title": "Interrupts",
+    "section": "An Aside",
+    "text": "An Aside\n\nWe can use an enum to specify the index of a given hardware interrupt in the PIC.\n\n\n\nsrc/interrupts.rs\n\npub enum InterruptIndex {\n    Timer = PIC_1_OFFSET,\n}\n\n\nThis explodes, for a reason I complain about often.\n\nerror[E0308]: mismatched types\n  --&gt; src/interrupts.rs:51:13\n   |\n51 |     Timer = PIC_1_OFFSET,\n   |             ^^^^^^^^^^^^ expected `isize`, found `u8`"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#set-repr",
+    "href": "90_interrupts.rjs.html#set-repr",
+    "title": "Interrupts",
+    "section": "Set repr",
+    "text": "Set repr\n\nWe can just tell Rust to use u8 because doing so would’ve been a sensible default.\n\n\n\nsrc/interrupts.rs\n\n#[repr(u8)]\npub enum InterruptIndex {\n    Timer = PIC_1_OFFSET,\n}\n\n\nRust: It’s good.\nThis does not at all encourage me to just not use enum and use magic numbers, at all."
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#write-a-handler",
+    "href": "90_interrupts.rjs.html#write-a-handler",
+    "title": "Interrupts",
+    "section": "Write a handler",
+    "text": "Write a handler\n\nI just used the breakpoint handler, but changed the print.\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_handler (\n    stack_frame: x86_64::structures::idt::InterruptStackFrame,\n) {\n    crate::println!(\"INTERRUPT: TIMER\\n{:#?}\", stack_frame);\n}"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#set-the-handler",
+    "href": "90_interrupts.rjs.html#set-the-handler",
+    "title": "Interrupts",
+    "section": "Set the handler",
+    "text": "Set the handler\n\nNothing too fancy setting this within the IDT, just have to get the index right.\n\n\n\nsrc/interrupts.rs\n\nIDT[InterruptIndex::Timer as usize].set_handler_fn(timer_handler);\n\n\nMake sure you include this line prior to loading the IDT.\n\nDon’t ask why I made this note!"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#what-do-we-expect",
+    "href": "90_interrupts.rjs.html#what-do-we-expect",
+    "title": "Interrupts",
+    "section": "What do we expect",
+    "text": "What do we expect\n\nIn theory, the timer should go off every so often.\nWe already know it seems to go off instantly, so probably quite often.\nSo we should see a few errors messages pop up right away… right?"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#wrong",
+    "href": "90_interrupts.rjs.html#wrong",
+    "title": "Interrupts",
+    "section": "Wrong!",
+    "text": "Wrong!\n\nThe PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler.\nThis signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt.\nSo the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one."
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#easy-fix",
+    "href": "90_interrupts.rjs.html#easy-fix",
+    "title": "Interrupts",
+    "section": "Easy fix",
+    "text": "Easy fix\n\nWe simply update our PIC with the handy, built-in .notify_end_of_interrupt.\n\nRust crate creators: Thank you for writing our OS.\n(We are still learning how OSes work, mind you!)"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#code-it-up",
+    "href": "90_interrupts.rjs.html#code-it-up",
+    "title": "Interrupts",
+    "section": "Code it up",
+    "text": "Code it up\n\nI have no idea why cargo fmt but the arguments back on one line.\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_handler(stack_frame: x86_64::structures::idt::InterruptStackFrame) {\n    crate::println!(\"INTERRUPT: TIMER\\n{:#?}\", stack_frame);\n    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };\n}\n\n\nI think of this as very close to being a “hardware level function return”"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#whats-happening",
+    "href": "90_interrupts.rjs.html#whats-happening",
+    "title": "Interrupts",
+    "section": "What’s Happening?",
+    "text": "What’s Happening?\n\nIf you try it out, you will now get many timer interrupts.\nThe notify_end_of_interrupt:\n\nFigures out whether the primary or secondary PIC sent the interrupt, then\nUses the command and data ports to\nSend an EOI signal to the respective controllers."
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#fast-2-furious",
+    "href": "90_interrupts.rjs.html#fast-2-furious",
+    "title": "Interrupts",
+    "section": "2 Fast 2 Furious",
+    "text": "2 Fast 2 Furious\n\nWe are now able to run multiple functions, or contexts, simultaneously.\n\nWe run whatever code is in _start, and…\nWe run whatever code is in the timer handler.\n\nAn obviously fun thing to do is print infinitely in both places.\n\nWe are already doing that with the timer, basically…"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#infinite-worlds",
+    "href": "90_interrupts.rjs.html#infinite-worlds",
+    "title": "Interrupts",
+    "section": "Infinite Worlds",
+    "text": "Infinite Worlds\n\nIt suffices to move our “Hello, world!” into the infinite loop for the purposes of this exercise.\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    osirs::init();\n    loop { println!(\"Hello, world{}\", \"!\"); }\n}\n\n\nRun your OS quickly. What do you see?"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#handwaving",
+    "href": "90_interrupts.rjs.html#handwaving",
+    "title": "Interrupts",
+    "section": "Handwaving",
+    "text": "Handwaving\n\nAw, they’re sharing!\nI am going to handwave concurrency into what I hope to be a future networks class.\nIt’s a very interesting cloud topic, and in generally we won’t mind it too much here.\nAll we have to do at this time is establish a perhaps more reasonable timer handler.\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_handler(stack_frame: x86_64::structures::idt::InterruptStackFrame) {\n    // crate::println!(\"INTERRUPT: TIMER\\n{:#?}\", stack_frame);\n    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };\n}"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#timing-considerations",
+    "href": "90_interrupts.rjs.html#timing-considerations",
+    "title": "Interrupts",
+    "section": "Timing Considerations",
+    "text": "Timing Considerations\n\nBut there are some quick performance gains to be had here…\nUntil now, our loop {}’s gobbled up all available resources.\n\nCPU time\nCPU energy\nHydroelectric power\n\nWith multiple infinities around, we should be more considerate."
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#halt",
+    "href": "90_interrupts.rjs.html#halt",
+    "title": "Interrupts",
+    "section": "Halt!",
+    "text": "Halt!\n\nWith loop {} the CPU continues to run at full speed even though there’s no work to do.\nWhat we really want to do is to halt the CPU until the next interrupt arrives.\nThis allows the CPU to enter a sleep state in which it consumes much less energy.\nThere is a hardware level “halt” command that does exactly that!\nRead more on HLT"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#try-it",
+    "href": "90_interrupts.rjs.html#try-it",
+    "title": "Interrupts",
+    "section": "Try it",
+    "text": "Try it\n\nLet’s use this instruction to create an energy-efficient endless loop:\n\n\n\nsrc/lib.rs\n\npub fn halt() -&gt; ! {\n    loop { x86_64::instructions::hlt(); }\n}\n\n\nThis is helpfully diverging, so add to:\n\n_start and panic in src/main.rs\nNot needed when testing. (Why?)"
+  },
+  {
+    "objectID": "90_interrupts.rjs.html#okay",
+    "href": "90_interrupts.rjs.html#okay",
+    "title": "Interrupts",
+    "section": "Okay…",
+    "text": "Okay…\n\nI think we are out of time here.\nComing up next in OS in Rust: Keyboard interrupts!"
   },
   {
     "objectID": "90_interrupts.rjs.html#keyboard-input",
@@ -12221,7 +12466,7 @@
     "href": "90_interrupts.html",
     "title": "Interrupts",
     "section": "",
-    "text": "Action Items:\n\nWelcome back.\nYou should have a working: - Breakpoint handler.\n\nDouble fault handler.",
+    "text": "Action Items:\n\nWelcome back.\nYou should have a working:\n\nBreakpoint handler.\nDouble fault handler.",
     "crumbs": [
       "Interrupts"
     ]
@@ -12231,7 +12476,7 @@
     "href": "90_interrupts.html#announcements",
     "title": "Interrupts",
     "section": "",
-    "text": "Action Items:\n\nWelcome back.\nYou should have a working: - Breakpoint handler.\n\nDouble fault handler.",
+    "text": "Action Items:\n\nWelcome back.\nYou should have a working:\n\nBreakpoint handler.\nDouble fault handler.",
     "crumbs": [
       "Interrupts"
     ]
@@ -12421,7 +12666,7 @@
     "href": "90_interrupts.html#defaults",
     "title": "Interrupts",
     "section": "Defaults",
-    "text": "Defaults\n\nThe default configuration of the PICs sends interrupt vector numbers in the range of 0–15 to the CPU.\nThese numbers are already occupied by (the first 0x20) CPU exceptions.\nFor example, number 8 corresponds to a double fault in the CPU and Serial Port 1 in the PIC.\nWe need to remap the PIC interrupts to different numbers.",
+    "text": "Defaults\n\nBy default PICs send interrupt vector numbers in the range of 0–15 to the CPU.\nThese numbers collide with (the first 0x20) CPU exceptions.\nE.g., 8 corresponds to a double fault in the CPU and Serial Port 1 in the PIC.\nRemap the PIC interrupts to different numbers.",
     "crumbs": [
       "Interrupts"
     ]
@@ -12447,51 +12692,261 @@
     ]
   },
   {
+    "objectID": "90_interrupts.html#lets-cheat",
+    "href": "90_interrupts.html#lets-cheat",
+    "title": "Interrupts",
+    "section": "Let’s Cheat",
+    "text": "Let’s Cheat\n\nWe’ve added crates before.\n\n\n\nCargo.toml\n\n[dependencies]\npic8259 = \"0.10.1\"\n\n\nRead more: pic8259\nMy Cargo.toml is growing quite large.\n\n$ wc Cargo.toml\n 20  44 381 Cargo.toml",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#how-i-did-it",
+    "href": "90_interrupts.html#how-i-did-it",
+    "title": "Interrupts",
+    "section": "How I did it",
+    "text": "How I did it\n\nI just appended to the end of src/interrupts.rs\nI use “ChainedPics”, the main thing the crate provides.\n\n\n\nsrc/interrupts.rs\n\n// PIC\n\npub const PIC_1_OFFSET: u8 = 32;\npub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;\n\npub static mut PICS: pic8259::ChainedPics =\n    unsafe { pic8259::ChainedPics::new(PIC_1_OFFSET, PIC_2_OFFSET) };",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#an-aside",
+    "href": "90_interrupts.html#an-aside",
+    "title": "Interrupts",
+    "section": "An Aside",
+    "text": "An Aside\n\nUp until now, I have taken the liberty of not implementing an mutex in our OS.\n\nStands for “MUTual EXclusion”\nUsed to prevent different… things (threads)… from modifying the same shared state at the same time.\nThis can lead to program inconsistencies… but not in our case yet.",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#on-the-mutex",
+    "href": "90_interrupts.html#on-the-mutex",
+    "title": "Interrupts",
+    "section": "On the Mutex",
+    "text": "On the Mutex\n\nUp until now, it hasn’t mattered - all our code executed serially (one thing at a time) and linearly (in a defined order).\nWe are now about to enter the “Cool Zone”\n\nBut I still won’t mutex yet until we see a better way to do it.",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#back-at-it",
+    "href": "90_interrupts.html#back-at-it",
+    "title": "Interrupts",
+    "section": "Back at it",
+    "text": "Back at it\n\nWe also initialize our PIC.\nI did in interrupts::init_idt()\nSome double fault handler stuff too…\n\n\n\nsrc/interrupts.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n        PICS.initialize();\n    }\n}",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
     "objectID": "90_interrupts.html#enabling-interrupts",
     "href": "90_interrupts.html#enabling-interrupts",
     "title": "Interrupts",
     "section": "Enabling Interrupts",
-    "text": "Enabling Interrupts\nUntil now, nothing happened because interrupts are still disabled in the CPU configuration. This means that the CPU does not listen to the interrupt controller at all, so no interrupts can reach the CPU. Let’s change that:\n// in src/lib.rs\n\npub fn init() {\n    gdt::init();\n    interrupts::init_idt();\n    unsafe { interrupts::PICS.lock().initialize() };\n    x86_64::instructions::interrupts::enable();     // new\n}\nThe interrupts::enable function of the x86_64 crate executes the special sti instruction (“set interrupts”) to enable external interrupts. When we try cargo run now, we see that a double fault occurs:\n\n\n\nQEMU printing EXCEPTION: DOUBLE FAULT because of hardware timer\n\n\nThe reason for this double fault is that the hardware timer (the Intel 8253, to be exact) is enabled by default, so we start receiving timer interrupts as soon as we enable interrupts. Since we didn’t define a handler function for it yet, our double fault handler is invoked.",
+    "text": "Enabling Interrupts\n\nUntil now, interrupts were disabled in the CPU configuration.\nSo no interrupts can reach the CPU.\nLet’s change that…\n\n\n\nsrc/interrupts.rs\n\npub fn init_idt() {\n    unsafe {\n        // Snip\n        PICS.initialize();\n        x86_64::instructions::interrupts::enable();\n    }\n}",
     "crumbs": [
       "Interrupts"
     ]
   },
   {
-    "objectID": "90_interrupts.html#handling-timer-interrupts",
-    "href": "90_interrupts.html#handling-timer-interrupts",
+    "objectID": "90_interrupts.html#i-bet-that-works",
+    "href": "90_interrupts.html#i-bet-that-works",
     "title": "Interrupts",
-    "section": "Handling Timer Interrupts",
-    "text": "Handling Timer Interrupts\nAs we see from the graphic above, the timer uses line 0 of the primary PIC. This means that it arrives at the CPU as interrupt 32 (0 + offset 32). Instead of hardcoding index 32, we store it in an InterruptIndex enum:\n// in src/interrupts.rs\n\n#[derive(Debug, Clone, Copy)]\n#[repr(u8)]\npub enum InterruptIndex {\n    Timer = PIC_1_OFFSET,\n}\n\nimpl InterruptIndex {\n    fn as_u8(self) -&gt; u8 {\n        self as u8\n    }\n\n    fn as_usize(self) -&gt; usize {\n        usize::from(self.as_u8())\n    }\n}\nThe enum is a C-like enum so that we can directly specify the index for each variant. The repr(u8) attribute specifies that each variant is represented as a u8. We will add more variants for other interrupts in the future.\nNow we can add a handler function for the timer interrupt:\n// in src/interrupts.rs\n\nuse crate::print;\n\nlazy_static! {\n    static ref IDT: InterruptDescriptorTable = {\n        let mut idt = InterruptDescriptorTable::new();\n        idt.breakpoint.set_handler_fn(breakpoint_handler);\n        […]\n        idt[InterruptIndex::Timer.as_usize()]\n            .set_handler_fn(timer_interrupt_handler); // new\n\n        idt\n    };\n}\n\nextern \"x86-interrupt\" fn timer_interrupt_handler(\n    _stack_frame: InterruptStackFrame)\n{\n    print!(\".\");\n}\nOur timer_interrupt_handler has the same signature as our exception handlers, because the CPU reacts identically to exceptions and external interrupts (the only difference is that some exceptions push an error code). The InterruptDescriptorTable struct implements the IndexMut trait, so we can access individual entries through array indexing syntax.\nIn our timer interrupt handler, we print a dot to the screen. As the timer interrupt happens periodically, we would expect to see a dot appearing on each timer tick. However, when we run it, we see that only a single dot is printed:\n\n\n\nQEMU printing only a single dot for hardware timer\n\n\n\nEnd of Interrupt\nThe reason is that the PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler. This signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt. So the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.\nTo send the EOI, we use our static PICS struct again:\n// in src/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_interrupt_handler(\n    _stack_frame: InterruptStackFrame)\n{\n    print!(\".\");\n\n    unsafe {\n        PICS.lock()\n            .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());\n    }\n}\nThe notify_end_of_interrupt figures out whether the primary or secondary PIC sent the interrupt and then uses the command and data ports to send an EOI signal to the respective controllers. If the secondary PIC sent the interrupt, both PICs need to be notified because the secondary PIC is connected to an input line of the primary PIC.\nWe need to be careful to use the correct interrupt vector number, otherwise we could accidentally delete an important unsent interrupt or cause our system to hang. This is the reason that the function is unsafe.\nWhen we now execute cargo run we see dots periodically appearing on the screen:\n\n\n\nQEMU printing consecutive dots showing the hardware timer\n\n\n\n\nConfiguring the Timer\nThe hardware timer that we use is called the Programmable Interval Timer, or PIT, for short. Like the name says, it is possible to configure the interval between two interrupts. We won’t go into details here because we will switch to the APIC timer soon, but the OSDev wiki has an extensive article about the configuring the PIT.",
+    "section": "I bet that works!",
+    "text": "I bet that works!\n\nIt double faults.\n\nThis is good!\nWe’ve changed something.\nThe first step to changing something we want to change!",
     "crumbs": [
       "Interrupts"
     ]
   },
   {
-    "objectID": "90_interrupts.html#deadlocks",
-    "href": "90_interrupts.html#deadlocks",
+    "objectID": "90_interrupts.html#why",
+    "href": "90_interrupts.html#why",
     "title": "Interrupts",
-    "section": "Deadlocks",
-    "text": "Deadlocks\nWe now have a form of concurrency in our kernel: The timer interrupts occur asynchronously, so they can interrupt our _start function at any time. Fortunately, Rust’s ownership system prevents many types of concurrency-related bugs at compile time. One notable exception is deadlocks. Deadlocks occur if a thread tries to acquire a lock that will never become free. Thus, the thread hangs indefinitely.\nWe can already provoke a deadlock in our kernel. Remember, our println macro calls the vga_buffer::_print function, which locks a global WRITER using a spinlock:\n// in src/vga_buffer.rs\n\n[…]\n\n#[doc(hidden)]\npub fn _print(args: fmt::Arguments) {\n    use core::fmt::Write;\n    WRITER.lock().write_fmt(args).unwrap();\n}\nIt locks the WRITER, calls write_fmt on it, and implicitly unlocks it at the end of the function. Now imagine that an interrupt occurs while the WRITER is locked and the interrupt handler tries to print something too:\n\n\n\n\n\n\n\n\nTimestep\n_start\ninterrupt_handler\n\n\n\n\n0\ncalls println!\n \n\n\n1\nprint locks WRITER\n \n\n\n2\n\ninterrupt occurs, handler begins to run\n\n\n3\n\ncalls println!\n\n\n4\n\nprint tries to lock WRITER (already locked)\n\n\n5\n\nprint tries to lock WRITER (already locked)\n\n\n…\n\n…\n\n\nnever\nunlock WRITER\n\n\n\n\nThe WRITER is locked, so the interrupt handler waits until it becomes free. But this never happens, because the _start function only continues to run after the interrupt handler returns. Thus, the entire system hangs.\n\nProvoking a Deadlock\nWe can easily provoke such a deadlock in our kernel by printing something in the loop at the end of our _start function:\n// in src/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    […]\n    loop {\n        use blog_os::print;\n        print!(\"-\");        // new\n    }\n}\nWhen we run it in QEMU, we get an output of the form:\n\n\n\nQEMU output with many rows of hyphens and no dots\n\n\nWe see that only a limited number of hyphens are printed until the first timer interrupt occurs. Then the system hangs because the timer interrupt handler deadlocks when it tries to print a dot. This is the reason that we see no dots in the above output.\nThe actual number of hyphens varies between runs because the timer interrupt occurs asynchronously. This non-determinism is what makes concurrency-related bugs so difficult to debug.\n\n\nFixing the Deadlock\nTo avoid this deadlock, we can disable interrupts as long as the Mutex is locked:\n// in src/vga_buffer.rs\n\n/// Prints the given formatted string to the VGA text buffer\n/// through the global `WRITER` instance.\n#[doc(hidden)]\npub fn _print(args: fmt::Arguments) {\n    use core::fmt::Write;\n    use x86_64::instructions::interrupts;   // new\n\n    interrupts::without_interrupts(|| {     // new\n        WRITER.lock().write_fmt(args).unwrap();\n    });\n}\nThe without_interrupts function takes a closure and executes it in an interrupt-free environment. We use it to ensure that no interrupt can occur as long as the Mutex is locked. When we run our kernel now, we see that it keeps running without hanging. (We still don’t notice any dots, but this is because they’re scrolling by too fast. Try to slow down the printing, e.g., by putting a for _ in 0..10000 {} inside the loop.)\nWe can apply the same change to our serial printing function to ensure that no deadlocks occur with it either:\n// in src/serial.rs\n\n#[doc(hidden)]\npub fn _print(args: ::core::fmt::Arguments) {\n    use core::fmt::Write;\n    use x86_64::instructions::interrupts;       // new\n\n    interrupts::without_interrupts(|| {         // new\n        SERIAL1\n            .lock()\n            .write_fmt(args)\n            .expect(\"Printing to serial failed\");\n    });\n}\nNote that disabling interrupts shouldn’t be a general solution. The problem is that it increases the worst-case interrupt latency, i.e., the time until the system reacts to an interrupt. Therefore, interrupts should only be disabled for a very short time.",
+    "section": "Why?",
+    "text": "Why?\n\nThe hardware timer (the Intel 8253, to be exact) is enabled by default.\nSo we start receiving timer interrupts as soon as we enable interrupts.\nSince we didn’t define a handler function for it yet, our double fault handler is invoked.\nAbsolute geniuses will notice that we can now do things using timers, though.",
     "crumbs": [
       "Interrupts"
     ]
   },
   {
-    "objectID": "90_interrupts.html#fixing-a-race-condition",
-    "href": "90_interrupts.html#fixing-a-race-condition",
+    "objectID": "90_interrupts.html#remember-this",
+    "href": "90_interrupts.html#remember-this",
     "title": "Interrupts",
-    "section": "Fixing a Race Condition",
-    "text": "Fixing a Race Condition\nIf you run cargo test, you might see the test_println_output test failing:\n&gt; cargo test --lib\n[…]\nRunning 4 tests\ntest_breakpoint_exception...[ok]\ntest_println... [ok]\ntest_println_many... [ok]\ntest_println_output... [failed]\n\nError: panicked at 'assertion failed: `(left == right)`\n  left: `'.'`,\n right: `'S'`', src/vga_buffer.rs:205:9\nThe reason is a race condition between the test and our timer handler. Remember, the test looks like this:\n// in src/vga_buffer.rs\n\n#[test_case]\nfn test_println_output() {\n    let s = \"Some test string that fits on a single line\";\n    println!(\"{}\", s);\n    for (i, c) in s.chars().enumerate() {\n        let screen_char = WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();\n        assert_eq!(char::from(screen_char.ascii_character), c);\n    }\n}\nThe test prints a string to the VGA buffer and then checks the output by manually iterating over the buffer_chars array. The race condition occurs because the timer interrupt handler might run between the println and the reading of the screen characters. Note that this isn’t a dangerous data race, which Rust completely prevents at compile time. See the Rustonomicon for details.\nTo fix this, we need to keep the WRITER locked for the complete duration of the test, so that the timer handler can’t write a . to the screen in between. The fixed test looks like this:\n// in src/vga_buffer.rs\n\n#[test_case]\nfn test_println_output() {\n    use core::fmt::Write;\n    use x86_64::instructions::interrupts;\n\n    let s = \"Some test string that fits on a single line\";\n    interrupts::without_interrupts(|| {\n        let mut writer = WRITER.lock();\n        writeln!(writer, \"\\n{}\", s).expect(\"writeln failed\");\n        for (i, c) in s.chars().enumerate() {\n            let screen_char = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();\n            assert_eq!(char::from(screen_char.ascii_character), c);\n        }\n    });\n}\nWe performed the following changes:\n\nWe keep the writer locked for the complete test by using the lock() method explicitly. Instead of println, we use the writeln macro that allows printing to an already locked writer.\nTo avoid another deadlock, we disable interrupts for the test’s duration. Otherwise, the test might get interrupted while the writer is still locked.\nSince the timer interrupt handler can still run before the test, we print an additional newline \\n before printing the string s. This way, we avoid test failure when the timer handler has already printed some . characters to the current line.\n\nWith the above changes, cargo test now deterministically succeeds again.\nThis was a very harmless race condition that only caused a test failure. As you can imagine, other race conditions can be much more difficult to debug due to their non-deterministic nature. Luckily, Rust prevents us from data races, which are the most serious class of race conditions since they can cause all kinds of undefined behavior, including system crashes and silent memory corruptions.",
+    "section": "Remember this?",
+    "text": "Remember this?\n                     ____________                          ____________\nReal Time Clock --&gt; |            |   Timer -------------&gt; |            |\nACPI -------------&gt; |            |   Keyboard-----------&gt; |            |      _____\nAvailable --------&gt; | Secondary  |----------------------&gt; | Primary    |     |     |\nAvailable --------&gt; | Interrupt  |   Serial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |\nMouse ------------&gt; | Controller |   Serial Port 1 -----&gt; | Controller |     |_____|\nCo-Processor -----&gt; |            |   Parallel Port 2/3 -&gt; |            |\nPrimary ATA ------&gt; |            |   Floppy disk -------&gt; |            |\nSecondary ATA ----&gt; |____________|   Parallel Port 1----&gt; |____________|",
     "crumbs": [
       "Interrupts"
     ]
   },
   {
-    "objectID": "90_interrupts.html#the-hlt-instruction",
-    "href": "90_interrupts.html#the-hlt-instruction",
+    "objectID": "90_interrupts.html#how-about-this-part",
+    "href": "90_interrupts.html#how-about-this-part",
     "title": "Interrupts",
-    "section": "The hlt Instruction",
-    "text": "The hlt Instruction\nUntil now, we used a simple empty loop statement at the end of our _start and panic functions. This causes the CPU to spin endlessly, and thus works as expected. But it is also very inefficient, because the CPU continues to run at full speed even though there’s no work to do. You can see this problem in your task manager when you run your kernel: The QEMU process needs close to 100% CPU the whole time.\nWhat we really want to do is to halt the CPU until the next interrupt arrives. This allows the CPU to enter a sleep state in which it consumes much less energy. The hlt instruction does exactly that. Let’s use this instruction to create an energy-efficient endless loop:\n// in src/lib.rs\n\npub fn hlt_loop() -&gt; ! {\n    loop {\n        x86_64::instructions::hlt();\n    }\n}\nThe instructions::hlt function is just a thin wrapper around the assembly instruction. It is safe because there’s no way it can compromise memory safety.\nWe can now use this hlt_loop instead of the endless loops in our _start and panic functions:\n// in src/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    […]\n\n    println!(\"It did not crash!\");\n    blog_os::hlt_loop();            // new\n}\n\n\n#[cfg(not(test))]\n#[panic_handler]\nfn panic(info: &PanicInfo) -&gt; ! {\n    println!(\"{}\", info);\n    blog_os::hlt_loop();            // new\n}\nLet’s update our lib.rs as well:\n// in src/lib.rs\n\n/// Entry point for `cargo test`\n#[cfg(test)]\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    init();\n    test_main();\n    hlt_loop();         // new\n}\n\npub fn test_panic_handler(info: &PanicInfo) -&gt; ! {\n    serial_println!(\"[failed]\\n\");\n    serial_println!(\"Error: {}\\n\", info);\n    exit_qemu(QemuExitCode::Failed);\n    hlt_loop();         // new\n}\nWhen we run our kernel now in QEMU, we see a much lower CPU usage.",
+    "section": "How about this part?",
+    "text": "How about this part?\n                      ____________ \nTimer -------------&gt; |            |\nKeyboard-----------&gt; |            |      _____\n-------------------&gt; | Primary    |     |     |\nSerial Port 2 -----&gt; | Interrupt  |---&gt; | CPU |\nSerial Port 1 -----&gt; | Controller |     |_____|\nParallel Port 2/3 -&gt; |            |\nFloppy disk -------&gt; |            |\nParallel Port 1----&gt; |____________|\n\nThat’s a timer on line 0 of the primary PIC.\nWe offset by… it doesn’t matter, it was a pub const",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#an-aside-1",
+    "href": "90_interrupts.html#an-aside-1",
+    "title": "Interrupts",
+    "section": "An Aside",
+    "text": "An Aside\n\nWe can use an enum to specify the index of a given hardware interrupt in the PIC.\n\n\n\nsrc/interrupts.rs\n\npub enum InterruptIndex {\n    Timer = PIC_1_OFFSET,\n}\n\n\nThis explodes, for a reason I complain about often.\n\nerror[E0308]: mismatched types\n  --&gt; src/interrupts.rs:51:13\n   |\n51 |     Timer = PIC_1_OFFSET,\n   |             ^^^^^^^^^^^^ expected `isize`, found `u8`",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#set-repr",
+    "href": "90_interrupts.html#set-repr",
+    "title": "Interrupts",
+    "section": "Set repr",
+    "text": "Set repr\n\nWe can just tell Rust to use u8 because doing so would’ve been a sensible default.\n\n\n\nsrc/interrupts.rs\n\n#[repr(u8)]\npub enum InterruptIndex {\n    Timer = PIC_1_OFFSET,\n}\n\n\nRust: It’s good.\nThis does not at all encourage me to just not use enum and use magic numbers, at all.",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#write-a-handler",
+    "href": "90_interrupts.html#write-a-handler",
+    "title": "Interrupts",
+    "section": "Write a handler",
+    "text": "Write a handler\n\nI just used the breakpoint handler, but changed the print.\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_handler (\n    stack_frame: x86_64::structures::idt::InterruptStackFrame,\n) {\n    crate::println!(\"INTERRUPT: TIMER\\n{:#?}\", stack_frame);\n}",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#set-the-handler",
+    "href": "90_interrupts.html#set-the-handler",
+    "title": "Interrupts",
+    "section": "Set the handler",
+    "text": "Set the handler\n\nNothing too fancy setting this within the IDT, just have to get the index right.\n\n\n\nsrc/interrupts.rs\n\nIDT[InterruptIndex::Timer as usize].set_handler_fn(timer_handler);\n\n\nMake sure you include this line prior to loading the IDT.\n\nDon’t ask why I made this note!",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#what-do-we-expect",
+    "href": "90_interrupts.html#what-do-we-expect",
+    "title": "Interrupts",
+    "section": "What do we expect",
+    "text": "What do we expect\n\nIn theory, the timer should go off every so often.\nWe already know it seems to go off instantly, so probably quite often.\nSo we should see a few errors messages pop up right away… right?",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#wrong",
+    "href": "90_interrupts.html#wrong",
+    "title": "Interrupts",
+    "section": "Wrong!",
+    "text": "Wrong!\n\nThe PIC expects an explicit “end of interrupt” (EOI) signal from our interrupt handler.\nThis signal tells the controller that the interrupt was processed and that the system is ready to receive the next interrupt.\nSo the PIC thinks we’re still busy processing the first timer interrupt and waits patiently for the EOI signal before sending the next one.",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#easy-fix",
+    "href": "90_interrupts.html#easy-fix",
+    "title": "Interrupts",
+    "section": "Easy fix",
+    "text": "Easy fix\n\nWe simply update our PIC with the handy, built-in .notify_end_of_interrupt.\n\nRust crate creators: Thank you for writing our OS.\n(We are still learning how OSes work, mind you!)",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#code-it-up",
+    "href": "90_interrupts.html#code-it-up",
+    "title": "Interrupts",
+    "section": "Code it up",
+    "text": "Code it up\n\nI have no idea why cargo fmt but the arguments back on one line.\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_handler(stack_frame: x86_64::structures::idt::InterruptStackFrame) {\n    crate::println!(\"INTERRUPT: TIMER\\n{:#?}\", stack_frame);\n    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };\n}\n\n\nI think of this as very close to being a “hardware level function return”",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#whats-happening",
+    "href": "90_interrupts.html#whats-happening",
+    "title": "Interrupts",
+    "section": "What’s Happening?",
+    "text": "What’s Happening?\n\nIf you try it out, you will now get many timer interrupts.\nThe notify_end_of_interrupt:\n\nFigures out whether the primary or secondary PIC sent the interrupt, then\nUses the command and data ports to\nSend an EOI signal to the respective controllers.",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#fast-2-furious",
+    "href": "90_interrupts.html#fast-2-furious",
+    "title": "Interrupts",
+    "section": "2 Fast 2 Furious",
+    "text": "2 Fast 2 Furious\n\nWe are now able to run multiple functions, or contexts, simultaneously.\n\nWe run whatever code is in _start, and…\nWe run whatever code is in the timer handler.\n\nAn obviously fun thing to do is print infinitely in both places.\n\nWe are already doing that with the timer, basically…",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#infinite-worlds",
+    "href": "90_interrupts.html#infinite-worlds",
+    "title": "Interrupts",
+    "section": "Infinite Worlds",
+    "text": "Infinite Worlds\n\nIt suffices to move our “Hello, world!” into the infinite loop for the purposes of this exercise.\n\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n    osirs::init();\n    loop { println!(\"Hello, world{}\", \"!\"); }\n}\n\n\nRun your OS quickly. What do you see?",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#handwaving",
+    "href": "90_interrupts.html#handwaving",
+    "title": "Interrupts",
+    "section": "Handwaving",
+    "text": "Handwaving\n\nAw, they’re sharing!\nI am going to handwave concurrency into what I hope to be a future networks class.\nIt’s a very interesting cloud topic, and in generally we won’t mind it too much here.\nAll we have to do at this time is establish a perhaps more reasonable timer handler.\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn timer_handler(stack_frame: x86_64::structures::idt::InterruptStackFrame) {\n    // crate::println!(\"INTERRUPT: TIMER\\n{:#?}\", stack_frame);\n    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };\n}",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#timing-considerations",
+    "href": "90_interrupts.html#timing-considerations",
+    "title": "Interrupts",
+    "section": "Timing Considerations",
+    "text": "Timing Considerations\n\nBut there are some quick performance gains to be had here…\nUntil now, our loop {}’s gobbled up all available resources.\n\nCPU time\nCPU energy\nHydroelectric power\n\nWith multiple infinities around, we should be more considerate.",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#halt",
+    "href": "90_interrupts.html#halt",
+    "title": "Interrupts",
+    "section": "Halt!",
+    "text": "Halt!\n\nWith loop {} the CPU continues to run at full speed even though there’s no work to do.\nWhat we really want to do is to halt the CPU until the next interrupt arrives.\nThis allows the CPU to enter a sleep state in which it consumes much less energy.\nThere is a hardware level “halt” command that does exactly that!\nRead more on HLT",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#try-it",
+    "href": "90_interrupts.html#try-it",
+    "title": "Interrupts",
+    "section": "Try it",
+    "text": "Try it\n\nLet’s use this instruction to create an energy-efficient endless loop:\n\n\n\nsrc/lib.rs\n\npub fn halt() -&gt; ! {\n    loop { x86_64::instructions::hlt(); }\n}\n\n\nThis is helpfully diverging, so add to:\n\n_start and panic in src/main.rs\nNot needed when testing. (Why?)",
+    "crumbs": [
+      "Interrupts"
+    ]
+  },
+  {
+    "objectID": "90_interrupts.html#okay",
+    "href": "90_interrupts.html#okay",
+    "title": "Interrupts",
+    "section": "Okay…",
+    "text": "Okay…\n\nI think we are out of time here.\nComing up next in OS in Rust: Keyboard interrupts!",
     "crumbs": [
       "Interrupts"
     ]
@@ -12527,88 +12982,43 @@
     ]
   },
   {
-    "objectID": "80_double.html#update-segments",
-    "href": "80_double.html#update-segments",
-    "title": "Double",
-    "section": "Update Segments",
-    "text": "Update Segments\n\nBasically, we got the kernel CS, and TSS.\nWe turned them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.load();\n// I love Rust namespaces!\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\nx86_64::instructions::tables::load_tss(tss);",
+    "objectID": "92_clock.html",
+    "href": "92_clock.html",
+    "title": "Clock",
+    "section": "",
+    "text": "Implement a clock.\n\nSomehow track ticks from the timer.\nSet the initial time from the keyboard.\n\nProvide hours, minute, seconds.\n\nDon’t worry about overly testing, put test at least seconds.\nYou don’t have to get the clock ticks exact, approximate is fine.",
     "crumbs": [
-      "Double"
+      "Clock"
     ]
   },
   {
-    "objectID": "80_double.html#full-file",
-    "href": "80_double.html#full-file",
-    "title": "Double",
-    "section": "Full File",
-    "text": "Full File\n\n\nsrc/gdt.rs\n\n#![allow(static_mut_refs)]\n\n// GDT\nstatic mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =\n    x86_64::structures::gdt::GlobalDescriptorTable::new();\n\n// TSS\nconst STACK_SIZE: usize = 4096 * 5;\nstatic mut TSS: x86_64::structures::tss::TaskStateSegment =\n    x86_64::structures::tss::TaskStateSegment::new();\nstatic mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\n        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n        GDT.load();\n        use x86_64::instructions::segmentation::Segment;\n        x86_64::instructions::segmentation::CS::set_reg(kcs);\n        x86_64::instructions::tables::load_tss(tss);\n    }\n}",
+    "objectID": "92_clock.html#your-task",
+    "href": "92_clock.html#your-task",
+    "title": "Clock",
+    "section": "",
+    "text": "Implement a clock.\n\nSomehow track ticks from the timer.\nSet the initial time from the keyboard.\n\nProvide hours, minute, seconds.\n\nDon’t worry about overly testing, put test at least seconds.\nYou don’t have to get the clock ticks exact, approximate is fine.",
     "crumbs": [
-      "Double"
+      "Clock"
     ]
   },
   {
-    "objectID": "80_double.html#insufficient",
-    "href": "80_double.html#insufficient",
-    "title": "Double",
-    "section": "Insufficient",
-    "text": "Insufficient\n\nI still triple fault on this.\nWhy?\n\nWe added a stack.\nWe added it’s location to the GDT.\nWe added a double fault handler, but\nWe did not direct the double fault handler to change stacks.\n\nWe return to the handler (NOT the GDT) to update it…",
+    "objectID": "92_clock.html#requirements",
+    "href": "92_clock.html#requirements",
+    "title": "Clock",
+    "section": "Requirements",
+    "text": "Requirements\n\nOn boot, display a prompt requesting current time.\nAccept 6 decimal digits of a well-formatted time.\n\nDelineate however you like - just include it in the prompt.\nI used SpaceBar to separate hours, minutes, seconds and also terminate.\n\nOnce the 6 decimal digits are input, clear the screen and display a single line of\n\nSix decimal digits.\nYou can format it or whatever, up to you.\nEven use colors I guess.\n\nIt should start at the input time and increase (roughly) every one second.",
     "crumbs": [
-      "Double"
+      "Clock"
     ]
   },
   {
-    "objectID": "80_double.html#handle-it-3",
-    "href": "80_double.html#handle-it-3",
-    "title": "Double",
-    "section": "Handle it",
-    "text": "Handle it\n\nYou probably have:\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault.set_handler_fn(double_fault_handler);\n        IDT.load();\n    }\n}",
+    "objectID": "92_clock.html#aside",
+    "href": "92_clock.html#aside",
+    "title": "Clock",
+    "section": "Aside",
+    "text": "Aside\n\nI think you’ll want to fork your OS for this, so when you make a new crate and copy things over, you’ll probably want to do any improvements to your OS first, or at least keep anything you learn in mind going into next week.",
     "crumbs": [
-      "Double"
+      "Clock"
     ]
-  },
-  {
-    "objectID": "80_double.html#update",
-    "href": "80_double.html#update",
-    "title": "Double",
-    "section": "Update",
-    "text": "Update\n\nUpdate to change a stack index\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        // This is from `cargo fmt`...\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n    }\n}",
-    "crumbs": [
-      "Double"
-    ]
-  },
-  {
-    "objectID": "80_double.rjs.html#update-segments",
-    "href": "80_double.rjs.html#update-segments",
-    "title": "Double",
-    "section": "Update Segments",
-    "text": "Update Segments\n\nBasically, we got the kernel CS, and TSS.\nWe turned them into descriptors.\nEither “set” or “load” these descriptors into the GDT.\n\n\n\nsrc/gdt.rs\n\n// Within \"init\"\nGDT.load();\n// I love Rust namespaces!\nuse x86_64::instructions::segmentation::Segment;\nx86_64::instructions::segmentation::CS::set_reg(kcs);\nx86_64::instructions::tables::load_tss(tss);"
-  },
-  {
-    "objectID": "80_double.rjs.html#full-file",
-    "href": "80_double.rjs.html#full-file",
-    "title": "Double",
-    "section": "Full File",
-    "text": "Full File\n\n\nsrc/gdt.rs\n\n#![allow(static_mut_refs)]\n\n// GDT\nstatic mut GDT: x86_64::structures::gdt::GlobalDescriptorTable =\n    x86_64::structures::gdt::GlobalDescriptorTable::new();\n\n// TSS\nconst STACK_SIZE: usize = 4096 * 5;\nstatic mut TSS: x86_64::structures::tss::TaskStateSegment =\n    x86_64::structures::tss::TaskStateSegment::new();\nstatic mut STACK: [u8; STACK_SIZE] = [0; STACK_SIZE];\n\npub const DOUBLE_FAULT_IST_INDEX: usize = 0;\n\npub fn init_gdt() {\n    unsafe {\n        TSS.interrupt_stack_table[DOUBLE_FAULT_IST_INDEX] =\n            x86_64::VirtAddr::from_ptr(&raw const STACK) + STACK_SIZE;\n        let kcs = GDT.add_entry(x86_64::structures::gdt::Descriptor::kernel_code_segment());\n        let tss = GDT.add_entry(x86_64::structures::gdt::Descriptor::tss_segment(&TSS));\n        GDT.load();\n        use x86_64::instructions::segmentation::Segment;\n        x86_64::instructions::segmentation::CS::set_reg(kcs);\n        x86_64::instructions::tables::load_tss(tss);\n    }\n}"
-  },
-  {
-    "objectID": "80_double.rjs.html#insufficient",
-    "href": "80_double.rjs.html#insufficient",
-    "title": "Double",
-    "section": "Insufficient",
-    "text": "Insufficient\n\nI still triple fault on this.\nWhy?\n\nWe added a stack.\nWe added it’s location to the GDT.\nWe added a double fault handler, but\nWe did not direct the double fault handler to change stacks.\n\nWe return to the handler (NOT the GDT) to update it…"
-  },
-  {
-    "objectID": "80_double.rjs.html#handle-it-3",
-    "href": "80_double.rjs.html#handle-it-3",
-    "title": "Double",
-    "section": "Handle it",
-    "text": "Handle it\n\nYou probably have:\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        IDT.double_fault.set_handler_fn(double_fault_handler);\n        IDT.load();\n    }\n}"
-  },
-  {
-    "objectID": "80_double.rjs.html#update",
-    "href": "80_double.rjs.html#update",
-    "title": "Double",
-    "section": "Update",
-    "text": "Update\n\nUpdate to change a stack index\n\n\n\nsrc/interrupt.rs\n\npub fn init_idt() {\n    unsafe {\n        IDT.breakpoint.set_handler_fn(breakpoint_handler);\n        // This is from `cargo fmt`...\n        IDT.double_fault\n            .set_handler_fn(double_fault_handler)\n            .set_stack_index(crate::gdt::DOUBLE_FAULT_IST_INDEX as u16);\n        IDT.load();\n    }\n}"
   }
 ]
