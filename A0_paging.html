@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Paging – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./A1_pagefault.html" rel="next">
+<link href="./92_clock.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./A0_paging.html">Paging</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_librs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./70_except.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exceptions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./71_calls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Call</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./72_handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handlers</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./80_double.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Double</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90_interrupts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interrupts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91_keyboard.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Keyboard</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92_clock.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clock</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./A0_paging.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Paging</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./A1_pagefault.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Page Fault</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#today" id="toc-today" class="nav-link" data-scroll-target="#today">Today</a></li>
+  <li><a href="#memory-isolation" id="toc-memory-isolation" class="nav-link" data-scroll-target="#memory-isolation">Memory Isolation</a>
+  <ul class="collapse">
+  <li><a href="#an-os-task" id="toc-an-os-task" class="nav-link" data-scroll-target="#an-os-task">An OS Task</a></li>
+  <li><a href="#how" id="toc-how" class="nav-link" data-scroll-target="#how">How?</a></li>
+  <li><a href="#one-approach" id="toc-one-approach" class="nav-link" data-scroll-target="#one-approach">One Approach</a></li>
+  <li><a href="#mpu" id="toc-mpu" class="nav-link" data-scroll-target="#mpu">MPU</a></li>
+  <li><a href="#two-approaches" id="toc-two-approaches" class="nav-link" data-scroll-target="#two-approaches">Two Approaches</a></li>
+  <li><a href="#two-approaches-1" id="toc-two-approaches-1" class="nav-link" data-scroll-target="#two-approaches-1">Two Approaches</a></li>
+  </ul></li>
+  <li><a href="#segmentation" id="toc-segmentation" class="nav-link" data-scroll-target="#segmentation">Segmentation</a>
+  <ul class="collapse">
+  <li><a href="#its-old" id="toc-its-old" class="nav-link" data-scroll-target="#its-old">It’s Old</a></li>
+  <li><a href="#outcomes" id="toc-outcomes" class="nav-link" data-scroll-target="#outcomes">Outcomes</a></li>
+  <li><a href="#segment-registers" id="toc-segment-registers" class="nav-link" data-scroll-target="#segment-registers">Segment Registers</a></li>
+  <li><a href="#usage" id="toc-usage" class="nav-link" data-scroll-target="#usage">Usage</a></li>
+  <li><a href="#protected-mode" id="toc-protected-mode" class="nav-link" data-scroll-target="#protected-mode">Protected Mode</a></li>
+  <li><a href="#how-it-feels" id="toc-how-it-feels" class="nav-link" data-scroll-target="#how-it-feels">How it feels</a></li>
+  </ul></li>
+  <li><a href="#virtual-memory" id="toc-virtual-memory" class="nav-link" data-scroll-target="#virtual-memory">Virtual Memory</a>
+  <ul class="collapse">
+  <li><a href="#what-it-means" id="toc-what-it-means" class="nav-link" data-scroll-target="#what-it-means">What it means</a></li>
+  <li><a href="#the-big-idea" id="toc-the-big-idea" class="nav-link" data-scroll-target="#the-big-idea">The Big Idea</a></li>
+  <li><a href="#segment-arithmetic" id="toc-segment-arithmetic" class="nav-link" data-scroll-target="#segment-arithmetic">Segment Arithmetic</a></li>
+  <li><a href="#namespaces" id="toc-namespaces" class="nav-link" data-scroll-target="#namespaces">Namespaces</a></li>
+  <li><a href="#physical-addresses" id="toc-physical-addresses" class="nav-link" data-scroll-target="#physical-addresses">Physical addresses</a></li>
+  <li><a href="#virtual-addresses" id="toc-virtual-addresses" class="nav-link" data-scroll-target="#virtual-addresses">Virtual addresses</a></li>
+  <li><a href="#visually" id="toc-visually" class="nav-link" data-scroll-target="#visually">Visually</a></li>
+  <li><a href="#textually" id="toc-textually" class="nav-link" data-scroll-target="#textually">Textually</a></li>
+  <li><a href="#benefit" id="toc-benefit" class="nav-link" data-scroll-target="#benefit">Benefit</a></li>
+  <li><a href="#fragmentation" id="toc-fragmentation" class="nav-link" data-scroll-target="#fragmentation">Fragmentation</a></li>
+  <li><a href="#visually-1" id="toc-visually-1" class="nav-link" data-scroll-target="#visually-1">Visually</a></li>
+  <li><a href="#problem" id="toc-problem" class="nav-link" data-scroll-target="#problem">Problem</a></li>
+  <li><a href="#one-solution" id="toc-one-solution" class="nav-link" data-scroll-target="#one-solution">One Solution</a></li>
+  <li><a href="#visually-2" id="toc-visually-2" class="nav-link" data-scroll-target="#visually-2">Visually</a></li>
+  <li><a href="#defrag" id="toc-defrag" class="nav-link" data-scroll-target="#defrag">“Defrag”</a></li>
+  <li><a href="#downsides" id="toc-downsides" class="nav-link" data-scroll-target="#downsides">Downsides</a></li>
+  <li><a href="#sunset" id="toc-sunset" class="nav-link" data-scroll-target="#sunset">Sunset</a></li>
+  </ul></li>
+  <li><a href="#paging" id="toc-paging" class="nav-link" data-scroll-target="#paging">Paging</a>
+  <ul class="collapse">
+  <li><a href="#the-idea" id="toc-the-idea" class="nav-link" data-scroll-target="#the-idea">The Idea</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  <li><a href="#visually-3" id="toc-visually-3" class="nav-link" data-scroll-target="#visually-3">Visually</a></li>
+  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#hidden-fragmentation" id="toc-hidden-fragmentation" class="nav-link" data-scroll-target="#hidden-fragmentation">Hidden Fragmentation</a></li>
+  <li><a href="#internal-fragmentation" id="toc-internal-fragmentation" class="nav-link" data-scroll-target="#internal-fragmentation">Internal Fragmentation</a></li>
+  <li><a href="#pros-and-cons" id="toc-pros-and-cons" class="nav-link" data-scroll-target="#pros-and-cons">Pros and Cons</a></li>
+  </ul></li>
+  <li><a href="#page-tables" id="toc-page-tables" class="nav-link" data-scroll-target="#page-tables">Page Tables</a>
+  <ul class="collapse">
+  <li><a href="#mapping" id="toc-mapping" class="nav-link" data-scroll-target="#mapping">Mapping</a></li>
+  <li><a href="#alternative" id="toc-alternative" class="nav-link" data-scroll-target="#alternative">Alternative</a></li>
+  <li><a href="#visually-4" id="toc-visually-4" class="nav-link" data-scroll-target="#visually-4">Visually</a></li>
+  <li><a href="#practically" id="toc-practically" class="nav-link" data-scroll-target="#practically">Practically</a></li>
+  <li><a href="#os-hardware" id="toc-os-hardware" class="nav-link" data-scroll-target="#os-hardware">OS &amp; Hardware</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  <li><a href="#visually-5" id="toc-visually-5" class="nav-link" data-scroll-target="#visually-5">Visually</a></li>
+  <li><a href="#a-solution" id="toc-a-solution" class="nav-link" data-scroll-target="#a-solution">A solution</a></li>
+  <li><a href="#visually-6" id="toc-visually-6" class="nav-link" data-scroll-target="#visually-6">Visually</a></li>
+  <li><a href="#its-just-a-radix-tree" id="toc-its-just-a-radix-tree" class="nav-link" data-scroll-target="#its-just-a-radix-tree">It’s just a radix tree</a></li>
+  </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">FIN?</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="A0_paging.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Paging</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li><strong>Action Items</strong>:
+<ul>
+<li>Welcome back.</li>
+<li>You should be working on:
+<ul>
+<li>Keyboards</li>
+<li>Timers</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>There’s a lot of ways to cover paging theory.</li>
+<li>By convention, I would use the <a href="https://en.wikipedia.org/wiki/Bin_packing_problem">bin packing problem</a></li>
+<li>This class doesn’t require the class that’s taught in, so… blog it is.</li>
+<li><a href="https://os.phil-opp.com/paging-introduction/">Paging</a></li>
+</ul>
+</section>
+<section id="today" class="level2">
+<h2 class="anchored" data-anchor-id="today">Today</h2>
+<ul>
+<li>Memory isolation</li>
+<li>Segmentation</li>
+<li>Virtual Memory</li>
+<li>Paging</li>
+<li>Multilevel page tables on x86_64</li>
+</ul>
+</section>
+<section id="memory-isolation" class="level1">
+<h1>Memory Isolation</h1>
+<section id="an-os-task" class="level2">
+<h2 class="anchored" data-anchor-id="an-os-task">An OS Task</h2>
+<ul>
+<li>The OS must isolate programs.
+<ul>
+<li>Imagine, say, separate VGA buffer from a clock.</li>
+<li>We currently do this with prolific <code>static mut</code></li>
+</ul></li>
+<li>In practice:
+<ul>
+<li>Text editor vs.&nbsp;web browser vs.&nbsp;video player.</li>
+</ul></li>
+</ul>
+</section>
+<section id="how" class="level2">
+<h2 class="anchored" data-anchor-id="how">How?</h2>
+<ul>
+<li>Utilize <em>hardware</em> functionality.</li>
+<li>Ensure that memory areas of one process are not accessible by other processes.
+<ul>
+<li>Use physically different SSD area</li>
+<li>Recycle physical RAM</li>
+<li>Use distinct “keys” in virtual memory space.</li>
+</ul></li>
+</ul>
+</section>
+<section id="one-approach" class="level2">
+<h2 class="anchored" data-anchor-id="one-approach">One Approach</h2>
+<ul>
+<li>Consider the ARM Cortex-M
+<ul>
+<li>I’ve run into these in simulation.</li>
+<li>Common embedded platform.</li>
+</ul></li>
+</ul>
+<p><a title="ZeptoBars, CC BY 3.0 <https://creativecommons.org/licenses/by/3.0>, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:STM32F100C4T6B-HD.jpg"><img width="960" alt="STM32F100C4T6B-HD" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/STM32F100C4T6B-HD.jpg/960px-STM32F100C4T6B-HD.jpg"></a></p>
+</section>
+<section id="mpu" class="level2">
+<h2 class="anchored" data-anchor-id="mpu">MPU</h2>
+<ul>
+<li>The Cortex-M has a “Memory Protection Unit”
+<ul>
+<li>Allows software to configure ~8 “regions”</li>
+<li>Regions can have <em>distinct permissions</em>
+<ul>
+<li>Read/write/execute/etc.</li>
+</ul></li>
+<li>MPU is an intermediary between CPU and MMU that vets memory accesses.</li>
+</ul></li>
+<li>This solves the memory isolation problem for the OS.</li>
+</ul>
+</section>
+<section id="two-approaches" class="level2">
+<h2 class="anchored" data-anchor-id="two-approaches">Two Approaches</h2>
+<ul>
+<li>x86 is not Cortex-M - it has two options:
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/X86_memory_segmentation">Segmentation</a>
+<ul>
+<li>“In a computer system using segmentation, a reference to a memory location includes a value that identifies a segment and an offset (memory location) within that segment.”</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="two-approaches-1" class="level2">
+<h2 class="anchored" data-anchor-id="two-approaches-1">Two Approaches</h2>
+<ul>
+<li>x86 is not Cortex-M - it has two options:
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Virtual_memory#Paged_virtual_memory">Paging</a>
+<ul>
+<li>“Page tables are used to translate the virtual addresses seen by the application into physical addresses used by the hardware to process instructions…”</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="segmentation" class="level1">
+<h1>Segmentation</h1>
+<section id="its-old" class="level2">
+<h2 class="anchored" data-anchor-id="its-old">It’s Old</h2>
+<ul>
+<li>Segmentation was already introduced in 1978.
+<ul>
+<li>Originally to increase the amount of addressable memory.</li>
+</ul></li>
+<li>The situation back then was that CPUs only used 16-bit addresses
+<ul>
+<li>Limited the amount of addressable memory to 64KiB.</li>
+</ul></li>
+</ul>
+</section>
+<section id="outcomes" class="level2">
+<h2 class="anchored" data-anchor-id="outcomes">Outcomes</h2>
+<ul>
+<li>To make more than these 64KiB accessible, additional segment registers added
+<ul>
+<li>Each has an offset.</li>
+<li>The CPU automatically added this offset on each memory access</li>
+<li>Up to 1MiB of memory was accessible.</li>
+</ul></li>
+</ul>
+</section>
+<section id="segment-registers" class="level2">
+<h2 class="anchored" data-anchor-id="segment-registers">Segment Registers</h2>
+<ul>
+<li>We’ve seen these before.
+<ul>
+<li>Recall we used the code segment register to <a href="./70_except.html#\cs-code-segment">handle exceptions</a>.</li>
+</ul></li>
+<li>CS - Code Segment</li>
+<li>SS - Stack Segment</li>
+<li>DS - Data Segment</li>
+<li>ES/FS/GS - Extra, fxtra, and gxtra</li>
+</ul>
+</section>
+<section id="usage" class="level2">
+<h2 class="anchored" data-anchor-id="usage">Usage</h2>
+<ul>
+<li>Simpler when originally implemented (e.g.&nbsp;before ES/FS/GS existed).
+<ul>
+<li>Segment registers directly contained the offset</li>
+<li>No access control was performed</li>
+</ul></li>
+</ul>
+</section>
+<section id="protected-mode" class="level2">
+<h2 class="anchored" data-anchor-id="protected-mode">Protected Mode</h2>
+<ul>
+<li>Enter <a href="https://en.wikipedia.org/wiki/X86_memory_segmentation#Protected_mode"><em>protected mode</em></a>.
+<ul>
+<li>Rather than offsets, uses a look-up table into a global descriptor table.</li>
+<li>Recall we used the global descriptor table to <a href="./70_except.html#\gdt">handle double faults</a>.</li>
+</ul></li>
+<li>What is protected? Memory.</li>
+<li>Who is the protector? The OS.</li>
+</ul>
+</section>
+<section id="how-it-feels" class="level2">
+<h2 class="anchored" data-anchor-id="how-it-feels">How it feels</h2>
+<ul>
+<li>A process, like a user mode program, anything we have written outside of this class, <em>perceives</em> there to be an internally consistent memory.
+<ul>
+<li>No other programs write to this space (unless mediated by file or network).</li>
+<li>Any write persists to be read.</li>
+<li>The OS runs and supports OS operations without any visible memory impact.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="virtual-memory" class="level1">
+<h1>Virtual Memory</h1>
+<section id="what-it-means" class="level2">
+<h2 class="anchored" data-anchor-id="what-it-means">What it means</h2>
+<ul>
+<li>So, whenever a program uses a numerical memory address, that numerical address is a historical artifact from the pre-segmentation era.
+<ul>
+<li>In practice, it is a “bit-packed” data structure unpacked by the OS to extract segment and local addresses.</li>
+</ul></li>
+<li>This is why when exception processing we drew memory addresses from multiple registers (memory and segment).</li>
+</ul>
+</section>
+<section id="the-big-idea" class="level2">
+<h2 class="anchored" data-anchor-id="the-big-idea">The Big Idea</h2>
+<ul>
+<li>The idea behind virtual memory is to abstract away the memory <em>addresses</em> from the underlying <em>physical</em> storage device.</li>
+<li>Instead of directly accessing the storage device, a translation step is performed first.
+<ul>
+<li>At the hardware-software interface, via the OS and MMU jointly.</li>
+</ul></li>
+</ul>
+</section>
+<section id="segment-arithmetic" class="level2">
+<h2 class="anchored" data-anchor-id="segment-arithmetic">Segment Arithmetic</h2>
+<ul>
+<li>For segmentation, the translation step is to add the offset address of the active segment.</li>
+<li>Imagine a program accessing memory address.
+<ul>
+<li>Local address of <code>0x1234000</code></li>
+<li>Segment address of <code>0x1111000</code></li>
+<li>Then, the address that is really accessed is <code>0x2345000</code>.</li>
+</ul></li>
+</ul>
+<div id="4c60b5a7" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource python number-lines code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1"></a><span class="bu">hex</span>(<span class="bn">0x12340000</span> <span class="op">+</span> <span class="bn">0x1111000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>'0x13451000'</code></pre>
+</div>
+</div>
+</section>
+<section id="namespaces" class="level2">
+<h2 class="anchored" data-anchor-id="namespaces">Namespaces</h2>
+<ul>
+<li>This can be monumentally confusing.
+<ul>
+<li>The MMU and, for example, an SSD and HDD are also using numerical memory addresses.</li>
+</ul></li>
+<li>To differentiate the two address types:
+<ul>
+<li>Addresses before the translation are called <em>virtual</em></li>
+<li>Addresses after the translation are called <em>physical</em></li>
+</ul></li>
+</ul>
+</section>
+<section id="physical-addresses" class="level2">
+<h2 class="anchored" data-anchor-id="physical-addresses">Physical addresses</h2>
+<ul>
+<li>Only visible to OS</li>
+<li>Unique.</li>
+<li>Same for all users/clients/programs/privilege levels</li>
+</ul>
+</section>
+<section id="virtual-addresses" class="level2">
+<h2 class="anchored" data-anchor-id="virtual-addresses">Virtual addresses</h2>
+<ul>
+<li>Translation dependent
+<ul>
+<li>Only meaningful relevant to a specific underlying OS</li>
+</ul></li>
+<li>Non-unique.
+<ul>
+<li>Multiple distinct <em>virtual</em> addresses may correspond to the same <em>physical</em> address.</li>
+<li>The same virtual address in different programs/processes may refer to distinct physical addresses.</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually" class="level2">
+<h2 class="anchored" data-anchor-id="visually">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/segmentation-same-program-twice.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="textually" class="level2">
+<h2 class="anchored" data-anchor-id="textually">Textually</h2>
+<ul>
+<li>Imagine the same program runs twice or more.
+<ul>
+<li>Each time uses a local 150 address for some data.</li>
+<li>No collision - same as if two programs both have their own <code>x</code> variable.</li>
+</ul></li>
+<li>Segments differ so physical address differ.</li>
+</ul>
+</section>
+<section id="benefit" class="level2">
+<h2 class="anchored" data-anchor-id="benefit">Benefit</h2>
+<ul>
+<li>We recall the abstraction of the <em>stored-program computer</em></li>
+<li>Now, those programs:
+<ul>
+<li>Can be placed at <em>arbitrary</em> physical memory addresses</li>
+<li>Always consistently refer to internal memory locations</li>
+</ul></li>
+</ul>
+</section>
+<section id="fragmentation" class="level2">
+<h2 class="anchored" data-anchor-id="fragmentation">Fragmentation</h2>
+<ul>
+<li>The differentiation between virtual and physical addresses makes segmentation really powerful.</li>
+<li>However, it has the problem of <em>fragmentation</em>.</li>
+<li>As an example, imagine that we want to run a third copy of the program we saw above.</li>
+</ul>
+</section>
+<section id="visually-1" class="level2">
+<h2 class="anchored" data-anchor-id="visually-1">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/segmentation-fragmentation.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="problem" class="level2">
+<h2 class="anchored" data-anchor-id="problem">Problem</h2>
+<ul>
+<li>There is no way to map the third instance of the program to virtual memory without overlapping.
+<ul>
+<li>But there is more than enough free memory available!</li>
+</ul></li>
+<li>The problem is that we need <em>contiguous</em> memory and can’t use the small free chunks (fragments).</li>
+</ul>
+</section>
+<section id="one-solution" class="level2">
+<h2 class="anchored" data-anchor-id="one-solution">One Solution</h2>
+<ul>
+<li>We can “make this work”
+<ul>
+<li>Dispatch a new program.</li>
+<li>If it needs more space, “smoosh” all other programs together.</li>
+<li>Fit in the new program in the opened space.</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually-2" class="level2">
+<h2 class="anchored" data-anchor-id="visually-2">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/segmentation-fragmentation-compacted.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="defrag" class="level2">
+<h2 class="anchored" data-anchor-id="defrag">“Defrag”</h2>
+<ul>
+<li>Even as recently as in within my lifetime, standard of practice was to recommend semiregular (monthly?) <strong>manual</strong> usage of “defragmentation” tools provided by the OS for the hard drive.</li>
+<li>This is the same technique but in RAM for working programs.</li>
+<li>Takes longer the longer between uses.</li>
+<li>Wastes time every time it’s run.</li>
+</ul>
+</section>
+<section id="downsides" class="level2">
+<h2 class="anchored" data-anchor-id="downsides">Downsides</h2>
+<ul>
+<li>It needs to copy large amounts of memory, which decreases performance.</li>
+<li>It needs to be done regularly before the memory becomes too fragmented.</li>
+<li>This makes performance unpredictable since programs are paused at random times and might become unresponsive.
+<ul>
+<li>What if a timer goes off for a visible application while defrag is running.</li>
+</ul></li>
+</ul>
+</section>
+<section id="sunset" class="level2">
+<h2 class="anchored" data-anchor-id="sunset">Sunset</h2>
+<ul>
+<li>Fragmentation has led to segmentation no longer being used by modern systems.</li>
+<li>Segmentation is not even supported in 64-bit x86 anymore.</li>
+<li>Instead, <em>paging</em> is used, which bypass the fragmentation problem.</li>
+</ul>
+</section>
+</section>
+<section id="paging" class="level1">
+<h1>Paging</h1>
+<section id="the-idea" class="level2">
+<h2 class="anchored" data-anchor-id="the-idea">The Idea</h2>
+<ul>
+<li>Divide both the virtual and physical memory space into small, fixed-size blocks.</li>
+<li>Term these blocks of the virtual memory space as <em>pages</em>.</li>
+<li>Term the blocks of the physical address space as <em>frames</em>.</li>
+<li>Each page can be individually mapped to <em>any</em> frame.</li>
+</ul>
+</section>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
+<ul>
+<li>We can now split larger memory regions across non-continuous physical frames.</li>
+<li>The advantage of this becomes visible if we recap the example of the fragmented memory space, but use paging instead of segmentation this time.
+<ul>
+<li>Easy to imagine each memory chunk mapping onto multiple pages/frames.</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually-3" class="level2">
+<h2 class="anchored" data-anchor-id="visually-3">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/paging-fragmentation.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="description" class="level2">
+<h2 class="anchored" data-anchor-id="description">Description</h2>
+<ul>
+<li>Take page size of 50 bytes.
+<ul>
+<li>Each program needs three pages.</li>
+</ul></li>
+<li>Each page is mapped to a frame individually.
+<ul>
+<li>A <em>continuous</em> virtual memory region can be mapped to <em>non-continuous</em> physical frames.</li>
+</ul></li>
+<li>Now may start the third instance of the program without defragmentation.</li>
+</ul>
+</section>
+<section id="hidden-fragmentation" class="level2">
+<h2 class="anchored" data-anchor-id="hidden-fragmentation">Hidden Fragmentation</h2>
+<ul>
+<li>Compared to segmentation, paging uses lots of small, fixed-sized memory regions instead of a few large, variable-sized regions.
+<ul>
+<li>And by variable-sized, we mean correctly-sized.</li>
+</ul></li>
+<li>Since every frame has the same size, there are no frames that are too small to be used, so no fragmentation occurs.
+<ul>
+<li>Right?</li>
+</ul></li>
+</ul>
+</section>
+<section id="internal-fragmentation" class="level2">
+<h2 class="anchored" data-anchor-id="internal-fragmentation">Internal Fragmentation</h2>
+<ul>
+<li><em>Internal</em> fragmentation occurs because not every memory region is an exact multiple of the page size.
+<ul>
+<li>Imagine a program of size 101 with pages sized 50.</li>
+<li>It would still need three pages of size 50.</li>
+<li>So you squander 49 bytes.</li>
+</ul></li>
+<li>Term the segmentation fragmentation <em>external fragmentation</em>.</li>
+</ul>
+</section>
+<section id="pros-and-cons" class="level2">
+<h2 class="anchored" data-anchor-id="pros-and-cons">Pros and Cons</h2>
+<ul>
+<li>Internal fragmentation is unfortunate but often better than the external fragmentation that occurs with segmentation.</li>
+<li>It still wastes memory, but
+<ul>
+<li>Does not require defragmentation and</li>
+<li>Makes the amount of fragmentation predictable
+<ul>
+<li>Half page per program on average</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="page-tables" class="level1">
+<h1>Page Tables</h1>
+<section id="mapping" class="level2">
+<h2 class="anchored" data-anchor-id="mapping">Mapping</h2>
+<ul>
+<li>Potentially <em>millions</em> of pages is individually mapped to a frame.</li>
+<li>This mapping information needs to be stored somewhere.
+<ul>
+<li>We recall the <a href="22_malloc.qmd"><code>malloc</code></a> assignment.</li>
+</ul></li>
+<li>Vs. a segment register for each program…
+<ul>
+<li>More pages than segment registers.</li>
+</ul></li>
+</ul>
+</section>
+<section id="alternative" class="level2">
+<h2 class="anchored" data-anchor-id="alternative">Alternative</h2>
+<ul>
+<li>As with, say, the IDT, the GDT, etc., we extend the capabilities of the OS to handle a hardware limitation.</li>
+<li>Paging uses a table structure called <em>page table</em> to store the mapping information.</li>
+<li>We can visualize.</li>
+</ul>
+</section>
+<section id="visually-4" class="level2">
+<h2 class="anchored" data-anchor-id="visually-4">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/paging-page-tables.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="practically" class="level2">
+<h2 class="anchored" data-anchor-id="practically">Practically</h2>
+<ul>
+<li>Each program instance has its own page table</li>
+<li>A pointer to the currently active table is stored in a special CPU register.</li>
+<li>On <code>x86</code>, this register is called <code>CR3</code>
+<ul>
+<li>“Control Register 3” - I noted there are many CR’s, some used.</li>
+</ul></li>
+<li>The OS loads the correct page table to a register <em>before</em> running a program.</li>
+</ul>
+</section>
+<section id="os-hardware" class="level2">
+<h2 class="anchored" data-anchor-id="os-hardware">OS &amp; Hardware</h2>
+<ul>
+<li>On each memory access, the CPU reads the table pointer from the register and looks up the mapped frame for the accessed page in the table.
+<ul>
+<li>Just like an exception!</li>
+<li>Hardware only process.</li>
+</ul></li>
+<li>Depending on the architecture, page table entries can also store attributes such as access permissions in a flags field.</li>
+</ul>
+</section>
+<section id="limitations" class="level2">
+<h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
+<ul>
+<li>Simple page tables have a problem in larger address spaces: waste.</li>
+<li>Imagine a program that uses the four virtual pages <code>0</code>, <code>1_000_000</code>, <code>1_000_050</code>, and <code>1_000_100</code></li>
+<li>It only needs 4 physical frames, but the page table has over a million entries.</li>
+<li>We can’t omit the empty entries or we lose constant-time access.</li>
+</ul>
+</section>
+<section id="visually-5" class="level2">
+<h2 class="anchored" data-anchor-id="visually-5">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/single-level-page-table.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="a-solution" class="level2">
+<h2 class="anchored" data-anchor-id="a-solution">A solution</h2>
+<ul>
+<li>To reduce the wasted memory, we can use a <strong>two-level page table</strong>.</li>
+<li>The idea is that we use different page tables for different address regions.</li>
+<li>An additional table called <em>level 2</em> page table contains the mapping between address regions and (level 1) page tables.
+<ul>
+<li>One-indexed 😬</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually-6" class="level2">
+<h2 class="anchored" data-anchor-id="visually-6">Visually</h2>
+<p><img src="https://os.phil-opp.com/paging-introduction/multilevel-page-table.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="its-just-a-radix-tree" class="level2">
+<h2 class="anchored" data-anchor-id="its-just-a-radix-tree">It’s just a radix tree</h2>
+<ul>
+<li>You probably know about these.</li>
+</ul>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Radix_tree.svg" style="filter:invert(.9)"></p>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>FIN?</h1>
+<ul>
+<li>I think that is probably enough for today.</li>
+<li>If not, we will start <a href="https://os.phil-opp.com/paging-introduction/#paging-on-x86-64">here</a>.</li>
+</ul>
+<!--
+# TODO
+
+## Paging on x86_64
+
+The x86_64 architecture uses a 4-level page table and a page size of 4&nbsp;KiB. Each page table, independent of the level, has a fixed size of 512 entries. Each entry has a size of 8 bytes, so each table is 512 * 8&nbsp;B = 4&nbsp;KiB large and thus fits exactly into one page.
+
+The page table index for each level is derived directly from the virtual address:
+
+![Bits 0–12 are the page offset, bits 12–21 the level 1 index, bits 21–30 the level 2 index, bits 30–39 the level 3 index, and bits 39–48 the level 4 index](x86_64-table-indices-from-address.svg)
+
+We see that each table index consists of 9 bits, which makes sense because each table has 2^9 = 512 entries. The lowest 12 bits are the offset in the 4&nbsp;KiB page (2^12 bytes = 4&nbsp;KiB). Bits 48 to 64 are discarded, which means that x86_64 is not really 64-bit since it only supports 48-bit addresses.
+
+Even though bits 48 to 64 are discarded, they can't be set to arbitrary values. Instead, all bits in this range have to be copies of bit 47 in order to keep addresses unique and allow future extensions like the 5-level page table. This is called _sign-extension_ because it's very similar to the [sign extension in two's complement]. When an address is not correctly sign-extended, the CPU throws an exception.
+
+[sign extension in two's complement]: https://en.wikipedia.org/wiki/Two's_complement#Sign_extension
+
+It's worth noting that the recent "Ice Lake" Intel CPUs optionally support [5-level page tables] to extend virtual addresses from 48-bit to 57-bit. Given that optimizing our kernel for a specific CPU does not make sense at this stage, we will only work with standard 4-level page tables in this post.
+
+[5-level page tables]: https://en.wikipedia.org/wiki/Intel_5-level_paging
+
+### Example Translation
+
+Let's go through an example to understand how the translation process works in detail:
+
+![An example of a 4-level page hierarchy with each page table shown in physical memory](x86_64-page-table-translation.svg)
+
+The physical address of the currently active level 4 page table, which is the root of the 4-level page table, is stored in the `CR3` register. Each page table entry then points to the physical frame of the next level table. The entry of the level 1 table then points to the mapped frame. Note that all addresses in the page tables are physical instead of virtual, because otherwise the CPU would need to translate those addresses too (which could cause a never-ending recursion).
+
+The above page table hierarchy maps two pages (in blue). From the page table indices, we can deduce that the virtual addresses of these two pages are `0x803FE7F000` and `0x803FE00000`. Let's see what happens when the program tries to read from address `0x803FE7F5CE`. First, we convert the address to binary and determine the page table indices and the page offset for the address:
+
+![The sign extension bits are all 0, the level 4 index is 1, the level 3 index is 0, the level 2 index is 511, the level 1 index is 127, and the page offset is 0x5ce](x86_64-page-table-translation-addresses.png)
+
+With these indices, we can now walk the page table hierarchy to determine the mapped frame for the address:
+
+- We start by reading the address of the level 4 table out of the `CR3` register.
+- The level 4 index is 1, so we look at the entry with index 1 of that table, which tells us that the level 3 table is stored at address 16&nbsp;KiB.
+- We load the level 3 table from that address and look at the entry with index 0, which points us to the level 2 table at 24&nbsp;KiB.
+- The level 2 index is 511, so we look at the last entry of that page to find out the address of the level 1 table.
+- Through the entry with index 127 of the level 1 table, we finally find out that the page is mapped to frame 12&nbsp;KiB, or 0x3000 in hexadecimal.
+- The final step is to add the page offset to the frame address to get the physical address 0x3000 + 0x5ce = 0x35ce.
+
+![The same example 4-level page hierarchy with 5 additional arrows: "Step 0" from the CR3 register to the level 4 table, "Step 1" from the level 4 entry to the level 3 table, "Step 2" from the level 3 entry to the level 2 table, "Step 3" from the level 2 entry to the level 1 table, and "Step 4" from the level 1 table to the mapped frames.](x86_64-page-table-translation-steps.svg)
+
+The permissions for the page in the level 1 table are `r`, which means read-only. The hardware enforces these permissions and would throw an exception if we tried to write to that page. Permissions in higher level pages restrict the possible permissions in lower levels, so if we set the level 3 entry to read-only, no pages that use this entry can be writable, even if lower levels specify read/write permissions.
+
+It's important to note that even though this example used only a single instance of each table, there are typically multiple instances of each level in each address space. At maximum, there are:
+
+- one level 4 table,
+- 512 level 3 tables (because the level 4 table has 512 entries),
+- 512 * 512 level 2 tables (because each of the 512 level 3 tables has 512 entries), and
+- 512 * 512 * 512 level 1 tables (512 entries for each level 2 table).
+
+### Page Table Format
+
+Page tables on the x86_64 architecture are basically an array of 512 entries. In Rust syntax:
+
+```rust
+#[repr(align(4096))]
+pub struct PageTable {
+    entries: [PageTableEntry; 512],
+}
+```
+
+As indicated by the `repr` attribute, page tables need to be page-aligned, i.e., aligned on a 4&nbsp;KiB boundary. This requirement guarantees that a page table always fills a complete page and allows an optimization that makes entries very compact.
+
+Each entry is 8 bytes (64 bits) large and has the following format:
+
+Bit(s) | Name | Meaning
+------ | ---- | -------
+0 | present | the page is currently in memory
+1 | writable | it's allowed to write to this page
+2 | user accessible | if not set, only kernel mode code can access this page
+3 | write-through caching | writes go directly to memory
+4 | disable cache | no cache is used for this page
+5 | accessed | the CPU sets this bit when this page is used
+6 | dirty | the CPU sets this bit when a write to this page occurs
+7 | huge page/null | must be 0 in P1 and P4, creates a 1&nbsp;GiB page in P3, creates a 2&nbsp;MiB page in P2
+8 | global | page isn't flushed from caches on address space switch (PGE bit of CR4 register must be set)
+9-11 | available | can be used freely by the OS
+12-51 | physical address | the page aligned 52bit physical address of the frame or the next page table
+52-62 | available | can be used freely by the OS
+63 | no execute | forbid executing code on this page (the NXE bit in the EFER register must be set)
+
+We see that only bits 12–51 are used to store the physical frame address. The remaining bits are used as flags or can be freely used by the operating system. This is possible because we always point to a 4096-byte aligned address, either to a page-aligned page table or to the start of a mapped frame. This means that bits 0–11 are always zero, so there is no reason to store these bits because the hardware can just set them to zero before using the address. The same is true for bits 52–63, because the x86_64 architecture only supports 52-bit physical addresses (similar to how it only supports 48-bit virtual addresses).
+
+Let's take a closer look at the available flags:
+
+- The `present` flag differentiates mapped pages from unmapped ones. It can be used to temporarily swap out pages to disk when the main memory becomes full. When the page is accessed subsequently, a special exception called _page fault_ occurs, to which the operating system can react by reloading the missing page from disk and then continuing the program.
+- The `writable` and `no execute` flags control whether the contents of the page are writable or contain executable instructions, respectively.
+- The `accessed` and `dirty` flags are automatically set by the CPU when a read or write to the page occurs. This information can be leveraged by the operating system, e.g., to decide which pages to swap out or whether the page contents have been modified since the last save to disk.
+- The `write-through caching` and `disable cache` flags allow the control of caches for every page individually.
+- The `user accessible` flag makes a page available to userspace code, otherwise, it is only accessible when the CPU is in kernel mode. This feature can be used to make [system calls] faster by keeping the kernel mapped while a userspace program is running. However, the [Spectre] vulnerability can allow userspace programs to read these pages nonetheless.
+- The `global` flag signals to the hardware that a page is available in all address spaces and thus does not need to be removed from the translation cache (see the section about the TLB below) on address space switches. This flag is commonly used together with a cleared `user accessible` flag to map the kernel code to all address spaces.
+- The `huge page` flag allows the creation of pages of larger sizes by letting the entries of the level 2 or level 3 page tables directly point to a mapped frame. With this bit set, the page size increases by factor 512 to either 2&nbsp;MiB = 512 * 4&nbsp;KiB for level 2 entries or even 1&nbsp;GiB = 512 * 2&nbsp;MiB for level 3 entries. The advantage of using larger pages is that fewer lines of the translation cache and fewer page tables are needed.
+
+[system calls]: https://en.wikipedia.org/wiki/System_call
+[Spectre]: https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)
+
+The `x86_64` crate provides types for [page tables] and their [entries], so we don't need to create these structures ourselves.
+
+[page tables]: https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page_table/struct.PageTable.html
+[entries]: https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page_table/struct.PageTableEntry.html
+
+### The Translation Lookaside Buffer
+
+A 4-level page table makes the translation of virtual addresses expensive because each translation requires four memory accesses. To improve performance, the x86_64 architecture caches the last few translations in the so-called _translation lookaside buffer_ (TLB). This allows skipping the translation when it is still cached.
+
+Unlike the other CPU caches, the TLB is not fully transparent and does not update or remove translations when the contents of page tables change. This means that the kernel must manually update the TLB whenever it modifies a page table. To do this, there is a special CPU instruction called [`invlpg`] (“invalidate page”) that removes the translation for the specified page from the TLB, so that it is loaded again from the page table on the next access. The TLB can also be flushed completely by reloading the `CR3` register, which simulates an address space switch. The `x86_64` crate provides Rust functions for both variants in the [`tlb` module].
+
+[`invlpg`]: https://www.felixcloutier.com/x86/INVLPG.html
+[`tlb` module]: https://docs.rs/x86_64/0.14.2/x86_64/instructions/tlb/index.html
+
+It is important to remember to flush the TLB on each page table modification because otherwise, the CPU might keep using the old translation, which can lead to non-deterministic bugs that are very hard to debug.
+
+-->
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./92_clock.html" class="pagination-link" aria-label="Clock">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Clock</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./A1_pagefault.html" class="pagination-link" aria-label="Page Fault">
+        <span class="nav-page-text">Page Fault</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb3" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">---</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="an">title:</span><span class="co"> Paging</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="co">---</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a></span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="ss">  - </span>Welcome back.</span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="ss">  - </span>You should be working on:</span>
+<span id="cb3-10"><a href="#cb3-10"></a><span class="ss">    - </span>Keyboards</span>
+<span id="cb3-11"><a href="#cb3-11"></a><span class="ss">    - </span>Timers</span>
+<span id="cb3-12"><a href="#cb3-12"></a></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="fu">## Citations</span></span>
+<span id="cb3-14"><a href="#cb3-14"></a></span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="ss">- </span>There's a lot of ways to cover paging theory.</span>
+<span id="cb3-16"><a href="#cb3-16"></a><span class="ss">- </span>By convention, I would use the <span class="co">[</span><span class="ot">bin packing problem</span><span class="co">](https://en.wikipedia.org/wiki/Bin_packing_problem)</span></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="ss">- </span>This class doesn't require the class that's taught in, so... blog it is.</span>
+<span id="cb3-18"><a href="#cb3-18"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Paging</span><span class="co">](https://os.phil-opp.com/paging-introduction/)</span></span>
+<span id="cb3-19"><a href="#cb3-19"></a></span>
+<span id="cb3-20"><a href="#cb3-20"></a><span class="fu">## Today</span></span>
+<span id="cb3-21"><a href="#cb3-21"></a></span>
+<span id="cb3-22"><a href="#cb3-22"></a><span class="ss">- </span>Memory isolation</span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="ss">- </span>Segmentation</span>
+<span id="cb3-24"><a href="#cb3-24"></a><span class="ss">- </span>Virtual Memory</span>
+<span id="cb3-25"><a href="#cb3-25"></a><span class="ss">- </span>Paging</span>
+<span id="cb3-26"><a href="#cb3-26"></a><span class="ss">- </span>Multilevel page tables on x86_64</span>
+<span id="cb3-27"><a href="#cb3-27"></a></span>
+<span id="cb3-28"><a href="#cb3-28"></a><span class="fu"># Memory Isolation</span></span>
+<span id="cb3-29"><a href="#cb3-29"></a></span>
+<span id="cb3-30"><a href="#cb3-30"></a><span class="fu">## An OS Task</span></span>
+<span id="cb3-31"><a href="#cb3-31"></a></span>
+<span id="cb3-32"><a href="#cb3-32"></a><span class="ss">- </span>The OS must isolate programs.</span>
+<span id="cb3-33"><a href="#cb3-33"></a><span class="ss">    - </span>Imagine, say, separate VGA buffer from a clock.</span>
+<span id="cb3-34"><a href="#cb3-34"></a><span class="ss">    - </span>We currently do this with prolific <span class="in">`static mut`</span></span>
+<span id="cb3-35"><a href="#cb3-35"></a><span class="ss">- </span>In practice:</span>
+<span id="cb3-36"><a href="#cb3-36"></a><span class="ss">    - </span>Text editor vs. web browser vs. video player.</span>
+<span id="cb3-37"><a href="#cb3-37"></a>    </span>
+<span id="cb3-38"><a href="#cb3-38"></a><span class="fu">## How?</span></span>
+<span id="cb3-39"><a href="#cb3-39"></a></span>
+<span id="cb3-40"><a href="#cb3-40"></a><span class="ss">- </span>Utilize *hardware* functionality.</span>
+<span id="cb3-41"><a href="#cb3-41"></a><span class="ss">- </span>Ensure that memory areas of one process are not accessible by other processes. </span>
+<span id="cb3-42"><a href="#cb3-42"></a><span class="ss">    - </span>Use physically different SSD area</span>
+<span id="cb3-43"><a href="#cb3-43"></a><span class="ss">    - </span>Recycle physical RAM</span>
+<span id="cb3-44"><a href="#cb3-44"></a><span class="ss">    - </span>Use distinct "keys" in virtual memory space.</span>
+<span id="cb3-45"><a href="#cb3-45"></a></span>
+<span id="cb3-46"><a href="#cb3-46"></a><span class="fu">## One Approach</span></span>
+<span id="cb3-47"><a href="#cb3-47"></a></span>
+<span id="cb3-48"><a href="#cb3-48"></a><span class="ss">- </span>Consider the ARM Cortex-M</span>
+<span id="cb3-49"><a href="#cb3-49"></a><span class="ss">    - </span>I've run into these in simulation.</span>
+<span id="cb3-50"><a href="#cb3-50"></a><span class="ss">    - </span>Common embedded platform.</span>
+<span id="cb3-51"><a href="#cb3-51"></a></span>
+<span id="cb3-52"><a href="#cb3-52"></a>&lt;a title="ZeptoBars, CC BY 3.0 <span class="dv">&amp;lt;</span>https://creativecommons.org/licenses/by/3.0<span class="dv">&amp;gt;</span>, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:STM32F100C4T6B-HD.jpg"&gt;&lt;img width="960" alt="STM32F100C4T6B-HD" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/STM32F100C4T6B-HD.jpg/960px-STM32F100C4T6B-HD.jpg"&gt;&lt;/a&gt;</span>
+<span id="cb3-53"><a href="#cb3-53"></a></span>
+<span id="cb3-54"><a href="#cb3-54"></a><span class="fu">## MPU</span></span>
+<span id="cb3-55"><a href="#cb3-55"></a></span>
+<span id="cb3-56"><a href="#cb3-56"></a><span class="ss">- </span>The Cortex-M has a "Memory Protection Unit"</span>
+<span id="cb3-57"><a href="#cb3-57"></a><span class="ss">    - </span>Allows software to configure ~8 "regions"</span>
+<span id="cb3-58"><a href="#cb3-58"></a><span class="ss">    - </span>Regions can have *distinct permissions*</span>
+<span id="cb3-59"><a href="#cb3-59"></a><span class="ss">        - </span>Read/write/execute/etc.</span>
+<span id="cb3-60"><a href="#cb3-60"></a><span class="ss">    - </span>MPU is an intermediary between CPU and MMU that vets memory accesses.</span>
+<span id="cb3-61"><a href="#cb3-61"></a><span class="ss">- </span>This solves the memory isolation problem for the OS.</span>
+<span id="cb3-62"><a href="#cb3-62"></a></span>
+<span id="cb3-63"><a href="#cb3-63"></a><span class="fu">## Two Approaches</span></span>
+<span id="cb3-64"><a href="#cb3-64"></a></span>
+<span id="cb3-65"><a href="#cb3-65"></a><span class="ss">- </span>x86 is not Cortex-M - it has two options:</span>
+<span id="cb3-66"><a href="#cb3-66"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Segmentation</span><span class="co">](https://en.wikipedia.org/wiki/X86_memory_segmentation)</span></span>
+<span id="cb3-67"><a href="#cb3-67"></a><span class="ss">        - </span>"In a computer system using segmentation, a reference to a memory location includes a value that identifies a segment and an offset (memory location) within that segment."</span>
+<span id="cb3-68"><a href="#cb3-68"></a>        </span>
+<span id="cb3-69"><a href="#cb3-69"></a><span class="fu">## Two Approaches</span></span>
+<span id="cb3-70"><a href="#cb3-70"></a></span>
+<span id="cb3-71"><a href="#cb3-71"></a><span class="ss">- </span>x86 is not Cortex-M - it has two options:        </span>
+<span id="cb3-72"><a href="#cb3-72"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Paging</span><span class="co">](https://en.wikipedia.org/wiki/Virtual_memory#Paged_virtual_memory)</span></span>
+<span id="cb3-73"><a href="#cb3-73"></a><span class="ss">        - </span>"Page tables are used to translate the virtual addresses seen by the application into physical addresses used by the hardware to process instructions..."</span>
+<span id="cb3-74"><a href="#cb3-74"></a>    </span>
+<span id="cb3-75"><a href="#cb3-75"></a><span class="fu"># Segmentation</span></span>
+<span id="cb3-76"><a href="#cb3-76"></a></span>
+<span id="cb3-77"><a href="#cb3-77"></a><span class="fu">## It's Old</span></span>
+<span id="cb3-78"><a href="#cb3-78"></a></span>
+<span id="cb3-79"><a href="#cb3-79"></a><span class="ss">- </span>Segmentation was already introduced in 1978.</span>
+<span id="cb3-80"><a href="#cb3-80"></a><span class="ss">    - </span>Originally to increase the amount of addressable memory. </span>
+<span id="cb3-81"><a href="#cb3-81"></a><span class="ss">- </span>The situation back then was that CPUs only used 16-bit addresses</span>
+<span id="cb3-82"><a href="#cb3-82"></a><span class="ss">    - </span>Limited the amount of addressable memory to 64KiB.</span>
+<span id="cb3-83"><a href="#cb3-83"></a>    </span>
+<span id="cb3-84"><a href="#cb3-84"></a><span class="fu">## Outcomes</span></span>
+<span id="cb3-85"><a href="#cb3-85"></a>    </span>
+<span id="cb3-86"><a href="#cb3-86"></a><span class="ss">- </span>To make more than these 64KiB accessible, additional segment registers added</span>
+<span id="cb3-87"><a href="#cb3-87"></a><span class="ss">    - </span>Each has an offset. </span>
+<span id="cb3-88"><a href="#cb3-88"></a><span class="ss">    - </span>The CPU automatically added this offset on each memory access</span>
+<span id="cb3-89"><a href="#cb3-89"></a><span class="ss">    - </span>Up to 1MiB of memory was accessible.</span>
+<span id="cb3-90"><a href="#cb3-90"></a>    </span>
+<span id="cb3-91"><a href="#cb3-91"></a><span class="fu">## Segment Registers</span></span>
+<span id="cb3-92"><a href="#cb3-92"></a></span>
+<span id="cb3-93"><a href="#cb3-93"></a><span class="ss">- </span>We've seen these before.</span>
+<span id="cb3-94"><a href="#cb3-94"></a><span class="ss">    - </span>Recall we used the code segment register to <span class="co">[</span><span class="ot">handle exceptions</span><span class="co">](70_except.qmd#/cs-code-segment)</span>.</span>
+<span id="cb3-95"><a href="#cb3-95"></a><span class="ss">- </span>CS - Code Segment</span>
+<span id="cb3-96"><a href="#cb3-96"></a><span class="ss">- </span>SS - Stack Segment</span>
+<span id="cb3-97"><a href="#cb3-97"></a><span class="ss">- </span>DS - Data Segment</span>
+<span id="cb3-98"><a href="#cb3-98"></a><span class="ss">- </span>ES/FS/GS - Extra, fxtra, and gxtra</span>
+<span id="cb3-99"><a href="#cb3-99"></a></span>
+<span id="cb3-100"><a href="#cb3-100"></a><span class="fu">## Usage</span></span>
+<span id="cb3-101"><a href="#cb3-101"></a></span>
+<span id="cb3-102"><a href="#cb3-102"></a><span class="ss">- </span>Simpler when originally implemented (e.g. before ES/FS/GS existed).</span>
+<span id="cb3-103"><a href="#cb3-103"></a><span class="ss">    - </span>Segment registers directly contained the offset</span>
+<span id="cb3-104"><a href="#cb3-104"></a><span class="ss">    - </span>No access control was performed</span>
+<span id="cb3-105"><a href="#cb3-105"></a>    </span>
+<span id="cb3-106"><a href="#cb3-106"></a><span class="fu">## Protected Mode</span></span>
+<span id="cb3-107"><a href="#cb3-107"></a>    </span>
+<span id="cb3-108"><a href="#cb3-108"></a><span class="ss">- </span>Enter <span class="co">[</span><span class="ot">*protected mode*</span><span class="co">](https://en.wikipedia.org/wiki/X86_memory_segmentation#Protected_mode)</span>.</span>
+<span id="cb3-109"><a href="#cb3-109"></a><span class="ss">    - </span>Rather than offsets, uses a look-up table into a global descriptor table.</span>
+<span id="cb3-110"><a href="#cb3-110"></a><span class="ss">    - </span>Recall we used the global descriptor table to <span class="co">[</span><span class="ot">handle double faults</span><span class="co">](70_except.qmd#/gdt)</span>.</span>
+<span id="cb3-111"><a href="#cb3-111"></a><span class="ss">- </span>What is protected? Memory.</span>
+<span id="cb3-112"><a href="#cb3-112"></a><span class="ss">- </span>Who is the protector? The OS.</span>
+<span id="cb3-113"><a href="#cb3-113"></a></span>
+<span id="cb3-114"><a href="#cb3-114"></a><span class="fu">## How it feels</span></span>
+<span id="cb3-115"><a href="#cb3-115"></a></span>
+<span id="cb3-116"><a href="#cb3-116"></a><span class="ss">- </span>A process, like a user mode program, anything we have written outside of this class, *perceives* there to be an internally consistent memory.</span>
+<span id="cb3-117"><a href="#cb3-117"></a><span class="ss">    - </span>No other programs write to this space (unless mediated by file or network).</span>
+<span id="cb3-118"><a href="#cb3-118"></a><span class="ss">    - </span>Any write persists to be read.</span>
+<span id="cb3-119"><a href="#cb3-119"></a><span class="ss">    - </span>The OS runs and supports OS operations without any visible memory impact.</span>
+<span id="cb3-120"><a href="#cb3-120"></a>    </span>
+<span id="cb3-121"><a href="#cb3-121"></a><span class="fu"># Virtual Memory</span></span>
+<span id="cb3-122"><a href="#cb3-122"></a></span>
+<span id="cb3-123"><a href="#cb3-123"></a><span class="fu">## What it means</span></span>
+<span id="cb3-124"><a href="#cb3-124"></a></span>
+<span id="cb3-125"><a href="#cb3-125"></a><span class="ss">- </span>So, whenever a program uses a numerical memory address, that numerical address is a historical artifact from the pre-segmentation era.</span>
+<span id="cb3-126"><a href="#cb3-126"></a><span class="ss">    - </span>In practice, it is a "bit-packed" data structure unpacked by the OS to extract segment and local addresses.</span>
+<span id="cb3-127"><a href="#cb3-127"></a><span class="ss">- </span>This is why when exception processing we drew memory addresses from multiple registers (memory and segment).</span>
+<span id="cb3-128"><a href="#cb3-128"></a></span>
+<span id="cb3-129"><a href="#cb3-129"></a><span class="fu">## The Big Idea</span></span>
+<span id="cb3-130"><a href="#cb3-130"></a></span>
+<span id="cb3-131"><a href="#cb3-131"></a><span class="ss">- </span>The idea behind virtual memory is to abstract away the memory *addresses* from the underlying *physical* storage device. </span>
+<span id="cb3-132"><a href="#cb3-132"></a><span class="ss">- </span>Instead of directly accessing the storage device, a translation step is performed first.</span>
+<span id="cb3-133"><a href="#cb3-133"></a><span class="ss">    - </span>At the hardware-software interface, via the OS and MMU jointly.</span>
+<span id="cb3-134"><a href="#cb3-134"></a></span>
+<span id="cb3-135"><a href="#cb3-135"></a><span class="fu">## Segment Arithmetic</span></span>
+<span id="cb3-136"><a href="#cb3-136"></a>    </span>
+<span id="cb3-137"><a href="#cb3-137"></a><span class="ss">- </span>For segmentation, the translation step is to add the offset address of the active segment. </span>
+<span id="cb3-138"><a href="#cb3-138"></a><span class="ss">- </span>Imagine a program accessing memory address.</span>
+<span id="cb3-139"><a href="#cb3-139"></a><span class="ss">    - </span>Local address of <span class="in">`0x1234000`</span></span>
+<span id="cb3-140"><a href="#cb3-140"></a><span class="ss">    - </span>Segment address of <span class="in">`0x1111000`</span></span>
+<span id="cb3-141"><a href="#cb3-141"></a><span class="ss">    - </span>Then, the address that is really accessed is <span class="in">`0x2345000`</span>.</span>
+<span id="cb3-142"><a href="#cb3-142"></a></span>
+<span id="cb3-145"><a href="#cb3-145"></a><span class="in">```{python}</span></span>
+<span id="cb3-146"><a href="#cb3-146"></a><span class="co">#| echo: true</span></span>
+<span id="cb3-147"><a href="#cb3-147"></a><span class="bu">hex</span>(<span class="bn">0x12340000</span> <span class="op">+</span> <span class="bn">0x1111000</span>)</span>
+<span id="cb3-148"><a href="#cb3-148"></a><span class="in">```</span></span>
+<span id="cb3-149"><a href="#cb3-149"></a></span>
+<span id="cb3-150"><a href="#cb3-150"></a><span class="fu">## Namespaces</span></span>
+<span id="cb3-151"><a href="#cb3-151"></a></span>
+<span id="cb3-152"><a href="#cb3-152"></a><span class="ss">- </span>This can be monumentally confusing.</span>
+<span id="cb3-153"><a href="#cb3-153"></a><span class="ss">    - </span>The MMU and, for example, an SSD and HDD are also using numerical memory addresses.</span>
+<span id="cb3-154"><a href="#cb3-154"></a><span class="ss">- </span>To differentiate the two address types:</span>
+<span id="cb3-155"><a href="#cb3-155"></a><span class="ss">    - </span>Addresses before the translation are called _virtual_</span>
+<span id="cb3-156"><a href="#cb3-156"></a><span class="ss">    - </span>Addresses after the translation are called _physical_</span>
+<span id="cb3-157"><a href="#cb3-157"></a></span>
+<span id="cb3-158"><a href="#cb3-158"></a><span class="fu">## Physical addresses</span></span>
+<span id="cb3-159"><a href="#cb3-159"></a></span>
+<span id="cb3-160"><a href="#cb3-160"></a><span class="ss">- </span>Only visible to OS</span>
+<span id="cb3-161"><a href="#cb3-161"></a><span class="ss">- </span>Unique.</span>
+<span id="cb3-162"><a href="#cb3-162"></a><span class="ss">- </span>Same for all users/clients/programs/privilege levels</span>
+<span id="cb3-163"><a href="#cb3-163"></a></span>
+<span id="cb3-164"><a href="#cb3-164"></a><span class="fu">## Virtual addresses</span></span>
+<span id="cb3-165"><a href="#cb3-165"></a></span>
+<span id="cb3-166"><a href="#cb3-166"></a><span class="ss">- </span>Translation dependent</span>
+<span id="cb3-167"><a href="#cb3-167"></a><span class="ss">    - </span>Only meaningful relevant to a specific underlying OS</span>
+<span id="cb3-168"><a href="#cb3-168"></a><span class="ss">- </span>Non-unique.</span>
+<span id="cb3-169"><a href="#cb3-169"></a><span class="ss">    - </span>Multiple distinct *virtual* addresses may correspond to the same *physical* address.</span>
+<span id="cb3-170"><a href="#cb3-170"></a><span class="ss">    - </span>The same virtual address in different programs/processes may refer to distinct physical addresses.</span>
+<span id="cb3-171"><a href="#cb3-171"></a>    </span>
+<span id="cb3-172"><a href="#cb3-172"></a><span class="fu">## Visually</span></span>
+<span id="cb3-173"><a href="#cb3-173"></a></span>
+<span id="cb3-174"><a href="#cb3-174"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/segmentation-same-program-twice.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb3-175"><a href="#cb3-175"></a></span>
+<span id="cb3-176"><a href="#cb3-176"></a><span class="fu">## Textually</span></span>
+<span id="cb3-177"><a href="#cb3-177"></a></span>
+<span id="cb3-178"><a href="#cb3-178"></a><span class="ss">- </span>Imagine the same program runs twice or more.</span>
+<span id="cb3-179"><a href="#cb3-179"></a><span class="ss">    - </span>Each time uses a local 150 address for some data.</span>
+<span id="cb3-180"><a href="#cb3-180"></a><span class="ss">    - </span>No collision - same as if two programs both have their own <span class="in">`x`</span> variable.</span>
+<span id="cb3-181"><a href="#cb3-181"></a><span class="ss">- </span>Segments differ so physical address differ.</span>
+<span id="cb3-182"><a href="#cb3-182"></a></span>
+<span id="cb3-183"><a href="#cb3-183"></a><span class="fu">## Benefit</span></span>
+<span id="cb3-184"><a href="#cb3-184"></a></span>
+<span id="cb3-185"><a href="#cb3-185"></a><span class="ss">- </span>We recall the abstraction of the *stored-program computer*</span>
+<span id="cb3-186"><a href="#cb3-186"></a><span class="ss">- </span>Now, those programs:</span>
+<span id="cb3-187"><a href="#cb3-187"></a><span class="ss">    - </span>Can be placed at *arbitrary* physical memory addresses</span>
+<span id="cb3-188"><a href="#cb3-188"></a><span class="ss">    - </span>Always consistently refer to internal memory locations</span>
+<span id="cb3-189"><a href="#cb3-189"></a></span>
+<span id="cb3-190"><a href="#cb3-190"></a><span class="fu">## Fragmentation</span></span>
+<span id="cb3-191"><a href="#cb3-191"></a></span>
+<span id="cb3-192"><a href="#cb3-192"></a><span class="ss">- </span>The differentiation between virtual and physical addresses makes segmentation really powerful.</span>
+<span id="cb3-193"><a href="#cb3-193"></a><span class="ss">- </span>However, it has the problem of *fragmentation*.</span>
+<span id="cb3-194"><a href="#cb3-194"></a><span class="ss">- </span>As an example, imagine that we want to run a third copy of the program we saw above.</span>
+<span id="cb3-195"><a href="#cb3-195"></a></span>
+<span id="cb3-196"><a href="#cb3-196"></a><span class="fu">## Visually</span></span>
+<span id="cb3-197"><a href="#cb3-197"></a></span>
+<span id="cb3-198"><a href="#cb3-198"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/segmentation-fragmentation.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb3-199"><a href="#cb3-199"></a></span>
+<span id="cb3-200"><a href="#cb3-200"></a><span class="fu">## Problem</span></span>
+<span id="cb3-201"><a href="#cb3-201"></a></span>
+<span id="cb3-202"><a href="#cb3-202"></a><span class="ss">- </span>There is no way to map the third instance of the program to virtual memory without overlapping.</span>
+<span id="cb3-203"><a href="#cb3-203"></a><span class="ss">    - </span>But there is more than enough free memory available! </span>
+<span id="cb3-204"><a href="#cb3-204"></a><span class="ss">- </span>The problem is that we need _contiguous_ memory and can't use the small free chunks (fragments).</span>
+<span id="cb3-205"><a href="#cb3-205"></a></span>
+<span id="cb3-206"><a href="#cb3-206"></a><span class="fu">## One Solution</span></span>
+<span id="cb3-207"><a href="#cb3-207"></a></span>
+<span id="cb3-208"><a href="#cb3-208"></a><span class="ss">- </span>We can "make this work"</span>
+<span id="cb3-209"><a href="#cb3-209"></a><span class="ss">    - </span>Dispatch a new program.</span>
+<span id="cb3-210"><a href="#cb3-210"></a><span class="ss">    - </span>If it needs more space, "smoosh" all other programs together.</span>
+<span id="cb3-211"><a href="#cb3-211"></a><span class="ss">    - </span>Fit in the new program in the opened space.</span>
+<span id="cb3-212"><a href="#cb3-212"></a>    </span>
+<span id="cb3-213"><a href="#cb3-213"></a><span class="fu">## Visually</span></span>
+<span id="cb3-214"><a href="#cb3-214"></a></span>
+<span id="cb3-215"><a href="#cb3-215"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/segmentation-fragmentation-compacted.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb3-216"><a href="#cb3-216"></a></span>
+<span id="cb3-217"><a href="#cb3-217"></a><span class="fu">## "Defrag"</span></span>
+<span id="cb3-218"><a href="#cb3-218"></a></span>
+<span id="cb3-219"><a href="#cb3-219"></a><span class="ss">- </span>Even as recently as in within my lifetime, standard of practice was to recommend semiregular (monthly?) **manual** usage of "defragmentation" tools provided by the OS for the hard drive.</span>
+<span id="cb3-220"><a href="#cb3-220"></a><span class="ss">- </span>This is the same technique but in RAM for working programs.</span>
+<span id="cb3-221"><a href="#cb3-221"></a><span class="ss">- </span>Takes longer the longer between uses.</span>
+<span id="cb3-222"><a href="#cb3-222"></a><span class="ss">- </span>Wastes time every time it's run.</span>
+<span id="cb3-223"><a href="#cb3-223"></a></span>
+<span id="cb3-224"><a href="#cb3-224"></a><span class="fu">## Downsides</span></span>
+<span id="cb3-225"><a href="#cb3-225"></a></span>
+<span id="cb3-226"><a href="#cb3-226"></a><span class="ss">- </span>It needs to copy large amounts of memory, which decreases performance. </span>
+<span id="cb3-227"><a href="#cb3-227"></a><span class="ss">- </span>It needs to be done regularly before the memory becomes too fragmented. </span>
+<span id="cb3-228"><a href="#cb3-228"></a><span class="ss">- </span>This makes performance unpredictable since programs are paused at random times and might become unresponsive.</span>
+<span id="cb3-229"><a href="#cb3-229"></a><span class="ss">    - </span>What if a timer goes off for a visible application while defrag is running.</span>
+<span id="cb3-230"><a href="#cb3-230"></a></span>
+<span id="cb3-231"><a href="#cb3-231"></a><span class="fu">## Sunset</span></span>
+<span id="cb3-232"><a href="#cb3-232"></a></span>
+<span id="cb3-233"><a href="#cb3-233"></a><span class="ss">- </span>Fragmentation has led to segmentation no longer being used by modern systems. </span>
+<span id="cb3-234"><a href="#cb3-234"></a><span class="ss">- </span>Segmentation is not even supported in 64-bit x86 anymore. </span>
+<span id="cb3-235"><a href="#cb3-235"></a><span class="ss">- </span>Instead, _paging_ is used, which bypass the fragmentation problem.</span>
+<span id="cb3-236"><a href="#cb3-236"></a></span>
+<span id="cb3-237"><a href="#cb3-237"></a><span class="fu"># Paging</span></span>
+<span id="cb3-238"><a href="#cb3-238"></a></span>
+<span id="cb3-239"><a href="#cb3-239"></a><span class="fu">## The Idea</span></span>
+<span id="cb3-240"><a href="#cb3-240"></a></span>
+<span id="cb3-241"><a href="#cb3-241"></a><span class="ss">- </span>Divide both the virtual and physical memory space into small, fixed-size blocks. </span>
+<span id="cb3-242"><a href="#cb3-242"></a><span class="ss">- </span>Term these blocks of the virtual memory space as _pages_.</span>
+<span id="cb3-243"><a href="#cb3-243"></a><span class="ss">- </span>Term the blocks of the physical address space as _frames_. </span>
+<span id="cb3-244"><a href="#cb3-244"></a><span class="ss">- </span>Each page can be individually mapped to *any* frame.</span>
+<span id="cb3-245"><a href="#cb3-245"></a></span>
+<span id="cb3-246"><a href="#cb3-246"></a><span class="fu">## Example</span></span>
+<span id="cb3-247"><a href="#cb3-247"></a></span>
+<span id="cb3-248"><a href="#cb3-248"></a><span class="ss">- </span>We can now split larger memory regions across non-continuous physical frames.</span>
+<span id="cb3-249"><a href="#cb3-249"></a><span class="ss">- </span>The advantage of this becomes visible if we recap the example of the fragmented memory space, but use paging instead of segmentation this time.</span>
+<span id="cb3-250"><a href="#cb3-250"></a><span class="ss">    - </span>Easy to imagine each memory chunk mapping onto multiple pages/frames.</span>
+<span id="cb3-251"><a href="#cb3-251"></a></span>
+<span id="cb3-252"><a href="#cb3-252"></a><span class="fu">## Visually</span></span>
+<span id="cb3-253"><a href="#cb3-253"></a></span>
+<span id="cb3-254"><a href="#cb3-254"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/paging-fragmentation.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb3-255"><a href="#cb3-255"></a></span>
+<span id="cb3-256"><a href="#cb3-256"></a><span class="fu">## Description</span></span>
+<span id="cb3-257"><a href="#cb3-257"></a></span>
+<span id="cb3-258"><a href="#cb3-258"></a><span class="ss">- </span>Take page size of 50 bytes.</span>
+<span id="cb3-259"><a href="#cb3-259"></a><span class="ss">    - </span>Each program needs three pages.</span>
+<span id="cb3-260"><a href="#cb3-260"></a><span class="ss">- </span>Each page is mapped to a frame individually.</span>
+<span id="cb3-261"><a href="#cb3-261"></a><span class="ss">    - </span>A *continuous* virtual memory region can be mapped to *non-continuous* physical frames. </span>
+<span id="cb3-262"><a href="#cb3-262"></a><span class="ss">- </span>Now may start the third instance of the program without defragmentation.</span>
+<span id="cb3-263"><a href="#cb3-263"></a></span>
+<span id="cb3-264"><a href="#cb3-264"></a><span class="fu">## Hidden Fragmentation</span></span>
+<span id="cb3-265"><a href="#cb3-265"></a></span>
+<span id="cb3-266"><a href="#cb3-266"></a><span class="ss">- </span>Compared to segmentation, paging uses lots of small, fixed-sized memory regions instead of a few large, variable-sized regions. </span>
+<span id="cb3-267"><a href="#cb3-267"></a><span class="ss">    - </span>And by variable-sized, we mean correctly-sized.</span>
+<span id="cb3-268"><a href="#cb3-268"></a><span class="ss">- </span>Since every frame has the same size, there are no frames that are too small to be used, so no fragmentation occurs.</span>
+<span id="cb3-269"><a href="#cb3-269"></a><span class="ss">    - </span>Right?</span>
+<span id="cb3-270"><a href="#cb3-270"></a>    </span>
+<span id="cb3-271"><a href="#cb3-271"></a><span class="fu">## Internal Fragmentation</span></span>
+<span id="cb3-272"><a href="#cb3-272"></a></span>
+<span id="cb3-273"><a href="#cb3-273"></a><span class="ss">- </span>*Internal* fragmentation occurs because not every memory region is an exact multiple of the page size. </span>
+<span id="cb3-274"><a href="#cb3-274"></a><span class="ss">    - </span>Imagine a program of size 101 with pages sized 50.</span>
+<span id="cb3-275"><a href="#cb3-275"></a><span class="ss">    - </span>It would still need three pages of size 50.</span>
+<span id="cb3-276"><a href="#cb3-276"></a><span class="ss">    - </span>So you squander 49 bytes. </span>
+<span id="cb3-277"><a href="#cb3-277"></a><span class="ss">- </span>Term the segmentation fragmentation _external fragmentation_.</span>
+<span id="cb3-278"><a href="#cb3-278"></a></span>
+<span id="cb3-279"><a href="#cb3-279"></a><span class="fu">## Pros and Cons</span></span>
+<span id="cb3-280"><a href="#cb3-280"></a></span>
+<span id="cb3-281"><a href="#cb3-281"></a><span class="ss">- </span>Internal fragmentation is unfortunate but often better than the external fragmentation that occurs with segmentation. </span>
+<span id="cb3-282"><a href="#cb3-282"></a><span class="ss">- </span>It still wastes memory, but </span>
+<span id="cb3-283"><a href="#cb3-283"></a><span class="ss">    - </span>Does not require defragmentation and </span>
+<span id="cb3-284"><a href="#cb3-284"></a><span class="ss">    - </span>Makes the amount of fragmentation predictable </span>
+<span id="cb3-285"><a href="#cb3-285"></a><span class="ss">        - </span>Half page per program on average</span>
+<span id="cb3-286"><a href="#cb3-286"></a></span>
+<span id="cb3-287"><a href="#cb3-287"></a><span class="fu"># Page Tables</span></span>
+<span id="cb3-288"><a href="#cb3-288"></a></span>
+<span id="cb3-289"><a href="#cb3-289"></a><span class="fu">## Mapping</span></span>
+<span id="cb3-290"><a href="#cb3-290"></a></span>
+<span id="cb3-291"><a href="#cb3-291"></a><span class="ss">- </span>Potentially *millions* of pages is individually mapped to a frame.</span>
+<span id="cb3-292"><a href="#cb3-292"></a><span class="ss">- </span>This mapping information needs to be stored somewhere.</span>
+<span id="cb3-293"><a href="#cb3-293"></a><span class="ss">    - </span>We recall the <span class="co">[</span><span class="ot">`malloc`</span><span class="co">](22_malloc.qmd)</span> assignment.</span>
+<span id="cb3-294"><a href="#cb3-294"></a><span class="ss">- </span>Vs. a segment register for each program...</span>
+<span id="cb3-295"><a href="#cb3-295"></a><span class="ss">    - </span>More pages than segment registers.</span>
+<span id="cb3-296"><a href="#cb3-296"></a></span>
+<span id="cb3-297"><a href="#cb3-297"></a><span class="fu">## Alternative</span></span>
+<span id="cb3-298"><a href="#cb3-298"></a></span>
+<span id="cb3-299"><a href="#cb3-299"></a><span class="ss">- </span>As with, say, the IDT, the GDT, etc., we extend the capabilities of the OS to handle a hardware limitation.</span>
+<span id="cb3-300"><a href="#cb3-300"></a><span class="ss">- </span>Paging uses a table structure called *page table* to store the mapping information.</span>
+<span id="cb3-301"><a href="#cb3-301"></a><span class="ss">- </span>We can visualize.</span>
+<span id="cb3-302"><a href="#cb3-302"></a></span>
+<span id="cb3-303"><a href="#cb3-303"></a><span class="fu">## Visually</span></span>
+<span id="cb3-304"><a href="#cb3-304"></a></span>
+<span id="cb3-305"><a href="#cb3-305"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/paging-page-tables.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb3-306"><a href="#cb3-306"></a></span>
+<span id="cb3-307"><a href="#cb3-307"></a><span class="fu">## Practically</span></span>
+<span id="cb3-308"><a href="#cb3-308"></a></span>
+<span id="cb3-309"><a href="#cb3-309"></a><span class="ss">- </span>Each program instance has its own page table</span>
+<span id="cb3-310"><a href="#cb3-310"></a><span class="ss">- </span>A pointer to the currently active table is stored in a special CPU register.</span>
+<span id="cb3-311"><a href="#cb3-311"></a><span class="ss">- </span>On <span class="in">`x86`</span>, this register is called <span class="in">`CR3`</span></span>
+<span id="cb3-312"><a href="#cb3-312"></a><span class="ss">    - </span>"Control Register 3" - I noted there are many CR's, some used.</span>
+<span id="cb3-313"><a href="#cb3-313"></a><span class="ss">- </span>The OS loads the correct page table to a register *before* running a program.</span>
+<span id="cb3-314"><a href="#cb3-314"></a></span>
+<span id="cb3-315"><a href="#cb3-315"></a><span class="fu">## OS &amp; Hardware</span></span>
+<span id="cb3-316"><a href="#cb3-316"></a></span>
+<span id="cb3-317"><a href="#cb3-317"></a><span class="ss">- </span>On each memory access, the CPU reads the table pointer from the register and looks up the mapped frame for the accessed page in the table.</span>
+<span id="cb3-318"><a href="#cb3-318"></a><span class="ss">    - </span>Just like an exception!</span>
+<span id="cb3-319"><a href="#cb3-319"></a><span class="ss">    - </span>Hardware only process.</span>
+<span id="cb3-320"><a href="#cb3-320"></a><span class="ss">- </span>Depending on the architecture, page table entries can also store attributes such as access permissions in a flags field.</span>
+<span id="cb3-321"><a href="#cb3-321"></a>    </span>
+<span id="cb3-322"><a href="#cb3-322"></a><span class="fu">## Limitations</span></span>
+<span id="cb3-323"><a href="#cb3-323"></a></span>
+<span id="cb3-324"><a href="#cb3-324"></a><span class="ss">- </span>Simple page tables have a problem in larger address spaces: waste. </span>
+<span id="cb3-325"><a href="#cb3-325"></a><span class="ss">- </span>Imagine a program that uses the four virtual pages <span class="in">`0`</span>, <span class="in">`1_000_000`</span>, <span class="in">`1_000_050`</span>, and <span class="in">`1_000_100`</span></span>
+<span id="cb3-326"><a href="#cb3-326"></a><span class="ss">- </span>It only needs 4 physical frames, but the page table has over a million entries. </span>
+<span id="cb3-327"><a href="#cb3-327"></a><span class="ss">- </span>We can't omit the empty entries or we lose constant-time access.</span>
+<span id="cb3-328"><a href="#cb3-328"></a></span>
+<span id="cb3-329"><a href="#cb3-329"></a><span class="fu">## Visually</span></span>
+<span id="cb3-330"><a href="#cb3-330"></a></span>
+<span id="cb3-331"><a href="#cb3-331"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/single-level-page-table.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb3-332"><a href="#cb3-332"></a></span>
+<span id="cb3-333"><a href="#cb3-333"></a><span class="fu">## A solution</span></span>
+<span id="cb3-334"><a href="#cb3-334"></a></span>
+<span id="cb3-335"><a href="#cb3-335"></a><span class="ss">- </span>To reduce the wasted memory, we can use a **two-level page table**. </span>
+<span id="cb3-336"><a href="#cb3-336"></a><span class="ss">- </span>The idea is that we use different page tables for different address regions. </span>
+<span id="cb3-337"><a href="#cb3-337"></a><span class="ss">- </span>An additional table called _level 2_ page table contains the mapping between address regions and (level 1) page tables.</span>
+<span id="cb3-338"><a href="#cb3-338"></a><span class="ss">    - </span>One-indexed 😬</span>
+<span id="cb3-339"><a href="#cb3-339"></a>    </span>
+<span id="cb3-340"><a href="#cb3-340"></a><span class="fu">## Visually</span></span>
+<span id="cb3-341"><a href="#cb3-341"></a></span>
+<span id="cb3-342"><a href="#cb3-342"></a>&lt;img src="https://os.phil-opp.com/paging-introduction/multilevel-page-table.svg" style="filter:invert(.9)"&gt; </span>
+<span id="cb3-343"><a href="#cb3-343"></a></span>
+<span id="cb3-344"><a href="#cb3-344"></a><span class="fu">## It's just a radix tree</span></span>
+<span id="cb3-345"><a href="#cb3-345"></a></span>
+<span id="cb3-346"><a href="#cb3-346"></a><span class="ss">- </span>You probably know about these.  </span>
+<span id="cb3-347"><a href="#cb3-347"></a></span>
+<span id="cb3-348"><a href="#cb3-348"></a>&lt;img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Radix_tree.svg" style="filter:invert(.9)"&gt; </span>
+<span id="cb3-349"><a href="#cb3-349"></a></span>
+<span id="cb3-350"><a href="#cb3-350"></a><span class="fu"># FIN?</span></span>
+<span id="cb3-351"><a href="#cb3-351"></a></span>
+<span id="cb3-352"><a href="#cb3-352"></a><span class="ss">- </span>I think that is probably enough for today.</span>
+<span id="cb3-353"><a href="#cb3-353"></a><span class="ss">- </span>If not, we will start <span class="co">[</span><span class="ot">here</span><span class="co">](https://os.phil-opp.com/paging-introduction/#paging-on-x86-64)</span>.</span>
+<span id="cb3-354"><a href="#cb3-354"></a></span>
+<span id="cb3-355"><a href="#cb3-355"></a><span class="co">&lt;!--</span></span>
+<span id="cb3-356"><a href="#cb3-356"></a><span class="co"># </span><span class="al">TODO</span></span>
+<span id="cb3-357"><a href="#cb3-357"></a></span>
+<span id="cb3-358"><a href="#cb3-358"></a><span class="co">## Paging on x86_64</span></span>
+<span id="cb3-359"><a href="#cb3-359"></a></span>
+<span id="cb3-360"><a href="#cb3-360"></a><span class="co">The x86_64 architecture uses a 4-level page table and a page size of 4&amp;nbsp;KiB. Each page table, independent of the level, has a fixed size of 512 entries. Each entry has a size of 8 bytes, so each table is 512 * 8&amp;nbsp;B = 4&amp;nbsp;KiB large and thus fits exactly into one page.</span></span>
+<span id="cb3-361"><a href="#cb3-361"></a></span>
+<span id="cb3-362"><a href="#cb3-362"></a><span class="co">The page table index for each level is derived directly from the virtual address:</span></span>
+<span id="cb3-363"><a href="#cb3-363"></a></span>
+<span id="cb3-364"><a href="#cb3-364"></a><span class="co">![Bits 0–12 are the page offset, bits 12–21 the level 1 index, bits 21–30 the level 2 index, bits 30–39 the level 3 index, and bits 39–48 the level 4 index](x86_64-table-indices-from-address.svg)</span></span>
+<span id="cb3-365"><a href="#cb3-365"></a></span>
+<span id="cb3-366"><a href="#cb3-366"></a><span class="co">We see that each table index consists of 9 bits, which makes sense because each table has 2^9 = 512 entries. The lowest 12 bits are the offset in the 4&amp;nbsp;KiB page (2^12 bytes = 4&amp;nbsp;KiB). Bits 48 to 64 are discarded, which means that x86_64 is not really 64-bit since it only supports 48-bit addresses.</span></span>
+<span id="cb3-367"><a href="#cb3-367"></a></span>
+<span id="cb3-368"><a href="#cb3-368"></a><span class="co">Even though bits 48 to 64 are discarded, they can't be set to arbitrary values. Instead, all bits in this range have to be copies of bit 47 in order to keep addresses unique and allow future extensions like the 5-level page table. This is called _sign-extension_ because it's very similar to the [sign extension in two's complement]. When an address is not correctly sign-extended, the CPU throws an exception.</span></span>
+<span id="cb3-369"><a href="#cb3-369"></a></span>
+<span id="cb3-370"><a href="#cb3-370"></a><span class="co">[sign extension in two's complement]: https://en.wikipedia.org/wiki/Two's_complement#Sign_extension</span></span>
+<span id="cb3-371"><a href="#cb3-371"></a></span>
+<span id="cb3-372"><a href="#cb3-372"></a><span class="co">It's worth noting that the recent "Ice Lake" Intel CPUs optionally support [5-level page tables] to extend virtual addresses from 48-bit to 57-bit. Given that optimizing our kernel for a specific CPU does not make sense at this stage, we will only work with standard 4-level page tables in this post.</span></span>
+<span id="cb3-373"><a href="#cb3-373"></a></span>
+<span id="cb3-374"><a href="#cb3-374"></a><span class="co">[5-level page tables]: https://en.wikipedia.org/wiki/Intel_5-level_paging</span></span>
+<span id="cb3-375"><a href="#cb3-375"></a></span>
+<span id="cb3-376"><a href="#cb3-376"></a><span class="al">###</span><span class="co"> Example Translation</span></span>
+<span id="cb3-377"><a href="#cb3-377"></a></span>
+<span id="cb3-378"><a href="#cb3-378"></a><span class="co">Let's go through an example to understand how the translation process works in detail:</span></span>
+<span id="cb3-379"><a href="#cb3-379"></a></span>
+<span id="cb3-380"><a href="#cb3-380"></a><span class="co">![An example of a 4-level page hierarchy with each page table shown in physical memory](x86_64-page-table-translation.svg)</span></span>
+<span id="cb3-381"><a href="#cb3-381"></a></span>
+<span id="cb3-382"><a href="#cb3-382"></a><span class="co">The physical address of the currently active level 4 page table, which is the root of the 4-level page table, is stored in the `CR3` register. Each page table entry then points to the physical frame of the next level table. The entry of the level 1 table then points to the mapped frame. Note that all addresses in the page tables are physical instead of virtual, because otherwise the CPU would need to translate those addresses too (which could cause a never-ending recursion).</span></span>
+<span id="cb3-383"><a href="#cb3-383"></a></span>
+<span id="cb3-384"><a href="#cb3-384"></a><span class="co">The above page table hierarchy maps two pages (in blue). From the page table indices, we can deduce that the virtual addresses of these two pages are `0x803FE7F000` and `0x803FE00000`. Let's see what happens when the program tries to read from address `0x803FE7F5CE`. First, we convert the address to binary and determine the page table indices and the page offset for the address:</span></span>
+<span id="cb3-385"><a href="#cb3-385"></a></span>
+<span id="cb3-386"><a href="#cb3-386"></a><span class="co">![The sign extension bits are all 0, the level 4 index is 1, the level 3 index is 0, the level 2 index is 511, the level 1 index is 127, and the page offset is 0x5ce](x86_64-page-table-translation-addresses.png)</span></span>
+<span id="cb3-387"><a href="#cb3-387"></a></span>
+<span id="cb3-388"><a href="#cb3-388"></a><span class="co">With these indices, we can now walk the page table hierarchy to determine the mapped frame for the address:</span></span>
+<span id="cb3-389"><a href="#cb3-389"></a></span>
+<span id="cb3-390"><a href="#cb3-390"></a><span class="co">- We start by reading the address of the level 4 table out of the `CR3` register.</span></span>
+<span id="cb3-391"><a href="#cb3-391"></a><span class="co">- The level 4 index is 1, so we look at the entry with index 1 of that table, which tells us that the level 3 table is stored at address 16&amp;nbsp;KiB.</span></span>
+<span id="cb3-392"><a href="#cb3-392"></a><span class="co">- We load the level 3 table from that address and look at the entry with index 0, which points us to the level 2 table at 24&amp;nbsp;KiB.</span></span>
+<span id="cb3-393"><a href="#cb3-393"></a><span class="co">- The level 2 index is 511, so we look at the last entry of that page to find out the address of the level 1 table.</span></span>
+<span id="cb3-394"><a href="#cb3-394"></a><span class="co">- Through the entry with index 127 of the level 1 table, we finally find out that the page is mapped to frame 12&amp;nbsp;KiB, or 0x3000 in hexadecimal.</span></span>
+<span id="cb3-395"><a href="#cb3-395"></a><span class="co">- The final step is to add the page offset to the frame address to get the physical address 0x3000 + 0x5ce = 0x35ce.</span></span>
+<span id="cb3-396"><a href="#cb3-396"></a></span>
+<span id="cb3-397"><a href="#cb3-397"></a><span class="co">![The same example 4-level page hierarchy with 5 additional arrows: "Step 0" from the CR3 register to the level 4 table, "Step 1" from the level 4 entry to the level 3 table, "Step 2" from the level 3 entry to the level 2 table, "Step 3" from the level 2 entry to the level 1 table, and "Step 4" from the level 1 table to the mapped frames.](x86_64-page-table-translation-steps.svg)</span></span>
+<span id="cb3-398"><a href="#cb3-398"></a></span>
+<span id="cb3-399"><a href="#cb3-399"></a><span class="co">The permissions for the page in the level 1 table are `r`, which means read-only. The hardware enforces these permissions and would throw an exception if we tried to write to that page. Permissions in higher level pages restrict the possible permissions in lower levels, so if we set the level 3 entry to read-only, no pages that use this entry can be writable, even if lower levels specify read/write permissions.</span></span>
+<span id="cb3-400"><a href="#cb3-400"></a></span>
+<span id="cb3-401"><a href="#cb3-401"></a><span class="co">It's important to note that even though this example used only a single instance of each table, there are typically multiple instances of each level in each address space. At maximum, there are:</span></span>
+<span id="cb3-402"><a href="#cb3-402"></a></span>
+<span id="cb3-403"><a href="#cb3-403"></a><span class="co">- one level 4 table,</span></span>
+<span id="cb3-404"><a href="#cb3-404"></a><span class="co">- 512 level 3 tables (because the level 4 table has 512 entries),</span></span>
+<span id="cb3-405"><a href="#cb3-405"></a><span class="co">- 512 * 512 level 2 tables (because each of the 512 level 3 tables has 512 entries), and</span></span>
+<span id="cb3-406"><a href="#cb3-406"></a><span class="co">- 512 * 512 * 512 level 1 tables (512 entries for each level 2 table).</span></span>
+<span id="cb3-407"><a href="#cb3-407"></a></span>
+<span id="cb3-408"><a href="#cb3-408"></a><span class="al">###</span><span class="co"> Page Table Format</span></span>
+<span id="cb3-409"><a href="#cb3-409"></a></span>
+<span id="cb3-410"><a href="#cb3-410"></a><span class="co">Page tables on the x86_64 architecture are basically an array of 512 entries. In Rust syntax:</span></span>
+<span id="cb3-411"><a href="#cb3-411"></a></span>
+<span id="cb3-412"><a href="#cb3-412"></a><span class="co">```rust</span></span>
+<span id="cb3-413"><a href="#cb3-413"></a><span class="co">#[repr(align(4096))]</span></span>
+<span id="cb3-414"><a href="#cb3-414"></a><span class="co">pub struct PageTable {</span></span>
+<span id="cb3-415"><a href="#cb3-415"></a><span class="co">    entries: [PageTableEntry; 512],</span></span>
+<span id="cb3-416"><a href="#cb3-416"></a><span class="co">}</span></span>
+<span id="cb3-417"><a href="#cb3-417"></a><span class="co">```</span></span>
+<span id="cb3-418"><a href="#cb3-418"></a></span>
+<span id="cb3-419"><a href="#cb3-419"></a><span class="co">As indicated by the `repr` attribute, page tables need to be page-aligned, i.e., aligned on a 4&amp;nbsp;KiB boundary. This requirement guarantees that a page table always fills a complete page and allows an optimization that makes entries very compact.</span></span>
+<span id="cb3-420"><a href="#cb3-420"></a></span>
+<span id="cb3-421"><a href="#cb3-421"></a><span class="co">Each entry is 8 bytes (64 bits) large and has the following format:</span></span>
+<span id="cb3-422"><a href="#cb3-422"></a></span>
+<span id="cb3-423"><a href="#cb3-423"></a><span class="co">Bit(s) | Name | Meaning</span></span>
+<span id="cb3-424"><a href="#cb3-424"></a><span class="co">------ | ---- | -------</span></span>
+<span id="cb3-425"><a href="#cb3-425"></a><span class="co">0 | present | the page is currently in memory</span></span>
+<span id="cb3-426"><a href="#cb3-426"></a><span class="co">1 | writable | it's allowed to write to this page</span></span>
+<span id="cb3-427"><a href="#cb3-427"></a><span class="co">2 | user accessible | if not set, only kernel mode code can access this page</span></span>
+<span id="cb3-428"><a href="#cb3-428"></a><span class="co">3 | write-through caching | writes go directly to memory</span></span>
+<span id="cb3-429"><a href="#cb3-429"></a><span class="co">4 | disable cache | no cache is used for this page</span></span>
+<span id="cb3-430"><a href="#cb3-430"></a><span class="co">5 | accessed | the CPU sets this bit when this page is used</span></span>
+<span id="cb3-431"><a href="#cb3-431"></a><span class="co">6 | dirty | the CPU sets this bit when a write to this page occurs</span></span>
+<span id="cb3-432"><a href="#cb3-432"></a><span class="co">7 | huge page/null | must be 0 in P1 and P4, creates a 1&amp;nbsp;GiB page in P3, creates a 2&amp;nbsp;MiB page in P2</span></span>
+<span id="cb3-433"><a href="#cb3-433"></a><span class="co">8 | global | page isn't flushed from caches on address space switch (PGE bit of CR4 register must be set)</span></span>
+<span id="cb3-434"><a href="#cb3-434"></a><span class="co">9-11 | available | can be used freely by the OS</span></span>
+<span id="cb3-435"><a href="#cb3-435"></a><span class="co">12-51 | physical address | the page aligned 52bit physical address of the frame or the next page table</span></span>
+<span id="cb3-436"><a href="#cb3-436"></a><span class="co">52-62 | available | can be used freely by the OS</span></span>
+<span id="cb3-437"><a href="#cb3-437"></a><span class="co">63 | no execute | forbid executing code on this page (the NXE bit in the EFER register must be set)</span></span>
+<span id="cb3-438"><a href="#cb3-438"></a></span>
+<span id="cb3-439"><a href="#cb3-439"></a><span class="co">We see that only bits 12–51 are used to store the physical frame address. The remaining bits are used as flags or can be freely used by the operating system. This is possible because we always point to a 4096-byte aligned address, either to a page-aligned page table or to the start of a mapped frame. This means that bits 0–11 are always zero, so there is no reason to store these bits because the hardware can just set them to zero before using the address. The same is true for bits 52–63, because the x86_64 architecture only supports 52-bit physical addresses (similar to how it only supports 48-bit virtual addresses).</span></span>
+<span id="cb3-440"><a href="#cb3-440"></a></span>
+<span id="cb3-441"><a href="#cb3-441"></a><span class="co">Let's take a closer look at the available flags:</span></span>
+<span id="cb3-442"><a href="#cb3-442"></a></span>
+<span id="cb3-443"><a href="#cb3-443"></a><span class="co">- The `present` flag differentiates mapped pages from unmapped ones. It can be used to temporarily swap out pages to disk when the main memory becomes full. When the page is accessed subsequently, a special exception called _page fault_ occurs, to which the operating system can react by reloading the missing page from disk and then continuing the program.</span></span>
+<span id="cb3-444"><a href="#cb3-444"></a><span class="co">- The `writable` and `no execute` flags control whether the contents of the page are writable or contain executable instructions, respectively.</span></span>
+<span id="cb3-445"><a href="#cb3-445"></a><span class="co">- The `accessed` and `dirty` flags are automatically set by the CPU when a read or write to the page occurs. This information can be leveraged by the operating system, e.g., to decide which pages to swap out or whether the page contents have been modified since the last save to disk.</span></span>
+<span id="cb3-446"><a href="#cb3-446"></a><span class="co">- The `write-through caching` and `disable cache` flags allow the control of caches for every page individually.</span></span>
+<span id="cb3-447"><a href="#cb3-447"></a><span class="co">- The `user accessible` flag makes a page available to userspace code, otherwise, it is only accessible when the CPU is in kernel mode. This feature can be used to make [system calls] faster by keeping the kernel mapped while a userspace program is running. However, the [Spectre] vulnerability can allow userspace programs to read these pages nonetheless.</span></span>
+<span id="cb3-448"><a href="#cb3-448"></a><span class="co">- The `global` flag signals to the hardware that a page is available in all address spaces and thus does not need to be removed from the translation cache (see the section about the TLB below) on address space switches. This flag is commonly used together with a cleared `user accessible` flag to map the kernel code to all address spaces.</span></span>
+<span id="cb3-449"><a href="#cb3-449"></a><span class="co">- The `huge page` flag allows the creation of pages of larger sizes by letting the entries of the level 2 or level 3 page tables directly point to a mapped frame. With this bit set, the page size increases by factor 512 to either 2&amp;nbsp;MiB = 512 * 4&amp;nbsp;KiB for level 2 entries or even 1&amp;nbsp;GiB = 512 * 2&amp;nbsp;MiB for level 3 entries. The advantage of using larger pages is that fewer lines of the translation cache and fewer page tables are needed.</span></span>
+<span id="cb3-450"><a href="#cb3-450"></a></span>
+<span id="cb3-451"><a href="#cb3-451"></a><span class="co">[system calls]: https://en.wikipedia.org/wiki/System_call</span></span>
+<span id="cb3-452"><a href="#cb3-452"></a><span class="co">[Spectre]: https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)</span></span>
+<span id="cb3-453"><a href="#cb3-453"></a></span>
+<span id="cb3-454"><a href="#cb3-454"></a><span class="co">The `x86_64` crate provides types for [page tables] and their [entries], so we don't need to create these structures ourselves.</span></span>
+<span id="cb3-455"><a href="#cb3-455"></a></span>
+<span id="cb3-456"><a href="#cb3-456"></a><span class="co">[page tables]: https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page_table/struct.PageTable.html</span></span>
+<span id="cb3-457"><a href="#cb3-457"></a><span class="co">[entries]: https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page_table/struct.PageTableEntry.html</span></span>
+<span id="cb3-458"><a href="#cb3-458"></a></span>
+<span id="cb3-459"><a href="#cb3-459"></a><span class="al">###</span><span class="co"> The Translation Lookaside Buffer</span></span>
+<span id="cb3-460"><a href="#cb3-460"></a></span>
+<span id="cb3-461"><a href="#cb3-461"></a><span class="co">A 4-level page table makes the translation of virtual addresses expensive because each translation requires four memory accesses. To improve performance, the x86_64 architecture caches the last few translations in the so-called _translation lookaside buffer_ (TLB). This allows skipping the translation when it is still cached.</span></span>
+<span id="cb3-462"><a href="#cb3-462"></a></span>
+<span id="cb3-463"><a href="#cb3-463"></a><span class="co">Unlike the other CPU caches, the TLB is not fully transparent and does not update or remove translations when the contents of page tables change. This means that the kernel must manually update the TLB whenever it modifies a page table. To do this, there is a special CPU instruction called [`invlpg`] (“invalidate page”) that removes the translation for the specified page from the TLB, so that it is loaded again from the page table on the next access. The TLB can also be flushed completely by reloading the `CR3` register, which simulates an address space switch. The `x86_64` crate provides Rust functions for both variants in the [`tlb` module].</span></span>
+<span id="cb3-464"><a href="#cb3-464"></a></span>
+<span id="cb3-465"><a href="#cb3-465"></a><span class="co">[`invlpg`]: https://www.felixcloutier.com/x86/INVLPG.html</span></span>
+<span id="cb3-466"><a href="#cb3-466"></a><span class="co">[`tlb` module]: https://docs.rs/x86_64/0.14.2/x86_64/instructions/tlb/index.html</span></span>
+<span id="cb3-467"><a href="#cb3-467"></a></span>
+<span id="cb3-468"><a href="#cb3-468"></a><span class="co">It is important to remember to flush the TLB on each page table modification because otherwise, the CPU might keep using the old translation, which can lead to non-deterministic bugs that are very hard to debug.</span></span>
+<span id="cb3-469"><a href="#cb3-469"></a></span>
+<span id="cb3-470"><a href="#cb3-470"></a><span class="co">--&gt;</span></span>
+</code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

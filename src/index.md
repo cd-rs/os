@@ -43,7 +43,7 @@ format: html
 |0x9|03/16|[Double](80_double.qmd)|
 |0bX|03/23|`None`|`None`|`None`|
 |0xA|03/30|[Interrupts](90_interrupts.qmd)|[Keyboard](91_keyboard.qmd)|[Clock](92_clock.qmd)|
-|0xB|03/06|[Paging](A0_paging.qmd)|
+|0xB|03/06|[Paging](A0_paging.qmd)|[Page Fault](A1_pagefault.qmd)|
 |0xC|04/13|Page Tables|[`None`](https://my.willamette.edu/site/ssrd)||
 |0xD|04/20|The Heap|
 |0xE|04/27|Allocators|

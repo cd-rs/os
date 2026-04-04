@@ -4,7 +4,850 @@
     "href": "index.html",
     "title": "OS in Rust",
     "section": "",
-    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\n“wc”\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nTransmute\nmalloc\n\n\n0x3\n02/02\nBare Metal\nLinker\nRISC-V\n\n\n0x4\n02/09\nKernel\nBoot\nHello\n\n\n0x5\n02/16\nText\nFormat\nGraphics\n\n\n0x6\n02/23\nGuest\nWork Session\n\n\n\n0x7\n03/02\nTest\nSerial\nIntegration\n\n\n0x8\n03/09\nExceptions\nThe Call\nHandlers\n\n\n0x9\n03/16\nDouble\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nInterrupts\nKeyboard\nClock\n\n\n0xB\n03/06\nPaging\n\n\n\n\n0xC\n04/13\nPage Tables\nNone\n\n\n\n0xD\n04/20\nThe Heap\n\n\n\n\n0xE\n04/27\nAllocators\n\n\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
+    "text": "CS 371 “OS in Rust”\n\nCalled:\n\nCS 371: Advanced Systems Computing, Adv. Operating Systems\n\nThe second semester class in a:\n\nCompiled language, with\nNo garbage collector.\n\nIn the second semester, one of the \\(n\\) great systems\n\nOperating System (OS)\nCompiler\nWeb Server\n\nTaught this year on OS and in Rust.\n\nSo to me, “OS in Rust”\n\n\n\nMW 1310-1440\n\n\nProf. Calvin\n\n\nSyllabus\n\nSyllabus link\n\n\n\n\nCalendar\n\n\n\nWeek\nDate (M)\nLecture (M)\nLab (W)\nHW (F)\n\n\n\n\n0x0\n01/12\nDerust\n“wc”\nCLI\n\n\n0x1\n01/19\nNone\nUnsafe\nSplits\n\n\n0x2\n01/26\nOSes\nTransmute\nmalloc\n\n\n0x3\n02/02\nBare Metal\nLinker\nRISC-V\n\n\n0x4\n02/09\nKernel\nBoot\nHello\n\n\n0x5\n02/16\nText\nFormat\nGraphics\n\n\n0x6\n02/23\nGuest\nWork Session\n\n\n\n0x7\n03/02\nTest\nSerial\nIntegration\n\n\n0x8\n03/09\nExceptions\nThe Call\nHandlers\n\n\n0x9\n03/16\nDouble\n\n\n\n\n0bX\n03/23\nNone\nNone\nNone\n\n\n0xA\n03/30\nInterrupts\nKeyboard\nClock\n\n\n0xB\n03/06\nPaging\nPage Fault\n\n\n\n0xC\n04/13\nPage Tables\nNone\n\n\n\n0xD\n04/20\nThe Heap\n\n\n\n\n0xE\n04/27\nAllocators\n\n\n\n\n\n\nFinal OS due Tuesday, May 5th, from 2:00 pm - 5:00 pm (5 PM ET on 5/5)\n\n\nLecture Recordings"
+  },
+  {
+    "objectID": "A0_paging.html",
+    "href": "A0_paging.html",
+    "title": "Paging",
+    "section": "",
+    "text": "Action Items:\n\nWelcome back.\nYou should be working on:\n\nKeyboards\nTimers",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#announcements",
+    "href": "A0_paging.html#announcements",
+    "title": "Paging",
+    "section": "",
+    "text": "Action Items:\n\nWelcome back.\nYou should be working on:\n\nKeyboards\nTimers",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#citations",
+    "href": "A0_paging.html#citations",
+    "title": "Paging",
+    "section": "Citations",
+    "text": "Citations\n\nThere’s a lot of ways to cover paging theory.\nBy convention, I would use the bin packing problem\nThis class doesn’t require the class that’s taught in, so… blog it is.\nPaging",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#today",
+    "href": "A0_paging.html#today",
+    "title": "Paging",
+    "section": "Today",
+    "text": "Today\n\nMemory isolation\nSegmentation\nVirtual Memory\nPaging\nMultilevel page tables on x86_64",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#an-os-task",
+    "href": "A0_paging.html#an-os-task",
+    "title": "Paging",
+    "section": "An OS Task",
+    "text": "An OS Task\n\nThe OS must isolate programs.\n\nImagine, say, separate VGA buffer from a clock.\nWe currently do this with prolific static mut\n\nIn practice:\n\nText editor vs. web browser vs. video player.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#how",
+    "href": "A0_paging.html#how",
+    "title": "Paging",
+    "section": "How?",
+    "text": "How?\n\nUtilize hardware functionality.\nEnsure that memory areas of one process are not accessible by other processes.\n\nUse physically different SSD area\nRecycle physical RAM\nUse distinct “keys” in virtual memory space.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#one-approach",
+    "href": "A0_paging.html#one-approach",
+    "title": "Paging",
+    "section": "One Approach",
+    "text": "One Approach\n\nConsider the ARM Cortex-M\n\nI’ve run into these in simulation.\nCommon embedded platform.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#mpu",
+    "href": "A0_paging.html#mpu",
+    "title": "Paging",
+    "section": "MPU",
+    "text": "MPU\n\nThe Cortex-M has a “Memory Protection Unit”\n\nAllows software to configure ~8 “regions”\nRegions can have distinct permissions\n\nRead/write/execute/etc.\n\nMPU is an intermediary between CPU and MMU that vets memory accesses.\n\nThis solves the memory isolation problem for the OS.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#two-approaches",
+    "href": "A0_paging.html#two-approaches",
+    "title": "Paging",
+    "section": "Two Approaches",
+    "text": "Two Approaches\n\nx86 is not Cortex-M - it has two options:\n\nSegmentation\n\n“In a computer system using segmentation, a reference to a memory location includes a value that identifies a segment and an offset (memory location) within that segment.”",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#two-approaches-1",
+    "href": "A0_paging.html#two-approaches-1",
+    "title": "Paging",
+    "section": "Two Approaches",
+    "text": "Two Approaches\n\nx86 is not Cortex-M - it has two options:\n\nPaging\n\n“Page tables are used to translate the virtual addresses seen by the application into physical addresses used by the hardware to process instructions…”",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#its-old",
+    "href": "A0_paging.html#its-old",
+    "title": "Paging",
+    "section": "It’s Old",
+    "text": "It’s Old\n\nSegmentation was already introduced in 1978.\n\nOriginally to increase the amount of addressable memory.\n\nThe situation back then was that CPUs only used 16-bit addresses\n\nLimited the amount of addressable memory to 64KiB.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#outcomes",
+    "href": "A0_paging.html#outcomes",
+    "title": "Paging",
+    "section": "Outcomes",
+    "text": "Outcomes\n\nTo make more than these 64KiB accessible, additional segment registers added\n\nEach has an offset.\nThe CPU automatically added this offset on each memory access\nUp to 1MiB of memory was accessible.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#segment-registers",
+    "href": "A0_paging.html#segment-registers",
+    "title": "Paging",
+    "section": "Segment Registers",
+    "text": "Segment Registers\n\nWe’ve seen these before.\n\nRecall we used the code segment register to handle exceptions.\n\nCS - Code Segment\nSS - Stack Segment\nDS - Data Segment\nES/FS/GS - Extra, fxtra, and gxtra",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#usage",
+    "href": "A0_paging.html#usage",
+    "title": "Paging",
+    "section": "Usage",
+    "text": "Usage\n\nSimpler when originally implemented (e.g. before ES/FS/GS existed).\n\nSegment registers directly contained the offset\nNo access control was performed",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#protected-mode",
+    "href": "A0_paging.html#protected-mode",
+    "title": "Paging",
+    "section": "Protected Mode",
+    "text": "Protected Mode\n\nEnter protected mode.\n\nRather than offsets, uses a look-up table into a global descriptor table.\nRecall we used the global descriptor table to handle double faults.\n\nWhat is protected? Memory.\nWho is the protector? The OS.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#how-it-feels",
+    "href": "A0_paging.html#how-it-feels",
+    "title": "Paging",
+    "section": "How it feels",
+    "text": "How it feels\n\nA process, like a user mode program, anything we have written outside of this class, perceives there to be an internally consistent memory.\n\nNo other programs write to this space (unless mediated by file or network).\nAny write persists to be read.\nThe OS runs and supports OS operations without any visible memory impact.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#what-it-means",
+    "href": "A0_paging.html#what-it-means",
+    "title": "Paging",
+    "section": "What it means",
+    "text": "What it means\n\nSo, whenever a program uses a numerical memory address, that numerical address is a historical artifact from the pre-segmentation era.\n\nIn practice, it is a “bit-packed” data structure unpacked by the OS to extract segment and local addresses.\n\nThis is why when exception processing we drew memory addresses from multiple registers (memory and segment).",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#the-big-idea",
+    "href": "A0_paging.html#the-big-idea",
+    "title": "Paging",
+    "section": "The Big Idea",
+    "text": "The Big Idea\n\nThe idea behind virtual memory is to abstract away the memory addresses from the underlying physical storage device.\nInstead of directly accessing the storage device, a translation step is performed first.\n\nAt the hardware-software interface, via the OS and MMU jointly.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#segment-arithmetic",
+    "href": "A0_paging.html#segment-arithmetic",
+    "title": "Paging",
+    "section": "Segment Arithmetic",
+    "text": "Segment Arithmetic\n\nFor segmentation, the translation step is to add the offset address of the active segment.\nImagine a program accessing memory address.\n\nLocal address of 0x1234000\nSegment address of 0x1111000\nThen, the address that is really accessed is 0x2345000.\n\n\n\nhex(0x12340000 + 0x1111000)\n\n'0x13451000'",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#namespaces",
+    "href": "A0_paging.html#namespaces",
+    "title": "Paging",
+    "section": "Namespaces",
+    "text": "Namespaces\n\nThis can be monumentally confusing.\n\nThe MMU and, for example, an SSD and HDD are also using numerical memory addresses.\n\nTo differentiate the two address types:\n\nAddresses before the translation are called virtual\nAddresses after the translation are called physical",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#physical-addresses",
+    "href": "A0_paging.html#physical-addresses",
+    "title": "Paging",
+    "section": "Physical addresses",
+    "text": "Physical addresses\n\nOnly visible to OS\nUnique.\nSame for all users/clients/programs/privilege levels",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#virtual-addresses",
+    "href": "A0_paging.html#virtual-addresses",
+    "title": "Paging",
+    "section": "Virtual addresses",
+    "text": "Virtual addresses\n\nTranslation dependent\n\nOnly meaningful relevant to a specific underlying OS\n\nNon-unique.\n\nMultiple distinct virtual addresses may correspond to the same physical address.\nThe same virtual address in different programs/processes may refer to distinct physical addresses.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually",
+    "href": "A0_paging.html#visually",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#textually",
+    "href": "A0_paging.html#textually",
+    "title": "Paging",
+    "section": "Textually",
+    "text": "Textually\n\nImagine the same program runs twice or more.\n\nEach time uses a local 150 address for some data.\nNo collision - same as if two programs both have their own x variable.\n\nSegments differ so physical address differ.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#benefit",
+    "href": "A0_paging.html#benefit",
+    "title": "Paging",
+    "section": "Benefit",
+    "text": "Benefit\n\nWe recall the abstraction of the stored-program computer\nNow, those programs:\n\nCan be placed at arbitrary physical memory addresses\nAlways consistently refer to internal memory locations",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#fragmentation",
+    "href": "A0_paging.html#fragmentation",
+    "title": "Paging",
+    "section": "Fragmentation",
+    "text": "Fragmentation\n\nThe differentiation between virtual and physical addresses makes segmentation really powerful.\nHowever, it has the problem of fragmentation.\nAs an example, imagine that we want to run a third copy of the program we saw above.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually-1",
+    "href": "A0_paging.html#visually-1",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#problem",
+    "href": "A0_paging.html#problem",
+    "title": "Paging",
+    "section": "Problem",
+    "text": "Problem\n\nThere is no way to map the third instance of the program to virtual memory without overlapping.\n\nBut there is more than enough free memory available!\n\nThe problem is that we need contiguous memory and can’t use the small free chunks (fragments).",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#one-solution",
+    "href": "A0_paging.html#one-solution",
+    "title": "Paging",
+    "section": "One Solution",
+    "text": "One Solution\n\nWe can “make this work”\n\nDispatch a new program.\nIf it needs more space, “smoosh” all other programs together.\nFit in the new program in the opened space.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually-2",
+    "href": "A0_paging.html#visually-2",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#defrag",
+    "href": "A0_paging.html#defrag",
+    "title": "Paging",
+    "section": "“Defrag”",
+    "text": "“Defrag”\n\nEven as recently as in within my lifetime, standard of practice was to recommend semiregular (monthly?) manual usage of “defragmentation” tools provided by the OS for the hard drive.\nThis is the same technique but in RAM for working programs.\nTakes longer the longer between uses.\nWastes time every time it’s run.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#downsides",
+    "href": "A0_paging.html#downsides",
+    "title": "Paging",
+    "section": "Downsides",
+    "text": "Downsides\n\nIt needs to copy large amounts of memory, which decreases performance.\nIt needs to be done regularly before the memory becomes too fragmented.\nThis makes performance unpredictable since programs are paused at random times and might become unresponsive.\n\nWhat if a timer goes off for a visible application while defrag is running.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#sunset",
+    "href": "A0_paging.html#sunset",
+    "title": "Paging",
+    "section": "Sunset",
+    "text": "Sunset\n\nFragmentation has led to segmentation no longer being used by modern systems.\nSegmentation is not even supported in 64-bit x86 anymore.\nInstead, paging is used, which bypass the fragmentation problem.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#the-idea",
+    "href": "A0_paging.html#the-idea",
+    "title": "Paging",
+    "section": "The Idea",
+    "text": "The Idea\n\nDivide both the virtual and physical memory space into small, fixed-size blocks.\nTerm these blocks of the virtual memory space as pages.\nTerm the blocks of the physical address space as frames.\nEach page can be individually mapped to any frame.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#example",
+    "href": "A0_paging.html#example",
+    "title": "Paging",
+    "section": "Example",
+    "text": "Example\n\nWe can now split larger memory regions across non-continuous physical frames.\nThe advantage of this becomes visible if we recap the example of the fragmented memory space, but use paging instead of segmentation this time.\n\nEasy to imagine each memory chunk mapping onto multiple pages/frames.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually-3",
+    "href": "A0_paging.html#visually-3",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#description",
+    "href": "A0_paging.html#description",
+    "title": "Paging",
+    "section": "Description",
+    "text": "Description\n\nTake page size of 50 bytes.\n\nEach program needs three pages.\n\nEach page is mapped to a frame individually.\n\nA continuous virtual memory region can be mapped to non-continuous physical frames.\n\nNow may start the third instance of the program without defragmentation.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#hidden-fragmentation",
+    "href": "A0_paging.html#hidden-fragmentation",
+    "title": "Paging",
+    "section": "Hidden Fragmentation",
+    "text": "Hidden Fragmentation\n\nCompared to segmentation, paging uses lots of small, fixed-sized memory regions instead of a few large, variable-sized regions.\n\nAnd by variable-sized, we mean correctly-sized.\n\nSince every frame has the same size, there are no frames that are too small to be used, so no fragmentation occurs.\n\nRight?",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#internal-fragmentation",
+    "href": "A0_paging.html#internal-fragmentation",
+    "title": "Paging",
+    "section": "Internal Fragmentation",
+    "text": "Internal Fragmentation\n\nInternal fragmentation occurs because not every memory region is an exact multiple of the page size.\n\nImagine a program of size 101 with pages sized 50.\nIt would still need three pages of size 50.\nSo you squander 49 bytes.\n\nTerm the segmentation fragmentation external fragmentation.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#pros-and-cons",
+    "href": "A0_paging.html#pros-and-cons",
+    "title": "Paging",
+    "section": "Pros and Cons",
+    "text": "Pros and Cons\n\nInternal fragmentation is unfortunate but often better than the external fragmentation that occurs with segmentation.\nIt still wastes memory, but\n\nDoes not require defragmentation and\nMakes the amount of fragmentation predictable\n\nHalf page per program on average",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#mapping",
+    "href": "A0_paging.html#mapping",
+    "title": "Paging",
+    "section": "Mapping",
+    "text": "Mapping\n\nPotentially millions of pages is individually mapped to a frame.\nThis mapping information needs to be stored somewhere.\n\nWe recall the malloc assignment.\n\nVs. a segment register for each program…\n\nMore pages than segment registers.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#alternative",
+    "href": "A0_paging.html#alternative",
+    "title": "Paging",
+    "section": "Alternative",
+    "text": "Alternative\n\nAs with, say, the IDT, the GDT, etc., we extend the capabilities of the OS to handle a hardware limitation.\nPaging uses a table structure called page table to store the mapping information.\nWe can visualize.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually-4",
+    "href": "A0_paging.html#visually-4",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#practically",
+    "href": "A0_paging.html#practically",
+    "title": "Paging",
+    "section": "Practically",
+    "text": "Practically\n\nEach program instance has its own page table\nA pointer to the currently active table is stored in a special CPU register.\nOn x86, this register is called CR3\n\n“Control Register 3” - I noted there are many CR’s, some used.\n\nThe OS loads the correct page table to a register before running a program.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#os-hardware",
+    "href": "A0_paging.html#os-hardware",
+    "title": "Paging",
+    "section": "OS & Hardware",
+    "text": "OS & Hardware\n\nOn each memory access, the CPU reads the table pointer from the register and looks up the mapped frame for the accessed page in the table.\n\nJust like an exception!\nHardware only process.\n\nDepending on the architecture, page table entries can also store attributes such as access permissions in a flags field.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#limitations",
+    "href": "A0_paging.html#limitations",
+    "title": "Paging",
+    "section": "Limitations",
+    "text": "Limitations\n\nSimple page tables have a problem in larger address spaces: waste.\nImagine a program that uses the four virtual pages 0, 1_000_000, 1_000_050, and 1_000_100\nIt only needs 4 physical frames, but the page table has over a million entries.\nWe can’t omit the empty entries or we lose constant-time access.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually-5",
+    "href": "A0_paging.html#visually-5",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#a-solution",
+    "href": "A0_paging.html#a-solution",
+    "title": "Paging",
+    "section": "A solution",
+    "text": "A solution\n\nTo reduce the wasted memory, we can use a two-level page table.\nThe idea is that we use different page tables for different address regions.\nAn additional table called level 2 page table contains the mapping between address regions and (level 1) page tables.\n\nOne-indexed 😬",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#visually-6",
+    "href": "A0_paging.html#visually-6",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.html#its-just-a-radix-tree",
+    "href": "A0_paging.html#its-just-a-radix-tree",
+    "title": "Paging",
+    "section": "It’s just a radix tree",
+    "text": "It’s just a radix tree\n\nYou probably know about these.",
+    "crumbs": [
+      "Paging"
+    ]
+  },
+  {
+    "objectID": "A0_paging.rjs.html#announcements",
+    "href": "A0_paging.rjs.html#announcements",
+    "title": "Paging",
+    "section": "Announcements",
+    "text": "Announcements\n\nAction Items:\n\nWelcome back.\nYou should be working on:\n\nKeyboards\nTimers"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#citations",
+    "href": "A0_paging.rjs.html#citations",
+    "title": "Paging",
+    "section": "Citations",
+    "text": "Citations\n\nThere’s a lot of ways to cover paging theory.\nBy convention, I would use the bin packing problem\nThis class doesn’t require the class that’s taught in, so… blog it is.\nPaging"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#today",
+    "href": "A0_paging.rjs.html#today",
+    "title": "Paging",
+    "section": "Today",
+    "text": "Today\n\nMemory isolation\nSegmentation\nVirtual Memory\nPaging\nMultilevel page tables on x86_64"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#an-os-task",
+    "href": "A0_paging.rjs.html#an-os-task",
+    "title": "Paging",
+    "section": "An OS Task",
+    "text": "An OS Task\n\nThe OS must isolate programs.\n\nImagine, say, separate VGA buffer from a clock.\nWe currently do this with prolific static mut\n\nIn practice:\n\nText editor vs. web browser vs. video player."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#how",
+    "href": "A0_paging.rjs.html#how",
+    "title": "Paging",
+    "section": "How?",
+    "text": "How?\n\nUtilize hardware functionality.\nEnsure that memory areas of one process are not accessible by other processes.\n\nUse physically different SSD area\nRecycle physical RAM\nUse distinct “keys” in virtual memory space."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#one-approach",
+    "href": "A0_paging.rjs.html#one-approach",
+    "title": "Paging",
+    "section": "One Approach",
+    "text": "One Approach\n\nConsider the ARM Cortex-M\n\nI’ve run into these in simulation.\nCommon embedded platform."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#mpu",
+    "href": "A0_paging.rjs.html#mpu",
+    "title": "Paging",
+    "section": "MPU",
+    "text": "MPU\n\nThe Cortex-M has a “Memory Protection Unit”\n\nAllows software to configure ~8 “regions”\nRegions can have distinct permissions\n\nRead/write/execute/etc.\n\nMPU is an intermediary between CPU and MMU that vets memory accesses.\n\nThis solves the memory isolation problem for the OS."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#two-approaches",
+    "href": "A0_paging.rjs.html#two-approaches",
+    "title": "Paging",
+    "section": "Two Approaches",
+    "text": "Two Approaches\n\nx86 is not Cortex-M - it has two options:\n\nSegmentation\n\n“In a computer system using segmentation, a reference to a memory location includes a value that identifies a segment and an offset (memory location) within that segment.”"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#two-approaches-1",
+    "href": "A0_paging.rjs.html#two-approaches-1",
+    "title": "Paging",
+    "section": "Two Approaches",
+    "text": "Two Approaches\n\nx86 is not Cortex-M - it has two options:\n\nPaging\n\n“Page tables are used to translate the virtual addresses seen by the application into physical addresses used by the hardware to process instructions…”"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#its-old",
+    "href": "A0_paging.rjs.html#its-old",
+    "title": "Paging",
+    "section": "It’s Old",
+    "text": "It’s Old\n\nSegmentation was already introduced in 1978.\n\nOriginally to increase the amount of addressable memory.\n\nThe situation back then was that CPUs only used 16-bit addresses\n\nLimited the amount of addressable memory to 64KiB."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#outcomes",
+    "href": "A0_paging.rjs.html#outcomes",
+    "title": "Paging",
+    "section": "Outcomes",
+    "text": "Outcomes\n\nTo make more than these 64KiB accessible, additional segment registers added\n\nEach has an offset.\nThe CPU automatically added this offset on each memory access\nUp to 1MiB of memory was accessible."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#segment-registers",
+    "href": "A0_paging.rjs.html#segment-registers",
+    "title": "Paging",
+    "section": "Segment Registers",
+    "text": "Segment Registers\n\nWe’ve seen these before.\n\nRecall we used the code segment register to handle exceptions.\n\nCS - Code Segment\nSS - Stack Segment\nDS - Data Segment\nES/FS/GS - Extra, fxtra, and gxtra"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#usage",
+    "href": "A0_paging.rjs.html#usage",
+    "title": "Paging",
+    "section": "Usage",
+    "text": "Usage\n\nSimpler when originally implemented (e.g. before ES/FS/GS existed).\n\nSegment registers directly contained the offset\nNo access control was performed"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#protected-mode",
+    "href": "A0_paging.rjs.html#protected-mode",
+    "title": "Paging",
+    "section": "Protected Mode",
+    "text": "Protected Mode\n\nEnter protected mode.\n\nRather than offsets, uses a look-up table into a global descriptor table.\nRecall we used the global descriptor table to handle double faults.\n\nWhat is protected? Memory.\nWho is the protector? The OS."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#how-it-feels",
+    "href": "A0_paging.rjs.html#how-it-feels",
+    "title": "Paging",
+    "section": "How it feels",
+    "text": "How it feels\n\nA process, like a user mode program, anything we have written outside of this class, perceives there to be an internally consistent memory.\n\nNo other programs write to this space (unless mediated by file or network).\nAny write persists to be read.\nThe OS runs and supports OS operations without any visible memory impact."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#what-it-means",
+    "href": "A0_paging.rjs.html#what-it-means",
+    "title": "Paging",
+    "section": "What it means",
+    "text": "What it means\n\nSo, whenever a program uses a numerical memory address, that numerical address is a historical artifact from the pre-segmentation era.\n\nIn practice, it is a “bit-packed” data structure unpacked by the OS to extract segment and local addresses.\n\nThis is why when exception processing we drew memory addresses from multiple registers (memory and segment)."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#the-big-idea",
+    "href": "A0_paging.rjs.html#the-big-idea",
+    "title": "Paging",
+    "section": "The Big Idea",
+    "text": "The Big Idea\n\nThe idea behind virtual memory is to abstract away the memory addresses from the underlying physical storage device.\nInstead of directly accessing the storage device, a translation step is performed first.\n\nAt the hardware-software interface, via the OS and MMU jointly."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#segment-arithmetic",
+    "href": "A0_paging.rjs.html#segment-arithmetic",
+    "title": "Paging",
+    "section": "Segment Arithmetic",
+    "text": "Segment Arithmetic\n\nFor segmentation, the translation step is to add the offset address of the active segment.\nImagine a program accessing memory address.\n\nLocal address of 0x1234000\nSegment address of 0x1111000\nThen, the address that is really accessed is 0x2345000.\n\n\n\nhex(0x12340000 + 0x1111000)\n\n'0x13451000'"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#namespaces",
+    "href": "A0_paging.rjs.html#namespaces",
+    "title": "Paging",
+    "section": "Namespaces",
+    "text": "Namespaces\n\nThis can be monumentally confusing.\n\nThe MMU and, for example, an SSD and HDD are also using numerical memory addresses.\n\nTo differentiate the two address types:\n\nAddresses before the translation are called virtual\nAddresses after the translation are called physical"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#physical-addresses",
+    "href": "A0_paging.rjs.html#physical-addresses",
+    "title": "Paging",
+    "section": "Physical addresses",
+    "text": "Physical addresses\n\nOnly visible to OS\nUnique.\nSame for all users/clients/programs/privilege levels"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#virtual-addresses",
+    "href": "A0_paging.rjs.html#virtual-addresses",
+    "title": "Paging",
+    "section": "Virtual addresses",
+    "text": "Virtual addresses\n\nTranslation dependent\n\nOnly meaningful relevant to a specific underlying OS\n\nNon-unique.\n\nMultiple distinct virtual addresses may correspond to the same physical address.\nThe same virtual address in different programs/processes may refer to distinct physical addresses."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually",
+    "href": "A0_paging.rjs.html#visually",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#textually",
+    "href": "A0_paging.rjs.html#textually",
+    "title": "Paging",
+    "section": "Textually",
+    "text": "Textually\n\nImagine the same program runs twice or more.\n\nEach time uses a local 150 address for some data.\nNo collision - same as if two programs both have their own x variable.\n\nSegments differ so physical address differ."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#benefit",
+    "href": "A0_paging.rjs.html#benefit",
+    "title": "Paging",
+    "section": "Benefit",
+    "text": "Benefit\n\nWe recall the abstraction of the stored-program computer\nNow, those programs:\n\nCan be placed at arbitrary physical memory addresses\nAlways consistently refer to internal memory locations"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#fragmentation",
+    "href": "A0_paging.rjs.html#fragmentation",
+    "title": "Paging",
+    "section": "Fragmentation",
+    "text": "Fragmentation\n\nThe differentiation between virtual and physical addresses makes segmentation really powerful.\nHowever, it has the problem of fragmentation.\nAs an example, imagine that we want to run a third copy of the program we saw above."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually-1",
+    "href": "A0_paging.rjs.html#visually-1",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#problem",
+    "href": "A0_paging.rjs.html#problem",
+    "title": "Paging",
+    "section": "Problem",
+    "text": "Problem\n\nThere is no way to map the third instance of the program to virtual memory without overlapping.\n\nBut there is more than enough free memory available!\n\nThe problem is that we need contiguous memory and can’t use the small free chunks (fragments)."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#one-solution",
+    "href": "A0_paging.rjs.html#one-solution",
+    "title": "Paging",
+    "section": "One Solution",
+    "text": "One Solution\n\nWe can “make this work”\n\nDispatch a new program.\nIf it needs more space, “smoosh” all other programs together.\nFit in the new program in the opened space."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually-2",
+    "href": "A0_paging.rjs.html#visually-2",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#defrag",
+    "href": "A0_paging.rjs.html#defrag",
+    "title": "Paging",
+    "section": "“Defrag”",
+    "text": "“Defrag”\n\nEven as recently as in within my lifetime, standard of practice was to recommend semiregular (monthly?) manual usage of “defragmentation” tools provided by the OS for the hard drive.\nThis is the same technique but in RAM for working programs.\nTakes longer the longer between uses.\nWastes time every time it’s run."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#downsides",
+    "href": "A0_paging.rjs.html#downsides",
+    "title": "Paging",
+    "section": "Downsides",
+    "text": "Downsides\n\nIt needs to copy large amounts of memory, which decreases performance.\nIt needs to be done regularly before the memory becomes too fragmented.\nThis makes performance unpredictable since programs are paused at random times and might become unresponsive.\n\nWhat if a timer goes off for a visible application while defrag is running."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#sunset",
+    "href": "A0_paging.rjs.html#sunset",
+    "title": "Paging",
+    "section": "Sunset",
+    "text": "Sunset\n\nFragmentation has led to segmentation no longer being used by modern systems.\nSegmentation is not even supported in 64-bit x86 anymore.\nInstead, paging is used, which bypass the fragmentation problem."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#the-idea",
+    "href": "A0_paging.rjs.html#the-idea",
+    "title": "Paging",
+    "section": "The Idea",
+    "text": "The Idea\n\nDivide both the virtual and physical memory space into small, fixed-size blocks.\nTerm these blocks of the virtual memory space as pages.\nTerm the blocks of the physical address space as frames.\nEach page can be individually mapped to any frame."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#example",
+    "href": "A0_paging.rjs.html#example",
+    "title": "Paging",
+    "section": "Example",
+    "text": "Example\n\nWe can now split larger memory regions across non-continuous physical frames.\nThe advantage of this becomes visible if we recap the example of the fragmented memory space, but use paging instead of segmentation this time.\n\nEasy to imagine each memory chunk mapping onto multiple pages/frames."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually-3",
+    "href": "A0_paging.rjs.html#visually-3",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#description",
+    "href": "A0_paging.rjs.html#description",
+    "title": "Paging",
+    "section": "Description",
+    "text": "Description\n\nTake page size of 50 bytes.\n\nEach program needs three pages.\n\nEach page is mapped to a frame individually.\n\nA continuous virtual memory region can be mapped to non-continuous physical frames.\n\nNow may start the third instance of the program without defragmentation."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#hidden-fragmentation",
+    "href": "A0_paging.rjs.html#hidden-fragmentation",
+    "title": "Paging",
+    "section": "Hidden Fragmentation",
+    "text": "Hidden Fragmentation\n\nCompared to segmentation, paging uses lots of small, fixed-sized memory regions instead of a few large, variable-sized regions.\n\nAnd by variable-sized, we mean correctly-sized.\n\nSince every frame has the same size, there are no frames that are too small to be used, so no fragmentation occurs.\n\nRight?"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#internal-fragmentation",
+    "href": "A0_paging.rjs.html#internal-fragmentation",
+    "title": "Paging",
+    "section": "Internal Fragmentation",
+    "text": "Internal Fragmentation\n\nInternal fragmentation occurs because not every memory region is an exact multiple of the page size.\n\nImagine a program of size 101 with pages sized 50.\nIt would still need three pages of size 50.\nSo you squander 49 bytes.\n\nTerm the segmentation fragmentation external fragmentation."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#pros-and-cons",
+    "href": "A0_paging.rjs.html#pros-and-cons",
+    "title": "Paging",
+    "section": "Pros and Cons",
+    "text": "Pros and Cons\n\nInternal fragmentation is unfortunate but often better than the external fragmentation that occurs with segmentation.\nIt still wastes memory, but\n\nDoes not require defragmentation and\nMakes the amount of fragmentation predictable\n\nHalf page per program on average"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#mapping",
+    "href": "A0_paging.rjs.html#mapping",
+    "title": "Paging",
+    "section": "Mapping",
+    "text": "Mapping\n\nPotentially millions of pages is individually mapped to a frame.\nThis mapping information needs to be stored somewhere.\n\nWe recall the malloc assignment.\n\nVs. a segment register for each program…\n\nMore pages than segment registers."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#alternative",
+    "href": "A0_paging.rjs.html#alternative",
+    "title": "Paging",
+    "section": "Alternative",
+    "text": "Alternative\n\nAs with, say, the IDT, the GDT, etc., we extend the capabilities of the OS to handle a hardware limitation.\nPaging uses a table structure called page table to store the mapping information.\nWe can visualize."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually-4",
+    "href": "A0_paging.rjs.html#visually-4",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#practically",
+    "href": "A0_paging.rjs.html#practically",
+    "title": "Paging",
+    "section": "Practically",
+    "text": "Practically\n\nEach program instance has its own page table\nA pointer to the currently active table is stored in a special CPU register.\nOn x86, this register is called CR3\n\n“Control Register 3” - I noted there are many CR’s, some used.\n\nThe OS loads the correct page table to a register before running a program."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#os-hardware",
+    "href": "A0_paging.rjs.html#os-hardware",
+    "title": "Paging",
+    "section": "OS & Hardware",
+    "text": "OS & Hardware\n\nOn each memory access, the CPU reads the table pointer from the register and looks up the mapped frame for the accessed page in the table.\n\nJust like an exception!\nHardware only process.\n\nDepending on the architecture, page table entries can also store attributes such as access permissions in a flags field."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#limitations",
+    "href": "A0_paging.rjs.html#limitations",
+    "title": "Paging",
+    "section": "Limitations",
+    "text": "Limitations\n\nSimple page tables have a problem in larger address spaces: waste.\nImagine a program that uses the four virtual pages 0, 1_000_000, 1_000_050, and 1_000_100\nIt only needs 4 physical frames, but the page table has over a million entries.\nWe can’t omit the empty entries or we lose constant-time access."
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually-5",
+    "href": "A0_paging.rjs.html#visually-5",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#a-solution",
+    "href": "A0_paging.rjs.html#a-solution",
+    "title": "Paging",
+    "section": "A solution",
+    "text": "A solution\n\nTo reduce the wasted memory, we can use a two-level page table.\nThe idea is that we use different page tables for different address regions.\nAn additional table called level 2 page table contains the mapping between address regions and (level 1) page tables.\n\nOne-indexed 😬"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#visually-6",
+    "href": "A0_paging.rjs.html#visually-6",
+    "title": "Paging",
+    "section": "Visually",
+    "text": "Visually"
+  },
+  {
+    "objectID": "A0_paging.rjs.html#its-just-a-radix-tree",
+    "href": "A0_paging.rjs.html#its-just-a-radix-tree",
+    "title": "Paging",
+    "section": "It’s just a radix tree",
+    "text": "It’s just a radix tree\n\nYou probably know about these."
   },
   {
     "objectID": "91_keyboard.html",
@@ -13016,9 +13859,59 @@
     "href": "92_clock.html#aside",
     "title": "Clock",
     "section": "Aside",
-    "text": "Aside\n\nI think you’ll want to fork your OS for this, so when you make a new crate and copy things over, you’ll probably want to do any improvements to your OS first, or at least keep anything you learn in mind going into next week.",
+    "text": "Aside\n\nI think you’ll want to diverge significantly from your baseline OS for this, so when you make a new crate and copy things over, you’ll probably want to do any improvements to your OS first, or at least keep anything you learn in mind going into next week.",
     "crumbs": [
       "Clock"
+    ]
+  },
+  {
+    "objectID": "A1_pagefault.html",
+    "href": "A1_pagefault.html",
+    "title": "Page Fault",
+    "section": "",
+    "text": "Page Fault Handler\nExploration\n\n\n\n\nWith Wednesday off next week, doing a split homework over two weeks with this lab.\nThat is the paging implementation homework, which is slated for after lecture next week.\n\nIt will be posted when its ready!",
+    "crumbs": [
+      "Page Fault"
+    ]
+  },
+  {
+    "objectID": "A1_pagefault.html#a-note",
+    "href": "A1_pagefault.html#a-note",
+    "title": "Page Fault",
+    "section": "",
+    "text": "With Wednesday off next week, doing a split homework over two weeks with this lab.\nThat is the paging implementation homework, which is slated for after lecture next week.\n\nIt will be posted when its ready!",
+    "crumbs": [
+      "Page Fault"
+    ]
+  },
+  {
+    "objectID": "A1_pagefault.html#implementation",
+    "href": "A1_pagefault.html#implementation",
+    "title": "Page Fault",
+    "section": "Implementation",
+    "text": "Implementation\nOne thing that we did not mention yet: Our kernel already runs on paging. The bootloader has already set up a 4-level paging hierarchy that maps every page of our kernel to a physical frame. The bootloader does this because paging is mandatory in 64-bit mode on x86_64.\nThis means that every memory address that we used in our kernel was a virtual address. Accessing the VGA buffer at address 0xb8000 only worked because the bootloader identity mapped that memory page, which means that it mapped the virtual page 0xb8000 to the physical frame 0xb8000.\nPaging makes our kernel already relatively safe, since every memory access that is out of bounds causes a page fault exception instead of writing to random physical memory. The bootloader even sets the correct access permissions for each page, which means that only the pages containing code are executable and only data pages are writable.",
+    "crumbs": [
+      "Page Fault"
+    ]
+  },
+  {
+    "objectID": "A1_pagefault.html#page-faults",
+    "href": "A1_pagefault.html#page-faults",
+    "title": "Page Fault",
+    "section": "Page Faults",
+    "text": "Page Faults\nLet’s try to cause a page fault by accessing some memory outside of our kernel. First, we create a page fault handler and register it in our IDT, so that we see a page fault exception instead of a generic double fault:\n\n\nsrc/interrupts.rs\n\nIDT.page_fault.set_handler_fn(page_fault_handler);\n\n\n\nsrc/interrupts.rs\n\nextern \"x86-interrupt\" fn page_fault_handler(\n    stack_frame: x86_64::structures::idt::InterruptStackFrame,\n    error_code: x86_64::structures::idt::PageFaultErrorCode,\n) {\n    crate::println!(\"EXCEPTION: PAGE FAULT\");\n    crate::println!(\"Accessed Address: {:?}\", x86_64::registers::control::Cr2::read());\n    crate::println!(\"Error Code: {:?}\", error_code);\n    crate::println!(\"{:#?}\", stack_frame);\n    crate::halt();\n}\n\nThe CR2 control register is automatically set by the CPU on a page fault and contains the accessed virtual address that caused the page fault. We use the Cr2::read function of the x86_64 crate to read and print it. The PageFaultErrorCode type provides more information about the type of memory access that caused the page fault, for example, whether it was caused by a read or write operation. For this reason, we print it too. We can’t continue execution without resolving the page fault, so we halt.\nNow we can try to access some memory outside our kernel:\n\n\nsrc/main.rs\n\n#[unsafe(no_mangle)]\npub extern \"C\" fn _start() -&gt; ! {\n\n    /* snip */\n\n    let ptr = 0xdeadbeaf as *mut u8;\n    unsafe { *ptr = 42; }\n    println!(\"It did not crash!\");\n    \n    /* snip */\n}\n\nFor me this worked.\nThe CR2 register indeed contains 0xdeadbeaf, the address that we tried to access. The error code tells us through the CAUSED_BY_WRITE that the fault occurred while trying to perform a write operation.\nWe see the current instruction pointer, so we know that this address points to a code page. Code pages are mapped read-only by the bootloader, so reading from this address works but writing causes a page fault. You can try this by changing the 0xdeadbeaf pointer to the address your handler reports, such as 0x205b06 or 0x2031b2.\nTry these separately.\n\nRead:\n\n\n\nsrc/main.rs\n\nlet ptr = 0x2031b2 as *mut u8;\n\n// read from a code page\nunsafe { let x = *ptr; }\nprintln!(\"read worked\");\n\n\nWrite:\n\n\n\nsrc/main.rs\n\n// write to a code page\nunsafe { *ptr = 42; }\nprintln!(\"write worked\");\n\nExpect to see that the “read worked” message is printed, which indicates that the read operation did not cause any errors. However, instead of the “write worked” message, a page fault occurs. This time the PROTECTION_VIOLATION flag is set in addition to the CAUSED_BY_WRITE flag, which indicates that the page was present, but the operation was not allowed on it. In this case, writes to the page are not allowed since code pages are mapped as read-only.",
+    "crumbs": [
+      "Page Fault"
+    ]
+  },
+  {
+    "objectID": "A1_pagefault.html#accessing-the-page-tables",
+    "href": "A1_pagefault.html#accessing-the-page-tables",
+    "title": "Page Fault",
+    "section": "Accessing the Page Tables",
+    "text": "Accessing the Page Tables\nLet’s try to take a look at the page tables that define how our kernel is mapped:\n\n\nsrc/main.rs\n\nprintln!(\"Level 4 page table at: {:?}\", x86_64::registers::control::Cr3::read().0.start_address());\n\nThe Cr3::read function of the x86_64 returns the currently active level 4 page table from the CR3 register. It returns a tuple of a PhysFrame and a Cr3Flags type. We are only interested in the frame, so we ignore the second element of the tuple. We recall that many control registers, including e.g. RFLAGS, contain both bit fields and bit flags.\nI see the following (within QEMU):\nLevel 4 page table at: PhysAddr(0x1000)\nSo the currently active level 4 page table is stored at address 0x1000 in physical memory, as indicated by the PhysAddr wrapper type. The question now is: how can we access this table from our kernel?\nAccessing physical memory directly is not possible when paging is active, since programs could easily circumvent memory protection and access the memory of other programs otherwise. So the only way to access the table is through some virtual page that is mapped to the physical frame at address 0x1000. This problem of creating mappings for page table frames is a general problem since the kernel needs to access the page tables regularly, for example, when allocating a stack for a new thread.\nSolutions to this problem are set aside for next week!",
+    "crumbs": [
+      "Page Fault"
     ]
   }
 ]

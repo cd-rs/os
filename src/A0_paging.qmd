@@ -1,0 +1,468 @@
+---
+title: Paging
+---
+
+## Announcements
+
+- **Action Items**:
+  - Welcome back.
+  - You should be working on:
+    - Keyboards
+    - Timers
+
+## Citations
+
+- There's a lot of ways to cover paging theory.
+- By convention, I would use the [bin packing problem](https://en.wikipedia.org/wiki/Bin_packing_problem)
+- This class doesn't require the class that's taught in, so... blog it is.
+- [Paging](https://os.phil-opp.com/paging-introduction/)
+
+## Today
+
+- Memory isolation
+- Segmentation
+- Virtual Memory
+- Paging
+- Multilevel page tables on x86_64
+
+# Memory Isolation
+
+## An OS Task
+
+- The OS must isolate programs.
+    - Imagine, say, separate VGA buffer from a clock.
+    - We currently do this with prolific `static mut`
+- In practice:
+    - Text editor vs. web browser vs. video player.
+    
+## How?
+
+- Utilize *hardware* functionality.
+- Ensure that memory areas of one process are not accessible by other processes. 
+    - Use physically different SSD area
+    - Recycle physical RAM
+    - Use distinct "keys" in virtual memory space.
+
+## One Approach
+
+- Consider the ARM Cortex-M
+    - I've run into these in simulation.
+    - Common embedded platform.
+
+<a title="ZeptoBars, CC BY 3.0 &lt;https://creativecommons.org/licenses/by/3.0&gt;, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:STM32F100C4T6B-HD.jpg"><img width="960" alt="STM32F100C4T6B-HD" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/STM32F100C4T6B-HD.jpg/960px-STM32F100C4T6B-HD.jpg"></a>
+
+## MPU
+
+- The Cortex-M has a "Memory Protection Unit"
+    - Allows software to configure ~8 "regions"
+    - Regions can have *distinct permissions*
+        - Read/write/execute/etc.
+    - MPU is an intermediary between CPU and MMU that vets memory accesses.
+- This solves the memory isolation problem for the OS.
+
+## Two Approaches
+
+- x86 is not Cortex-M - it has two options:
+    - [Segmentation](https://en.wikipedia.org/wiki/X86_memory_segmentation)
+        - "In a computer system using segmentation, a reference to a memory location includes a value that identifies a segment and an offset (memory location) within that segment."
+        
+## Two Approaches
+
+- x86 is not Cortex-M - it has two options:        
+    - [Paging](https://en.wikipedia.org/wiki/Virtual_memory#Paged_virtual_memory)
+        - "Page tables are used to translate the virtual addresses seen by the application into physical addresses used by the hardware to process instructions..."
+    
+# Segmentation
+
+## It's Old
+
+- Segmentation was already introduced in 1978.
+    - Originally to increase the amount of addressable memory. 
+- The situation back then was that CPUs only used 16-bit addresses
+    - Limited the amount of addressable memory to 64KiB.
+    
+## Outcomes
+    
+- To make more than these 64KiB accessible, additional segment registers added
+    - Each has an offset. 
+    - The CPU automatically added this offset on each memory access
+    - Up to 1MiB of memory was accessible.
+    
+## Segment Registers
+
+- We've seen these before.
+    - Recall we used the code segment register to [handle exceptions](70_except.qmd#/cs-code-segment).
+- CS - Code Segment
+- SS - Stack Segment
+- DS - Data Segment
+- ES/FS/GS - Extra, fxtra, and gxtra
+
+## Usage
+
+- Simpler when originally implemented (e.g. before ES/FS/GS existed).
+    - Segment registers directly contained the offset
+    - No access control was performed
+    
+## Protected Mode
+    
+- Enter [*protected mode*](https://en.wikipedia.org/wiki/X86_memory_segmentation#Protected_mode).
+    - Rather than offsets, uses a look-up table into a global descriptor table.
+    - Recall we used the global descriptor table to [handle double faults](70_except.qmd#/gdt).
+- What is protected? Memory.
+- Who is the protector? The OS.
+
+## How it feels
+
+- A process, like a user mode program, anything we have written outside of this class, *perceives* there to be an internally consistent memory.
+    - No other programs write to this space (unless mediated by file or network).
+    - Any write persists to be read.
+    - The OS runs and supports OS operations without any visible memory impact.
+    
+# Virtual Memory
+
+## What it means
+
+- So, whenever a program uses a numerical memory address, that numerical address is a historical artifact from the pre-segmentation era.
+    - In practice, it is a "bit-packed" data structure unpacked by the OS to extract segment and local addresses.
+- This is why when exception processing we drew memory addresses from multiple registers (memory and segment).
+
+## The Big Idea
+
+- The idea behind virtual memory is to abstract away the memory *addresses* from the underlying *physical* storage device. 
+- Instead of directly accessing the storage device, a translation step is performed first.
+    - At the hardware-software interface, via the OS and MMU jointly.
+
+## Segment Arithmetic
+    
+- For segmentation, the translation step is to add the offset address of the active segment. 
+- Imagine a program accessing memory address.
+    - Local address of `0x1234000`
+    - Segment address of `0x1111000`
+    - Then, the address that is really accessed is `0x2345000`.
+
+```{python}
+#| echo: true
+hex(0x12340000 + 0x1111000)
+```
+
+## Namespaces
+
+- This can be monumentally confusing.
+    - The MMU and, for example, an SSD and HDD are also using numerical memory addresses.
+- To differentiate the two address types:
+    - Addresses before the translation are called _virtual_
+    - Addresses after the translation are called _physical_
+
+## Physical addresses
+
+- Only visible to OS
+- Unique.
+- Same for all users/clients/programs/privilege levels
+
+## Virtual addresses
+
+- Translation dependent
+    - Only meaningful relevant to a specific underlying OS
+- Non-unique.
+    - Multiple distinct *virtual* addresses may correspond to the same *physical* address.
+    - The same virtual address in different programs/processes may refer to distinct physical addresses.
+    
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/segmentation-same-program-twice.svg" style="filter:invert(.9)">
+
+## Textually
+
+- Imagine the same program runs twice or more.
+    - Each time uses a local 150 address for some data.
+    - No collision - same as if two programs both have their own `x` variable.
+- Segments differ so physical address differ.
+
+## Benefit
+
+- We recall the abstraction of the *stored-program computer*
+- Now, those programs:
+    - Can be placed at *arbitrary* physical memory addresses
+    - Always consistently refer to internal memory locations
+
+## Fragmentation
+
+- The differentiation between virtual and physical addresses makes segmentation really powerful.
+- However, it has the problem of *fragmentation*.
+- As an example, imagine that we want to run a third copy of the program we saw above.
+
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/segmentation-fragmentation.svg" style="filter:invert(.9)">
+
+## Problem
+
+- There is no way to map the third instance of the program to virtual memory without overlapping.
+    - But there is more than enough free memory available! 
+- The problem is that we need _contiguous_ memory and can't use the small free chunks (fragments).
+
+## One Solution
+
+- We can "make this work"
+    - Dispatch a new program.
+    - If it needs more space, "smoosh" all other programs together.
+    - Fit in the new program in the opened space.
+    
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/segmentation-fragmentation-compacted.svg" style="filter:invert(.9)">
+
+## "Defrag"
+
+- Even as recently as in within my lifetime, standard of practice was to recommend semiregular (monthly?) **manual** usage of "defragmentation" tools provided by the OS for the hard drive.
+- This is the same technique but in RAM for working programs.
+- Takes longer the longer between uses.
+- Wastes time every time it's run.
+
+## Downsides
+
+- It needs to copy large amounts of memory, which decreases performance. 
+- It needs to be done regularly before the memory becomes too fragmented. 
+- This makes performance unpredictable since programs are paused at random times and might become unresponsive.
+    - What if a timer goes off for a visible application while defrag is running.
+
+## Sunset
+
+- Fragmentation has led to segmentation no longer being used by modern systems. 
+- Segmentation is not even supported in 64-bit x86 anymore. 
+- Instead, _paging_ is used, which bypass the fragmentation problem.
+
+# Paging
+
+## The Idea
+
+- Divide both the virtual and physical memory space into small, fixed-size blocks. 
+- Term these blocks of the virtual memory space as _pages_.
+- Term the blocks of the physical address space as _frames_. 
+- Each page can be individually mapped to *any* frame.
+
+## Example
+
+- We can now split larger memory regions across non-continuous physical frames.
+- The advantage of this becomes visible if we recap the example of the fragmented memory space, but use paging instead of segmentation this time.
+    - Easy to imagine each memory chunk mapping onto multiple pages/frames.
+
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/paging-fragmentation.svg" style="filter:invert(.9)">
+
+## Description
+
+- Take page size of 50 bytes.
+    - Each program needs three pages.
+- Each page is mapped to a frame individually.
+    - A *continuous* virtual memory region can be mapped to *non-continuous* physical frames. 
+- Now may start the third instance of the program without defragmentation.
+
+## Hidden Fragmentation
+
+- Compared to segmentation, paging uses lots of small, fixed-sized memory regions instead of a few large, variable-sized regions. 
+    - And by variable-sized, we mean correctly-sized.
+- Since every frame has the same size, there are no frames that are too small to be used, so no fragmentation occurs.
+    - Right?
+    
+## Internal Fragmentation
+
+- *Internal* fragmentation occurs because not every memory region is an exact multiple of the page size. 
+    - Imagine a program of size 101 with pages sized 50.
+    - It would still need three pages of size 50.
+    - So you squander 49 bytes. 
+- Term the segmentation fragmentation _external fragmentation_.
+
+## Pros and Cons
+
+- Internal fragmentation is unfortunate but often better than the external fragmentation that occurs with segmentation. 
+- It still wastes memory, but 
+    - Does not require defragmentation and 
+    - Makes the amount of fragmentation predictable 
+        - Half page per program on average
+
+# Page Tables
+
+## Mapping
+
+- Potentially *millions* of pages is individually mapped to a frame.
+- This mapping information needs to be stored somewhere.
+    - We recall the [`malloc`](22_malloc.qmd) assignment.
+- Vs. a segment register for each program...
+    - More pages than segment registers.
+
+## Alternative
+
+- As with, say, the IDT, the GDT, etc., we extend the capabilities of the OS to handle a hardware limitation.
+- Paging uses a table structure called *page table* to store the mapping information.
+- We can visualize.
+
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/paging-page-tables.svg" style="filter:invert(.9)">
+
+## Practically
+
+- Each program instance has its own page table
+- A pointer to the currently active table is stored in a special CPU register.
+- On `x86`, this register is called `CR3`
+    - "Control Register 3" - I noted there are many CR's, some used.
+- The OS loads the correct page table to a register *before* running a program.
+
+## OS & Hardware
+
+- On each memory access, the CPU reads the table pointer from the register and looks up the mapped frame for the accessed page in the table.
+    - Just like an exception!
+    - Hardware only process.
+- Depending on the architecture, page table entries can also store attributes such as access permissions in a flags field.
+    
+## Limitations
+
+- Simple page tables have a problem in larger address spaces: waste. 
+- Imagine a program that uses the four virtual pages `0`, `1_000_000`, `1_000_050`, and `1_000_100`
+- It only needs 4 physical frames, but the page table has over a million entries. 
+- We can't omit the empty entries or we lose constant-time access.
+
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/single-level-page-table.svg" style="filter:invert(.9)">
+
+## A solution
+
+- To reduce the wasted memory, we can use a **two-level page table**. 
+- The idea is that we use different page tables for different address regions. 
+- An additional table called _level 2_ page table contains the mapping between address regions and (level 1) page tables.
+    - One-indexed 😬
+    
+## Visually
+
+<img src="https://os.phil-opp.com/paging-introduction/multilevel-page-table.svg" style="filter:invert(.9)"> 
+
+## It's just a radix tree
+
+- You probably know about these.  
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/65/Radix_tree.svg" style="filter:invert(.9)"> 
+
+# FIN?
+
+- I think that is probably enough for today.
+- If not, we will start [here](https://os.phil-opp.com/paging-introduction/#paging-on-x86-64).
+
+<!--
+# TODO
+
+## Paging on x86_64
+
+The x86_64 architecture uses a 4-level page table and a page size of 4&nbsp;KiB. Each page table, independent of the level, has a fixed size of 512 entries. Each entry has a size of 8 bytes, so each table is 512 * 8&nbsp;B = 4&nbsp;KiB large and thus fits exactly into one page.
+
+The page table index for each level is derived directly from the virtual address:
+
+![Bits 0–12 are the page offset, bits 12–21 the level 1 index, bits 21–30 the level 2 index, bits 30–39 the level 3 index, and bits 39–48 the level 4 index](x86_64-table-indices-from-address.svg)
+
+We see that each table index consists of 9 bits, which makes sense because each table has 2^9 = 512 entries. The lowest 12 bits are the offset in the 4&nbsp;KiB page (2^12 bytes = 4&nbsp;KiB). Bits 48 to 64 are discarded, which means that x86_64 is not really 64-bit since it only supports 48-bit addresses.
+
+Even though bits 48 to 64 are discarded, they can't be set to arbitrary values. Instead, all bits in this range have to be copies of bit 47 in order to keep addresses unique and allow future extensions like the 5-level page table. This is called _sign-extension_ because it's very similar to the [sign extension in two's complement]. When an address is not correctly sign-extended, the CPU throws an exception.
+
+[sign extension in two's complement]: https://en.wikipedia.org/wiki/Two's_complement#Sign_extension
+
+It's worth noting that the recent "Ice Lake" Intel CPUs optionally support [5-level page tables] to extend virtual addresses from 48-bit to 57-bit. Given that optimizing our kernel for a specific CPU does not make sense at this stage, we will only work with standard 4-level page tables in this post.
+
+[5-level page tables]: https://en.wikipedia.org/wiki/Intel_5-level_paging
+
+### Example Translation
+
+Let's go through an example to understand how the translation process works in detail:
+
+![An example of a 4-level page hierarchy with each page table shown in physical memory](x86_64-page-table-translation.svg)
+
+The physical address of the currently active level 4 page table, which is the root of the 4-level page table, is stored in the `CR3` register. Each page table entry then points to the physical frame of the next level table. The entry of the level 1 table then points to the mapped frame. Note that all addresses in the page tables are physical instead of virtual, because otherwise the CPU would need to translate those addresses too (which could cause a never-ending recursion).
+
+The above page table hierarchy maps two pages (in blue). From the page table indices, we can deduce that the virtual addresses of these two pages are `0x803FE7F000` and `0x803FE00000`. Let's see what happens when the program tries to read from address `0x803FE7F5CE`. First, we convert the address to binary and determine the page table indices and the page offset for the address:
+
+![The sign extension bits are all 0, the level 4 index is 1, the level 3 index is 0, the level 2 index is 511, the level 1 index is 127, and the page offset is 0x5ce](x86_64-page-table-translation-addresses.png)
+
+With these indices, we can now walk the page table hierarchy to determine the mapped frame for the address:
+
+- We start by reading the address of the level 4 table out of the `CR3` register.
+- The level 4 index is 1, so we look at the entry with index 1 of that table, which tells us that the level 3 table is stored at address 16&nbsp;KiB.
+- We load the level 3 table from that address and look at the entry with index 0, which points us to the level 2 table at 24&nbsp;KiB.
+- The level 2 index is 511, so we look at the last entry of that page to find out the address of the level 1 table.
+- Through the entry with index 127 of the level 1 table, we finally find out that the page is mapped to frame 12&nbsp;KiB, or 0x3000 in hexadecimal.
+- The final step is to add the page offset to the frame address to get the physical address 0x3000 + 0x5ce = 0x35ce.
+
+![The same example 4-level page hierarchy with 5 additional arrows: "Step 0" from the CR3 register to the level 4 table, "Step 1" from the level 4 entry to the level 3 table, "Step 2" from the level 3 entry to the level 2 table, "Step 3" from the level 2 entry to the level 1 table, and "Step 4" from the level 1 table to the mapped frames.](x86_64-page-table-translation-steps.svg)
+
+The permissions for the page in the level 1 table are `r`, which means read-only. The hardware enforces these permissions and would throw an exception if we tried to write to that page. Permissions in higher level pages restrict the possible permissions in lower levels, so if we set the level 3 entry to read-only, no pages that use this entry can be writable, even if lower levels specify read/write permissions.
+
+It's important to note that even though this example used only a single instance of each table, there are typically multiple instances of each level in each address space. At maximum, there are:
+
+- one level 4 table,
+- 512 level 3 tables (because the level 4 table has 512 entries),
+- 512 * 512 level 2 tables (because each of the 512 level 3 tables has 512 entries), and
+- 512 * 512 * 512 level 1 tables (512 entries for each level 2 table).
+
+### Page Table Format
+
+Page tables on the x86_64 architecture are basically an array of 512 entries. In Rust syntax:
+
+```rust
+#[repr(align(4096))]
+pub struct PageTable {
+    entries: [PageTableEntry; 512],
+}
+```
+
+As indicated by the `repr` attribute, page tables need to be page-aligned, i.e., aligned on a 4&nbsp;KiB boundary. This requirement guarantees that a page table always fills a complete page and allows an optimization that makes entries very compact.
+
+Each entry is 8 bytes (64 bits) large and has the following format:
+
+Bit(s) | Name | Meaning
+------ | ---- | -------
+0 | present | the page is currently in memory
+1 | writable | it's allowed to write to this page
+2 | user accessible | if not set, only kernel mode code can access this page
+3 | write-through caching | writes go directly to memory
+4 | disable cache | no cache is used for this page
+5 | accessed | the CPU sets this bit when this page is used
+6 | dirty | the CPU sets this bit when a write to this page occurs
+7 | huge page/null | must be 0 in P1 and P4, creates a 1&nbsp;GiB page in P3, creates a 2&nbsp;MiB page in P2
+8 | global | page isn't flushed from caches on address space switch (PGE bit of CR4 register must be set)
+9-11 | available | can be used freely by the OS
+12-51 | physical address | the page aligned 52bit physical address of the frame or the next page table
+52-62 | available | can be used freely by the OS
+63 | no execute | forbid executing code on this page (the NXE bit in the EFER register must be set)
+
+We see that only bits 12–51 are used to store the physical frame address. The remaining bits are used as flags or can be freely used by the operating system. This is possible because we always point to a 4096-byte aligned address, either to a page-aligned page table or to the start of a mapped frame. This means that bits 0–11 are always zero, so there is no reason to store these bits because the hardware can just set them to zero before using the address. The same is true for bits 52–63, because the x86_64 architecture only supports 52-bit physical addresses (similar to how it only supports 48-bit virtual addresses).
+
+Let's take a closer look at the available flags:
+
+- The `present` flag differentiates mapped pages from unmapped ones. It can be used to temporarily swap out pages to disk when the main memory becomes full. When the page is accessed subsequently, a special exception called _page fault_ occurs, to which the operating system can react by reloading the missing page from disk and then continuing the program.
+- The `writable` and `no execute` flags control whether the contents of the page are writable or contain executable instructions, respectively.
+- The `accessed` and `dirty` flags are automatically set by the CPU when a read or write to the page occurs. This information can be leveraged by the operating system, e.g., to decide which pages to swap out or whether the page contents have been modified since the last save to disk.
+- The `write-through caching` and `disable cache` flags allow the control of caches for every page individually.
+- The `user accessible` flag makes a page available to userspace code, otherwise, it is only accessible when the CPU is in kernel mode. This feature can be used to make [system calls] faster by keeping the kernel mapped while a userspace program is running. However, the [Spectre] vulnerability can allow userspace programs to read these pages nonetheless.
+- The `global` flag signals to the hardware that a page is available in all address spaces and thus does not need to be removed from the translation cache (see the section about the TLB below) on address space switches. This flag is commonly used together with a cleared `user accessible` flag to map the kernel code to all address spaces.
+- The `huge page` flag allows the creation of pages of larger sizes by letting the entries of the level 2 or level 3 page tables directly point to a mapped frame. With this bit set, the page size increases by factor 512 to either 2&nbsp;MiB = 512 * 4&nbsp;KiB for level 2 entries or even 1&nbsp;GiB = 512 * 2&nbsp;MiB for level 3 entries. The advantage of using larger pages is that fewer lines of the translation cache and fewer page tables are needed.
+
+[system calls]: https://en.wikipedia.org/wiki/System_call
+[Spectre]: https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)
+
+The `x86_64` crate provides types for [page tables] and their [entries], so we don't need to create these structures ourselves.
+
+[page tables]: https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page_table/struct.PageTable.html
+[entries]: https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page_table/struct.PageTableEntry.html
+
+### The Translation Lookaside Buffer
+
+A 4-level page table makes the translation of virtual addresses expensive because each translation requires four memory accesses. To improve performance, the x86_64 architecture caches the last few translations in the so-called _translation lookaside buffer_ (TLB). This allows skipping the translation when it is still cached.
+
+Unlike the other CPU caches, the TLB is not fully transparent and does not update or remove translations when the contents of page tables change. This means that the kernel must manually update the TLB whenever it modifies a page table. To do this, there is a special CPU instruction called [`invlpg`] (“invalidate page”) that removes the translation for the specified page from the TLB, so that it is loaded again from the page table on the next access. The TLB can also be flushed completely by reloading the `CR3` register, which simulates an address space switch. The `x86_64` crate provides Rust functions for both variants in the [`tlb` module].
+
+[`invlpg`]: https://www.felixcloutier.com/x86/INVLPG.html
+[`tlb` module]: https://docs.rs/x86_64/0.14.2/x86_64/instructions/tlb/index.html
+
+It is important to remember to flush the TLB on each page table modification because otherwise, the CPU might keep using the old translation, which can lead to non-deterministic bugs that are very hard to debug.
+
+-->
