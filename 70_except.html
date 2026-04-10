@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.25">
+<meta name="generator" content="quarto-1.6.30">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -21,9 +21,8 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -34,7 +33,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -67,17 +66,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <meta name="quarto:offset" content="./">
 <link href="./71_calls.html" rel="next">
 <link href="./62_librs.html" rel="prev">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-707d8167ce6003fca903bfe2be84ab7f.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-40a160e28a8c0a8ad2fc184c8ba4238c.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -120,7 +117,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+      if (mathElements[i].tagName == "SPAN") {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -138,7 +135,7 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar floating quarto-light">
+<body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -161,8 +158,9 @@ window.Quarto = {
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
-      <a href="./index.html" class="sidebar-logo-link">
-      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
       </div>
         <div class="mt-2 flex-shrink-0 align-items-center">
         <div class="sidebar-search">
@@ -363,6 +361,12 @@ window.Quarto = {
  <span class="menu-text">Page Tables</span></a>
   </div>
 </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./B2_mapping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mapping</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -528,10 +532,10 @@ window.Quarto = {
 <div class="code-with-filename-file">
 <pre><strong>src/main.rs</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<div class="sourceCode" id="cb1" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a>    <span class="co">// Print so isn't optimized out.</span></span>
 <span id="cb1-3"><a href="#cb1-3"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> <span class="dv">1</span> <span class="op">/</span> <span class="dv">0</span>)<span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="rustc-protects" class="level2">
@@ -539,7 +543,7 @@ window.Quarto = {
 <ul>
 <li>Modern languages won’t allow this.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">$</span> cargo r</span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1"></a><span class="ex">$</span> cargo r</span>
 <span id="cb2-2"><a href="#cb2-2"></a>   <span class="ex">Compiling</span> divzero v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/divzero</span><span class="kw">)</span></span>
 <span id="cb2-3"><a href="#cb2-3"></a><span class="ex">error:</span> this operation will panic at runtime</span>
 <span id="cb2-4"><a href="#cb2-4"></a> <span class="ex">--</span><span class="op">&gt;</span> src/main.rs:3:20</span>
@@ -549,7 +553,7 @@ window.Quarto = {
 <span id="cb2-8"><a href="#cb2-8"></a>  <span class="kw">|</span></span>
 <span id="cb2-9"><a href="#cb2-9"></a>  <span class="ex">=</span> note: <span class="kw">`</span><span class="co">#[deny(unconditional_panic)]</span><span class="kw">`</span> on by default</span>
 <span id="cb2-10"><a href="#cb2-10"></a></span>
-<span id="cb2-11"><a href="#cb2-11"></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">divzero</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"divzero"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-11"><a href="#cb2-11"></a><span class="ex">error:</span> could not compile <span class="kw">`</span><span class="ex">divzero</span><span class="kw">`</span> <span class="er">(</span><span class="ex">bin</span> <span class="st">"divzero"</span><span class="kw">)</span> <span class="ex">due</span> to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="permit" class="level2">
 <h2 class="anchored" data-anchor-id="permit">Permit</h2>
@@ -561,11 +565,11 @@ window.Quarto = {
 <div class="code-with-filename-file">
 <pre><strong>src/main.rs</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="op">$</span> cat src<span class="op">/</span>main<span class="op">.</span>rs</span>
+<div class="sourceCode" id="cb3" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="op">$</span> cat src<span class="op">/</span>main<span class="op">.</span>rs</span>
 <span id="cb3-2"><a href="#cb3-2"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
 <span id="cb3-3"><a href="#cb3-3"></a>    <span class="at">#[</span>allow<span class="at">(</span>unconditional_panic<span class="at">)]</span></span>
 <span id="cb3-4"><a href="#cb3-4"></a>    <span class="kw">let</span> _x <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="see-a-panic" class="level2">
@@ -573,14 +577,14 @@ window.Quarto = {
 <ul>
 <li>Presumably this is hitting the CPU then a <code>rustc</code> provided panic handler.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="ex">$</span> cargo r</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1"></a><span class="ex">$</span> cargo r</span>
 <span id="cb4-2"><a href="#cb4-2"></a>   <span class="ex">Compiling</span> divzero v0.1.0 <span class="er">(</span><span class="ex">/home/user/tmp/divzero</span><span class="kw">)</span></span>
 <span id="cb4-3"><a href="#cb4-3"></a>    <span class="ex">Finished</span> <span class="kw">`</span><span class="ex">dev</span><span class="kw">`</span> profile [unoptimized + debuginfo] target<span class="er">(</span><span class="ex">s</span><span class="kw">)</span> <span class="er">in</span> <span class="ex">0.17s</span></span>
 <span id="cb4-4"><a href="#cb4-4"></a>     <span class="ex">Running</span> <span class="kw">`</span><span class="ex">target/debug/divzero</span><span class="kw">`</span></span>
 <span id="cb4-5"><a href="#cb4-5"></a></span>
 <span id="cb4-6"><a href="#cb4-6"></a><span class="ex">thread</span> <span class="st">'main'</span> <span class="er">(</span><span class="ex">2292</span><span class="kw">)</span> <span class="ex">panicked</span> at src/main.rs:3:14:</span>
 <span id="cb4-7"><a href="#cb4-7"></a><span class="ex">attempt</span> to divide by zero</span>
-<span id="cb4-8"><a href="#cb4-8"></a><span class="ex">note:</span> run with <span class="kw">`</span><span class="va">RUST_BACKTRACE</span><span class="op">=</span>1<span class="kw">`</span> <span class="ex">environment</span> variable to display a backtrace</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb4-8"><a href="#cb4-8"></a><span class="ex">note:</span> run with <span class="kw">`</span><span class="va">RUST_BACKTRACE</span><span class="op">=</span>1<span class="kw">`</span> <span class="ex">environment</span> variable to display a backtrace</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="much-easier" class="level2">
 <h2 class="anchored" data-anchor-id="much-easier">Much Easier</h2>
@@ -591,10 +595,10 @@ window.Quarto = {
 <div class="code-with-filename-file">
 <pre><strong>main.c</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="main.c"><pre class="sourceCode numberSource c number-lines code-with-copy"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<div class="sourceCode" id="cb5" data-filename="main.c"><pre class="sourceCode numberSource c number-lines code-with-copy"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
 <span id="cb5-2"><a href="#cb5-2"></a>        <span class="dt">int</span> x <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> <span class="dv">0</span><span class="op">;</span></span>
 <span id="cb5-3"><a href="#cb5-3"></a>        <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb5-4"><a href="#cb5-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="permitted" class="level2">
@@ -602,11 +606,11 @@ window.Quarto = {
 <ul>
 <li>It will warn us but not stop us.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">$</span> gcc main.c <span class="at">-o</span> main</span>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1"></a><span class="ex">$</span> gcc main.c <span class="at">-o</span> main</span>
 <span id="cb6-2"><a href="#cb6-2"></a><span class="ex">main.c:</span> In function ‘main’:</span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="ex">main.c:2:19:</span> warning: division by zero <span class="pp">[-</span><span class="ss">Wdiv</span><span class="pp">-</span><span class="ss">by</span><span class="pp">-</span><span class="ss">zero</span><span class="pp">]</span></span>
 <span id="cb6-4"><a href="#cb6-4"></a>    <span class="ex">2</span> <span class="kw">|</span>         <span class="ex">int</span> x = 1 / 0<span class="kw">;</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a>      <span class="kw">|</span>                   <span class="ex">^</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-5"><a href="#cb6-5"></a>      <span class="kw">|</span>                   <span class="ex">^</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="modernizing" class="level2">
 <h2 class="anchored" data-anchor-id="modernizing">Modernizing</h2>
@@ -617,13 +621,13 @@ window.Quarto = {
 <div class="code-with-filename-file">
 <pre><strong>Makefile</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="Makefile"><pre class="sourceCode numberSource makefile number-lines code-with-copy"><code class="sourceCode makefile"><span id="cb7-1"><a href="#cb7-1"></a><span class="dt">CC</span> <span class="ch">=</span><span class="st"> gcc </span><span class="co"># or clang</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="dt">CFLAGS</span> <span class="ch">=</span><span class="st"> -std=c89 -Wall -Wextra -Werror -Wpedantic -O2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="sourceCode" id="cb7" data-filename="Makefile"><pre class="sourceCode numberSource makefile number-lines code-with-copy"><code class="sourceCode makefile"><span id="cb7-1"><a href="#cb7-1"></a><span class="dt">CC</span> <span class="ch">=</span><span class="st"> gcc </span><span class="co"># or clang</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a><span class="dt">CFLAGS</span> <span class="ch">=</span><span class="st"> -std=c89 -Wall -Wextra -Werror -Wpedantic -O2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>This yields:</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">$</span> gcc main.c <span class="at">-std</span><span class="op">=</span>c89 <span class="at">-Wall</span> <span class="at">-Wextra</span> <span class="at">-Werror</span> <span class="at">-Wpedantic</span> <span class="at">-O2</span> <span class="at">-o</span> main</span>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1"></a><span class="ex">$</span> gcc main.c <span class="at">-std</span><span class="op">=</span>c89 <span class="at">-Wall</span> <span class="at">-Wextra</span> <span class="at">-Werror</span> <span class="at">-Wpedantic</span> <span class="at">-O2</span> <span class="at">-o</span> main</span>
 <span id="cb8-2"><a href="#cb8-2"></a><span class="ex">main.c:</span> In function ‘main’:</span>
 <span id="cb8-3"><a href="#cb8-3"></a><span class="ex">main.c:2:19:</span> error: division by zero <span class="pp">[-</span><span class="ss">Werror=div</span><span class="pp">-</span><span class="ss">by</span><span class="pp">-</span><span class="ss">zero</span><span class="pp">]</span></span>
 <span id="cb8-4"><a href="#cb8-4"></a>    <span class="ex">2</span> <span class="kw">|</span>         <span class="ex">int</span> x = 1 / 0<span class="kw">;</span></span>
@@ -631,15 +635,15 @@ window.Quarto = {
 <span id="cb8-6"><a href="#cb8-6"></a><span class="ex">main.c:2:13:</span> error: unused variable ‘x’ <span class="pp">[-</span><span class="ss">Werror=unused</span><span class="pp">-</span><span class="ss">variable</span><span class="pp">]</span></span>
 <span id="cb8-7"><a href="#cb8-7"></a>    <span class="ex">2</span> <span class="kw">|</span>         <span class="ex">int</span> x = 1 / 0<span class="kw">;</span></span>
 <span id="cb8-8"><a href="#cb8-8"></a>      <span class="kw">|</span>             <span class="ex">^</span></span>
-<span id="cb8-9"><a href="#cb8-9"></a><span class="ex">cc1:</span> all warnings being treated as errors</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-9"><a href="#cb8-9"></a><span class="ex">cc1:</span> all warnings being treated as errors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="results" class="level2">
 <h2 class="anchored" data-anchor-id="results">Results</h2>
 <ul>
 <li>In any case, if you do use naive <code>gcc</code> you will get the following:</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">$</span> ./main</span>
-<span id="cb9-2"><a href="#cb9-2"></a><span class="ex">Floating</span> point exception <span class="er">(</span><span class="ex">core</span> dumped<span class="kw">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1"></a><span class="ex">$</span> ./main</span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="ex">Floating</span> point exception <span class="er">(</span><span class="ex">core</span> dumped<span class="kw">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>This is of course ludicrously confusing.
 <ul>
@@ -653,18 +657,18 @@ window.Quarto = {
 <li>There are <code>clang</code> fans (vs.&nbsp;<code>gcc</code>)</li>
 <li>Compilation is identical though the warning format differs.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">$</span> clang main.c <span class="at">-o</span> main</span>
+<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1"></a><span class="ex">$</span> clang main.c <span class="at">-o</span> main</span>
 <span id="cb10-2"><a href="#cb10-2"></a><span class="ex">main.c:2:12:</span> warning: division by zero is undefined <span class="pp">[-</span><span class="ss">Wdivision</span><span class="pp">-</span><span class="ss">by</span><span class="pp">-</span><span class="ss">zero</span><span class="pp">]</span></span>
 <span id="cb10-3"><a href="#cb10-3"></a>        <span class="ex">int</span> x = 1 / 0<span class="kw">;</span></span>
 <span id="cb10-4"><a href="#cb10-4"></a>                  <span class="ex">^</span> ~</span>
-<span id="cb10-5"><a href="#cb10-5"></a><span class="ex">1</span> warning generated.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-5"><a href="#cb10-5"></a><span class="ex">1</span> warning generated.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="difference" class="level2">
 <h2 class="anchored" data-anchor-id="difference">Difference</h2>
 <ul>
 <li><code>clang</code> <em>does not</em> trigger an exception.</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">$</span> cat main.c</span>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource sh number-lines code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1"></a><span class="ex">$</span> cat main.c</span>
 <span id="cb11-2"><a href="#cb11-2"></a><span class="co">#include &lt;stdio.h&gt;</span></span>
 <span id="cb11-3"><a href="#cb11-3"></a></span>
 <span id="cb11-4"><a href="#cb11-4"></a><span class="ex">int</span> main<span class="er">(</span><span class="kw">)</span> <span class="kw">{</span></span>
@@ -680,7 +684,7 @@ window.Quarto = {
 <span id="cb11-14"><a href="#cb11-14"></a><span class="ex">user@cd-desk:~/tmp/divzero$</span> ./main</span>
 <span id="cb11-15"><a href="#cb11-15"></a><span class="ex">267243840</span></span>
 <span id="cb11-16"><a href="#cb11-16"></a><span class="ex">user@cd-desk:~/tmp/divzero$</span> ./main</span>
-<span id="cb11-17"><a href="#cb11-17"></a><span class="ex">2140340544</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="ex">2140340544</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="aside" class="level2">
 <h2 class="anchored" data-anchor-id="aside">Aside</h2>
@@ -787,7 +791,7 @@ window.Quarto = {
 <li>♪♫♪ key-value storage my old friend ♫♪♫</li>
 <li>♫♪♫ ive come to code with you again ♪♫♪</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a>fs <span class="op">=</span> {</span>
+<div class="sourceCode" id="cb12"><pre class="sourceCode numberSource py number-lines code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1"></a>fs <span class="op">=</span> {</span>
 <span id="cb12-2"><a href="#cb12-2"></a>    <span class="st">"ADD"</span> : <span class="kw">lambda</span> x , y : x <span class="op">+</span> y ,</span>
 <span id="cb12-3"><a href="#cb12-3"></a>    <span class="st">"SUB"</span> : <span class="kw">lambda</span> x , y : x <span class="op">-</span> y ,</span>
 <span id="cb12-4"><a href="#cb12-4"></a>    <span class="st">"MUL"</span> : <span class="kw">lambda</span> x , y : x <span class="op">*</span> y ,</span>
@@ -797,7 +801,7 @@ window.Quarto = {
 <span id="cb12-8"><a href="#cb12-8"></a>    <span class="st">"ODD"</span> : <span class="kw">lambda</span> x , y : x <span class="op">%</span> <span class="dv">2</span> ,</span>
 <span id="cb12-9"><a href="#cb12-9"></a>    <span class="st">"ZER"</span> : <span class="kw">lambda</span> x , y :     <span class="dv">0</span> ,</span>
 <span id="cb12-10"><a href="#cb12-10"></a>    <span class="st">"EXT"</span> : <span class="kw">lambda</span> x , y : exit(),</span>
-<span id="cb12-11"><a href="#cb12-11"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb12-11"><a href="#cb12-11"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="rust-style" class="level2">
 <h2 class="anchored" data-anchor-id="rust-style">Rust Style</h2>
@@ -808,12 +812,12 @@ window.Quarto = {
 <div class="code-with-filename-file">
 <pre><strong>tests/println.rs</strong></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-filename="tests/println.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<div class="sourceCode" id="cb13" data-filename="tests/println.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
 <span id="cb13-2"><a href="#cb13-2"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
 <span id="cb13-3"><a href="#cb13-3"></a>    <span class="pp">osirs::</span>_test_runner(<span class="op">&amp;</span>[<span class="op">&amp;</span>at_top<span class="op">,</span> <span class="op">&amp;</span>wraps<span class="op">,</span> <span class="op">&amp;</span>scrolls<span class="op">,</span> <span class="op">&amp;</span>colors<span class="op">,</span> <span class="op">&amp;</span>newlines])<span class="op">;</span></span>
 <span id="cb13-4"><a href="#cb13-4"></a>    <span class="pp">osirs::</span>qemu_quit(<span class="pp">osirs::</span>QEMU_PASS)<span class="op">;</span></span>
 <span id="cb13-5"><a href="#cb13-5"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb13-6"><a href="#cb13-6"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-6"><a href="#cb13-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="layout" class="level2 smaller">
@@ -1373,7 +1377,7 @@ window.Quarto = {
 </section>
 <section id="its-big" class="level2">
 <h2 class="anchored" data-anchor-id="its-big">It’s big</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb14-1"><a href="#cb14-1"></a><span class="at">#[</span>repr<span class="at">(</span>C<span class="at">)]</span></span>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb14-1"><a href="#cb14-1"></a><span class="at">#[</span>repr<span class="at">(</span>C<span class="at">)]</span></span>
 <span id="cb14-2"><a href="#cb14-2"></a><span class="kw">pub</span> <span class="kw">struct</span> InterruptDescriptorTable <span class="op">{</span></span>
 <span id="cb14-3"><a href="#cb14-3"></a>    <span class="kw">pub</span> divide_by_zero<span class="op">:</span> Entry<span class="op">&lt;</span>HandlerFunc<span class="op">&gt;,</span></span>
 <span id="cb14-4"><a href="#cb14-4"></a>    <span class="kw">pub</span> debug<span class="op">:</span> Entry<span class="op">&lt;</span>HandlerFunc<span class="op">&gt;,</span></span>
@@ -1396,7 +1400,7 @@ window.Quarto = {
 <span id="cb14-21"><a href="#cb14-21"></a>    <span class="kw">pub</span> virtualization<span class="op">:</span> Entry<span class="op">&lt;</span>HandlerFunc<span class="op">&gt;,</span></span>
 <span id="cb14-22"><a href="#cb14-22"></a>    <span class="kw">pub</span> security_exception<span class="op">:</span> Entry<span class="op">&lt;</span>HandlerFuncWithErrCode<span class="op">&gt;,</span></span>
 <span id="cb14-23"><a href="#cb14-23"></a>    <span class="co">// some fields omitted</span></span>
-<span id="cb14-24"><a href="#cb14-24"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-24"><a href="#cb14-24"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="format-1" class="level2">
 <h2 class="anchored" data-anchor-id="format-1">Format</h2>
@@ -1418,7 +1422,7 @@ window.Quarto = {
 <ul>
 <li><code>HandlerFunc</code> first:</li>
 </ul>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">type</span> HandlerFunc <span class="op">=</span> <span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span>(_<span class="op">:</span> InterruptStackFrame)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">type</span> HandlerFunc <span class="op">=</span> <span class="kw">extern</span> <span class="st">"x86-interrupt"</span> <span class="kw">fn</span>(_<span class="op">:</span> InterruptStackFrame)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>That’s a function alright.
 <ul>
@@ -1494,294 +1498,290 @@ window.Quarto = {
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-  window.document.addEventListener("DOMContentLoaded", function (event) {
-    const icon = "";
-    const anchorJS = new window.AnchorJS();
-    anchorJS.options = {
-      placement: 'right',
-      icon: icon
-    };
-    anchorJS.add('.anchored');
-    const isCodeAnnotation = (el) => {
-      for (const clz of el.classList) {
-        if (clz.startsWith('code-annotation-')) {                     
-          return true;
-        }
-      }
-      return false;
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
     }
-    const onCopySuccess = function(e) {
-      // button target
-      const button = e.trigger;
-      // don't keep focus
-      button.blur();
-      // flash "checked"
-      button.classList.add('code-copy-button-checked');
-      var currentTitle = button.getAttribute("title");
-      button.setAttribute("title", "Copied!");
-      let tooltip;
-      if (window.bootstrap) {
-        button.setAttribute("data-bs-toggle", "tooltip");
-        button.setAttribute("data-bs-placement", "left");
-        button.setAttribute("data-bs-title", "Copied!");
-        tooltip = new bootstrap.Tooltip(button, 
-          { trigger: "manual", 
-            customClass: "code-copy-button-tooltip",
-            offset: [0, -8]});
-        tooltip.show();    
-      }
-      setTimeout(function() {
-        if (tooltip) {
-          tooltip.hide();
-          button.removeAttribute("data-bs-title");
-          button.removeAttribute("data-bs-toggle");
-          button.removeAttribute("data-bs-placement");
-        }
-        button.setAttribute("title", currentTitle);
-        button.classList.remove('code-copy-button-checked');
-      }, 1000);
-      // clear code selection
-      e.clearSelection();
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
     }
-    const getTextToCopy = function(trigger) {
-      const outerScaffold = trigger.parentElement.cloneNode(true);
-      const codeEl = outerScaffold.querySelector('code');
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
       for (const childEl of codeEl.children) {
         if (isCodeAnnotation(childEl)) {
           childEl.remove();
         }
       }
       return codeEl.innerText;
-    }
-    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-      text: getTextToCopy
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
     });
-    clipboard.on('success', onCopySuccess);
-    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-        text: getTextToCopy,
-        container: window.document.getElementById('quarto-embedded-source-code-modal')
-      });
-      clipboardModal.on('success', onCopySuccess);
-    }
-    const viewSource = window.document.getElementById('quarto-view-source') ||
-                       window.document.getElementById('quarto-code-tools-source');
-    if (viewSource) {
-      const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
-      viewSource.addEventListener("click", function(e) {
-        if (sourceUrl) {
-          // rstudio viewer pane
-          if (/\bcapabilities=\b/.test(window.location)) {
-            window.open(sourceUrl);
-          } else {
-            window.location.href = sourceUrl;
-          }
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
         } else {
-          const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
-          modal.show();
-        }
-        return false;
-      });
-    }
-    function toggleCodeHandler(show) {
-      return function(e) {
-        const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
-        for (let i=0; i<detailsSrc.length; i++) {
-          const details = detailsSrc[i].parentElement;
-          if (show) {
-            details.open = true;
-          } else {
-            details.removeAttribute("open");
-          }
-        }
-        const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
-        const fromCls = show ? "hidden" : "unhidden";
-        const toCls = show ? "unhidden" : "hidden";
-        for (let i=0; i<cellCodeDivs.length; i++) {
-          const codeDiv = cellCodeDivs[i];
-          if (codeDiv.classList.contains(fromCls)) {
-            codeDiv.classList.remove(fromCls);
-            codeDiv.classList.add(toCls);
-          } 
-        }
-        return false;
-      }
-    }
-    const hideAllCode = window.document.getElementById("quarto-hide-all-code");
-    if (hideAllCode) {
-      hideAllCode.addEventListener("click", toggleCodeHandler(false));
-    }
-    const showAllCode = window.document.getElementById("quarto-show-all-code");
-    if (showAllCode) {
-      showAllCode.addEventListener("click", toggleCodeHandler(true));
-    }
-      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-      var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
-      var isInternal = (href) => {
-          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-      }
-      // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-      for (var i=0; i<links.length; i++) {
-        const link = links[i];
-        if (!isInternal(link.href)) {
-          // undo the damage that might have been done by quarto-nav.js in the case of
-          // links that we want to consider external
-          if (link.dataset.originalHref !== undefined) {
-            link.href = link.dataset.originalHref;
-          }
-        }
-      }
-    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-      const config = {
-        allowHTML: true,
-        maxWidth: 500,
-        delay: 100,
-        arrow: false,
-        appendTo: function(el) {
-            return el.parentElement;
-        },
-        interactive: true,
-        interactiveBorder: 10,
-        theme: 'quarto',
-        placement: 'bottom-start',
-      };
-      if (contentFn) {
-        config.content = contentFn;
-      }
-      if (onTriggerFn) {
-        config.onTrigger = onTriggerFn;
-      }
-      if (onUntriggerFn) {
-        config.onUntrigger = onUntriggerFn;
-      }
-      window.tippy(el, config); 
-    }
-    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-    for (var i=0; i<noterefs.length; i++) {
-      const ref = noterefs[i];
-      tippyHover(ref, function() {
-        // use id or data attribute instead here
-        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-        try { href = new URL(href).hash; } catch {}
-        const id = href.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note) {
-          return note.innerHTML;
-        } else {
-          return "";
-        }
-      });
-    }
-    const xrefs = window.document.querySelectorAll('a.quarto-xref');
-    const processXRef = (id, note) => {
-      // Strip column container classes
-      const stripColumnClz = (el) => {
-        el.classList.remove("page-full", "page-columns");
-        if (el.children) {
-          for (const child of el.children) {
-            stripColumnClz(child);
-          }
-        }
-      }
-      stripColumnClz(note)
-      if (id === null || id.startsWith('sec-')) {
-        // Special case sections, only their first couple elements
-        const container = document.createElement("div");
-        if (note.children && note.children.length > 2) {
-          container.appendChild(note.children[0].cloneNode(true));
-          for (let i = 1; i < note.children.length; i++) {
-            const child = note.children[i];
-            if (child.tagName === "P" && child.innerText === "") {
-              continue;
-            } else {
-              container.appendChild(child.cloneNode(true));
-              break;
-            }
-          }
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(container);
-          }
-          return container.innerHTML
-        } else {
-          if (window.Quarto?.typesetMath) {
-            window.Quarto.typesetMath(note);
-          }
-          return note.innerHTML;
+          window.location.href = sourceUrl;
         }
       } else {
-        // Remove any anchor links if they are present
-        const anchorLink = note.querySelector('a.anchorjs-link');
-        if (anchorLink) {
-          anchorLink.remove();
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
         }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        if (note.classList.contains("callout")) {
-          return note.outerHTML;
-        } else {
-          return note.innerHTML;
-        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
       }
     }
-    for (var i=0; i<xrefs.length; i++) {
-      const xref = xrefs[i];
-      tippyHover(xref, undefined, function(instance) {
-        instance.disable();
-        let url = xref.getAttribute('href');
-        let hash = undefined; 
-        if (url.startsWith('#')) {
-          hash = url;
-        } else {
-          try { hash = new URL(url).hash; } catch {}
-        }
-        if (hash) {
-          const id = hash.replace(/^#\/?/, "");
-          const note = window.document.getElementById(id);
-          if (note !== null) {
-            try {
-              const html = processXRef(id, note.cloneNode(true));
-              instance.setContent(html);
-            } finally {
-              instance.enable();
-              instance.show();
-            }
-          } else {
-            // See if we can fetch this
-            fetch(url.split('#')[0])
-            .then(res => res.text())
-            .then(html => {
-              const parser = new DOMParser();
-              const htmlDoc = parser.parseFromString(html, "text/html");
-              const note = htmlDoc.getElementById(id);
-              if (note !== null) {
-                const html = processXRef(id, note);
-                instance.setContent(html);
-              } 
-            }).finally(() => {
-              instance.enable();
-              instance.show();
-            });
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
           }
         } else {
-          // See if we can fetch a full url (with no hash to target)
-          // This is a special case and we should probably do some content thinning / targeting
-          fetch(url)
+          // See if we can fetch this
+          fetch(url.split('#')[0])
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.querySelector('main.content');
+            const note = htmlDoc.getElementById(id);
             if (note !== null) {
-              // This should only happen for chapter cross references
-              // (since there is no id in the URL)
-              // remove the first header
-              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-                note.children[0].remove();
-              }
-              const html = processXRef(null, note);
+              const html = processXRef(id, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1789,161 +1789,185 @@ window.Quarto = {
             instance.show();
           });
         }
-      }, function(instance) {
-      });
-    }
-        let selectedAnnoteEl;
-        const selectorForAnnotation = ( cell, annotation) => {
-          let cellAttr = 'data-code-cell="' + cell + '"';
-          let lineAttr = 'data-code-annotation="' +  annotation + '"';
-          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-          return selector;
-        }
-        const selectCodeLines = (annoteEl) => {
-          const doc = window.document;
-          const targetCell = annoteEl.getAttribute("data-target-cell");
-          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-          const lineIds = lines.map((line) => {
-            return targetCell + "-" + line;
-          })
-          let top = null;
-          let height = null;
-          let parent = null;
-          if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
-            }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
-            }
-            selectedAnnoteEl = annoteEl;
-          }
-        };
-        const unselectCodeLines = () => {
-          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-          elementsIds.forEach((elId) => {
-            const div = window.document.getElementById(elId);
-            if (div) {
-              div.remove();
-            }
-          });
-          selectedAnnoteEl = undefined;
-        };
-          // Handle positioning of the toggle
-      window.addEventListener(
-        "resize",
-        throttle(() => {
-          elRect = undefined;
-          if (selectedAnnoteEl) {
-            selectCodeLines(selectedAnnoteEl);
-          }
-        }, 10)
-      );
-      function throttle(fn, ms) {
-      let throttle = false;
-      let timer;
-        return (...args) => {
-          if(!throttle) { // first call gets through
-              fn.apply(this, args);
-              throttle = true;
-          } else { // all the others get throttled
-              if(timer) clearTimeout(timer); // cancel #2
-              timer = setTimeout(() => {
-                fn.apply(this, args);
-                timer = throttle = false;
-              }, ms);
-          }
-        };
-      }
-        // Attach click handler to the DT
-        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-        for (const annoteDlNode of annoteDls) {
-          annoteDlNode.addEventListener('click', (event) => {
-            const clickedEl = event.target;
-            if (clickedEl !== selectedAnnoteEl) {
-              unselectCodeLines();
-              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-              if (activeEl) {
-                activeEl.classList.remove('code-annotation-active');
-              }
-              selectCodeLines(clickedEl);
-              clickedEl.classList.add('code-annotation-active');
-            } else {
-              // Unselect the line
-              unselectCodeLines();
-              clickedEl.classList.remove('code-annotation-active');
-            }
-          });
-        }
-    const findCites = (el) => {
-      const parentEl = el.parentElement;
-      if (parentEl) {
-        const cites = parentEl.dataset.cites;
-        if (cites) {
-          return {
-            el,
-            cites: cites.split(' ')
-          };
-        } else {
-          return findCites(el.parentElement)
-        }
       } else {
-        return undefined;
-      }
-    };
-    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-    for (var i=0; i<bibliorefs.length; i++) {
-      const ref = bibliorefs[i];
-      const citeInfo = findCites(ref);
-      if (citeInfo) {
-        tippyHover(citeInfo.el, function() {
-          var popup = window.document.createElement('div');
-          citeInfo.cites.forEach(function(cite) {
-            var citeDiv = window.document.createElement('div');
-            citeDiv.classList.add('hanging-indent');
-            citeDiv.classList.add('csl-entry');
-            var biblioDiv = window.document.getElementById('ref-' + cite);
-            if (biblioDiv) {
-              citeDiv.innerHTML = biblioDiv.innerHTML;
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
             }
-            popup.appendChild(citeDiv);
-          });
-          return popup.innerHTML;
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
         });
       }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
     }
-  });
-  </script>
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./62_librs.html" class="pagination-link" aria-label="Serial">
@@ -1956,7 +1980,7 @@ window.Quarto = {
       </a>
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">---</span></span>
+<div class="sourceCode" id="cb16" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb16-1"><a href="#cb16-1"></a><span class="co">---</span></span>
 <span id="cb16-2"><a href="#cb16-2"></a><span class="an">title:</span><span class="co"> Exceptions</span></span>
 <span id="cb16-3"><a href="#cb16-3"></a><span class="co">---</span></span>
 <span id="cb16-4"><a href="#cb16-4"></a></span>
@@ -1995,579 +2019,579 @@ window.Quarto = {
 <span id="cb16-37"><a href="#cb16-37"></a><span class="ss">- </span>The most famous is zero division.</span>
 <span id="cb16-38"><a href="#cb16-38"></a></span>
 <span id="cb16-39"><a href="#cb16-39"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
-<span id="cb16-40"><a href="#cb16-40"></a>fn <span class="fu">main</span>() {</span>
-<span id="cb16-41"><a href="#cb16-41"></a>    <span class="sc">/</span><span class="er">/</span> Print so isn<span class="st">'t optimized out.</span></span>
-<span id="cb16-42"><a href="#cb16-42"></a><span class="st">    println!("{}", 1 / 0);</span></span>
-<span id="cb16-43"><a href="#cb16-43"></a><span class="st">}</span></span>
-<span id="cb16-44"><a href="#cb16-44"></a><span class="st">```</span></span>
+<span id="cb16-40"><a href="#cb16-40"></a><span class="in">fn main() {</span></span>
+<span id="cb16-41"><a href="#cb16-41"></a><span class="in">    // Print so isn't optimized out.</span></span>
+<span id="cb16-42"><a href="#cb16-42"></a><span class="in">    println!("{}", 1 / 0);</span></span>
+<span id="cb16-43"><a href="#cb16-43"></a><span class="in">}</span></span>
+<span id="cb16-44"><a href="#cb16-44"></a><span class="in">```</span></span>
 <span id="cb16-45"><a href="#cb16-45"></a></span>
-<span id="cb16-46"><a href="#cb16-46"></a><span class="st">## `rustc` protects</span></span>
+<span id="cb16-46"><a href="#cb16-46"></a><span class="fu">## `rustc` protects</span></span>
 <span id="cb16-47"><a href="#cb16-47"></a></span>
-<span id="cb16-48"><a href="#cb16-48"></a><span class="st">- Modern languages won'</span>t allow this.</span>
+<span id="cb16-48"><a href="#cb16-48"></a><span class="ss">- </span>Modern languages won't allow this.</span>
 <span id="cb16-49"><a href="#cb16-49"></a></span>
-<span id="cb16-50"><a href="#cb16-50"></a><span class="st">```</span><span class="at">{.sh}</span></span>
-<span id="cb16-51"><a href="#cb16-51"></a><span class="at">$ cargo r</span></span>
-<span id="cb16-52"><a href="#cb16-52"></a><span class="at">   Compiling divzero v0.1.0 (/home/user/tmp/divzero)</span></span>
-<span id="cb16-53"><a href="#cb16-53"></a><span class="at">error: this operation will panic at runtime</span></span>
-<span id="cb16-54"><a href="#cb16-54"></a><span class="at"> --&gt; src/main.rs:3:20</span></span>
-<span id="cb16-55"><a href="#cb16-55"></a><span class="at">  |</span></span>
-<span id="cb16-56"><a href="#cb16-56"></a><span class="at">3 |     println!("{}", 1 / 0);</span></span>
-<span id="cb16-57"><a href="#cb16-57"></a><span class="at">  |                    ^^^^^ attempt to divide </span><span class="st">`</span><span class="dv">1</span>_i32<span class="st">`</span><span class="at"> by zero</span></span>
-<span id="cb16-58"><a href="#cb16-58"></a><span class="at">  |</span></span>
-<span id="cb16-59"><a href="#cb16-59"></a><span class="at">  = note: </span><span class="st">`</span><span class="co">#[deny(unconditional_panic)]` on by default</span></span>
+<span id="cb16-50"><a href="#cb16-50"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-51"><a href="#cb16-51"></a><span class="in">$ cargo r</span></span>
+<span id="cb16-52"><a href="#cb16-52"></a><span class="in">   Compiling divzero v0.1.0 (/home/user/tmp/divzero)</span></span>
+<span id="cb16-53"><a href="#cb16-53"></a><span class="in">error: this operation will panic at runtime</span></span>
+<span id="cb16-54"><a href="#cb16-54"></a><span class="in"> --&gt; src/main.rs:3:20</span></span>
+<span id="cb16-55"><a href="#cb16-55"></a><span class="in">  |</span></span>
+<span id="cb16-56"><a href="#cb16-56"></a><span class="in">3 |     println!("{}", 1 / 0);</span></span>
+<span id="cb16-57"><a href="#cb16-57"></a><span class="in">  |                    ^^^^^ attempt to divide `1_i32` by zero</span></span>
+<span id="cb16-58"><a href="#cb16-58"></a><span class="in">  |</span></span>
+<span id="cb16-59"><a href="#cb16-59"></a><span class="in">  = note: `#[deny(unconditional_panic)]` on by default</span></span>
 <span id="cb16-60"><a href="#cb16-60"></a></span>
-<span id="cb16-61"><a href="#cb16-61"></a>error<span class="sc">:</span> could not compile <span class="st">`</span><span class="at">divzero</span><span class="st">`</span> (bin <span class="st">"divzero"</span>) due to <span class="dv">1</span> previous error</span>
-<span id="cb16-62"><a href="#cb16-62"></a><span class="st">```</span></span>
+<span id="cb16-61"><a href="#cb16-61"></a><span class="in">error: could not compile `divzero` (bin "divzero") due to 1 previous error</span></span>
+<span id="cb16-62"><a href="#cb16-62"></a><span class="in">```</span></span>
 <span id="cb16-63"><a href="#cb16-63"></a></span>
-<span id="cb16-64"><a href="#cb16-64"></a><span class="at">## Permit</span></span>
+<span id="cb16-64"><a href="#cb16-64"></a><span class="fu">## Permit</span></span>
 <span id="cb16-65"><a href="#cb16-65"></a></span>
-<span id="cb16-66"><a href="#cb16-66"></a><span class="at">- We can of course </span><span class="st">`</span><span class="co">#[allow(unconditional_panic)]`</span></span>
-<span id="cb16-67"><a href="#cb16-67"></a><span class="sc">-</span> (Or take user input, of course.)</span>
+<span id="cb16-66"><a href="#cb16-66"></a><span class="ss">- </span>We can of course <span class="in">`#[allow(unconditional_panic)]`</span></span>
+<span id="cb16-67"><a href="#cb16-67"></a><span class="ss">- </span>(Or take user input, of course.)</span>
 <span id="cb16-68"><a href="#cb16-68"></a></span>
-<span id="cb16-69"><a href="#cb16-69"></a><span class="st">```</span><span class="at">{.rs filename="src/main.rs"}</span></span>
-<span id="cb16-70"><a href="#cb16-70"></a><span class="at">$ cat src/main.rs</span></span>
-<span id="cb16-71"><a href="#cb16-71"></a><span class="at">fn main() {</span></span>
-<span id="cb16-72"><a href="#cb16-72"></a><span class="at">    #[allow(unconditional_panic)]</span></span>
-<span id="cb16-73"><a href="#cb16-73"></a><span class="at">    let _x = 1 / 0;</span></span>
-<span id="cb16-74"><a href="#cb16-74"></a><span class="at">}</span></span>
-<span id="cb16-75"><a href="#cb16-75"></a><span class="st">```</span></span>
+<span id="cb16-69"><a href="#cb16-69"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb16-70"><a href="#cb16-70"></a><span class="in">$ cat src/main.rs</span></span>
+<span id="cb16-71"><a href="#cb16-71"></a><span class="in">fn main() {</span></span>
+<span id="cb16-72"><a href="#cb16-72"></a><span class="in">    #[allow(unconditional_panic)]</span></span>
+<span id="cb16-73"><a href="#cb16-73"></a><span class="in">    let _x = 1 / 0;</span></span>
+<span id="cb16-74"><a href="#cb16-74"></a><span class="in">}</span></span>
+<span id="cb16-75"><a href="#cb16-75"></a><span class="in">```</span></span>
 <span id="cb16-76"><a href="#cb16-76"></a></span>
-<span id="cb16-77"><a href="#cb16-77"></a><span class="do">## See a panic</span></span>
+<span id="cb16-77"><a href="#cb16-77"></a><span class="fu">## See a panic</span></span>
 <span id="cb16-78"><a href="#cb16-78"></a></span>
-<span id="cb16-79"><a href="#cb16-79"></a><span class="sc">-</span> Presumably this is hitting the CPU then a <span class="st">`</span><span class="at">rustc</span><span class="st">`</span> provided panic handler.</span>
+<span id="cb16-79"><a href="#cb16-79"></a><span class="ss">- </span>Presumably this is hitting the CPU then a <span class="in">`rustc`</span> provided panic handler.</span>
 <span id="cb16-80"><a href="#cb16-80"></a></span>
-<span id="cb16-81"><a href="#cb16-81"></a><span class="st">```</span><span class="at">{.sh}</span></span>
-<span id="cb16-82"><a href="#cb16-82"></a><span class="at">$ cargo r</span></span>
-<span id="cb16-83"><a href="#cb16-83"></a><span class="at">   Compiling divzero v0.1.0 (/home/user/tmp/divzero)</span></span>
-<span id="cb16-84"><a href="#cb16-84"></a><span class="at">    Finished </span><span class="st">`</span>dev<span class="st">`</span><span class="at"> profile [unoptimized + debuginfo] target(s) in 0.17s</span></span>
-<span id="cb16-85"><a href="#cb16-85"></a><span class="at">     Running </span><span class="st">`</span>target<span class="sc">/</span>debug<span class="sc">/</span>divzero<span class="st">`</span></span>
+<span id="cb16-81"><a href="#cb16-81"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-82"><a href="#cb16-82"></a><span class="in">$ cargo r</span></span>
+<span id="cb16-83"><a href="#cb16-83"></a><span class="in">   Compiling divzero v0.1.0 (/home/user/tmp/divzero)</span></span>
+<span id="cb16-84"><a href="#cb16-84"></a><span class="in">    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.17s</span></span>
+<span id="cb16-85"><a href="#cb16-85"></a><span class="in">     Running `target/debug/divzero`</span></span>
 <span id="cb16-86"><a href="#cb16-86"></a></span>
-<span id="cb16-87"><a href="#cb16-87"></a><span class="at">thread 'main' (2292) panicked at src/main.rs:3:14:</span></span>
-<span id="cb16-88"><a href="#cb16-88"></a><span class="at">attempt to divide by zero</span></span>
-<span id="cb16-89"><a href="#cb16-89"></a><span class="at">note: run with </span><span class="st">`</span>RUST_BACKTRACE<span class="ot">=</span><span class="dv">1</span><span class="st">`</span><span class="at"> environment variable to display a backtrace</span></span>
-<span id="cb16-90"><a href="#cb16-90"></a><span class="st">```</span></span>
+<span id="cb16-87"><a href="#cb16-87"></a><span class="in">thread 'main' (2292) panicked at src/main.rs:3:14:</span></span>
+<span id="cb16-88"><a href="#cb16-88"></a><span class="in">attempt to divide by zero</span></span>
+<span id="cb16-89"><a href="#cb16-89"></a><span class="in">note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace</span></span>
+<span id="cb16-90"><a href="#cb16-90"></a><span class="in">```</span></span>
 <span id="cb16-91"><a href="#cb16-91"></a></span>
-<span id="cb16-92"><a href="#cb16-92"></a><span class="do">## Much Easier</span></span>
+<span id="cb16-92"><a href="#cb16-92"></a><span class="fu">## Much Easier</span></span>
 <span id="cb16-93"><a href="#cb16-93"></a></span>
-<span id="cb16-94"><a href="#cb16-94"></a><span class="sc">-</span> We can just use a language that let<span class="st">'s us use the computer.</span></span>
+<span id="cb16-94"><a href="#cb16-94"></a><span class="ss">- </span>We can just use a language that let's us use the computer.</span>
 <span id="cb16-95"><a href="#cb16-95"></a></span>
-<span id="cb16-96"><a href="#cb16-96"></a><span class="st">```{.c filename="main.c"}</span></span>
-<span id="cb16-97"><a href="#cb16-97"></a><span class="st">int main() {</span></span>
-<span id="cb16-98"><a href="#cb16-98"></a><span class="st">        int x = 1 / 0;</span></span>
-<span id="cb16-99"><a href="#cb16-99"></a><span class="st">        return 0;</span></span>
-<span id="cb16-100"><a href="#cb16-100"></a><span class="st">}</span></span>
-<span id="cb16-101"><a href="#cb16-101"></a><span class="st">```</span></span>
+<span id="cb16-96"><a href="#cb16-96"></a><span class="in">```{.c filename="main.c"}</span></span>
+<span id="cb16-97"><a href="#cb16-97"></a><span class="in">int main() {</span></span>
+<span id="cb16-98"><a href="#cb16-98"></a><span class="in">        int x = 1 / 0;</span></span>
+<span id="cb16-99"><a href="#cb16-99"></a><span class="in">        return 0;</span></span>
+<span id="cb16-100"><a href="#cb16-100"></a><span class="in">}</span></span>
+<span id="cb16-101"><a href="#cb16-101"></a><span class="in">```</span></span>
 <span id="cb16-102"><a href="#cb16-102"></a></span>
-<span id="cb16-103"><a href="#cb16-103"></a><span class="st">## Permitted</span></span>
+<span id="cb16-103"><a href="#cb16-103"></a><span class="fu">## Permitted</span></span>
 <span id="cb16-104"><a href="#cb16-104"></a></span>
-<span id="cb16-105"><a href="#cb16-105"></a><span class="st">- It will warn us but not stop us.</span></span>
+<span id="cb16-105"><a href="#cb16-105"></a><span class="ss">- </span>It will warn us but not stop us.</span>
 <span id="cb16-106"><a href="#cb16-106"></a></span>
-<span id="cb16-107"><a href="#cb16-107"></a><span class="st">```{.sh}</span></span>
-<span id="cb16-108"><a href="#cb16-108"></a><span class="st">$ gcc main.c -o main</span></span>
-<span id="cb16-109"><a href="#cb16-109"></a><span class="st">main.c: In function ‘main’:</span></span>
-<span id="cb16-110"><a href="#cb16-110"></a><span class="st">main.c:2:19: warning: division by zero [-Wdiv-by-zero]</span></span>
-<span id="cb16-111"><a href="#cb16-111"></a><span class="st">    2 |         int x = 1 / 0;</span></span>
-<span id="cb16-112"><a href="#cb16-112"></a><span class="st">      |                   ^</span></span>
-<span id="cb16-113"><a href="#cb16-113"></a><span class="st">```</span></span>
+<span id="cb16-107"><a href="#cb16-107"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-108"><a href="#cb16-108"></a><span class="in">$ gcc main.c -o main</span></span>
+<span id="cb16-109"><a href="#cb16-109"></a><span class="in">main.c: In function ‘main’:</span></span>
+<span id="cb16-110"><a href="#cb16-110"></a><span class="in">main.c:2:19: warning: division by zero [-Wdiv-by-zero]</span></span>
+<span id="cb16-111"><a href="#cb16-111"></a><span class="in">    2 |         int x = 1 / 0;</span></span>
+<span id="cb16-112"><a href="#cb16-112"></a><span class="in">      |                   ^</span></span>
+<span id="cb16-113"><a href="#cb16-113"></a><span class="in">```</span></span>
 <span id="cb16-114"><a href="#cb16-114"></a></span>
-<span id="cb16-115"><a href="#cb16-115"></a><span class="st">## Modernizing</span></span>
+<span id="cb16-115"><a href="#cb16-115"></a><span class="fu">## Modernizing</span></span>
 <span id="cb16-116"><a href="#cb16-116"></a></span>
-<span id="cb16-117"><a href="#cb16-117"></a><span class="st">- Naturally, in a C class this would be banned through use of compiler options.</span></span>
+<span id="cb16-117"><a href="#cb16-117"></a><span class="ss">- </span>Naturally, in a C class this would be banned through use of compiler options.</span>
 <span id="cb16-118"><a href="#cb16-118"></a></span>
-<span id="cb16-119"><a href="#cb16-119"></a><span class="st">```{.makefile filename="Makefile"}</span></span>
-<span id="cb16-120"><a href="#cb16-120"></a><span class="st">CC = gcc # or clang</span></span>
-<span id="cb16-121"><a href="#cb16-121"></a><span class="st">CFLAGS = -std=c89 -Wall -Wextra -Werror -Wpedantic -O2</span></span>
-<span id="cb16-122"><a href="#cb16-122"></a><span class="st">```</span></span>
+<span id="cb16-119"><a href="#cb16-119"></a><span class="in">```{.makefile filename="Makefile"}</span></span>
+<span id="cb16-120"><a href="#cb16-120"></a><span class="in">CC = gcc # or clang</span></span>
+<span id="cb16-121"><a href="#cb16-121"></a><span class="in">CFLAGS = -std=c89 -Wall -Wextra -Werror -Wpedantic -O2</span></span>
+<span id="cb16-122"><a href="#cb16-122"></a><span class="in">```</span></span>
 <span id="cb16-123"><a href="#cb16-123"></a></span>
-<span id="cb16-124"><a href="#cb16-124"></a><span class="st">- This yields:</span></span>
+<span id="cb16-124"><a href="#cb16-124"></a><span class="ss">- </span>This yields:</span>
 <span id="cb16-125"><a href="#cb16-125"></a></span>
-<span id="cb16-126"><a href="#cb16-126"></a><span class="st">```{.sh}</span></span>
-<span id="cb16-127"><a href="#cb16-127"></a><span class="st">$ gcc main.c -std=c89 -Wall -Wextra -Werror -Wpedantic -O2 -o main</span></span>
-<span id="cb16-128"><a href="#cb16-128"></a><span class="st">main.c: In function ‘main’:</span></span>
-<span id="cb16-129"><a href="#cb16-129"></a><span class="st">main.c:2:19: error: division by zero [-Werror=div-by-zero]</span></span>
-<span id="cb16-130"><a href="#cb16-130"></a><span class="st">    2 |         int x = 1 / 0;</span></span>
-<span id="cb16-131"><a href="#cb16-131"></a><span class="st">      |                   ^</span></span>
-<span id="cb16-132"><a href="#cb16-132"></a><span class="st">main.c:2:13: error: unused variable ‘x’ [-Werror=unused-variable]</span></span>
-<span id="cb16-133"><a href="#cb16-133"></a><span class="st">    2 |         int x = 1 / 0;</span></span>
-<span id="cb16-134"><a href="#cb16-134"></a><span class="st">      |             ^</span></span>
-<span id="cb16-135"><a href="#cb16-135"></a><span class="st">cc1: all warnings being treated as errors</span></span>
-<span id="cb16-136"><a href="#cb16-136"></a><span class="st">```</span></span>
+<span id="cb16-126"><a href="#cb16-126"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-127"><a href="#cb16-127"></a><span class="in">$ gcc main.c -std=c89 -Wall -Wextra -Werror -Wpedantic -O2 -o main</span></span>
+<span id="cb16-128"><a href="#cb16-128"></a><span class="in">main.c: In function ‘main’:</span></span>
+<span id="cb16-129"><a href="#cb16-129"></a><span class="in">main.c:2:19: error: division by zero [-Werror=div-by-zero]</span></span>
+<span id="cb16-130"><a href="#cb16-130"></a><span class="in">    2 |         int x = 1 / 0;</span></span>
+<span id="cb16-131"><a href="#cb16-131"></a><span class="in">      |                   ^</span></span>
+<span id="cb16-132"><a href="#cb16-132"></a><span class="in">main.c:2:13: error: unused variable ‘x’ [-Werror=unused-variable]</span></span>
+<span id="cb16-133"><a href="#cb16-133"></a><span class="in">    2 |         int x = 1 / 0;</span></span>
+<span id="cb16-134"><a href="#cb16-134"></a><span class="in">      |             ^</span></span>
+<span id="cb16-135"><a href="#cb16-135"></a><span class="in">cc1: all warnings being treated as errors</span></span>
+<span id="cb16-136"><a href="#cb16-136"></a><span class="in">```</span></span>
 <span id="cb16-137"><a href="#cb16-137"></a></span>
-<span id="cb16-138"><a href="#cb16-138"></a><span class="st">## Results</span></span>
+<span id="cb16-138"><a href="#cb16-138"></a><span class="fu">## Results</span></span>
 <span id="cb16-139"><a href="#cb16-139"></a></span>
-<span id="cb16-140"><a href="#cb16-140"></a><span class="st">- In any case, if you do use naive `gcc` you will get the following:</span></span>
+<span id="cb16-140"><a href="#cb16-140"></a><span class="ss">- </span>In any case, if you do use naive <span class="in">`gcc`</span> you will get the following:</span>
 <span id="cb16-141"><a href="#cb16-141"></a></span>
-<span id="cb16-142"><a href="#cb16-142"></a><span class="st">```{.sh}</span></span>
-<span id="cb16-143"><a href="#cb16-143"></a><span class="st">$ ./main</span></span>
-<span id="cb16-144"><a href="#cb16-144"></a><span class="st">Floating point exception (core dumped)</span></span>
-<span id="cb16-145"><a href="#cb16-145"></a><span class="st">```</span></span>
+<span id="cb16-142"><a href="#cb16-142"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-143"><a href="#cb16-143"></a><span class="in">$ ./main</span></span>
+<span id="cb16-144"><a href="#cb16-144"></a><span class="in">Floating point exception (core dumped)</span></span>
+<span id="cb16-145"><a href="#cb16-145"></a><span class="in">```</span></span>
 <span id="cb16-146"><a href="#cb16-146"></a></span>
-<span id="cb16-147"><a href="#cb16-147"></a><span class="st">- This is of course ludicrously confusing.</span></span>
-<span id="cb16-148"><a href="#cb16-148"></a><span class="st">    - There is no usage of floating point at all.</span></span>
+<span id="cb16-147"><a href="#cb16-147"></a><span class="ss">- </span>This is of course ludicrously confusing.</span>
+<span id="cb16-148"><a href="#cb16-148"></a><span class="ss">    - </span>There is no usage of floating point at all.</span>
 <span id="cb16-149"><a href="#cb16-149"></a></span>
-<span id="cb16-150"><a href="#cb16-150"></a><span class="st">## Clang</span></span>
+<span id="cb16-150"><a href="#cb16-150"></a><span class="fu">## Clang</span></span>
 <span id="cb16-151"><a href="#cb16-151"></a></span>
-<span id="cb16-152"><a href="#cb16-152"></a><span class="st">- There are `clang` fans (vs. `gcc`)</span></span>
-<span id="cb16-153"><a href="#cb16-153"></a><span class="st">- Compilation is identical though the warning format differs.</span></span>
+<span id="cb16-152"><a href="#cb16-152"></a><span class="ss">- </span>There are <span class="in">`clang`</span> fans (vs. <span class="in">`gcc`</span>)</span>
+<span id="cb16-153"><a href="#cb16-153"></a><span class="ss">- </span>Compilation is identical though the warning format differs.</span>
 <span id="cb16-154"><a href="#cb16-154"></a></span>
-<span id="cb16-155"><a href="#cb16-155"></a><span class="st">```{.sh}</span></span>
-<span id="cb16-156"><a href="#cb16-156"></a><span class="st">$ clang main.c -o main</span></span>
-<span id="cb16-157"><a href="#cb16-157"></a><span class="st">main.c:2:12: warning: division by zero is undefined [-Wdivision-by-zero]</span></span>
-<span id="cb16-158"><a href="#cb16-158"></a><span class="st">        int x = 1 / 0;</span></span>
-<span id="cb16-159"><a href="#cb16-159"></a><span class="st">                  ^ ~</span></span>
-<span id="cb16-160"><a href="#cb16-160"></a><span class="st">1 warning generated.</span></span>
-<span id="cb16-161"><a href="#cb16-161"></a><span class="st">```</span></span>
+<span id="cb16-155"><a href="#cb16-155"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-156"><a href="#cb16-156"></a><span class="in">$ clang main.c -o main</span></span>
+<span id="cb16-157"><a href="#cb16-157"></a><span class="in">main.c:2:12: warning: division by zero is undefined [-Wdivision-by-zero]</span></span>
+<span id="cb16-158"><a href="#cb16-158"></a><span class="in">        int x = 1 / 0;</span></span>
+<span id="cb16-159"><a href="#cb16-159"></a><span class="in">                  ^ ~</span></span>
+<span id="cb16-160"><a href="#cb16-160"></a><span class="in">1 warning generated.</span></span>
+<span id="cb16-161"><a href="#cb16-161"></a><span class="in">```</span></span>
 <span id="cb16-162"><a href="#cb16-162"></a></span>
-<span id="cb16-163"><a href="#cb16-163"></a><span class="st">## Difference</span></span>
+<span id="cb16-163"><a href="#cb16-163"></a><span class="fu">## Difference</span></span>
 <span id="cb16-164"><a href="#cb16-164"></a></span>
-<span id="cb16-165"><a href="#cb16-165"></a><span class="st">- `clang` *does not* trigger an exception.</span></span>
+<span id="cb16-165"><a href="#cb16-165"></a><span class="ss">- </span><span class="in">`clang`</span> *does not* trigger an exception.</span>
 <span id="cb16-166"><a href="#cb16-166"></a></span>
-<span id="cb16-167"><a href="#cb16-167"></a><span class="st">```{.sh}</span></span>
-<span id="cb16-168"><a href="#cb16-168"></a><span class="st">$ cat main.c</span></span>
-<span id="cb16-169"><a href="#cb16-169"></a><span class="st">#include &lt;stdio.h&gt;</span></span>
+<span id="cb16-167"><a href="#cb16-167"></a><span class="in">```{.sh}</span></span>
+<span id="cb16-168"><a href="#cb16-168"></a><span class="in">$ cat main.c</span></span>
+<span id="cb16-169"><a href="#cb16-169"></a><span class="in">#include &lt;stdio.h&gt;</span></span>
 <span id="cb16-170"><a href="#cb16-170"></a></span>
-<span id="cb16-171"><a href="#cb16-171"></a><span class="st">int main() {</span></span>
-<span id="cb16-172"><a href="#cb16-172"></a><span class="st">        int x = 1 / 0;</span></span>
-<span id="cb16-173"><a href="#cb16-173"></a><span class="st">        printf("%d</span><span class="sc">\n</span><span class="st">", x);</span></span>
-<span id="cb16-174"><a href="#cb16-174"></a><span class="st">        return 0;</span></span>
-<span id="cb16-175"><a href="#cb16-175"></a><span class="st">}</span></span>
-<span id="cb16-176"><a href="#cb16-176"></a><span class="st">user@cd-desk:~/tmp/divzero$ clang main.c -o main</span></span>
-<span id="cb16-177"><a href="#cb16-177"></a><span class="st">main.c:4:12: warning: division by zero is undefined [-Wdivision-by-zero]</span></span>
-<span id="cb16-178"><a href="#cb16-178"></a><span class="st">        int x = 1 / 0;</span></span>
-<span id="cb16-179"><a href="#cb16-179"></a><span class="st">                  ^ ~</span></span>
-<span id="cb16-180"><a href="#cb16-180"></a><span class="st">1 warning generated.</span></span>
-<span id="cb16-181"><a href="#cb16-181"></a><span class="st">user@cd-desk:~/tmp/divzero$ ./main</span></span>
-<span id="cb16-182"><a href="#cb16-182"></a><span class="st">267243840</span></span>
-<span id="cb16-183"><a href="#cb16-183"></a><span class="st">user@cd-desk:~/tmp/divzero$ ./main</span></span>
-<span id="cb16-184"><a href="#cb16-184"></a><span class="st">2140340544</span></span>
-<span id="cb16-185"><a href="#cb16-185"></a><span class="st">```</span></span>
+<span id="cb16-171"><a href="#cb16-171"></a><span class="in">int main() {</span></span>
+<span id="cb16-172"><a href="#cb16-172"></a><span class="in">        int x = 1 / 0;</span></span>
+<span id="cb16-173"><a href="#cb16-173"></a><span class="in">        printf("%d\n", x);</span></span>
+<span id="cb16-174"><a href="#cb16-174"></a><span class="in">        return 0;</span></span>
+<span id="cb16-175"><a href="#cb16-175"></a><span class="in">}</span></span>
+<span id="cb16-176"><a href="#cb16-176"></a><span class="in">user@cd-desk:~/tmp/divzero$ clang main.c -o main</span></span>
+<span id="cb16-177"><a href="#cb16-177"></a><span class="in">main.c:4:12: warning: division by zero is undefined [-Wdivision-by-zero]</span></span>
+<span id="cb16-178"><a href="#cb16-178"></a><span class="in">        int x = 1 / 0;</span></span>
+<span id="cb16-179"><a href="#cb16-179"></a><span class="in">                  ^ ~</span></span>
+<span id="cb16-180"><a href="#cb16-180"></a><span class="in">1 warning generated.</span></span>
+<span id="cb16-181"><a href="#cb16-181"></a><span class="in">user@cd-desk:~/tmp/divzero$ ./main</span></span>
+<span id="cb16-182"><a href="#cb16-182"></a><span class="in">267243840</span></span>
+<span id="cb16-183"><a href="#cb16-183"></a><span class="in">user@cd-desk:~/tmp/divzero$ ./main</span></span>
+<span id="cb16-184"><a href="#cb16-184"></a><span class="in">2140340544</span></span>
+<span id="cb16-185"><a href="#cb16-185"></a><span class="in">```</span></span>
 <span id="cb16-186"><a href="#cb16-186"></a></span>
-<span id="cb16-187"><a href="#cb16-187"></a><span class="st">## Aside</span></span>
+<span id="cb16-187"><a href="#cb16-187"></a><span class="fu">## Aside</span></span>
 <span id="cb16-188"><a href="#cb16-188"></a></span>
-<span id="cb16-189"><a href="#cb16-189"></a><span class="st">- Checkmate `clang` fans.</span></span>
-<span id="cb16-190"><a href="#cb16-190"></a><span class="st">- That should definitely explode.</span></span>
-<span id="cb16-191"><a href="#cb16-191"></a><span class="st">    - *Not* because the language is specified that way.</span></span>
-<span id="cb16-192"><a href="#cb16-192"></a><span class="st">    - Because `gcc` does and therefore so should you.</span></span>
+<span id="cb16-189"><a href="#cb16-189"></a><span class="ss">- </span>Checkmate <span class="in">`clang`</span> fans.</span>
+<span id="cb16-190"><a href="#cb16-190"></a><span class="ss">- </span>That should definitely explode.</span>
+<span id="cb16-191"><a href="#cb16-191"></a><span class="ss">    - </span>*Not* because the language is specified that way.</span>
+<span id="cb16-192"><a href="#cb16-192"></a><span class="ss">    - </span>Because <span class="in">`gcc`</span> does and therefore so should you.</span>
 <span id="cb16-193"><a href="#cb16-193"></a></span>
-<span id="cb16-194"><a href="#cb16-194"></a><span class="st"># Exceptions</span></span>
+<span id="cb16-194"><a href="#cb16-194"></a><span class="fu"># Exceptions</span></span>
 <span id="cb16-195"><a href="#cb16-195"></a></span>
-<span id="cb16-196"><a href="#cb16-196"></a><span class="st">## Types</span></span>
+<span id="cb16-196"><a href="#cb16-196"></a><span class="fu">## Types</span></span>
 <span id="cb16-197"><a href="#cb16-197"></a></span>
-<span id="cb16-198"><a href="#cb16-198"></a><span class="st">On x86, there are about 20 different CPU exception types. The most important are:</span></span>
+<span id="cb16-198"><a href="#cb16-198"></a>On x86, there are about 20 different CPU exception types. The most important are:</span>
 <span id="cb16-199"><a href="#cb16-199"></a></span>
-<span id="cb16-200"><a href="#cb16-200"></a><span class="st">- **Page Fault**: A page fault occurs on illegal memory accesses. For example, if the current instruction tries to read from an unmapped page or tries to write to a read-only page.</span></span>
-<span id="cb16-201"><a href="#cb16-201"></a><span class="st">    - Pages are numerical regions of memory.</span></span>
-<span id="cb16-202"><a href="#cb16-202"></a><span class="st">    - We imagine, for example, missing the VGA buffer due to faulty arithmetic.</span></span>
+<span id="cb16-200"><a href="#cb16-200"></a><span class="ss">- </span>**Page Fault**: A page fault occurs on illegal memory accesses. For example, if the current instruction tries to read from an unmapped page or tries to write to a read-only page.</span>
+<span id="cb16-201"><a href="#cb16-201"></a><span class="ss">    - </span>Pages are numerical regions of memory.</span>
+<span id="cb16-202"><a href="#cb16-202"></a><span class="ss">    - </span>We imagine, for example, missing the VGA buffer due to faulty arithmetic.</span>
 <span id="cb16-203"><a href="#cb16-203"></a></span>
-<span id="cb16-204"><a href="#cb16-204"></a><span class="st">## Types</span></span>
+<span id="cb16-204"><a href="#cb16-204"></a><span class="fu">## Types</span></span>
 <span id="cb16-205"><a href="#cb16-205"></a></span>
-<span id="cb16-206"><a href="#cb16-206"></a><span class="st">On x86, there are about 20 different CPU exception types. The most important are:</span></span>
+<span id="cb16-206"><a href="#cb16-206"></a>On x86, there are about 20 different CPU exception types. The most important are:</span>
 <span id="cb16-207"><a href="#cb16-207"></a></span>
-<span id="cb16-208"><a href="#cb16-208"></a><span class="st">- **Invalid Opcode**: This exception occurs when the current instruction is invalid, for example, when we try to use new [SSE instructions](https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions) on an old CPU that does not support them.</span></span>
-<span id="cb16-209"><a href="#cb16-209"></a><span class="st">    - If we naively accelerate graphics code this is an issue.</span></span>
-<span id="cb16-210"><a href="#cb16-210"></a><span class="st">    - Common in "early" (1995-2005) game design.</span></span>
+<span id="cb16-208"><a href="#cb16-208"></a><span class="ss">- </span>**Invalid Opcode**: This exception occurs when the current instruction is invalid, for example, when we try to use new <span class="co">[</span><span class="ot">SSE instructions</span><span class="co">](https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions)</span> on an old CPU that does not support them.</span>
+<span id="cb16-209"><a href="#cb16-209"></a><span class="ss">    - </span>If we naively accelerate graphics code this is an issue.</span>
+<span id="cb16-210"><a href="#cb16-210"></a><span class="ss">    - </span>Common in "early" (1995-2005) game design.</span>
 <span id="cb16-211"><a href="#cb16-211"></a></span>
 <span id="cb16-212"><a href="#cb16-212"></a></span>
-<span id="cb16-213"><a href="#cb16-213"></a><span class="st">## Types</span></span>
+<span id="cb16-213"><a href="#cb16-213"></a><span class="fu">## Types</span></span>
 <span id="cb16-214"><a href="#cb16-214"></a></span>
-<span id="cb16-215"><a href="#cb16-215"></a><span class="st">On x86, there are about 20 different CPU exception types. The most important are:</span></span>
+<span id="cb16-215"><a href="#cb16-215"></a>On x86, there are about 20 different CPU exception types. The most important are:</span>
 <span id="cb16-216"><a href="#cb16-216"></a></span>
-<span id="cb16-217"><a href="#cb16-217"></a><span class="st">- **General Protection Fault**: This is the exception with the broadest range of causes. </span></span>
-<span id="cb16-218"><a href="#cb16-218"></a><span class="st">    - Usually prevents a user from elevating their own privilege level by trying to overwrite a *protected* value that defines privilege level.</span></span>
-<span id="cb16-219"><a href="#cb16-219"></a><span class="st">    - Used to prevent virtual machine escape, safely sandbox browser code.</span></span>
+<span id="cb16-217"><a href="#cb16-217"></a><span class="ss">- </span>**General Protection Fault**: This is the exception with the broadest range of causes. </span>
+<span id="cb16-218"><a href="#cb16-218"></a><span class="ss">    - </span>Usually prevents a user from elevating their own privilege level by trying to overwrite a *protected* value that defines privilege level.</span>
+<span id="cb16-219"><a href="#cb16-219"></a><span class="ss">    - </span>Used to prevent virtual machine escape, safely sandbox browser code.</span>
 <span id="cb16-220"><a href="#cb16-220"></a></span>
 <span id="cb16-221"><a href="#cb16-221"></a></span>
-<span id="cb16-222"><a href="#cb16-222"></a><span class="st">## Types</span></span>
+<span id="cb16-222"><a href="#cb16-222"></a><span class="fu">## Types</span></span>
 <span id="cb16-223"><a href="#cb16-223"></a></span>
-<span id="cb16-224"><a href="#cb16-224"></a><span class="st">On x86, there are about 20 different CPU exception types. The most important are:</span></span>
+<span id="cb16-224"><a href="#cb16-224"></a>On x86, there are about 20 different CPU exception types. The most important are:</span>
 <span id="cb16-225"><a href="#cb16-225"></a></span>
-<span id="cb16-226"><a href="#cb16-226"></a><span class="st">- **Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. </span></span>
-<span id="cb16-227"><a href="#cb16-227"></a><span class="st">    - This exception also occurs when there is no handler function registered for an exception.</span></span>
-<span id="cb16-228"><a href="#cb16-228"></a><span class="st">    </span></span>
+<span id="cb16-226"><a href="#cb16-226"></a><span class="ss">- </span>**Double Fault**: When an exception occurs, the CPU tries to call the corresponding handler function. If another exception occurs _while calling the exception handler_, the CPU raises a double fault exception. </span>
+<span id="cb16-227"><a href="#cb16-227"></a><span class="ss">    - </span>This exception also occurs when there is no handler function registered for an exception.</span>
+<span id="cb16-228"><a href="#cb16-228"></a>    </span>
 <span id="cb16-229"><a href="#cb16-229"></a></span>
-<span id="cb16-230"><a href="#cb16-230"></a><span class="st">## Types</span></span>
+<span id="cb16-230"><a href="#cb16-230"></a><span class="fu">## Types</span></span>
 <span id="cb16-231"><a href="#cb16-231"></a></span>
-<span id="cb16-232"><a href="#cb16-232"></a><span class="st">On x86, there are about 20 different CPU exception types. The most important are:</span></span>
+<span id="cb16-232"><a href="#cb16-232"></a>On x86, there are about 20 different CPU exception types. The most important are:</span>
 <span id="cb16-233"><a href="#cb16-233"></a></span>
-<span id="cb16-234"><a href="#cb16-234"></a><span class="st">- **Triple Fault**: If an exception occurs while handling a double fault, the CPU issues a fatal _triple fault_. We can'</span>t catch or handle a triple fault. </span>
-<span id="cb16-235"><a href="#cb16-235"></a>    <span class="sc">-</span> Most processors react by resetting themselves and rebooting the OS.</span>
-<span id="cb16-236"><a href="#cb16-236"></a>    <span class="sc">-</span> Usually caused by some recursive fault pattern.</span>
+<span id="cb16-234"><a href="#cb16-234"></a><span class="ss">- </span>**Triple Fault**: If an exception occurs while handling a double fault, the CPU issues a fatal _triple fault_. We can't catch or handle a triple fault. </span>
+<span id="cb16-235"><a href="#cb16-235"></a><span class="ss">    - </span>Most processors react by resetting themselves and rebooting the OS.</span>
+<span id="cb16-236"><a href="#cb16-236"></a><span class="ss">    - </span>Usually caused by some recursive fault pattern.</span>
 <span id="cb16-237"><a href="#cb16-237"></a></span>
-<span id="cb16-238"><a href="#cb16-238"></a><span class="do">## Interrupt Descriptor Table</span></span>
+<span id="cb16-238"><a href="#cb16-238"></a><span class="fu">## Interrupt Descriptor Table</span></span>
 <span id="cb16-239"><a href="#cb16-239"></a></span>
-<span id="cb16-240"><a href="#cb16-240"></a><span class="sc">-</span> In order to catch and handle exceptions, we have to set up a so<span class="sc">-</span>called _Interrupt Descriptor <span class="fu">Table_</span> (IDT). </span>
-<span id="cb16-241"><a href="#cb16-241"></a><span class="sc">-</span> Special case of a dispatch table.</span>
+<span id="cb16-240"><a href="#cb16-240"></a><span class="ss">- </span>In order to catch and handle exceptions, we have to set up a so-called _Interrupt Descriptor Table_ (IDT). </span>
+<span id="cb16-241"><a href="#cb16-241"></a><span class="ss">- </span>Special case of a dispatch table.</span>
 <span id="cb16-242"><a href="#cb16-242"></a></span>
-<span id="cb16-243"><a href="#cb16-243"></a><span class="sc">&gt;</span> [In computer science, a dispatch table is a table of pointers or memory addresses to functions or methods.](https<span class="sc">:</span><span class="er">//</span>en.wikipedia.org<span class="sc">/</span>wiki<span class="sc">/</span>Dispatch_table)</span>
+<span id="cb16-243"><a href="#cb16-243"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">In computer science, a dispatch table is a table of pointers or memory addresses to functions or methods.</span><span class="co">](https://en.wikipedia.org/wiki/Dispatch_table)</span></span>
 <span id="cb16-244"><a href="#cb16-244"></a></span>
-<span id="cb16-245"><a href="#cb16-245"></a><span class="do">## Aside</span></span>
+<span id="cb16-245"><a href="#cb16-245"></a><span class="fu">## Aside</span></span>
 <span id="cb16-246"><a href="#cb16-246"></a></span>
-<span id="cb16-247"><a href="#cb16-247"></a><span class="sc">-</span> Dispatch tables are cool as all get<span class="sc">-</span>out.</span>
-<span id="cb16-248"><a href="#cb16-248"></a><span class="sc">-</span> I recently performed an advanced <span class="fu">manuever</span> (taught them <span class="cf">in</span> CS <span class="dv">151</span>).</span>
-<span id="cb16-249"><a href="#cb16-249"></a><span class="sc">-</span> [Video](https<span class="sc">:</span><span class="er">//</span>www.youtube.com<span class="sc">/</span>watch?<span class="at">v=</span>MtI7bBGDuiM<span class="sc">&amp;</span><span class="at">feature=</span>youtu.be)</span>
-<span id="cb16-250"><a href="#cb16-250"></a><span class="sc">-</span> [Code](https<span class="sc">:</span><span class="er">//</span>gist.github.com<span class="sc">/</span>cd<span class="sc">-</span>public<span class="sc">/</span>d17f7c0cf114052fe719266251745fb0)</span>
-<span id="cb16-251"><a href="#cb16-251"></a><span class="sc">-</span> Python a functional language within my life time, oversoul willing.</span>
+<span id="cb16-247"><a href="#cb16-247"></a><span class="ss">- </span>Dispatch tables are cool as all get-out.</span>
+<span id="cb16-248"><a href="#cb16-248"></a><span class="ss">- </span>I recently performed an advanced manuever (taught them in CS 151).</span>
+<span id="cb16-249"><a href="#cb16-249"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Video</span><span class="co">](https://www.youtube.com/watch?v=MtI7bBGDuiM&amp;feature=youtu.be)</span></span>
+<span id="cb16-250"><a href="#cb16-250"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Code</span><span class="co">](https://gist.github.com/cd-public/d17f7c0cf114052fe719266251745fb0)</span></span>
+<span id="cb16-251"><a href="#cb16-251"></a><span class="ss">- </span>Python a functional language within my life time, oversoul willing.</span>
 <span id="cb16-252"><a href="#cb16-252"></a></span>
-<span id="cb16-253"><a href="#cb16-253"></a><span class="do">## Format</span></span>
+<span id="cb16-253"><a href="#cb16-253"></a><span class="fu">## Format</span></span>
 <span id="cb16-254"><a href="#cb16-254"></a></span>
-<span id="cb16-255"><a href="#cb16-255"></a><span class="sc">-</span> Keys are exceptions; values are functions.</span>
-<span id="cb16-256"><a href="#cb16-256"></a>    <span class="sc">-</span> Helpfully, exceptions are numeric so can implement as an array<span class="sc">/</span>vector<span class="sc">/</span><span class="st">"table"</span></span>
-<span id="cb16-257"><a href="#cb16-257"></a><span class="sc">-</span> The hardware uses this table directly, so we need to follow a predefined format. </span>
-<span id="cb16-258"><a href="#cb16-258"></a><span class="sc">-</span> Each entry must have a <span class="dv">16</span><span class="sc">-</span>byte structure.</span>
+<span id="cb16-255"><a href="#cb16-255"></a><span class="ss">- </span>Keys are exceptions; values are functions.</span>
+<span id="cb16-256"><a href="#cb16-256"></a><span class="ss">    - </span>Helpfully, exceptions are numeric so can implement as an array/vector/"table"</span>
+<span id="cb16-257"><a href="#cb16-257"></a><span class="ss">- </span>The hardware uses this table directly, so we need to follow a predefined format. </span>
+<span id="cb16-258"><a href="#cb16-258"></a><span class="ss">- </span>Each entry must have a 16-byte structure.</span>
 <span id="cb16-259"><a href="#cb16-259"></a></span>
-<span id="cb16-260"><a href="#cb16-260"></a><span class="do">## Python Style</span></span>
+<span id="cb16-260"><a href="#cb16-260"></a><span class="fu">## Python Style</span></span>
 <span id="cb16-261"><a href="#cb16-261"></a></span>
-<span id="cb16-262"><a href="#cb16-262"></a><span class="sc">-</span> ♪♫♪ key<span class="sc">-</span>value storage my old friend ♫♪♫</span>
-<span id="cb16-263"><a href="#cb16-263"></a><span class="sc">-</span> ♫♪♫ ive come to code with you again ♪♫♪</span>
+<span id="cb16-262"><a href="#cb16-262"></a><span class="ss">- </span>♪♫♪ key-value storage my old friend ♫♪♫</span>
+<span id="cb16-263"><a href="#cb16-263"></a><span class="ss">- </span>♫♪♫ ive come to code with you again ♪♫♪</span>
 <span id="cb16-264"><a href="#cb16-264"></a></span>
-<span id="cb16-265"><a href="#cb16-265"></a><span class="st">```</span><span class="at">{.py}</span></span>
-<span id="cb16-266"><a href="#cb16-266"></a><span class="at">fs = {</span></span>
-<span id="cb16-267"><a href="#cb16-267"></a><span class="at">    "ADD" : lambda x , y : x + y ,</span></span>
-<span id="cb16-268"><a href="#cb16-268"></a><span class="at">    "SUB" : lambda x , y : x - y ,</span></span>
-<span id="cb16-269"><a href="#cb16-269"></a><span class="at">    "MUL" : lambda x , y : x * y ,</span></span>
-<span id="cb16-270"><a href="#cb16-270"></a><span class="at">    "DIV" : lambda x , y : x / y ,</span></span>
-<span id="cb16-271"><a href="#cb16-271"></a><span class="at">    "MOD" : lambda x , y : x % y ,</span></span>
-<span id="cb16-272"><a href="#cb16-272"></a><span class="at">    "NEG" : lambda x , y :   - x ,</span></span>
-<span id="cb16-273"><a href="#cb16-273"></a><span class="at">    "ODD" : lambda x , y : x % 2 ,</span></span>
-<span id="cb16-274"><a href="#cb16-274"></a><span class="at">    "ZER" : lambda x , y :     0 ,</span></span>
-<span id="cb16-275"><a href="#cb16-275"></a><span class="at">    "EXT" : lambda x , y : exit(),</span></span>
-<span id="cb16-276"><a href="#cb16-276"></a><span class="at">}</span></span>
-<span id="cb16-277"><a href="#cb16-277"></a><span class="st">```</span></span>
+<span id="cb16-265"><a href="#cb16-265"></a><span class="in">```{.py}</span></span>
+<span id="cb16-266"><a href="#cb16-266"></a><span class="in">fs = {</span></span>
+<span id="cb16-267"><a href="#cb16-267"></a><span class="in">    "ADD" : lambda x , y : x + y ,</span></span>
+<span id="cb16-268"><a href="#cb16-268"></a><span class="in">    "SUB" : lambda x , y : x - y ,</span></span>
+<span id="cb16-269"><a href="#cb16-269"></a><span class="in">    "MUL" : lambda x , y : x * y ,</span></span>
+<span id="cb16-270"><a href="#cb16-270"></a><span class="in">    "DIV" : lambda x , y : x / y ,</span></span>
+<span id="cb16-271"><a href="#cb16-271"></a><span class="in">    "MOD" : lambda x , y : x % y ,</span></span>
+<span id="cb16-272"><a href="#cb16-272"></a><span class="in">    "NEG" : lambda x , y :   - x ,</span></span>
+<span id="cb16-273"><a href="#cb16-273"></a><span class="in">    "ODD" : lambda x , y : x % 2 ,</span></span>
+<span id="cb16-274"><a href="#cb16-274"></a><span class="in">    "ZER" : lambda x , y :     0 ,</span></span>
+<span id="cb16-275"><a href="#cb16-275"></a><span class="in">    "EXT" : lambda x , y : exit(),</span></span>
+<span id="cb16-276"><a href="#cb16-276"></a><span class="in">}</span></span>
+<span id="cb16-277"><a href="#cb16-277"></a><span class="in">```</span></span>
 <span id="cb16-278"><a href="#cb16-278"></a></span>
-<span id="cb16-279"><a href="#cb16-279"></a><span class="do">## Rust Style</span></span>
+<span id="cb16-279"><a href="#cb16-279"></a><span class="fu">## Rust Style</span></span>
 <span id="cb16-280"><a href="#cb16-280"></a></span>
-<span id="cb16-281"><a href="#cb16-281"></a><span class="sc">-</span> Wait a minute wasn<span class="st">'t that our test runner????</span></span>
+<span id="cb16-281"><a href="#cb16-281"></a><span class="ss">- </span>Wait a minute wasn't that our test runner????</span>
 <span id="cb16-282"><a href="#cb16-282"></a></span>
-<span id="cb16-283"><a href="#cb16-283"></a><span class="st">```{.rs filename="tests/println.rs"}</span></span>
-<span id="cb16-284"><a href="#cb16-284"></a><span class="st">#[unsafe(no_mangle)]</span></span>
-<span id="cb16-285"><a href="#cb16-285"></a><span class="st">pub extern "C" fn _start() -&gt; ! {</span></span>
-<span id="cb16-286"><a href="#cb16-286"></a><span class="st">    osirs::_test_runner(&amp;[&amp;at_top, &amp;wraps, &amp;scrolls, &amp;colors, &amp;newlines]);</span></span>
-<span id="cb16-287"><a href="#cb16-287"></a><span class="st">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
-<span id="cb16-288"><a href="#cb16-288"></a><span class="st">    loop {}</span></span>
-<span id="cb16-289"><a href="#cb16-289"></a><span class="st">}</span></span>
-<span id="cb16-290"><a href="#cb16-290"></a><span class="st">```</span></span>
+<span id="cb16-283"><a href="#cb16-283"></a><span class="in">```{.rs filename="tests/println.rs"}</span></span>
+<span id="cb16-284"><a href="#cb16-284"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb16-285"><a href="#cb16-285"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb16-286"><a href="#cb16-286"></a><span class="in">    osirs::_test_runner(&amp;[&amp;at_top, &amp;wraps, &amp;scrolls, &amp;colors, &amp;newlines]);</span></span>
+<span id="cb16-287"><a href="#cb16-287"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb16-288"><a href="#cb16-288"></a><span class="in">    loop {}</span></span>
+<span id="cb16-289"><a href="#cb16-289"></a><span class="in">}</span></span>
+<span id="cb16-290"><a href="#cb16-290"></a><span class="in">```</span></span>
 <span id="cb16-291"><a href="#cb16-291"></a></span>
-<span id="cb16-292"><a href="#cb16-292"></a><span class="st">## Layout {.smaller}</span></span>
+<span id="cb16-292"><a href="#cb16-292"></a><span class="fu">## Layout {.smaller}</span></span>
 <span id="cb16-293"><a href="#cb16-293"></a></span>
-<span id="cb16-294"><a href="#cb16-294"></a><span class="st">| Type | Name                     | Description                                                  |</span></span>
-<span id="cb16-295"><a href="#cb16-295"></a><span class="st">| ---- | ------------------------ | ------------------------------------------------------------ |</span></span>
-<span id="cb16-296"><a href="#cb16-296"></a><span class="st">| u16  | Function Pointer [0:15]  | The lower bits of the pointer to the handler function.       |</span></span>
-<span id="cb16-297"><a href="#cb16-297"></a><span class="st">| u16  | GDT selector             | Selector of a code segment in the [global descriptor table](https://en.wikipedia.org/wiki/Global_Descriptor_Table). |</span></span>
-<span id="cb16-298"><a href="#cb16-298"></a><span class="st">| u16  | Options                  | (next slide) |</span></span>
-<span id="cb16-299"><a href="#cb16-299"></a><span class="st">| u16  | Function Pointer [16:31] | The middle bits of the pointer to the handler function.      |</span></span>
-<span id="cb16-300"><a href="#cb16-300"></a><span class="st">| u32  | Function Pointer [32:63] | The remaining bits of the pointer to the handler function.   |</span></span>
-<span id="cb16-301"><a href="#cb16-301"></a><span class="st">| u32  | Reserved                 |</span></span>
+<span id="cb16-294"><a href="#cb16-294"></a>| Type | Name                     | Description                                                  |</span>
+<span id="cb16-295"><a href="#cb16-295"></a>| ---- | ------------------------ | ------------------------------------------------------------ |</span>
+<span id="cb16-296"><a href="#cb16-296"></a>| u16  | Function Pointer <span class="co">[</span><span class="ot">0:15</span><span class="co">]</span>  | The lower bits of the pointer to the handler function.       |</span>
+<span id="cb16-297"><a href="#cb16-297"></a>| u16  | GDT selector             | Selector of a code segment in the <span class="co">[</span><span class="ot">global descriptor table</span><span class="co">](https://en.wikipedia.org/wiki/Global_Descriptor_Table)</span>. |</span>
+<span id="cb16-298"><a href="#cb16-298"></a>| u16  | Options                  | (next slide) |</span>
+<span id="cb16-299"><a href="#cb16-299"></a>| u16  | Function Pointer <span class="co">[</span><span class="ot">16:31</span><span class="co">]</span> | The middle bits of the pointer to the handler function.      |</span>
+<span id="cb16-300"><a href="#cb16-300"></a>| u32  | Function Pointer <span class="co">[</span><span class="ot">32:63</span><span class="co">]</span> | The remaining bits of the pointer to the handler function.   |</span>
+<span id="cb16-301"><a href="#cb16-301"></a>| u32  | Reserved                 |</span>
 <span id="cb16-302"><a href="#cb16-302"></a></span>
-<span id="cb16-303"><a href="#cb16-303"></a><span class="st">## Options {.smaller}</span></span>
+<span id="cb16-303"><a href="#cb16-303"></a><span class="fu">## Options {.smaller}</span></span>
 <span id="cb16-304"><a href="#cb16-304"></a></span>
-<span id="cb16-305"><a href="#cb16-305"></a><span class="st">| Bits  | Name                             | Description                                                                                                     |</span></span>
-<span id="cb16-306"><a href="#cb16-306"></a><span class="st">| ----- | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |</span></span>
-<span id="cb16-307"><a href="#cb16-307"></a><span class="st">| 0-2   | Interrupt Stack Table Index      | 0: Don'</span>t <span class="cf">switch</span> stacks, <span class="dv">1-7</span><span class="sc">:</span> Switch to the n<span class="sc">-</span>th stack <span class="cf">in</span> the Interrupt Stack Table when this handler is called. <span class="sc">|</span></span>
-<span id="cb16-308"><a href="#cb16-308"></a><span class="er">|</span> <span class="dv">3-7</span>   <span class="sc">|</span> Reserved                         <span class="sc">|</span></span>
-<span id="cb16-309"><a href="#cb16-309"></a><span class="er">|</span> <span class="dv">8</span>     <span class="sc">|</span> <span class="dv">0</span><span class="sc">:</span> Interrupt Gate, <span class="dv">1</span><span class="sc">:</span> Trap Gate  <span class="sc">|</span> If this bit is <span class="dv">0</span>, interrupts are disabled when this handler is called.                                          <span class="sc">|</span></span>
-<span id="cb16-310"><a href="#cb16-310"></a><span class="er">|</span> <span class="dv">9-11</span>  <span class="sc">|</span> must be one                      <span class="sc">|</span></span>
-<span id="cb16-311"><a href="#cb16-311"></a><span class="er">|</span> <span class="dv">12</span>    <span class="sc">|</span> must be zero                     <span class="sc">|</span></span>
-<span id="cb16-312"><a href="#cb16-312"></a><span class="er">|</span> <span class="dv">13-14</span> <span class="sc">|</span> Descriptor Privilege <span class="fu">Level</span> (DPL) <span class="sc">|</span> The minimal privilege level required <span class="cf">for</span> calling this handler.                                                  <span class="sc">|</span></span>
-<span id="cb16-313"><a href="#cb16-313"></a><span class="er">|</span> <span class="dv">15</span>    <span class="sc">|</span> Present                          <span class="sc">|</span></span>
+<span id="cb16-305"><a href="#cb16-305"></a>| Bits  | Name                             | Description                                                                                                     |</span>
+<span id="cb16-306"><a href="#cb16-306"></a>| ----- | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |</span>
+<span id="cb16-307"><a href="#cb16-307"></a>| 0-2   | Interrupt Stack Table Index      | 0: Don't switch stacks, 1-7: Switch to the n-th stack in the Interrupt Stack Table when this handler is called. |</span>
+<span id="cb16-308"><a href="#cb16-308"></a>| 3-7   | Reserved                         |</span>
+<span id="cb16-309"><a href="#cb16-309"></a>| 8     | 0: Interrupt Gate, 1: Trap Gate  | If this bit is 0, interrupts are disabled when this handler is called.                                          |</span>
+<span id="cb16-310"><a href="#cb16-310"></a>| 9-11  | must be one                      |</span>
+<span id="cb16-311"><a href="#cb16-311"></a>| 12    | must be zero                     |</span>
+<span id="cb16-312"><a href="#cb16-312"></a>| 13-14 | Descriptor Privilege Level (DPL) | The minimal privilege level required for calling this handler.                                                  |</span>
+<span id="cb16-313"><a href="#cb16-313"></a>| 15    | Present                          |</span>
 <span id="cb16-314"><a href="#cb16-314"></a></span>
-<span id="cb16-315"><a href="#cb16-315"></a><span class="do">## The Keys</span></span>
+<span id="cb16-315"><a href="#cb16-315"></a><span class="fu">## The Keys</span></span>
 <span id="cb16-316"><a href="#cb16-316"></a></span>
-<span id="cb16-317"><a href="#cb16-317"></a><span class="sc">-</span> Each exception has a predefined IDT index. </span>
-<span id="cb16-318"><a href="#cb16-318"></a>    <span class="sc">-</span> Set by the hardware designers.</span>
-<span id="cb16-319"><a href="#cb16-319"></a>    <span class="sc">-</span> Invalid opcode exception has table index <span class="dv">6</span></span>
-<span id="cb16-320"><a href="#cb16-320"></a>    <span class="sc">-</span> Page fault exception has table index <span class="dv">14</span></span>
-<span id="cb16-321"><a href="#cb16-321"></a><span class="sc">-</span> <span class="er">$</span>\therefore<span class="sc">$</span> hardware can automatically load the corresponding IDT entry <span class="cf">for</span> any exception.</span>
+<span id="cb16-317"><a href="#cb16-317"></a><span class="ss">- </span>Each exception has a predefined IDT index. </span>
+<span id="cb16-318"><a href="#cb16-318"></a><span class="ss">    - </span>Set by the hardware designers.</span>
+<span id="cb16-319"><a href="#cb16-319"></a><span class="ss">    - </span>Invalid opcode exception has table index 6</span>
+<span id="cb16-320"><a href="#cb16-320"></a><span class="ss">    - </span>Page fault exception has table index 14</span>
+<span id="cb16-321"><a href="#cb16-321"></a><span class="ss">- </span>$\therefore$ hardware can automatically load the corresponding IDT entry for any exception.</span>
 <span id="cb16-322"><a href="#cb16-322"></a></span>
-<span id="cb16-323"><a href="#cb16-323"></a><span class="do">## Step 1</span></span>
+<span id="cb16-323"><a href="#cb16-323"></a><span class="fu">## Step 1</span></span>
 <span id="cb16-324"><a href="#cb16-324"></a></span>
-<span id="cb16-325"><a href="#cb16-325"></a>When an exception occurs, the CPU roughly does the following<span class="sc">:</span></span>
+<span id="cb16-325"><a href="#cb16-325"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-326"><a href="#cb16-326"></a></span>
-<span id="cb16-327"><a href="#cb16-327"></a><span class="sc">-</span> Push some registers on the stack, including the instruction pointer and the <span class="sc">**</span>FLAGS<span class="sc">**</span> register.</span>
-<span id="cb16-328"><a href="#cb16-328"></a>    <span class="sc">-</span> The instruction pointer keeps track of the current machine<span class="sc">-</span>level line<span class="sc">-</span>of<span class="sc">-</span>code</span>
-<span id="cb16-329"><a href="#cb16-329"></a>        <span class="sc">-</span> It is like the stack <span class="fu">pointer</span> (which keeps track of the top of the stack of values.</span>
-<span id="cb16-330"><a href="#cb16-330"></a>        <span class="sc">-</span> A special hardware variable.</span>
+<span id="cb16-327"><a href="#cb16-327"></a><span class="ss">- </span>Push some registers on the stack, including the instruction pointer and the **FLAGS** register.</span>
+<span id="cb16-328"><a href="#cb16-328"></a><span class="ss">    - </span>The instruction pointer keeps track of the current machine-level line-of-code</span>
+<span id="cb16-329"><a href="#cb16-329"></a><span class="ss">        - </span>It is like the stack pointer (which keeps track of the top of the stack of values.</span>
+<span id="cb16-330"><a href="#cb16-330"></a><span class="ss">        - </span>A special hardware variable.</span>
 <span id="cb16-331"><a href="#cb16-331"></a></span>
-<span id="cb16-332"><a href="#cb16-332"></a><span class="co"># Aside: Hardware Security</span></span>
+<span id="cb16-332"><a href="#cb16-332"></a><span class="fu"># Aside: Hardware Security</span></span>
 <span id="cb16-333"><a href="#cb16-333"></a></span>
-<span id="cb16-334"><a href="#cb16-334"></a><span class="do">## FLAGS</span></span>
+<span id="cb16-334"><a href="#cb16-334"></a><span class="fu">## FLAGS</span></span>
 <span id="cb16-335"><a href="#cb16-335"></a></span>
-<span id="cb16-336"><a href="#cb16-336"></a><span class="sc">-</span> The <span class="sc">**</span>FLAGS<span class="sc">**</span> <span class="fu">register</span> (<span class="dv">16</span> bit) and it<span class="st">'s cousins, **EFLAGS** (**e**xtended 32 bit) and **RFLAGS** (**register** 64 bit) are *very* important.</span></span>
-<span id="cb16-337"><a href="#cb16-337"></a><span class="st">    - [Read more](https://en.wikipedia.org/wiki/FLAGS_register)</span></span>
-<span id="cb16-338"><a href="#cb16-338"></a><span class="st">    - Whether a carry occurred.</span></span>
-<span id="cb16-339"><a href="#cb16-339"></a><span class="st">    - Whether a value is zero.</span></span>
-<span id="cb16-340"><a href="#cb16-340"></a><span class="st">    - Whether the sign is positive or negative.</span></span>
-<span id="cb16-341"><a href="#cb16-341"></a><span class="st">    - Whether a trap occurs (more soon).</span></span>
-<span id="cb16-342"><a href="#cb16-342"></a><span class="st">    - Whether interrupts are enabled (more soon).</span></span>
-<span id="cb16-343"><a href="#cb16-343"></a><span class="st">    </span></span>
-<span id="cb16-344"><a href="#cb16-344"></a><span class="st">## On FLAGS {.smaller}</span></span>
+<span id="cb16-336"><a href="#cb16-336"></a><span class="ss">- </span>The **FLAGS** register (16 bit) and it's cousins, **EFLAGS** (**e**xtended 32 bit) and **RFLAGS** (**register** 64 bit) are *very* important.</span>
+<span id="cb16-337"><a href="#cb16-337"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/FLAGS_register)</span></span>
+<span id="cb16-338"><a href="#cb16-338"></a><span class="ss">    - </span>Whether a carry occurred.</span>
+<span id="cb16-339"><a href="#cb16-339"></a><span class="ss">    - </span>Whether a value is zero.</span>
+<span id="cb16-340"><a href="#cb16-340"></a><span class="ss">    - </span>Whether the sign is positive or negative.</span>
+<span id="cb16-341"><a href="#cb16-341"></a><span class="ss">    - </span>Whether a trap occurs (more soon).</span>
+<span id="cb16-342"><a href="#cb16-342"></a><span class="ss">    - </span>Whether interrupts are enabled (more soon).</span>
+<span id="cb16-343"><a href="#cb16-343"></a>    </span>
+<span id="cb16-344"><a href="#cb16-344"></a><span class="fu">## On FLAGS {.smaller}</span></span>
 <span id="cb16-345"><a href="#cb16-345"></a></span>
-<span id="cb16-346"><a href="#cb16-346"></a><span class="st">| Bit | Mask | Name | Description | Category | =1 | =0 |</span></span>
-<span id="cb16-347"><a href="#cb16-347"></a><span class="st">| :--- | :--- | :--- | :--- | :--- | :--- | :--- |</span></span>
-<span id="cb16-348"><a href="#cb16-348"></a><span class="st">| 0 | 0x0001 | **CF** | Carry flag | Status | CY (Carry) | NC (No Carry) |</span></span>
-<span id="cb16-349"><a href="#cb16-349"></a><span class="st">| 1 | 0x0002 | — | Reserved, always 1 in EFLAGS | — | — | — |</span></span>
-<span id="cb16-350"><a href="#cb16-350"></a><span class="st">| 2 | 0x0004 | **PF** | Parity flag | Status | PE (Parity Even) | PO (Parity Odd) |</span></span>
-<span id="cb16-351"><a href="#cb16-351"></a><span class="st">| 3 | 0x0008 | — | Reserved | — | — | — |</span></span>
-<span id="cb16-352"><a href="#cb16-352"></a><span class="st">| 4 | 0x0010 | **AF** | Auxiliary Carry flag | Status | AC (Auxiliary Carry) | NA (No Auxiliary Carry) |</span></span>
-<span id="cb16-353"><a href="#cb16-353"></a><span class="st">| 5 | 0x0020 | — | Reserved | — | — | — |</span></span>
+<span id="cb16-346"><a href="#cb16-346"></a>| Bit | Mask | Name | Description | Category | =1 | =0 |</span>
+<span id="cb16-347"><a href="#cb16-347"></a>| :--- | :--- | :--- | :--- | :--- | :--- | :--- |</span>
+<span id="cb16-348"><a href="#cb16-348"></a>| 0 | 0x0001 | **CF** | Carry flag | Status | CY (Carry) | NC (No Carry) |</span>
+<span id="cb16-349"><a href="#cb16-349"></a>| 1 | 0x0002 | — | Reserved, always 1 in EFLAGS | — | — | — |</span>
+<span id="cb16-350"><a href="#cb16-350"></a>| 2 | 0x0004 | **PF** | Parity flag | Status | PE (Parity Even) | PO (Parity Odd) |</span>
+<span id="cb16-351"><a href="#cb16-351"></a>| 3 | 0x0008 | — | Reserved | — | — | — |</span>
+<span id="cb16-352"><a href="#cb16-352"></a>| 4 | 0x0010 | **AF** | Auxiliary Carry flag | Status | AC (Auxiliary Carry) | NA (No Auxiliary Carry) |</span>
+<span id="cb16-353"><a href="#cb16-353"></a>| 5 | 0x0020 | — | Reserved | — | — | — |</span>
 <span id="cb16-354"><a href="#cb16-354"></a></span>
 <span id="cb16-355"><a href="#cb16-355"></a></span>
-<span id="cb16-356"><a href="#cb16-356"></a><span class="st">## On FLAGS {.smaller}</span></span>
+<span id="cb16-356"><a href="#cb16-356"></a><span class="fu">## On FLAGS {.smaller}</span></span>
 <span id="cb16-357"><a href="#cb16-357"></a></span>
-<span id="cb16-358"><a href="#cb16-358"></a><span class="st">| Bit | Mask | Name | Description | Category | =1 | =0 |</span></span>
-<span id="cb16-359"><a href="#cb16-359"></a><span class="st">| :--- | :--- | :--- | :--- | :--- | :--- | :--- |</span></span>
-<span id="cb16-360"><a href="#cb16-360"></a><span class="st">| 6 | 0x0040 | **ZF** | Zero flag | Status | ZR (Zero) | NZ (Not Zero) |</span></span>
-<span id="cb16-361"><a href="#cb16-361"></a><span class="st">| 7 | 0x0080 | **SF** | Sign flag | Status | NG (Negative) | PL (Positive) |</span></span>
-<span id="cb16-362"><a href="#cb16-362"></a><span class="st">| 8 | 0x0100 | **TF** | Trap flag (single step) | Control | — | — |</span></span>
-<span id="cb16-363"><a href="#cb16-363"></a><span class="st">| 9 | 0x0200 | **IF** | Interrupt enable flag | Control | EI (Enable Interrupt) | DI (Disable Interrupt) |</span></span>
-<span id="cb16-364"><a href="#cb16-364"></a><span class="st">| 10 | 0x0400 | **DF** | Direction flag | Control | DN (Down) | UP (Up) |</span></span>
+<span id="cb16-358"><a href="#cb16-358"></a>| Bit | Mask | Name | Description | Category | =1 | =0 |</span>
+<span id="cb16-359"><a href="#cb16-359"></a>| :--- | :--- | :--- | :--- | :--- | :--- | :--- |</span>
+<span id="cb16-360"><a href="#cb16-360"></a>| 6 | 0x0040 | **ZF** | Zero flag | Status | ZR (Zero) | NZ (Not Zero) |</span>
+<span id="cb16-361"><a href="#cb16-361"></a>| 7 | 0x0080 | **SF** | Sign flag | Status | NG (Negative) | PL (Positive) |</span>
+<span id="cb16-362"><a href="#cb16-362"></a>| 8 | 0x0100 | **TF** | Trap flag (single step) | Control | — | — |</span>
+<span id="cb16-363"><a href="#cb16-363"></a>| 9 | 0x0200 | **IF** | Interrupt enable flag | Control | EI (Enable Interrupt) | DI (Disable Interrupt) |</span>
+<span id="cb16-364"><a href="#cb16-364"></a>| 10 | 0x0400 | **DF** | Direction flag | Control | DN (Down) | UP (Up) |</span>
 <span id="cb16-365"><a href="#cb16-365"></a></span>
 <span id="cb16-366"><a href="#cb16-366"></a></span>
-<span id="cb16-367"><a href="#cb16-367"></a><span class="st">## On FLAGS {.smaller}</span></span>
+<span id="cb16-367"><a href="#cb16-367"></a><span class="fu">## On FLAGS {.smaller}</span></span>
 <span id="cb16-368"><a href="#cb16-368"></a></span>
-<span id="cb16-369"><a href="#cb16-369"></a><span class="st">| Bit | Mask | Name | Description | Category | =1 | =0 |</span></span>
-<span id="cb16-370"><a href="#cb16-370"></a><span class="st">| :--- | :--- | :--- | :--- | :--- | :--- | :--- |</span></span>
-<span id="cb16-371"><a href="#cb16-371"></a><span class="st">| 11 | 0x0800 | **OF** | Overflow flag | Status | OV (Overflow) | NV (Not Overflow) |</span></span>
-<span id="cb16-372"><a href="#cb16-372"></a><span class="st">| 12–13 | 0x3000 | **IOPL** | I/O privilege level (286+) | System | — | — |</span></span>
-<span id="cb16-373"><a href="#cb16-373"></a><span class="st">| 14 | 0x4000 | **NT** | Nested task flag (286+) | System | — | — |</span></span>
-<span id="cb16-374"><a href="#cb16-374"></a><span class="st">| 15 | 0x8000 | **MD** | Mode flag (NEC V-series only) | Control | Native Mode (186) | Emulation Mode (8080) |    </span></span>
-<span id="cb16-375"><a href="#cb16-375"></a><span class="st">    </span></span>
-<span id="cb16-376"><a href="#cb16-376"></a><span class="st">## My research</span></span>
+<span id="cb16-369"><a href="#cb16-369"></a>| Bit | Mask | Name | Description | Category | =1 | =0 |</span>
+<span id="cb16-370"><a href="#cb16-370"></a>| :--- | :--- | :--- | :--- | :--- | :--- | :--- |</span>
+<span id="cb16-371"><a href="#cb16-371"></a>| 11 | 0x0800 | **OF** | Overflow flag | Status | OV (Overflow) | NV (Not Overflow) |</span>
+<span id="cb16-372"><a href="#cb16-372"></a>| 12–13 | 0x3000 | **IOPL** | I/O privilege level (286+) | System | — | — |</span>
+<span id="cb16-373"><a href="#cb16-373"></a>| 14 | 0x4000 | **NT** | Nested task flag (286+) | System | — | — |</span>
+<span id="cb16-374"><a href="#cb16-374"></a>| 15 | 0x8000 | **MD** | Mode flag (NEC V-series only) | Control | Native Mode (186) | Emulation Mode (8080) |    </span>
+<span id="cb16-375"><a href="#cb16-375"></a>    </span>
+<span id="cb16-376"><a href="#cb16-376"></a><span class="fu">## My research</span></span>
 <span id="cb16-377"><a href="#cb16-377"></a></span>
-<span id="cb16-378"><a href="#cb16-378"></a><span class="st">- I used **RFLAGS** in my research to get the doctorate that I *do* have.</span></span>
-<span id="cb16-379"><a href="#cb16-379"></a><span class="st">- You can mostly understand this sentence now:</span></span>
+<span id="cb16-378"><a href="#cb16-378"></a><span class="ss">- </span>I used **RFLAGS** in my research to get the doctorate that I *do* have.</span>
+<span id="cb16-379"><a href="#cb16-379"></a><span class="ss">- </span>You can mostly understand this sentence now:</span>
 <span id="cb16-380"><a href="#cb16-380"></a></span>
-<span id="cb16-381"><a href="#cb16-381"></a><span class="st">&gt; [...when the `in` instruction executes, the I/O privilege level (`IOPL`, as</span></span>
-<span id="cb16-382"><a href="#cb16-382"></a><span class="st">given by bit 13 of the status `EFLAGS` register) must be greater</span></span>
-<span id="cb16-383"><a href="#cb16-383"></a><span class="st">than or equal to the current privilege level (`CPL`, as given</span></span>
-<span id="cb16-384"><a href="#cb16-384"></a><span class="st">by bit 13 of the Code Segment `CS` register)](https://cd-public.github.io/papers/2020/HOST2020.pdf)</span></span>
+<span id="cb16-381"><a href="#cb16-381"></a><span class="at">&gt; [...when the </span><span class="in">`in`</span><span class="at"> instruction executes, the I/O privilege level (</span><span class="in">`IOPL`</span><span class="at">, as</span></span>
+<span id="cb16-382"><a href="#cb16-382"></a><span class="at">given by bit 13 of the status </span><span class="in">`EFLAGS`</span><span class="at"> register) must be greater</span></span>
+<span id="cb16-383"><a href="#cb16-383"></a><span class="at">than or equal to the current privilege level (</span><span class="in">`CPL`</span><span class="at">, as given</span></span>
+<span id="cb16-384"><a href="#cb16-384"></a><span class="at">by bit 13 of the Code Segment </span><span class="in">`CS`</span><span class="at"> register)](https://cd-public.github.io/papers/2020/HOST2020.pdf)</span></span>
 <span id="cb16-385"><a href="#cb16-385"></a></span>
-<span id="cb16-386"><a href="#cb16-386"></a><span class="st">## Named instructions</span></span>
+<span id="cb16-386"><a href="#cb16-386"></a><span class="fu">## Named instructions</span></span>
 <span id="cb16-387"><a href="#cb16-387"></a></span>
-<span id="cb16-388"><a href="#cb16-388"></a><span class="st">&gt; the `in` instruction</span></span>
+<span id="cb16-388"><a href="#cb16-388"></a><span class="at">&gt; the </span><span class="in">`in`</span><span class="at"> instruction</span></span>
 <span id="cb16-389"><a href="#cb16-389"></a></span>
-<span id="cb16-390"><a href="#cb16-390"></a><span class="st">- From blog:</span></span>
+<span id="cb16-390"><a href="#cb16-390"></a><span class="ss">- </span>From blog:</span>
 <span id="cb16-391"><a href="#cb16-391"></a></span>
-<span id="cb16-392"><a href="#cb16-392"></a><span class="st">&gt; To communicate with such an I/O port, there are special CPU instructions called `in` and `out`, which take a port number and a data byte</span></span>
+<span id="cb16-392"><a href="#cb16-392"></a><span class="at">&gt; To communicate with such an I/O port, there are special CPU instructions called </span><span class="in">`in`</span><span class="at"> and </span><span class="in">`out`</span><span class="at">, which take a port number and a data byte</span></span>
 <span id="cb16-393"><a href="#cb16-393"></a></span>
-<span id="cb16-394"><a href="#cb16-394"></a><span class="st">- You used `in` via the `x86_64` crate to print to serial.</span></span>
+<span id="cb16-394"><a href="#cb16-394"></a><span class="ss">- </span>You used <span class="in">`in`</span> via the <span class="in">`x86_64`</span> crate to print to serial.</span>
 <span id="cb16-395"><a href="#cb16-395"></a></span>
-<span id="cb16-396"><a href="#cb16-396"></a><span class="st">## Privilege levels</span></span>
+<span id="cb16-396"><a href="#cb16-396"></a><span class="fu">## Privilege levels</span></span>
 <span id="cb16-397"><a href="#cb16-397"></a></span>
-<span id="cb16-398"><a href="#cb16-398"></a><span class="st">&gt; current privilege level</span></span>
+<span id="cb16-398"><a href="#cb16-398"></a><span class="at">&gt; current privilege level</span></span>
 <span id="cb16-399"><a href="#cb16-399"></a></span>
-<span id="cb16-400"><a href="#cb16-400"></a><span class="st">- We haven'</span>t dwelt on these but have noted, with respect to the general protection fault<span class="sc">:</span></span>
+<span id="cb16-400"><a href="#cb16-400"></a><span class="ss">- </span>We haven't dwelt on these but have noted, with respect to the general protection fault:</span>
 <span id="cb16-401"><a href="#cb16-401"></a></span>
-<span id="cb16-402"><a href="#cb16-402"></a><span class="er">&gt;</span> Used to prevent virtual machine escape, safely sandbox browser code.</span>
+<span id="cb16-402"><a href="#cb16-402"></a><span class="at">&gt; Used to prevent virtual machine escape, safely sandbox browser code.</span></span>
 <span id="cb16-403"><a href="#cb16-403"></a></span>
-<span id="cb16-404"><a href="#cb16-404"></a><span class="do">## Segments</span></span>
+<span id="cb16-404"><a href="#cb16-404"></a><span class="fu">## Segments</span></span>
 <span id="cb16-405"><a href="#cb16-405"></a></span>
-<span id="cb16-406"><a href="#cb16-406"></a><span class="sc">-</span> We will return to segments soon, but basically...</span>
-<span id="cb16-407"><a href="#cb16-407"></a><span class="sc">-</span> Memory got too big to comfortably fit <span class="cf">in</span> a single register, so it got split into a <span class="st">"neighborhood"</span> (segment) and <span class="fu">offset</span> (the stack pointer, instruction pointer, etc.).</span>
-<span id="cb16-408"><a href="#cb16-408"></a><span class="sc">-</span> This is a big performance win since usually the high <span class="dv">32-48</span> bits are fixed within an executable.</span>
+<span id="cb16-406"><a href="#cb16-406"></a><span class="ss">- </span>We will return to segments soon, but basically...</span>
+<span id="cb16-407"><a href="#cb16-407"></a><span class="ss">- </span>Memory got too big to comfortably fit in a single register, so it got split into a "neighborhood" (segment) and offset (the stack pointer, instruction pointer, etc.).</span>
+<span id="cb16-408"><a href="#cb16-408"></a><span class="ss">- </span>This is a big performance win since usually the high 32-48 bits are fixed within an executable.</span>
 <span id="cb16-409"><a href="#cb16-409"></a></span>
-<span id="cb16-410"><a href="#cb16-410"></a><span class="co"># Back to Work</span></span>
+<span id="cb16-410"><a href="#cb16-410"></a><span class="fu"># Back to Work</span></span>
 <span id="cb16-411"><a href="#cb16-411"></a></span>
-<span id="cb16-412"><a href="#cb16-412"></a><span class="do">## Step 1</span></span>
+<span id="cb16-412"><a href="#cb16-412"></a><span class="fu">## Step 1</span></span>
 <span id="cb16-413"><a href="#cb16-413"></a></span>
-<span id="cb16-414"><a href="#cb16-414"></a>When an exception occurs, the CPU roughly does the following<span class="sc">:</span></span>
+<span id="cb16-414"><a href="#cb16-414"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-415"><a href="#cb16-415"></a></span>
-<span id="cb16-416"><a href="#cb16-416"></a><span class="sc">-</span> Push some registers on the stack, including the instruction pointer and the <span class="sc">**</span>FLAGS<span class="sc">**</span> register.</span>
-<span id="cb16-417"><a href="#cb16-417"></a>    <span class="sc">-</span> Naturally it is not important whether a carry occured immediately prior to an exception, and <span class="cf">if</span> it is you can read it from the stack.</span>
+<span id="cb16-416"><a href="#cb16-416"></a><span class="ss">- </span>Push some registers on the stack, including the instruction pointer and the **FLAGS** register.</span>
+<span id="cb16-417"><a href="#cb16-417"></a><span class="ss">    - </span>Naturally it is not important whether a carry occured immediately prior to an exception, and if it is you can read it from the stack.</span>
 <span id="cb16-418"><a href="#cb16-418"></a></span>
 <span id="cb16-419"><a href="#cb16-419"></a></span>
-<span id="cb16-420"><a href="#cb16-420"></a><span class="do">## Step 2</span></span>
+<span id="cb16-420"><a href="#cb16-420"></a><span class="fu">## Step 2</span></span>
 <span id="cb16-421"><a href="#cb16-421"></a></span>
-<span id="cb16-422"><a href="#cb16-422"></a>When an exception occurs, the CPU roughly does the following<span class="sc">:</span></span>
+<span id="cb16-422"><a href="#cb16-422"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-423"><a href="#cb16-423"></a></span>
-<span id="cb16-424"><a href="#cb16-424"></a><span class="sc">-</span> Push some registers on the stack.</span>
-<span id="cb16-425"><a href="#cb16-425"></a><span class="sc">-</span> Read the corresponding entry from the Interrupt Descriptor <span class="fu">Table</span> (IDT). </span>
-<span id="cb16-426"><a href="#cb16-426"></a>    <span class="sc">-</span> For example, the CPU reads the <span class="dv">14</span>th entry when a page fault occurs.</span>
+<span id="cb16-424"><a href="#cb16-424"></a><span class="ss">- </span>Push some registers on the stack.</span>
+<span id="cb16-425"><a href="#cb16-425"></a><span class="ss">- </span>Read the corresponding entry from the Interrupt Descriptor Table (IDT). </span>
+<span id="cb16-426"><a href="#cb16-426"></a><span class="ss">    - </span>For example, the CPU reads the 14th entry when a page fault occurs.</span>
 <span id="cb16-427"><a href="#cb16-427"></a>    </span>
 <span id="cb16-428"><a href="#cb16-428"></a>    </span>
 <span id="cb16-429"><a href="#cb16-429"></a></span>
-<span id="cb16-430"><a href="#cb16-430"></a><span class="do">## Step 3</span></span>
+<span id="cb16-430"><a href="#cb16-430"></a><span class="fu">## Step 3</span></span>
 <span id="cb16-431"><a href="#cb16-431"></a></span>
-<span id="cb16-432"><a href="#cb16-432"></a>When an exception occurs, the CPU roughly does the following<span class="sc">:</span></span>
+<span id="cb16-432"><a href="#cb16-432"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-433"><a href="#cb16-433"></a></span>
-<span id="cb16-434"><a href="#cb16-434"></a><span class="sc">-</span> Push some registers on the stack.</span>
-<span id="cb16-435"><a href="#cb16-435"></a><span class="sc">-</span> Read the corresponding entry from IDT.       </span>
-<span id="cb16-436"><a href="#cb16-436"></a><span class="sc">-</span> Check <span class="cf">if</span> the entry is present and, <span class="cf">if</span> not, raise a double fault.</span>
-<span id="cb16-437"><a href="#cb16-437"></a>    <span class="sc">-</span> <span class="er">*</span>This is why the Rust option is so important to OS<span class="sc">!</span><span class="er">*</span></span>
+<span id="cb16-434"><a href="#cb16-434"></a><span class="ss">- </span>Push some registers on the stack.</span>
+<span id="cb16-435"><a href="#cb16-435"></a><span class="ss">- </span>Read the corresponding entry from IDT.       </span>
+<span id="cb16-436"><a href="#cb16-436"></a><span class="ss">- </span>Check if the entry is present and, if not, raise a double fault.</span>
+<span id="cb16-437"><a href="#cb16-437"></a><span class="ss">    - </span>*This is why the Rust option is so important to OS!*</span>
 <span id="cb16-438"><a href="#cb16-438"></a></span>
-<span id="cb16-439"><a href="#cb16-439"></a><span class="do">## Step 4</span></span>
+<span id="cb16-439"><a href="#cb16-439"></a><span class="fu">## Step 4</span></span>
 <span id="cb16-440"><a href="#cb16-440"></a></span>
-<span id="cb16-441"><a href="#cb16-441"></a>When an exception occurs, the CPU roughly does the following<span class="sc">:</span></span>
+<span id="cb16-441"><a href="#cb16-441"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-442"><a href="#cb16-442"></a></span>
-<span id="cb16-443"><a href="#cb16-443"></a><span class="sc">-</span> Push some registers on the stack.</span>
-<span id="cb16-444"><a href="#cb16-444"></a><span class="sc">-</span> Read the corresponding entry from IDT.     </span>
-<span id="cb16-445"><a href="#cb16-445"></a><span class="sc">-</span> Check entry or raise a double fault.</span>
-<span id="cb16-446"><a href="#cb16-446"></a><span class="sc">-</span> Disable hardware interrupts <span class="cf">if</span> the entry is an interrupt <span class="fu">gate</span> (bit <span class="dv">40</span> not set).</span>
-<span id="cb16-447"><a href="#cb16-447"></a>    <span class="sc">-</span> Okay what does this mean.</span>
+<span id="cb16-443"><a href="#cb16-443"></a><span class="ss">- </span>Push some registers on the stack.</span>
+<span id="cb16-444"><a href="#cb16-444"></a><span class="ss">- </span>Read the corresponding entry from IDT.     </span>
+<span id="cb16-445"><a href="#cb16-445"></a><span class="ss">- </span>Check entry or raise a double fault.</span>
+<span id="cb16-446"><a href="#cb16-446"></a><span class="ss">- </span>Disable hardware interrupts if the entry is an interrupt gate (bit 40 not set).</span>
+<span id="cb16-447"><a href="#cb16-447"></a><span class="ss">    - </span>Okay what does this mean.</span>
 <span id="cb16-448"><a href="#cb16-448"></a></span>
 <span id="cb16-449"><a href="#cb16-449"></a>    </span>
-<span id="cb16-450"><a href="#cb16-450"></a><span class="do">## Gate Types</span></span>
+<span id="cb16-450"><a href="#cb16-450"></a><span class="fu">## Gate Types</span></span>
 <span id="cb16-451"><a href="#cb16-451"></a></span>
-<span id="cb16-452"><a href="#cb16-452"></a><span class="sc">&gt;</span> [There are basically two kinds of interrupts<span class="sc">:</span> ones that occur when code execution has encountered an Exception due to bad code, or ones that occur to handle events unrelated to currently executing code.](https<span class="sc">:</span><span class="er">//</span>wiki.osdev.org<span class="sc">/</span>Interrupt_Descriptor_Table<span class="co">#Gate_Types)</span></span>
+<span id="cb16-452"><a href="#cb16-452"></a><span class="at">&gt; </span><span class="co">[</span><span class="ot">There are basically two kinds of interrupts: ones that occur when code execution has encountered an Exception due to bad code, or ones that occur to handle events unrelated to currently executing code.</span><span class="co">](https://wiki.osdev.org/Interrupt_Descriptor_Table#Gate_Types)</span></span>
 <span id="cb16-453"><a href="#cb16-453"></a></span>
-<span id="cb16-454"><a href="#cb16-454"></a><span class="sc">-</span> They become <span class="st">"visible"</span> to CPU by appearing within some hardware <span class="st">"gate"</span>.</span>
+<span id="cb16-454"><a href="#cb16-454"></a><span class="ss">- </span>They become "visible" to CPU by appearing within some hardware "gate".</span>
 <span id="cb16-455"><a href="#cb16-455"></a></span>
-<span id="cb16-456"><a href="#cb16-456"></a><span class="do">## Two Kinds</span></span>
+<span id="cb16-456"><a href="#cb16-456"></a><span class="fu">## Two Kinds</span></span>
 <span id="cb16-457"><a href="#cb16-457"></a></span>
-<span id="cb16-458"><a href="#cb16-458"></a><span class="sc">-</span> Term some <span class="st">"Traps"</span> <span class="sc">-</span> where execution is frozen, stopped, or <span class="st">"trapped"</span> <span class="cf">in</span> some way.</span>
-<span id="cb16-459"><a href="#cb16-459"></a><span class="sc">-</span> Term some <span class="st">"Interrupts"</span> <span class="sc">-</span> some exogenous <span class="fu">factor</span> (generally I<span class="sc">/</span>O) causes the CPU to divert control flow elsewhere.</span>
-<span id="cb16-460"><a href="#cb16-460"></a><span class="sc">-</span> Interrupts preempt other hardware interrupts, but exceptions don<span class="st">'t.</span></span>
+<span id="cb16-458"><a href="#cb16-458"></a><span class="ss">- </span>Term some "Traps" - where execution is frozen, stopped, or "trapped" in some way.</span>
+<span id="cb16-459"><a href="#cb16-459"></a><span class="ss">- </span>Term some "Interrupts" - some exogenous factor (generally I/O) causes the CPU to divert control flow elsewhere.</span>
+<span id="cb16-460"><a href="#cb16-460"></a><span class="ss">- </span>Interrupts preempt other hardware interrupts, but exceptions don't.</span>
 <span id="cb16-461"><a href="#cb16-461"></a></span>
-<span id="cb16-462"><a href="#cb16-462"></a><span class="st">## Steps</span></span>
+<span id="cb16-462"><a href="#cb16-462"></a><span class="fu">## Steps</span></span>
 <span id="cb16-463"><a href="#cb16-463"></a></span>
-<span id="cb16-464"><a href="#cb16-464"></a><span class="st">When an exception occurs, the CPU roughly does the following:</span></span>
+<span id="cb16-464"><a href="#cb16-464"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-465"><a href="#cb16-465"></a></span>
-<span id="cb16-466"><a href="#cb16-466"></a><span class="st">- Push some registers on the stack.</span></span>
-<span id="cb16-467"><a href="#cb16-467"></a><span class="st">- Read the corresponding entry from IDT.     </span></span>
-<span id="cb16-468"><a href="#cb16-468"></a><span class="st">- Check entry or raise a double fault.</span></span>
-<span id="cb16-469"><a href="#cb16-469"></a><span class="st">- Perhaps disable hardware interrupts.</span></span>
-<span id="cb16-470"><a href="#cb16-470"></a><span class="st">- Load the specified [GDT](https://en.wikipedia.org/wiki/Global_Descriptor_Table) selector into the CS (code segment).</span></span>
+<span id="cb16-466"><a href="#cb16-466"></a><span class="ss">- </span>Push some registers on the stack.</span>
+<span id="cb16-467"><a href="#cb16-467"></a><span class="ss">- </span>Read the corresponding entry from IDT.     </span>
+<span id="cb16-468"><a href="#cb16-468"></a><span class="ss">- </span>Check entry or raise a double fault.</span>
+<span id="cb16-469"><a href="#cb16-469"></a><span class="ss">- </span>Perhaps disable hardware interrupts.</span>
+<span id="cb16-470"><a href="#cb16-470"></a><span class="ss">- </span>Load the specified <span class="co">[</span><span class="ot">GDT</span><span class="co">](https://en.wikipedia.org/wiki/Global_Descriptor_Table)</span> selector into the CS (code segment).</span>
 <span id="cb16-471"><a href="#cb16-471"></a></span>
-<span id="cb16-472"><a href="#cb16-472"></a><span class="st">## GDT</span></span>
+<span id="cb16-472"><a href="#cb16-472"></a><span class="fu">## GDT</span></span>
 <span id="cb16-473"><a href="#cb16-473"></a></span>
-<span id="cb16-474"><a href="#cb16-474"></a><span class="st">- Basically a table of memory segments.</span></span>
-<span id="cb16-475"><a href="#cb16-475"></a><span class="st">    - The "neighborhoods" of memory</span></span>
-<span id="cb16-476"><a href="#cb16-476"></a><span class="st">- There are three kinds:</span></span>
-<span id="cb16-477"><a href="#cb16-477"></a><span class="st">    - Code segments: regions of memory that contain executable instructions.</span></span>
-<span id="cb16-478"><a href="#cb16-478"></a><span class="st">    - Data segments: used to store program data.</span></span>
-<span id="cb16-479"><a href="#cb16-479"></a><span class="st">    - System segments, like Task State Segment (TSS).</span></span>
-<span id="cb16-480"><a href="#cb16-480"></a><span class="st">    </span></span>
-<span id="cb16-481"><a href="#cb16-481"></a><span class="st">## CS (Code Segment)</span></span>
+<span id="cb16-474"><a href="#cb16-474"></a><span class="ss">- </span>Basically a table of memory segments.</span>
+<span id="cb16-475"><a href="#cb16-475"></a><span class="ss">    - </span>The "neighborhoods" of memory</span>
+<span id="cb16-476"><a href="#cb16-476"></a><span class="ss">- </span>There are three kinds:</span>
+<span id="cb16-477"><a href="#cb16-477"></a><span class="ss">    - </span>Code segments: regions of memory that contain executable instructions.</span>
+<span id="cb16-478"><a href="#cb16-478"></a><span class="ss">    - </span>Data segments: used to store program data.</span>
+<span id="cb16-479"><a href="#cb16-479"></a><span class="ss">    - </span>System segments, like Task State Segment (TSS).</span>
+<span id="cb16-480"><a href="#cb16-480"></a>    </span>
+<span id="cb16-481"><a href="#cb16-481"></a><span class="fu">## CS (Code Segment)</span></span>
 <span id="cb16-482"><a href="#cb16-482"></a></span>
-<span id="cb16-483"><a href="#cb16-483"></a><span class="st">- The region where the currently executing code lives...</span></span>
-<span id="cb16-484"><a href="#cb16-484"></a><span class="st">    - Was: possibly anywhere</span></span>
-<span id="cb16-485"><a href="#cb16-485"></a><span class="st">    - Is now: wherever the OS keeps exception handlers.</span></span>
-<span id="cb16-486"><a href="#cb16-486"></a><span class="st">- The CS (and other segments) contain more than just addresses!    </span></span>
+<span id="cb16-483"><a href="#cb16-483"></a><span class="ss">- </span>The region where the currently executing code lives...</span>
+<span id="cb16-484"><a href="#cb16-484"></a><span class="ss">    - </span>Was: possibly anywhere</span>
+<span id="cb16-485"><a href="#cb16-485"></a><span class="ss">    - </span>Is now: wherever the OS keeps exception handlers.</span>
+<span id="cb16-486"><a href="#cb16-486"></a><span class="ss">- </span>The CS (and other segments) contain more than just addresses!    </span>
 <span id="cb16-487"><a href="#cb16-487"></a></span>
-<span id="cb16-488"><a href="#cb16-488"></a><span class="st">## Visually</span></span>
+<span id="cb16-488"><a href="#cb16-488"></a><span class="fu">## Visually</span></span>
 <span id="cb16-489"><a href="#cb16-489"></a></span>
-<span id="cb16-490"><a href="#cb16-490"></a><span class="st">- Easier visually.</span></span>
-<span id="cb16-491"><a href="#cb16-491"></a><span class="st">- [Read more](https://en.wikipedia.org/wiki/Segment_descriptor)</span></span>
+<span id="cb16-490"><a href="#cb16-490"></a><span class="ss">- </span>Easier visually.</span>
+<span id="cb16-491"><a href="#cb16-491"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Read more</span><span class="co">](https://en.wikipedia.org/wiki/Segment_descriptor)</span></span>
 <span id="cb16-492"><a href="#cb16-492"></a></span>
-<span id="cb16-493"><a href="#cb16-493"></a><span class="st">&lt;a title="Lars H. Rohwedder (User:RokerHRO, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:SegmentDescriptor.svg"&gt;&lt;img  src="https://upload.wikimedia.org/wikipedia/commons/0/0a/SegmentDescriptor.svg"&gt;&lt;/a&gt;</span></span>
+<span id="cb16-493"><a href="#cb16-493"></a>&lt;a title="Lars H. Rohwedder (User:RokerHRO, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:SegmentDescriptor.svg"&gt;&lt;img  src="https://upload.wikimedia.org/wikipedia/commons/0/0a/SegmentDescriptor.svg"&gt;&lt;/a&gt;</span>
 <span id="cb16-494"><a href="#cb16-494"></a></span>
-<span id="cb16-495"><a href="#cb16-495"></a><span class="st">## Takeaways</span></span>
+<span id="cb16-495"><a href="#cb16-495"></a><span class="fu">## Takeaways</span></span>
 <span id="cb16-496"><a href="#cb16-496"></a></span>
-<span id="cb16-497"><a href="#cb16-497"></a><span class="st">- The "DPL" is what I tend to regard as important.</span></span>
-<span id="cb16-498"><a href="#cb16-498"></a><span class="st">    - The DPL of the CS is the CPL, which determines if user mode vs. super mode.</span></span>
-<span id="cb16-499"><a href="#cb16-499"></a><span class="st">        - Descriptor Privilege Level</span></span>
-<span id="cb16-500"><a href="#cb16-500"></a><span class="st">        - Code Segment</span></span>
-<span id="cb16-501"><a href="#cb16-501"></a><span class="st">        - Current Privilege Level</span></span>
-<span id="cb16-502"><a href="#cb16-502"></a><span class="st">        - 2 bits, but both are always equal on every wildly known OS.</span></span>
+<span id="cb16-497"><a href="#cb16-497"></a><span class="ss">- </span>The "DPL" is what I tend to regard as important.</span>
+<span id="cb16-498"><a href="#cb16-498"></a><span class="ss">    - </span>The DPL of the CS is the CPL, which determines if user mode vs. super mode.</span>
+<span id="cb16-499"><a href="#cb16-499"></a><span class="ss">        - </span>Descriptor Privilege Level</span>
+<span id="cb16-500"><a href="#cb16-500"></a><span class="ss">        - </span>Code Segment</span>
+<span id="cb16-501"><a href="#cb16-501"></a><span class="ss">        - </span>Current Privilege Level</span>
+<span id="cb16-502"><a href="#cb16-502"></a><span class="ss">        - </span>2 bits, but both are always equal on every wildly known OS.</span>
 <span id="cb16-503"><a href="#cb16-503"></a></span>
 <span id="cb16-504"><a href="#cb16-504"></a></span>
-<span id="cb16-505"><a href="#cb16-505"></a><span class="st">## Steps</span></span>
+<span id="cb16-505"><a href="#cb16-505"></a><span class="fu">## Steps</span></span>
 <span id="cb16-506"><a href="#cb16-506"></a></span>
-<span id="cb16-507"><a href="#cb16-507"></a><span class="st">When an exception occurs, the CPU roughly does the following:</span></span>
+<span id="cb16-507"><a href="#cb16-507"></a>When an exception occurs, the CPU roughly does the following:</span>
 <span id="cb16-508"><a href="#cb16-508"></a></span>
-<span id="cb16-509"><a href="#cb16-509"></a><span class="st">1. Push some registers on the stack.</span></span>
-<span id="cb16-510"><a href="#cb16-510"></a><span class="st">1. Read the corresponding entry from IDT.     </span></span>
-<span id="cb16-511"><a href="#cb16-511"></a><span class="st">1. Check entry or raise a double fault.</span></span>
-<span id="cb16-512"><a href="#cb16-512"></a><span class="st">1. Perhaps disable hardware interrupts.</span></span>
-<span id="cb16-513"><a href="#cb16-513"></a><span class="st">1. Update the CS (code segment).</span></span>
-<span id="cb16-514"><a href="#cb16-514"></a><span class="st">1. Jump to the specified handler function.</span></span>
+<span id="cb16-509"><a href="#cb16-509"></a><span class="ss">1. </span>Push some registers on the stack.</span>
+<span id="cb16-510"><a href="#cb16-510"></a><span class="ss">1. </span>Read the corresponding entry from IDT.     </span>
+<span id="cb16-511"><a href="#cb16-511"></a><span class="ss">1. </span>Check entry or raise a double fault.</span>
+<span id="cb16-512"><a href="#cb16-512"></a><span class="ss">1. </span>Perhaps disable hardware interrupts.</span>
+<span id="cb16-513"><a href="#cb16-513"></a><span class="ss">1. </span>Update the CS (code segment).</span>
+<span id="cb16-514"><a href="#cb16-514"></a><span class="ss">1. </span>Jump to the specified handler function.</span>
 <span id="cb16-515"><a href="#cb16-515"></a></span>
-<span id="cb16-516"><a href="#cb16-516"></a><span class="st"># Handlers</span></span>
+<span id="cb16-516"><a href="#cb16-516"></a><span class="fu"># Handlers</span></span>
 <span id="cb16-517"><a href="#cb16-517"></a></span>
-<span id="cb16-518"><a href="#cb16-518"></a><span class="st">## An IDT Type</span></span>
+<span id="cb16-518"><a href="#cb16-518"></a><span class="fu">## An IDT Type</span></span>
 <span id="cb16-519"><a href="#cb16-519"></a></span>
-<span id="cb16-520"><a href="#cb16-520"></a><span class="st">- No real benefit to making our own IDT.</span></span>
-<span id="cb16-521"><a href="#cb16-521"></a><span class="st">- It'</span>s hardware defined and we just want to implement exceptions.</span>
-<span id="cb16-522"><a href="#cb16-522"></a><span class="sc">-</span> We<span class="st">'ll use [`InterruptDescriptorTable` struct](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html) of the `x86_64` crate.</span></span>
+<span id="cb16-520"><a href="#cb16-520"></a><span class="ss">- </span>No real benefit to making our own IDT.</span>
+<span id="cb16-521"><a href="#cb16-521"></a><span class="ss">- </span>It's hardware defined and we just want to implement exceptions.</span>
+<span id="cb16-522"><a href="#cb16-522"></a><span class="ss">- </span>We'll use <span class="co">[</span><span class="ot">`InterruptDescriptorTable` struct</span><span class="co">](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.InterruptDescriptorTable.html)</span> of the <span class="in">`x86_64`</span> crate.</span>
 <span id="cb16-523"><a href="#cb16-523"></a></span>
-<span id="cb16-524"><a href="#cb16-524"></a><span class="st">## It'</span>s big</span>
+<span id="cb16-524"><a href="#cb16-524"></a><span class="fu">## It's big</span></span>
 <span id="cb16-525"><a href="#cb16-525"></a></span>
-<span id="cb16-526"><a href="#cb16-526"></a><span class="st">```</span><span class="at">{.rs}</span></span>
-<span id="cb16-527"><a href="#cb16-527"></a><span class="at">#[repr(C)]</span></span>
-<span id="cb16-528"><a href="#cb16-528"></a><span class="at">pub struct InterruptDescriptorTable {</span></span>
-<span id="cb16-529"><a href="#cb16-529"></a><span class="at">    pub divide_by_zero: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-530"><a href="#cb16-530"></a><span class="at">    pub debug: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-531"><a href="#cb16-531"></a><span class="at">    pub non_maskable_interrupt: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-532"><a href="#cb16-532"></a><span class="at">    pub breakpoint: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-533"><a href="#cb16-533"></a><span class="at">    pub overflow: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-534"><a href="#cb16-534"></a><span class="at">    pub bound_range_exceeded: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-535"><a href="#cb16-535"></a><span class="at">    pub invalid_opcode: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-536"><a href="#cb16-536"></a><span class="at">    pub device_not_available: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-537"><a href="#cb16-537"></a><span class="at">    pub double_fault: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-538"><a href="#cb16-538"></a><span class="at">    pub invalid_tss: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-539"><a href="#cb16-539"></a><span class="at">    pub segment_not_present: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-540"><a href="#cb16-540"></a><span class="at">    pub stack_segment_fault: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-541"><a href="#cb16-541"></a><span class="at">    pub general_protection_fault: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-542"><a href="#cb16-542"></a><span class="at">    pub page_fault: Entry&lt;PageFaultHandlerFunc&gt;,</span></span>
-<span id="cb16-543"><a href="#cb16-543"></a><span class="at">    pub x87_floating_point: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-544"><a href="#cb16-544"></a><span class="at">    pub alignment_check: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-545"><a href="#cb16-545"></a><span class="at">    pub machine_check: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-546"><a href="#cb16-546"></a><span class="at">    pub simd_floating_point: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-547"><a href="#cb16-547"></a><span class="at">    pub virtualization: Entry&lt;HandlerFunc&gt;,</span></span>
-<span id="cb16-548"><a href="#cb16-548"></a><span class="at">    pub security_exception: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
-<span id="cb16-549"><a href="#cb16-549"></a><span class="at">    // some fields omitted</span></span>
-<span id="cb16-550"><a href="#cb16-550"></a><span class="at">}</span></span>
-<span id="cb16-551"><a href="#cb16-551"></a><span class="st">```</span></span>
+<span id="cb16-526"><a href="#cb16-526"></a><span class="in">```{.rs}</span></span>
+<span id="cb16-527"><a href="#cb16-527"></a><span class="in">#[repr(C)]</span></span>
+<span id="cb16-528"><a href="#cb16-528"></a><span class="in">pub struct InterruptDescriptorTable {</span></span>
+<span id="cb16-529"><a href="#cb16-529"></a><span class="in">    pub divide_by_zero: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-530"><a href="#cb16-530"></a><span class="in">    pub debug: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-531"><a href="#cb16-531"></a><span class="in">    pub non_maskable_interrupt: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-532"><a href="#cb16-532"></a><span class="in">    pub breakpoint: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-533"><a href="#cb16-533"></a><span class="in">    pub overflow: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-534"><a href="#cb16-534"></a><span class="in">    pub bound_range_exceeded: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-535"><a href="#cb16-535"></a><span class="in">    pub invalid_opcode: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-536"><a href="#cb16-536"></a><span class="in">    pub device_not_available: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-537"><a href="#cb16-537"></a><span class="in">    pub double_fault: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-538"><a href="#cb16-538"></a><span class="in">    pub invalid_tss: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-539"><a href="#cb16-539"></a><span class="in">    pub segment_not_present: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-540"><a href="#cb16-540"></a><span class="in">    pub stack_segment_fault: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-541"><a href="#cb16-541"></a><span class="in">    pub general_protection_fault: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-542"><a href="#cb16-542"></a><span class="in">    pub page_fault: Entry&lt;PageFaultHandlerFunc&gt;,</span></span>
+<span id="cb16-543"><a href="#cb16-543"></a><span class="in">    pub x87_floating_point: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-544"><a href="#cb16-544"></a><span class="in">    pub alignment_check: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-545"><a href="#cb16-545"></a><span class="in">    pub machine_check: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-546"><a href="#cb16-546"></a><span class="in">    pub simd_floating_point: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-547"><a href="#cb16-547"></a><span class="in">    pub virtualization: Entry&lt;HandlerFunc&gt;,</span></span>
+<span id="cb16-548"><a href="#cb16-548"></a><span class="in">    pub security_exception: Entry&lt;HandlerFuncWithErrCode&gt;,</span></span>
+<span id="cb16-549"><a href="#cb16-549"></a><span class="in">    // some fields omitted</span></span>
+<span id="cb16-550"><a href="#cb16-550"></a><span class="in">}</span></span>
+<span id="cb16-551"><a href="#cb16-551"></a><span class="in">```</span></span>
 <span id="cb16-552"><a href="#cb16-552"></a></span>
-<span id="cb16-553"><a href="#cb16-553"></a><span class="do">## Format</span></span>
+<span id="cb16-553"><a href="#cb16-553"></a><span class="fu">## Format</span></span>
 <span id="cb16-554"><a href="#cb16-554"></a></span>
-<span id="cb16-555"><a href="#cb16-555"></a><span class="sc">-</span> The fields have the type [<span class="st">`</span><span class="at">idt::Entry&lt;F&gt;</span><span class="st">`</span>](ttps<span class="sc">:</span><span class="er">//</span>docs.rs<span class="sc">/</span>x86_64<span class="sc">/</span><span class="dv">0</span>.<span class="fl">14.2</span><span class="sc">/</span>x86_64<span class="sc">/</span>structures<span class="sc">/</span>idt<span class="sc">/</span>struct.Entry.html)</span>
-<span id="cb16-556"><a href="#cb16-556"></a>    <span class="sc">-</span> We introduced this previously <span class="sc">-</span> a <span class="cf">function</span> pointer and options, basically.</span>
-<span id="cb16-557"><a href="#cb16-557"></a><span class="sc">-</span> The type parameter <span class="st">`</span><span class="at">F</span><span class="st">`</span> defines the expected handler <span class="cf">function</span> type.</span>
-<span id="cb16-558"><a href="#cb16-558"></a>    <span class="sc">-</span> [<span class="st">`</span><span class="at">HandlerFunc</span><span class="st">`</span>](https<span class="sc">:</span><span class="er">//</span>docs.rs<span class="sc">/</span>x86_64<span class="sc">/</span><span class="dv">0</span>.<span class="fl">14.2</span><span class="sc">/</span>x86_64<span class="sc">/</span>structures<span class="sc">/</span>idt<span class="sc">/</span>type.HandlerFunc.html)</span>
-<span id="cb16-559"><a href="#cb16-559"></a>    <span class="sc">-</span> [<span class="st">`</span><span class="at">HandlerFuncWithErrCode</span><span class="st">`</span>](https<span class="sc">:</span><span class="er">//</span>docs.rs<span class="sc">/</span>x86_64<span class="sc">/</span><span class="dv">0</span>.<span class="fl">14.2</span><span class="sc">/</span>x86_64<span class="sc">/</span>structures<span class="sc">/</span>idt<span class="sc">/</span>type.HandlerFuncWithErrCode.html)</span>
-<span id="cb16-560"><a href="#cb16-560"></a>    <span class="sc">-</span> [<span class="st">`</span><span class="at">PageFaultHandlerFunc</span><span class="st">`</span>](https<span class="sc">:</span><span class="er">//</span>docs.rs<span class="sc">/</span>x86_64<span class="sc">/</span><span class="dv">0</span>.<span class="fl">14.2</span><span class="sc">/</span>x86_64<span class="sc">/</span>structures<span class="sc">/</span>idt<span class="sc">/</span>type.PageFaultHandlerFunc.html)</span>
+<span id="cb16-555"><a href="#cb16-555"></a><span class="ss">- </span>The fields have the type <span class="co">[</span><span class="ot">`idt::Entry&lt;F&gt;`</span><span class="co">](ttps://docs.rs/x86_64/0.14.2/x86_64/structures/idt/struct.Entry.html)</span></span>
+<span id="cb16-556"><a href="#cb16-556"></a><span class="ss">    - </span>We introduced this previously - a function pointer and options, basically.</span>
+<span id="cb16-557"><a href="#cb16-557"></a><span class="ss">- </span>The type parameter <span class="in">`F`</span> defines the expected handler function type.</span>
+<span id="cb16-558"><a href="#cb16-558"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`HandlerFunc`</span><span class="co">](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/type.HandlerFunc.html)</span></span>
+<span id="cb16-559"><a href="#cb16-559"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`HandlerFuncWithErrCode`</span><span class="co">](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/type.HandlerFuncWithErrCode.html)</span></span>
+<span id="cb16-560"><a href="#cb16-560"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`PageFaultHandlerFunc`</span><span class="co">](https://docs.rs/x86_64/0.14.2/x86_64/structures/idt/type.PageFaultHandlerFunc.html)</span></span>
 <span id="cb16-561"><a href="#cb16-561"></a></span>
-<span id="cb16-562"><a href="#cb16-562"></a><span class="do">## First</span></span>
+<span id="cb16-562"><a href="#cb16-562"></a><span class="fu">## First</span></span>
 <span id="cb16-563"><a href="#cb16-563"></a></span>
-<span id="cb16-564"><a href="#cb16-564"></a><span class="sc">-</span> <span class="st">`</span><span class="at">HandlerFunc</span><span class="st">`</span>  first<span class="sc">:</span></span>
+<span id="cb16-564"><a href="#cb16-564"></a><span class="ss">- </span><span class="in">`HandlerFunc`</span>  first:</span>
 <span id="cb16-565"><a href="#cb16-565"></a></span>
-<span id="cb16-566"><a href="#cb16-566"></a><span class="st">```</span><span class="at">{.rs}</span></span>
-<span id="cb16-567"><a href="#cb16-567"></a><span class="at">type HandlerFunc = extern "x86-interrupt" fn(_: InterruptStackFrame);</span></span>
-<span id="cb16-568"><a href="#cb16-568"></a><span class="st">```</span></span>
+<span id="cb16-566"><a href="#cb16-566"></a><span class="in">```{.rs}</span></span>
+<span id="cb16-567"><a href="#cb16-567"></a><span class="in">type HandlerFunc = extern "x86-interrupt" fn(_: InterruptStackFrame);</span></span>
+<span id="cb16-568"><a href="#cb16-568"></a><span class="in">```</span></span>
 <span id="cb16-569"><a href="#cb16-569"></a></span>
-<span id="cb16-570"><a href="#cb16-570"></a><span class="sc">-</span> That<span class="st">'s a function alright.</span></span>
-<span id="cb16-571"><a href="#cb16-571"></a><span class="st">    - A [type alias](https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases) for an `extern "x86-interrupt" fn` type</span></span>
-<span id="cb16-572"><a href="#cb16-572"></a><span class="st">    - Usually use `extern` for C, here we use it to interface with hardware.</span></span>
-<span id="cb16-573"><a href="#cb16-573"></a><span class="st">    </span></span>
-<span id="cb16-574"><a href="#cb16-574"></a><span class="st">## Calling Functions</span></span>
+<span id="cb16-570"><a href="#cb16-570"></a><span class="ss">- </span>That's a function alright.</span>
+<span id="cb16-571"><a href="#cb16-571"></a><span class="ss">    - </span>A <span class="co">[</span><span class="ot">type alias</span><span class="co">](https://doc.rust-lang.org/book/ch20-03-advanced-types.html#creating-type-synonyms-with-type-aliases)</span> for an <span class="in">`extern "x86-interrupt" fn`</span> type</span>
+<span id="cb16-572"><a href="#cb16-572"></a><span class="ss">    - </span>Usually use <span class="in">`extern`</span> for C, here we use it to interface with hardware.</span>
+<span id="cb16-573"><a href="#cb16-573"></a>    </span>
+<span id="cb16-574"><a href="#cb16-574"></a><span class="fu">## Calling Functions</span></span>
 <span id="cb16-575"><a href="#cb16-575"></a></span>
-<span id="cb16-576"><a href="#cb16-576"></a><span class="st">- The `x86-interrupt` calling convention:</span></span>
-<span id="cb16-577"><a href="#cb16-577"></a><span class="st">    - Usually, with functions, the processor and compile can anticipate a future call.</span></span>
-<span id="cb16-578"><a href="#cb16-578"></a><span class="st">        - The compiler loads certain values in certain registers.</span></span>
-<span id="cb16-579"><a href="#cb16-579"></a><span class="st">        - The processor avoids overwriting certain registers.</span></span>
-<span id="cb16-580"><a href="#cb16-580"></a><span class="st">    - Not so with interrupts.</span></span>
-<span id="cb16-581"><a href="#cb16-581"></a><span class="st">    </span></span>
-<span id="cb16-582"><a href="#cb16-582"></a><span class="st">## Easy Mode</span></span>
+<span id="cb16-576"><a href="#cb16-576"></a><span class="ss">- </span>The <span class="in">`x86-interrupt`</span> calling convention:</span>
+<span id="cb16-577"><a href="#cb16-577"></a><span class="ss">    - </span>Usually, with functions, the processor and compile can anticipate a future call.</span>
+<span id="cb16-578"><a href="#cb16-578"></a><span class="ss">        - </span>The compiler loads certain values in certain registers.</span>
+<span id="cb16-579"><a href="#cb16-579"></a><span class="ss">        - </span>The processor avoids overwriting certain registers.</span>
+<span id="cb16-580"><a href="#cb16-580"></a><span class="ss">    - </span>Not so with interrupts.</span>
+<span id="cb16-581"><a href="#cb16-581"></a>    </span>
+<span id="cb16-582"><a href="#cb16-582"></a><span class="fu">## Easy Mode</span></span>
 <span id="cb16-583"><a href="#cb16-583"></a></span>
-<span id="cb16-584"><a href="#cb16-584"></a><span class="st">- By convention, a function call is invoked voluntarily by a compiler-inserted `call` instruction.</span></span>
-<span id="cb16-585"><a href="#cb16-585"></a><span class="st">    - This is less true than people would like it to be, but we can handwave for now.</span></span>
-<span id="cb16-586"><a href="#cb16-586"></a><span class="st">    - The compiler loads up a bunch of registers and presses the "call" button.</span></span>
-<span id="cb16-587"><a href="#cb16-587"></a><span class="st">    - The OS loads up a new memory location with new instructions, which use registers in the anticipated way.</span></span>
-<span id="cb16-588"><a href="#cb16-588"></a><span class="st">    </span></span>
-<span id="cb16-589"><a href="#cb16-589"></a><span class="st">## Hard Mode</span></span>
+<span id="cb16-584"><a href="#cb16-584"></a><span class="ss">- </span>By convention, a function call is invoked voluntarily by a compiler-inserted <span class="in">`call`</span> instruction.</span>
+<span id="cb16-585"><a href="#cb16-585"></a><span class="ss">    - </span>This is less true than people would like it to be, but we can handwave for now.</span>
+<span id="cb16-586"><a href="#cb16-586"></a><span class="ss">    - </span>The compiler loads up a bunch of registers and presses the "call" button.</span>
+<span id="cb16-587"><a href="#cb16-587"></a><span class="ss">    - </span>The OS loads up a new memory location with new instructions, which use registers in the anticipated way.</span>
+<span id="cb16-588"><a href="#cb16-588"></a>    </span>
+<span id="cb16-589"><a href="#cb16-589"></a><span class="fu">## Hard Mode</span></span>
 <span id="cb16-590"><a href="#cb16-590"></a></span>
-<span id="cb16-591"><a href="#cb16-591"></a><span class="st">- Imagine if you had to write a function where you didn'</span>t know<span class="sc">:</span></span>
-<span id="cb16-592"><a href="#cb16-592"></a>    <span class="sc">-</span> How many arguments would be provided.</span>
-<span id="cb16-593"><a href="#cb16-593"></a>    <span class="sc">-</span> The types of the arguments.</span>
-<span id="cb16-594"><a href="#cb16-594"></a>    <span class="sc">-</span> Whether heap<span class="sc">-</span>allocated arguments are valid pointers.</span>
-<span id="cb16-595"><a href="#cb16-595"></a><span class="sc">-</span> Each of these can happen on an interrupt since <span class="sc">*</span>the state of processor is not fixed<span class="sc">*</span>.</span>
+<span id="cb16-591"><a href="#cb16-591"></a><span class="ss">- </span>Imagine if you had to write a function where you didn't know:</span>
+<span id="cb16-592"><a href="#cb16-592"></a><span class="ss">    - </span>How many arguments would be provided.</span>
+<span id="cb16-593"><a href="#cb16-593"></a><span class="ss">    - </span>The types of the arguments.</span>
+<span id="cb16-594"><a href="#cb16-594"></a><span class="ss">    - </span>Whether heap-allocated arguments are valid pointers.</span>
+<span id="cb16-595"><a href="#cb16-595"></a><span class="ss">- </span>Each of these can happen on an interrupt since *the state of processor is not fixed*.</span>
 <span id="cb16-596"><a href="#cb16-596"></a></span>
-<span id="cb16-597"><a href="#cb16-597"></a><span class="do">## Calling Conventions</span></span>
+<span id="cb16-597"><a href="#cb16-597"></a><span class="fu">## Calling Conventions</span></span>
 <span id="cb16-598"><a href="#cb16-598"></a></span>
-<span id="cb16-599"><a href="#cb16-599"></a><span class="sc">-</span> Return to the level of languages.</span>
-<span id="cb16-600"><a href="#cb16-600"></a><span class="sc">-</span> [Calling conventions](https<span class="sc">:</span><span class="er">//</span>en.wikipedia.org<span class="sc">/</span>wiki<span class="sc">/</span>Calling_convention) specify the details of a <span class="cf">function</span> call.</span>
-<span id="cb16-601"><a href="#cb16-601"></a>    <span class="sc">-</span> Where the arguments are, <span class="cf">for</span> example.</span>
-<span id="cb16-602"><a href="#cb16-602"></a>    <span class="sc">-</span> Whether the <span class="cf">function</span> gets a new stack.</span>
-<span id="cb16-603"><a href="#cb16-603"></a>    <span class="sc">-</span> What happens when you return.</span>
-<span id="cb16-604"><a href="#cb16-604"></a><span class="sc">-</span> On x86_64 Linux, the following rules apply <span class="cf">for</span> C <span class="fu">functions</span> (specified <span class="cf">in</span> the [System V ABI](https<span class="sc">:</span><span class="er">//</span>refspecs.linuxbase.org<span class="sc">/</span>elf<span class="sc">/</span>x86_64<span class="sc">-</span>abi<span class="dv">-0</span>.<span class="fl">99.</span>pdf))</span>
+<span id="cb16-599"><a href="#cb16-599"></a><span class="ss">- </span>Return to the level of languages.</span>
+<span id="cb16-600"><a href="#cb16-600"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Calling conventions</span><span class="co">](https://en.wikipedia.org/wiki/Calling_convention)</span> specify the details of a function call.</span>
+<span id="cb16-601"><a href="#cb16-601"></a><span class="ss">    - </span>Where the arguments are, for example.</span>
+<span id="cb16-602"><a href="#cb16-602"></a><span class="ss">    - </span>Whether the function gets a new stack.</span>
+<span id="cb16-603"><a href="#cb16-603"></a><span class="ss">    - </span>What happens when you return.</span>
+<span id="cb16-604"><a href="#cb16-604"></a><span class="ss">- </span>On x86_64 Linux, the following rules apply for C functions (specified in the <span class="co">[</span><span class="ot">System V ABI</span><span class="co">](https://refspecs.linuxbase.org/elf/x86_64-abi-0.99.pdf)</span>)</span>
 <span id="cb16-605"><a href="#cb16-605"></a></span>
-<span id="cb16-606"><a href="#cb16-606"></a><span class="do">## To be continued...</span></span>
+<span id="cb16-606"><a href="#cb16-606"></a><span class="fu">## To be continued...</span></span>
 <span id="cb16-607"><a href="#cb16-607"></a></span>
-<span id="cb16-608"><a href="#cb16-608"></a>In <span class="sc">*</span>bonus<span class="sc">*</span> lecture [<span class="st">"The Call"</span>](<span class="dv">71</span>_calls.qmd)</span>
+<span id="cb16-608"><a href="#cb16-608"></a>In *bonus* lecture <span class="co">[</span><span class="ot">"The Call"</span><span class="co">](71_calls.qmd)</span></span>
 <span id="cb16-609"><a href="#cb16-609"></a></span>
-<span id="cb16-610"><a href="#cb16-610"></a><span class="sc">&lt;</span>iframe <span class="at">width=</span><span class="st">"560"</span> <span class="at">height=</span><span class="st">"315"</span> <span class="at">src=</span><span class="st">"https://www.youtube.com/embed/wMOkm57vu0k?si=GmKMOK0vv9ImFzRt"</span> <span class="at">title=</span><span class="st">"YouTube video player"</span> <span class="at">frameborder=</span><span class="st">"0"</span> <span class="at">allow=</span><span class="st">"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"</span> <span class="at">referrerpolicy=</span><span class="st">"strict-origin-when-cross-origin"</span> allowfullscreen<span class="sc">&gt;</span><span class="er">&lt;/</span>iframe<span class="sc">&gt;</span></span>
+<span id="cb16-610"><a href="#cb16-610"></a>&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/wMOkm57vu0k?si=GmKMOK0vv9ImFzRt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen&gt;&lt;/iframe&gt;</span>
 <span id="cb16-611"><a href="#cb16-611"></a></span>
-<span id="cb16-612"><a href="#cb16-612"></a><span class="co"># Fin</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb16-612"><a href="#cb16-612"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 

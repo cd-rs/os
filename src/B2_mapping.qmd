@@ -1,0 +1,286 @@
+---
+title: Mapping
+format: html
+---
+
+# Your Task
+
+- [ ] Paging
+
+## A Note
+
+- With Wednesday off this week, doing a split homework over two weeks with last weeks lab.
+- This is the paging implementation homework, which is slated for *after* two lectures and one lab.
+
+# An Example Mapping
+
+Until now, we only looked at the page tables without modifying anything. Let's change that by creating a new mapping for a previously unmapped page.
+
+We will use the [`map_to`](https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/trait.Mapper.html#tymethod.map_to) function of the [`Mapper`](https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/trait.Mapper.html) trait for our implementation, so let's take a look at that function first. The documentation tells us that it takes four arguments: 
+
+1. The page that we want to map,
+2. The frame that the page should be mapped to,
+3. A set of flags for the page table entry, and 
+4. a `frame_allocator`. 
+
+The frame allocator is needed because mapping the given page might require creating additional page tables, which need unused frames as backing storage.
+
+## `create_example_mapping`
+
+The first step of our implementation is to create a new `create_example_mapping` function that maps a given virtual page to `0xb8000`, the physical frame of the VGA text buffer. 
+
+We choose that frame because it allows us to easily test if the mapping was created correctly: We just need to write to the newly mapped page and see whether we see the write appear on the screen.
+
+The `create_example_mapping` function looks like this:
+
+```{.rs filename="src/memory.rs"}
+pub fn create_example_mapping(
+    page: x86_64::structures::paging::Page,
+    mapper: &mut x86_64::structures::paging::OffsetPageTable,
+    frame_allocator: &mut impl x86_64::structures::paging::FrameAllocator<
+        x86_64::structures::paging::Size4KiB,
+    >,
+) {
+    let frame =
+        x86_64::structures::paging::PhysFrame::containing_address(x86_64::PhysAddr::new(0xb8000));
+    let flags = x86_64::structures::paging::PageTableFlags::PRESENT
+        | x86_64::structures::paging::PageTableFlags::WRITABLE;
+
+    let map_to_result = unsafe {
+        use x86_64::structures::paging::Mapper;
+        mapper.map_to(page, frame, flags, frame_allocator)
+    };
+    map_to_result.expect("map_to failed").flush();
+}
+```
+
+In addition to the `page` that should be mapped, the function expects a mutable reference to an `OffsetPageTable` instance and a `frame_allocator`. The `frame_allocator` parameter uses the [`impl Trait`](https://doc.rust-lang.org/book/ch10-02-traits.html#traits-as-parameters) syntax to be [generic](https://doc.rust-lang.org/book/ch10-00-generics.html) over all types that implement the [`FrameAllocator`](https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/trait.FrameAllocator.html) trait. 
+
+The trait is generic over the [`PageSize`](https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/page/trait.PageSize.html) trait to work with both standard 4&nbsp;KiB pages and huge 2&nbsp;MiB/1&nbsp;GiB pages (huge is actually the technical term, be advised). We only want to create a 4&nbsp;KiB mapping, so we set the generic parameter to `Size4KiB`.
+
+The [`map_to`] method is unsafe because the caller must ensure that the frame is not already in use. The reason for this is that mapping the same frame twice could result in undefined behavior, for example when two different `&mut` references point to the same physical memory location. In our case, we reuse the VGA text buffer frame, which is already mapped, so we break the required condition. However, the `create_example_mapping` function is only a temporary testing function and will be removed after this post, so we don't care. That is a problem for future-us.
+
+In addition to the `page` and the `unused_frame`, the `map_to` method takes a set of flags for the mapping and a reference to the `frame_allocator`, which will be explained in a moment. For the flags, we set the `PRESENT` flag because it is required for all valid entries and the `WRITABLE` flag to make the mapped page writable. 
+
+The `map_to` function can fail, so it returns a [`Result`](https://doc.rust-lang.org/core/result/enum.Result.html). Since this is just some example code that does not need to be robust, we just use [`expect`](https://doc.rust-lang.org/core/result/enum.Result.html#method.expect) to panic when an error occurs. On success, the function returns a [`MapperFlush`](https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/mapper/struct.MapperFlush.html) type that provides an easy way to flush the newly mapped page from the translation lookaside buffer (TLB) with its [`flush`](https://docs.rs/x86_64/0.14.2/x86_64/structures/paging/mapper/struct.MapperFlush.html#method.flush) method. Like `Result`, the type uses the [`#[must_use]`](https://doc.rust-lang.org/std/result/#results-must-be-used) attribute to emit a warning when we accidentally forget to use it.
+
+## Our first `FrameAllocator`
+
+To be able to call `create_example_mapping`, we need to create a type that implements the `FrameAllocator` trait first. As noted above, the trait is responsible for allocating frames for new page tables if they are needed by `map_to`.
+
+Let's start with the simple case and assume that we don't need to create new page tables. For this case, a frame allocator that always returns `None` suffices. We create such an `EmptyFrameAllocator` for testing our mapping function:
+
+```{.rs filename="src/memory.rs"}
+pub struct EmptyFrameAllocator;
+
+unsafe impl x86_64::structures::paging::FrameAllocator<x86_64::structures::paging::Size4KiB>
+    for EmptyFrameAllocator
+{
+    fn allocate_frame(&mut self) -> Option<x86_64::structures::paging::PhysFrame> {
+        None
+    }
+}
+```
+
+Implementing the `FrameAllocator` is unsafe because the implementer must guarantee that the allocator yields only unused frames. Otherwise, undefined behavior might occur, for example when two virtual pages are mapped to the same physical frame. Our `EmptyFrameAllocator` only returns `None`, so this isn't a problem in this case.
+
+## Choosing a Virtual Page
+
+We now have a simple frame allocator that we can pass to our `create_example_mapping` function. However, the allocator always returns `None`, so this will only work if no additional page table frames are needed for creating the mapping. To understand when additional page table frames are needed and when not, let's consider an example:
+
+<img src="https://os.phil-opp.com/paging-implementation/required-page-frames-example.svg" style="filter:invert(.9)">
+
+The graphic shows the virtual address space on the left, the physical address space on the right, and the page tables in between. The page tables are stored in physical memory frames, indicated by the dashed lines. The virtual address space contains a single mapped page at address `0x803fe00000`, marked in burnt orange. To translate this page to its frame, the CPU walks the 4-level page table until it reaches the frame at address 36&nbsp;KiB.
+
+Additionally, the graphic shows the physical frame of the VGA text buffer in sea green (at the bottom of the physical memory). Our goal is to map a previously unmapped virtual page to this frame using our `create_example_mapping` function. Since our `EmptyFrameAllocator` always returns `None`, we want to create the mapping so that no additional frames are needed from the allocator. This depends on the virtual page that we select for the mapping.
+
+The graphic shows two candidate pages in the virtual address space, both marked in blue. One page is at address `0x803fdfd000`, which is 3 pages before the mapped page. While the level 4 and level 3 page table indices are the same as for the blue page, the level 2 and level 1 indices are different. The different index into the level 2 table means that a different level 1 table is used for this page. Since this level 1 table does not exist yet, we would need to create it if we chose that page for our example mapping, which would require an additional unused physical frame. In contrast, the second candidate page at address `0x803fe02000` does not have this problem because it uses the same level 1 page table as the blue page. Thus, all the required page tables already exist.
+
+::: {.callout-note appearance="simple"}
+
+# Amortized Analysis
+
+Students who have already taken algorithms will, at this juncture, consider the *amortized* cost of an insert operation to the page table data structure.
+
+:::
+
+The difficulty of creating a new mapping depends on the virtual page that we want to map. In the easiest case, the level 1 page table for the page already exists and we just need to write a single entry. In the most difficult case, the page is in a memory region for which no level 3 exists yet, so we need to create new level 3, level 2 and level 1 page tables first.
+
+For calling our `create_example_mapping` function with the `EmptyFrameAllocator`, we need to choose a page for which all page tables already exist. To find such a page, we can utilize the fact that the bootloader loads itself in the first megabyte of the virtual address space. This means that a valid level 1 table exists for all pages in this region. Thus, we can choose any unused page in this memory region for our example mapping, such as the page at address `0`. Normally, this page should stay unused to guarantee that dereferencing a null pointer causes a page fault, so we know that the bootloader leaves it unmapped.
+
+::: {.callout-note appearance="simple"}
+
+# Null Pointer Dereference
+
+Taking this liberty is a luxury afforded by the language design of Rust, which includes the option type rather than the proliferation of null-checking.
+
+:::
+
+## Creating the Mapping
+
+We now have all the required parameters for calling our `create_example_mapping` function, so let's modify our `src/main.rs` function to map the page at virtual address `0`. Since we map the page to the frame of the VGA text buffer, we should be able to write to the screen through it afterward. The implementation looks like this:
+
+```{.rs filename="src/main.rs"}
+let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
+let mut mapper = unsafe { osirs::memory::init(offset) };
+let mut frame_allocator = osirs::memory::EmptyFrameAllocator;
+
+// map an unused page
+let page = x86_64::structures::paging::Page::containing_address(x86_64::VirtAddr::new(0));
+osirs::memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+
+// write the string `New!` to the screen through the new mapping
+let ptr: *mut u64 = page.start_address().as_mut_ptr();
+unsafe { ptr.write_volatile(0x_f021_f077_f065_f04e) };
+```
+
+We first create the mapping for the page at address `0` by calling our `create_example_mapping` function with a mutable reference to the `mapper` and the `frame_allocator` instances. This maps the page to the VGA text buffer frame, so we should see any write to it on the screen.
+
+Then we convert the page to a raw pointer and write a value. We write the value `0x_f021_f077_f065_f04e`, which represents the string _"New!"_ on a white background. Writes to the VGA buffer should be volatile, so we use the `write_volatile` method, though it is unlikely to matter in this case.
+
+::: {.callout-note appearance="simple"}
+
+# Strings as Numerical Values
+
+At this time, we note the recurrence of a teaching technique leveraged earlier this term - express string information as numerical values, which is common within computing education and operating system development.
+
+You can read the source document using this technique [here](https://os.phil-opp.com/paging-implementation/#creating-the-mapping).
+
+:::
+
+You should probably see _"New!"_ on the screen, caused by our write to page `0`, which means that we successfully created a new mapping in the page tables.
+
+Creating that mapping only worked because the level 1 table responsible for the page at address `0` already exists. When we try to map a page for which no level 1 table exists yet, the `map_to` function fails because it tries to create new page tables by allocating frames with the `EmptyFrameAllocator`.
+
+As an exercise, see what happens when trying to map page `0xdeadbeaf000` instead of `0`:
+
+```{.rs filename="src/main.rs"}
+let page = Page::containing_address(VirtAddr::new(0xdeadbeaf000));
+```
+
+To map pages that don't have a level 1 page table yet, we need to create a proper `FrameAllocator`. But how do we know which frames are unused and how much physical memory is available?
+
+# Allocating Frames
+
+## New Tables
+
+In order to create new page tables, we need to create a proper frame allocator. To do that, we use the `memory_map` that is passed by the bootloader as part of the `BootInfo` struct:
+
+```{.rs filename="src/memory.rs"}
+pub struct BootInfoFrameAllocator {
+    memory_map: &'static bootloader::bootinfo::MemoryMap,
+    next: usize,
+}
+
+impl BootInfoFrameAllocator {
+    pub unsafe fn init(memory_map: &'static bootloader::bootinfo::MemoryMap) -> Self {
+        BootInfoFrameAllocator {
+            memory_map,
+            next: 0,
+        }
+    }
+}
+```
+
+The struct has two fields: A `'static` (non-expiring) reference to the memory map passed by the bootloader and a `next` field that keeps track of the number of the next frame that the allocator should return.
+
+The memory map is provided by the BIOS/UEFI firmware. It can only be queried very early in the boot process, so the bootloader already calls the respective functions for us. When we printed out the memory map, we saw a list of `MemoryRegion` structs, which contain the start address, the length, and the type (e.g. unused, reserved, etc.) of each memory region.
+
+The `init` function initializes a `BootInfoFrameAllocator` with a given memory map. The `next` field is initialized with `0` and will be increased for every frame allocation to avoid returning the same frame twice. Since we don't know if the usable frames of the memory map were already used somewhere else, our `init` function must be `unsafe` to require additional guarantees from the caller.
+
+
+::: {.callout-note appearance="simple"}
+
+# Free
+
+What happens when frames are no longer in use?
+
+:::
+
+## A `usable_frames` Method
+
+Before we implement the `FrameAllocator` trait, we add an auxiliary method that converts the memory map into an iterator of usable frames:
+
+```{.rs filename="src/memory.rs"}
+pub fn create_example_mapping(
+    page: x86_64::structures::paging::Page,
+    mapper: &mut x86_64::structures::paging::OffsetPageTable,
+    frame_allocator: &mut impl x86_64::structures::paging::FrameAllocator<
+        x86_64::structures::paging::Size4KiB,
+    >,
+) {
+    let frame =
+        x86_64::structures::paging::PhysFrame::containing_address(x86_64::PhysAddr::new(0xb8000));
+    let flags = x86_64::structures::paging::PageTableFlags::PRESENT
+        | x86_64::structures::paging::PageTableFlags::WRITABLE;
+
+    let map_to_result = unsafe {
+        use x86_64::structures::paging::Mapper;
+        mapper.map_to(page, frame, flags, frame_allocator)
+    };
+    map_to_result.expect("map_to failed").flush();
+}
+```
+
+This function uses iterator combinator methods to transform the initial `MemoryMap` into an iterator of usable physical frames:
+
+- First, we call the `iter` method to convert the memory map to an iterator of [`MemoryRegion`](https://docs.rs/bootloader/0.6.4/bootloader/bootinfo/struct.MemoryRegion.html)s.
+- Then we use the [`filter`](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.filter) method to skip any reserved or otherwise unavailable regions. The bootloader updates the memory map for all the mappings it creates, so frames that are used by our kernel (code, data, or stack) or to store the boot information are already marked as `InUse` or similar. Thus, we can be sure that `Usable` frames are not used somewhere else.
+- Afterwards, we use the [`map`](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.map) combinator and Rust's [range syntax](https://doc.rust-lang.org/core/ops/struct.Range.html) to transform our iterator of memory regions to an iterator of address ranges.
+- Next, we use [`flat_map`](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.flat_map) to transform the address ranges into an iterator of frame start addresses, choosing every 4096th address using [`step_by`](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.step_by). Since 4096 bytes (= 4&nbsp;KiB) is the page size, we get the start address of each frame. The bootloader page-aligns all usable memory areas so that we don't need any alignment or rounding code here. By using [`flat_map`](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.flat_map) instead of `map`, we get an `Iterator<Item = u64>` instead of an `Iterator<Item = Iterator<Item = u64>>`.
+- Finally, we convert the start addresses to `PhysFrame` types to construct an `Iterator<Item = PhysFrame>`.
+
+::: {.callout-note appearance="simple"}
+
+# Filter and Map
+
+Filter and map are a common function in traditional function programming, and a luxury afforded to us by our language choice!
+
+While many modern languages support these functions in some way, the first class support in Rust is a strong benefit to an OS designer.
+
+FlatMap is used in my current research efforts, as seen in [this](https://cd-public.github.io/papers/2025/ACDSA25.pdf) publication and its open source reproducability artifacts..
+
+:::
+
+
+The return type of the function uses the [`impl Trait`](https://doc.rust-lang.org/book/ch10-02-traits.html#returning-types-that-implement-traits) feature. This way, we can specify that we return some type that implements the [`Iterator`](https://doc.rust-lang.org/core/iter/trait.Iterator.html) trait with item type `PhysFrame` but don't need to name the concrete return type. This is important here because we _can't_ name the concrete type since it depends on unnamable closure types.
+
+## Implementing the `FrameAllocator` Trait
+
+Now we can implement the `FrameAllocator` trait:
+
+```{.rs filename="src/memory.rs"}
+unsafe impl x86_64::structures::paging::FrameAllocator<x86_64::structures::paging::Size4KiB>
+    for BootInfoFrameAllocator
+{
+    fn allocate_frame(&mut self) -> Option<x86_64::structures::paging::PhysFrame> {
+        let frame = self.usable_frames().nth(self.next);
+        self.next += 1;
+        frame
+    }
+}
+```
+
+We first use the `usable_frames` method to get an iterator of usable frames from the memory map. Then, we use the [`Iterator::nth`](https://doc.rust-lang.org/core/iter/trait.Iterator.html#method.nth) function to get the frame with index `self.next` (thereby skipping `(self.next - 1)` frames). Before returning that frame, we increase `self.next` by one so that we return the following frame on the next call.
+
+
+## Using the `BootInfoFrameAllocator`
+
+We can now modify our `kernel_main` function to pass a `BootInfoFrameAllocator` instance instead of an `EmptyFrameAllocator`:
+
+```{.rs filename="src/main.rs"}
+let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
+let mut mapper = unsafe { osirs::memory::init(offset) };
+let mut frame_allocator = unsafe { osirs::memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
+```
+
+With the boot info frame allocator, the mapping succeeds and we see the black-on-white _"New!"_ on the screen again. Behind the scenes, the `map_to` method creates the missing page tables in the following way:
+
+- Use the passed `frame_allocator` to allocate an unused frame.
+- Zero the frame to create a new, empty page table.
+- Map the entry of the higher level table to that frame.
+- Continue with the next table level.
+
+While our `create_example_mapping` function is just some example code, we are now able to create new mappings for arbitrary pages. This will be essential for allocating memory or implementing multithreading in future posts.
+
+# Fin
