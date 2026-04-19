@@ -1,0 +1,735 @@
+---
+title: Heap
+---
+
+## Announcements
+
+- **Action Items**:
+  - Welcome back.
+  - Be finishing up on page faults and tables.
+
+## Citations
+
+- You have previously seen how I teach the heap.
+- I don't differentiate the theory from the practice (I see no reason to do so).
+    - [C](https://cd-public.github.io/courses/old/c89s25/qmd/heap_t.html)
+    - [Rust](https://cd-c89.github.io/rs/C1_heap.html)
+- Today, as blog teaches it. [Source](https://os.phil-opp.com/heap-allocation/)
+
+# Intro
+
+## Local and Static Variables
+
+- We currently use two types of variables in our kernel: 
+    - - Local variables are stored on the [call stack](https://en.wikipedia.org/wiki/Call_stack) for the lifetime of the function.
+    - `static` variables are stored at a fixed memory location for the complete lifetime of the program.
+
+## Local Variables
+
+- The call stack is a (hardware level) [stack ADT](https://en.wikipedia.org/wiki/Stack_(abstract_data_type))
+- Supports `push` and `pop` operations. 
+- Handshake between the hardware and the compiler.
+
+## The Call Stack
+
+- On each function entry, these are pushed by the compiler:
+    - The parameters, 
+    - The return address, and 
+    - The local variables of the called function
+    
+## Visually 
+
+<img src="https://os.phil-opp.com/heap-allocation/call-stack.svg" style="filter:invert(.9)">
+
+## Description
+
+- Consider the call stack after the `outer` function called the `inner` function. 
+- The local variables of `outer` are first. 
+- On the `inner` call, the parameter `1` and the return address were pushed. 
+- Then `inner` which pushed its local array.
+
+## Visually 
+
+<img src="https://os.phil-opp.com/heap-allocation/call-stack-return.svg" style="filter:invert(.9)">
+
+## Description
+
+- After the `inner` function returns:
+    - Its part of the call stack is popped again and
+    - Only the local variables of `outer` remain.
+- Variables persist precisely as long as the function that creates them.
+
+## Rust implementation
+
+- The Rust compiler enforces these lifetimes.
+- It throws an error when we use a value for too long.
+- For example, return a reference to a local variable:
+
+```{.rs}
+fn inner(i: usize) -> &'static u32 {
+    let z = [1, 2, 3];
+    &z[i]
+}
+```
+
+## Error
+
+> returns a reference to data owned by the current function
+
+```{.email}
+error[E0515]: cannot return reference to local data `z[_]`
+ --> src/main.rs:3:5
+  |
+3 |     &z[i]
+  |     ^^^^^ returns a reference to data owned by the current function
+
+For more information about this error, try `rustc --explain E0515`.
+error: could not compile `thing` (bin "thing") due to 1 previous error
+```
+
+## Use Case
+
+- Maybe we want to do this.
+    - The most common case is returning a pair (or some other collection) of values.
+- One option is the static variable.
+
+## Static Variables
+
+- Static variables are stored at a fixed memory location separate from the stack. 
+- This memory location is assigned at compile time by the linker (remember those?) and encoded in the executable. 
+- Statics live for the complete runtime of the program, so they have the `'static` lifetime and can always be referenced from local variables.
+
+## Visually 
+
+<img src="https://os.phil-opp.com/heap-allocation/call-stack-static.svg" style="filter:invert(.9)">
+
+## Description
+
+- When the `inner` function returns, its part of the call stack is "destroyed". 
+    - I wonder how it gets destroyed.
+    - I wonder what destroyed means.
+- The static variables live in a separate memory range that is never destroyed.
+- So the `&Z[1]` reference is still valid after the return.
+
+## Code
+
+- This resolves the earlier error.
+
+```{.rs filename="src/main.rs"}
+static Z: [u32; 3] = [1, 2, 3];
+
+fn inner(i: usize) -> &'static u32 {
+    &Z[i]
+}
+
+fn main() {
+    println!("Hello, world! z = {}", inner(1));
+}
+```
+
+## Niceties
+
+- Static variables' location is known at compile time...
+    - So *no reference* is needed for accessing them.
+    - That is, `Z` was not defined within `inner`.
+
+## Problems
+
+- They are read-only by default.
+- And if they aren't read-only, it is possible to trigger a [data race](https://doc.rust-lang.org/nomicon/races.html).
+- The only way to avoid this is to encapsulate in a [`Mutex`](https://docs.rs/spin/0.5.2/spin/struct.Mutex.html).
+    - This has been the correct way to deal with most of our `static mut` cases.
+
+## State of Play
+
+- Local and static variables enable *most* use cases. 
+- However, they both have their limitations:
+    - Local variables cannot be returned.
+    - Static variables cost memory for the complete runtime of the program. 
+        - They pose many safety problems.
+        
+## Fixed Size
+
+- I have historically motivated allocation with variable size types.
+    - Locals and statics are fixed size.
+- Examples include arbitrary precision integers, Pythonic lists.
+
+## Dynamic Memory
+
+- Compilers often support a memory region for storing variables called the **heap**. 
+- The heap supports _dynamic memory allocation_ at runtime through two functions called `allocate` and `deallocate`. 
+    - `allocate` returns a free chunk of memory of the specified size that can be used to store a variable. 
+    - This variable then lives until it is freed by being passed to the `deallocate` function.
+
+## Visually 
+
+<img src="https://os.phil-opp.com/heap-allocation/call-stack-heap.svg" style="filter:invert(.9)">
+
+## Description
+
+- `inner` stores `z` to heap.
+    - Allocates to get a [raw pointer](https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer)
+    - Writes using [`ptr::write`](https://doc.rust-lang.org/core/ptr/fn.write.html)
+    - Returns via [`offset`](https://doc.rust-lang.org/std/primitive.pointer.html#method.offset)
+- The calling function then frees the memory via `deallocated`.
+
+
+## Visually 
+
+<img src="https://os.phil-opp.com/heap-allocation/call-stack-heap-freed.svg" style="filter:invert(.9)">
+
+
+## Problem
+
+- `z[1]` slot is free again and can be reused
+- But `z[0]` and `z[2]` are never freed!
+- This is a memory leak and is bad.
+
+## Other Problems
+
+- Continuing to use a variable after calling `deallocate` is a **use-after-free** vulnerability.
+- Freeing a variable twice, is a **double-free** vulnerability. 
+    - It might free a different allocation.
+    - Can also (indirectly) lead to a use-after-free.
+
+## These Happen
+
+- Writing memory safe code is hard.
+- [Here's](https://securityboulevard.com/2019/02/linux-use-after-free-vulnerability-found-in-linux-2-6-through-4-20-11/) a 2019 Linux use-after-free.
+- Absolute cowards, and also other people, use Java and Python to solve this problem.
+
+## Enter Ownership
+
+- Rust allocation and deallocation is implicit using:
+    - Ownership, and
+    - Lifetimes.
+- To manage memory manually, we used [**`Box`**](https://doc.rust-lang.org/std/boxed/index.html)
+
+## Boxing
+
+- We recall [`Box::new`](https://doc.rust-lang.org/alloc/boxed/struct.Box.html#method.new), which is the Rust allocator.
+- We introduce *dropping* to free, implemented in two parts.
+    - By the [`Drop` trait](https://doc.rust-lang.org/book/ch15-03-drop.html)
+    - By the [`drop<T>(_x: T)` function](https://doc.rust-lang.org/std/mem/fn.drop.html)
+- Drops also occur on out-of-scope.
+
+## Minimal Examples
+
+- This works
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    let b = Box::new("Hello, world!");
+    println!("{}", *b);
+    drop(b);
+}
+```
+
+## Minimal Examples
+
+- This fails.
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    let b = Box::new("Hello, world!");
+    drop(b);
+    println!("{}", *b);
+}
+```
+
+## Error
+
+```{.email}
+error[E0382]: borrow of moved value: `b`
+ --> src/main.rs:4:20
+  |
+2 |     let b = Box::new("Hello, world!");
+  |         - move occurs because `b` has type `Box<&str>`, which does not implement the `Copy` trait
+3 |     drop(b);
+  |          - value moved here
+4 |     println!("{}", *b);
+  |                    ^^ value borrowed here after move
+```
+
+## Implicit Drop
+
+- This works
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    {
+        let b = Box::new("Hello, world!");
+        println!("{}", *b);
+    }
+}
+```
+
+
+## Implicit Drop
+
+- This fails
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    {
+        let b = Box::new("Hello, world!");
+    }
+    println!("{}", *b);
+}
+```
+
+
+## Error
+
+```{.email}
+error[E0425]: cannot find value `b` in this scope
+ --> src/main.rs:5:21
+  |
+5 |     println!("{}", *b);
+  |                     ^
+  |
+help: the binding `b` is available in a different scope in the same function
+ --> src/main.rs:3:13
+  |
+3 |         let b = Box::new("Hello, world!");
+  |             ^
+```
+
+## Shout out C++
+
+> This pattern has the strange name [_resource acquisition is initialization_](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization) (or _RAII_ for short). It originated in C++, where it is used to implement a similar abstraction type called [`std::unique_ptr`](https://en.cppreference.com/w/cpp/memory/unique_ptr).
+
+## Breaking the Rules
+
+- Persist a reference after a deallocation.
+
+```{.rs filename="src/main.rs"}
+fn main() {
+    let x = {
+        let y = Box::new(["Hello", "World"]);
+        &y[0] // No semi-colon.
+    }; // Semi-colon.
+    println!("{}", x);
+}
+```
+
+## `rustc` complains
+
+```{.email}
+error[E0597]: `y[_]` does not live long enough
+ --> src/main.rs:4:9
+  |
+2 |     let x = {
+  |         - borrow later stored here
+3 |         let y = Box::new(["Hello", "World"]);
+  |             - binding `y` declared here
+4 |         &y[0] // No semi-colon.
+  |         ^^^^^ borrowed value does not live long enough
+5 |     }; // Semi-colon.
+  |     - `y[_]` dropped here while still borrowed
+```
+
+## Lifetimes
+
+- Rust attached a ["lifetime"](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html) to each reference.
+- Lifetimes can be specified as some set of scopes.
+    - Can be assigned variables and used within the type checker. [Read more](https://doc.rust-lang.org/rust-by-example/scope/lifetime.html)
+- Lifetimes prevent use-after-free and go further to provide memory safety.
+    - All memory freed eventually, no unallocated memory accessed.
+
+# Interface
+
+## Caveats
+
+- We avoid dynamic memory allocation thus far.
+    - Incurs overhead to performance.
+    - Incurs engineering overhead in design.
+- Has a minor problem.
+    - Isn't Turing complete.
+    - Can't compute by definition.
+    
+## Requirements
+
+- Dynamic memory is required for variables that have 
+    - a dynamic lifetime or
+    - a variable size.
+
+## Reference count
+
+- An important dynamic lifetime is [**`Rc`**]
+    - "Reference Counted"
+    - Can be addressed by $n$ rather than $1$ aliases (references).
+    - [`std::rc::Rc`](https://doc.rust-lang.org/alloc/rc/index.html)
+- I haven't really found a use for these but some student solutions have leveraged reference counts.
+
+## Vectors
+
+- Remember these? They're a good time.
+- Strings too, of course.
+- And the other collection types, like `BTreeMap` which I used in [code I actually wrote that I wanted to work](https://github.com/vcd2df/rs/blob/main/src/lib.rs) once.
+
+```{.rs filename="src/lib.rs"}
+pub fn vcd2df<P: AsRef<Path>>(filename: P) -> DataFrame {
+    let mut lines = read_lines(filename).expect("File DNE");
+    let mut names = BTreeMap::<String, String>::new();
+```
+
+## We Lack These
+
+- Try it:
+
+```{.rs filename="src/main.rs"}
+pub extern "C" fn _start(boot_info: &'static bootloader::BootInfo) -> ! {
+    osirs::init();
+
+    let v = vec!("Hello", "World");
+
+    println!("{} {}{}", v[0], v[1], "!");
+```
+
+## It Fails
+
+- `Vec` is in `std` but not in [`core`](https://doc.rust-lang.org/core/).
+    - This is... pretty much why we've been using [`core`](https://doc.rust-lang.org/core/)...
+    - We would sure like `Vec` though!
+
+```{.email}
+error: cannot find macro `vec` in this scope
+  --> src/main.rs:18:13
+   |
+18 |     let v = vec!("Hello", "World");
+   |             ^^^
+
+error: could not compile `osirs` (bin "osirs") due to 1 previous error
+```
+
+## Allocator
+
+- To implement a heap allocator is to add a dependency on the built-in [`alloc`](https://doc.rust-lang.org/alloc/) crate.
+- Like the [`core`](https://doc.rust-lang.org/core/) crate, it is a subset of the standard library that additionally contains the allocation and collection types. 
+- To add the dependency on `alloc`, we add the following:
+
+```{.rs filename="src/lib.rs"}
+extern crate alloc;
+```
+
+## I Lied
+
+- Surely that will work.
+
+```{.email}
+error[E0463]: can't find crate for `alloc`
+ --> src/lib.rs:7:1
+  |
+7 | extern crate alloc;
+  | ^^^^^^^^^^^^^^^^^^^ can't find crate
+
+For more information about this error, try `rustc --explain E0463`.
+error: could not compile `osirs` (lib) due to 1 previous error
+```
+
+## Custom Target
+
+- We once again return to `.cargo/config.toml`
+    - Cargo: $\exists$ people that hold it in some regard.
+
+## config
+
+- It's been a while, so refresher.
+- Mine currently looks like this:
+
+```{.toml filename=".cargo/config.toml"}
+[unstable]
+json-target-spec = true
+build-std-features = ["compiler-builtins-mem"]
+build-std = ["core", "compiler_builtins"]
+panic-abort-tests = true
+
+[build]
+target = "x86_64-osirs.json"
+
+[target.'cfg(target_os = "none")']
+runner = "bootimage runner"
+```
+
+## Modify `build-std`
+
+- We add `alloc` where we added `core`
+- That's it!
+
+```{.toml filename=".cargo/config.toml" code-line-numbers="4"}
+[unstable]
+json-target-spec = true
+build-std-features = ["compiler-builtins-mem"]
+build-std = ["core", "compiler_builtins", "alloc"]
+panic-abort-tests = true
+
+[build]
+target = "x86_64-osirs.json"
+
+[target.'cfg(target_os = "none")']
+runner = "bootimage runner"
+```
+## I Lied
+
+- Someone actually has to write the allocator.
+
+```{.email}
+error: no global memory allocator found but one is required; link to std or add `#[global_allocator]` to a static item that implements the GlobalAlloc trait
+
+error: could not compile `osirs` (bin "osirs") due to 1 previous error
+```
+
+## Requirements
+
+- The `alloc` crate requires a heap allocator
+    - Which implements `allocate` and `deallocate`
+- In Rust, described by [`GlobalAlloc`] (referred to in error)
+
+> To set the heap allocator for the crate, the `#[global_allocator]` attribute must be applied to a `static` variable that implements the `GlobalAlloc` trait.
+
+## `GlobalAlloc`
+
+- Here it is:
+
+```{.rs}
+pub unsafe trait GlobalAlloc {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8;
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout);
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 { ... }
+    unsafe fn realloc(
+        &self,
+        ptr: *mut u8,
+        layout: Layout,
+        new_size: usize
+    ) -> *mut u8 { ... }
+}
+```
+
+## `alloc`
+
+- Takes a [`Layout`](https://doc.rust-lang.org/alloc/alloc/struct.Layout.html) instance as an argument
+    - Describes the desired size and alignment for allocated memory.
+- Returns a raw pointer to the first byte of the allocated memory block. 
+    - Instead of an explicit error value, the `alloc` method returns a null pointer to signal an allocation error. 
+    - No comment from me on that.
+    - Okay, I have one comment.
+    
+## `dealloc`
+
+- The `dealloc` method is the counterpart to `alloc`.
+- Frees a memory block after use. 
+- It receives two arguments: 
+    - A pointer returned by `alloc` 
+    - The `Layout` that was used for the allocation.
+    
+## Bonus Methods
+
+- `alloc_zeroed` is equivalent to calling `alloc` and then setting the allocated memory block to zero.
+- `realloc` method allows to grow or shrink an allocation.
+    - The default implementation allocates a new memory block with the desired size and copies over all the content from the previous allocation.
+    
+## A `DummyAllocator`
+
+- Create a simple dummy allocator. 
+- Create a new `allocator` module:
+
+```{.rs filename="src/lib.rs"}
+pub mod allocator;
+```
+
+## Do nothing
+
+- We return a null point on alloc and panic on dealloc.
+
+```{.rs filename="src/allocator.rs"}
+pub struct Dummy;
+
+unsafe impl alloc::alloc::GlobalAlloc for Dummy {
+    unsafe fn alloc(&self, _layout: alloc::alloc::Layout) -> *mut u8 {
+        core::ptr::null_mut()
+    }
+
+    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: alloc::alloc::Layout) {
+        panic!("dealloc should be never called")
+    }
+}
+```
+
+## Some notes
+
+- We use a size zero struct.
+    - I used this previously in my implementation of printing.
+    - I love it when Rust forces me to implement a function as a method!
+- This isn't quite enough.
+    - We'll get the same error.
+- In theory, we should never hit that panic.
+    
+## The Attribute
+
+- We have satisfying, if useless, allocator.
+- Informer compiler via `#[global_allocator]`
+- It must be:
+    - A `static` which
+    - Implements `GlobalAlloc`
+
+```{.rs filename="src/allocator.rs"}
+#[global_allocator]
+static ALLOCATOR: Dummy = Dummy;
+```
+
+## This should work
+
+- I at least got a "Hello, world!" after:
+    - Update `.config`
+    - Add `alloc` and `allocator`, both, to `src/lib.rs`
+    - Define a `struct` with some methods, and...
+    - Declare a `static`.
+    
+# Kernel Heap
+
+## Boxing
+
+- Let's try boxing something up, like a delicious integer.
+
+```{.rs filename="src/main.rs"}
+error[E0433]: failed to resolve: use of undeclared type `Box`
+  --> src/main.rs:21:13
+   |
+21 |     let b = Box::new(371);
+   |             ^^^ use of undeclared type `Box`
+
+For more information about this error, try `rustc --explain E0433`.
+```
+
+- Rust in its infinite wisdom has blessed us with getting to navigate an obscure namespace.
+
+## Fixing
+
+- We must:
+    - Include `extern crate alloc;` in *any* file where we use `Box`.
+    - Must refer to `Box` from within `alloc` using whatever means we prefer.
+- You can tell it's "working" when you get the following panic:
+```{.email}
+panicked at /home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/alloc.rs:566:9:
+memory allocation of 4 bytes failed
+```
+
+## So far...
+
+- `Box::new` calls alloc.
+- Alloc returns.
+- `Box::new` null-checks the return value.
+    - It does not unpack an `Option`
+- `Box::new` panics if it sees null.
+- We didn't write any of this (except the `alloc` return), it's all just language features.
+
+## Creating a Kernel Heap
+
+- We must create a proper allocator
+- But first we need to create a heap memory region
+    - Somewhere from which the allocator can allocate memory
+- We need:
+    - A virtual memory range for the heap region
+    - A map from this region to physical frames
+    
+## Virtual Region
+
+- This part is easy.
+- We can make our life moderately easier by picking recognizable values.
+```{.rs filename="src/allocator.rs"}
+pub const HEAP_START: usize = 0x_C371_C371_0000; // CS-371
+pub const HEAP_SIZE: usize = 1 << 16;  // Arbitrary
+```
+
+## Naively
+
+- If we simply map this region now, allocation will fail.
+    - There is no corresponding physical frame.
+- We will initialize our heap, using the `Mapper` we previously implemented.
+    - I didn't find a graceful way to do this since I'm coerced into certain return types and into using certain methods.
+    
+## Implementation
+
+```{.rs filename="src/allocator.rs"}
+pub fn init_heap(
+    mapper: &mut impl x86_64::structures::paging::Mapper<x86_64::structures::paging::Size4KiB>,
+    frame_allocator: &mut impl x86_64::structures::paging::FrameAllocator<
+        x86_64::structures::paging::Size4KiB,
+    >,
+) -> Option<()> {
+    let page_range = {
+        let heap_start = x86_64::VirtAddr::new(HEAP_START as u64);
+        let heap_end = heap_start + HEAP_SIZE - 1u64;
+        let heap_start_page = x86_64::structures::paging::Page::containing_address(heap_start);
+        let heap_end_page = x86_64::structures::paging::Page::containing_address(heap_end);
+        x86_64::structures::paging::Page::range_inclusive(heap_start_page, heap_end_page)
+    };
+
+    let flags = x86_64::structures::paging::PageTableFlags::PRESENT
+        | x86_64::structures::paging::PageTableFlags::WRITABLE;
+    for page in page_range {
+        let frame = match frame_allocator.allocate_frame() {
+            Some(f) => f,
+            _ => return None,
+        };
+        unsafe {
+            match mapper.map_to(page, frame, flags, frame_allocator) {
+                Ok(m) => m.flush(),
+                _ => return None,
+            };
+        }
+    }
+
+    return Some(());
+}
+```
+
+## Two Parts
+
+1. Pages: Create a page range using a little arithmetic technique I like to call substraction (also some addition in there!)
+2. Frames: Construct a map from pages to frames.
+    
+## Pages
+
+- Convert the `HEAP_START` pointer to a `VirtAddr` type.
+- Calculate the heap end address from it by adding the `HEAP_SIZE`. 
+- Subtract 1, obviously. 
+- Convert the addresses into `Page` types using the `containing_address` function. 
+- Create a page range from the start and end pages using the (provided) `Page::range_inclusive` function.
+    
+## Frames
+
+- Prepare page flags for the pages in this region.
+- For each page:
+    - Allocate a frame via `FrameAllocator::allocate_frame`.
+    - Set flags.
+    - Map the page to the frame with the flags.
+        - The `flush` updates the **TLB**.
+- I used options instead of results to reduce text volumes.
+    
+## Onward
+
+- Go ahead and `cargo r` to make sure your code doesn't explode, then let's head over to `src/main.rs` to run this thing.
+- Basically, we are extending our initialization routine.
+    - I am finally, for the first time in my life, considering appreciating how long computers take to turn on.
+    - After some consideration, I've determined actual OS engineers should not use crates and instead optimize this code.
+   
+## Run it
+
+- At long last, initialize the kernel heap from `src/main.rs`
+
+```{.rs filename="src/main.rs"}
+pub extern "C" fn _start(boot_info: &'static bootloader::BootInfo) -> ! {
+    osirs::init();
+    let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { osirs::memory::init(offset) };
+    let mut frame_allocator =
+        unsafe { osirs::memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    osirs::allocator::init_heap(&mut mapper, &mut frame_allocator).unwrap();
+
+    println!("Hello world{}", "!");
+```
+
+# Fin

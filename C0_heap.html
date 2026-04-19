@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Heap – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./C1_allocator.html" rel="next">
+<link href="./B2_mapping.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./C0_heap.html">Heap</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_librs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./70_except.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exceptions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./71_calls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Call</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./72_handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handlers</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./80_double.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Double</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90_interrupts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interrupts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91_keyboard.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Keyboard</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92_clock.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clock</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./A0_paging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Paging</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./A1_pagefault.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Page Fault</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./B0_pagetable.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Page Tables</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./B2_mapping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mapping</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./C0_heap.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Heap</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./C1_allocator.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Allocator</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#intro" id="toc-intro" class="nav-link" data-scroll-target="#intro">Intro</a>
+  <ul class="collapse">
+  <li><a href="#local-and-static-variables" id="toc-local-and-static-variables" class="nav-link" data-scroll-target="#local-and-static-variables">Local and Static Variables</a></li>
+  <li><a href="#local-variables" id="toc-local-variables" class="nav-link" data-scroll-target="#local-variables">Local Variables</a></li>
+  <li><a href="#the-call-stack" id="toc-the-call-stack" class="nav-link" data-scroll-target="#the-call-stack">The Call Stack</a></li>
+  <li><a href="#visually" id="toc-visually" class="nav-link" data-scroll-target="#visually">Visually</a></li>
+  <li><a href="#description" id="toc-description" class="nav-link" data-scroll-target="#description">Description</a></li>
+  <li><a href="#visually-1" id="toc-visually-1" class="nav-link" data-scroll-target="#visually-1">Visually</a></li>
+  <li><a href="#description-1" id="toc-description-1" class="nav-link" data-scroll-target="#description-1">Description</a></li>
+  <li><a href="#rust-implementation" id="toc-rust-implementation" class="nav-link" data-scroll-target="#rust-implementation">Rust implementation</a></li>
+  <li><a href="#error" id="toc-error" class="nav-link" data-scroll-target="#error">Error</a></li>
+  <li><a href="#use-case" id="toc-use-case" class="nav-link" data-scroll-target="#use-case">Use Case</a></li>
+  <li><a href="#static-variables" id="toc-static-variables" class="nav-link" data-scroll-target="#static-variables">Static Variables</a></li>
+  <li><a href="#visually-2" id="toc-visually-2" class="nav-link" data-scroll-target="#visually-2">Visually</a></li>
+  <li><a href="#description-2" id="toc-description-2" class="nav-link" data-scroll-target="#description-2">Description</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code">Code</a></li>
+  <li><a href="#niceties" id="toc-niceties" class="nav-link" data-scroll-target="#niceties">Niceties</a></li>
+  <li><a href="#problems" id="toc-problems" class="nav-link" data-scroll-target="#problems">Problems</a></li>
+  <li><a href="#state-of-play" id="toc-state-of-play" class="nav-link" data-scroll-target="#state-of-play">State of Play</a></li>
+  <li><a href="#fixed-size" id="toc-fixed-size" class="nav-link" data-scroll-target="#fixed-size">Fixed Size</a></li>
+  <li><a href="#dynamic-memory" id="toc-dynamic-memory" class="nav-link" data-scroll-target="#dynamic-memory">Dynamic Memory</a></li>
+  <li><a href="#visually-3" id="toc-visually-3" class="nav-link" data-scroll-target="#visually-3">Visually</a></li>
+  <li><a href="#description-3" id="toc-description-3" class="nav-link" data-scroll-target="#description-3">Description</a></li>
+  <li><a href="#visually-4" id="toc-visually-4" class="nav-link" data-scroll-target="#visually-4">Visually</a></li>
+  <li><a href="#problem" id="toc-problem" class="nav-link" data-scroll-target="#problem">Problem</a></li>
+  <li><a href="#other-problems" id="toc-other-problems" class="nav-link" data-scroll-target="#other-problems">Other Problems</a></li>
+  <li><a href="#these-happen" id="toc-these-happen" class="nav-link" data-scroll-target="#these-happen">These Happen</a></li>
+  <li><a href="#enter-ownership" id="toc-enter-ownership" class="nav-link" data-scroll-target="#enter-ownership">Enter Ownership</a></li>
+  <li><a href="#boxing" id="toc-boxing" class="nav-link" data-scroll-target="#boxing">Boxing</a></li>
+  <li><a href="#minimal-examples" id="toc-minimal-examples" class="nav-link" data-scroll-target="#minimal-examples">Minimal Examples</a></li>
+  <li><a href="#minimal-examples-1" id="toc-minimal-examples-1" class="nav-link" data-scroll-target="#minimal-examples-1">Minimal Examples</a></li>
+  <li><a href="#error-1" id="toc-error-1" class="nav-link" data-scroll-target="#error-1">Error</a></li>
+  <li><a href="#implicit-drop" id="toc-implicit-drop" class="nav-link" data-scroll-target="#implicit-drop">Implicit Drop</a></li>
+  <li><a href="#implicit-drop-1" id="toc-implicit-drop-1" class="nav-link" data-scroll-target="#implicit-drop-1">Implicit Drop</a></li>
+  <li><a href="#error-2" id="toc-error-2" class="nav-link" data-scroll-target="#error-2">Error</a></li>
+  <li><a href="#shout-out-c" id="toc-shout-out-c" class="nav-link" data-scroll-target="#shout-out-c">Shout out C++</a></li>
+  <li><a href="#breaking-the-rules" id="toc-breaking-the-rules" class="nav-link" data-scroll-target="#breaking-the-rules">Breaking the Rules</a></li>
+  <li><a href="#rustc-complains" id="toc-rustc-complains" class="nav-link" data-scroll-target="#rustc-complains"><code>rustc</code> complains</a></li>
+  <li><a href="#lifetimes" id="toc-lifetimes" class="nav-link" data-scroll-target="#lifetimes">Lifetimes</a></li>
+  </ul></li>
+  <li><a href="#interface" id="toc-interface" class="nav-link" data-scroll-target="#interface">Interface</a>
+  <ul class="collapse">
+  <li><a href="#caveats" id="toc-caveats" class="nav-link" data-scroll-target="#caveats">Caveats</a></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
+  <li><a href="#reference-count" id="toc-reference-count" class="nav-link" data-scroll-target="#reference-count">Reference count</a></li>
+  <li><a href="#vectors" id="toc-vectors" class="nav-link" data-scroll-target="#vectors">Vectors</a></li>
+  <li><a href="#we-lack-these" id="toc-we-lack-these" class="nav-link" data-scroll-target="#we-lack-these">We Lack These</a></li>
+  <li><a href="#it-fails" id="toc-it-fails" class="nav-link" data-scroll-target="#it-fails">It Fails</a></li>
+  <li><a href="#allocator" id="toc-allocator" class="nav-link" data-scroll-target="#allocator">Allocator</a></li>
+  <li><a href="#i-lied" id="toc-i-lied" class="nav-link" data-scroll-target="#i-lied">I Lied</a></li>
+  <li><a href="#custom-target" id="toc-custom-target" class="nav-link" data-scroll-target="#custom-target">Custom Target</a></li>
+  <li><a href="#config" id="toc-config" class="nav-link" data-scroll-target="#config">config</a></li>
+  <li><a href="#modify-build-std" id="toc-modify-build-std" class="nav-link" data-scroll-target="#modify-build-std">Modify <code>build-std</code></a></li>
+  <li><a href="#i-lied-1" id="toc-i-lied-1" class="nav-link" data-scroll-target="#i-lied-1">I Lied</a></li>
+  <li><a href="#requirements-1" id="toc-requirements-1" class="nav-link" data-scroll-target="#requirements-1">Requirements</a></li>
+  <li><a href="#globalalloc" id="toc-globalalloc" class="nav-link" data-scroll-target="#globalalloc"><code>GlobalAlloc</code></a></li>
+  <li><a href="#alloc" id="toc-alloc" class="nav-link" data-scroll-target="#alloc"><code>alloc</code></a></li>
+  <li><a href="#dealloc" id="toc-dealloc" class="nav-link" data-scroll-target="#dealloc"><code>dealloc</code></a></li>
+  <li><a href="#bonus-methods" id="toc-bonus-methods" class="nav-link" data-scroll-target="#bonus-methods">Bonus Methods</a></li>
+  <li><a href="#a-dummyallocator" id="toc-a-dummyallocator" class="nav-link" data-scroll-target="#a-dummyallocator">A <code>DummyAllocator</code></a></li>
+  <li><a href="#do-nothing" id="toc-do-nothing" class="nav-link" data-scroll-target="#do-nothing">Do nothing</a></li>
+  <li><a href="#some-notes" id="toc-some-notes" class="nav-link" data-scroll-target="#some-notes">Some notes</a></li>
+  <li><a href="#the-attribute" id="toc-the-attribute" class="nav-link" data-scroll-target="#the-attribute">The Attribute</a></li>
+  <li><a href="#this-should-work" id="toc-this-should-work" class="nav-link" data-scroll-target="#this-should-work">This should work</a></li>
+  </ul></li>
+  <li><a href="#kernel-heap" id="toc-kernel-heap" class="nav-link" data-scroll-target="#kernel-heap">Kernel Heap</a>
+  <ul class="collapse">
+  <li><a href="#boxing-1" id="toc-boxing-1" class="nav-link" data-scroll-target="#boxing-1">Boxing</a></li>
+  <li><a href="#fixing" id="toc-fixing" class="nav-link" data-scroll-target="#fixing">Fixing</a></li>
+  <li><a href="#so-far" id="toc-so-far" class="nav-link" data-scroll-target="#so-far">So far…</a></li>
+  <li><a href="#creating-a-kernel-heap" id="toc-creating-a-kernel-heap" class="nav-link" data-scroll-target="#creating-a-kernel-heap">Creating a Kernel Heap</a></li>
+  <li><a href="#virtual-region" id="toc-virtual-region" class="nav-link" data-scroll-target="#virtual-region">Virtual Region</a></li>
+  <li><a href="#naively" id="toc-naively" class="nav-link" data-scroll-target="#naively">Naively</a></li>
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a></li>
+  <li><a href="#two-parts" id="toc-two-parts" class="nav-link" data-scroll-target="#two-parts">Two Parts</a></li>
+  <li><a href="#pages" id="toc-pages" class="nav-link" data-scroll-target="#pages">Pages</a></li>
+  <li><a href="#frames" id="toc-frames" class="nav-link" data-scroll-target="#frames">Frames</a></li>
+  <li><a href="#onward" id="toc-onward" class="nav-link" data-scroll-target="#onward">Onward</a></li>
+  <li><a href="#run-it" id="toc-run-it" class="nav-link" data-scroll-target="#run-it">Run it</a></li>
+  </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="C0_heap.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Heap</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li><strong>Action Items</strong>:
+<ul>
+<li>Welcome back.</li>
+<li>Be finishing up on page faults and tables.</li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>You have previously seen how I teach the heap.</li>
+<li>I don’t differentiate the theory from the practice (I see no reason to do so).
+<ul>
+<li><a href="https://cd-public.github.io/courses/old/c89s25/qmd/heap_t.html">C</a></li>
+<li><a href="https://cd-c89.github.io/rs/C1_heap.html">Rust</a></li>
+</ul></li>
+<li>Today, as blog teaches it. <a href="https://os.phil-opp.com/heap-allocation/">Source</a></li>
+</ul>
+</section>
+<section id="intro" class="level1">
+<h1>Intro</h1>
+<section id="local-and-static-variables" class="level2">
+<h2 class="anchored" data-anchor-id="local-and-static-variables">Local and Static Variables</h2>
+<ul>
+<li>We currently use two types of variables in our kernel:
+<ul>
+<li><ul>
+<li>Local variables are stored on the <a href="https://en.wikipedia.org/wiki/Call_stack">call stack</a> for the lifetime of the function.</li>
+</ul></li>
+<li><code>static</code> variables are stored at a fixed memory location for the complete lifetime of the program.</li>
+</ul></li>
+</ul>
+</section>
+<section id="local-variables" class="level2">
+<h2 class="anchored" data-anchor-id="local-variables">Local Variables</h2>
+<ul>
+<li>The call stack is a (hardware level) <a href="https://en.wikipedia.org/wiki/Stack_(abstract_data_type)">stack ADT</a></li>
+<li>Supports <code>push</code> and <code>pop</code> operations.</li>
+<li>Handshake between the hardware and the compiler.</li>
+</ul>
+</section>
+<section id="the-call-stack" class="level2">
+<h2 class="anchored" data-anchor-id="the-call-stack">The Call Stack</h2>
+<ul>
+<li>On each function entry, these are pushed by the compiler:
+<ul>
+<li>The parameters,</li>
+<li>The return address, and</li>
+<li>The local variables of the called function</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually" class="level2">
+<h2 class="anchored" data-anchor-id="visually">Visually</h2>
+<p><img src="https://os.phil-opp.com/heap-allocation/call-stack.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="description" class="level2">
+<h2 class="anchored" data-anchor-id="description">Description</h2>
+<ul>
+<li>Consider the call stack after the <code>outer</code> function called the <code>inner</code> function.</li>
+<li>The local variables of <code>outer</code> are first.</li>
+<li>On the <code>inner</code> call, the parameter <code>1</code> and the return address were pushed.</li>
+<li>Then <code>inner</code> which pushed its local array.</li>
+</ul>
+</section>
+<section id="visually-1" class="level2">
+<h2 class="anchored" data-anchor-id="visually-1">Visually</h2>
+<p><img src="https://os.phil-opp.com/heap-allocation/call-stack-return.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="description-1" class="level2">
+<h2 class="anchored" data-anchor-id="description-1">Description</h2>
+<ul>
+<li>After the <code>inner</code> function returns:
+<ul>
+<li>Its part of the call stack is popped again and</li>
+<li>Only the local variables of <code>outer</code> remain.</li>
+</ul></li>
+<li>Variables persist precisely as long as the function that creates them.</li>
+</ul>
+</section>
+<section id="rust-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="rust-implementation">Rust implementation</h2>
+<ul>
+<li>The Rust compiler enforces these lifetimes.</li>
+<li>It throws an error when we use a value for too long.</li>
+<li>For example, return a reference to a local variable:</li>
+</ul>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">fn</span> inner(i<span class="op">:</span> <span class="dt">usize</span>) <span class="op">-&gt;</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="dt">u32</span> <span class="op">{</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a>    <span class="kw">let</span> z <span class="op">=</span> [<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3"></a>    <span class="op">&amp;</span>z[i]</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="error" class="level2">
+<h2 class="anchored" data-anchor-id="error">Error</h2>
+<blockquote class="blockquote">
+<p>returns a reference to data owned by the current function</p>
+</blockquote>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb2-1"><a href="#cb2-1"></a>error[E0515]: cannot return reference to local data `z[_]`</span>
+<span id="cb2-2"><a href="#cb2-2"></a> --&gt; src/main.rs:3:5</span>
+<span id="cb2-3"><a href="#cb2-3"></a>  |</span>
+<span id="cb2-4"><a href="#cb2-4"></a>3 |     &amp;z[i]</span>
+<span id="cb2-5"><a href="#cb2-5"></a>  |     ^^^^^ returns a reference to data owned by the current function</span>
+<span id="cb2-6"><a href="#cb2-6"></a></span>
+<span id="cb2-7"><a href="#cb2-7"></a>For more information about this error, try `rustc --explain E0515`.</span>
+<span id="cb2-8"><a href="#cb2-8"></a>error: could not compile `thing` (bin "thing") due to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="use-case" class="level2">
+<h2 class="anchored" data-anchor-id="use-case">Use Case</h2>
+<ul>
+<li>Maybe we want to do this.
+<ul>
+<li>The most common case is returning a pair (or some other collection) of values.</li>
+</ul></li>
+<li>One option is the static variable.</li>
+</ul>
+</section>
+<section id="static-variables" class="level2">
+<h2 class="anchored" data-anchor-id="static-variables">Static Variables</h2>
+<ul>
+<li>Static variables are stored at a fixed memory location separate from the stack.</li>
+<li>This memory location is assigned at compile time by the linker (remember those?) and encoded in the executable.</li>
+<li>Statics live for the complete runtime of the program, so they have the <code>'static</code> lifetime and can always be referenced from local variables.</li>
+</ul>
+</section>
+<section id="visually-2" class="level2">
+<h2 class="anchored" data-anchor-id="visually-2">Visually</h2>
+<p><img src="https://os.phil-opp.com/heap-allocation/call-stack-static.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="description-2" class="level2">
+<h2 class="anchored" data-anchor-id="description-2">Description</h2>
+<ul>
+<li>When the <code>inner</code> function returns, its part of the call stack is “destroyed”.
+<ul>
+<li>I wonder how it gets destroyed.</li>
+<li>I wonder what destroyed means.</li>
+</ul></li>
+<li>The static variables live in a separate memory range that is never destroyed.</li>
+<li>So the <code>&amp;Z[1]</code> reference is still valid after the return.</li>
+</ul>
+</section>
+<section id="code" class="level2">
+<h2 class="anchored" data-anchor-id="code">Code</h2>
+<ul>
+<li>This resolves the earlier error.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">static</span> Z<span class="op">:</span> [<span class="dt">u32</span><span class="op">;</span> <span class="dv">3</span>] <span class="op">=</span> [<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>]<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a></span>
+<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">fn</span> inner(i<span class="op">:</span> <span class="dt">usize</span>) <span class="op">-&gt;</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="dt">u32</span> <span class="op">{</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>    <span class="op">&amp;</span>Z[i]</span>
+<span id="cb3-5"><a href="#cb3-5"></a><span class="op">}</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a>    <span class="pp">println!</span>(<span class="st">"Hello, world! z = {}"</span><span class="op">,</span> inner(<span class="dv">1</span>))<span class="op">;</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="niceties" class="level2">
+<h2 class="anchored" data-anchor-id="niceties">Niceties</h2>
+<ul>
+<li>Static variables’ location is known at compile time…
+<ul>
+<li>So <em>no reference</em> is needed for accessing them.</li>
+<li>That is, <code>Z</code> was not defined within <code>inner</code>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="problems" class="level2">
+<h2 class="anchored" data-anchor-id="problems">Problems</h2>
+<ul>
+<li>They are read-only by default.</li>
+<li>And if they aren’t read-only, it is possible to trigger a <a href="https://doc.rust-lang.org/nomicon/races.html">data race</a>.</li>
+<li>The only way to avoid this is to encapsulate in a <a href="https://docs.rs/spin/0.5.2/spin/struct.Mutex.html"><code>Mutex</code></a>.
+<ul>
+<li>This has been the correct way to deal with most of our <code>static mut</code> cases.</li>
+</ul></li>
+</ul>
+</section>
+<section id="state-of-play" class="level2">
+<h2 class="anchored" data-anchor-id="state-of-play">State of Play</h2>
+<ul>
+<li>Local and static variables enable <em>most</em> use cases.</li>
+<li>However, they both have their limitations:
+<ul>
+<li>Local variables cannot be returned.</li>
+<li>Static variables cost memory for the complete runtime of the program.
+<ul>
+<li>They pose many safety problems.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="fixed-size" class="level2">
+<h2 class="anchored" data-anchor-id="fixed-size">Fixed Size</h2>
+<ul>
+<li>I have historically motivated allocation with variable size types.
+<ul>
+<li>Locals and statics are fixed size.</li>
+</ul></li>
+<li>Examples include arbitrary precision integers, Pythonic lists.</li>
+</ul>
+</section>
+<section id="dynamic-memory" class="level2">
+<h2 class="anchored" data-anchor-id="dynamic-memory">Dynamic Memory</h2>
+<ul>
+<li>Compilers often support a memory region for storing variables called the <strong>heap</strong>.</li>
+<li>The heap supports <em>dynamic memory allocation</em> at runtime through two functions called <code>allocate</code> and <code>deallocate</code>.
+<ul>
+<li><code>allocate</code> returns a free chunk of memory of the specified size that can be used to store a variable.</li>
+<li>This variable then lives until it is freed by being passed to the <code>deallocate</code> function.</li>
+</ul></li>
+</ul>
+</section>
+<section id="visually-3" class="level2">
+<h2 class="anchored" data-anchor-id="visually-3">Visually</h2>
+<p><img src="https://os.phil-opp.com/heap-allocation/call-stack-heap.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="description-3" class="level2">
+<h2 class="anchored" data-anchor-id="description-3">Description</h2>
+<ul>
+<li><code>inner</code> stores <code>z</code> to heap.
+<ul>
+<li>Allocates to get a <a href="https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer">raw pointer</a></li>
+<li>Writes using <a href="https://doc.rust-lang.org/core/ptr/fn.write.html"><code>ptr::write</code></a></li>
+<li>Returns via <a href="https://doc.rust-lang.org/std/primitive.pointer.html#method.offset"><code>offset</code></a></li>
+</ul></li>
+<li>The calling function then frees the memory via <code>deallocated</code>.</li>
+</ul>
+</section>
+<section id="visually-4" class="level2">
+<h2 class="anchored" data-anchor-id="visually-4">Visually</h2>
+<p><img src="https://os.phil-opp.com/heap-allocation/call-stack-heap-freed.svg" style="filter:invert(.9)"></p>
+</section>
+<section id="problem" class="level2">
+<h2 class="anchored" data-anchor-id="problem">Problem</h2>
+<ul>
+<li><code>z[1]</code> slot is free again and can be reused</li>
+<li>But <code>z[0]</code> and <code>z[2]</code> are never freed!</li>
+<li>This is a memory leak and is bad.</li>
+</ul>
+</section>
+<section id="other-problems" class="level2">
+<h2 class="anchored" data-anchor-id="other-problems">Other Problems</h2>
+<ul>
+<li>Continuing to use a variable after calling <code>deallocate</code> is a <strong>use-after-free</strong> vulnerability.</li>
+<li>Freeing a variable twice, is a <strong>double-free</strong> vulnerability.
+<ul>
+<li>It might free a different allocation.</li>
+<li>Can also (indirectly) lead to a use-after-free.</li>
+</ul></li>
+</ul>
+</section>
+<section id="these-happen" class="level2">
+<h2 class="anchored" data-anchor-id="these-happen">These Happen</h2>
+<ul>
+<li>Writing memory safe code is hard.</li>
+<li><a href="https://securityboulevard.com/2019/02/linux-use-after-free-vulnerability-found-in-linux-2-6-through-4-20-11/">Here’s</a> a 2019 Linux use-after-free.</li>
+<li>Absolute cowards, and also other people, use Java and Python to solve this problem.</li>
+</ul>
+</section>
+<section id="enter-ownership" class="level2">
+<h2 class="anchored" data-anchor-id="enter-ownership">Enter Ownership</h2>
+<ul>
+<li>Rust allocation and deallocation is implicit using:
+<ul>
+<li>Ownership, and</li>
+<li>Lifetimes.</li>
+</ul></li>
+<li>To manage memory manually, we used <a href="https://doc.rust-lang.org/std/boxed/index.html"><strong><code>Box</code></strong></a></li>
+</ul>
+</section>
+<section id="boxing" class="level2">
+<h2 class="anchored" data-anchor-id="boxing">Boxing</h2>
+<ul>
+<li>We recall <a href="https://doc.rust-lang.org/alloc/boxed/struct.Box.html#method.new"><code>Box::new</code></a>, which is the Rust allocator.</li>
+<li>We introduce <em>dropping</em> to free, implemented in two parts.
+<ul>
+<li>By the <a href="https://doc.rust-lang.org/book/ch15-03-drop.html"><code>Drop</code> trait</a></li>
+<li>By the <a href="https://doc.rust-lang.org/std/mem/fn.drop.html"><code>drop&lt;T&gt;(_x: T)</code> function</a></li>
+</ul></li>
+<li>Drops also occur on out-of-scope.</li>
+</ul>
+</section>
+<section id="minimal-examples" class="level2">
+<h2 class="anchored" data-anchor-id="minimal-examples">Minimal Examples</h2>
+<ul>
+<li>This works</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb4" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>    <span class="kw">let</span> b <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> <span class="op">*</span>b)<span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>    drop(b)<span class="op">;</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="minimal-examples-1" class="level2">
+<h2 class="anchored" data-anchor-id="minimal-examples-1">Minimal Examples</h2>
+<ul>
+<li>This fails.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb5" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb5-1"><a href="#cb5-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb5-2"><a href="#cb5-2"></a>    <span class="kw">let</span> b <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
+<span id="cb5-3"><a href="#cb5-3"></a>    drop(b)<span class="op">;</span></span>
+<span id="cb5-4"><a href="#cb5-4"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> <span class="op">*</span>b)<span class="op">;</span></span>
+<span id="cb5-5"><a href="#cb5-5"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="error-1" class="level2">
+<h2 class="anchored" data-anchor-id="error-1">Error</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb6-1"><a href="#cb6-1"></a>error[E0382]: borrow of moved value: `b`</span>
+<span id="cb6-2"><a href="#cb6-2"></a> --&gt; src/main.rs:4:20</span>
+<span id="cb6-3"><a href="#cb6-3"></a>  |</span>
+<span id="cb6-4"><a href="#cb6-4"></a>2 |     let b = Box::new("Hello, world!");</span>
+<span id="cb6-5"><a href="#cb6-5"></a>  |         - move occurs because `b` has type `Box&lt;&amp;str&gt;`, which does not implement the `Copy` trait</span>
+<span id="cb6-6"><a href="#cb6-6"></a>3 |     drop(b);</span>
+<span id="cb6-7"><a href="#cb6-7"></a>  |          - value moved here</span>
+<span id="cb6-8"><a href="#cb6-8"></a>4 |     println!("{}", *b);</span>
+<span id="cb6-9"><a href="#cb6-9"></a>  |                    ^^ value borrowed here after move</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="implicit-drop" class="level2">
+<h2 class="anchored" data-anchor-id="implicit-drop">Implicit Drop</h2>
+<ul>
+<li>This works</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>    <span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>        <span class="kw">let</span> b <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>        <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> <span class="op">*</span>b)<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>    <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="implicit-drop-1" class="level2">
+<h2 class="anchored" data-anchor-id="implicit-drop-1">Implicit Drop</h2>
+<ul>
+<li>This fails</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>    <span class="op">{</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>        <span class="kw">let</span> b <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="st">"Hello, world!"</span>)<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="op">}</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> <span class="op">*</span>b)<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="error-2" class="level2">
+<h2 class="anchored" data-anchor-id="error-2">Error</h2>
+<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb9-1"><a href="#cb9-1"></a>error[E0425]: cannot find value `b` in this scope</span>
+<span id="cb9-2"><a href="#cb9-2"></a> --&gt; src/main.rs:5:21</span>
+<span id="cb9-3"><a href="#cb9-3"></a>  |</span>
+<span id="cb9-4"><a href="#cb9-4"></a>5 |     println!("{}", *b);</span>
+<span id="cb9-5"><a href="#cb9-5"></a>  |                     ^</span>
+<span id="cb9-6"><a href="#cb9-6"></a>  |</span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="fu">help: </span>the binding `b` is available in a different scope in the same function</span>
+<span id="cb9-8"><a href="#cb9-8"></a> --&gt; src/main.rs:3:13</span>
+<span id="cb9-9"><a href="#cb9-9"></a>  |</span>
+<span id="cb9-10"><a href="#cb9-10"></a>3 |         let b = Box::new("Hello, world!");</span>
+<span id="cb9-11"><a href="#cb9-11"></a>  |             ^</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="shout-out-c" class="level2">
+<h2 class="anchored" data-anchor-id="shout-out-c">Shout out C++</h2>
+<blockquote class="blockquote">
+<p>This pattern has the strange name <a href="https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization"><em>resource acquisition is initialization</em></a> (or <em>RAII</em> for short). It originated in C++, where it is used to implement a similar abstraction type called <a href="https://en.cppreference.com/w/cpp/memory/unique_ptr"><code>std::unique_ptr</code></a>.</p>
+</blockquote>
+</section>
+<section id="breaking-the-rules" class="level2">
+<h2 class="anchored" data-anchor-id="breaking-the-rules">Breaking the Rules</h2>
+<ul>
+<li>Persist a reference after a deallocation.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb10" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="kw">fn</span> main() <span class="op">{</span></span>
+<span id="cb10-2"><a href="#cb10-2"></a>    <span class="kw">let</span> x <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb10-3"><a href="#cb10-3"></a>        <span class="kw">let</span> y <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new([<span class="st">"Hello"</span><span class="op">,</span> <span class="st">"World"</span>])<span class="op">;</span></span>
+<span id="cb10-4"><a href="#cb10-4"></a>        <span class="op">&amp;</span>y[<span class="dv">0</span>] <span class="co">// No semi-colon.</span></span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="op">};</span> <span class="co">// Semi-colon.</span></span>
+<span id="cb10-6"><a href="#cb10-6"></a>    <span class="pp">println!</span>(<span class="st">"{}"</span><span class="op">,</span> x)<span class="op">;</span></span>
+<span id="cb10-7"><a href="#cb10-7"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="rustc-complains" class="level2">
+<h2 class="anchored" data-anchor-id="rustc-complains"><code>rustc</code> complains</h2>
+<div class="sourceCode" id="cb11"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb11-1"><a href="#cb11-1"></a>error[E0597]: `y[_]` does not live long enough</span>
+<span id="cb11-2"><a href="#cb11-2"></a> --&gt; src/main.rs:4:9</span>
+<span id="cb11-3"><a href="#cb11-3"></a>  |</span>
+<span id="cb11-4"><a href="#cb11-4"></a>2 |     let x = {</span>
+<span id="cb11-5"><a href="#cb11-5"></a>  |         - borrow later stored here</span>
+<span id="cb11-6"><a href="#cb11-6"></a>3 |         let y = Box::new(["Hello", "World"]);</span>
+<span id="cb11-7"><a href="#cb11-7"></a>  |             - binding `y` declared here</span>
+<span id="cb11-8"><a href="#cb11-8"></a>4 |         &amp;y[0] // No semi-colon.</span>
+<span id="cb11-9"><a href="#cb11-9"></a>  |         ^^^^^ borrowed value does not live long enough</span>
+<span id="cb11-10"><a href="#cb11-10"></a>5 |     }; // Semi-colon.</span>
+<span id="cb11-11"><a href="#cb11-11"></a>  |     - `y[_]` dropped here while still borrowed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="lifetimes" class="level2">
+<h2 class="anchored" data-anchor-id="lifetimes">Lifetimes</h2>
+<ul>
+<li>Rust attached a <a href="https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html">“lifetime”</a> to each reference.</li>
+<li>Lifetimes can be specified as some set of scopes.
+<ul>
+<li>Can be assigned variables and used within the type checker. <a href="https://doc.rust-lang.org/rust-by-example/scope/lifetime.html">Read more</a></li>
+</ul></li>
+<li>Lifetimes prevent use-after-free and go further to provide memory safety.
+<ul>
+<li>All memory freed eventually, no unallocated memory accessed.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="interface" class="level1">
+<h1>Interface</h1>
+<section id="caveats" class="level2">
+<h2 class="anchored" data-anchor-id="caveats">Caveats</h2>
+<ul>
+<li>We avoid dynamic memory allocation thus far.
+<ul>
+<li>Incurs overhead to performance.</li>
+<li>Incurs engineering overhead in design.</li>
+</ul></li>
+<li>Has a minor problem.
+<ul>
+<li>Isn’t Turing complete.</li>
+<li>Can’t compute by definition.</li>
+</ul></li>
+</ul>
+</section>
+<section id="requirements" class="level2">
+<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
+<ul>
+<li>Dynamic memory is required for variables that have
+<ul>
+<li>a dynamic lifetime or</li>
+<li>a variable size.</li>
+</ul></li>
+</ul>
+</section>
+<section id="reference-count" class="level2">
+<h2 class="anchored" data-anchor-id="reference-count">Reference count</h2>
+<ul>
+<li>An important dynamic lifetime is [<strong><code>Rc</code></strong>]
+<ul>
+<li>“Reference Counted”</li>
+<li>Can be addressed by <span class="math inline">\(n\)</span> rather than <span class="math inline">\(1\)</span> aliases (references).</li>
+<li><a href="https://doc.rust-lang.org/alloc/rc/index.html"><code>std::rc::Rc</code></a></li>
+</ul></li>
+<li>I haven’t really found a use for these but some student solutions have leveraged reference counts.</li>
+</ul>
+</section>
+<section id="vectors" class="level2">
+<h2 class="anchored" data-anchor-id="vectors">Vectors</h2>
+<ul>
+<li>Remember these? They’re a good time.</li>
+<li>Strings too, of course.</li>
+<li>And the other collection types, like <code>BTreeMap</code> which I used in <a href="https://github.com/vcd2df/rs/blob/main/src/lib.rs">code I actually wrote that I wanted to work</a> once.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb12" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb12-1"><a href="#cb12-1"></a><span class="kw">pub</span> <span class="kw">fn</span> vcd2df<span class="op">&lt;</span>P<span class="op">:</span> <span class="bu">AsRef</span><span class="op">&lt;</span><span class="dt">Path</span><span class="op">&gt;&gt;</span>(filename<span class="op">:</span> P) <span class="op">-&gt;</span> DataFrame <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2"></a>    <span class="kw">let</span> <span class="kw">mut</span> lines <span class="op">=</span> read_lines(filename)<span class="op">.</span>expect(<span class="st">"File DNE"</span>)<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3"></a>    <span class="kw">let</span> <span class="kw">mut</span> names <span class="op">=</span> <span class="pp">BTreeMap::</span><span class="op">&lt;</span><span class="dt">String</span><span class="op">,</span> <span class="dt">String</span><span class="op">&gt;</span><span class="pp">::</span>new()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="we-lack-these" class="level2">
+<h2 class="anchored" data-anchor-id="we-lack-these">We Lack These</h2>
+<ul>
+<li>Try it:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb13" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb13-1"><a href="#cb13-1"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start(boot_info<span class="op">:</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="pp">bootloader::</span>BootInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2"></a>    <span class="pp">osirs::</span>init()<span class="op">;</span></span>
+<span id="cb13-3"><a href="#cb13-3"></a></span>
+<span id="cb13-4"><a href="#cb13-4"></a>    <span class="kw">let</span> v <span class="op">=</span> <span class="pp">vec!</span>(<span class="st">"Hello"</span><span class="op">,</span> <span class="st">"World"</span>)<span class="op">;</span></span>
+<span id="cb13-5"><a href="#cb13-5"></a></span>
+<span id="cb13-6"><a href="#cb13-6"></a>    <span class="pp">println!</span>(<span class="st">"{} {}{}"</span><span class="op">,</span> v[<span class="dv">0</span>]<span class="op">,</span> v[<span class="dv">1</span>]<span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="it-fails" class="level2">
+<h2 class="anchored" data-anchor-id="it-fails">It Fails</h2>
+<ul>
+<li><code>Vec</code> is in <code>std</code> but not in <a href="https://doc.rust-lang.org/core/"><code>core</code></a>.
+<ul>
+<li>This is… pretty much why we’ve been using <a href="https://doc.rust-lang.org/core/"><code>core</code></a>…</li>
+<li>We would sure like <code>Vec</code> though!</li>
+</ul></li>
+</ul>
+<div class="sourceCode" id="cb14"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">error: </span>cannot find macro `vec` in this scope</span>
+<span id="cb14-2"><a href="#cb14-2"></a>  --&gt; src/main.rs:18:13</span>
+<span id="cb14-3"><a href="#cb14-3"></a>   |</span>
+<span id="cb14-4"><a href="#cb14-4"></a>18 |     let v = vec!("Hello", "World");</span>
+<span id="cb14-5"><a href="#cb14-5"></a>   |             ^^^</span>
+<span id="cb14-6"><a href="#cb14-6"></a></span>
+<span id="cb14-7"><a href="#cb14-7"></a>error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="allocator" class="level2">
+<h2 class="anchored" data-anchor-id="allocator">Allocator</h2>
+<ul>
+<li>To implement a heap allocator is to add a dependency on the built-in <a href="https://doc.rust-lang.org/alloc/"><code>alloc</code></a> crate.</li>
+<li>Like the <a href="https://doc.rust-lang.org/core/"><code>core</code></a> crate, it is a subset of the standard library that additionally contains the allocation and collection types.</li>
+<li>To add the dependency on <code>alloc</code>, we add the following:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb15" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb15-1"><a href="#cb15-1"></a><span class="kw">extern</span> <span class="kw">crate</span> alloc<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="i-lied" class="level2">
+<h2 class="anchored" data-anchor-id="i-lied">I Lied</h2>
+<ul>
+<li>Surely that will work.</li>
+</ul>
+<div class="sourceCode" id="cb16"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb16-1"><a href="#cb16-1"></a>error[E0463]: can't find crate for `alloc`</span>
+<span id="cb16-2"><a href="#cb16-2"></a> --&gt; src/lib.rs:7:1</span>
+<span id="cb16-3"><a href="#cb16-3"></a>  |</span>
+<span id="cb16-4"><a href="#cb16-4"></a>7 | extern crate alloc;</span>
+<span id="cb16-5"><a href="#cb16-5"></a>  | ^^^^^^^^^^^^^^^^^^^ can't find crate</span>
+<span id="cb16-6"><a href="#cb16-6"></a></span>
+<span id="cb16-7"><a href="#cb16-7"></a>For more information about this error, try `rustc --explain E0463`.</span>
+<span id="cb16-8"><a href="#cb16-8"></a>error: could not compile `osirs` (lib) due to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="custom-target" class="level2">
+<h2 class="anchored" data-anchor-id="custom-target">Custom Target</h2>
+<ul>
+<li>We once again return to <code>.cargo/config.toml</code>
+<ul>
+<li>Cargo: <span class="math inline">\(\exists\)</span> people that hold it in some regard.</li>
+</ul></li>
+</ul>
+</section>
+<section id="config" class="level2">
+<h2 class="anchored" data-anchor-id="config">config</h2>
+<ul>
+<li>It’s been a while, so refresher.</li>
+<li>Mine currently looks like this:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.cargo/config.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb17" data-filename=".cargo/config.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">[unstable]</span></span>
+<span id="cb17-2"><a href="#cb17-2"></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb17-3"><a href="#cb17-3"></a><span class="dt">build-std-features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"compiler-builtins-mem"</span><span class="op">]</span></span>
+<span id="cb17-4"><a href="#cb17-4"></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">]</span></span>
+<span id="cb17-5"><a href="#cb17-5"></a><span class="dt">panic-abort-tests</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb17-6"><a href="#cb17-6"></a></span>
+<span id="cb17-7"><a href="#cb17-7"></a><span class="kw">[build]</span></span>
+<span id="cb17-8"><a href="#cb17-8"></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-osirs.json"</span></span>
+<span id="cb17-9"><a href="#cb17-9"></a></span>
+<span id="cb17-10"><a href="#cb17-10"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "none")'</span><span class="kw">]</span></span>
+<span id="cb17-11"><a href="#cb17-11"></a><span class="dt">runner</span> <span class="op">=</span> <span class="st">"bootimage runner"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="modify-build-std" class="level2">
+<h2 class="anchored" data-anchor-id="modify-build-std">Modify <code>build-std</code></h2>
+<ul>
+<li>We add <code>alloc</code> where we added <code>core</code></li>
+<li>That’s it!</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>.cargo/config.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb18" data-filename=".cargo/config.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb18-1"><a href="#cb18-1"></a><span class="kw">[unstable]</span></span>
+<span id="cb18-2"><a href="#cb18-2"></a><span class="dt">json-target-spec</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb18-3"><a href="#cb18-3"></a><span class="dt">build-std-features</span> <span class="op">=</span> <span class="op">[</span><span class="st">"compiler-builtins-mem"</span><span class="op">]</span></span>
+<span id="cb18-4"><a href="#cb18-4"></a><span class="dt">build-std</span> <span class="op">=</span> <span class="op">[</span><span class="st">"core"</span><span class="op">,</span> <span class="st">"compiler_builtins"</span><span class="op">,</span> <span class="st">"alloc"</span><span class="op">]</span></span>
+<span id="cb18-5"><a href="#cb18-5"></a><span class="dt">panic-abort-tests</span> <span class="op">=</span> <span class="cn">true</span></span>
+<span id="cb18-6"><a href="#cb18-6"></a></span>
+<span id="cb18-7"><a href="#cb18-7"></a><span class="kw">[build]</span></span>
+<span id="cb18-8"><a href="#cb18-8"></a><span class="dt">target</span> <span class="op">=</span> <span class="st">"x86_64-osirs.json"</span></span>
+<span id="cb18-9"><a href="#cb18-9"></a></span>
+<span id="cb18-10"><a href="#cb18-10"></a><span class="kw">[target.'</span><span class="dt">cfg(target_os = "none")'</span><span class="kw">]</span></span>
+<span id="cb18-11"><a href="#cb18-11"></a><span class="dt">runner</span> <span class="op">=</span> <span class="st">"bootimage runner"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="i-lied-1" class="level2">
+<h2 class="anchored" data-anchor-id="i-lied-1">I Lied</h2>
+<ul>
+<li>Someone actually has to write the allocator.</li>
+</ul>
+<div class="sourceCode" id="cb19"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb19-1"><a href="#cb19-1"></a><span class="fu">error: </span>no global memory allocator found but one is required; link to std or add `#[global_allocator]` to a static item that implements the GlobalAlloc trait</span>
+<span id="cb19-2"><a href="#cb19-2"></a></span>
+<span id="cb19-3"><a href="#cb19-3"></a>error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="requirements-1" class="level2">
+<h2 class="anchored" data-anchor-id="requirements-1">Requirements</h2>
+<ul>
+<li>The <code>alloc</code> crate requires a heap allocator
+<ul>
+<li>Which implements <code>allocate</code> and <code>deallocate</code></li>
+</ul></li>
+<li>In Rust, described by <a href="#globalalloc"><code>GlobalAlloc</code></a> (referred to in error)</li>
+</ul>
+<blockquote class="blockquote">
+<p>To set the heap allocator for the crate, the <code>#[global_allocator]</code> attribute must be applied to a <code>static</code> variable that implements the <code>GlobalAlloc</code> trait.</p>
+</blockquote>
+</section>
+<section id="globalalloc" class="level2">
+<h2 class="anchored" data-anchor-id="globalalloc"><code>GlobalAlloc</code></h2>
+<ul>
+<li>Here it is:</li>
+</ul>
+<div class="sourceCode" id="cb20"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb20-1"><a href="#cb20-1"></a><span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="bu">GlobalAlloc</span> <span class="op">{</span></span>
+<span id="cb20-2"><a href="#cb20-2"></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> alloc(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> layout<span class="op">:</span> Layout) <span class="op">-&gt;</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">;</span></span>
+<span id="cb20-3"><a href="#cb20-3"></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> dealloc(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> ptr<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">,</span> layout<span class="op">:</span> Layout)<span class="op">;</span></span>
+<span id="cb20-4"><a href="#cb20-4"></a></span>
+<span id="cb20-5"><a href="#cb20-5"></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> alloc_zeroed(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> layout<span class="op">:</span> Layout) <span class="op">-&gt;</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb20-6"><a href="#cb20-6"></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> realloc(</span>
+<span id="cb20-7"><a href="#cb20-7"></a>        <span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span></span>
+<span id="cb20-8"><a href="#cb20-8"></a>        ptr<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">,</span></span>
+<span id="cb20-9"><a href="#cb20-9"></a>        layout<span class="op">:</span> Layout<span class="op">,</span></span>
+<span id="cb20-10"><a href="#cb20-10"></a>        new_size<span class="op">:</span> <span class="dt">usize</span></span>
+<span id="cb20-11"><a href="#cb20-11"></a>    ) <span class="op">-&gt;</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">{</span> <span class="op">...</span> <span class="op">}</span></span>
+<span id="cb20-12"><a href="#cb20-12"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="alloc" class="level2">
+<h2 class="anchored" data-anchor-id="alloc"><code>alloc</code></h2>
+<ul>
+<li>Takes a <a href="https://doc.rust-lang.org/alloc/alloc/struct.Layout.html"><code>Layout</code></a> instance as an argument
+<ul>
+<li>Describes the desired size and alignment for allocated memory.</li>
+</ul></li>
+<li>Returns a raw pointer to the first byte of the allocated memory block.
+<ul>
+<li>Instead of an explicit error value, the <code>alloc</code> method returns a null pointer to signal an allocation error.</li>
+<li>No comment from me on that.</li>
+<li>Okay, I have one comment.</li>
+</ul></li>
+</ul>
+</section>
+<section id="dealloc" class="level2">
+<h2 class="anchored" data-anchor-id="dealloc"><code>dealloc</code></h2>
+<ul>
+<li>The <code>dealloc</code> method is the counterpart to <code>alloc</code>.</li>
+<li>Frees a memory block after use.</li>
+<li>It receives two arguments:
+<ul>
+<li>A pointer returned by <code>alloc</code></li>
+<li>The <code>Layout</code> that was used for the allocation.</li>
+</ul></li>
+</ul>
+</section>
+<section id="bonus-methods" class="level2">
+<h2 class="anchored" data-anchor-id="bonus-methods">Bonus Methods</h2>
+<ul>
+<li><code>alloc_zeroed</code> is equivalent to calling <code>alloc</code> and then setting the allocated memory block to zero.</li>
+<li><code>realloc</code> method allows to grow or shrink an allocation.
+<ul>
+<li>The default implementation allocates a new memory block with the desired size and copies over all the content from the previous allocation.</li>
+</ul></li>
+</ul>
+</section>
+<section id="a-dummyallocator" class="level2">
+<h2 class="anchored" data-anchor-id="a-dummyallocator">A <code>DummyAllocator</code></h2>
+<ul>
+<li>Create a simple dummy allocator.</li>
+<li>Create a new <code>allocator</code> module:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/lib.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb21" data-filename="src/lib.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb21-1"><a href="#cb21-1"></a><span class="kw">pub</span> <span class="kw">mod</span> allocator<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="do-nothing" class="level2">
+<h2 class="anchored" data-anchor-id="do-nothing">Do nothing</h2>
+<ul>
+<li>We return a null point on alloc and panic on dealloc.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/allocator.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb22" data-filename="src/allocator.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb22-1"><a href="#cb22-1"></a><span class="kw">pub</span> <span class="kw">struct</span> Dummy<span class="op">;</span></span>
+<span id="cb22-2"><a href="#cb22-2"></a></span>
+<span id="cb22-3"><a href="#cb22-3"></a><span class="kw">unsafe</span> <span class="kw">impl</span> <span class="pp">alloc::alloc::</span><span class="bu">GlobalAlloc</span> <span class="cf">for</span> Dummy <span class="op">{</span></span>
+<span id="cb22-4"><a href="#cb22-4"></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> alloc(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> _layout<span class="op">:</span> <span class="pp">alloc::alloc::</span>Layout) <span class="op">-&gt;</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span> <span class="op">{</span></span>
+<span id="cb22-5"><a href="#cb22-5"></a>        <span class="pp">core::ptr::</span>null_mut()</span>
+<span id="cb22-6"><a href="#cb22-6"></a>    <span class="op">}</span></span>
+<span id="cb22-7"><a href="#cb22-7"></a></span>
+<span id="cb22-8"><a href="#cb22-8"></a>    <span class="kw">unsafe</span> <span class="kw">fn</span> dealloc(<span class="op">&amp;</span><span class="kw">self</span><span class="op">,</span> _ptr<span class="op">:</span> <span class="op">*</span><span class="kw">mut</span> <span class="dt">u8</span><span class="op">,</span> _layout<span class="op">:</span> <span class="pp">alloc::alloc::</span>Layout) <span class="op">{</span></span>
+<span id="cb22-9"><a href="#cb22-9"></a>        <span class="pp">panic!</span>(<span class="st">"dealloc should be never called"</span>)</span>
+<span id="cb22-10"><a href="#cb22-10"></a>    <span class="op">}</span></span>
+<span id="cb22-11"><a href="#cb22-11"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="some-notes" class="level2">
+<h2 class="anchored" data-anchor-id="some-notes">Some notes</h2>
+<ul>
+<li>We use a size zero struct.
+<ul>
+<li>I used this previously in my implementation of printing.</li>
+<li>I love it when Rust forces me to implement a function as a method!</li>
+</ul></li>
+<li>This isn’t quite enough.
+<ul>
+<li>We’ll get the same error.</li>
+</ul></li>
+<li>In theory, we should never hit that panic.</li>
+</ul>
+</section>
+<section id="the-attribute" class="level2">
+<h2 class="anchored" data-anchor-id="the-attribute">The Attribute</h2>
+<ul>
+<li>We have satisfying, if useless, allocator.</li>
+<li>Informer compiler via <code>#[global_allocator]</code></li>
+<li>It must be:
+<ul>
+<li>A <code>static</code> which</li>
+<li>Implements <code>GlobalAlloc</code></li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/allocator.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb23" data-filename="src/allocator.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb23-1"><a href="#cb23-1"></a><span class="at">#[</span>global_allocator<span class="at">]</span></span>
+<span id="cb23-2"><a href="#cb23-2"></a><span class="kw">static</span> ALLOCATOR<span class="op">:</span> Dummy <span class="op">=</span> Dummy<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="this-should-work" class="level2">
+<h2 class="anchored" data-anchor-id="this-should-work">This should work</h2>
+<ul>
+<li>I at least got a “Hello, world!” after:
+<ul>
+<li>Update <code>.config</code></li>
+<li>Add <code>alloc</code> and <code>allocator</code>, both, to <code>src/lib.rs</code></li>
+<li>Define a <code>struct</code> with some methods, and…</li>
+<li>Declare a <code>static</code>.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="kernel-heap" class="level1">
+<h1>Kernel Heap</h1>
+<section id="boxing-1" class="level2">
+<h2 class="anchored" data-anchor-id="boxing-1">Boxing</h2>
+<ul>
+<li>Let’s try boxing something up, like a delicious integer.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb24" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb24-1"><a href="#cb24-1"></a>error[E0433]<span class="op">:</span> failed to resolve<span class="op">:</span> <span class="kw">use</span> of undeclared <span class="kw">type</span> `Box`</span>
+<span id="cb24-2"><a href="#cb24-2"></a>  --&gt; src/main.rs:21:13</span>
+<span id="cb24-3"><a href="#cb24-3"></a>   |</span>
+<span id="cb24-4"><a href="#cb24-4"></a>21 |     let b <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">371</span>)<span class="op">;</span></span>
+<span id="cb24-5"><a href="#cb24-5"></a>   <span class="op">|</span>             <span class="op">^^^</span> <span class="kw">use</span> of undeclared <span class="kw">type</span> `Box`</span>
+<span id="cb24-6"><a href="#cb24-6"></a></span>
+<span id="cb24-7"><a href="#cb24-7"></a>For more information about this error, try `rustc --explain E0433`.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Rust in its infinite wisdom has blessed us with getting to navigate an obscure namespace.</li>
+</ul>
+</section>
+<section id="fixing" class="level2">
+<h2 class="anchored" data-anchor-id="fixing">Fixing</h2>
+<ul>
+<li>We must:
+<ul>
+<li>Include <code>extern crate alloc;</code> in <em>any</em> file where we use <code>Box</code>.</li>
+<li>Must refer to <code>Box</code> from within <code>alloc</code> using whatever means we prefer.</li>
+</ul></li>
+<li>You can tell it’s “working” when you get the following panic:</li>
+</ul>
+<div class="sourceCode" id="cb25"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb25-1"><a href="#cb25-1"></a>panicked at /home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/alloc.rs:566:9:</span>
+<span id="cb25-2"><a href="#cb25-2"></a>memory allocation of 4 bytes failed</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="so-far" class="level2">
+<h2 class="anchored" data-anchor-id="so-far">So far…</h2>
+<ul>
+<li><code>Box::new</code> calls alloc.</li>
+<li>Alloc returns.</li>
+<li><code>Box::new</code> null-checks the return value.
+<ul>
+<li>It does not unpack an <code>Option</code></li>
+</ul></li>
+<li><code>Box::new</code> panics if it sees null.</li>
+<li>We didn’t write any of this (except the <code>alloc</code> return), it’s all just language features.</li>
+</ul>
+</section>
+<section id="creating-a-kernel-heap" class="level2">
+<h2 class="anchored" data-anchor-id="creating-a-kernel-heap">Creating a Kernel Heap</h2>
+<ul>
+<li>We must create a proper allocator</li>
+<li>But first we need to create a heap memory region
+<ul>
+<li>Somewhere from which the allocator can allocate memory</li>
+</ul></li>
+<li>We need:
+<ul>
+<li>A virtual memory range for the heap region</li>
+<li>A map from this region to physical frames</li>
+</ul></li>
+</ul>
+</section>
+<section id="virtual-region" class="level2">
+<h2 class="anchored" data-anchor-id="virtual-region">Virtual Region</h2>
+<ul>
+<li>This part is easy.</li>
+<li>We can make our life moderately easier by picking recognizable values.</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/allocator.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb26" data-filename="src/allocator.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb26-1"><a href="#cb26-1"></a><span class="kw">pub</span> <span class="kw">const</span> HEAP_START<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">0x_C371_C371_0000</span><span class="op">;</span> <span class="co">// CS-371</span></span>
+<span id="cb26-2"><a href="#cb26-2"></a><span class="kw">pub</span> <span class="kw">const</span> HEAP_SIZE<span class="op">:</span> <span class="dt">usize</span> <span class="op">=</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">16</span><span class="op">;</span>  <span class="co">// Arbitrary</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="naively" class="level2">
+<h2 class="anchored" data-anchor-id="naively">Naively</h2>
+<ul>
+<li>If we simply map this region now, allocation will fail.
+<ul>
+<li>There is no corresponding physical frame.</li>
+</ul></li>
+<li>We will initialize our heap, using the <code>Mapper</code> we previously implemented.
+<ul>
+<li>I didn’t find a graceful way to do this since I’m coerced into certain return types and into using certain methods.</li>
+</ul></li>
+</ul>
+</section>
+<section id="implementation" class="level2">
+<h2 class="anchored" data-anchor-id="implementation">Implementation</h2>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/allocator.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb27" data-filename="src/allocator.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb27-1"><a href="#cb27-1"></a><span class="kw">pub</span> <span class="kw">fn</span> init_heap(</span>
+<span id="cb27-2"><a href="#cb27-2"></a>    mapper<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> <span class="pp">x86_64::structures::paging::</span>Mapper<span class="op">&lt;</span><span class="pp">x86_64::structures::paging::</span>Size4KiB<span class="op">&gt;,</span></span>
+<span id="cb27-3"><a href="#cb27-3"></a>    frame_allocator<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> <span class="pp">x86_64::structures::paging::</span>FrameAllocator<span class="op">&lt;</span></span>
+<span id="cb27-4"><a href="#cb27-4"></a>        <span class="pp">x86_64::structures::paging::</span>Size4KiB<span class="op">,</span></span>
+<span id="cb27-5"><a href="#cb27-5"></a>    <span class="op">&gt;,</span></span>
+<span id="cb27-6"><a href="#cb27-6"></a>) <span class="op">-&gt;</span> <span class="dt">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb27-7"><a href="#cb27-7"></a>    <span class="kw">let</span> page_range <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb27-8"><a href="#cb27-8"></a>        <span class="kw">let</span> heap_start <span class="op">=</span> <span class="pp">x86_64::VirtAddr::</span>new(HEAP_START <span class="kw">as</span> <span class="dt">u64</span>)<span class="op">;</span></span>
+<span id="cb27-9"><a href="#cb27-9"></a>        <span class="kw">let</span> heap_end <span class="op">=</span> heap_start <span class="op">+</span> HEAP_SIZE <span class="op">-</span> <span class="dv">1u64</span><span class="op">;</span></span>
+<span id="cb27-10"><a href="#cb27-10"></a>        <span class="kw">let</span> heap_start_page <span class="op">=</span> <span class="pp">x86_64::structures::paging::Page::</span>containing_address(heap_start)<span class="op">;</span></span>
+<span id="cb27-11"><a href="#cb27-11"></a>        <span class="kw">let</span> heap_end_page <span class="op">=</span> <span class="pp">x86_64::structures::paging::Page::</span>containing_address(heap_end)<span class="op">;</span></span>
+<span id="cb27-12"><a href="#cb27-12"></a>        <span class="pp">x86_64::structures::paging::Page::</span>range_inclusive(heap_start_page<span class="op">,</span> heap_end_page)</span>
+<span id="cb27-13"><a href="#cb27-13"></a>    <span class="op">};</span></span>
+<span id="cb27-14"><a href="#cb27-14"></a></span>
+<span id="cb27-15"><a href="#cb27-15"></a>    <span class="kw">let</span> flags <span class="op">=</span> <span class="pp">x86_64::structures::paging::PageTableFlags::</span>PRESENT</span>
+<span id="cb27-16"><a href="#cb27-16"></a>        <span class="op">|</span> <span class="pp">x86_64::structures::paging::PageTableFlags::</span>WRITABLE<span class="op">;</span></span>
+<span id="cb27-17"><a href="#cb27-17"></a>    <span class="cf">for</span> page <span class="kw">in</span> page_range <span class="op">{</span></span>
+<span id="cb27-18"><a href="#cb27-18"></a>        <span class="kw">let</span> frame <span class="op">=</span> <span class="cf">match</span> frame_allocator<span class="op">.</span>allocate_frame() <span class="op">{</span></span>
+<span id="cb27-19"><a href="#cb27-19"></a>            <span class="cn">Some</span>(f) <span class="op">=&gt;</span> f<span class="op">,</span></span>
+<span id="cb27-20"><a href="#cb27-20"></a>            _ <span class="op">=&gt;</span> <span class="cf">return</span> <span class="cn">None</span><span class="op">,</span></span>
+<span id="cb27-21"><a href="#cb27-21"></a>        <span class="op">};</span></span>
+<span id="cb27-22"><a href="#cb27-22"></a>        <span class="kw">unsafe</span> <span class="op">{</span></span>
+<span id="cb27-23"><a href="#cb27-23"></a>            <span class="cf">match</span> mapper<span class="op">.</span>map_to(page<span class="op">,</span> frame<span class="op">,</span> flags<span class="op">,</span> frame_allocator) <span class="op">{</span></span>
+<span id="cb27-24"><a href="#cb27-24"></a>                <span class="cn">Ok</span>(m) <span class="op">=&gt;</span> m<span class="op">.</span>flush()<span class="op">,</span></span>
+<span id="cb27-25"><a href="#cb27-25"></a>                _ <span class="op">=&gt;</span> <span class="cf">return</span> <span class="cn">None</span><span class="op">,</span></span>
+<span id="cb27-26"><a href="#cb27-26"></a>            <span class="op">};</span></span>
+<span id="cb27-27"><a href="#cb27-27"></a>        <span class="op">}</span></span>
+<span id="cb27-28"><a href="#cb27-28"></a>    <span class="op">}</span></span>
+<span id="cb27-29"><a href="#cb27-29"></a></span>
+<span id="cb27-30"><a href="#cb27-30"></a>    <span class="cf">return</span> <span class="cn">Some</span>(())<span class="op">;</span></span>
+<span id="cb27-31"><a href="#cb27-31"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="two-parts" class="level2">
+<h2 class="anchored" data-anchor-id="two-parts">Two Parts</h2>
+<ol type="1">
+<li>Pages: Create a page range using a little arithmetic technique I like to call substraction (also some addition in there!)</li>
+<li>Frames: Construct a map from pages to frames.</li>
+</ol>
+</section>
+<section id="pages" class="level2">
+<h2 class="anchored" data-anchor-id="pages">Pages</h2>
+<ul>
+<li>Convert the <code>HEAP_START</code> pointer to a <code>VirtAddr</code> type.</li>
+<li>Calculate the heap end address from it by adding the <code>HEAP_SIZE</code>.</li>
+<li>Subtract 1, obviously.</li>
+<li>Convert the addresses into <code>Page</code> types using the <code>containing_address</code> function.</li>
+<li>Create a page range from the start and end pages using the (provided) <code>Page::range_inclusive</code> function.</li>
+</ul>
+</section>
+<section id="frames" class="level2">
+<h2 class="anchored" data-anchor-id="frames">Frames</h2>
+<ul>
+<li>Prepare page flags for the pages in this region.</li>
+<li>For each page:
+<ul>
+<li>Allocate a frame via <code>FrameAllocator::allocate_frame</code>.</li>
+<li>Set flags.</li>
+<li>Map the page to the frame with the flags.
+<ul>
+<li>The <code>flush</code> updates the <strong>TLB</strong>.</li>
+</ul></li>
+</ul></li>
+<li>I used options instead of results to reduce text volumes.</li>
+</ul>
+</section>
+<section id="onward" class="level2">
+<h2 class="anchored" data-anchor-id="onward">Onward</h2>
+<ul>
+<li>Go ahead and <code>cargo r</code> to make sure your code doesn’t explode, then let’s head over to <code>src/main.rs</code> to run this thing.</li>
+<li>Basically, we are extending our initialization routine.
+<ul>
+<li>I am finally, for the first time in my life, considering appreciating how long computers take to turn on.</li>
+<li>After some consideration, I’ve determined actual OS engineers should not use crates and instead optimize this code.</li>
+</ul></li>
+</ul>
+</section>
+<section id="run-it" class="level2">
+<h2 class="anchored" data-anchor-id="run-it">Run it</h2>
+<ul>
+<li>At long last, initialize the kernel heap from <code>src/main.rs</code></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/main.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb28" data-filename="src/main.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb28-1"><a href="#cb28-1"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start(boot_info<span class="op">:</span> <span class="op">&amp;</span><span class="ot">'static</span> <span class="pp">bootloader::</span>BootInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb28-2"><a href="#cb28-2"></a>    <span class="pp">osirs::</span>init()<span class="op">;</span></span>
+<span id="cb28-3"><a href="#cb28-3"></a>    <span class="kw">let</span> offset <span class="op">=</span> <span class="pp">x86_64::VirtAddr::</span>new(boot_info<span class="op">.</span>physical_memory_offset)<span class="op">;</span></span>
+<span id="cb28-4"><a href="#cb28-4"></a>    <span class="kw">let</span> <span class="kw">mut</span> mapper <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">osirs::memory::</span>init(offset) <span class="op">};</span></span>
+<span id="cb28-5"><a href="#cb28-5"></a>    <span class="kw">let</span> <span class="kw">mut</span> frame_allocator <span class="op">=</span></span>
+<span id="cb28-6"><a href="#cb28-6"></a>        <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">osirs::memory::BootInfoFrameAllocator::</span>init(<span class="op">&amp;</span>boot_info<span class="op">.</span>memory_map) <span class="op">};</span></span>
+<span id="cb28-7"><a href="#cb28-7"></a>    <span class="pp">osirs::allocator::</span>init_heap(<span class="op">&amp;</span><span class="kw">mut</span> mapper<span class="op">,</span> <span class="op">&amp;</span><span class="kw">mut</span> frame_allocator)<span class="op">.</span>unwrap()<span class="op">;</span></span>
+<span id="cb28-8"><a href="#cb28-8"></a></span>
+<span id="cb28-9"><a href="#cb28-9"></a>    <span class="pp">println!</span>(<span class="st">"Hello world{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>Fin</h1>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./B2_mapping.html" class="pagination-link" aria-label="Mapping">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Mapping</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./C1_allocator.html" class="pagination-link" aria-label="Allocator">
+        <span class="nav-page-text">Allocator</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb29" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb29-1"><a href="#cb29-1"></a><span class="co">---</span></span>
+<span id="cb29-2"><a href="#cb29-2"></a><span class="an">title:</span><span class="co"> Heap</span></span>
+<span id="cb29-3"><a href="#cb29-3"></a><span class="co">---</span></span>
+<span id="cb29-4"><a href="#cb29-4"></a></span>
+<span id="cb29-5"><a href="#cb29-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb29-6"><a href="#cb29-6"></a></span>
+<span id="cb29-7"><a href="#cb29-7"></a><span class="ss">- </span>**Action Items**:</span>
+<span id="cb29-8"><a href="#cb29-8"></a><span class="ss">  - </span>Welcome back.</span>
+<span id="cb29-9"><a href="#cb29-9"></a><span class="ss">  - </span>Be finishing up on page faults and tables.</span>
+<span id="cb29-10"><a href="#cb29-10"></a></span>
+<span id="cb29-11"><a href="#cb29-11"></a><span class="fu">## Citations</span></span>
+<span id="cb29-12"><a href="#cb29-12"></a></span>
+<span id="cb29-13"><a href="#cb29-13"></a><span class="ss">- </span>You have previously seen how I teach the heap.</span>
+<span id="cb29-14"><a href="#cb29-14"></a><span class="ss">- </span>I don't differentiate the theory from the practice (I see no reason to do so).</span>
+<span id="cb29-15"><a href="#cb29-15"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">C</span><span class="co">](https://cd-public.github.io/courses/old/c89s25/qmd/heap_t.html)</span></span>
+<span id="cb29-16"><a href="#cb29-16"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">Rust</span><span class="co">](https://cd-c89.github.io/rs/C1_heap.html)</span></span>
+<span id="cb29-17"><a href="#cb29-17"></a><span class="ss">- </span>Today, as blog teaches it. <span class="co">[</span><span class="ot">Source</span><span class="co">](https://os.phil-opp.com/heap-allocation/)</span></span>
+<span id="cb29-18"><a href="#cb29-18"></a></span>
+<span id="cb29-19"><a href="#cb29-19"></a><span class="fu"># Intro</span></span>
+<span id="cb29-20"><a href="#cb29-20"></a></span>
+<span id="cb29-21"><a href="#cb29-21"></a><span class="fu">## Local and Static Variables</span></span>
+<span id="cb29-22"><a href="#cb29-22"></a></span>
+<span id="cb29-23"><a href="#cb29-23"></a><span class="ss">- </span>We currently use two types of variables in our kernel: </span>
+<span id="cb29-24"><a href="#cb29-24"></a><span class="ss">    - </span>- Local variables are stored on the <span class="co">[</span><span class="ot">call stack</span><span class="co">](https://en.wikipedia.org/wiki/Call_stack)</span> for the lifetime of the function.</span>
+<span id="cb29-25"><a href="#cb29-25"></a><span class="ss">    - </span><span class="in">`static`</span> variables are stored at a fixed memory location for the complete lifetime of the program.</span>
+<span id="cb29-26"><a href="#cb29-26"></a></span>
+<span id="cb29-27"><a href="#cb29-27"></a><span class="fu">## Local Variables</span></span>
+<span id="cb29-28"><a href="#cb29-28"></a></span>
+<span id="cb29-29"><a href="#cb29-29"></a><span class="ss">- </span>The call stack is a (hardware level) <span class="co">[</span><span class="ot">stack ADT</span><span class="co">]</span>(https://en.wikipedia.org/wiki/Stack_(abstract_data_type))</span>
+<span id="cb29-30"><a href="#cb29-30"></a><span class="ss">- </span>Supports <span class="in">`push`</span> and <span class="in">`pop`</span> operations. </span>
+<span id="cb29-31"><a href="#cb29-31"></a><span class="ss">- </span>Handshake between the hardware and the compiler.</span>
+<span id="cb29-32"><a href="#cb29-32"></a></span>
+<span id="cb29-33"><a href="#cb29-33"></a><span class="fu">## The Call Stack</span></span>
+<span id="cb29-34"><a href="#cb29-34"></a></span>
+<span id="cb29-35"><a href="#cb29-35"></a><span class="ss">- </span>On each function entry, these are pushed by the compiler:</span>
+<span id="cb29-36"><a href="#cb29-36"></a><span class="ss">    - </span>The parameters, </span>
+<span id="cb29-37"><a href="#cb29-37"></a><span class="ss">    - </span>The return address, and </span>
+<span id="cb29-38"><a href="#cb29-38"></a><span class="ss">    - </span>The local variables of the called function</span>
+<span id="cb29-39"><a href="#cb29-39"></a>    </span>
+<span id="cb29-40"><a href="#cb29-40"></a><span class="fu">## Visually </span></span>
+<span id="cb29-41"><a href="#cb29-41"></a></span>
+<span id="cb29-42"><a href="#cb29-42"></a>&lt;img src="https://os.phil-opp.com/heap-allocation/call-stack.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb29-43"><a href="#cb29-43"></a></span>
+<span id="cb29-44"><a href="#cb29-44"></a><span class="fu">## Description</span></span>
+<span id="cb29-45"><a href="#cb29-45"></a></span>
+<span id="cb29-46"><a href="#cb29-46"></a><span class="ss">- </span>Consider the call stack after the <span class="in">`outer`</span> function called the <span class="in">`inner`</span> function. </span>
+<span id="cb29-47"><a href="#cb29-47"></a><span class="ss">- </span>The local variables of <span class="in">`outer`</span> are first. </span>
+<span id="cb29-48"><a href="#cb29-48"></a><span class="ss">- </span>On the <span class="in">`inner`</span> call, the parameter <span class="in">`1`</span> and the return address were pushed. </span>
+<span id="cb29-49"><a href="#cb29-49"></a><span class="ss">- </span>Then <span class="in">`inner`</span> which pushed its local array.</span>
+<span id="cb29-50"><a href="#cb29-50"></a></span>
+<span id="cb29-51"><a href="#cb29-51"></a><span class="fu">## Visually </span></span>
+<span id="cb29-52"><a href="#cb29-52"></a></span>
+<span id="cb29-53"><a href="#cb29-53"></a>&lt;img src="https://os.phil-opp.com/heap-allocation/call-stack-return.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb29-54"><a href="#cb29-54"></a></span>
+<span id="cb29-55"><a href="#cb29-55"></a><span class="fu">## Description</span></span>
+<span id="cb29-56"><a href="#cb29-56"></a></span>
+<span id="cb29-57"><a href="#cb29-57"></a><span class="ss">- </span>After the <span class="in">`inner`</span> function returns:</span>
+<span id="cb29-58"><a href="#cb29-58"></a><span class="ss">    - </span>Its part of the call stack is popped again and</span>
+<span id="cb29-59"><a href="#cb29-59"></a><span class="ss">    - </span>Only the local variables of <span class="in">`outer`</span> remain.</span>
+<span id="cb29-60"><a href="#cb29-60"></a><span class="ss">- </span>Variables persist precisely as long as the function that creates them.</span>
+<span id="cb29-61"><a href="#cb29-61"></a></span>
+<span id="cb29-62"><a href="#cb29-62"></a><span class="fu">## Rust implementation</span></span>
+<span id="cb29-63"><a href="#cb29-63"></a></span>
+<span id="cb29-64"><a href="#cb29-64"></a><span class="ss">- </span>The Rust compiler enforces these lifetimes.</span>
+<span id="cb29-65"><a href="#cb29-65"></a><span class="ss">- </span>It throws an error when we use a value for too long.</span>
+<span id="cb29-66"><a href="#cb29-66"></a><span class="ss">- </span>For example, return a reference to a local variable:</span>
+<span id="cb29-67"><a href="#cb29-67"></a></span>
+<span id="cb29-68"><a href="#cb29-68"></a><span class="in">```{.rs}</span></span>
+<span id="cb29-69"><a href="#cb29-69"></a><span class="in">fn inner(i: usize) -&gt; &amp;'static u32 {</span></span>
+<span id="cb29-70"><a href="#cb29-70"></a><span class="in">    let z = [1, 2, 3];</span></span>
+<span id="cb29-71"><a href="#cb29-71"></a><span class="in">    &amp;z[i]</span></span>
+<span id="cb29-72"><a href="#cb29-72"></a><span class="in">}</span></span>
+<span id="cb29-73"><a href="#cb29-73"></a><span class="in">```</span></span>
+<span id="cb29-74"><a href="#cb29-74"></a></span>
+<span id="cb29-75"><a href="#cb29-75"></a><span class="fu">## Error</span></span>
+<span id="cb29-76"><a href="#cb29-76"></a></span>
+<span id="cb29-77"><a href="#cb29-77"></a><span class="at">&gt; returns a reference to data owned by the current function</span></span>
+<span id="cb29-78"><a href="#cb29-78"></a></span>
+<span id="cb29-79"><a href="#cb29-79"></a><span class="in">```{.email}</span></span>
+<span id="cb29-80"><a href="#cb29-80"></a><span class="in">error[E0515]: cannot return reference to local data `z[_]`</span></span>
+<span id="cb29-81"><a href="#cb29-81"></a><span class="in"> --&gt; src/main.rs:3:5</span></span>
+<span id="cb29-82"><a href="#cb29-82"></a><span class="in">  |</span></span>
+<span id="cb29-83"><a href="#cb29-83"></a><span class="in">3 |     &amp;z[i]</span></span>
+<span id="cb29-84"><a href="#cb29-84"></a><span class="in">  |     ^^^^^ returns a reference to data owned by the current function</span></span>
+<span id="cb29-85"><a href="#cb29-85"></a></span>
+<span id="cb29-86"><a href="#cb29-86"></a><span class="in">For more information about this error, try `rustc --explain E0515`.</span></span>
+<span id="cb29-87"><a href="#cb29-87"></a><span class="in">error: could not compile `thing` (bin "thing") due to 1 previous error</span></span>
+<span id="cb29-88"><a href="#cb29-88"></a><span class="in">```</span></span>
+<span id="cb29-89"><a href="#cb29-89"></a></span>
+<span id="cb29-90"><a href="#cb29-90"></a><span class="fu">## Use Case</span></span>
+<span id="cb29-91"><a href="#cb29-91"></a></span>
+<span id="cb29-92"><a href="#cb29-92"></a><span class="ss">- </span>Maybe we want to do this.</span>
+<span id="cb29-93"><a href="#cb29-93"></a><span class="ss">    - </span>The most common case is returning a pair (or some other collection) of values.</span>
+<span id="cb29-94"><a href="#cb29-94"></a><span class="ss">- </span>One option is the static variable.</span>
+<span id="cb29-95"><a href="#cb29-95"></a></span>
+<span id="cb29-96"><a href="#cb29-96"></a><span class="fu">## Static Variables</span></span>
+<span id="cb29-97"><a href="#cb29-97"></a></span>
+<span id="cb29-98"><a href="#cb29-98"></a><span class="ss">- </span>Static variables are stored at a fixed memory location separate from the stack. </span>
+<span id="cb29-99"><a href="#cb29-99"></a><span class="ss">- </span>This memory location is assigned at compile time by the linker (remember those?) and encoded in the executable. </span>
+<span id="cb29-100"><a href="#cb29-100"></a><span class="ss">- </span>Statics live for the complete runtime of the program, so they have the <span class="in">`'static`</span> lifetime and can always be referenced from local variables.</span>
+<span id="cb29-101"><a href="#cb29-101"></a></span>
+<span id="cb29-102"><a href="#cb29-102"></a><span class="fu">## Visually </span></span>
+<span id="cb29-103"><a href="#cb29-103"></a></span>
+<span id="cb29-104"><a href="#cb29-104"></a>&lt;img src="https://os.phil-opp.com/heap-allocation/call-stack-static.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb29-105"><a href="#cb29-105"></a></span>
+<span id="cb29-106"><a href="#cb29-106"></a><span class="fu">## Description</span></span>
+<span id="cb29-107"><a href="#cb29-107"></a></span>
+<span id="cb29-108"><a href="#cb29-108"></a><span class="ss">- </span>When the <span class="in">`inner`</span> function returns, its part of the call stack is "destroyed". </span>
+<span id="cb29-109"><a href="#cb29-109"></a><span class="ss">    - </span>I wonder how it gets destroyed.</span>
+<span id="cb29-110"><a href="#cb29-110"></a><span class="ss">    - </span>I wonder what destroyed means.</span>
+<span id="cb29-111"><a href="#cb29-111"></a><span class="ss">- </span>The static variables live in a separate memory range that is never destroyed.</span>
+<span id="cb29-112"><a href="#cb29-112"></a><span class="ss">- </span>So the <span class="in">`&amp;Z[1]`</span> reference is still valid after the return.</span>
+<span id="cb29-113"><a href="#cb29-113"></a></span>
+<span id="cb29-114"><a href="#cb29-114"></a><span class="fu">## Code</span></span>
+<span id="cb29-115"><a href="#cb29-115"></a></span>
+<span id="cb29-116"><a href="#cb29-116"></a><span class="ss">- </span>This resolves the earlier error.</span>
+<span id="cb29-117"><a href="#cb29-117"></a></span>
+<span id="cb29-118"><a href="#cb29-118"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-119"><a href="#cb29-119"></a><span class="in">static Z: [u32; 3] = [1, 2, 3];</span></span>
+<span id="cb29-120"><a href="#cb29-120"></a></span>
+<span id="cb29-121"><a href="#cb29-121"></a><span class="in">fn inner(i: usize) -&gt; &amp;'static u32 {</span></span>
+<span id="cb29-122"><a href="#cb29-122"></a><span class="in">    &amp;Z[i]</span></span>
+<span id="cb29-123"><a href="#cb29-123"></a><span class="in">}</span></span>
+<span id="cb29-124"><a href="#cb29-124"></a></span>
+<span id="cb29-125"><a href="#cb29-125"></a><span class="in">fn main() {</span></span>
+<span id="cb29-126"><a href="#cb29-126"></a><span class="in">    println!("Hello, world! z = {}", inner(1));</span></span>
+<span id="cb29-127"><a href="#cb29-127"></a><span class="in">}</span></span>
+<span id="cb29-128"><a href="#cb29-128"></a><span class="in">```</span></span>
+<span id="cb29-129"><a href="#cb29-129"></a></span>
+<span id="cb29-130"><a href="#cb29-130"></a><span class="fu">## Niceties</span></span>
+<span id="cb29-131"><a href="#cb29-131"></a></span>
+<span id="cb29-132"><a href="#cb29-132"></a><span class="ss">- </span>Static variables' location is known at compile time...</span>
+<span id="cb29-133"><a href="#cb29-133"></a><span class="ss">    - </span>So *no reference* is needed for accessing them.</span>
+<span id="cb29-134"><a href="#cb29-134"></a><span class="ss">    - </span>That is, <span class="in">`Z`</span> was not defined within <span class="in">`inner`</span>.</span>
+<span id="cb29-135"><a href="#cb29-135"></a></span>
+<span id="cb29-136"><a href="#cb29-136"></a><span class="fu">## Problems</span></span>
+<span id="cb29-137"><a href="#cb29-137"></a></span>
+<span id="cb29-138"><a href="#cb29-138"></a><span class="ss">- </span>They are read-only by default.</span>
+<span id="cb29-139"><a href="#cb29-139"></a><span class="ss">- </span>And if they aren't read-only, it is possible to trigger a <span class="co">[</span><span class="ot">data race</span><span class="co">](https://doc.rust-lang.org/nomicon/races.html)</span>.</span>
+<span id="cb29-140"><a href="#cb29-140"></a><span class="ss">- </span>The only way to avoid this is to encapsulate in a <span class="co">[</span><span class="ot">`Mutex`</span><span class="co">](https://docs.rs/spin/0.5.2/spin/struct.Mutex.html)</span>.</span>
+<span id="cb29-141"><a href="#cb29-141"></a><span class="ss">    - </span>This has been the correct way to deal with most of our <span class="in">`static mut`</span> cases.</span>
+<span id="cb29-142"><a href="#cb29-142"></a></span>
+<span id="cb29-143"><a href="#cb29-143"></a><span class="fu">## State of Play</span></span>
+<span id="cb29-144"><a href="#cb29-144"></a></span>
+<span id="cb29-145"><a href="#cb29-145"></a><span class="ss">- </span>Local and static variables enable *most* use cases. </span>
+<span id="cb29-146"><a href="#cb29-146"></a><span class="ss">- </span>However, they both have their limitations:</span>
+<span id="cb29-147"><a href="#cb29-147"></a><span class="ss">    - </span>Local variables cannot be returned.</span>
+<span id="cb29-148"><a href="#cb29-148"></a><span class="ss">    - </span>Static variables cost memory for the complete runtime of the program. </span>
+<span id="cb29-149"><a href="#cb29-149"></a><span class="ss">        - </span>They pose many safety problems.</span>
+<span id="cb29-150"><a href="#cb29-150"></a>        </span>
+<span id="cb29-151"><a href="#cb29-151"></a><span class="fu">## Fixed Size</span></span>
+<span id="cb29-152"><a href="#cb29-152"></a></span>
+<span id="cb29-153"><a href="#cb29-153"></a><span class="ss">- </span>I have historically motivated allocation with variable size types.</span>
+<span id="cb29-154"><a href="#cb29-154"></a><span class="ss">    - </span>Locals and statics are fixed size.</span>
+<span id="cb29-155"><a href="#cb29-155"></a><span class="ss">- </span>Examples include arbitrary precision integers, Pythonic lists.</span>
+<span id="cb29-156"><a href="#cb29-156"></a></span>
+<span id="cb29-157"><a href="#cb29-157"></a><span class="fu">## Dynamic Memory</span></span>
+<span id="cb29-158"><a href="#cb29-158"></a></span>
+<span id="cb29-159"><a href="#cb29-159"></a><span class="ss">- </span>Compilers often support a memory region for storing variables called the **heap**. </span>
+<span id="cb29-160"><a href="#cb29-160"></a><span class="ss">- </span>The heap supports _dynamic memory allocation_ at runtime through two functions called <span class="in">`allocate`</span> and <span class="in">`deallocate`</span>. </span>
+<span id="cb29-161"><a href="#cb29-161"></a><span class="ss">    - </span><span class="in">`allocate`</span> returns a free chunk of memory of the specified size that can be used to store a variable. </span>
+<span id="cb29-162"><a href="#cb29-162"></a><span class="ss">    - </span>This variable then lives until it is freed by being passed to the <span class="in">`deallocate`</span> function.</span>
+<span id="cb29-163"><a href="#cb29-163"></a></span>
+<span id="cb29-164"><a href="#cb29-164"></a><span class="fu">## Visually </span></span>
+<span id="cb29-165"><a href="#cb29-165"></a></span>
+<span id="cb29-166"><a href="#cb29-166"></a>&lt;img src="https://os.phil-opp.com/heap-allocation/call-stack-heap.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb29-167"><a href="#cb29-167"></a></span>
+<span id="cb29-168"><a href="#cb29-168"></a><span class="fu">## Description</span></span>
+<span id="cb29-169"><a href="#cb29-169"></a></span>
+<span id="cb29-170"><a href="#cb29-170"></a><span class="ss">- </span><span class="in">`inner`</span> stores <span class="in">`z`</span> to heap.</span>
+<span id="cb29-171"><a href="#cb29-171"></a><span class="ss">    - </span>Allocates to get a <span class="co">[</span><span class="ot">raw pointer</span><span class="co">](https://doc.rust-lang.org/book/ch20-01-unsafe-rust.html#dereferencing-a-raw-pointer)</span></span>
+<span id="cb29-172"><a href="#cb29-172"></a><span class="ss">    - </span>Writes using <span class="co">[</span><span class="ot">`ptr::write`</span><span class="co">](https://doc.rust-lang.org/core/ptr/fn.write.html)</span></span>
+<span id="cb29-173"><a href="#cb29-173"></a><span class="ss">    - </span>Returns via <span class="co">[</span><span class="ot">`offset`</span><span class="co">](https://doc.rust-lang.org/std/primitive.pointer.html#method.offset)</span></span>
+<span id="cb29-174"><a href="#cb29-174"></a><span class="ss">- </span>The calling function then frees the memory via <span class="in">`deallocated`</span>.</span>
+<span id="cb29-175"><a href="#cb29-175"></a></span>
+<span id="cb29-176"><a href="#cb29-176"></a></span>
+<span id="cb29-177"><a href="#cb29-177"></a><span class="fu">## Visually </span></span>
+<span id="cb29-178"><a href="#cb29-178"></a></span>
+<span id="cb29-179"><a href="#cb29-179"></a>&lt;img src="https://os.phil-opp.com/heap-allocation/call-stack-heap-freed.svg" style="filter:invert(.9)"&gt;</span>
+<span id="cb29-180"><a href="#cb29-180"></a></span>
+<span id="cb29-181"><a href="#cb29-181"></a></span>
+<span id="cb29-182"><a href="#cb29-182"></a><span class="fu">## Problem</span></span>
+<span id="cb29-183"><a href="#cb29-183"></a></span>
+<span id="cb29-184"><a href="#cb29-184"></a><span class="ss">- </span><span class="in">`z[1]`</span> slot is free again and can be reused</span>
+<span id="cb29-185"><a href="#cb29-185"></a><span class="ss">- </span>But <span class="in">`z[0]`</span> and <span class="in">`z[2]`</span> are never freed!</span>
+<span id="cb29-186"><a href="#cb29-186"></a><span class="ss">- </span>This is a memory leak and is bad.</span>
+<span id="cb29-187"><a href="#cb29-187"></a></span>
+<span id="cb29-188"><a href="#cb29-188"></a><span class="fu">## Other Problems</span></span>
+<span id="cb29-189"><a href="#cb29-189"></a></span>
+<span id="cb29-190"><a href="#cb29-190"></a><span class="ss">- </span>Continuing to use a variable after calling <span class="in">`deallocate`</span> is a **use-after-free** vulnerability.</span>
+<span id="cb29-191"><a href="#cb29-191"></a><span class="ss">- </span>Freeing a variable twice, is a **double-free** vulnerability. </span>
+<span id="cb29-192"><a href="#cb29-192"></a><span class="ss">    - </span>It might free a different allocation.</span>
+<span id="cb29-193"><a href="#cb29-193"></a><span class="ss">    - </span>Can also (indirectly) lead to a use-after-free.</span>
+<span id="cb29-194"><a href="#cb29-194"></a></span>
+<span id="cb29-195"><a href="#cb29-195"></a><span class="fu">## These Happen</span></span>
+<span id="cb29-196"><a href="#cb29-196"></a></span>
+<span id="cb29-197"><a href="#cb29-197"></a><span class="ss">- </span>Writing memory safe code is hard.</span>
+<span id="cb29-198"><a href="#cb29-198"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Here's</span><span class="co">](https://securityboulevard.com/2019/02/linux-use-after-free-vulnerability-found-in-linux-2-6-through-4-20-11/)</span> a 2019 Linux use-after-free.</span>
+<span id="cb29-199"><a href="#cb29-199"></a><span class="ss">- </span>Absolute cowards, and also other people, use Java and Python to solve this problem.</span>
+<span id="cb29-200"><a href="#cb29-200"></a></span>
+<span id="cb29-201"><a href="#cb29-201"></a><span class="fu">## Enter Ownership</span></span>
+<span id="cb29-202"><a href="#cb29-202"></a></span>
+<span id="cb29-203"><a href="#cb29-203"></a><span class="ss">- </span>Rust allocation and deallocation is implicit using:</span>
+<span id="cb29-204"><a href="#cb29-204"></a><span class="ss">    - </span>Ownership, and</span>
+<span id="cb29-205"><a href="#cb29-205"></a><span class="ss">    - </span>Lifetimes.</span>
+<span id="cb29-206"><a href="#cb29-206"></a><span class="ss">- </span>To manage memory manually, we used <span class="co">[</span><span class="ot">**`Box`**</span><span class="co">](https://doc.rust-lang.org/std/boxed/index.html)</span></span>
+<span id="cb29-207"><a href="#cb29-207"></a></span>
+<span id="cb29-208"><a href="#cb29-208"></a><span class="fu">## Boxing</span></span>
+<span id="cb29-209"><a href="#cb29-209"></a></span>
+<span id="cb29-210"><a href="#cb29-210"></a><span class="ss">- </span>We recall <span class="co">[</span><span class="ot">`Box::new`</span><span class="co">](https://doc.rust-lang.org/alloc/boxed/struct.Box.html#method.new)</span>, which is the Rust allocator.</span>
+<span id="cb29-211"><a href="#cb29-211"></a><span class="ss">- </span>We introduce *dropping* to free, implemented in two parts.</span>
+<span id="cb29-212"><a href="#cb29-212"></a><span class="ss">    - </span>By the <span class="co">[</span><span class="ot">`Drop` trait</span><span class="co">](https://doc.rust-lang.org/book/ch15-03-drop.html)</span></span>
+<span id="cb29-213"><a href="#cb29-213"></a><span class="ss">    - </span>By the <span class="co">[</span><span class="ot">`drop&lt;T&gt;(_x: T)` function</span><span class="co">](https://doc.rust-lang.org/std/mem/fn.drop.html)</span></span>
+<span id="cb29-214"><a href="#cb29-214"></a><span class="ss">- </span>Drops also occur on out-of-scope.</span>
+<span id="cb29-215"><a href="#cb29-215"></a></span>
+<span id="cb29-216"><a href="#cb29-216"></a><span class="fu">## Minimal Examples</span></span>
+<span id="cb29-217"><a href="#cb29-217"></a></span>
+<span id="cb29-218"><a href="#cb29-218"></a><span class="ss">- </span>This works</span>
+<span id="cb29-219"><a href="#cb29-219"></a></span>
+<span id="cb29-220"><a href="#cb29-220"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-221"><a href="#cb29-221"></a><span class="in">fn main() {</span></span>
+<span id="cb29-222"><a href="#cb29-222"></a><span class="in">    let b = Box::new("Hello, world!");</span></span>
+<span id="cb29-223"><a href="#cb29-223"></a><span class="in">    println!("{}", *b);</span></span>
+<span id="cb29-224"><a href="#cb29-224"></a><span class="in">    drop(b);</span></span>
+<span id="cb29-225"><a href="#cb29-225"></a><span class="in">}</span></span>
+<span id="cb29-226"><a href="#cb29-226"></a><span class="in">```</span></span>
+<span id="cb29-227"><a href="#cb29-227"></a></span>
+<span id="cb29-228"><a href="#cb29-228"></a><span class="fu">## Minimal Examples</span></span>
+<span id="cb29-229"><a href="#cb29-229"></a></span>
+<span id="cb29-230"><a href="#cb29-230"></a><span class="ss">- </span>This fails.</span>
+<span id="cb29-231"><a href="#cb29-231"></a></span>
+<span id="cb29-232"><a href="#cb29-232"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-233"><a href="#cb29-233"></a><span class="in">fn main() {</span></span>
+<span id="cb29-234"><a href="#cb29-234"></a><span class="in">    let b = Box::new("Hello, world!");</span></span>
+<span id="cb29-235"><a href="#cb29-235"></a><span class="in">    drop(b);</span></span>
+<span id="cb29-236"><a href="#cb29-236"></a><span class="in">    println!("{}", *b);</span></span>
+<span id="cb29-237"><a href="#cb29-237"></a><span class="in">}</span></span>
+<span id="cb29-238"><a href="#cb29-238"></a><span class="in">```</span></span>
+<span id="cb29-239"><a href="#cb29-239"></a></span>
+<span id="cb29-240"><a href="#cb29-240"></a><span class="fu">## Error</span></span>
+<span id="cb29-241"><a href="#cb29-241"></a></span>
+<span id="cb29-242"><a href="#cb29-242"></a><span class="in">```{.email}</span></span>
+<span id="cb29-243"><a href="#cb29-243"></a><span class="in">error[E0382]: borrow of moved value: `b`</span></span>
+<span id="cb29-244"><a href="#cb29-244"></a><span class="in"> --&gt; src/main.rs:4:20</span></span>
+<span id="cb29-245"><a href="#cb29-245"></a><span class="in">  |</span></span>
+<span id="cb29-246"><a href="#cb29-246"></a><span class="in">2 |     let b = Box::new("Hello, world!");</span></span>
+<span id="cb29-247"><a href="#cb29-247"></a><span class="in">  |         - move occurs because `b` has type `Box&lt;&amp;str&gt;`, which does not implement the `Copy` trait</span></span>
+<span id="cb29-248"><a href="#cb29-248"></a><span class="in">3 |     drop(b);</span></span>
+<span id="cb29-249"><a href="#cb29-249"></a><span class="in">  |          - value moved here</span></span>
+<span id="cb29-250"><a href="#cb29-250"></a><span class="in">4 |     println!("{}", *b);</span></span>
+<span id="cb29-251"><a href="#cb29-251"></a><span class="in">  |                    ^^ value borrowed here after move</span></span>
+<span id="cb29-252"><a href="#cb29-252"></a><span class="in">```</span></span>
+<span id="cb29-253"><a href="#cb29-253"></a></span>
+<span id="cb29-254"><a href="#cb29-254"></a><span class="fu">## Implicit Drop</span></span>
+<span id="cb29-255"><a href="#cb29-255"></a></span>
+<span id="cb29-256"><a href="#cb29-256"></a><span class="ss">- </span>This works</span>
+<span id="cb29-257"><a href="#cb29-257"></a></span>
+<span id="cb29-258"><a href="#cb29-258"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-259"><a href="#cb29-259"></a><span class="in">fn main() {</span></span>
+<span id="cb29-260"><a href="#cb29-260"></a><span class="in">    {</span></span>
+<span id="cb29-261"><a href="#cb29-261"></a><span class="in">        let b = Box::new("Hello, world!");</span></span>
+<span id="cb29-262"><a href="#cb29-262"></a><span class="in">        println!("{}", *b);</span></span>
+<span id="cb29-263"><a href="#cb29-263"></a><span class="in">    }</span></span>
+<span id="cb29-264"><a href="#cb29-264"></a><span class="in">}</span></span>
+<span id="cb29-265"><a href="#cb29-265"></a><span class="in">```</span></span>
+<span id="cb29-266"><a href="#cb29-266"></a></span>
+<span id="cb29-267"><a href="#cb29-267"></a></span>
+<span id="cb29-268"><a href="#cb29-268"></a><span class="fu">## Implicit Drop</span></span>
+<span id="cb29-269"><a href="#cb29-269"></a></span>
+<span id="cb29-270"><a href="#cb29-270"></a><span class="ss">- </span>This fails</span>
+<span id="cb29-271"><a href="#cb29-271"></a></span>
+<span id="cb29-272"><a href="#cb29-272"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-273"><a href="#cb29-273"></a><span class="in">fn main() {</span></span>
+<span id="cb29-274"><a href="#cb29-274"></a><span class="in">    {</span></span>
+<span id="cb29-275"><a href="#cb29-275"></a><span class="in">        let b = Box::new("Hello, world!");</span></span>
+<span id="cb29-276"><a href="#cb29-276"></a><span class="in">    }</span></span>
+<span id="cb29-277"><a href="#cb29-277"></a><span class="in">    println!("{}", *b);</span></span>
+<span id="cb29-278"><a href="#cb29-278"></a><span class="in">}</span></span>
+<span id="cb29-279"><a href="#cb29-279"></a><span class="in">```</span></span>
+<span id="cb29-280"><a href="#cb29-280"></a></span>
+<span id="cb29-281"><a href="#cb29-281"></a></span>
+<span id="cb29-282"><a href="#cb29-282"></a><span class="fu">## Error</span></span>
+<span id="cb29-283"><a href="#cb29-283"></a></span>
+<span id="cb29-284"><a href="#cb29-284"></a><span class="in">```{.email}</span></span>
+<span id="cb29-285"><a href="#cb29-285"></a><span class="in">error[E0425]: cannot find value `b` in this scope</span></span>
+<span id="cb29-286"><a href="#cb29-286"></a><span class="in"> --&gt; src/main.rs:5:21</span></span>
+<span id="cb29-287"><a href="#cb29-287"></a><span class="in">  |</span></span>
+<span id="cb29-288"><a href="#cb29-288"></a><span class="in">5 |     println!("{}", *b);</span></span>
+<span id="cb29-289"><a href="#cb29-289"></a><span class="in">  |                     ^</span></span>
+<span id="cb29-290"><a href="#cb29-290"></a><span class="in">  |</span></span>
+<span id="cb29-291"><a href="#cb29-291"></a><span class="in">help: the binding `b` is available in a different scope in the same function</span></span>
+<span id="cb29-292"><a href="#cb29-292"></a><span class="in"> --&gt; src/main.rs:3:13</span></span>
+<span id="cb29-293"><a href="#cb29-293"></a><span class="in">  |</span></span>
+<span id="cb29-294"><a href="#cb29-294"></a><span class="in">3 |         let b = Box::new("Hello, world!");</span></span>
+<span id="cb29-295"><a href="#cb29-295"></a><span class="in">  |             ^</span></span>
+<span id="cb29-296"><a href="#cb29-296"></a><span class="in">```</span></span>
+<span id="cb29-297"><a href="#cb29-297"></a></span>
+<span id="cb29-298"><a href="#cb29-298"></a><span class="fu">## Shout out C++</span></span>
+<span id="cb29-299"><a href="#cb29-299"></a></span>
+<span id="cb29-300"><a href="#cb29-300"></a><span class="at">&gt; This pattern has the strange name </span><span class="co">[</span><span class="ot">_resource acquisition is initialization_</span><span class="co">](https://en.wikipedia.org/wiki/Resource_acquisition_is_initialization)</span><span class="at"> (or _RAII_ for short). It originated in C++, where it is used to implement a similar abstraction type called </span><span class="co">[</span><span class="ot">`std::unique_ptr`</span><span class="co">](https://en.cppreference.com/w/cpp/memory/unique_ptr)</span><span class="at">.</span></span>
+<span id="cb29-301"><a href="#cb29-301"></a></span>
+<span id="cb29-302"><a href="#cb29-302"></a><span class="fu">## Breaking the Rules</span></span>
+<span id="cb29-303"><a href="#cb29-303"></a></span>
+<span id="cb29-304"><a href="#cb29-304"></a><span class="ss">- </span>Persist a reference after a deallocation.</span>
+<span id="cb29-305"><a href="#cb29-305"></a></span>
+<span id="cb29-306"><a href="#cb29-306"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-307"><a href="#cb29-307"></a><span class="in">fn main() {</span></span>
+<span id="cb29-308"><a href="#cb29-308"></a><span class="in">    let x = {</span></span>
+<span id="cb29-309"><a href="#cb29-309"></a><span class="in">        let y = Box::new(["Hello", "World"]);</span></span>
+<span id="cb29-310"><a href="#cb29-310"></a><span class="in">        &amp;y[0] // No semi-colon.</span></span>
+<span id="cb29-311"><a href="#cb29-311"></a><span class="in">    }; // Semi-colon.</span></span>
+<span id="cb29-312"><a href="#cb29-312"></a><span class="in">    println!("{}", x);</span></span>
+<span id="cb29-313"><a href="#cb29-313"></a><span class="in">}</span></span>
+<span id="cb29-314"><a href="#cb29-314"></a><span class="in">```</span></span>
+<span id="cb29-315"><a href="#cb29-315"></a></span>
+<span id="cb29-316"><a href="#cb29-316"></a><span class="fu">## `rustc` complains</span></span>
+<span id="cb29-317"><a href="#cb29-317"></a></span>
+<span id="cb29-318"><a href="#cb29-318"></a><span class="in">```{.email}</span></span>
+<span id="cb29-319"><a href="#cb29-319"></a><span class="in">error[E0597]: `y[_]` does not live long enough</span></span>
+<span id="cb29-320"><a href="#cb29-320"></a><span class="in"> --&gt; src/main.rs:4:9</span></span>
+<span id="cb29-321"><a href="#cb29-321"></a><span class="in">  |</span></span>
+<span id="cb29-322"><a href="#cb29-322"></a><span class="in">2 |     let x = {</span></span>
+<span id="cb29-323"><a href="#cb29-323"></a><span class="in">  |         - borrow later stored here</span></span>
+<span id="cb29-324"><a href="#cb29-324"></a><span class="in">3 |         let y = Box::new(["Hello", "World"]);</span></span>
+<span id="cb29-325"><a href="#cb29-325"></a><span class="in">  |             - binding `y` declared here</span></span>
+<span id="cb29-326"><a href="#cb29-326"></a><span class="in">4 |         &amp;y[0] // No semi-colon.</span></span>
+<span id="cb29-327"><a href="#cb29-327"></a><span class="in">  |         ^^^^^ borrowed value does not live long enough</span></span>
+<span id="cb29-328"><a href="#cb29-328"></a><span class="in">5 |     }; // Semi-colon.</span></span>
+<span id="cb29-329"><a href="#cb29-329"></a><span class="in">  |     - `y[_]` dropped here while still borrowed</span></span>
+<span id="cb29-330"><a href="#cb29-330"></a><span class="in">```</span></span>
+<span id="cb29-331"><a href="#cb29-331"></a></span>
+<span id="cb29-332"><a href="#cb29-332"></a><span class="fu">## Lifetimes</span></span>
+<span id="cb29-333"><a href="#cb29-333"></a></span>
+<span id="cb29-334"><a href="#cb29-334"></a><span class="ss">- </span>Rust attached a <span class="co">[</span><span class="ot">"lifetime"</span><span class="co">](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html)</span> to each reference.</span>
+<span id="cb29-335"><a href="#cb29-335"></a><span class="ss">- </span>Lifetimes can be specified as some set of scopes.</span>
+<span id="cb29-336"><a href="#cb29-336"></a><span class="ss">    - </span>Can be assigned variables and used within the type checker. <span class="co">[</span><span class="ot">Read more</span><span class="co">](https://doc.rust-lang.org/rust-by-example/scope/lifetime.html)</span></span>
+<span id="cb29-337"><a href="#cb29-337"></a><span class="ss">- </span>Lifetimes prevent use-after-free and go further to provide memory safety.</span>
+<span id="cb29-338"><a href="#cb29-338"></a><span class="ss">    - </span>All memory freed eventually, no unallocated memory accessed.</span>
+<span id="cb29-339"><a href="#cb29-339"></a></span>
+<span id="cb29-340"><a href="#cb29-340"></a><span class="fu"># Interface</span></span>
+<span id="cb29-341"><a href="#cb29-341"></a></span>
+<span id="cb29-342"><a href="#cb29-342"></a><span class="fu">## Caveats</span></span>
+<span id="cb29-343"><a href="#cb29-343"></a></span>
+<span id="cb29-344"><a href="#cb29-344"></a><span class="ss">- </span>We avoid dynamic memory allocation thus far.</span>
+<span id="cb29-345"><a href="#cb29-345"></a><span class="ss">    - </span>Incurs overhead to performance.</span>
+<span id="cb29-346"><a href="#cb29-346"></a><span class="ss">    - </span>Incurs engineering overhead in design.</span>
+<span id="cb29-347"><a href="#cb29-347"></a><span class="ss">- </span>Has a minor problem.</span>
+<span id="cb29-348"><a href="#cb29-348"></a><span class="ss">    - </span>Isn't Turing complete.</span>
+<span id="cb29-349"><a href="#cb29-349"></a><span class="ss">    - </span>Can't compute by definition.</span>
+<span id="cb29-350"><a href="#cb29-350"></a>    </span>
+<span id="cb29-351"><a href="#cb29-351"></a><span class="fu">## Requirements</span></span>
+<span id="cb29-352"><a href="#cb29-352"></a></span>
+<span id="cb29-353"><a href="#cb29-353"></a><span class="ss">- </span>Dynamic memory is required for variables that have </span>
+<span id="cb29-354"><a href="#cb29-354"></a><span class="ss">    - </span>a dynamic lifetime or</span>
+<span id="cb29-355"><a href="#cb29-355"></a><span class="ss">    - </span>a variable size.</span>
+<span id="cb29-356"><a href="#cb29-356"></a></span>
+<span id="cb29-357"><a href="#cb29-357"></a><span class="fu">## Reference count</span></span>
+<span id="cb29-358"><a href="#cb29-358"></a></span>
+<span id="cb29-359"><a href="#cb29-359"></a><span class="ss">- </span>An important dynamic lifetime is <span class="co">[</span><span class="ot">**`Rc`**</span><span class="co">]</span></span>
+<span id="cb29-360"><a href="#cb29-360"></a><span class="ss">    - </span>"Reference Counted"</span>
+<span id="cb29-361"><a href="#cb29-361"></a><span class="ss">    - </span>Can be addressed by $n$ rather than $1$ aliases (references).</span>
+<span id="cb29-362"><a href="#cb29-362"></a><span class="ss">    - </span><span class="co">[</span><span class="ot">`std::rc::Rc`</span><span class="co">](https://doc.rust-lang.org/alloc/rc/index.html)</span></span>
+<span id="cb29-363"><a href="#cb29-363"></a><span class="ss">- </span>I haven't really found a use for these but some student solutions have leveraged reference counts.</span>
+<span id="cb29-364"><a href="#cb29-364"></a></span>
+<span id="cb29-365"><a href="#cb29-365"></a><span class="fu">## Vectors</span></span>
+<span id="cb29-366"><a href="#cb29-366"></a></span>
+<span id="cb29-367"><a href="#cb29-367"></a><span class="ss">- </span>Remember these? They're a good time.</span>
+<span id="cb29-368"><a href="#cb29-368"></a><span class="ss">- </span>Strings too, of course.</span>
+<span id="cb29-369"><a href="#cb29-369"></a><span class="ss">- </span>And the other collection types, like <span class="in">`BTreeMap`</span> which I used in <span class="co">[</span><span class="ot">code I actually wrote that I wanted to work</span><span class="co">](https://github.com/vcd2df/rs/blob/main/src/lib.rs)</span> once.</span>
+<span id="cb29-370"><a href="#cb29-370"></a></span>
+<span id="cb29-371"><a href="#cb29-371"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb29-372"><a href="#cb29-372"></a><span class="in">pub fn vcd2df&lt;P: AsRef&lt;Path&gt;&gt;(filename: P) -&gt; DataFrame {</span></span>
+<span id="cb29-373"><a href="#cb29-373"></a><span class="in">    let mut lines = read_lines(filename).expect("File DNE");</span></span>
+<span id="cb29-374"><a href="#cb29-374"></a><span class="in">    let mut names = BTreeMap::&lt;String, String&gt;::new();</span></span>
+<span id="cb29-375"><a href="#cb29-375"></a><span class="in">```</span></span>
+<span id="cb29-376"><a href="#cb29-376"></a></span>
+<span id="cb29-377"><a href="#cb29-377"></a><span class="fu">## We Lack These</span></span>
+<span id="cb29-378"><a href="#cb29-378"></a></span>
+<span id="cb29-379"><a href="#cb29-379"></a><span class="ss">- </span>Try it:</span>
+<span id="cb29-380"><a href="#cb29-380"></a></span>
+<span id="cb29-381"><a href="#cb29-381"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-382"><a href="#cb29-382"></a><span class="in">pub extern "C" fn _start(boot_info: &amp;'static bootloader::BootInfo) -&gt; ! {</span></span>
+<span id="cb29-383"><a href="#cb29-383"></a><span class="in">    osirs::init();</span></span>
+<span id="cb29-384"><a href="#cb29-384"></a></span>
+<span id="cb29-385"><a href="#cb29-385"></a><span class="in">    let v = vec!("Hello", "World");</span></span>
+<span id="cb29-386"><a href="#cb29-386"></a></span>
+<span id="cb29-387"><a href="#cb29-387"></a><span class="in">    println!("{} {}{}", v[0], v[1], "!");</span></span>
+<span id="cb29-388"><a href="#cb29-388"></a><span class="in">```</span></span>
+<span id="cb29-389"><a href="#cb29-389"></a></span>
+<span id="cb29-390"><a href="#cb29-390"></a><span class="fu">## It Fails</span></span>
+<span id="cb29-391"><a href="#cb29-391"></a></span>
+<span id="cb29-392"><a href="#cb29-392"></a><span class="ss">- </span><span class="in">`Vec`</span> is in <span class="in">`std`</span> but not in <span class="co">[</span><span class="ot">`core`</span><span class="co">](https://doc.rust-lang.org/core/)</span>.</span>
+<span id="cb29-393"><a href="#cb29-393"></a><span class="ss">    - </span>This is... pretty much why we've been using <span class="co">[</span><span class="ot">`core`</span><span class="co">](https://doc.rust-lang.org/core/)</span>...</span>
+<span id="cb29-394"><a href="#cb29-394"></a><span class="ss">    - </span>We would sure like <span class="in">`Vec`</span> though!</span>
+<span id="cb29-395"><a href="#cb29-395"></a></span>
+<span id="cb29-396"><a href="#cb29-396"></a><span class="in">```{.email}</span></span>
+<span id="cb29-397"><a href="#cb29-397"></a><span class="in">error: cannot find macro `vec` in this scope</span></span>
+<span id="cb29-398"><a href="#cb29-398"></a><span class="in">  --&gt; src/main.rs:18:13</span></span>
+<span id="cb29-399"><a href="#cb29-399"></a><span class="in">   |</span></span>
+<span id="cb29-400"><a href="#cb29-400"></a><span class="in">18 |     let v = vec!("Hello", "World");</span></span>
+<span id="cb29-401"><a href="#cb29-401"></a><span class="in">   |             ^^^</span></span>
+<span id="cb29-402"><a href="#cb29-402"></a></span>
+<span id="cb29-403"><a href="#cb29-403"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb29-404"><a href="#cb29-404"></a><span class="in">```</span></span>
+<span id="cb29-405"><a href="#cb29-405"></a></span>
+<span id="cb29-406"><a href="#cb29-406"></a><span class="fu">## Allocator</span></span>
+<span id="cb29-407"><a href="#cb29-407"></a></span>
+<span id="cb29-408"><a href="#cb29-408"></a><span class="ss">- </span>To implement a heap allocator is to add a dependency on the built-in <span class="co">[</span><span class="ot">`alloc`</span><span class="co">](https://doc.rust-lang.org/alloc/)</span> crate.</span>
+<span id="cb29-409"><a href="#cb29-409"></a><span class="ss">- </span>Like the <span class="co">[</span><span class="ot">`core`</span><span class="co">](https://doc.rust-lang.org/core/)</span> crate, it is a subset of the standard library that additionally contains the allocation and collection types. </span>
+<span id="cb29-410"><a href="#cb29-410"></a><span class="ss">- </span>To add the dependency on <span class="in">`alloc`</span>, we add the following:</span>
+<span id="cb29-411"><a href="#cb29-411"></a></span>
+<span id="cb29-412"><a href="#cb29-412"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb29-413"><a href="#cb29-413"></a><span class="in">extern crate alloc;</span></span>
+<span id="cb29-414"><a href="#cb29-414"></a><span class="in">```</span></span>
+<span id="cb29-415"><a href="#cb29-415"></a></span>
+<span id="cb29-416"><a href="#cb29-416"></a><span class="fu">## I Lied</span></span>
+<span id="cb29-417"><a href="#cb29-417"></a></span>
+<span id="cb29-418"><a href="#cb29-418"></a><span class="ss">- </span>Surely that will work.</span>
+<span id="cb29-419"><a href="#cb29-419"></a></span>
+<span id="cb29-420"><a href="#cb29-420"></a><span class="in">```{.email}</span></span>
+<span id="cb29-421"><a href="#cb29-421"></a><span class="in">error[E0463]: can't find crate for `alloc`</span></span>
+<span id="cb29-422"><a href="#cb29-422"></a><span class="in"> --&gt; src/lib.rs:7:1</span></span>
+<span id="cb29-423"><a href="#cb29-423"></a><span class="in">  |</span></span>
+<span id="cb29-424"><a href="#cb29-424"></a><span class="in">7 | extern crate alloc;</span></span>
+<span id="cb29-425"><a href="#cb29-425"></a><span class="in">  | ^^^^^^^^^^^^^^^^^^^ can't find crate</span></span>
+<span id="cb29-426"><a href="#cb29-426"></a></span>
+<span id="cb29-427"><a href="#cb29-427"></a><span class="in">For more information about this error, try `rustc --explain E0463`.</span></span>
+<span id="cb29-428"><a href="#cb29-428"></a><span class="in">error: could not compile `osirs` (lib) due to 1 previous error</span></span>
+<span id="cb29-429"><a href="#cb29-429"></a><span class="in">```</span></span>
+<span id="cb29-430"><a href="#cb29-430"></a></span>
+<span id="cb29-431"><a href="#cb29-431"></a><span class="fu">## Custom Target</span></span>
+<span id="cb29-432"><a href="#cb29-432"></a></span>
+<span id="cb29-433"><a href="#cb29-433"></a><span class="ss">- </span>We once again return to <span class="in">`.cargo/config.toml`</span></span>
+<span id="cb29-434"><a href="#cb29-434"></a><span class="ss">    - </span>Cargo: $\exists$ people that hold it in some regard.</span>
+<span id="cb29-435"><a href="#cb29-435"></a></span>
+<span id="cb29-436"><a href="#cb29-436"></a><span class="fu">## config</span></span>
+<span id="cb29-437"><a href="#cb29-437"></a></span>
+<span id="cb29-438"><a href="#cb29-438"></a><span class="ss">- </span>It's been a while, so refresher.</span>
+<span id="cb29-439"><a href="#cb29-439"></a><span class="ss">- </span>Mine currently looks like this:</span>
+<span id="cb29-440"><a href="#cb29-440"></a></span>
+<span id="cb29-441"><a href="#cb29-441"></a><span class="in">```{.toml filename=".cargo/config.toml"}</span></span>
+<span id="cb29-442"><a href="#cb29-442"></a><span class="in">[unstable]</span></span>
+<span id="cb29-443"><a href="#cb29-443"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb29-444"><a href="#cb29-444"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
+<span id="cb29-445"><a href="#cb29-445"></a><span class="in">build-std = ["core", "compiler_builtins"]</span></span>
+<span id="cb29-446"><a href="#cb29-446"></a><span class="in">panic-abort-tests = true</span></span>
+<span id="cb29-447"><a href="#cb29-447"></a></span>
+<span id="cb29-448"><a href="#cb29-448"></a><span class="in">[build]</span></span>
+<span id="cb29-449"><a href="#cb29-449"></a><span class="in">target = "x86_64-osirs.json"</span></span>
+<span id="cb29-450"><a href="#cb29-450"></a></span>
+<span id="cb29-451"><a href="#cb29-451"></a><span class="in">[target.'cfg(target_os = "none")']</span></span>
+<span id="cb29-452"><a href="#cb29-452"></a><span class="in">runner = "bootimage runner"</span></span>
+<span id="cb29-453"><a href="#cb29-453"></a><span class="in">```</span></span>
+<span id="cb29-454"><a href="#cb29-454"></a></span>
+<span id="cb29-455"><a href="#cb29-455"></a><span class="fu">## Modify `build-std`</span></span>
+<span id="cb29-456"><a href="#cb29-456"></a></span>
+<span id="cb29-457"><a href="#cb29-457"></a><span class="ss">- </span>We add <span class="in">`alloc`</span> where we added <span class="in">`core`</span></span>
+<span id="cb29-458"><a href="#cb29-458"></a><span class="ss">- </span>That's it!</span>
+<span id="cb29-459"><a href="#cb29-459"></a></span>
+<span id="cb29-460"><a href="#cb29-460"></a><span class="in">```{.toml filename=".cargo/config.toml" code-line-numbers="4"}</span></span>
+<span id="cb29-461"><a href="#cb29-461"></a><span class="in">[unstable]</span></span>
+<span id="cb29-462"><a href="#cb29-462"></a><span class="in">json-target-spec = true</span></span>
+<span id="cb29-463"><a href="#cb29-463"></a><span class="in">build-std-features = ["compiler-builtins-mem"]</span></span>
+<span id="cb29-464"><a href="#cb29-464"></a><span class="in">build-std = ["core", "compiler_builtins", "alloc"]</span></span>
+<span id="cb29-465"><a href="#cb29-465"></a><span class="in">panic-abort-tests = true</span></span>
+<span id="cb29-466"><a href="#cb29-466"></a></span>
+<span id="cb29-467"><a href="#cb29-467"></a><span class="in">[build]</span></span>
+<span id="cb29-468"><a href="#cb29-468"></a><span class="in">target = "x86_64-osirs.json"</span></span>
+<span id="cb29-469"><a href="#cb29-469"></a></span>
+<span id="cb29-470"><a href="#cb29-470"></a><span class="in">[target.'cfg(target_os = "none")']</span></span>
+<span id="cb29-471"><a href="#cb29-471"></a><span class="in">runner = "bootimage runner"</span></span>
+<span id="cb29-472"><a href="#cb29-472"></a><span class="in">```</span></span>
+<span id="cb29-473"><a href="#cb29-473"></a><span class="fu">## I Lied</span></span>
+<span id="cb29-474"><a href="#cb29-474"></a></span>
+<span id="cb29-475"><a href="#cb29-475"></a><span class="ss">- </span>Someone actually has to write the allocator.</span>
+<span id="cb29-476"><a href="#cb29-476"></a></span>
+<span id="cb29-477"><a href="#cb29-477"></a><span class="in">```{.email}</span></span>
+<span id="cb29-478"><a href="#cb29-478"></a><span class="in">error: no global memory allocator found but one is required; link to std or add `#[global_allocator]` to a static item that implements the GlobalAlloc trait</span></span>
+<span id="cb29-479"><a href="#cb29-479"></a></span>
+<span id="cb29-480"><a href="#cb29-480"></a><span class="in">error: could not compile `osirs` (bin "osirs") due to 1 previous error</span></span>
+<span id="cb29-481"><a href="#cb29-481"></a><span class="in">```</span></span>
+<span id="cb29-482"><a href="#cb29-482"></a></span>
+<span id="cb29-483"><a href="#cb29-483"></a><span class="fu">## Requirements</span></span>
+<span id="cb29-484"><a href="#cb29-484"></a></span>
+<span id="cb29-485"><a href="#cb29-485"></a><span class="ss">- </span>The <span class="in">`alloc`</span> crate requires a heap allocator</span>
+<span id="cb29-486"><a href="#cb29-486"></a><span class="ss">    - </span>Which implements <span class="in">`allocate`</span> and <span class="in">`deallocate`</span></span>
+<span id="cb29-487"><a href="#cb29-487"></a><span class="ss">- </span>In Rust, described by <span class="co">[</span><span class="ot">`GlobalAlloc`</span><span class="co">]</span> (referred to in error)</span>
+<span id="cb29-488"><a href="#cb29-488"></a></span>
+<span id="cb29-489"><a href="#cb29-489"></a><span class="at">&gt; To set the heap allocator for the crate, the </span><span class="in">`#[global_allocator]`</span><span class="at"> attribute must be applied to a </span><span class="in">`static`</span><span class="at"> variable that implements the </span><span class="in">`GlobalAlloc`</span><span class="at"> trait.</span></span>
+<span id="cb29-490"><a href="#cb29-490"></a></span>
+<span id="cb29-491"><a href="#cb29-491"></a><span class="fu">## `GlobalAlloc`</span></span>
+<span id="cb29-492"><a href="#cb29-492"></a></span>
+<span id="cb29-493"><a href="#cb29-493"></a><span class="ss">- </span>Here it is:</span>
+<span id="cb29-494"><a href="#cb29-494"></a></span>
+<span id="cb29-495"><a href="#cb29-495"></a><span class="in">```{.rs}</span></span>
+<span id="cb29-496"><a href="#cb29-496"></a><span class="in">pub unsafe trait GlobalAlloc {</span></span>
+<span id="cb29-497"><a href="#cb29-497"></a><span class="in">    unsafe fn alloc(&amp;self, layout: Layout) -&gt; *mut u8;</span></span>
+<span id="cb29-498"><a href="#cb29-498"></a><span class="in">    unsafe fn dealloc(&amp;self, ptr: *mut u8, layout: Layout);</span></span>
+<span id="cb29-499"><a href="#cb29-499"></a></span>
+<span id="cb29-500"><a href="#cb29-500"></a><span class="in">    unsafe fn alloc_zeroed(&amp;self, layout: Layout) -&gt; *mut u8 { ... }</span></span>
+<span id="cb29-501"><a href="#cb29-501"></a><span class="in">    unsafe fn realloc(</span></span>
+<span id="cb29-502"><a href="#cb29-502"></a><span class="in">        &amp;self,</span></span>
+<span id="cb29-503"><a href="#cb29-503"></a><span class="in">        ptr: *mut u8,</span></span>
+<span id="cb29-504"><a href="#cb29-504"></a><span class="in">        layout: Layout,</span></span>
+<span id="cb29-505"><a href="#cb29-505"></a><span class="in">        new_size: usize</span></span>
+<span id="cb29-506"><a href="#cb29-506"></a><span class="in">    ) -&gt; *mut u8 { ... }</span></span>
+<span id="cb29-507"><a href="#cb29-507"></a><span class="in">}</span></span>
+<span id="cb29-508"><a href="#cb29-508"></a><span class="in">```</span></span>
+<span id="cb29-509"><a href="#cb29-509"></a></span>
+<span id="cb29-510"><a href="#cb29-510"></a><span class="fu">## `alloc`</span></span>
+<span id="cb29-511"><a href="#cb29-511"></a></span>
+<span id="cb29-512"><a href="#cb29-512"></a><span class="ss">- </span>Takes a <span class="co">[</span><span class="ot">`Layout`</span><span class="co">](https://doc.rust-lang.org/alloc/alloc/struct.Layout.html)</span> instance as an argument</span>
+<span id="cb29-513"><a href="#cb29-513"></a><span class="ss">    - </span>Describes the desired size and alignment for allocated memory.</span>
+<span id="cb29-514"><a href="#cb29-514"></a><span class="ss">- </span>Returns a raw pointer to the first byte of the allocated memory block. </span>
+<span id="cb29-515"><a href="#cb29-515"></a><span class="ss">    - </span>Instead of an explicit error value, the <span class="in">`alloc`</span> method returns a null pointer to signal an allocation error. </span>
+<span id="cb29-516"><a href="#cb29-516"></a><span class="ss">    - </span>No comment from me on that.</span>
+<span id="cb29-517"><a href="#cb29-517"></a><span class="ss">    - </span>Okay, I have one comment.</span>
+<span id="cb29-518"><a href="#cb29-518"></a>    </span>
+<span id="cb29-519"><a href="#cb29-519"></a><span class="fu">## `dealloc`</span></span>
+<span id="cb29-520"><a href="#cb29-520"></a></span>
+<span id="cb29-521"><a href="#cb29-521"></a><span class="ss">- </span>The <span class="in">`dealloc`</span> method is the counterpart to <span class="in">`alloc`</span>.</span>
+<span id="cb29-522"><a href="#cb29-522"></a><span class="ss">- </span>Frees a memory block after use. </span>
+<span id="cb29-523"><a href="#cb29-523"></a><span class="ss">- </span>It receives two arguments: </span>
+<span id="cb29-524"><a href="#cb29-524"></a><span class="ss">    - </span>A pointer returned by <span class="in">`alloc`</span> </span>
+<span id="cb29-525"><a href="#cb29-525"></a><span class="ss">    - </span>The <span class="in">`Layout`</span> that was used for the allocation.</span>
+<span id="cb29-526"><a href="#cb29-526"></a>    </span>
+<span id="cb29-527"><a href="#cb29-527"></a><span class="fu">## Bonus Methods</span></span>
+<span id="cb29-528"><a href="#cb29-528"></a></span>
+<span id="cb29-529"><a href="#cb29-529"></a><span class="ss">- </span><span class="in">`alloc_zeroed`</span> is equivalent to calling <span class="in">`alloc`</span> and then setting the allocated memory block to zero.</span>
+<span id="cb29-530"><a href="#cb29-530"></a><span class="ss">- </span><span class="in">`realloc`</span> method allows to grow or shrink an allocation.</span>
+<span id="cb29-531"><a href="#cb29-531"></a><span class="ss">    - </span>The default implementation allocates a new memory block with the desired size and copies over all the content from the previous allocation.</span>
+<span id="cb29-532"><a href="#cb29-532"></a>    </span>
+<span id="cb29-533"><a href="#cb29-533"></a><span class="fu">## A `DummyAllocator`</span></span>
+<span id="cb29-534"><a href="#cb29-534"></a></span>
+<span id="cb29-535"><a href="#cb29-535"></a><span class="ss">- </span>Create a simple dummy allocator. </span>
+<span id="cb29-536"><a href="#cb29-536"></a><span class="ss">- </span>Create a new <span class="in">`allocator`</span> module:</span>
+<span id="cb29-537"><a href="#cb29-537"></a></span>
+<span id="cb29-538"><a href="#cb29-538"></a><span class="in">```{.rs filename="src/lib.rs"}</span></span>
+<span id="cb29-539"><a href="#cb29-539"></a><span class="in">pub mod allocator;</span></span>
+<span id="cb29-540"><a href="#cb29-540"></a><span class="in">```</span></span>
+<span id="cb29-541"><a href="#cb29-541"></a></span>
+<span id="cb29-542"><a href="#cb29-542"></a><span class="fu">## Do nothing</span></span>
+<span id="cb29-543"><a href="#cb29-543"></a></span>
+<span id="cb29-544"><a href="#cb29-544"></a><span class="ss">- </span>We return a null point on alloc and panic on dealloc.</span>
+<span id="cb29-545"><a href="#cb29-545"></a></span>
+<span id="cb29-546"><a href="#cb29-546"></a><span class="in">```{.rs filename="src/allocator.rs"}</span></span>
+<span id="cb29-547"><a href="#cb29-547"></a><span class="in">pub struct Dummy;</span></span>
+<span id="cb29-548"><a href="#cb29-548"></a></span>
+<span id="cb29-549"><a href="#cb29-549"></a><span class="in">unsafe impl alloc::alloc::GlobalAlloc for Dummy {</span></span>
+<span id="cb29-550"><a href="#cb29-550"></a><span class="in">    unsafe fn alloc(&amp;self, _layout: alloc::alloc::Layout) -&gt; *mut u8 {</span></span>
+<span id="cb29-551"><a href="#cb29-551"></a><span class="in">        core::ptr::null_mut()</span></span>
+<span id="cb29-552"><a href="#cb29-552"></a><span class="in">    }</span></span>
+<span id="cb29-553"><a href="#cb29-553"></a></span>
+<span id="cb29-554"><a href="#cb29-554"></a><span class="in">    unsafe fn dealloc(&amp;self, _ptr: *mut u8, _layout: alloc::alloc::Layout) {</span></span>
+<span id="cb29-555"><a href="#cb29-555"></a><span class="in">        panic!("dealloc should be never called")</span></span>
+<span id="cb29-556"><a href="#cb29-556"></a><span class="in">    }</span></span>
+<span id="cb29-557"><a href="#cb29-557"></a><span class="in">}</span></span>
+<span id="cb29-558"><a href="#cb29-558"></a><span class="in">```</span></span>
+<span id="cb29-559"><a href="#cb29-559"></a></span>
+<span id="cb29-560"><a href="#cb29-560"></a><span class="fu">## Some notes</span></span>
+<span id="cb29-561"><a href="#cb29-561"></a></span>
+<span id="cb29-562"><a href="#cb29-562"></a><span class="ss">- </span>We use a size zero struct.</span>
+<span id="cb29-563"><a href="#cb29-563"></a><span class="ss">    - </span>I used this previously in my implementation of printing.</span>
+<span id="cb29-564"><a href="#cb29-564"></a><span class="ss">    - </span>I love it when Rust forces me to implement a function as a method!</span>
+<span id="cb29-565"><a href="#cb29-565"></a><span class="ss">- </span>This isn't quite enough.</span>
+<span id="cb29-566"><a href="#cb29-566"></a><span class="ss">    - </span>We'll get the same error.</span>
+<span id="cb29-567"><a href="#cb29-567"></a><span class="ss">- </span>In theory, we should never hit that panic.</span>
+<span id="cb29-568"><a href="#cb29-568"></a>    </span>
+<span id="cb29-569"><a href="#cb29-569"></a><span class="fu">## The Attribute</span></span>
+<span id="cb29-570"><a href="#cb29-570"></a></span>
+<span id="cb29-571"><a href="#cb29-571"></a><span class="ss">- </span>We have satisfying, if useless, allocator.</span>
+<span id="cb29-572"><a href="#cb29-572"></a><span class="ss">- </span>Informer compiler via <span class="in">`#[global_allocator]`</span></span>
+<span id="cb29-573"><a href="#cb29-573"></a><span class="ss">- </span>It must be:</span>
+<span id="cb29-574"><a href="#cb29-574"></a><span class="ss">    - </span>A <span class="in">`static`</span> which</span>
+<span id="cb29-575"><a href="#cb29-575"></a><span class="ss">    - </span>Implements <span class="in">`GlobalAlloc`</span></span>
+<span id="cb29-576"><a href="#cb29-576"></a></span>
+<span id="cb29-577"><a href="#cb29-577"></a><span class="in">```{.rs filename="src/allocator.rs"}</span></span>
+<span id="cb29-578"><a href="#cb29-578"></a><span class="in">#[global_allocator]</span></span>
+<span id="cb29-579"><a href="#cb29-579"></a><span class="in">static ALLOCATOR: Dummy = Dummy;</span></span>
+<span id="cb29-580"><a href="#cb29-580"></a><span class="in">```</span></span>
+<span id="cb29-581"><a href="#cb29-581"></a></span>
+<span id="cb29-582"><a href="#cb29-582"></a><span class="fu">## This should work</span></span>
+<span id="cb29-583"><a href="#cb29-583"></a></span>
+<span id="cb29-584"><a href="#cb29-584"></a><span class="ss">- </span>I at least got a "Hello, world!" after:</span>
+<span id="cb29-585"><a href="#cb29-585"></a><span class="ss">    - </span>Update <span class="in">`.config`</span></span>
+<span id="cb29-586"><a href="#cb29-586"></a><span class="ss">    - </span>Add <span class="in">`alloc`</span> and <span class="in">`allocator`</span>, both, to <span class="in">`src/lib.rs`</span></span>
+<span id="cb29-587"><a href="#cb29-587"></a><span class="ss">    - </span>Define a <span class="in">`struct`</span> with some methods, and...</span>
+<span id="cb29-588"><a href="#cb29-588"></a><span class="ss">    - </span>Declare a <span class="in">`static`</span>.</span>
+<span id="cb29-589"><a href="#cb29-589"></a>    </span>
+<span id="cb29-590"><a href="#cb29-590"></a><span class="fu"># Kernel Heap</span></span>
+<span id="cb29-591"><a href="#cb29-591"></a></span>
+<span id="cb29-592"><a href="#cb29-592"></a><span class="fu">## Boxing</span></span>
+<span id="cb29-593"><a href="#cb29-593"></a></span>
+<span id="cb29-594"><a href="#cb29-594"></a><span class="ss">- </span>Let's try boxing something up, like a delicious integer.</span>
+<span id="cb29-595"><a href="#cb29-595"></a></span>
+<span id="cb29-596"><a href="#cb29-596"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-597"><a href="#cb29-597"></a><span class="in">error[E0433]: failed to resolve: use of undeclared type `Box`</span></span>
+<span id="cb29-598"><a href="#cb29-598"></a><span class="in">  --&gt; src/main.rs:21:13</span></span>
+<span id="cb29-599"><a href="#cb29-599"></a><span class="in">   |</span></span>
+<span id="cb29-600"><a href="#cb29-600"></a><span class="in">21 |     let b = Box::new(371);</span></span>
+<span id="cb29-601"><a href="#cb29-601"></a><span class="in">   |             ^^^ use of undeclared type `Box`</span></span>
+<span id="cb29-602"><a href="#cb29-602"></a></span>
+<span id="cb29-603"><a href="#cb29-603"></a><span class="in">For more information about this error, try `rustc --explain E0433`.</span></span>
+<span id="cb29-604"><a href="#cb29-604"></a><span class="in">```</span></span>
+<span id="cb29-605"><a href="#cb29-605"></a></span>
+<span id="cb29-606"><a href="#cb29-606"></a><span class="ss">- </span>Rust in its infinite wisdom has blessed us with getting to navigate an obscure namespace.</span>
+<span id="cb29-607"><a href="#cb29-607"></a></span>
+<span id="cb29-608"><a href="#cb29-608"></a><span class="fu">## Fixing</span></span>
+<span id="cb29-609"><a href="#cb29-609"></a></span>
+<span id="cb29-610"><a href="#cb29-610"></a><span class="ss">- </span>We must:</span>
+<span id="cb29-611"><a href="#cb29-611"></a><span class="ss">    - </span>Include <span class="in">`extern crate alloc;`</span> in *any* file where we use <span class="in">`Box`</span>.</span>
+<span id="cb29-612"><a href="#cb29-612"></a><span class="ss">    - </span>Must refer to <span class="in">`Box`</span> from within <span class="in">`alloc`</span> using whatever means we prefer.</span>
+<span id="cb29-613"><a href="#cb29-613"></a><span class="ss">- </span>You can tell it's "working" when you get the following panic:</span>
+<span id="cb29-614"><a href="#cb29-614"></a><span class="in">```{.email}</span></span>
+<span id="cb29-615"><a href="#cb29-615"></a><span class="in">panicked at /home/user/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/library/alloc/src/alloc.rs:566:9:</span></span>
+<span id="cb29-616"><a href="#cb29-616"></a><span class="in">memory allocation of 4 bytes failed</span></span>
+<span id="cb29-617"><a href="#cb29-617"></a><span class="in">```</span></span>
+<span id="cb29-618"><a href="#cb29-618"></a></span>
+<span id="cb29-619"><a href="#cb29-619"></a><span class="fu">## So far...</span></span>
+<span id="cb29-620"><a href="#cb29-620"></a></span>
+<span id="cb29-621"><a href="#cb29-621"></a><span class="ss">- </span><span class="in">`Box::new`</span> calls alloc.</span>
+<span id="cb29-622"><a href="#cb29-622"></a><span class="ss">- </span>Alloc returns.</span>
+<span id="cb29-623"><a href="#cb29-623"></a><span class="ss">- </span><span class="in">`Box::new`</span> null-checks the return value.</span>
+<span id="cb29-624"><a href="#cb29-624"></a><span class="ss">    - </span>It does not unpack an <span class="in">`Option`</span></span>
+<span id="cb29-625"><a href="#cb29-625"></a><span class="ss">- </span><span class="in">`Box::new`</span> panics if it sees null.</span>
+<span id="cb29-626"><a href="#cb29-626"></a><span class="ss">- </span>We didn't write any of this (except the <span class="in">`alloc`</span> return), it's all just language features.</span>
+<span id="cb29-627"><a href="#cb29-627"></a></span>
+<span id="cb29-628"><a href="#cb29-628"></a><span class="fu">## Creating a Kernel Heap</span></span>
+<span id="cb29-629"><a href="#cb29-629"></a></span>
+<span id="cb29-630"><a href="#cb29-630"></a><span class="ss">- </span>We must create a proper allocator</span>
+<span id="cb29-631"><a href="#cb29-631"></a><span class="ss">- </span>But first we need to create a heap memory region</span>
+<span id="cb29-632"><a href="#cb29-632"></a><span class="ss">    - </span>Somewhere from which the allocator can allocate memory</span>
+<span id="cb29-633"><a href="#cb29-633"></a><span class="ss">- </span>We need:</span>
+<span id="cb29-634"><a href="#cb29-634"></a><span class="ss">    - </span>A virtual memory range for the heap region</span>
+<span id="cb29-635"><a href="#cb29-635"></a><span class="ss">    - </span>A map from this region to physical frames</span>
+<span id="cb29-636"><a href="#cb29-636"></a>    </span>
+<span id="cb29-637"><a href="#cb29-637"></a><span class="fu">## Virtual Region</span></span>
+<span id="cb29-638"><a href="#cb29-638"></a></span>
+<span id="cb29-639"><a href="#cb29-639"></a><span class="ss">- </span>This part is easy.</span>
+<span id="cb29-640"><a href="#cb29-640"></a><span class="ss">- </span>We can make our life moderately easier by picking recognizable values.</span>
+<span id="cb29-641"><a href="#cb29-641"></a><span class="in">```{.rs filename="src/allocator.rs"}</span></span>
+<span id="cb29-642"><a href="#cb29-642"></a><span class="in">pub const HEAP_START: usize = 0x_C371_C371_0000; // CS-371</span></span>
+<span id="cb29-643"><a href="#cb29-643"></a><span class="in">pub const HEAP_SIZE: usize = 1 &lt;&lt; 16;  // Arbitrary</span></span>
+<span id="cb29-644"><a href="#cb29-644"></a><span class="in">```</span></span>
+<span id="cb29-645"><a href="#cb29-645"></a></span>
+<span id="cb29-646"><a href="#cb29-646"></a><span class="fu">## Naively</span></span>
+<span id="cb29-647"><a href="#cb29-647"></a></span>
+<span id="cb29-648"><a href="#cb29-648"></a><span class="ss">- </span>If we simply map this region now, allocation will fail.</span>
+<span id="cb29-649"><a href="#cb29-649"></a><span class="ss">    - </span>There is no corresponding physical frame.</span>
+<span id="cb29-650"><a href="#cb29-650"></a><span class="ss">- </span>We will initialize our heap, using the <span class="in">`Mapper`</span> we previously implemented.</span>
+<span id="cb29-651"><a href="#cb29-651"></a><span class="ss">    - </span>I didn't find a graceful way to do this since I'm coerced into certain return types and into using certain methods.</span>
+<span id="cb29-652"><a href="#cb29-652"></a>    </span>
+<span id="cb29-653"><a href="#cb29-653"></a><span class="fu">## Implementation</span></span>
+<span id="cb29-654"><a href="#cb29-654"></a></span>
+<span id="cb29-655"><a href="#cb29-655"></a><span class="in">```{.rs filename="src/allocator.rs"}</span></span>
+<span id="cb29-656"><a href="#cb29-656"></a><span class="in">pub fn init_heap(</span></span>
+<span id="cb29-657"><a href="#cb29-657"></a><span class="in">    mapper: &amp;mut impl x86_64::structures::paging::Mapper&lt;x86_64::structures::paging::Size4KiB&gt;,</span></span>
+<span id="cb29-658"><a href="#cb29-658"></a><span class="in">    frame_allocator: &amp;mut impl x86_64::structures::paging::FrameAllocator&lt;</span></span>
+<span id="cb29-659"><a href="#cb29-659"></a><span class="in">        x86_64::structures::paging::Size4KiB,</span></span>
+<span id="cb29-660"><a href="#cb29-660"></a><span class="in">    &gt;,</span></span>
+<span id="cb29-661"><a href="#cb29-661"></a><span class="in">) -&gt; Option&lt;()&gt; {</span></span>
+<span id="cb29-662"><a href="#cb29-662"></a><span class="in">    let page_range = {</span></span>
+<span id="cb29-663"><a href="#cb29-663"></a><span class="in">        let heap_start = x86_64::VirtAddr::new(HEAP_START as u64);</span></span>
+<span id="cb29-664"><a href="#cb29-664"></a><span class="in">        let heap_end = heap_start + HEAP_SIZE - 1u64;</span></span>
+<span id="cb29-665"><a href="#cb29-665"></a><span class="in">        let heap_start_page = x86_64::structures::paging::Page::containing_address(heap_start);</span></span>
+<span id="cb29-666"><a href="#cb29-666"></a><span class="in">        let heap_end_page = x86_64::structures::paging::Page::containing_address(heap_end);</span></span>
+<span id="cb29-667"><a href="#cb29-667"></a><span class="in">        x86_64::structures::paging::Page::range_inclusive(heap_start_page, heap_end_page)</span></span>
+<span id="cb29-668"><a href="#cb29-668"></a><span class="in">    };</span></span>
+<span id="cb29-669"><a href="#cb29-669"></a></span>
+<span id="cb29-670"><a href="#cb29-670"></a><span class="in">    let flags = x86_64::structures::paging::PageTableFlags::PRESENT</span></span>
+<span id="cb29-671"><a href="#cb29-671"></a><span class="in">        | x86_64::structures::paging::PageTableFlags::WRITABLE;</span></span>
+<span id="cb29-672"><a href="#cb29-672"></a><span class="in">    for page in page_range {</span></span>
+<span id="cb29-673"><a href="#cb29-673"></a><span class="in">        let frame = match frame_allocator.allocate_frame() {</span></span>
+<span id="cb29-674"><a href="#cb29-674"></a><span class="in">            Some(f) =&gt; f,</span></span>
+<span id="cb29-675"><a href="#cb29-675"></a><span class="in">            _ =&gt; return None,</span></span>
+<span id="cb29-676"><a href="#cb29-676"></a><span class="in">        };</span></span>
+<span id="cb29-677"><a href="#cb29-677"></a><span class="in">        unsafe {</span></span>
+<span id="cb29-678"><a href="#cb29-678"></a><span class="in">            match mapper.map_to(page, frame, flags, frame_allocator) {</span></span>
+<span id="cb29-679"><a href="#cb29-679"></a><span class="in">                Ok(m) =&gt; m.flush(),</span></span>
+<span id="cb29-680"><a href="#cb29-680"></a><span class="in">                _ =&gt; return None,</span></span>
+<span id="cb29-681"><a href="#cb29-681"></a><span class="in">            };</span></span>
+<span id="cb29-682"><a href="#cb29-682"></a><span class="in">        }</span></span>
+<span id="cb29-683"><a href="#cb29-683"></a><span class="in">    }</span></span>
+<span id="cb29-684"><a href="#cb29-684"></a></span>
+<span id="cb29-685"><a href="#cb29-685"></a><span class="in">    return Some(());</span></span>
+<span id="cb29-686"><a href="#cb29-686"></a><span class="in">}</span></span>
+<span id="cb29-687"><a href="#cb29-687"></a><span class="in">```</span></span>
+<span id="cb29-688"><a href="#cb29-688"></a></span>
+<span id="cb29-689"><a href="#cb29-689"></a><span class="fu">## Two Parts</span></span>
+<span id="cb29-690"><a href="#cb29-690"></a></span>
+<span id="cb29-691"><a href="#cb29-691"></a><span class="ss">1. </span>Pages: Create a page range using a little arithmetic technique I like to call substraction (also some addition in there!)</span>
+<span id="cb29-692"><a href="#cb29-692"></a><span class="ss">2. </span>Frames: Construct a map from pages to frames.</span>
+<span id="cb29-693"><a href="#cb29-693"></a>    </span>
+<span id="cb29-694"><a href="#cb29-694"></a><span class="fu">## Pages</span></span>
+<span id="cb29-695"><a href="#cb29-695"></a></span>
+<span id="cb29-696"><a href="#cb29-696"></a><span class="ss">- </span>Convert the <span class="in">`HEAP_START`</span> pointer to a <span class="in">`VirtAddr`</span> type.</span>
+<span id="cb29-697"><a href="#cb29-697"></a><span class="ss">- </span>Calculate the heap end address from it by adding the <span class="in">`HEAP_SIZE`</span>. </span>
+<span id="cb29-698"><a href="#cb29-698"></a><span class="ss">- </span>Subtract 1, obviously. </span>
+<span id="cb29-699"><a href="#cb29-699"></a><span class="ss">- </span>Convert the addresses into <span class="in">`Page`</span> types using the <span class="in">`containing_address`</span> function. </span>
+<span id="cb29-700"><a href="#cb29-700"></a><span class="ss">- </span>Create a page range from the start and end pages using the (provided) <span class="in">`Page::range_inclusive`</span> function.</span>
+<span id="cb29-701"><a href="#cb29-701"></a>    </span>
+<span id="cb29-702"><a href="#cb29-702"></a><span class="fu">## Frames</span></span>
+<span id="cb29-703"><a href="#cb29-703"></a></span>
+<span id="cb29-704"><a href="#cb29-704"></a><span class="ss">- </span>Prepare page flags for the pages in this region.</span>
+<span id="cb29-705"><a href="#cb29-705"></a><span class="ss">- </span>For each page:</span>
+<span id="cb29-706"><a href="#cb29-706"></a><span class="ss">    - </span>Allocate a frame via <span class="in">`FrameAllocator::allocate_frame`</span>.</span>
+<span id="cb29-707"><a href="#cb29-707"></a><span class="ss">    - </span>Set flags.</span>
+<span id="cb29-708"><a href="#cb29-708"></a><span class="ss">    - </span>Map the page to the frame with the flags.</span>
+<span id="cb29-709"><a href="#cb29-709"></a><span class="ss">        - </span>The <span class="in">`flush`</span> updates the **TLB**.</span>
+<span id="cb29-710"><a href="#cb29-710"></a><span class="ss">- </span>I used options instead of results to reduce text volumes.</span>
+<span id="cb29-711"><a href="#cb29-711"></a>    </span>
+<span id="cb29-712"><a href="#cb29-712"></a><span class="fu">## Onward</span></span>
+<span id="cb29-713"><a href="#cb29-713"></a></span>
+<span id="cb29-714"><a href="#cb29-714"></a><span class="ss">- </span>Go ahead and <span class="in">`cargo r`</span> to make sure your code doesn't explode, then let's head over to <span class="in">`src/main.rs`</span> to run this thing.</span>
+<span id="cb29-715"><a href="#cb29-715"></a><span class="ss">- </span>Basically, we are extending our initialization routine.</span>
+<span id="cb29-716"><a href="#cb29-716"></a><span class="ss">    - </span>I am finally, for the first time in my life, considering appreciating how long computers take to turn on.</span>
+<span id="cb29-717"><a href="#cb29-717"></a><span class="ss">    - </span>After some consideration, I've determined actual OS engineers should not use crates and instead optimize this code.</span>
+<span id="cb29-718"><a href="#cb29-718"></a>   </span>
+<span id="cb29-719"><a href="#cb29-719"></a><span class="fu">## Run it</span></span>
+<span id="cb29-720"><a href="#cb29-720"></a></span>
+<span id="cb29-721"><a href="#cb29-721"></a><span class="ss">- </span>At long last, initialize the kernel heap from <span class="in">`src/main.rs`</span></span>
+<span id="cb29-722"><a href="#cb29-722"></a></span>
+<span id="cb29-723"><a href="#cb29-723"></a><span class="in">```{.rs filename="src/main.rs"}</span></span>
+<span id="cb29-724"><a href="#cb29-724"></a><span class="in">pub extern "C" fn _start(boot_info: &amp;'static bootloader::BootInfo) -&gt; ! {</span></span>
+<span id="cb29-725"><a href="#cb29-725"></a><span class="in">    osirs::init();</span></span>
+<span id="cb29-726"><a href="#cb29-726"></a><span class="in">    let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);</span></span>
+<span id="cb29-727"><a href="#cb29-727"></a><span class="in">    let mut mapper = unsafe { osirs::memory::init(offset) };</span></span>
+<span id="cb29-728"><a href="#cb29-728"></a><span class="in">    let mut frame_allocator =</span></span>
+<span id="cb29-729"><a href="#cb29-729"></a><span class="in">        unsafe { osirs::memory::BootInfoFrameAllocator::init(&amp;boot_info.memory_map) };</span></span>
+<span id="cb29-730"><a href="#cb29-730"></a><span class="in">    osirs::allocator::init_heap(&amp;mut mapper, &amp;mut frame_allocator).unwrap();</span></span>
+<span id="cb29-731"><a href="#cb29-731"></a></span>
+<span id="cb29-732"><a href="#cb29-732"></a><span class="in">    println!("Hello world{}", "!");</span></span>
+<span id="cb29-733"><a href="#cb29-733"></a><span class="in">```</span></span>
+<span id="cb29-734"><a href="#cb29-734"></a></span>
+<span id="cb29-735"><a href="#cb29-735"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
