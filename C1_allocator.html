@@ -102,6 +102,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -359,11 +388,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#todo" id="toc-todo" class="nav-link active" data-scroll-target="#todo">TODO</a>
+  <li><a href="#update" id="toc-update" class="nav-link active" data-scroll-target="#update">Update</a>
   <ul class="collapse">
-  <li><a href="#using-an-allocator-crate" id="toc-using-an-allocator-crate" class="nav-link" data-scroll-target="#using-an-allocator-crate">Using an Allocator Crate</a></li>
+  <li><a href="#cheating-using-an-allocator-crate" id="toc-cheating-using-an-allocator-crate" class="nav-link" data-scroll-target="#cheating-using-an-allocator-crate"><s>Cheating</s> Using an Allocator Crate</a></li>
   <li><a href="#adding-a-test" id="toc-adding-a-test" class="nav-link" data-scroll-target="#adding-a-test">Adding a Test</a></li>
   </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
   </ul>
 </nav>
     </div>
@@ -390,13 +420,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="todo" class="level1">
-<h1>TODO</h1>
-<p>We now have a mapped heap memory region that is ready to be used. The <code>Box::new</code> call still uses our old <code>Dummy</code> allocator, so you will still see the “out of memory” error when you run it. Let’s fix this by using a proper allocator.</p>
-<section id="using-an-allocator-crate" class="level2">
-<h2 class="anchored" data-anchor-id="using-an-allocator-crate">Using an Allocator Crate</h2>
-<p>Since implementing an allocator is somewhat complex, we start by using an external allocator crate. We will learn how to implement our own allocator latter.</p>
-<p>A simple allocator crate for <code>no_std</code> applications is the <a href="https://github.com/phil-opp/linked-list-allocator/"><code>linked_list_allocator</code></a> crate. Its name comes from the fact that it uses a linked list data structure to keep track of deallocated memory regions. See the next post for a more detailed explanation of this approach.</p>
+<section id="update" class="level1">
+<h1>Update</h1>
+<p>This is a lab.</p>
+<ul>
+<li>The last homework would be assigned Friday, 24 April.</li>
+<li>Homeworks are due one week after being assigned, which would be Friday, 1 May.</li>
+<li>Study Days run 30 April to 1 May.</li>
+<li>So no homework may be assigned that day.</li>
+</ul>
+<p><strong>There is no more homework, so this week we only have this lab.</strong></p>
+<section id="cheating-using-an-allocator-crate" class="level2">
+<h2 class="anchored" data-anchor-id="cheating-using-an-allocator-crate"><s>Cheating</s> Using an Allocator Crate</h2>
+<p>Since implementing an allocator is somewhat complex, we start by using an external allocator crate.</p>
+<p>A simple allocator crate for <code>no_std</code> applications is the <a href="https://github.com/phil-opp/linked-list-allocator/"><code>linked_list_allocator</code></a> crate. Its name comes from the fact that it uses a linked list data structure to keep track of deallocated memory regions.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -411,73 +448,66 @@ Q: When will you used linked lists?
 </div>
 </div>
 <p>To use the crate, we first need to add a dependency on it in our <code>Cargo.toml</code>:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># in Cargo.toml</span></span>
-<span id="cb1-2"><a href="#cb1-2"></a></span>
-<span id="cb1-3"><a href="#cb1-3"></a><span class="kw">[dependencies]</span></span>
-<span id="cb1-4"><a href="#cb1-4"></a><span class="dt">linked_list_allocator</span> <span class="op">=</span> <span class="st">"0.9.0"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Cargo.toml</strong></pre>
+</div>
+<div class="sourceCode" id="cb1" data-filename="Cargo.toml"><pre class="sourceCode numberSource toml number-lines code-with-copy"><code class="sourceCode toml"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">[dependencies]</span></span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="dt">linked_list_allocator</span> <span class="op">=</span> <span class="st">"0.9.0"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Then we can replace our dummy allocator with the allocator provided by the crate:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">// in src/allocator.rs</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a></span>
-<span id="cb2-3"><a href="#cb2-3"></a><span class="kw">use</span> <span class="pp">linked_list_allocator::</span>LockedHeap<span class="op">;</span></span>
-<span id="cb2-4"><a href="#cb2-4"></a></span>
-<span id="cb2-5"><a href="#cb2-5"></a><span class="at">#[</span>global_allocator<span class="at">]</span></span>
-<span id="cb2-6"><a href="#cb2-6"></a><span class="kw">static</span> ALLOCATOR<span class="op">:</span> LockedHeap <span class="op">=</span> <span class="pp">LockedHeap::</span>empty()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/allocator.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb2" data-filename="src/allocator.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="at">#[</span>global_allocator<span class="at">]</span></span>
+<span id="cb2-2"><a href="#cb2-2"></a><span class="kw">static</span> ALLOCATOR<span class="op">:</span> <span class="pp">linked_list_allocator::</span>LockedHeap <span class="op">=</span> <span class="pp">linked_list_allocator::LockedHeap::</span>empty()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>The struct is named <code>LockedHeap</code> because it uses the <a href="https://docs.rs/spinning_top/0.1.0/spinning_top/type.Spinlock.html"><code>spinning_top::Spinlock</code></a> type for synchronization. This is required because multiple threads could access the <code>ALLOCATOR</code> static at the same time. As always, when using a spinlock or a mutex, we need to be careful to not accidentally cause a deadlock. This means that we shouldn’t perform any allocations in interrupt handlers, since they can run at an arbitrary time and might interrupt an in-progress allocation.</p>
 <p>Setting the <code>LockedHeap</code> as global allocator is not enough. The reason is that we use the <a href="https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.LockedHeap.html#method.empty"><code>empty</code></a> constructor function, which creates an allocator without any backing memory. Like our dummy allocator, it always returns an error on <code>alloc</code>. To fix this, we need to initialize the allocator after creating the heap:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="co">// in src/allocator.rs</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">pub</span> <span class="kw">fn</span> init_heap(</span>
-<span id="cb3-4"><a href="#cb3-4"></a>    mapper<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> Mapper<span class="op">&lt;</span>Size4KiB<span class="op">&gt;,</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a>    frame_allocator<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> FrameAllocator<span class="op">&lt;</span>Size4KiB<span class="op">&gt;,</span></span>
-<span id="cb3-6"><a href="#cb3-6"></a>) <span class="op">-&gt;</span> <span class="dt">Result</span><span class="op">&lt;</span>()<span class="op">,</span> MapToError<span class="op">&lt;</span>Size4KiB<span class="op">&gt;&gt;</span> <span class="op">{</span></span>
-<span id="cb3-7"><a href="#cb3-7"></a>    <span class="co">// […] map all heap pages to physical frames</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a></span>
-<span id="cb3-9"><a href="#cb3-9"></a>    <span class="co">// new</span></span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/allocator.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb3" data-filename="src/allocator.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">pub</span> <span class="kw">fn</span> init_heap(</span>
+<span id="cb3-2"><a href="#cb3-2"></a>    mapper<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> <span class="pp">x86_64::structures::paging::</span>Mapper<span class="op">&lt;</span><span class="pp">x86_64::structures::paging::</span>Size4KiB<span class="op">&gt;,</span></span>
+<span id="cb3-3"><a href="#cb3-3"></a>    frame_allocator<span class="op">:</span> <span class="op">&amp;</span><span class="kw">mut</span> <span class="kw">impl</span> <span class="pp">x86_64::structures::paging::</span>FrameAllocator<span class="op">&lt;</span></span>
+<span id="cb3-4"><a href="#cb3-4"></a>        <span class="pp">x86_64::structures::paging::</span>Size4KiB<span class="op">,</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>    <span class="op">&gt;,</span></span>
+<span id="cb3-6"><a href="#cb3-6"></a>) <span class="op">-&gt;</span> <span class="dt">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="op">{</span></span>
+<span id="cb3-7"><a href="#cb3-7"></a></span>
+<span id="cb3-8"><a href="#cb3-8"></a>    <span class="co">// All the stuff we did already</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a></span>
 <span id="cb3-10"><a href="#cb3-10"></a>    <span class="kw">unsafe</span> <span class="op">{</span></span>
 <span id="cb3-11"><a href="#cb3-11"></a>        ALLOCATOR<span class="op">.</span>lock()<span class="op">.</span>init(HEAP_START<span class="op">,</span> HEAP_SIZE)<span class="op">;</span></span>
 <span id="cb3-12"><a href="#cb3-12"></a>    <span class="op">}</span></span>
 <span id="cb3-13"><a href="#cb3-13"></a></span>
-<span id="cb3-14"><a href="#cb3-14"></a>    <span class="cn">Ok</span>(())</span>
+<span id="cb3-14"><a href="#cb3-14"></a>    <span class="cf">return</span> <span class="cn">Some</span>(())<span class="op">;</span></span>
 <span id="cb3-15"><a href="#cb3-15"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We use the <a href="https://docs.rs/lock_api/0.3.3/lock_api/struct.Mutex.html#method.lock"><code>lock</code></a> method on the inner spinlock of the <code>LockedHeap</code> type to get an exclusive reference to the wrapped <a href="https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html"><code>Heap</code></a> instance, on which we then call the <a href="https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init"><code>init</code></a> method with the heap bounds as arguments. Because the <a href="https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init"><code>init</code></a> function already tries to write to the heap memory, we must initialize the heap only <em>after</em> mapping the heap pages.</p>
+</div>
+<p>We use the <a href="https://docs.rs/lock_api/0.3.3/lock_api/struct.Mutex.html#method.lock"><code>lock</code></a> method on the inner spinlock of the <code>LockedHeap</code> type to get an exclusive reference to the wrapped [<code>Heap</code>] instance, on which we then call the <a href="https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init"><code>init</code></a> method with the heap bounds as arguments. Because the <a href="https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init"><code>init</code></a> function already tries to write to the heap memory, we must initialize the heap only <em>after</em> mapping the heap pages.</p>
 <p>After initializing the heap, we can now use all allocation and collection types of the built-in [<code>alloc</code>] crate without error:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="co">// in src/main.rs</span></span>
 <span id="cb4-2"><a href="#cb4-2"></a></span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="kw">use</span> <span class="pp">alloc::</span><span class="op">{</span><span class="pp">boxed::</span><span class="dt">Box</span><span class="op">,</span> vec<span class="op">,</span> <span class="pp">vec::</span><span class="dt">Vec</span><span class="op">,</span> <span class="pp">rc::</span>Rc<span class="op">};</span></span>
 <span id="cb4-4"><a href="#cb4-4"></a></span>
 <span id="cb4-5"><a href="#cb4-5"></a><span class="kw">fn</span> kernel_main(boot_info<span class="op">:</span> <span class="op">&amp;</span><span class="ot">'static</span> BootInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a>    <span class="co">// […] initialize interrupts, mapper, frame_allocator, heap</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a></span>
-<span id="cb4-8"><a href="#cb4-8"></a>    <span class="co">// allocate a number on the heap</span></span>
-<span id="cb4-9"><a href="#cb4-9"></a>    <span class="kw">let</span> heap_value <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">41</span>)<span class="op">;</span></span>
-<span id="cb4-10"><a href="#cb4-10"></a>    <span class="pp">println!</span>(<span class="st">"heap_value at {:p}"</span><span class="op">,</span> heap_value)<span class="op">;</span></span>
-<span id="cb4-11"><a href="#cb4-11"></a></span>
-<span id="cb4-12"><a href="#cb4-12"></a>    <span class="co">// create a dynamically sized vector</span></span>
-<span id="cb4-13"><a href="#cb4-13"></a>    <span class="kw">let</span> <span class="kw">mut</span> vec <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
-<span id="cb4-14"><a href="#cb4-14"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="dv">500</span> <span class="op">{</span></span>
-<span id="cb4-15"><a href="#cb4-15"></a>        vec<span class="op">.</span>push(i)<span class="op">;</span></span>
-<span id="cb4-16"><a href="#cb4-16"></a>    <span class="op">}</span></span>
-<span id="cb4-17"><a href="#cb4-17"></a>    <span class="pp">println!</span>(<span class="st">"vec at {:p}"</span><span class="op">,</span> vec<span class="op">.</span>as_slice())<span class="op">;</span></span>
-<span id="cb4-18"><a href="#cb4-18"></a></span>
-<span id="cb4-19"><a href="#cb4-19"></a>    <span class="co">// create a reference counted vector -&gt; will be freed when count reaches 0</span></span>
-<span id="cb4-20"><a href="#cb4-20"></a>    <span class="kw">let</span> reference_counted <span class="op">=</span> <span class="pp">Rc::</span>new(<span class="pp">vec!</span>[<span class="dv">1</span><span class="op">,</span> <span class="dv">2</span><span class="op">,</span> <span class="dv">3</span>])<span class="op">;</span></span>
-<span id="cb4-21"><a href="#cb4-21"></a>    <span class="kw">let</span> cloned_reference <span class="op">=</span> reference_counted<span class="op">.</span>clone()<span class="op">;</span></span>
-<span id="cb4-22"><a href="#cb4-22"></a>    <span class="pp">println!</span>(<span class="st">"current reference count is {}"</span><span class="op">,</span> <span class="pp">Rc::</span>strong_count(<span class="op">&amp;</span>cloned_reference))<span class="op">;</span></span>
-<span id="cb4-23"><a href="#cb4-23"></a>    <span class="pp">core::mem::</span>drop(reference_counted)<span class="op">;</span></span>
-<span id="cb4-24"><a href="#cb4-24"></a>    <span class="pp">println!</span>(<span class="st">"reference count is {} now"</span><span class="op">,</span> <span class="pp">Rc::</span>strong_count(<span class="op">&amp;</span>cloned_reference))<span class="op">;</span></span>
-<span id="cb4-25"><a href="#cb4-25"></a></span>
-<span id="cb4-26"><a href="#cb4-26"></a>    <span class="co">// […] call `test_main` in test context</span></span>
-<span id="cb4-27"><a href="#cb4-27"></a>    <span class="pp">println!</span>(<span class="st">"It did not crash!"</span>)<span class="op">;</span></span>
-<span id="cb4-28"><a href="#cb4-28"></a>    <span class="pp">blog_os::</span>hlt_loop()<span class="op">;</span></span>
-<span id="cb4-29"><a href="#cb4-29"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This code example shows some uses of the [<code>Box</code>], <a href="https://doc.rust-lang.org/alloc/vec/"><code>Vec</code></a>, and <a href="https://doc.rust-lang.org/alloc/rc/"><code>Rc</code></a> types. For the <code>Box</code> and <code>Vec</code> types, we print the underlying heap pointers using the <a href="https://doc.rust-lang.org/core/fmt/trait.Pointer.html"><code>{:p}</code> formatting specifier</a>. To showcase <code>Rc</code>, we create a reference-counted heap value and use the <a href="https://doc.rust-lang.org/alloc/rc/struct.Rc.html#method.strong_count"><code>Rc::strong_count</code></a> function to print the current reference count before and after dropping an instance (using <a href="https://doc.rust-lang.org/core/mem/fn.drop.html"><code>core::mem::drop</code></a>).</p>
-<p>When we run it, we see the following:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb5-1"><a href="#cb5-1"></a>heap_value at 0x444444440000</span>
-<span id="cb5-2"><a href="#cb5-2"></a>vec at 0x4444444408000</span>
-<span id="cb5-3"><a href="#cb5-3"></a>current reference count is 2</span>
-<span id="cb5-4"><a href="#cb5-4"></a>reference count is 1 now</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>As expected, we see that the <code>Box</code> and <code>Vec</code> values live on the heap, as indicated by the pointer starting with the <code>0x_4444_4444_*</code> prefix. The reference counted value also behaves as expected, with the reference count being 2 after the <code>clone</code> call, and 1 again after one of the instances was dropped.</p>
-<p>The reason that the vector starts at offset <code>0x800</code> is not that the boxed value is <code>0x800</code> bytes large, but the <a href="https://doc.rust-lang.org/alloc/vec/struct.Vec.html#capacity-and-reallocation">reallocations</a> that occur when the vector needs to increase its capacity. For example, when the vector’s capacity is 32 and we try to add the next element, the vector allocates a new backing array with a capacity of 64 behind the scenes and copies all elements over. Then it frees the old allocation.</p>
+<span id="cb4-6"><a href="#cb4-6"></a></span>
+<span id="cb4-7"><a href="#cb4-7"></a>    <span class="co">// Do all the initialization stuff</span></span>
+<span id="cb4-8"><a href="#cb4-8"></a></span>
+<span id="cb4-9"><a href="#cb4-9"></a>    <span class="pp">println!</span>(<span class="st">"Hello world{}"</span><span class="op">,</span> <span class="st">"!"</span>)<span class="op">;</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>    <span class="kw">let</span> b <span class="op">=</span> <span class="pp">alloc::boxed::</span><span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">371</span>)<span class="op">;</span></span>
+<span id="cb4-11"><a href="#cb4-11"></a>    <span class="pp">println!</span>(<span class="st">"Hello box containing {}!"</span><span class="op">,</span> <span class="op">*</span>b)<span class="op">;</span></span>
+<span id="cb4-12"><a href="#cb4-12"></a>    <span class="pp">println!</span>(<span class="st">"Hello box at {:p}!"</span><span class="op">,</span> b)<span class="op">;</span></span>
+<span id="cb4-13"><a href="#cb4-13"></a>    </span>
+<span id="cb4-14"><a href="#cb4-14"></a>    <span class="co">// All the other main nonsense.</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a>    </span>
+<span id="cb4-16"><a href="#cb4-16"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I see the following:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb5-1"><a href="#cb5-1"></a>Hello world!</span>
+<span id="cb5-2"><a href="#cb5-2"></a>Hello box containing 371!</span>
+<span id="cb5-3"><a href="#cb5-3"></a>Hello box at 0xc3710010!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I note that this is the <code>371</code> we enboxified and the <code>0x_c371_0000</code> used as a memory location during initialization (which mean it is out on the heap).</p>
 <p>Of course, there are many more allocation and collection types in the <code>alloc</code> crate that we can now all use in our kernel, including:</p>
 <ul>
 <li>the thread-safe reference counted pointer <a href="https://doc.rust-lang.org/alloc/sync/struct.Arc.html"><code>Arc</code></a></li>
@@ -487,109 +517,132 @@ Q: When will you used linked lists?
 <li>the <a href="https://doc.rust-lang.org/alloc/collections/binary_heap/struct.BinaryHeap.html"><code>BinaryHeap</code></a> priority queue</li>
 <li><a href="https://doc.rust-lang.org/alloc/collections/btree_map/struct.BTreeMap.html"><code>BTreeMap</code></a> and <a href="https://doc.rust-lang.org/alloc/collections/btree_set/struct.BTreeSet.html"><code>BTreeSet</code></a></li>
 </ul>
-<p>These types will become very useful when we want to implement thread lists, scheduling queues, or support for async/await.</p>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Recall
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I, an actual real life Rust developer (honest!) have used <code>BTreeMap</code>.</p>
+</div>
+</div>
+<p>These types will become very useful to implement thread lists, scheduling queues, or support for async/await.</p>
 </section>
 <section id="adding-a-test" class="level2">
 <h2 class="anchored" data-anchor-id="adding-a-test">Adding a Test</h2>
 <p>To ensure that we don’t accidentally break our new allocation code, we should add an integration test for it. We start by creating a new <code>tests/heap_allocation.rs</code> file with the following content:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="co">// in tests/heap_allocation.rs</span></span>
-<span id="cb6-2"><a href="#cb6-2"></a></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">blog_os::</span>test_runner<span class="at">)]</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a><span class="at">#![</span>reexport_test_harness_main <span class="op">=</span> <span class="st">"test_main"</span><span class="at">]</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a></span>
-<span id="cb6-9"><a href="#cb6-9"></a><span class="kw">extern</span> <span class="kw">crate</span> alloc<span class="op">;</span></span>
-<span id="cb6-10"><a href="#cb6-10"></a></span>
-<span id="cb6-11"><a href="#cb6-11"></a><span class="kw">use</span> <span class="pp">bootloader::</span><span class="op">{</span>entry_point<span class="op">,</span> BootInfo<span class="op">};</span></span>
-<span id="cb6-12"><a href="#cb6-12"></a><span class="kw">use</span> <span class="pp">core::panic::</span>PanicInfo<span class="op">;</span></span>
-<span id="cb6-13"><a href="#cb6-13"></a></span>
-<span id="cb6-14"><a href="#cb6-14"></a><span class="pp">entry_point!</span>(main)<span class="op">;</span></span>
-<span id="cb6-15"><a href="#cb6-15"></a></span>
-<span id="cb6-16"><a href="#cb6-16"></a><span class="kw">fn</span> main(boot_info<span class="op">:</span> <span class="op">&amp;</span><span class="ot">'static</span> BootInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb6-17"><a href="#cb6-17"></a>    <span class="pp">unimplemented!</span>()<span class="op">;</span></span>
-<span id="cb6-18"><a href="#cb6-18"></a><span class="op">}</span></span>
-<span id="cb6-19"><a href="#cb6-19"></a></span>
-<span id="cb6-20"><a href="#cb6-20"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
-<span id="cb6-21"><a href="#cb6-21"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb6-22"><a href="#cb6-22"></a>    <span class="pp">blog_os::</span>test_panic_handler(info)</span>
-<span id="cb6-23"><a href="#cb6-23"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>We reuse the <code>test_runner</code> and <code>test_panic_handler</code> functions from our <code>lib.rs</code>. Since we want to test allocations, we enable the <code>alloc</code> crate through the <code>extern crate alloc</code> statement. For more information about the test boilerplate, check out the <a href="@/edition-2/posts/04-testing/index.md"><em>Testing</em></a> post.</p>
-<p>The implementation of the <code>main</code> function looks like this:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="co">// in tests/heap_allocation.rs</span></span>
-<span id="cb7-2"><a href="#cb7-2"></a></span>
-<span id="cb7-3"><a href="#cb7-3"></a><span class="kw">fn</span> main(boot_info<span class="op">:</span> <span class="op">&amp;</span><span class="ot">'static</span> BootInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
-<span id="cb7-4"><a href="#cb7-4"></a>    <span class="kw">use</span> <span class="pp">blog_os::</span>allocator<span class="op">;</span></span>
-<span id="cb7-5"><a href="#cb7-5"></a>    <span class="kw">use</span> <span class="pp">blog_os::memory::</span><span class="op">{</span><span class="kw">self</span><span class="op">,</span> BootInfoFrameAllocator<span class="op">};</span></span>
-<span id="cb7-6"><a href="#cb7-6"></a>    <span class="kw">use</span> <span class="pp">x86_64::</span>VirtAddr<span class="op">;</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a></span>
-<span id="cb7-8"><a href="#cb7-8"></a>    <span class="pp">blog_os::</span>init()<span class="op">;</span></span>
-<span id="cb7-9"><a href="#cb7-9"></a>    <span class="kw">let</span> phys_mem_offset <span class="op">=</span> <span class="pp">VirtAddr::</span>new(boot_info<span class="op">.</span>physical_memory_offset)<span class="op">;</span></span>
-<span id="cb7-10"><a href="#cb7-10"></a>    <span class="kw">let</span> <span class="kw">mut</span> mapper <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span> <span class="pp">memory::</span>init(phys_mem_offset) <span class="op">};</span></span>
-<span id="cb7-11"><a href="#cb7-11"></a>    <span class="kw">let</span> <span class="kw">mut</span> frame_allocator <span class="op">=</span> <span class="kw">unsafe</span> <span class="op">{</span></span>
-<span id="cb7-12"><a href="#cb7-12"></a>        <span class="pp">BootInfoFrameAllocator::</span>init(<span class="op">&amp;</span>boot_info<span class="op">.</span>memory_map)</span>
-<span id="cb7-13"><a href="#cb7-13"></a>    <span class="op">};</span></span>
-<span id="cb7-14"><a href="#cb7-14"></a>    <span class="pp">allocator::</span>init_heap(<span class="op">&amp;</span><span class="kw">mut</span> mapper<span class="op">,</span> <span class="op">&amp;</span><span class="kw">mut</span> frame_allocator)</span>
-<span id="cb7-15"><a href="#cb7-15"></a>        <span class="op">.</span>expect(<span class="st">"heap initialization failed"</span>)<span class="op">;</span></span>
-<span id="cb7-16"><a href="#cb7-16"></a></span>
-<span id="cb7-17"><a href="#cb7-17"></a>    test_main()<span class="op">;</span></span>
-<span id="cb7-18"><a href="#cb7-18"></a>    <span class="cf">loop</span> <span class="op">{}</span></span>
-<span id="cb7-19"><a href="#cb7-19"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>It is very similar to the <code>kernel_main</code> function in our <code>main.rs</code>, with the differences that we don’t invoke <code>println</code>, don’t include any example allocations, and call <code>test_main</code> unconditionally.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tests/heap_allocation.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb6" data-filename="tests/heap_allocation.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb6-1"><a href="#cb6-1"></a><span class="at">#![</span>no_std<span class="at">]</span></span>
+<span id="cb6-2"><a href="#cb6-2"></a><span class="at">#![</span>no_main<span class="at">]</span></span>
+<span id="cb6-3"><a href="#cb6-3"></a><span class="at">#![</span>feature<span class="at">(</span>custom_test_frameworks<span class="at">)]</span></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="at">#![</span>test_runner<span class="at">(</span><span class="pp">osirs::</span>_test_runner<span class="at">)]</span></span>
+<span id="cb6-5"><a href="#cb6-5"></a></span>
+<span id="cb6-6"><a href="#cb6-6"></a><span class="kw">extern</span> <span class="kw">crate</span> alloc<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7"></a></span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="at">#[</span>panic_handler<span class="at">]</span></span>
+<span id="cb6-9"><a href="#cb6-9"></a><span class="kw">fn</span> panic(info<span class="op">:</span> <span class="op">&amp;</span><span class="pp">core::panic::</span>PanicInfo) <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb6-10"><a href="#cb6-10"></a>    <span class="pp">osirs::</span>test_panic_handler(info)</span>
+<span id="cb6-11"><a href="#cb6-11"></a><span class="op">}</span></span>
+<span id="cb6-12"><a href="#cb6-12"></a></span>
+<span id="cb6-13"><a href="#cb6-13"></a><span class="at">#[</span><span class="kw">unsafe</span><span class="at">(</span>no_mangle<span class="at">)]</span></span>
+<span id="cb6-14"><a href="#cb6-14"></a><span class="kw">pub</span> <span class="kw">extern</span> <span class="st">"C"</span> <span class="kw">fn</span> _start() <span class="op">-&gt;</span> <span class="op">!</span> <span class="op">{</span></span>
+<span id="cb6-15"><a href="#cb6-15"></a>    <span class="pp">osirs::</span>init()<span class="op">;</span></span>
+<span id="cb6-16"><a href="#cb6-16"></a>    <span class="pp">osirs::</span>qemu_quit(<span class="pp">osirs::</span>QEMU_PASS)<span class="op">;</span></span>
+<span id="cb6-17"><a href="#cb6-17"></a>    <span class="pp">osirs::</span>halt()<span class="op">;</span></span>
+<span id="cb6-18"><a href="#cb6-18"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Best Practice
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Around this point, I would refactor all the initialization code back into the <code>src/lib.rs</code> function <code>init()</code> to avoid copying around (and maintaining!) reams of code.</p>
+</div>
+</div>
 <p>Now we’re ready to add a few test cases. First, we add a test that performs some simple allocations using [<code>Box</code>] and checks the allocated values to ensure that basic allocations work:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="co">// in tests/heap_allocation.rs</span></span>
-<span id="cb8-2"><a href="#cb8-2"></a><span class="kw">use</span> <span class="pp">alloc::boxed::</span><span class="dt">Box</span><span class="op">;</span></span>
-<span id="cb8-3"><a href="#cb8-3"></a></span>
-<span id="cb8-4"><a href="#cb8-4"></a><span class="at">#[</span>test_case<span class="at">]</span></span>
-<span id="cb8-5"><a href="#cb8-5"></a><span class="kw">fn</span> simple_allocation() <span class="op">{</span></span>
-<span id="cb8-6"><a href="#cb8-6"></a>    <span class="kw">let</span> heap_value_1 <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">41</span>)<span class="op">;</span></span>
-<span id="cb8-7"><a href="#cb8-7"></a>    <span class="kw">let</span> heap_value_2 <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">13</span>)<span class="op">;</span></span>
-<span id="cb8-8"><a href="#cb8-8"></a>    <span class="pp">assert_eq!</span>(<span class="op">*</span>heap_value_1<span class="op">,</span> <span class="dv">41</span>)<span class="op">;</span></span>
-<span id="cb8-9"><a href="#cb8-9"></a>    <span class="pp">assert_eq!</span>(<span class="op">*</span>heap_value_2<span class="op">,</span> <span class="dv">13</span>)<span class="op">;</span></span>
-<span id="cb8-10"><a href="#cb8-10"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tests/heap_allocation.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb7" data-filename="tests/heap_allocation.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">fn</span> simple_allocation() <span class="op">{</span></span>
+<span id="cb7-2"><a href="#cb7-2"></a>    <span class="kw">let</span> heap_value_1 <span class="op">=</span> <span class="pp">alloc::boxed::</span><span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">41</span>)<span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3"></a>    <span class="kw">let</span> heap_value_2 <span class="op">=</span> <span class="pp">alloc::boxed::</span><span class="dt">Box</span><span class="pp">::</span>new(<span class="dv">13</span>)<span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4"></a>    <span class="pp">assert_eq!</span>(<span class="op">*</span>heap_value_1<span class="op">,</span> <span class="dv">41</span>)<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5"></a>    <span class="pp">assert_eq!</span>(<span class="op">*</span>heap_value_2<span class="op">,</span> <span class="dv">13</span>)<span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Most importantly, this test verifies that no allocation error occurs.</p>
 <p>Next, we iteratively build a large vector, to test both large allocations and multiple allocations (due to reallocations):</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">// in tests/heap_allocation.rs</span></span>
-<span id="cb9-2"><a href="#cb9-2"></a></span>
-<span id="cb9-3"><a href="#cb9-3"></a><span class="kw">use</span> <span class="pp">alloc::vec::</span><span class="dt">Vec</span><span class="op">;</span></span>
-<span id="cb9-4"><a href="#cb9-4"></a></span>
-<span id="cb9-5"><a href="#cb9-5"></a><span class="at">#[</span>test_case<span class="at">]</span></span>
-<span id="cb9-6"><a href="#cb9-6"></a><span class="kw">fn</span> large_vec() <span class="op">{</span></span>
-<span id="cb9-7"><a href="#cb9-7"></a>    <span class="kw">let</span> n <span class="op">=</span> <span class="dv">1000</span><span class="op">;</span></span>
-<span id="cb9-8"><a href="#cb9-8"></a>    <span class="kw">let</span> <span class="kw">mut</span> vec <span class="op">=</span> <span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
-<span id="cb9-9"><a href="#cb9-9"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>n <span class="op">{</span></span>
-<span id="cb9-10"><a href="#cb9-10"></a>        vec<span class="op">.</span>push(i)<span class="op">;</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a>    <span class="op">}</span></span>
-<span id="cb9-12"><a href="#cb9-12"></a>    <span class="pp">assert_eq!</span>(vec<span class="op">.</span>iter()<span class="op">.</span><span class="pp">sum::</span><span class="op">&lt;</span><span class="dt">u64</span><span class="op">&gt;</span>()<span class="op">,</span> (n <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> n <span class="op">/</span> <span class="dv">2</span>)<span class="op">;</span></span>
-<span id="cb9-13"><a href="#cb9-13"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tests/heap_allocation.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb8" data-filename="tests/heap_allocation.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">fn</span> large_vec() <span class="op">{</span></span>
+<span id="cb8-2"><a href="#cb8-2"></a>    <span class="kw">let</span> n <span class="op">=</span> <span class="dv">1000</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="kw">let</span> <span class="kw">mut</span> vec <span class="op">=</span> <span class="pp">alloc::vec::</span><span class="dt">Vec</span><span class="pp">::</span>new()<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>n <span class="op">{</span></span>
+<span id="cb8-5"><a href="#cb8-5"></a>        vec<span class="op">.</span>push(i)<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6"></a>    <span class="op">}</span></span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="pp">assert_eq!</span>(vec<span class="op">.</span>iter()<span class="op">.</span><span class="pp">sum::</span><span class="op">&lt;</span><span class="dt">u64</span><span class="op">&gt;</span>()<span class="op">,</span> (n <span class="op">-</span> <span class="dv">1</span>) <span class="op">*</span> n <span class="op">/</span> <span class="dv">2</span>)<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>We verify the sum by comparing it with the formula for the <a href="https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF#Partial_sums">n-th partial sum</a>. This gives us some confidence that the allocated values are all correct.</p>
+<p><span class="math display">\[
+\sum_{k=1}^n k = \frac{n(n + 1)}{2}
+\]</span></p>
 <p>As a third test, we create ten thousand allocations after each other:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb10-1"><a href="#cb10-1"></a><span class="co">// in tests/heap_allocation.rs</span></span>
-<span id="cb10-2"><a href="#cb10-2"></a></span>
-<span id="cb10-3"><a href="#cb10-3"></a><span class="kw">use</span> <span class="pp">blog_os::allocator::</span>HEAP_SIZE<span class="op">;</span></span>
-<span id="cb10-4"><a href="#cb10-4"></a></span>
-<span id="cb10-5"><a href="#cb10-5"></a><span class="at">#[</span>test_case<span class="at">]</span></span>
-<span id="cb10-6"><a href="#cb10-6"></a><span class="kw">fn</span> many_boxes() <span class="op">{</span></span>
-<span id="cb10-7"><a href="#cb10-7"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span>HEAP_SIZE <span class="op">{</span></span>
-<span id="cb10-8"><a href="#cb10-8"></a>        <span class="kw">let</span> x <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(i)<span class="op">;</span></span>
-<span id="cb10-9"><a href="#cb10-9"></a>        <span class="pp">assert_eq!</span>(<span class="op">*</span>x<span class="op">,</span> i)<span class="op">;</span></span>
-<span id="cb10-10"><a href="#cb10-10"></a>    <span class="op">}</span></span>
-<span id="cb10-11"><a href="#cb10-11"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>This test ensures that the allocator reuses freed memory for subsequent allocations since it would run out of memory otherwise. This might seem like an obvious requirement for an allocator, but there are allocator designs that don’t do this. An example is the bump allocator design that will be explained in the next post.</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tests/heap_allocation.rs</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="tests/heap_allocation.rs"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">fn</span> many_boxes() <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="dv">0</span><span class="op">..</span><span class="pp">osirs::allocator::</span>HEAP_SIZE <span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a>        <span class="kw">let</span> x <span class="op">=</span> <span class="dt">Box</span><span class="pp">::</span>new(i)<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>        <span class="pp">assert_eq!</span>(<span class="op">*</span>x<span class="op">,</span> i)<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>    <span class="op">}</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-simple callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Timeout
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I couldn’t finish this test during my timeout window, but you can make a smaller heap size, especially just for now, and may need to change the vector test accordingly.</p>
+</div>
+</div>
+<p>This test ensures that the allocator reuses freed memory for subsequent allocations since it would run out of memory otherwise. This might seem like an obvious requirement for an allocator, but there are allocator designs that don’t do this.</p>
 <p>Let’s run our new integration test:</p>
 <pre><code>&gt; cargo test --test heap_allocation
 […]
-Running 3 tests
-simple_allocation... [ok]
-large_vec... [ok]
-many_boxes... [ok]</code></pre>
-<p>All three tests succeeded! You can also invoke <code>cargo test</code> (without the <code>--test</code> argument) to run all unit and integration tests.</p>
+Initiating test 0x00... [Pass]
+Initiating test 0x01... [Pass]
+Initiating test 0x02... [Pass]</code></pre>
+<p>All three tests succeeded! You can also invoke <code>cargo t</code> (without the <code>--test</code> argument) to run all unit and integration tests.</p>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>Fin</h1>
 
 
 <!-- -->
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -1073,287 +1126,225 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   <div class="nav-page nav-page-next">
   </div>
 </nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb12" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb12-1"><a href="#cb12-1"></a><span class="co">---</span></span>
-<span id="cb12-2"><a href="#cb12-2"></a><span class="an">title:</span><span class="co"> Allocator</span></span>
-<span id="cb12-3"><a href="#cb12-3"></a><span class="an">format:</span><span class="co"> html</span></span>
-<span id="cb12-4"><a href="#cb12-4"></a><span class="co">---</span></span>
-<span id="cb12-5"><a href="#cb12-5"></a>   </span>
-<span id="cb12-6"><a href="#cb12-6"></a><span class="fu"># TODO</span></span>
-<span id="cb12-7"><a href="#cb12-7"></a></span>
-<span id="cb12-8"><a href="#cb12-8"></a>We now have a mapped heap memory region that is ready to be used. The <span class="in">`Box::new`</span> call still uses our old <span class="in">`Dummy`</span> allocator, so you will still see the "out of memory" error when you run it. Let's fix this by using a proper allocator.</span>
-<span id="cb12-9"><a href="#cb12-9"></a></span>
-<span id="cb12-10"><a href="#cb12-10"></a><span class="fu">## Using an Allocator Crate</span></span>
-<span id="cb12-11"><a href="#cb12-11"></a></span>
-<span id="cb12-12"><a href="#cb12-12"></a>Since implementing an allocator is somewhat complex, we start by using an external allocator crate. We will learn how to implement our own allocator latter.</span>
-<span id="cb12-13"><a href="#cb12-13"></a></span>
-<span id="cb12-14"><a href="#cb12-14"></a>A simple allocator crate for <span class="in">`no_std`</span> applications is the <span class="co">[</span><span class="ot">`linked_list_allocator`</span><span class="co">]</span> crate. Its name comes from the fact that it uses a linked list data structure to keep track of deallocated memory regions. See the next post for a more detailed explanation of this approach.</span>
-<span id="cb12-15"><a href="#cb12-15"></a></span>
-<span id="cb12-16"><a href="#cb12-16"></a>::: {.callout-note}</span>
-<span id="cb12-17"><a href="#cb12-17"></a><span class="fu">## Q: When will you used linked lists?</span></span>
-<span id="cb12-18"><a href="#cb12-18"></a></span>
-<span id="cb12-19"><a href="#cb12-19"></a>**A**: Always.</span>
-<span id="cb12-20"><a href="#cb12-20"></a>:::</span>
-<span id="cb12-21"><a href="#cb12-21"></a></span>
-<span id="cb12-22"><a href="#cb12-22"></a>To use the crate, we first need to add a dependency on it in our <span class="in">`Cargo.toml`</span>:</span>
-<span id="cb12-23"><a href="#cb12-23"></a></span>
-<span id="cb12-24"><a href="#cb12-24"></a><span class="ot">[`linked_list_allocator`]: https://github.com/phil-opp/linked-list-allocator/</span></span>
-<span id="cb12-25"><a href="#cb12-25"></a></span>
-<span id="cb12-26"><a href="#cb12-26"></a><span class="in">```toml</span></span>
-<span id="cb12-27"><a href="#cb12-27"></a><span class="in"># in Cargo.toml</span></span>
-<span id="cb12-28"><a href="#cb12-28"></a></span>
-<span id="cb12-29"><a href="#cb12-29"></a><span class="in">[dependencies]</span></span>
-<span id="cb12-30"><a href="#cb12-30"></a><span class="in">linked_list_allocator = "0.9.0"</span></span>
-<span id="cb12-31"><a href="#cb12-31"></a><span class="in">```</span></span>
-<span id="cb12-32"><a href="#cb12-32"></a></span>
-<span id="cb12-33"><a href="#cb12-33"></a>Then we can replace our dummy allocator with the allocator provided by the crate:</span>
-<span id="cb12-34"><a href="#cb12-34"></a></span>
-<span id="cb12-35"><a href="#cb12-35"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-36"><a href="#cb12-36"></a><span class="in">// in src/allocator.rs</span></span>
-<span id="cb12-37"><a href="#cb12-37"></a></span>
-<span id="cb12-38"><a href="#cb12-38"></a><span class="in">use linked_list_allocator::LockedHeap;</span></span>
-<span id="cb12-39"><a href="#cb12-39"></a></span>
-<span id="cb12-40"><a href="#cb12-40"></a><span class="in">#[global_allocator]</span></span>
-<span id="cb12-41"><a href="#cb12-41"></a><span class="in">static ALLOCATOR: LockedHeap = LockedHeap::empty();</span></span>
-<span id="cb12-42"><a href="#cb12-42"></a><span class="in">```</span></span>
-<span id="cb12-43"><a href="#cb12-43"></a></span>
-<span id="cb12-44"><a href="#cb12-44"></a>The struct is named <span class="in">`LockedHeap`</span> because it uses the <span class="co">[</span><span class="ot">`spinning_top::Spinlock`</span><span class="co">]</span> type for synchronization. This is required because multiple threads could access the <span class="in">`ALLOCATOR`</span> static at the same time. As always, when using a spinlock or a mutex, we need to be careful to not accidentally cause a deadlock. This means that we shouldn't perform any allocations in interrupt handlers, since they can run at an arbitrary time and might interrupt an in-progress allocation.</span>
-<span id="cb12-45"><a href="#cb12-45"></a></span>
-<span id="cb12-46"><a href="#cb12-46"></a><span class="ot">[`spinning_top::Spinlock`]: https://docs.rs/spinning_top/0.1.0/spinning_top/type.Spinlock.html</span></span>
-<span id="cb12-47"><a href="#cb12-47"></a></span>
-<span id="cb12-48"><a href="#cb12-48"></a>Setting the <span class="in">`LockedHeap`</span> as global allocator is not enough. The reason is that we use the <span class="co">[</span><span class="ot">`empty`</span><span class="co">]</span> constructor function, which creates an allocator without any backing memory. Like our dummy allocator, it always returns an error on <span class="in">`alloc`</span>. To fix this, we need to initialize the allocator after creating the heap:</span>
-<span id="cb12-49"><a href="#cb12-49"></a></span>
-<span id="cb12-50"><a href="#cb12-50"></a><span class="ot">[`empty`]: https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.LockedHeap.html#method.empty</span></span>
-<span id="cb12-51"><a href="#cb12-51"></a></span>
-<span id="cb12-52"><a href="#cb12-52"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-53"><a href="#cb12-53"></a><span class="in">// in src/allocator.rs</span></span>
-<span id="cb12-54"><a href="#cb12-54"></a></span>
-<span id="cb12-55"><a href="#cb12-55"></a><span class="in">pub fn init_heap(</span></span>
-<span id="cb12-56"><a href="#cb12-56"></a><span class="in">    mapper: &amp;mut impl Mapper&lt;Size4KiB&gt;,</span></span>
-<span id="cb12-57"><a href="#cb12-57"></a><span class="in">    frame_allocator: &amp;mut impl FrameAllocator&lt;Size4KiB&gt;,</span></span>
-<span id="cb12-58"><a href="#cb12-58"></a><span class="in">) -&gt; Result&lt;(), MapToError&lt;Size4KiB&gt;&gt; {</span></span>
-<span id="cb12-59"><a href="#cb12-59"></a><span class="in">    // […] map all heap pages to physical frames</span></span>
-<span id="cb12-60"><a href="#cb12-60"></a></span>
-<span id="cb12-61"><a href="#cb12-61"></a><span class="in">    // new</span></span>
-<span id="cb12-62"><a href="#cb12-62"></a><span class="in">    unsafe {</span></span>
-<span id="cb12-63"><a href="#cb12-63"></a><span class="in">        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);</span></span>
-<span id="cb12-64"><a href="#cb12-64"></a><span class="in">    }</span></span>
-<span id="cb12-65"><a href="#cb12-65"></a></span>
-<span id="cb12-66"><a href="#cb12-66"></a><span class="in">    Ok(())</span></span>
-<span id="cb12-67"><a href="#cb12-67"></a><span class="in">}</span></span>
-<span id="cb12-68"><a href="#cb12-68"></a><span class="in">```</span></span>
-<span id="cb12-69"><a href="#cb12-69"></a></span>
-<span id="cb12-70"><a href="#cb12-70"></a>We use the <span class="co">[</span><span class="ot">`lock`</span><span class="co">]</span> method on the inner spinlock of the <span class="in">`LockedHeap`</span> type to get an exclusive reference to the wrapped <span class="co">[</span><span class="ot">`Heap`</span><span class="co">]</span> instance, on which we then call the <span class="co">[</span><span class="ot">`init`</span><span class="co">]</span> method with the heap bounds as arguments. Because the <span class="co">[</span><span class="ot">`init`</span><span class="co">]</span> function already tries to write to the heap memory, we must initialize the heap only _after_ mapping the heap pages.</span>
-<span id="cb12-71"><a href="#cb12-71"></a></span>
-<span id="cb12-72"><a href="#cb12-72"></a><span class="ot">[`lock`]: https://docs.rs/lock_api/0.3.3/lock_api/struct.Mutex.html#method.lock</span></span>
-<span id="cb12-73"><a href="#cb12-73"></a><span class="ot">[`Heap`]: https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html</span></span>
-<span id="cb12-74"><a href="#cb12-74"></a><span class="ot">[`init`]: https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init</span></span>
-<span id="cb12-75"><a href="#cb12-75"></a></span>
-<span id="cb12-76"><a href="#cb12-76"></a>After initializing the heap, we can now use all allocation and collection types of the built-in <span class="co">[</span><span class="ot">`alloc`</span><span class="co">]</span> crate without error:</span>
-<span id="cb12-77"><a href="#cb12-77"></a></span>
-<span id="cb12-78"><a href="#cb12-78"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-79"><a href="#cb12-79"></a><span class="in">// in src/main.rs</span></span>
-<span id="cb12-80"><a href="#cb12-80"></a></span>
-<span id="cb12-81"><a href="#cb12-81"></a><span class="in">use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};</span></span>
-<span id="cb12-82"><a href="#cb12-82"></a></span>
-<span id="cb12-83"><a href="#cb12-83"></a><span class="in">fn kernel_main(boot_info: &amp;'static BootInfo) -&gt; ! {</span></span>
-<span id="cb12-84"><a href="#cb12-84"></a><span class="in">    // […] initialize interrupts, mapper, frame_allocator, heap</span></span>
-<span id="cb12-85"><a href="#cb12-85"></a></span>
-<span id="cb12-86"><a href="#cb12-86"></a><span class="in">    // allocate a number on the heap</span></span>
-<span id="cb12-87"><a href="#cb12-87"></a><span class="in">    let heap_value = Box::new(41);</span></span>
-<span id="cb12-88"><a href="#cb12-88"></a><span class="in">    println!("heap_value at {:p}", heap_value);</span></span>
-<span id="cb12-89"><a href="#cb12-89"></a></span>
-<span id="cb12-90"><a href="#cb12-90"></a><span class="in">    // create a dynamically sized vector</span></span>
-<span id="cb12-91"><a href="#cb12-91"></a><span class="in">    let mut vec = Vec::new();</span></span>
-<span id="cb12-92"><a href="#cb12-92"></a><span class="in">    for i in 0..500 {</span></span>
-<span id="cb12-93"><a href="#cb12-93"></a><span class="in">        vec.push(i);</span></span>
-<span id="cb12-94"><a href="#cb12-94"></a><span class="in">    }</span></span>
-<span id="cb12-95"><a href="#cb12-95"></a><span class="in">    println!("vec at {:p}", vec.as_slice());</span></span>
-<span id="cb12-96"><a href="#cb12-96"></a></span>
-<span id="cb12-97"><a href="#cb12-97"></a><span class="in">    // create a reference counted vector -&gt; will be freed when count reaches 0</span></span>
-<span id="cb12-98"><a href="#cb12-98"></a><span class="in">    let reference_counted = Rc::new(vec![1, 2, 3]);</span></span>
-<span id="cb12-99"><a href="#cb12-99"></a><span class="in">    let cloned_reference = reference_counted.clone();</span></span>
-<span id="cb12-100"><a href="#cb12-100"></a><span class="in">    println!("current reference count is {}", Rc::strong_count(&amp;cloned_reference));</span></span>
-<span id="cb12-101"><a href="#cb12-101"></a><span class="in">    core::mem::drop(reference_counted);</span></span>
-<span id="cb12-102"><a href="#cb12-102"></a><span class="in">    println!("reference count is {} now", Rc::strong_count(&amp;cloned_reference));</span></span>
-<span id="cb12-103"><a href="#cb12-103"></a></span>
-<span id="cb12-104"><a href="#cb12-104"></a><span class="in">    // […] call `test_main` in test context</span></span>
-<span id="cb12-105"><a href="#cb12-105"></a><span class="in">    println!("It did not crash!");</span></span>
-<span id="cb12-106"><a href="#cb12-106"></a><span class="in">    blog_os::hlt_loop();</span></span>
-<span id="cb12-107"><a href="#cb12-107"></a><span class="in">}</span></span>
-<span id="cb12-108"><a href="#cb12-108"></a><span class="in">```</span></span>
-<span id="cb12-109"><a href="#cb12-109"></a></span>
-<span id="cb12-110"><a href="#cb12-110"></a>This code example shows some uses of the <span class="co">[</span><span class="ot">`Box`</span><span class="co">]</span>, <span class="co">[</span><span class="ot">`Vec`</span><span class="co">]</span>, and <span class="co">[</span><span class="ot">`Rc`</span><span class="co">]</span> types. For the <span class="in">`Box`</span> and <span class="in">`Vec`</span> types, we print the underlying heap pointers using the <span class="co">[</span><span class="ot">`{:p}` formatting specifier</span><span class="co">]</span>. To showcase <span class="in">`Rc`</span>, we create a reference-counted heap value and use the <span class="co">[</span><span class="ot">`Rc::strong_count`</span><span class="co">]</span> function to print the current reference count before and after dropping an instance (using <span class="co">[</span><span class="ot">`core::mem::drop`</span><span class="co">]</span>).</span>
-<span id="cb12-111"><a href="#cb12-111"></a></span>
-<span id="cb12-112"><a href="#cb12-112"></a><span class="ot">[`Vec`]: https://doc.rust-lang.org/alloc/vec/</span></span>
-<span id="cb12-113"><a href="#cb12-113"></a><span class="ot">[`Rc`]: https://doc.rust-lang.org/alloc/rc/</span></span>
-<span id="cb12-114"><a href="#cb12-114"></a><span class="ot">[`{:p}` formatting specifier]: https://doc.rust-lang.org/core/fmt/trait.Pointer.html</span></span>
-<span id="cb12-115"><a href="#cb12-115"></a><span class="ot">[`Rc::strong_count`]: https://doc.rust-lang.org/alloc/rc/struct.Rc.html#method.strong_count</span></span>
-<span id="cb12-116"><a href="#cb12-116"></a><span class="ot">[`core::mem::drop`]: https://doc.rust-lang.org/core/mem/fn.drop.html</span></span>
-<span id="cb12-117"><a href="#cb12-117"></a></span>
-<span id="cb12-118"><a href="#cb12-118"></a>When we run it, we see the following:</span>
-<span id="cb12-119"><a href="#cb12-119"></a></span>
-<span id="cb12-120"><a href="#cb12-120"></a><span class="in">```{.email}</span></span>
-<span id="cb12-121"><a href="#cb12-121"></a><span class="in">heap_value at 0x444444440000</span></span>
-<span id="cb12-122"><a href="#cb12-122"></a><span class="in">vec at 0x4444444408000</span></span>
-<span id="cb12-123"><a href="#cb12-123"></a><span class="in">current reference count is 2</span></span>
-<span id="cb12-124"><a href="#cb12-124"></a><span class="in">reference count is 1 now</span></span>
-<span id="cb12-125"><a href="#cb12-125"></a><span class="in">```</span></span>
-<span id="cb12-126"><a href="#cb12-126"></a></span>
-<span id="cb12-127"><a href="#cb12-127"></a>As expected, we see that the <span class="in">`Box`</span> and <span class="in">`Vec`</span> values live on the heap, as indicated by the pointer starting with the <span class="in">`0x_4444_4444_*`</span> prefix. The reference counted value also behaves as expected, with the reference count being 2 after the <span class="in">`clone`</span> call, and 1 again after one of the instances was dropped.</span>
-<span id="cb12-128"><a href="#cb12-128"></a></span>
-<span id="cb12-129"><a href="#cb12-129"></a>The reason that the vector starts at offset <span class="in">`0x800`</span> is not that the boxed value is <span class="in">`0x800`</span> bytes large, but the <span class="co">[</span><span class="ot">reallocations</span><span class="co">]</span> that occur when the vector needs to increase its capacity. For example, when the vector's capacity is 32 and we try to add the next element, the vector allocates a new backing array with a capacity of 64 behind the scenes and copies all elements over. Then it frees the old allocation.</span>
-<span id="cb12-130"><a href="#cb12-130"></a></span>
-<span id="cb12-131"><a href="#cb12-131"></a><span class="ot">[reallocations]: https://doc.rust-lang.org/alloc/vec/struct.Vec.html#capacity-and-reallocation</span></span>
-<span id="cb12-132"><a href="#cb12-132"></a></span>
-<span id="cb12-133"><a href="#cb12-133"></a>Of course, there are many more allocation and collection types in the <span class="in">`alloc`</span> crate that we can now all use in our kernel, including:</span>
-<span id="cb12-134"><a href="#cb12-134"></a></span>
-<span id="cb12-135"><a href="#cb12-135"></a><span class="ss">- </span>the thread-safe reference counted pointer <span class="co">[</span><span class="ot">`Arc`</span><span class="co">]</span></span>
-<span id="cb12-136"><a href="#cb12-136"></a><span class="ss">- </span>the owned string type <span class="co">[</span><span class="ot">`String`</span><span class="co">]</span> and the <span class="co">[</span><span class="ot">`format!`</span><span class="co">]</span> macro</span>
-<span id="cb12-137"><a href="#cb12-137"></a><span class="ss">- </span><span class="co">[</span><span class="ot">`LinkedList`</span><span class="co">]</span></span>
-<span id="cb12-138"><a href="#cb12-138"></a><span class="ss">- </span>the growable ring buffer <span class="co">[</span><span class="ot">`VecDeque`</span><span class="co">]</span></span>
-<span id="cb12-139"><a href="#cb12-139"></a><span class="ss">- </span>the <span class="co">[</span><span class="ot">`BinaryHeap`</span><span class="co">]</span> priority queue</span>
-<span id="cb12-140"><a href="#cb12-140"></a><span class="ss">- </span><span class="co">[</span><span class="ot">`BTreeMap`</span><span class="co">]</span> and <span class="co">[</span><span class="ot">`BTreeSet`</span><span class="co">]</span></span>
-<span id="cb12-141"><a href="#cb12-141"></a></span>
-<span id="cb12-142"><a href="#cb12-142"></a><span class="ot">[`Arc`]: https://doc.rust-lang.org/alloc/sync/struct.Arc.html</span></span>
-<span id="cb12-143"><a href="#cb12-143"></a><span class="ot">[`String`]: https://doc.rust-lang.org/alloc/string/struct.String.html</span></span>
-<span id="cb12-144"><a href="#cb12-144"></a><span class="ot">[`format!`]: https://doc.rust-lang.org/alloc/macro.format.html</span></span>
-<span id="cb12-145"><a href="#cb12-145"></a><span class="ot">[`LinkedList`]: https://doc.rust-lang.org/alloc/collections/linked_list/struct.LinkedList.html</span></span>
-<span id="cb12-146"><a href="#cb12-146"></a><span class="ot">[`VecDeque`]: https://doc.rust-lang.org/alloc/collections/vec_deque/struct.VecDeque.html</span></span>
-<span id="cb12-147"><a href="#cb12-147"></a><span class="ot">[`BinaryHeap`]: https://doc.rust-lang.org/alloc/collections/binary_heap/struct.BinaryHeap.html</span></span>
-<span id="cb12-148"><a href="#cb12-148"></a><span class="ot">[`BTreeMap`]: https://doc.rust-lang.org/alloc/collections/btree_map/struct.BTreeMap.html</span></span>
-<span id="cb12-149"><a href="#cb12-149"></a><span class="ot">[`BTreeSet`]: https://doc.rust-lang.org/alloc/collections/btree_set/struct.BTreeSet.html</span></span>
-<span id="cb12-150"><a href="#cb12-150"></a></span>
-<span id="cb12-151"><a href="#cb12-151"></a>These types will become very useful when we want to implement thread lists, scheduling queues, or support for async/await.</span>
-<span id="cb12-152"><a href="#cb12-152"></a></span>
-<span id="cb12-153"><a href="#cb12-153"></a><span class="fu">## Adding a Test</span></span>
-<span id="cb12-154"><a href="#cb12-154"></a></span>
-<span id="cb12-155"><a href="#cb12-155"></a>To ensure that we don't accidentally break our new allocation code, we should add an integration test for it. We start by creating a new <span class="in">`tests/heap_allocation.rs`</span> file with the following content:</span>
-<span id="cb12-156"><a href="#cb12-156"></a></span>
-<span id="cb12-157"><a href="#cb12-157"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-158"><a href="#cb12-158"></a><span class="in">// in tests/heap_allocation.rs</span></span>
-<span id="cb12-159"><a href="#cb12-159"></a></span>
-<span id="cb12-160"><a href="#cb12-160"></a><span class="in">#![no_std]</span></span>
-<span id="cb12-161"><a href="#cb12-161"></a><span class="in">#![no_main]</span></span>
-<span id="cb12-162"><a href="#cb12-162"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
-<span id="cb12-163"><a href="#cb12-163"></a><span class="in">#![test_runner(blog_os::test_runner)]</span></span>
-<span id="cb12-164"><a href="#cb12-164"></a><span class="in">#![reexport_test_harness_main = "test_main"]</span></span>
-<span id="cb12-165"><a href="#cb12-165"></a></span>
-<span id="cb12-166"><a href="#cb12-166"></a><span class="in">extern crate alloc;</span></span>
-<span id="cb12-167"><a href="#cb12-167"></a></span>
-<span id="cb12-168"><a href="#cb12-168"></a><span class="in">use bootloader::{entry_point, BootInfo};</span></span>
-<span id="cb12-169"><a href="#cb12-169"></a><span class="in">use core::panic::PanicInfo;</span></span>
-<span id="cb12-170"><a href="#cb12-170"></a></span>
-<span id="cb12-171"><a href="#cb12-171"></a><span class="in">entry_point!(main);</span></span>
-<span id="cb12-172"><a href="#cb12-172"></a></span>
-<span id="cb12-173"><a href="#cb12-173"></a><span class="in">fn main(boot_info: &amp;'static BootInfo) -&gt; ! {</span></span>
-<span id="cb12-174"><a href="#cb12-174"></a><span class="in">    unimplemented!();</span></span>
-<span id="cb12-175"><a href="#cb12-175"></a><span class="in">}</span></span>
-<span id="cb12-176"><a href="#cb12-176"></a></span>
-<span id="cb12-177"><a href="#cb12-177"></a><span class="in">#[panic_handler]</span></span>
-<span id="cb12-178"><a href="#cb12-178"></a><span class="in">fn panic(info: &amp;PanicInfo) -&gt; ! {</span></span>
-<span id="cb12-179"><a href="#cb12-179"></a><span class="in">    blog_os::test_panic_handler(info)</span></span>
-<span id="cb12-180"><a href="#cb12-180"></a><span class="in">}</span></span>
-<span id="cb12-181"><a href="#cb12-181"></a><span class="in">```</span></span>
-<span id="cb12-182"><a href="#cb12-182"></a></span>
-<span id="cb12-183"><a href="#cb12-183"></a>We reuse the <span class="in">`test_runner`</span> and <span class="in">`test_panic_handler`</span> functions from our <span class="in">`lib.rs`</span>. Since we want to test allocations, we enable the <span class="in">`alloc`</span> crate through the <span class="in">`extern crate alloc`</span> statement. For more information about the test boilerplate, check out the <span class="co">[</span><span class="ot">_Testing_</span><span class="co">]</span> post.</span>
-<span id="cb12-184"><a href="#cb12-184"></a></span>
-<span id="cb12-185"><a href="#cb12-185"></a><span class="ot">[_Testing_]: </span>@/edition-2/posts/04-testing/index.md</span>
-<span id="cb12-186"><a href="#cb12-186"></a></span>
-<span id="cb12-187"><a href="#cb12-187"></a>The implementation of the <span class="in">`main`</span> function looks like this:</span>
-<span id="cb12-188"><a href="#cb12-188"></a></span>
-<span id="cb12-189"><a href="#cb12-189"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-190"><a href="#cb12-190"></a><span class="in">// in tests/heap_allocation.rs</span></span>
-<span id="cb12-191"><a href="#cb12-191"></a></span>
-<span id="cb12-192"><a href="#cb12-192"></a><span class="in">fn main(boot_info: &amp;'static BootInfo) -&gt; ! {</span></span>
-<span id="cb12-193"><a href="#cb12-193"></a><span class="in">    use blog_os::allocator;</span></span>
-<span id="cb12-194"><a href="#cb12-194"></a><span class="in">    use blog_os::memory::{self, BootInfoFrameAllocator};</span></span>
-<span id="cb12-195"><a href="#cb12-195"></a><span class="in">    use x86_64::VirtAddr;</span></span>
-<span id="cb12-196"><a href="#cb12-196"></a></span>
-<span id="cb12-197"><a href="#cb12-197"></a><span class="in">    blog_os::init();</span></span>
-<span id="cb12-198"><a href="#cb12-198"></a><span class="in">    let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);</span></span>
-<span id="cb12-199"><a href="#cb12-199"></a><span class="in">    let mut mapper = unsafe { memory::init(phys_mem_offset) };</span></span>
-<span id="cb12-200"><a href="#cb12-200"></a><span class="in">    let mut frame_allocator = unsafe {</span></span>
-<span id="cb12-201"><a href="#cb12-201"></a><span class="in">        BootInfoFrameAllocator::init(&amp;boot_info.memory_map)</span></span>
-<span id="cb12-202"><a href="#cb12-202"></a><span class="in">    };</span></span>
-<span id="cb12-203"><a href="#cb12-203"></a><span class="in">    allocator::init_heap(&amp;mut mapper, &amp;mut frame_allocator)</span></span>
-<span id="cb12-204"><a href="#cb12-204"></a><span class="in">        .expect("heap initialization failed");</span></span>
-<span id="cb12-205"><a href="#cb12-205"></a></span>
-<span id="cb12-206"><a href="#cb12-206"></a><span class="in">    test_main();</span></span>
-<span id="cb12-207"><a href="#cb12-207"></a><span class="in">    loop {}</span></span>
-<span id="cb12-208"><a href="#cb12-208"></a><span class="in">}</span></span>
-<span id="cb12-209"><a href="#cb12-209"></a><span class="in">```</span></span>
-<span id="cb12-210"><a href="#cb12-210"></a></span>
-<span id="cb12-211"><a href="#cb12-211"></a>It is very similar to the <span class="in">`kernel_main`</span> function in our <span class="in">`main.rs`</span>, with the differences that we don't invoke <span class="in">`println`</span>, don't include any example allocations, and call <span class="in">`test_main`</span> unconditionally.</span>
-<span id="cb12-212"><a href="#cb12-212"></a></span>
-<span id="cb12-213"><a href="#cb12-213"></a>Now we're ready to add a few test cases. First, we add a test that performs some simple allocations using <span class="co">[</span><span class="ot">`Box`</span><span class="co">]</span> and checks the allocated values to ensure that basic allocations work:</span>
-<span id="cb12-214"><a href="#cb12-214"></a></span>
-<span id="cb12-215"><a href="#cb12-215"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-216"><a href="#cb12-216"></a><span class="in">// in tests/heap_allocation.rs</span></span>
-<span id="cb12-217"><a href="#cb12-217"></a><span class="in">use alloc::boxed::Box;</span></span>
-<span id="cb12-218"><a href="#cb12-218"></a></span>
-<span id="cb12-219"><a href="#cb12-219"></a><span class="in">#[test_case]</span></span>
-<span id="cb12-220"><a href="#cb12-220"></a><span class="in">fn simple_allocation() {</span></span>
-<span id="cb12-221"><a href="#cb12-221"></a><span class="in">    let heap_value_1 = Box::new(41);</span></span>
-<span id="cb12-222"><a href="#cb12-222"></a><span class="in">    let heap_value_2 = Box::new(13);</span></span>
-<span id="cb12-223"><a href="#cb12-223"></a><span class="in">    assert_eq!(*heap_value_1, 41);</span></span>
-<span id="cb12-224"><a href="#cb12-224"></a><span class="in">    assert_eq!(*heap_value_2, 13);</span></span>
-<span id="cb12-225"><a href="#cb12-225"></a><span class="in">}</span></span>
-<span id="cb12-226"><a href="#cb12-226"></a><span class="in">```</span></span>
-<span id="cb12-227"><a href="#cb12-227"></a></span>
-<span id="cb12-228"><a href="#cb12-228"></a>Most importantly, this test verifies that no allocation error occurs.</span>
-<span id="cb12-229"><a href="#cb12-229"></a></span>
-<span id="cb12-230"><a href="#cb12-230"></a>Next, we iteratively build a large vector, to test both large allocations and multiple allocations (due to reallocations):</span>
-<span id="cb12-231"><a href="#cb12-231"></a></span>
-<span id="cb12-232"><a href="#cb12-232"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-233"><a href="#cb12-233"></a><span class="in">// in tests/heap_allocation.rs</span></span>
-<span id="cb12-234"><a href="#cb12-234"></a></span>
-<span id="cb12-235"><a href="#cb12-235"></a><span class="in">use alloc::vec::Vec;</span></span>
-<span id="cb12-236"><a href="#cb12-236"></a></span>
-<span id="cb12-237"><a href="#cb12-237"></a><span class="in">#[test_case]</span></span>
-<span id="cb12-238"><a href="#cb12-238"></a><span class="in">fn large_vec() {</span></span>
-<span id="cb12-239"><a href="#cb12-239"></a><span class="in">    let n = 1000;</span></span>
-<span id="cb12-240"><a href="#cb12-240"></a><span class="in">    let mut vec = Vec::new();</span></span>
-<span id="cb12-241"><a href="#cb12-241"></a><span class="in">    for i in 0..n {</span></span>
-<span id="cb12-242"><a href="#cb12-242"></a><span class="in">        vec.push(i);</span></span>
-<span id="cb12-243"><a href="#cb12-243"></a><span class="in">    }</span></span>
-<span id="cb12-244"><a href="#cb12-244"></a><span class="in">    assert_eq!(vec.iter().sum::&lt;u64&gt;(), (n - 1) * n / 2);</span></span>
-<span id="cb12-245"><a href="#cb12-245"></a><span class="in">}</span></span>
-<span id="cb12-246"><a href="#cb12-246"></a><span class="in">```</span></span>
-<span id="cb12-247"><a href="#cb12-247"></a></span>
-<span id="cb12-248"><a href="#cb12-248"></a>We verify the sum by comparing it with the formula for the <span class="co">[</span><span class="ot">n-th partial sum</span><span class="co">]</span>. This gives us some confidence that the allocated values are all correct.</span>
-<span id="cb12-249"><a href="#cb12-249"></a></span>
-<span id="cb12-250"><a href="#cb12-250"></a><span class="ot">[n-th partial sum]: https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF#Partial_sums</span></span>
-<span id="cb12-251"><a href="#cb12-251"></a></span>
-<span id="cb12-252"><a href="#cb12-252"></a>As a third test, we create ten thousand allocations after each other:</span>
-<span id="cb12-253"><a href="#cb12-253"></a></span>
-<span id="cb12-254"><a href="#cb12-254"></a><span class="in">```{.rs}</span></span>
-<span id="cb12-255"><a href="#cb12-255"></a><span class="in">// in tests/heap_allocation.rs</span></span>
-<span id="cb12-256"><a href="#cb12-256"></a></span>
-<span id="cb12-257"><a href="#cb12-257"></a><span class="in">use blog_os::allocator::HEAP_SIZE;</span></span>
-<span id="cb12-258"><a href="#cb12-258"></a></span>
-<span id="cb12-259"><a href="#cb12-259"></a><span class="in">#[test_case]</span></span>
-<span id="cb12-260"><a href="#cb12-260"></a><span class="in">fn many_boxes() {</span></span>
-<span id="cb12-261"><a href="#cb12-261"></a><span class="in">    for i in 0..HEAP_SIZE {</span></span>
-<span id="cb12-262"><a href="#cb12-262"></a><span class="in">        let x = Box::new(i);</span></span>
-<span id="cb12-263"><a href="#cb12-263"></a><span class="in">        assert_eq!(*x, i);</span></span>
-<span id="cb12-264"><a href="#cb12-264"></a><span class="in">    }</span></span>
-<span id="cb12-265"><a href="#cb12-265"></a><span class="in">}</span></span>
-<span id="cb12-266"><a href="#cb12-266"></a><span class="in">```</span></span>
-<span id="cb12-267"><a href="#cb12-267"></a></span>
-<span id="cb12-268"><a href="#cb12-268"></a>This test ensures that the allocator reuses freed memory for subsequent allocations since it would run out of memory otherwise. This might seem like an obvious requirement for an allocator, but there are allocator designs that don't do this. An example is the bump allocator design that will be explained in the next post.</span>
-<span id="cb12-269"><a href="#cb12-269"></a></span>
-<span id="cb12-270"><a href="#cb12-270"></a>Let's run our new integration test:</span>
-<span id="cb12-271"><a href="#cb12-271"></a></span>
-<span id="cb12-272"><a href="#cb12-272"></a><span class="in">```</span></span>
-<span id="cb12-273"><a href="#cb12-273"></a><span class="in">&gt; cargo test --test heap_allocation</span></span>
-<span id="cb12-274"><a href="#cb12-274"></a><span class="in">[…]</span></span>
-<span id="cb12-275"><a href="#cb12-275"></a><span class="in">Running 3 tests</span></span>
-<span id="cb12-276"><a href="#cb12-276"></a><span class="in">simple_allocation... [ok]</span></span>
-<span id="cb12-277"><a href="#cb12-277"></a><span class="in">large_vec... [ok]</span></span>
-<span id="cb12-278"><a href="#cb12-278"></a><span class="in">many_boxes... [ok]</span></span>
-<span id="cb12-279"><a href="#cb12-279"></a><span class="in">```</span></span>
-<span id="cb12-280"><a href="#cb12-280"></a></span>
-<span id="cb12-281"><a href="#cb12-281"></a>All three tests succeeded! You can also invoke <span class="in">`cargo test`</span> (without the <span class="in">`--test`</span> argument) to run all unit and integration tests.</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1"></a><span class="co">---</span></span>
+<span id="cb11-2"><a href="#cb11-2"></a><span class="an">title:</span><span class="co"> Allocator</span></span>
+<span id="cb11-3"><a href="#cb11-3"></a><span class="an">format:</span><span class="co"> html</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a><span class="co">---</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>   </span>
+<span id="cb11-6"><a href="#cb11-6"></a><span class="fu"># Update</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a></span>
+<span id="cb11-8"><a href="#cb11-8"></a>This is a lab.</span>
+<span id="cb11-9"><a href="#cb11-9"></a></span>
+<span id="cb11-10"><a href="#cb11-10"></a><span class="ss">- </span>The last homework would be assigned Friday, 24 April.</span>
+<span id="cb11-11"><a href="#cb11-11"></a><span class="ss">- </span>Homeworks are due one week after being assigned, which would be Friday, 1 May.</span>
+<span id="cb11-12"><a href="#cb11-12"></a><span class="ss">- </span>Study Days run 30 April to 1 May.</span>
+<span id="cb11-13"><a href="#cb11-13"></a><span class="ss">- </span>So no homework may be assigned that day.</span>
+<span id="cb11-14"><a href="#cb11-14"></a></span>
+<span id="cb11-15"><a href="#cb11-15"></a>**There is no more homework, so this week we only have this lab.**</span>
+<span id="cb11-16"><a href="#cb11-16"></a></span>
+<span id="cb11-17"><a href="#cb11-17"></a><span class="fu">## &lt;s&gt;Cheating&lt;/s&gt; Using an Allocator Crate</span></span>
+<span id="cb11-18"><a href="#cb11-18"></a></span>
+<span id="cb11-19"><a href="#cb11-19"></a>Since implementing an allocator is somewhat complex, we start by using an external allocator crate.</span>
+<span id="cb11-20"><a href="#cb11-20"></a></span>
+<span id="cb11-21"><a href="#cb11-21"></a>A simple allocator crate for <span class="in">`no_std`</span> applications is the <span class="co">[</span><span class="ot">`linked_list_allocator`</span><span class="co">]</span> crate. Its name comes from the fact that it uses a linked list data structure to keep track of deallocated memory regions.</span>
+<span id="cb11-22"><a href="#cb11-22"></a></span>
+<span id="cb11-23"><a href="#cb11-23"></a>::: {.callout-note}</span>
+<span id="cb11-24"><a href="#cb11-24"></a><span class="fu">## Q: When will you used linked lists?</span></span>
+<span id="cb11-25"><a href="#cb11-25"></a></span>
+<span id="cb11-26"><a href="#cb11-26"></a>**A**: Always.</span>
+<span id="cb11-27"><a href="#cb11-27"></a>:::</span>
+<span id="cb11-28"><a href="#cb11-28"></a></span>
+<span id="cb11-29"><a href="#cb11-29"></a>To use the crate, we first need to add a dependency on it in our <span class="in">`Cargo.toml`</span>:</span>
+<span id="cb11-30"><a href="#cb11-30"></a></span>
+<span id="cb11-31"><a href="#cb11-31"></a><span class="ot">[`linked_list_allocator`]: https://github.com/phil-opp/linked-list-allocator/</span></span>
+<span id="cb11-32"><a href="#cb11-32"></a></span>
+<span id="cb11-33"><a href="#cb11-33"></a><span class="in">```{.toml filename="Cargo.toml"}</span></span>
+<span id="cb11-34"><a href="#cb11-34"></a><span class="in">[dependencies]</span></span>
+<span id="cb11-35"><a href="#cb11-35"></a><span class="in">linked_list_allocator = "0.9.0"</span></span>
+<span id="cb11-36"><a href="#cb11-36"></a><span class="in">```</span></span>
+<span id="cb11-37"><a href="#cb11-37"></a></span>
+<span id="cb11-38"><a href="#cb11-38"></a>Then we can replace our dummy allocator with the allocator provided by the crate:</span>
+<span id="cb11-39"><a href="#cb11-39"></a></span>
+<span id="cb11-40"><a href="#cb11-40"></a><span class="in">```{.rs filename="src/allocator.rs"}</span></span>
+<span id="cb11-41"><a href="#cb11-41"></a><span class="in">#[global_allocator]</span></span>
+<span id="cb11-42"><a href="#cb11-42"></a><span class="in">static ALLOCATOR: linked_list_allocator::LockedHeap = linked_list_allocator::LockedHeap::empty();</span></span>
+<span id="cb11-43"><a href="#cb11-43"></a><span class="in">```</span></span>
+<span id="cb11-44"><a href="#cb11-44"></a></span>
+<span id="cb11-45"><a href="#cb11-45"></a>The struct is named <span class="in">`LockedHeap`</span> because it uses the <span class="co">[</span><span class="ot">`spinning_top::Spinlock`</span><span class="co">](https://docs.rs/spinning_top/0.1.0/spinning_top/type.Spinlock.html)</span> type for synchronization. This is required because multiple threads could access the <span class="in">`ALLOCATOR`</span> static at the same time. As always, when using a spinlock or a mutex, we need to be careful to not accidentally cause a deadlock. This means that we shouldn't perform any allocations in interrupt handlers, since they can run at an arbitrary time and might interrupt an in-progress allocation.</span>
+<span id="cb11-46"><a href="#cb11-46"></a></span>
+<span id="cb11-47"><a href="#cb11-47"></a>Setting the <span class="in">`LockedHeap`</span> as global allocator is not enough. The reason is that we use the <span class="co">[</span><span class="ot">`empty`</span><span class="co">](https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.LockedHeap.html#method.empty)</span> constructor function, which creates an allocator without any backing memory. Like our dummy allocator, it always returns an error on <span class="in">`alloc`</span>. To fix this, we need to initialize the allocator after creating the heap:</span>
+<span id="cb11-48"><a href="#cb11-48"></a></span>
+<span id="cb11-49"><a href="#cb11-49"></a></span>
+<span id="cb11-50"><a href="#cb11-50"></a><span class="in">```{.rs filename="src/allocator.rs"}</span></span>
+<span id="cb11-51"><a href="#cb11-51"></a><span class="in">pub fn init_heap(</span></span>
+<span id="cb11-52"><a href="#cb11-52"></a><span class="in">    mapper: &amp;mut impl x86_64::structures::paging::Mapper&lt;x86_64::structures::paging::Size4KiB&gt;,</span></span>
+<span id="cb11-53"><a href="#cb11-53"></a><span class="in">    frame_allocator: &amp;mut impl x86_64::structures::paging::FrameAllocator&lt;</span></span>
+<span id="cb11-54"><a href="#cb11-54"></a><span class="in">        x86_64::structures::paging::Size4KiB,</span></span>
+<span id="cb11-55"><a href="#cb11-55"></a><span class="in">    &gt;,</span></span>
+<span id="cb11-56"><a href="#cb11-56"></a><span class="in">) -&gt; Option&lt;()&gt; {</span></span>
+<span id="cb11-57"><a href="#cb11-57"></a></span>
+<span id="cb11-58"><a href="#cb11-58"></a><span class="in">    // All the stuff we did already</span></span>
+<span id="cb11-59"><a href="#cb11-59"></a></span>
+<span id="cb11-60"><a href="#cb11-60"></a><span class="in">    unsafe {</span></span>
+<span id="cb11-61"><a href="#cb11-61"></a><span class="in">        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);</span></span>
+<span id="cb11-62"><a href="#cb11-62"></a><span class="in">    }</span></span>
+<span id="cb11-63"><a href="#cb11-63"></a></span>
+<span id="cb11-64"><a href="#cb11-64"></a><span class="in">    return Some(());</span></span>
+<span id="cb11-65"><a href="#cb11-65"></a><span class="in">}</span></span>
+<span id="cb11-66"><a href="#cb11-66"></a><span class="in">```</span></span>
+<span id="cb11-67"><a href="#cb11-67"></a></span>
+<span id="cb11-68"><a href="#cb11-68"></a>We use the <span class="co">[</span><span class="ot">`lock`</span><span class="co">](https://docs.rs/lock_api/0.3.3/lock_api/struct.Mutex.html#method.lock)</span> method on the inner spinlock of the <span class="in">`LockedHeap`</span> type to get an exclusive reference to the wrapped <span class="co">[</span><span class="ot">`Heap`</span><span class="co">]</span> instance, on which we then call the <span class="co">[</span><span class="ot">`init`</span><span class="co">](https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init)</span> method with the heap bounds as arguments. Because the <span class="co">[</span><span class="ot">`init`</span><span class="co">](https://docs.rs/linked_list_allocator/0.9.0/linked_list_allocator/struct.Heap.html#method.init)</span> function already tries to write to the heap memory, we must initialize the heap only _after_ mapping the heap pages.</span>
+<span id="cb11-69"><a href="#cb11-69"></a></span>
+<span id="cb11-70"><a href="#cb11-70"></a></span>
+<span id="cb11-71"><a href="#cb11-71"></a>After initializing the heap, we can now use all allocation and collection types of the built-in <span class="co">[</span><span class="ot">`alloc`</span><span class="co">]</span> crate without error:</span>
+<span id="cb11-72"><a href="#cb11-72"></a></span>
+<span id="cb11-73"><a href="#cb11-73"></a><span class="in">```{.rs}</span></span>
+<span id="cb11-74"><a href="#cb11-74"></a><span class="in">// in src/main.rs</span></span>
+<span id="cb11-75"><a href="#cb11-75"></a></span>
+<span id="cb11-76"><a href="#cb11-76"></a><span class="in">use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};</span></span>
+<span id="cb11-77"><a href="#cb11-77"></a></span>
+<span id="cb11-78"><a href="#cb11-78"></a><span class="in">fn kernel_main(boot_info: &amp;'static BootInfo) -&gt; ! {</span></span>
+<span id="cb11-79"><a href="#cb11-79"></a></span>
+<span id="cb11-80"><a href="#cb11-80"></a><span class="in">    // Do all the initialization stuff</span></span>
+<span id="cb11-81"><a href="#cb11-81"></a></span>
+<span id="cb11-82"><a href="#cb11-82"></a><span class="in">    println!("Hello world{}", "!");</span></span>
+<span id="cb11-83"><a href="#cb11-83"></a><span class="in">    let b = alloc::boxed::Box::new(371);</span></span>
+<span id="cb11-84"><a href="#cb11-84"></a><span class="in">    println!("Hello box containing {}!", *b);</span></span>
+<span id="cb11-85"><a href="#cb11-85"></a><span class="in">    println!("Hello box at {:p}!", b);</span></span>
+<span id="cb11-86"><a href="#cb11-86"></a><span class="in">    </span></span>
+<span id="cb11-87"><a href="#cb11-87"></a><span class="in">    // All the other main nonsense.</span></span>
+<span id="cb11-88"><a href="#cb11-88"></a><span class="in">    </span></span>
+<span id="cb11-89"><a href="#cb11-89"></a><span class="in">}</span></span>
+<span id="cb11-90"><a href="#cb11-90"></a><span class="in">```</span></span>
+<span id="cb11-91"><a href="#cb11-91"></a></span>
+<span id="cb11-92"><a href="#cb11-92"></a>I see the following:</span>
+<span id="cb11-93"><a href="#cb11-93"></a></span>
+<span id="cb11-94"><a href="#cb11-94"></a><span class="in">```{.email}</span></span>
+<span id="cb11-95"><a href="#cb11-95"></a><span class="in">Hello world!</span></span>
+<span id="cb11-96"><a href="#cb11-96"></a><span class="in">Hello box containing 371!</span></span>
+<span id="cb11-97"><a href="#cb11-97"></a><span class="in">Hello box at 0xc3710010!</span></span>
+<span id="cb11-98"><a href="#cb11-98"></a><span class="in">```</span></span>
+<span id="cb11-99"><a href="#cb11-99"></a></span>
+<span id="cb11-100"><a href="#cb11-100"></a>I note that this is the <span class="in">`371`</span> we enboxified and the <span class="in">`0x_c371_0000`</span> used as a memory location during initialization (which mean it is out on the heap).</span>
+<span id="cb11-101"><a href="#cb11-101"></a></span>
+<span id="cb11-102"><a href="#cb11-102"></a>Of course, there are many more allocation and collection types in the <span class="in">`alloc`</span> crate that we can now all use in our kernel, including:</span>
+<span id="cb11-103"><a href="#cb11-103"></a></span>
+<span id="cb11-104"><a href="#cb11-104"></a><span class="ss">- </span>the thread-safe reference counted pointer <span class="co">[</span><span class="ot">`Arc`</span><span class="co">](https://doc.rust-lang.org/alloc/sync/struct.Arc.html)</span></span>
+<span id="cb11-105"><a href="#cb11-105"></a><span class="ss">- </span>the owned string type <span class="co">[</span><span class="ot">`String`</span><span class="co">](https://doc.rust-lang.org/alloc/string/struct.String.html)</span> and the <span class="co">[</span><span class="ot">`format!`</span><span class="co">](https://doc.rust-lang.org/alloc/macro.format.html)</span> macro</span>
+<span id="cb11-106"><a href="#cb11-106"></a><span class="ss">- </span><span class="co">[</span><span class="ot">`LinkedList`</span><span class="co">](https://doc.rust-lang.org/alloc/collections/linked_list/struct.LinkedList.html)</span></span>
+<span id="cb11-107"><a href="#cb11-107"></a><span class="ss">- </span>the growable ring buffer <span class="co">[</span><span class="ot">`VecDeque`</span><span class="co">](https://doc.rust-lang.org/alloc/collections/vec_deque/struct.VecDeque.html)</span></span>
+<span id="cb11-108"><a href="#cb11-108"></a><span class="ss">- </span>the <span class="co">[</span><span class="ot">`BinaryHeap`</span><span class="co">](https://doc.rust-lang.org/alloc/collections/binary_heap/struct.BinaryHeap.html)</span> priority queue</span>
+<span id="cb11-109"><a href="#cb11-109"></a><span class="ss">- </span><span class="co">[</span><span class="ot">`BTreeMap`</span><span class="co">](https://doc.rust-lang.org/alloc/collections/btree_map/struct.BTreeMap.html)</span> and <span class="co">[</span><span class="ot">`BTreeSet`</span><span class="co">](https://doc.rust-lang.org/alloc/collections/btree_set/struct.BTreeSet.html)</span></span>
+<span id="cb11-110"><a href="#cb11-110"></a></span>
+<span id="cb11-111"><a href="#cb11-111"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb11-112"><a href="#cb11-112"></a></span>
+<span id="cb11-113"><a href="#cb11-113"></a><span class="fu">## Recall</span></span>
+<span id="cb11-114"><a href="#cb11-114"></a></span>
+<span id="cb11-115"><a href="#cb11-115"></a>I, an actual real life Rust developer (honest!) have used <span class="in">`BTreeMap`</span>.</span>
+<span id="cb11-116"><a href="#cb11-116"></a></span>
+<span id="cb11-117"><a href="#cb11-117"></a>:::</span>
+<span id="cb11-118"><a href="#cb11-118"></a></span>
+<span id="cb11-119"><a href="#cb11-119"></a>These types will become very useful to implement thread lists, scheduling queues, or support for async/await.</span>
+<span id="cb11-120"><a href="#cb11-120"></a></span>
+<span id="cb11-121"><a href="#cb11-121"></a><span class="fu">## Adding a Test</span></span>
+<span id="cb11-122"><a href="#cb11-122"></a></span>
+<span id="cb11-123"><a href="#cb11-123"></a>To ensure that we don't accidentally break our new allocation code, we should add an integration test for it. We start by creating a new <span class="in">`tests/heap_allocation.rs`</span> file with the following content:</span>
+<span id="cb11-124"><a href="#cb11-124"></a></span>
+<span id="cb11-125"><a href="#cb11-125"></a><span class="in">```{.rs filename="tests/heap_allocation.rs"}</span></span>
+<span id="cb11-126"><a href="#cb11-126"></a><span class="in">#![no_std]</span></span>
+<span id="cb11-127"><a href="#cb11-127"></a><span class="in">#![no_main]</span></span>
+<span id="cb11-128"><a href="#cb11-128"></a><span class="in">#![feature(custom_test_frameworks)]</span></span>
+<span id="cb11-129"><a href="#cb11-129"></a><span class="in">#![test_runner(osirs::_test_runner)]</span></span>
+<span id="cb11-130"><a href="#cb11-130"></a></span>
+<span id="cb11-131"><a href="#cb11-131"></a><span class="in">extern crate alloc;</span></span>
+<span id="cb11-132"><a href="#cb11-132"></a></span>
+<span id="cb11-133"><a href="#cb11-133"></a><span class="in">#[panic_handler]</span></span>
+<span id="cb11-134"><a href="#cb11-134"></a><span class="in">fn panic(info: &amp;core::panic::PanicInfo) -&gt; ! {</span></span>
+<span id="cb11-135"><a href="#cb11-135"></a><span class="in">    osirs::test_panic_handler(info)</span></span>
+<span id="cb11-136"><a href="#cb11-136"></a><span class="in">}</span></span>
+<span id="cb11-137"><a href="#cb11-137"></a></span>
+<span id="cb11-138"><a href="#cb11-138"></a><span class="in">#[unsafe(no_mangle)]</span></span>
+<span id="cb11-139"><a href="#cb11-139"></a><span class="in">pub extern "C" fn _start() -&gt; ! {</span></span>
+<span id="cb11-140"><a href="#cb11-140"></a><span class="in">    osirs::init();</span></span>
+<span id="cb11-141"><a href="#cb11-141"></a><span class="in">    osirs::qemu_quit(osirs::QEMU_PASS);</span></span>
+<span id="cb11-142"><a href="#cb11-142"></a><span class="in">    osirs::halt();</span></span>
+<span id="cb11-143"><a href="#cb11-143"></a><span class="in">}</span></span>
+<span id="cb11-144"><a href="#cb11-144"></a><span class="in">```</span></span>
+<span id="cb11-145"><a href="#cb11-145"></a></span>
+<span id="cb11-146"><a href="#cb11-146"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb11-147"><a href="#cb11-147"></a></span>
+<span id="cb11-148"><a href="#cb11-148"></a><span class="fu">## Best Practice</span></span>
+<span id="cb11-149"><a href="#cb11-149"></a></span>
+<span id="cb11-150"><a href="#cb11-150"></a>Around this point, I would refactor all the initialization code back into the <span class="in">`src/lib.rs`</span> function <span class="in">`init()`</span> to avoid copying around (and maintaining!) reams of code. </span>
+<span id="cb11-151"><a href="#cb11-151"></a></span>
+<span id="cb11-152"><a href="#cb11-152"></a>:::</span>
+<span id="cb11-153"><a href="#cb11-153"></a></span>
+<span id="cb11-154"><a href="#cb11-154"></a>Now we're ready to add a few test cases. First, we add a test that performs some simple allocations using <span class="co">[</span><span class="ot">`Box`</span><span class="co">]</span> and checks the allocated values to ensure that basic allocations work:</span>
+<span id="cb11-155"><a href="#cb11-155"></a></span>
+<span id="cb11-156"><a href="#cb11-156"></a><span class="in">```{.rs filename="tests/heap_allocation.rs"}</span></span>
+<span id="cb11-157"><a href="#cb11-157"></a><span class="in">fn simple_allocation() {</span></span>
+<span id="cb11-158"><a href="#cb11-158"></a><span class="in">    let heap_value_1 = alloc::boxed::Box::new(41);</span></span>
+<span id="cb11-159"><a href="#cb11-159"></a><span class="in">    let heap_value_2 = alloc::boxed::Box::new(13);</span></span>
+<span id="cb11-160"><a href="#cb11-160"></a><span class="in">    assert_eq!(*heap_value_1, 41);</span></span>
+<span id="cb11-161"><a href="#cb11-161"></a><span class="in">    assert_eq!(*heap_value_2, 13);</span></span>
+<span id="cb11-162"><a href="#cb11-162"></a><span class="in">}</span></span>
+<span id="cb11-163"><a href="#cb11-163"></a><span class="in">```</span></span>
+<span id="cb11-164"><a href="#cb11-164"></a></span>
+<span id="cb11-165"><a href="#cb11-165"></a>Most importantly, this test verifies that no allocation error occurs.</span>
+<span id="cb11-166"><a href="#cb11-166"></a></span>
+<span id="cb11-167"><a href="#cb11-167"></a>Next, we iteratively build a large vector, to test both large allocations and multiple allocations (due to reallocations):</span>
+<span id="cb11-168"><a href="#cb11-168"></a></span>
+<span id="cb11-169"><a href="#cb11-169"></a><span class="in">```{.rs filename="tests/heap_allocation.rs"}</span></span>
+<span id="cb11-170"><a href="#cb11-170"></a><span class="in">fn large_vec() {</span></span>
+<span id="cb11-171"><a href="#cb11-171"></a><span class="in">    let n = 1000;</span></span>
+<span id="cb11-172"><a href="#cb11-172"></a><span class="in">    let mut vec = alloc::vec::Vec::new();</span></span>
+<span id="cb11-173"><a href="#cb11-173"></a><span class="in">    for i in 0..n {</span></span>
+<span id="cb11-174"><a href="#cb11-174"></a><span class="in">        vec.push(i);</span></span>
+<span id="cb11-175"><a href="#cb11-175"></a><span class="in">    }</span></span>
+<span id="cb11-176"><a href="#cb11-176"></a><span class="in">    assert_eq!(vec.iter().sum::&lt;u64&gt;(), (n - 1) * n / 2);</span></span>
+<span id="cb11-177"><a href="#cb11-177"></a><span class="in">}</span></span>
+<span id="cb11-178"><a href="#cb11-178"></a><span class="in">```</span></span>
+<span id="cb11-179"><a href="#cb11-179"></a></span>
+<span id="cb11-180"><a href="#cb11-180"></a>We verify the sum by comparing it with the formula for the <span class="co">[</span><span class="ot">n-th partial sum</span><span class="co">](https://en.wikipedia.org/wiki/1_%2B_2_%2B_3_%2B_4_%2B_%E2%8B%AF#Partial_sums)</span>. This gives us some confidence that the allocated values are all correct.</span>
+<span id="cb11-181"><a href="#cb11-181"></a></span>
+<span id="cb11-182"><a href="#cb11-182"></a>$$</span>
+<span id="cb11-183"><a href="#cb11-183"></a>\sum_{k=1}^n k = \frac{n(n + 1)}{2}</span>
+<span id="cb11-184"><a href="#cb11-184"></a>$$</span>
+<span id="cb11-185"><a href="#cb11-185"></a></span>
+<span id="cb11-186"><a href="#cb11-186"></a>As a third test, we create ten thousand allocations after each other:</span>
+<span id="cb11-187"><a href="#cb11-187"></a></span>
+<span id="cb11-188"><a href="#cb11-188"></a><span class="in">```{.rs filename="tests/heap_allocation.rs"}</span></span>
+<span id="cb11-189"><a href="#cb11-189"></a><span class="in">fn many_boxes() {</span></span>
+<span id="cb11-190"><a href="#cb11-190"></a><span class="in">    for i in 0..osirs::allocator::HEAP_SIZE {</span></span>
+<span id="cb11-191"><a href="#cb11-191"></a><span class="in">        let x = Box::new(i);</span></span>
+<span id="cb11-192"><a href="#cb11-192"></a><span class="in">        assert_eq!(*x, i);</span></span>
+<span id="cb11-193"><a href="#cb11-193"></a><span class="in">    }</span></span>
+<span id="cb11-194"><a href="#cb11-194"></a><span class="in">}</span></span>
+<span id="cb11-195"><a href="#cb11-195"></a><span class="in">```</span></span>
+<span id="cb11-196"><a href="#cb11-196"></a></span>
+<span id="cb11-197"><a href="#cb11-197"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb11-198"><a href="#cb11-198"></a></span>
+<span id="cb11-199"><a href="#cb11-199"></a><span class="fu">## Timeout</span></span>
+<span id="cb11-200"><a href="#cb11-200"></a></span>
+<span id="cb11-201"><a href="#cb11-201"></a>I couldn't finish this test during my timeout window, but you can make a smaller heap size, especially just for now, and may need to change the vector test accordingly.</span>
+<span id="cb11-202"><a href="#cb11-202"></a></span>
+<span id="cb11-203"><a href="#cb11-203"></a>:::</span>
+<span id="cb11-204"><a href="#cb11-204"></a></span>
+<span id="cb11-205"><a href="#cb11-205"></a>This test ensures that the allocator reuses freed memory for subsequent allocations since it would run out of memory otherwise. This might seem like an obvious requirement for an allocator, but there are allocator designs that don't do this.</span>
+<span id="cb11-206"><a href="#cb11-206"></a></span>
+<span id="cb11-207"><a href="#cb11-207"></a>Let's run our new integration test:</span>
+<span id="cb11-208"><a href="#cb11-208"></a></span>
+<span id="cb11-209"><a href="#cb11-209"></a><span class="in">```</span></span>
+<span id="cb11-210"><a href="#cb11-210"></a><span class="in">&gt; cargo test --test heap_allocation</span></span>
+<span id="cb11-211"><a href="#cb11-211"></a><span class="in">[…]</span></span>
+<span id="cb11-212"><a href="#cb11-212"></a><span class="in">Initiating test 0x00... [Pass]</span></span>
+<span id="cb11-213"><a href="#cb11-213"></a><span class="in">Initiating test 0x01... [Pass]</span></span>
+<span id="cb11-214"><a href="#cb11-214"></a><span class="in">Initiating test 0x02... [Pass]</span></span>
+<span id="cb11-215"><a href="#cb11-215"></a><span class="in">```</span></span>
+<span id="cb11-216"><a href="#cb11-216"></a></span>
+<span id="cb11-217"><a href="#cb11-217"></a>All three tests succeeded! You can also invoke <span class="in">`cargo t`</span> (without the <span class="in">`--test`</span> argument) to run all unit and integration tests.</span>
+<span id="cb11-218"><a href="#cb11-218"></a></span>
+<span id="cb11-219"><a href="#cb11-219"></a><span class="fu"># Fin</span></span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 
