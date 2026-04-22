@@ -21,7 +21,7 @@ Since implementing an allocator is somewhat complex, we start by using an extern
 A simple allocator crate for `no_std` applications is the [`linked_list_allocator`] crate. Its name comes from the fact that it uses a linked list data structure to keep track of deallocated memory regions.
 
 ::: {.callout-note}
-## Q: When will you use linked lists?
+## Q: When will you used linked lists?
 
 **A**: Always.
 :::
@@ -70,13 +70,7 @@ We use the [`lock`](https://docs.rs/lock_api/0.3.3/lock_api/struct.Mutex.html#me
 
 After initializing the heap, we can now use all allocation and collection types of the built-in [`alloc`] crate without error:
 
-```{.rs}
-// in src/main.rs
-
-use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};
-
-fn kernel_main(boot_info: &'static BootInfo) -> ! {
-
+```{.rs filename="src/main.rs"}
     // Do all the initialization stuff
 
     println!("Hello world{}", "!");
@@ -85,8 +79,6 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Hello box at {:p}!", b);
     
     // All the other main nonsense.
-    
-}
 ```
 
 I see the following:
