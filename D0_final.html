@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.30">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Snake – OS in Rust</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./C1_allocator.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-a4a11d514c7d463668e07712114998e6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-fc9c1a4fc1048689359919db0170c3de.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./D0_final.html">Snake</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">OS in Rust</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./00_derust.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Derust</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_wc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">wc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02_cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">CLI</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11_unsafe.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Unsafe</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12_split_at.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Splits</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./20_os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">OS</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./21_xmute.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Transmute</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./22_malloc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">malloc</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./30_metal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Bare Metal</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./31_linker.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Linker</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./32_r5.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">RISC-V</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./40_kernel.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kernel</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./41_boot.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Boot</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./42_hello.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Hello</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./50_text.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Text</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./51_format.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Format</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./52_graphics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Graphics</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./6__guest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Guest</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./60_test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Test</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./61_serial.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Integration</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./62_librs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Serial</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./70_except.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exceptions</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./71_calls.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Call</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./72_handlers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Handlers</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./80_double.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Double</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./90_interrupts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Interrupts</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./91_keyboard.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Keyboard</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./92_clock.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clock</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./A0_paging.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Paging</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./A1_pagefault.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Page Fault</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./B0_pagetable.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Page Tables</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./B2_mapping.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mapping</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./C0_heap.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Heap</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./C1_allocator.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Allocator</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./D0_final.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Snake</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#announcements" id="toc-announcements" class="nav-link active" data-scroll-target="#announcements">Announcements</a></li>
+  <li><a href="#citations" id="toc-citations" class="nav-link" data-scroll-target="#citations">Citations</a></li>
+  <li><a href="#intro" id="toc-intro" class="nav-link" data-scroll-target="#intro">Intro</a>
+  <ul class="collapse">
+  <li><a href="#preamble" id="toc-preamble" class="nav-link" data-scroll-target="#preamble">Preamble</a></li>
+  <li><a href="#demo" id="toc-demo" class="nav-link" data-scroll-target="#demo">Demo</a></li>
+  <li><a href="#video" id="toc-video" class="nav-link" data-scroll-target="#video">Video</a></li>
+  <li><a href="#scope" id="toc-scope" class="nav-link" data-scroll-target="#scope">Scope</a></li>
+  <li><a href="#effort" id="toc-effort" class="nav-link" data-scroll-target="#effort">Effort</a></li>
+  </ul></li>
+  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a>
+  <ul class="collapse">
+  <li><a href="#io" id="toc-io" class="nav-link" data-scroll-target="#io">I/O</a></li>
+  <li><a href="#timing" id="toc-timing" class="nav-link" data-scroll-target="#timing">Timing</a></li>
+  <li><a href="#display" id="toc-display" class="nav-link" data-scroll-target="#display">Display</a></li>
+  <li><a href="#bounding-elements" id="toc-bounding-elements" class="nav-link" data-scroll-target="#bounding-elements">Bounding Elements</a></li>
+  <li><a href="#some-characters" id="toc-some-characters" class="nav-link" data-scroll-target="#some-characters">Some characters</a></li>
+  <li><a href="#visually" id="toc-visually" class="nav-link" data-scroll-target="#visually">Visually</a></li>
+  <li><a href="#textually" id="toc-textually" class="nav-link" data-scroll-target="#textually">Textually</a></li>
+  <li><a href="#food-item-element" id="toc-food-item-element" class="nav-link" data-scroll-target="#food-item-element">Food Item Element</a></li>
+  <li><a href="#visually-1" id="toc-visually-1" class="nav-link" data-scroll-target="#visually-1">Visually</a></li>
+  <li><a href="#textually-1" id="toc-textually-1" class="nav-link" data-scroll-target="#textually-1">Textually</a></li>
+  <li><a href="#snake-element" id="toc-snake-element" class="nav-link" data-scroll-target="#snake-element">Snake Element</a></li>
+  <li><a href="#sad-aside" id="toc-sad-aside" class="nav-link" data-scroll-target="#sad-aside">Sad aside</a></li>
+  <li><a href="#option" id="toc-option" class="nav-link" data-scroll-target="#option">Option</a></li>
+  <li><a href="#option-1" id="toc-option-1" class="nav-link" data-scroll-target="#option-1">Option</a></li>
+  <li><a href="#textually---food" id="toc-textually---food" class="nav-link" data-scroll-target="#textually---food">Textually - Food</a></li>
+  <li><a href="#textually---failure-modes" id="toc-textually---failure-modes" class="nav-link" data-scroll-target="#textually---failure-modes">Textually - Failure Modes</a></li>
+  <li><a href="#display-1" id="toc-display-1" class="nav-link" data-scroll-target="#display-1">Display</a></li>
+  <li><a href="#game-state" id="toc-game-state" class="nav-link" data-scroll-target="#game-state">Game State</a></li>
+  <li><a href="#commands" id="toc-commands" class="nav-link" data-scroll-target="#commands">Commands</a></li>
+  <li><a href="#updates---snake" id="toc-updates---snake" class="nav-link" data-scroll-target="#updates---snake">Updates - Snake</a></li>
+  <li><a href="#updates---empty" id="toc-updates---empty" class="nav-link" data-scroll-target="#updates---empty">Updates - Empty</a></li>
+  <li><a href="#updates---quit" id="toc-updates---quit" class="nav-link" data-scroll-target="#updates---quit">Updates - Quit</a></li>
+  <li><a href="#updates---food-item" id="toc-updates---food-item" class="nav-link" data-scroll-target="#updates---food-item">Updates - Food Item</a></li>
+  <li><a href="#updates---victory" id="toc-updates---victory" class="nav-link" data-scroll-target="#updates---victory">Updates - Victory</a></li>
+  </ul></li>
+  <li><a href="#randomization" id="toc-randomization" class="nav-link" data-scroll-target="#randomization">Randomization</a>
+  <ul class="collapse">
+  <li><a href="#its-hard" id="toc-its-hard" class="nav-link" data-scroll-target="#its-hard">It’s hard</a></li>
+  </ul></li>
+  <li><a href="#fin" id="toc-fin" class="nav-link" data-scroll-target="#fin">Fin</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="D0_final.rjs.html"><i class="bi bi-file-slides"></i>RevealJS</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<div class="quarto-title-block"><div><h1 class="title">Snake</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i></button></div></div>
+<p class="subtitle lead">OS in Rust</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="announcements" class="level2">
+<h2 class="anchored" data-anchor-id="announcements">Announcements</h2>
+<ul>
+<li>Last lecture</li>
+<li>Introducing last assignment.
+<ul>
+<li>Final project.</li>
+<li>Work on it whenever you want.</li>
+<li>Due <a href="https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations">Tuesday, May 5th, from 2:00 pm - 5:00 pm</a> (5 PM ET on 5/5)*</li>
+</ul></li>
+</ul>
+</section>
+<section id="citations" class="level2">
+<h2 class="anchored" data-anchor-id="citations">Citations</h2>
+<ul>
+<li>Adapted from a previous Networks final.</li>
+<li><a href="https://cd-public.github.io/snek/snek.html">Snek</a></li>
+<li>Probably not interesting to you, but I’m not going to hide it.</li>
+</ul>
+</section>
+<section id="intro" class="level1">
+<h1>Intro</h1>
+<section id="preamble" class="level2">
+<h2 class="anchored" data-anchor-id="preamble">Preamble</h2>
+<blockquote class="blockquote">
+<p>“Snake” is an ambitious bare-metal snake game implementation using interrupts, memory allocation, graphics, I/O, and more in unified human-centered effort.</p>
+</blockquote>
+</section>
+<section id="demo" class="level2">
+<h2 class="anchored" data-anchor-id="demo">Demo</h2>
+<blockquote class="blockquote">
+<p>For those of you not familiar with snake, here is a <a href="https://www.google.com/fbx?fbx=snake_arcade">much cuter version</a> available from Google.</p>
+</blockquote>
+<ul>
+<li>It uses arrow keys versus my implementation which used <code>WASD</code></li>
+<li>It has a different grid size.</li>
+</ul>
+</section>
+<section id="video" class="level2">
+<h2 class="anchored" data-anchor-id="video">Video</h2>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/kzRJ9_5krcE?si=10MqB6_NYvpJQGIx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="">
+</iframe>
+</section>
+<section id="scope" class="level2">
+<h2 class="anchored" data-anchor-id="scope">Scope</h2>
+<ul>
+<li>My implementation:
+<ul>
+<li>Began with an OS satisfying all requirements up through the <a href="./C1_allocator.html">Allocator</a> lab.</li>
+<li>Altered 60 lines in this existing OS.
+<ul>
+<li>Mostly in <code>src/interrupts.rs</code></li>
+</ul></li>
+<li>Added 120 lines in a new <code>src/snake.rs</code> file.</li>
+</ul></li>
+</ul>
+</section>
+<section id="effort" class="level2">
+<h2 class="anchored" data-anchor-id="effort">Effort</h2>
+<ul>
+<li>My implementation:
+<ul>
+<li>Was written in around 4.5 real-time hours, with interrupts.
+<ul>
+<li>~<a href="./52_graphics.html">Graphics</a> with all extensions.</li>
+</ul></li>
+<li>Leveraged a few techniques I looked up and had not previously used (or taught in this class).
+<ul>
+<li>Mostly randomization.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="requirements" class="level1">
+<h1>Requirements</h1>
+<section id="io" class="level2">
+<h2 class="anchored" data-anchor-id="io">I/O</h2>
+<ul>
+<li>Must support 4 keypress inputs. I used:
+<ul>
+<li><code>W</code> - for “up”</li>
+<li><code>A</code> - for “left”</li>
+<li><code>S</code> - for “right”</li>
+<li><code>D</code> - for “down”</li>
+</ul></li>
+<li>I optionally supported <code>Q</code> for QEMU quit.</li>
+<li>Rhymes with the <a href="./91_keyboard.html">Keyboard</a> lab.</li>
+</ul>
+</section>
+<section id="timing" class="level2">
+<h2 class="anchored" data-anchor-id="timing">Timing</h2>
+<ul>
+<li>Must minimally support and timer event which updates the display on some clock tick.
+<ul>
+<li>Similar to the <a href="./92_clock.html">Clock</a> homework</li>
+</ul></li>
+</ul>
+</section>
+<section id="display" class="level2">
+<h2 class="anchored" data-anchor-id="display">Display</h2>
+<blockquote class="blockquote">
+<p>Display is perhaps the most intensive part of this project as it requires <em>maintaining internal state</em> and <em>responding to user input</em></p>
+</blockquote>
+<ul>
+<li>We now decompose the display task.</li>
+</ul>
+</section>
+<section id="bounding-elements" class="level2">
+<h2 class="anchored" data-anchor-id="bounding-elements">Bounding Elements</h2>
+<ul>
+<li>Within the VGA text buffer, display <a href="https://en.wikipedia.org/wiki/Box-drawing_characters">“Box-drawing characters”</a> that bound the screen.</li>
+<li>We recall <span class="math inline">\(\exists\)</span> box-drawing characters within the character set leveraged by the VGA text buffer - [Code page 437]</li>
+</ul>
+</section>
+<section id="some-characters" class="level2">
+<h2 class="anchored" data-anchor-id="some-characters">Some characters</h2>
+<ul>
+<li>Use vertical pipes <code>│</code> (<code>0xB3</code>) on the leftmost and rightmost column.</li>
+<li>Use horizontal bars <code>─</code> (<code>0xC4</code>) on the topmost and bottommost row.</li>
+<li>Additional, apply cornering elements to all four corners: <code>┌┐└┘</code></li>
+</ul>
+</section>
+<section id="visually" class="level2">
+<h2 class="anchored" data-anchor-id="visually">Visually</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb1-1"><a href="#cb1-1"></a>┌──────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span id="cb1-2"><a href="#cb1-2"></a>│                                                                                      │</span>
+<span id="cb1-3"><a href="#cb1-3"></a>│                                                                                      │</span>
+<span id="cb1-4"><a href="#cb1-4"></a>│                                                                                      │</span>
+<span id="cb1-5"><a href="#cb1-5"></a>│                                                                                      │</span>
+<span id="cb1-6"><a href="#cb1-6"></a>│                                                                                      │</span>
+<span id="cb1-7"><a href="#cb1-7"></a>│                                                                                      │</span>
+<span id="cb1-8"><a href="#cb1-8"></a>│                                                                                      │</span>
+<span id="cb1-9"><a href="#cb1-9"></a>│                                                                                      │</span>
+<span id="cb1-10"><a href="#cb1-10"></a>│                                                                                      │</span>
+<span id="cb1-11"><a href="#cb1-11"></a>│                                                                                      │</span>
+<span id="cb1-12"><a href="#cb1-12"></a>│                                                                                      │</span>
+<span id="cb1-13"><a href="#cb1-13"></a>│                                                                                      │</span>
+<span id="cb1-14"><a href="#cb1-14"></a>│                                                                                      │</span>
+<span id="cb1-15"><a href="#cb1-15"></a>│                                                                                      │</span>
+<span id="cb1-16"><a href="#cb1-16"></a>│                                                                                      │</span>
+<span id="cb1-17"><a href="#cb1-17"></a>│                                                                                      │</span>
+<span id="cb1-18"><a href="#cb1-18"></a>│                                                                                      │</span>
+<span id="cb1-19"><a href="#cb1-19"></a>│                                                                                      │</span>
+<span id="cb1-20"><a href="#cb1-20"></a>│                                                                                      │</span>
+<span id="cb1-21"><a href="#cb1-21"></a>│                                                                                      │</span>
+<span id="cb1-22"><a href="#cb1-22"></a>│                                                                                      │</span>
+<span id="cb1-23"><a href="#cb1-23"></a>│                                                                                      │</span>
+<span id="cb1-24"><a href="#cb1-24"></a>└──────────────────────────────────────────────────────────────────────────────────────┘ </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="textually" class="level2 smaller">
+<h2 class="smaller anchored" data-anchor-id="textually">Textually</h2>
+<blockquote class="blockquote">
+<p>Bounding elements are statically maintained in the highest and lowest indexed locations of both rows and columns, and are unalterable through gameplay. Food item and snake elements may not occupy any space wherein a bounding element is present. Food item elements, placed by the executing code, must be restricted not to be placed in the same grid location as a bounding element or snake elements. Snake elements, as they are directed by user input, may be directed into grid locations in which bounding elements are present, but doing so results in the executable terminating - regarded as a gameplay loss for the player.</p>
+</blockquote>
+</section>
+<section id="food-item-element" class="level2">
+<h2 class="anchored" data-anchor-id="food-item-element">Food Item Element</h2>
+<ul>
+<li>Within the VGA text buffer, display at an arbitrary location the “food item element”.</li>
+<li>You may use any character, I used <code>ó</code>:</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb2-1"><a href="#cb2-1"></a><span class="kw">const</span> FOOD<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0xA2</span><span class="op">;</span> <span class="co">// It looked like an apple to me, okay.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="visually-1" class="level2">
+<h2 class="anchored" data-anchor-id="visually-1">Visually</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb3-1"><a href="#cb3-1"></a>┌──────────────────────────────────────────────────────────────────────────────────────┐</span>
+<span id="cb3-2"><a href="#cb3-2"></a>│                                                                                      │</span>
+<span id="cb3-3"><a href="#cb3-3"></a>│                                                                                      │</span>
+<span id="cb3-4"><a href="#cb3-4"></a>│                                                                                      │</span>
+<span id="cb3-5"><a href="#cb3-5"></a>│                                                                                      │</span>
+<span id="cb3-6"><a href="#cb3-6"></a>│                                                                                      │</span>
+<span id="cb3-7"><a href="#cb3-7"></a>│                                                                                      │</span>
+<span id="cb3-8"><a href="#cb3-8"></a>│                    ó                                                                 │</span>
+<span id="cb3-9"><a href="#cb3-9"></a>│                                                                                      │</span>
+<span id="cb3-10"><a href="#cb3-10"></a>│                                                                                      │</span>
+<span id="cb3-11"><a href="#cb3-11"></a>│                                                                                      │</span>
+<span id="cb3-12"><a href="#cb3-12"></a>│                                                                                      │</span>
+<span id="cb3-13"><a href="#cb3-13"></a>│                                                                                      │</span>
+<span id="cb3-14"><a href="#cb3-14"></a>│                                                                                      │</span>
+<span id="cb3-15"><a href="#cb3-15"></a>│                                                                                      │</span>
+<span id="cb3-16"><a href="#cb3-16"></a>│                                                                                      │</span>
+<span id="cb3-17"><a href="#cb3-17"></a>│                                                                                      │</span>
+<span id="cb3-18"><a href="#cb3-18"></a>│                                                                                      │</span>
+<span id="cb3-19"><a href="#cb3-19"></a>│                                                                                      │</span>
+<span id="cb3-20"><a href="#cb3-20"></a>│                                                                                      │</span>
+<span id="cb3-21"><a href="#cb3-21"></a>│                                                                                      │</span>
+<span id="cb3-22"><a href="#cb3-22"></a>│                                                                                      │</span>
+<span id="cb3-23"><a href="#cb3-23"></a>│                                                                                      │</span>
+<span id="cb3-24"><a href="#cb3-24"></a>└──────────────────────────────────────────────────────────────────────────────────────┘ </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="textually-1" class="level2">
+<h2 class="anchored" data-anchor-id="textually-1">Textually</h2>
+<blockquote class="blockquote">
+<p>Food item elements are placed arbitrarily at any point within the grid unoccupied by another gameplay element, whether a bounding elements or a snake element.</p>
+</blockquote>
+<ul>
+<li>I hardcode the first location because I use user input to seed number generation for future arbitrary elements.</li>
+<li>There always exists precisely one food element at all times during gameplay.</li>
+</ul>
+</section>
+<section id="snake-element" class="level2">
+<h2 class="anchored" data-anchor-id="snake-element">Snake Element</h2>
+<ul>
+<li>Within the VGA text buffer, from an initial starting location, iteratively update the “snake” location according to the most recently input directional command via the keyboard.</li>
+<li>You may use any character or characters, or manipulate the background colors.</li>
+<li>I used <code>█</code>:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb4-1"><a href="#cb4-1"></a><span class="kw">const</span> SNAKE<span class="op">:</span> <span class="dt">u8</span> <span class="op">=</span> <span class="dv">0xDB</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="sad-aside" class="level2">
+<h2 class="anchored" data-anchor-id="sad-aside">Sad aside</h2>
+<ul>
+<li>I had every intention of using box drawing characters for the snake and then the character set missed the initializing/terminating elements I wanted.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb5-1"><a href="#cb5-1"></a> ═════╗</span>
+<span id="cb5-2"><a href="#cb5-2"></a>      ║     ║</span>
+<span id="cb5-3"><a href="#cb5-3"></a>      ║    ╔╝</span>
+<span id="cb5-4"><a href="#cb5-4"></a>      ║    ║</span>
+<span id="cb5-5"><a href="#cb5-5"></a>      ║    ║ </span>
+<span id="cb5-6"><a href="#cb5-6"></a>      ╚════╝</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>I wanted specific head/tail elements.</li>
+</ul>
+</section>
+<section id="option" class="level2">
+<h2 class="anchored" data-anchor-id="option">Option</h2>
+<ul>
+<li>You can try “centipede” but then I didn’t like the corners.</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb6-1"><a href="#cb6-1"></a> ╞╪╪╪╪╗</span>
+<span id="cb6-2"><a href="#cb6-2"></a>      ╫     ╥</span>
+<span id="cb6-3"><a href="#cb6-3"></a>      ╫    ╔╝</span>
+<span id="cb6-4"><a href="#cb6-4"></a>      ╫    ╫</span>
+<span id="cb6-5"><a href="#cb6-5"></a>      ╫    ╫ </span>
+<span id="cb6-6"><a href="#cb6-6"></a>      ╚╪╪╪╪╝</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="option-1" class="level2">
+<h2 class="anchored" data-anchor-id="option-1">Option</h2>
+<ul>
+<li>If you are okay with not having seamless, can differentiate head/tail.</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="sourceCode numberSource email number-lines code-with-copy"><code class="sourceCode email"><span id="cb7-1"><a href="#cb7-1"></a> ◄╪╪╪╪╗</span>
+<span id="cb7-2"><a href="#cb7-2"></a>      ╫     ☺︎</span>
+<span id="cb7-3"><a href="#cb7-3"></a>      ╫    ╔╝</span>
+<span id="cb7-4"><a href="#cb7-4"></a>      ╫    ╫</span>
+<span id="cb7-5"><a href="#cb7-5"></a>      ╫    ╫ </span>
+<span id="cb7-6"><a href="#cb7-6"></a>      ╚╪╪╪╪╝</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="textually---food" class="level2">
+<h2 class="anchored" data-anchor-id="textually---food">Textually - Food</h2>
+<blockquote class="blockquote">
+<p>If a snake element is moved onto the grid location of a food element, the gameplay state is updated in the following way: a new snake element is created at the location of the food element, and all other snake elements are maintained in their current location.</p>
+</blockquote>
+</section>
+<section id="textually---failure-modes" class="level2">
+<h2 class="anchored" data-anchor-id="textually---failure-modes">Textually - Failure Modes</h2>
+<blockquote class="blockquote">
+<p>Snake elements placed initially by the gameplay server in either a fixed or randomized starting location at from that point on set according to user input and then translate through the space in accordance with the user input direction. While moving, the snake may move through grid spaces with food items in order for the snake to grow larger (by adding a single snake element) but may not move through spaces already occupied by snake or boundary elements.</p>
+</blockquote>
+</section>
+<section id="display-1" class="level2">
+<h2 class="anchored" data-anchor-id="display-1">Display</h2>
+<ul>
+<li>Display:
+<ul>
+<li>Bounding elements, which are static</li>
+<li>Precisely one food item element</li>
+<li><span class="math inline">\(n \geq 1\)</span> snake element</li>
+</ul></li>
+<li>The food and snake elements are not static, are requiring maintaining game state.</li>
+</ul>
+</section>
+<section id="game-state" class="level2">
+<h2 class="anchored" data-anchor-id="game-state">Game State</h2>
+<ul>
+<li>To maintain game state, I used a <code>static mut</code> to maintain the food item element’s location.</li>
+<li>I also completed the <a href="./C1_allocator.html">Allocator</a> lab and then used a <code>VecDeque</code> to maintain the locations of an unbounded number of snake elements.</li>
+</ul>
+<div class="sourceCode" id="cb8"><pre class="sourceCode numberSource rs number-lines code-with-copy"><code class="sourceCode rust"><span id="cb8-1"><a href="#cb8-1"></a><span class="kw">static</span> <span class="kw">mut</span> SNEK<span class="op">:</span> <span class="pp">alloc::collections::vec_deque::</span>VecDeque<span class="op">&lt;</span>[<span class="dt">usize</span><span class="op">;</span> <span class="dv">2</span>]<span class="op">&gt;</span> <span class="op">=</span> <span class="pp">alloc::collections::vec_deque::VecDeque::</span>new()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>VecDeque</code> appears to implement the “queue” abstract data type within the <code>alloc</code> crate.</li>
+</ul>
+</section>
+<section id="commands" class="level2">
+<h2 class="anchored" data-anchor-id="commands">Commands</h2>
+<ul>
+<li>We can regard the most recently input directional command as another element of game state.
+<ul>
+<li>A keyboard input prompts no immediate action.</li>
+<li>However, on some timer, the game state is updated.</li>
+<li>The update is conditioned on the most recent keyboard input.</li>
+</ul></li>
+</ul>
+</section>
+<section id="updates---snake" class="level2">
+<h2 class="anchored" data-anchor-id="updates---snake">Updates - Snake</h2>
+<ul>
+<li>Each gameplay clock tick, the following occurs:</li>
+</ul>
+<blockquote class="blockquote">
+<p>A new snake element should be created relative to the most recently added snake element, either in the same row and an adjacent column, or the same column and an adjacent row, according to whether the snake is directed to move up, down, left, or right</p>
+</blockquote>
+</section>
+<section id="updates---empty" class="level2">
+<h2 class="anchored" data-anchor-id="updates---empty">Updates - Empty</h2>
+<blockquote class="blockquote">
+<p>If the new snake element would be created in a currently empty grid space, the least recently placed snake element is removed from the game state.</p>
+</blockquote>
+</section>
+<section id="updates---quit" class="level2">
+<h2 class="anchored" data-anchor-id="updates---quit">Updates - Quit</h2>
+<blockquote class="blockquote">
+<p>If the new snake element would be created in a grid space already occupied by an existing bounding or snake element, the executable terminates in what is regarded as a gameplay loss for the player.</p>
+</blockquote>
+<ul>
+<li>In this case I issue a QEMU quit.</li>
+</ul>
+</section>
+<section id="updates---food-item" class="level2">
+<h2 class="anchored" data-anchor-id="updates---food-item">Updates - Food Item</h2>
+<blockquote class="blockquote">
+<p>If the new snake element would be created in a grid space occupied by a food item element, the food item element is set to a new, abritrary location and the game state update concludes.</p>
+</blockquote>
+</section>
+<section id="updates---victory" class="level2">
+<h2 class="anchored" data-anchor-id="updates---victory">Updates - Victory</h2>
+<blockquote class="blockquote">
+<p>If there are no available locations for a new food item, the executable terminates in what is regarded as a gameplay victory for the player.</p>
+</blockquote>
+<ul>
+<li>This occurs precisely when the snake elements fill all area within the VGA buffer which are not filled with bounding elements.</li>
+</ul>
+</section>
+</section>
+<section id="randomization" class="level1">
+<h1>Randomization</h1>
+<section id="its-hard" class="level2">
+<h2 class="anchored" data-anchor-id="its-hard">It’s hard</h2>
+<ul>
+<li>I didn’t bother implementing true randomization.</li>
+<li>Don’t get stuck on this.</li>
+<li>Rather, I:
+<ul>
+<li>Tracked the clock tick at which any user input occured.</li>
+<li>Multiplied it by some primes.</li>
+<li>Took it modulo something.</li>
+<li>Saved it in a <code>static mut</code>.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="fin" class="level1">
+<h1>Fin</h1>
+<ul>
+<li>Any questions?</li>
+</ul>
+
+
+<!-- -->
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+  const viewSource = window.document.getElementById('quarto-view-source') ||
+                     window.document.getElementById('quarto-code-tools-source');
+  if (viewSource) {
+    const sourceUrl = viewSource.getAttribute("data-quarto-source-url");
+    viewSource.addEventListener("click", function(e) {
+      if (sourceUrl) {
+        // rstudio viewer pane
+        if (/\bcapabilities=\b/.test(window.location)) {
+          window.open(sourceUrl);
+        } else {
+          window.location.href = sourceUrl;
+        }
+      } else {
+        const modal = new bootstrap.Modal(document.getElementById('quarto-embedded-source-code-modal'));
+        modal.show();
+      }
+      return false;
+    });
+  }
+  function toggleCodeHandler(show) {
+    return function(e) {
+      const detailsSrc = window.document.querySelectorAll(".cell > details > .sourceCode");
+      for (let i=0; i<detailsSrc.length; i++) {
+        const details = detailsSrc[i].parentElement;
+        if (show) {
+          details.open = true;
+        } else {
+          details.removeAttribute("open");
+        }
+      }
+      const cellCodeDivs = window.document.querySelectorAll(".cell > .sourceCode");
+      const fromCls = show ? "hidden" : "unhidden";
+      const toCls = show ? "unhidden" : "hidden";
+      for (let i=0; i<cellCodeDivs.length; i++) {
+        const codeDiv = cellCodeDivs[i];
+        if (codeDiv.classList.contains(fromCls)) {
+          codeDiv.classList.remove(fromCls);
+          codeDiv.classList.add(toCls);
+        } 
+      }
+      return false;
+    }
+  }
+  const hideAllCode = window.document.getElementById("quarto-hide-all-code");
+  if (hideAllCode) {
+    hideAllCode.addEventListener("click", toggleCodeHandler(false));
+  }
+  const showAllCode = window.document.getElementById("quarto-show-all-code");
+  if (showAllCode) {
+    showAllCode.addEventListener("click", toggleCodeHandler(true));
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./C1_allocator.html" class="pagination-link" aria-label="Allocator">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Allocator</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
+<div class="sourceCode" id="cb9" data-shortcodes="false"><pre class="sourceCode numberSource markdown number-lines code-with-copy"><code class="sourceCode markdown"><span id="cb9-1"><a href="#cb9-1"></a><span class="co">---</span></span>
+<span id="cb9-2"><a href="#cb9-2"></a><span class="an">title:</span><span class="co"> Snake</span></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="co">---</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a></span>
+<span id="cb9-5"><a href="#cb9-5"></a><span class="fu">## Announcements</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a></span>
+<span id="cb9-7"><a href="#cb9-7"></a><span class="ss">  - </span>Last lecture</span>
+<span id="cb9-8"><a href="#cb9-8"></a><span class="ss">  - </span>Introducing last assignment.</span>
+<span id="cb9-9"><a href="#cb9-9"></a><span class="ss">    - </span>Final project.</span>
+<span id="cb9-10"><a href="#cb9-10"></a><span class="ss">    - </span>Work on it whenever you want.</span>
+<span id="cb9-11"><a href="#cb9-11"></a><span class="ss">    - </span>Due <span class="co">[</span><span class="ot">Tuesday, May 5th, from 2:00 pm - 5:00 pm</span><span class="co">](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations)</span> (5 PM ET on 5/5)*</span>
+<span id="cb9-12"><a href="#cb9-12"></a>    </span>
+<span id="cb9-13"><a href="#cb9-13"></a><span class="fu">## Citations</span></span>
+<span id="cb9-14"><a href="#cb9-14"></a></span>
+<span id="cb9-15"><a href="#cb9-15"></a><span class="ss">- </span>Adapted from a previous Networks final.</span>
+<span id="cb9-16"><a href="#cb9-16"></a><span class="ss">- </span><span class="co">[</span><span class="ot">Snek</span><span class="co">](https://cd-public.github.io/snek/snek.html)</span></span>
+<span id="cb9-17"><a href="#cb9-17"></a><span class="ss">- </span>Probably not interesting to you, but I'm not going to hide it.</span>
+<span id="cb9-18"><a href="#cb9-18"></a></span>
+<span id="cb9-19"><a href="#cb9-19"></a><span class="fu"># Intro</span></span>
+<span id="cb9-20"><a href="#cb9-20"></a></span>
+<span id="cb9-21"><a href="#cb9-21"></a><span class="fu">## Preamble</span></span>
+<span id="cb9-22"><a href="#cb9-22"></a></span>
+<span id="cb9-23"><a href="#cb9-23"></a><span class="at">&gt; "Snake" is an ambitious bare-metal snake game implementation using interrupts, memory allocation, graphics, I/O, and more in unified human-centered effort. </span></span>
+<span id="cb9-24"><a href="#cb9-24"></a></span>
+<span id="cb9-25"><a href="#cb9-25"></a><span class="fu">## Demo</span></span>
+<span id="cb9-26"><a href="#cb9-26"></a></span>
+<span id="cb9-27"><a href="#cb9-27"></a><span class="at">&gt; For those of you not familiar with snake, here is a </span><span class="co">[</span><span class="ot">much cuter version</span><span class="co">](https://www.google.com/fbx?fbx=snake_arcade)</span><span class="at"> available from Google.</span></span>
+<span id="cb9-28"><a href="#cb9-28"></a></span>
+<span id="cb9-29"><a href="#cb9-29"></a><span class="ss">- </span>It uses arrow keys versus my implementation which used <span class="in">`WASD`</span></span>
+<span id="cb9-30"><a href="#cb9-30"></a><span class="ss">- </span>It has a different grid size.</span>
+<span id="cb9-31"><a href="#cb9-31"></a></span>
+<span id="cb9-32"><a href="#cb9-32"></a><span class="fu">## Video</span></span>
+<span id="cb9-33"><a href="#cb9-33"></a></span>
+<span id="cb9-34"><a href="#cb9-34"></a>&lt;iframe width="560" height="315" src="https://www.youtube.com/embed/kzRJ9_5krcE?si=10MqB6_NYvpJQGIx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen&gt;&lt;/iframe&gt;</span>
+<span id="cb9-35"><a href="#cb9-35"></a></span>
+<span id="cb9-36"><a href="#cb9-36"></a><span class="fu">## Scope</span></span>
+<span id="cb9-37"><a href="#cb9-37"></a></span>
+<span id="cb9-38"><a href="#cb9-38"></a><span class="ss">- </span>My implementation:</span>
+<span id="cb9-39"><a href="#cb9-39"></a><span class="ss">    - </span>Began with an OS satisfying all requirements up through the <span class="co">[</span><span class="ot">Allocator</span><span class="co">](C1_allocator.qmd)</span> lab.</span>
+<span id="cb9-40"><a href="#cb9-40"></a><span class="ss">    - </span>Altered 60 lines in this existing OS.</span>
+<span id="cb9-41"><a href="#cb9-41"></a><span class="ss">        - </span>Mostly in <span class="in">`src/interrupts.rs`</span></span>
+<span id="cb9-42"><a href="#cb9-42"></a><span class="ss">    - </span>Added 120 lines in a new <span class="in">`src/snake.rs`</span> file.</span>
+<span id="cb9-43"><a href="#cb9-43"></a>    </span>
+<span id="cb9-44"><a href="#cb9-44"></a><span class="fu">## Effort</span></span>
+<span id="cb9-45"><a href="#cb9-45"></a></span>
+<span id="cb9-46"><a href="#cb9-46"></a><span class="ss">- </span>My implementation:</span>
+<span id="cb9-47"><a href="#cb9-47"></a><span class="ss">    - </span>Was written in around 4.5 real-time hours, with interrupts.</span>
+<span id="cb9-48"><a href="#cb9-48"></a><span class="ss">        - </span>~<span class="co">[</span><span class="ot">Graphics</span><span class="co">](52_graphics.md)</span> with all extensions.</span>
+<span id="cb9-49"><a href="#cb9-49"></a><span class="ss">    - </span>Leveraged a few techniques I looked up and had not previously used (or taught in this class).</span>
+<span id="cb9-50"><a href="#cb9-50"></a><span class="ss">        - </span>Mostly randomization.</span>
+<span id="cb9-51"><a href="#cb9-51"></a>        </span>
+<span id="cb9-52"><a href="#cb9-52"></a><span class="fu"># Requirements</span></span>
+<span id="cb9-53"><a href="#cb9-53"></a></span>
+<span id="cb9-54"><a href="#cb9-54"></a><span class="fu">## I/O</span></span>
+<span id="cb9-55"><a href="#cb9-55"></a></span>
+<span id="cb9-56"><a href="#cb9-56"></a><span class="ss">- </span>Must support 4 keypress inputs. I used:</span>
+<span id="cb9-57"><a href="#cb9-57"></a><span class="ss">    - </span><span class="in">`W`</span> - for "up"</span>
+<span id="cb9-58"><a href="#cb9-58"></a><span class="ss">    - </span><span class="in">`A`</span> - for "left"</span>
+<span id="cb9-59"><a href="#cb9-59"></a><span class="ss">    - </span><span class="in">`S`</span> - for "right"</span>
+<span id="cb9-60"><a href="#cb9-60"></a><span class="ss">    - </span><span class="in">`D`</span> - for "down"</span>
+<span id="cb9-61"><a href="#cb9-61"></a><span class="ss">- </span>I optionally supported <span class="in">`Q`</span> for QEMU quit.</span>
+<span id="cb9-62"><a href="#cb9-62"></a><span class="ss">- </span>Rhymes with the <span class="co">[</span><span class="ot">Keyboard</span><span class="co">](91_keyboard.qmd)</span> lab.</span>
+<span id="cb9-63"><a href="#cb9-63"></a></span>
+<span id="cb9-64"><a href="#cb9-64"></a><span class="fu">## Timing</span></span>
+<span id="cb9-65"><a href="#cb9-65"></a></span>
+<span id="cb9-66"><a href="#cb9-66"></a><span class="ss">- </span>Must minimally support and timer event which updates the display on some clock tick.</span>
+<span id="cb9-67"><a href="#cb9-67"></a><span class="ss">    - </span>Similar to the <span class="co">[</span><span class="ot">Clock</span><span class="co">](92_clock.qmd)</span> homework</span>
+<span id="cb9-68"><a href="#cb9-68"></a></span>
+<span id="cb9-69"><a href="#cb9-69"></a><span class="fu">## Display</span></span>
+<span id="cb9-70"><a href="#cb9-70"></a></span>
+<span id="cb9-71"><a href="#cb9-71"></a><span class="at">&gt; Display is perhaps the most intensive part of this project as it requires *maintaining internal state* and *responding to user input*</span></span>
+<span id="cb9-72"><a href="#cb9-72"></a></span>
+<span id="cb9-73"><a href="#cb9-73"></a><span class="ss">- </span>We now decompose the display task.</span>
+<span id="cb9-74"><a href="#cb9-74"></a></span>
+<span id="cb9-75"><a href="#cb9-75"></a><span class="fu">## Bounding Elements</span></span>
+<span id="cb9-76"><a href="#cb9-76"></a></span>
+<span id="cb9-77"><a href="#cb9-77"></a><span class="ss">- </span>Within the VGA text buffer, display <span class="co">[</span><span class="ot">"Box-drawing characters"</span><span class="co">](https://en.wikipedia.org/wiki/Box-drawing_characters)</span> that bound the screen.</span>
+<span id="cb9-78"><a href="#cb9-78"></a><span class="ss">- </span>We recall $\exists$ box-drawing characters within the character set leveraged by the VGA text buffer - <span class="co">[</span><span class="ot">Code page 437</span><span class="co">]</span></span>
+<span id="cb9-79"><a href="#cb9-79"></a></span>
+<span id="cb9-80"><a href="#cb9-80"></a><span class="fu">## Some characters</span></span>
+<span id="cb9-81"><a href="#cb9-81"></a></span>
+<span id="cb9-82"><a href="#cb9-82"></a><span class="ss">- </span>Use vertical pipes <span class="in">`│`</span> (<span class="in">`0xB3`</span>) on the leftmost and rightmost column.</span>
+<span id="cb9-83"><a href="#cb9-83"></a><span class="ss">- </span>Use horizontal bars <span class="in">`─`</span> (<span class="in">`0xC4`</span>) on the topmost and bottommost row.</span>
+<span id="cb9-84"><a href="#cb9-84"></a><span class="ss">- </span>Additional, apply cornering elements to all four corners: <span class="in">`┌┐└┘`</span></span>
+<span id="cb9-85"><a href="#cb9-85"></a>    </span>
+<span id="cb9-86"><a href="#cb9-86"></a><span class="fu">## Visually</span></span>
+<span id="cb9-87"><a href="#cb9-87"></a></span>
+<span id="cb9-88"><a href="#cb9-88"></a><span class="in">```{.email}</span></span>
+<span id="cb9-89"><a href="#cb9-89"></a><span class="in">┌──────────────────────────────────────────────────────────────────────────────────────┐</span></span>
+<span id="cb9-90"><a href="#cb9-90"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-91"><a href="#cb9-91"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-92"><a href="#cb9-92"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-93"><a href="#cb9-93"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-94"><a href="#cb9-94"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-95"><a href="#cb9-95"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-96"><a href="#cb9-96"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-97"><a href="#cb9-97"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-98"><a href="#cb9-98"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-99"><a href="#cb9-99"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-100"><a href="#cb9-100"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-101"><a href="#cb9-101"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-102"><a href="#cb9-102"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-103"><a href="#cb9-103"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-104"><a href="#cb9-104"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-105"><a href="#cb9-105"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-106"><a href="#cb9-106"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-107"><a href="#cb9-107"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-108"><a href="#cb9-108"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-109"><a href="#cb9-109"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-110"><a href="#cb9-110"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-111"><a href="#cb9-111"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-112"><a href="#cb9-112"></a><span class="in">└──────────────────────────────────────────────────────────────────────────────────────┘ </span></span>
+<span id="cb9-113"><a href="#cb9-113"></a><span class="in">```</span></span>
+<span id="cb9-114"><a href="#cb9-114"></a></span>
+<span id="cb9-115"><a href="#cb9-115"></a><span class="fu">## Textually {.smaller}</span></span>
+<span id="cb9-116"><a href="#cb9-116"></a></span>
+<span id="cb9-117"><a href="#cb9-117"></a><span class="at">&gt; Bounding elements are statically maintained in the highest and lowest indexed locations of both rows and columns, and are unalterable through gameplay. Food item and snake elements may not occupy any space wherein a bounding element is present. Food item elements, placed by the executing code, must be restricted not to be placed in the same grid location as a bounding element or snake elements. Snake elements, as they are directed by user input, may be directed into grid locations in which bounding elements are present, but doing so results in the executable terminating - regarded as a gameplay loss for the player.</span></span>
+<span id="cb9-118"><a href="#cb9-118"></a></span>
+<span id="cb9-119"><a href="#cb9-119"></a><span class="fu">## Food Item Element</span></span>
+<span id="cb9-120"><a href="#cb9-120"></a></span>
+<span id="cb9-121"><a href="#cb9-121"></a><span class="ss">- </span>Within the VGA text buffer, display at an arbitrary location the "food item element".</span>
+<span id="cb9-122"><a href="#cb9-122"></a><span class="ss">- </span>You may use any character, I used <span class="in">`ó`</span>:</span>
+<span id="cb9-123"><a href="#cb9-123"></a></span>
+<span id="cb9-124"><a href="#cb9-124"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-125"><a href="#cb9-125"></a><span class="in">const FOOD: u8 = 0xA2; // It looked like an apple to me, okay.</span></span>
+<span id="cb9-126"><a href="#cb9-126"></a><span class="in">```</span></span>
+<span id="cb9-127"><a href="#cb9-127"></a></span>
+<span id="cb9-128"><a href="#cb9-128"></a><span class="fu">## Visually</span></span>
+<span id="cb9-129"><a href="#cb9-129"></a></span>
+<span id="cb9-130"><a href="#cb9-130"></a><span class="in">```{.email}</span></span>
+<span id="cb9-131"><a href="#cb9-131"></a><span class="in">┌──────────────────────────────────────────────────────────────────────────────────────┐</span></span>
+<span id="cb9-132"><a href="#cb9-132"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-133"><a href="#cb9-133"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-134"><a href="#cb9-134"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-135"><a href="#cb9-135"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-136"><a href="#cb9-136"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-137"><a href="#cb9-137"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-138"><a href="#cb9-138"></a><span class="in">│                    ó                                                                 │</span></span>
+<span id="cb9-139"><a href="#cb9-139"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-140"><a href="#cb9-140"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-141"><a href="#cb9-141"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-142"><a href="#cb9-142"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-143"><a href="#cb9-143"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-144"><a href="#cb9-144"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-145"><a href="#cb9-145"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-146"><a href="#cb9-146"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-147"><a href="#cb9-147"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-148"><a href="#cb9-148"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-149"><a href="#cb9-149"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-150"><a href="#cb9-150"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-151"><a href="#cb9-151"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-152"><a href="#cb9-152"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-153"><a href="#cb9-153"></a><span class="in">│                                                                                      │</span></span>
+<span id="cb9-154"><a href="#cb9-154"></a><span class="in">└──────────────────────────────────────────────────────────────────────────────────────┘ </span></span>
+<span id="cb9-155"><a href="#cb9-155"></a><span class="in">```</span></span>
+<span id="cb9-156"><a href="#cb9-156"></a></span>
+<span id="cb9-157"><a href="#cb9-157"></a></span>
+<span id="cb9-158"><a href="#cb9-158"></a><span class="fu">## Textually</span></span>
+<span id="cb9-159"><a href="#cb9-159"></a></span>
+<span id="cb9-160"><a href="#cb9-160"></a><span class="at">&gt; Food item elements are placed arbitrarily at any point within the grid unoccupied by another gameplay element, whether a bounding elements or a snake element. </span></span>
+<span id="cb9-161"><a href="#cb9-161"></a></span>
+<span id="cb9-162"><a href="#cb9-162"></a><span class="ss">- </span>I hardcode the first location because I use user input to seed number generation for future arbitrary elements.</span>
+<span id="cb9-163"><a href="#cb9-163"></a><span class="ss">- </span>There always exists precisely one food element at all times during gameplay.</span>
+<span id="cb9-164"><a href="#cb9-164"></a></span>
+<span id="cb9-165"><a href="#cb9-165"></a><span class="fu">## Snake Element</span></span>
+<span id="cb9-166"><a href="#cb9-166"></a></span>
+<span id="cb9-167"><a href="#cb9-167"></a><span class="ss">- </span>Within the VGA text buffer, from an initial starting location, iteratively update the "snake" location according to the most recently input directional command via the keyboard.</span>
+<span id="cb9-168"><a href="#cb9-168"></a><span class="ss">- </span>You may use any character or characters, or manipulate the background colors.</span>
+<span id="cb9-169"><a href="#cb9-169"></a><span class="ss">- </span>I used <span class="in">`█`</span>:</span>
+<span id="cb9-170"><a href="#cb9-170"></a></span>
+<span id="cb9-171"><a href="#cb9-171"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-172"><a href="#cb9-172"></a><span class="in">const SNAKE: u8 = 0xDB;</span></span>
+<span id="cb9-173"><a href="#cb9-173"></a><span class="in">```</span></span>
+<span id="cb9-174"><a href="#cb9-174"></a></span>
+<span id="cb9-175"><a href="#cb9-175"></a><span class="fu">## Sad aside</span></span>
+<span id="cb9-176"><a href="#cb9-176"></a></span>
+<span id="cb9-177"><a href="#cb9-177"></a><span class="ss">- </span>I had every intention of using box drawing characters for the snake and then the character set missed the initializing/terminating elements I wanted.</span>
+<span id="cb9-178"><a href="#cb9-178"></a></span>
+<span id="cb9-179"><a href="#cb9-179"></a><span class="in">```{.email}</span></span>
+<span id="cb9-180"><a href="#cb9-180"></a><span class="in"> ═════╗</span></span>
+<span id="cb9-181"><a href="#cb9-181"></a><span class="in">      ║     ║</span></span>
+<span id="cb9-182"><a href="#cb9-182"></a><span class="in">      ║    ╔╝</span></span>
+<span id="cb9-183"><a href="#cb9-183"></a><span class="in">      ║    ║</span></span>
+<span id="cb9-184"><a href="#cb9-184"></a><span class="in">      ║    ║ </span></span>
+<span id="cb9-185"><a href="#cb9-185"></a><span class="in">      ╚════╝</span></span>
+<span id="cb9-186"><a href="#cb9-186"></a><span class="in">```</span></span>
+<span id="cb9-187"><a href="#cb9-187"></a></span>
+<span id="cb9-188"><a href="#cb9-188"></a><span class="ss">- </span>I wanted specific head/tail elements.</span>
+<span id="cb9-189"><a href="#cb9-189"></a></span>
+<span id="cb9-190"><a href="#cb9-190"></a><span class="fu">## Option</span></span>
+<span id="cb9-191"><a href="#cb9-191"></a></span>
+<span id="cb9-192"><a href="#cb9-192"></a><span class="ss">- </span>You can try "centipede" but then I didn't like the corners.</span>
+<span id="cb9-193"><a href="#cb9-193"></a></span>
+<span id="cb9-194"><a href="#cb9-194"></a><span class="in">```{.email}</span></span>
+<span id="cb9-195"><a href="#cb9-195"></a><span class="in"> ╞╪╪╪╪╗</span></span>
+<span id="cb9-196"><a href="#cb9-196"></a><span class="in">      ╫     ╥</span></span>
+<span id="cb9-197"><a href="#cb9-197"></a><span class="in">      ╫    ╔╝</span></span>
+<span id="cb9-198"><a href="#cb9-198"></a><span class="in">      ╫    ╫</span></span>
+<span id="cb9-199"><a href="#cb9-199"></a><span class="in">      ╫    ╫ </span></span>
+<span id="cb9-200"><a href="#cb9-200"></a><span class="in">      ╚╪╪╪╪╝</span></span>
+<span id="cb9-201"><a href="#cb9-201"></a><span class="in">```</span></span>
+<span id="cb9-202"><a href="#cb9-202"></a></span>
+<span id="cb9-203"><a href="#cb9-203"></a><span class="fu">## Option</span></span>
+<span id="cb9-204"><a href="#cb9-204"></a></span>
+<span id="cb9-205"><a href="#cb9-205"></a><span class="ss">- </span>If you are okay with not having seamless, can differentiate head/tail.</span>
+<span id="cb9-206"><a href="#cb9-206"></a></span>
+<span id="cb9-207"><a href="#cb9-207"></a><span class="in">```{.email}</span></span>
+<span id="cb9-208"><a href="#cb9-208"></a><span class="in"> ◄╪╪╪╪╗</span></span>
+<span id="cb9-209"><a href="#cb9-209"></a><span class="in">      ╫     ☺︎</span></span>
+<span id="cb9-210"><a href="#cb9-210"></a><span class="in">      ╫    ╔╝</span></span>
+<span id="cb9-211"><a href="#cb9-211"></a><span class="in">      ╫    ╫</span></span>
+<span id="cb9-212"><a href="#cb9-212"></a><span class="in">      ╫    ╫ </span></span>
+<span id="cb9-213"><a href="#cb9-213"></a><span class="in">      ╚╪╪╪╪╝</span></span>
+<span id="cb9-214"><a href="#cb9-214"></a><span class="in">```</span></span>
+<span id="cb9-215"><a href="#cb9-215"></a></span>
+<span id="cb9-216"><a href="#cb9-216"></a><span class="fu">## Textually - Food</span></span>
+<span id="cb9-217"><a href="#cb9-217"></a></span>
+<span id="cb9-218"><a href="#cb9-218"></a><span class="at">&gt; If a snake element is moved onto the grid location of a food element, the gameplay state is updated in the following way: a new snake element is created at the location of the food element, and all other snake elements are maintained in their current location. </span></span>
+<span id="cb9-219"><a href="#cb9-219"></a></span>
+<span id="cb9-220"><a href="#cb9-220"></a><span class="fu">## Textually - Failure Modes</span></span>
+<span id="cb9-221"><a href="#cb9-221"></a></span>
+<span id="cb9-222"><a href="#cb9-222"></a><span class="at">&gt; Snake elements placed initially by the gameplay server in either a fixed or randomized starting location at from that point on set according to user input and then translate through the space in accordance with the user input direction. While moving, the snake may move through grid spaces with food items in order for the snake to grow larger (by adding a single snake element) but may not move through spaces already occupied by snake or boundary elements.</span></span>
+<span id="cb9-223"><a href="#cb9-223"></a></span>
+<span id="cb9-224"><a href="#cb9-224"></a><span class="fu">## Display</span></span>
+<span id="cb9-225"><a href="#cb9-225"></a></span>
+<span id="cb9-226"><a href="#cb9-226"></a><span class="ss">- </span>Display:</span>
+<span id="cb9-227"><a href="#cb9-227"></a><span class="ss">    - </span>Bounding elements, which are static</span>
+<span id="cb9-228"><a href="#cb9-228"></a><span class="ss">    - </span>Precisely one food item element</span>
+<span id="cb9-229"><a href="#cb9-229"></a><span class="ss">    - </span>$n \geq 1$ snake element</span>
+<span id="cb9-230"><a href="#cb9-230"></a><span class="ss">- </span>The food and snake elements are not static, are requiring maintaining game state.</span>
+<span id="cb9-231"><a href="#cb9-231"></a></span>
+<span id="cb9-232"><a href="#cb9-232"></a><span class="fu">## Game State</span></span>
+<span id="cb9-233"><a href="#cb9-233"></a></span>
+<span id="cb9-234"><a href="#cb9-234"></a><span class="ss">- </span>To maintain game state, I used a <span class="in">`static mut`</span> to maintain the food item element's location.</span>
+<span id="cb9-235"><a href="#cb9-235"></a><span class="ss">- </span>I also completed the <span class="co">[</span><span class="ot">Allocator</span><span class="co">](C1_allocator.qmd)</span> lab and then used a <span class="in">`VecDeque`</span> to maintain the locations of an unbounded number of snake elements.</span>
+<span id="cb9-236"><a href="#cb9-236"></a></span>
+<span id="cb9-237"><a href="#cb9-237"></a><span class="in">```{.rs}</span></span>
+<span id="cb9-238"><a href="#cb9-238"></a><span class="in">static mut SNEK: alloc::collections::vec_deque::VecDeque&lt;[usize; 2]&gt; = alloc::collections::vec_deque::VecDeque::new();</span></span>
+<span id="cb9-239"><a href="#cb9-239"></a><span class="in">```</span></span>
+<span id="cb9-240"><a href="#cb9-240"></a></span>
+<span id="cb9-241"><a href="#cb9-241"></a><span class="ss">- </span><span class="in">`VecDeque`</span> appears to implement the "queue" abstract data type within the <span class="in">`alloc`</span> crate.</span>
+<span id="cb9-242"><a href="#cb9-242"></a></span>
+<span id="cb9-243"><a href="#cb9-243"></a><span class="fu">## Commands</span></span>
+<span id="cb9-244"><a href="#cb9-244"></a></span>
+<span id="cb9-245"><a href="#cb9-245"></a><span class="ss">- </span>We can regard the most recently input directional command as another element of game state.</span>
+<span id="cb9-246"><a href="#cb9-246"></a><span class="ss">    - </span>A keyboard input prompts no immediate action.</span>
+<span id="cb9-247"><a href="#cb9-247"></a><span class="ss">    - </span>However, on some timer, the game state is updated.</span>
+<span id="cb9-248"><a href="#cb9-248"></a><span class="ss">    - </span>The update is conditioned on the most recent keyboard input.</span>
+<span id="cb9-249"><a href="#cb9-249"></a></span>
+<span id="cb9-250"><a href="#cb9-250"></a><span class="fu">## Updates - Snake</span></span>
+<span id="cb9-251"><a href="#cb9-251"></a></span>
+<span id="cb9-252"><a href="#cb9-252"></a><span class="ss">- </span>Each gameplay clock tick, the following occurs:</span>
+<span id="cb9-253"><a href="#cb9-253"></a></span>
+<span id="cb9-254"><a href="#cb9-254"></a><span class="at">&gt; A new snake element should be created relative to the most recently added snake element, either in the same row and an adjacent column, or the same column and an adjacent row, according to whether the snake is directed to move up, down, left, or right</span></span>
+<span id="cb9-255"><a href="#cb9-255"></a></span>
+<span id="cb9-256"><a href="#cb9-256"></a><span class="fu">## Updates - Empty</span></span>
+<span id="cb9-257"><a href="#cb9-257"></a></span>
+<span id="cb9-258"><a href="#cb9-258"></a><span class="at">&gt; If the new snake element would be created in a currently empty grid space, the least recently placed snake element is removed from the game state.</span></span>
+<span id="cb9-259"><a href="#cb9-259"></a></span>
+<span id="cb9-260"><a href="#cb9-260"></a><span class="fu">## Updates - Quit</span></span>
+<span id="cb9-261"><a href="#cb9-261"></a></span>
+<span id="cb9-262"><a href="#cb9-262"></a><span class="at">&gt; If the new snake element would be created in a grid space already occupied by an existing bounding or snake element, the executable terminates in what is regarded as a gameplay loss for the player.</span></span>
+<span id="cb9-263"><a href="#cb9-263"></a></span>
+<span id="cb9-264"><a href="#cb9-264"></a><span class="ss">- </span>In this case I issue a QEMU quit.</span>
+<span id="cb9-265"><a href="#cb9-265"></a></span>
+<span id="cb9-266"><a href="#cb9-266"></a><span class="fu">## Updates - Food Item</span></span>
+<span id="cb9-267"><a href="#cb9-267"></a>         </span>
+<span id="cb9-268"><a href="#cb9-268"></a><span class="at">&gt; If the new snake element would be created in a grid space occupied by a food item element, the food item element is set to a new, abritrary location and the game state update concludes. </span></span>
+<span id="cb9-269"><a href="#cb9-269"></a></span>
+<span id="cb9-270"><a href="#cb9-270"></a><span class="fu">## Updates - Victory</span></span>
+<span id="cb9-271"><a href="#cb9-271"></a></span>
+<span id="cb9-272"><a href="#cb9-272"></a><span class="at">&gt; If there are no available locations for a new food item,  the executable terminates in what is regarded as a gameplay victory for the player.</span></span>
+<span id="cb9-273"><a href="#cb9-273"></a></span>
+<span id="cb9-274"><a href="#cb9-274"></a><span class="ss">- </span>This occurs precisely when the snake elements fill all area within the VGA buffer which are not filled with bounding elements.</span>
+<span id="cb9-275"><a href="#cb9-275"></a></span>
+<span id="cb9-276"><a href="#cb9-276"></a><span class="fu"># Randomization</span></span>
+<span id="cb9-277"><a href="#cb9-277"></a></span>
+<span id="cb9-278"><a href="#cb9-278"></a><span class="fu">## It's hard</span></span>
+<span id="cb9-279"><a href="#cb9-279"></a></span>
+<span id="cb9-280"><a href="#cb9-280"></a><span class="ss">- </span>I didn't bother implementing true randomization.</span>
+<span id="cb9-281"><a href="#cb9-281"></a><span class="ss">- </span>Don't get stuck on this.</span>
+<span id="cb9-282"><a href="#cb9-282"></a><span class="ss">- </span>Rather, I:</span>
+<span id="cb9-283"><a href="#cb9-283"></a><span class="ss">    - </span>Tracked the clock tick at which any user input occured.</span>
+<span id="cb9-284"><a href="#cb9-284"></a><span class="ss">    - </span>Multiplied it by some primes.</span>
+<span id="cb9-285"><a href="#cb9-285"></a><span class="ss">    - </span>Took it modulo something.</span>
+<span id="cb9-286"><a href="#cb9-286"></a><span class="ss">    - </span>Saved it in a <span class="in">`static mut`</span>.</span>
+<span id="cb9-287"><a href="#cb9-287"></a>    </span>
+<span id="cb9-288"><a href="#cb9-288"></a><span class="fu"># Fin</span></span>
+<span id="cb9-289"><a href="#cb9-289"></a></span>
+<span id="cb9-290"><a href="#cb9-290"></a><span class="ss">- </span>Any questions?</span></code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
+</div></div></div></div></div>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

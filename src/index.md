@@ -45,13 +45,13 @@ format: html
 |0xA|03/30|[Interrupts](90_interrupts.qmd)|[Keyboard](91_keyboard.qmd)|[Clock](92_clock.qmd)|
 |0xB|03/06|[Paging](A0_paging.qmd)|[Page Fault](A1_pagefault.qmd)|
 |0xC|04/13|[Page Tables](B0_pagetable.qmd)|[`None`](https://my.willamette.edu/site/ssrd)|[Mapping](B2_mapping.qmd)|
-|0xD|04/20|The Heap|
-|0xE|04/27|Allocators|
+|0xD|04/20|[Heap](C0_heap.qmd)|[Allocator](C1_allocator.qmd)|
+|0xE|04/27|[Snake](D0_final.qmd)|Questions
 <!--
 |0xE|04/29|`async`||`None`|
 -->
 
-*Final OS due [Tuesday, May 5th, from 2:00 pm - 5:00 pm](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations) (5 PM ET on 5/5)*
+*[Final OS]((D0_final.qmd)) due [Tuesday, May 5th, from 2:00 pm - 5:00 pm](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations) (5 PM ET on 5/5)*
 
 
 # Lecture Recordings

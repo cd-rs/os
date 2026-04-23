@@ -1,0 +1,290 @@
+---
+title: Snake
+---
+
+## Announcements
+
+  - Last lecture
+  - Introducing last assignment.
+    - Final project.
+    - Work on it whenever you want.
+    - Due [Tuesday, May 5th, from 2:00 pm - 5:00 pm](https://my.willamette.edu/site/registrar/info/mywu-summative-evaluations) (5 PM ET on 5/5)*
+    
+## Citations
+
+- Adapted from a previous Networks final.
+- [Snek](https://cd-public.github.io/snek/snek.html)
+- Probably not interesting to you, but I'm not going to hide it.
+
+# Intro
+
+## Preamble
+
+> "Snake" is an ambitious bare-metal snake game implementation using interrupts, memory allocation, graphics, I/O, and more in unified human-centered effort. 
+
+## Demo
+
+> For those of you not familiar with snake, here is a [much cuter version](https://www.google.com/fbx?fbx=snake_arcade) available from Google.
+
+- It uses arrow keys versus my implementation which used `WASD`
+- It has a different grid size.
+
+## Video
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/kzRJ9_5krcE?si=10MqB6_NYvpJQGIx" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
+## Scope
+
+- My implementation:
+    - Began with an OS satisfying all requirements up through the [Allocator](C1_allocator.qmd) lab.
+    - Altered 60 lines in this existing OS.
+        - Mostly in `src/interrupts.rs`
+    - Added 120 lines in a new `src/snake.rs` file.
+    
+## Effort
+
+- My implementation:
+    - Was written in around 4.5 real-time hours, with interrupts.
+        - ~[Graphics](52_graphics.md) with all extensions.
+    - Leveraged a few techniques I looked up and had not previously used (or taught in this class).
+        - Mostly randomization.
+        
+# Requirements
+
+## I/O
+
+- Must support 4 keypress inputs. I used:
+    - `W` - for "up"
+    - `A` - for "left"
+    - `S` - for "right"
+    - `D` - for "down"
+- I optionally supported `Q` for QEMU quit.
+- Rhymes with the [Keyboard](91_keyboard.qmd) lab.
+
+## Timing
+
+- Must minimally support and timer event which updates the display on some clock tick.
+    - Similar to the [Clock](92_clock.qmd) homework
+
+## Display
+
+> Display is perhaps the most intensive part of this project as it requires *maintaining internal state* and *responding to user input*
+
+- We now decompose the display task.
+
+## Bounding Elements
+
+- Within the VGA text buffer, display ["Box-drawing characters"](https://en.wikipedia.org/wiki/Box-drawing_characters) that bound the screen.
+- We recall $\exists$ box-drawing characters within the character set leveraged by the VGA text buffer - [Code page 437]
+
+## Some characters
+
+- Use vertical pipes `│` (`0xB3`) on the leftmost and rightmost column.
+- Use horizontal bars `─` (`0xC4`) on the topmost and bottommost row.
+- Additional, apply cornering elements to all four corners: `┌┐└┘`
+    
+## Visually
+
+```{.email}
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────┘ 
+```
+
+## Textually {.smaller}
+
+> Bounding elements are statically maintained in the highest and lowest indexed locations of both rows and columns, and are unalterable through gameplay. Food item and snake elements may not occupy any space wherein a bounding element is present. Food item elements, placed by the executing code, must be restricted not to be placed in the same grid location as a bounding element or snake elements. Snake elements, as they are directed by user input, may be directed into grid locations in which bounding elements are present, but doing so results in the executable terminating - regarded as a gameplay loss for the player.
+
+## Food Item Element
+
+- Within the VGA text buffer, display at an arbitrary location the "food item element".
+- You may use any character, I used `ó`:
+
+```{.rs}
+const FOOD: u8 = 0xA2; // It looked like an apple to me, okay.
+```
+
+## Visually
+
+```{.email}
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                    ó                                                                 │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+│                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────┘ 
+```
+
+
+## Textually
+
+> Food item elements are placed arbitrarily at any point within the grid unoccupied by another gameplay element, whether a bounding elements or a snake element. 
+
+- I hardcode the first location because I use user input to seed number generation for future arbitrary elements.
+- There always exists precisely one food element at all times during gameplay.
+
+## Snake Element
+
+- Within the VGA text buffer, from an initial starting location, iteratively update the "snake" location according to the most recently input directional command via the keyboard.
+- You may use any character or characters, or manipulate the background colors.
+- I used `█`:
+
+```{.rs}
+const SNAKE: u8 = 0xDB;
+```
+
+## Sad aside
+
+- I had every intention of using box drawing characters for the snake and then the character set missed the initializing/terminating elements I wanted.
+
+```{.email}
+ ═════╗
+      ║     ║
+      ║    ╔╝
+      ║    ║
+      ║    ║ 
+      ╚════╝
+```
+
+- I wanted specific head/tail elements.
+
+## Option
+
+- You can try "centipede" but then I didn't like the corners.
+
+```{.email}
+ ╞╪╪╪╪╗
+      ╫     ╥
+      ╫    ╔╝
+      ╫    ╫
+      ╫    ╫ 
+      ╚╪╪╪╪╝
+```
+
+## Option
+
+- If you are okay with not having seamless, can differentiate head/tail.
+
+```{.email}
+ ◄╪╪╪╪╗
+      ╫     ☺︎
+      ╫    ╔╝
+      ╫    ╫
+      ╫    ╫ 
+      ╚╪╪╪╪╝
+```
+
+## Textually - Food
+
+> If a snake element is moved onto the grid location of a food element, the gameplay state is updated in the following way: a new snake element is created at the location of the food element, and all other snake elements are maintained in their current location. 
+
+## Textually - Failure Modes
+
+> Snake elements placed initially by the gameplay server in either a fixed or randomized starting location at from that point on set according to user input and then translate through the space in accordance with the user input direction. While moving, the snake may move through grid spaces with food items in order for the snake to grow larger (by adding a single snake element) but may not move through spaces already occupied by snake or boundary elements.
+
+## Display
+
+- Display:
+    - Bounding elements, which are static
+    - Precisely one food item element
+    - $n \geq 1$ snake element
+- The food and snake elements are not static, are requiring maintaining game state.
+
+## Game State
+
+- To maintain game state, I used a `static mut` to maintain the food item element's location.
+- I also completed the [Allocator](C1_allocator.qmd) lab and then used a `VecDeque` to maintain the locations of an unbounded number of snake elements.
+
+```{.rs}
+static mut SNEK: alloc::collections::vec_deque::VecDeque<[usize; 2]> = alloc::collections::vec_deque::VecDeque::new();
+```
+
+- `VecDeque` appears to implement the "queue" abstract data type within the `alloc` crate.
+
+## Commands
+
+- We can regard the most recently input directional command as another element of game state.
+    - A keyboard input prompts no immediate action.
+    - However, on some timer, the game state is updated.
+    - The update is conditioned on the most recent keyboard input.
+
+## Updates - Snake
+
+- Each gameplay clock tick, the following occurs:
+
+> A new snake element should be created relative to the most recently added snake element, either in the same row and an adjacent column, or the same column and an adjacent row, according to whether the snake is directed to move up, down, left, or right
+
+## Updates - Empty
+
+> If the new snake element would be created in a currently empty grid space, the least recently placed snake element is removed from the game state.
+
+## Updates - Quit
+
+> If the new snake element would be created in a grid space already occupied by an existing bounding or snake element, the executable terminates in what is regarded as a gameplay loss for the player.
+
+- In this case I issue a QEMU quit.
+
+## Updates - Food Item
+         
+> If the new snake element would be created in a grid space occupied by a food item element, the food item element is set to a new, abritrary location and the game state update concludes. 
+
+## Updates - Victory
+
+> If there are no available locations for a new food item,  the executable terminates in what is regarded as a gameplay victory for the player.
+
+- This occurs precisely when the snake elements fill all area within the VGA buffer which are not filled with bounding elements.
+
+# Randomization
+
+## It's hard
+
+- I didn't bother implementing true randomization.
+- Don't get stuck on this.
+- Rather, I:
+    - Tracked the clock tick at which any user input occured.
+    - Multiplied it by some primes.
+    - Took it modulo something.
+    - Saved it in a `static mut`.
+    
+# Fin
+
+- Any questions?
